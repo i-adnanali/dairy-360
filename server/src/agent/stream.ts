@@ -34,7 +34,9 @@ const MAX_TOKENS = 1500;
 // Matches loop.ts (8); overridable only to make the cap path testable.
 const MAX_ITERATIONS = Number(process.env.AGENT_MAX_ITERATIONS) || 8;
 
-const ITERATION_CAP_MESSAGE =
+// Exported so the regression suite can assert the iteration-cap path by
+// matching the exact message the loop emits when it hits MAX_ITERATIONS.
+export const ITERATION_CAP_MESSAGE =
   'This request got too involved for me to complete in one go. Could you narrow it down or break it into smaller steps?';
 
 type AnyMessage = Anthropic.MessageParam;

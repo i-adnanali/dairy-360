@@ -17,14 +17,14 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-const rng = mulberry32(20260628);
-const rand = (min: number, max: number) => min + rng() * (max - min);
-
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-function daysAgo(n: number): string {
+/** ISO date `n` days before today (noon-anchored to avoid DST edge slips).
+ * Exported so the regression suite can compute the exact windows this seed
+ * populates (e.g. the deliberately-mismatched reconciliation window). */
+export function daysAgo(n: number): string {
   const d = new Date();
   d.setHours(12, 0, 0, 0);
   d.setDate(d.getDate() - n);
@@ -66,7 +66,16 @@ const ANIMALS: SeedAnimal[] = [
   { id: 'animal_014', tag: 'B-014', name: null, species: 'buffalo', breed: 'Nili-Ravi', status: 'dry', date_of_birth: '2018-06-11', group_name: 'Nili-Ravi' },
 ];
 
-function seed(): void {
+/**
+ * Reset the schema and repopulate deterministic seed data. Exported so the
+ * regression suite can spin up a fresh, identical DB per test. The RNG is
+ * re-seeded inside the function (not at module load) so every call produces
+ * byte-identical data, independent of how many times it has run this process.
+ */
+export function seed(): void {
+  const rng = mulberry32(20260628);
+  const rand = (min: number, max: number) => min + rng() * (max - min);
+
   resetSchema();
 
   const insertAnimal = db.prepare(
@@ -215,4 +224,6 @@ function seed(): void {
   console.log('Seeded dairy.db:', counts);
 }
 
-seed();
+// Auto-run only when invoked as a script (`tsx src/seed.ts`), not when imported
+// by the regression suite.
+if (require.main === module) seed();

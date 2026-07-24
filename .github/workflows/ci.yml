@@ -21,3 +21,12 @@ jobs:
       - run: npm test -w server           # pure shaper tests, no DB/key
       - run: npm test -w web-angular      # Vitest (jsdom); CI=true is auto-set
       - run: npm run build -w web-angular
+      # Regression & eval suite (Cycle 3). Runs against the live Anthropic API,
+      # so it is gated on the secret: absent the key (forks, contributors), the
+      # step is skipped visibly rather than failing CI -- the same
+      # degrade-gracefully convention as GET /api/health. See docs/REGRESSION.md.
+      - name: Regression suite (live model)
+        if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        run: npm run test:regression -w server
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
