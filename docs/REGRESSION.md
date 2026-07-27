@@ -1,7 +1,7 @@
 # Regression & Eval Suite — Decision Doc (Cycle 3)
 
-*Status: implemented on branch `feat/regression-suite` (Phases 01–04 complete;
-12 scenarios, two clean live passes). Tag `v0.6.0` pending merge. Prerequisite:
+*Status: complete — merged to `main` and tagged `v0.6.0` (Phases 01–04;
+12 scenarios, verified over multiple clean live passes). Prerequisite:
 `docs/MULTI_AGENT.md` (Cycle 2) complete and tagged `v0.5.0`.*
 
 ## Context
@@ -192,7 +192,8 @@ flowchart TD
 | `regression/03-ci-wiring` | `test:regression*` server scripts, the CI job, skip path verified with the opt-in absent. Repo secret `ANTHROPIC_API_KEY` still to be set in GitHub settings. | ⏳ secret |
 | `regression/04-verification` | Two clean full live passes (12/12 each), no flakes observed. | ✅ |
 
-Tag the completed state `v0.6.0` (pending merge + the repo secret).
+Tagged `v0.6.0`. (The CI regression job stays skipped until the
+`ANTHROPIC_API_KEY` repo secret is set — see the `03-ci-wiring` row.)
 
 ## Open items
 

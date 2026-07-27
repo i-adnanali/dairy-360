@@ -1,11 +1,11 @@
 # Multi-Agent System — Decision Doc (Cycle 2)
 
-*Status: in progress. Supersedes the Cycle 2 note in [OBSERVABILITY.md](OBSERVABILITY.md)
-§ Open items ("no decision yet on eval/regression tooling — that's Cycle 2").
-Regression testing has been resequenced to Cycle 3 — it now follows the
-multi-agent system instead of preceding it, so it can be scoped against a shape
-that has actually stabilized. Its own doc (`REGRESSION.md`) is authored when
-Cycle 3 begins; the resequencing is noted inline here and in OBSERVABILITY.md.*
+*Status: complete — tagged `v0.5.0`. Supersedes the Cycle 2 note in
+[OBSERVABILITY.md](OBSERVABILITY.md) § Open items ("no decision yet on
+eval/regression tooling — that's Cycle 2"). Regression testing was resequenced
+to Cycle 3 — it now follows the multi-agent system instead of preceding it, so
+it could be scoped against a shape that had actually stabilized. That work is
+now done: see [REGRESSION.md](REGRESSION.md) (Cycle 3, tagged `v0.6.0`).*
 
 ## Context
 
