@@ -68,6 +68,36 @@ export interface Delivery {
   paid: boolean;
 }
 
+// --- Farm event ingestion (Cycle 4; see docs/FARM_EVENTS.md) -----------------
+// Camera events from Frigate (object detection) and Double Take (face
+// recognition). No foreign key to any dairy table -- rows are correlated to
+// each other by source_event_id, never to the herd.
+
+export type FarmEventSource = 'frigate' | 'double_take';
+
+/** `detection` from Frigate; `face_match` and `unknown_cluster` from Double
+ * Take, decided by which array the entry came from (matches/misses vs
+ * unknowns), never by inspecting the name. Note `face_match` does NOT imply a
+ * confident match -- a Double Take "miss" is a named identity below its
+ * threshold, and lands here too. `confidence` is the only discriminator. */
+export type FarmEventType = 'detection' | 'face_match' | 'unknown_cluster';
+
+export interface FarmEvent {
+  id: string;
+  source: FarmEventSource;
+  source_event_id: string | null; // Frigate event id; NOT unique per row
+  is_synthetic: boolean; // 0/1 in SQLite, normalized like Delivery.paid
+  camera_id: string;
+  zone: string | null; // both sources legitimately emit no zone
+  event_type: FarmEventType;
+  identity: string | null; // null on `detection`
+  confidence: number | null; // always 0..1, normalized on ingest
+  occurred_at: string; // ISO-8601 UTC
+  ingested_at: string; // ISO-8601 UTC
+  snapshot_ref: string | null; // derived from the payload, never sent by it
+  raw_payload: string; // the request body, verbatim
+}
+
 // ---------------------------------------------------------------------------
 // Tool plumbing
 // ---------------------------------------------------------------------------

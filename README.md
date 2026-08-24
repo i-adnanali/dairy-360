@@ -54,6 +54,13 @@ shaper, confirmation gating). The multi-agent design is in
 [docs/ANGULAR_PORT.md](docs/ANGULAR_PORT.md); the AG-UI migration and its design
 decisions in [docs/AGUI_MIGRATION.md](docs/AGUI_MIGRATION.md).
 
+Alongside the chat transport there are two webhook endpoints,
+`POST /api/webhooks/frigate` and `POST /api/webhooks/double-take`, which ingest
+camera events into a `farm_events` table. They accept the real Frigate and
+Double Take wire formats and are exercised by a synthetic scenario generator —
+no camera hardware and no agent reasoning involved yet. See
+[docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
+
 ## Tech stack
 
 - **Server:** Node, TypeScript, Express, official Anthropic SDK
@@ -100,8 +107,13 @@ of failing obscurely.
   the data — and the milk-yield trend — is reproducible).
 - `npm run typecheck` — typecheck shared + server.
 - `npm run build:angular` — build shared + the Angular frontend.
-- `npm test -w server` — sanity tests for the digest shaper.
+- `npm test -w server` — sanity tests for the digest shaper and the farm event
+  normalizers (no DB or API key needed).
 - `npm test -w web-angular` — Vitest unit tests for the Angular frontend.
+- `npm run simulate:farm -w server -- --all --days-ago=14` — replay synthetic
+  camera events through the ingestion webhooks (needs the server running).
+- `npm run verify:farm -w server` — prove every farm scenario lands correctly in
+  `farm_events` (needs the server running).
 
 ## Command reference
 
@@ -139,6 +151,29 @@ curl http://localhost:4000/api/health            # -> {"status":"ok","seeded":tr
 docker compose -f docker-compose.langfuse.yml ps  # Langfuse container health
 open http://localhost:3000                         # Langfuse UI
 ```
+
+### Farm event ingestion (synthetic)
+
+Camera event plumbing — no hardware, no agent reasoning. Needs the server
+running; see [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
+
+```bash
+# replay one scenario, backdated 3 days
+npm run simulate:farm -w server -- --scenario=night-visitor-unknown --days-ago=3
+
+# replay every scenario
+npm run simulate:farm -w server -- --all --days-ago=14
+
+# list the scenario names and flags
+npm run simulate:farm -w server -- --help
+
+# prove every scenario lands correctly in farm_events (exits non-zero on a diff)
+npm run verify:farm -w server
+```
+
+> `verify:farm` clears `farm_events` before each scenario and again when it
+> finishes, so it leaves the table empty. It does not touch the dairy tables,
+> and `npm run seed -w server` does not touch `farm_events`.
 
 ### Langfuse Docker stack
 

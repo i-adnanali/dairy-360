@@ -12,6 +12,7 @@ import express from 'express';
 import type { AgentRunForwardedProps } from '@dairy/shared';
 import { isSeeded } from './db';
 import { runAgentStream } from './agent/stream';
+import { farmRouter } from './farm/routes';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
@@ -21,6 +22,11 @@ app.use(express.json({ limit: '2mb' }));
 
 const SEED_HINT =
   'The database has not been seeded yet. Run `npm run seed -w server` first.';
+
+// Camera event ingestion (Cycle 4; see docs/FARM_EVENTS.md). Deliberately not
+// behind the isSeeded() guard: farm_events lives outside the dairy seed
+// lifecycle, so ingestion works against an unseeded database.
+app.use('/api/webhooks', farmRouter);
 
 app.get('/api/health', (_req, res) => {
   if (!isSeeded()) {

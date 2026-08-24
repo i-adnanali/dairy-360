@@ -3,6 +3,7 @@ import path from 'node:path';
 import type {
   Animal,
   Delivery,
+  FarmEvent,
   FeedInventory,
   HealthEvent,
   Milking,
@@ -80,7 +81,51 @@ CREATE INDEX idx_deliveries_date ON deliveries(date);
 CREATE INDEX idx_deliveries_vendor ON deliveries(vendor_id);
 `;
 
-/** Drop everything and recreate the schema. Used by the seed script. */
+// ---------------------------------------------------------------------------
+// Farm event ingestion (Cycle 4; see docs/FARM_EVENTS.md).
+//
+// Deliberately NOT part of SCHEMA and NOT in resetSchema()'s DROP list. Two
+// reasons: `npm run seed -w server` would otherwise wipe every ingested event,
+// and the Cycle 3 regression suite calls seed() in beforeEach -- which would
+// truncate farm data mid-run. IF NOT EXISTS lets this be applied at module
+// load, independent of whether the dairy tables have ever been seeded (so
+// ingestion works against an unseeded DB, unlike the agent endpoints).
+//
+// No foreign key to any dairy table. Rows are correlated to each other by
+// source_event_id (the Frigate event id that both webhooks carry); that column
+// is indexed but deliberately NOT unique -- Frigate sends new/update/end for
+// one id, and a single Double Take POST can carry several faces.
+// ---------------------------------------------------------------------------
+export const FARM_SCHEMA = `
+CREATE TABLE IF NOT EXISTS farm_events (
+  id              TEXT PRIMARY KEY,
+  source          TEXT NOT NULL CHECK (source IN ('frigate','double_take')),
+  source_event_id TEXT,
+  is_synthetic    INTEGER NOT NULL DEFAULT 0,
+  camera_id       TEXT NOT NULL,
+  zone            TEXT,
+  event_type      TEXT NOT NULL CHECK (
+                    event_type IN ('detection','face_match','unknown_cluster')
+                  ),
+  identity        TEXT,
+  confidence      REAL,
+  occurred_at     TEXT NOT NULL,
+  ingested_at     TEXT NOT NULL,
+  snapshot_ref    TEXT,
+  raw_payload     TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_farm_events_occurred_at ON farm_events(occurred_at);
+CREATE INDEX IF NOT EXISTS idx_farm_events_zone        ON farm_events(zone);
+CREATE INDEX IF NOT EXISTS idx_farm_events_identity    ON farm_events(identity);
+CREATE INDEX IF NOT EXISTS idx_farm_events_source_ref  ON farm_events(source_event_id);
+`;
+
+// Applied at module load: idempotent, and every farm code path needs the table
+// to exist regardless of seed state.
+db.exec(FARM_SCHEMA);
+
+/** Drop everything and recreate the schema. Used by the seed script.
+ * Deliberately does NOT touch farm_events -- see FARM_SCHEMA above. */
 export function resetSchema(): void {
   db.exec(`
     DROP TABLE IF EXISTS deliveries;
@@ -275,4 +320,70 @@ export function sumDeliveredLitres(from: string, to: string): number {
     )
     .get(from, to) as { s: number };
   return row.s;
+}
+
+// ---------------------------------------------------------------------------
+// Farm event helpers (Cycle 4). farm_events.is_synthetic is stored as 0/1 in
+// SQLite; toFarmEvent() normalizes it to the boolean the FarmEvent type
+// expects -- the same pattern as toDelivery() above.
+// ---------------------------------------------------------------------------
+
+type FarmEventRow = Omit<FarmEvent, 'is_synthetic'> & { is_synthetic: number };
+
+function toFarmEvent(row: FarmEventRow): FarmEvent {
+  return { ...row, is_synthetic: !!row.is_synthetic };
+}
+
+/** Insert one normalized farm event. Throws on a CHECK violation -- the caller
+ * (farm/routes.ts) catches that and maps it to a 400 rather than a 500. */
+export function insertFarmEvent(e: FarmEvent): void {
+  db.prepare(
+    `INSERT INTO farm_events
+       (id, source, source_event_id, is_synthetic, camera_id, zone, event_type,
+        identity, confidence, occurred_at, ingested_at, snapshot_ref, raw_payload)
+     VALUES
+       (@id, @source, @source_event_id, @is_synthetic, @camera_id, @zone, @event_type,
+        @identity, @confidence, @occurred_at, @ingested_at, @snapshot_ref, @raw_payload)`,
+  ).run({ ...e, is_synthetic: e.is_synthetic ? 1 : 0 });
+}
+
+/** Insert several events in one transaction (one Double Take POST can carry
+ * multiple faces, and either all of them land or none do). */
+export function insertFarmEvents(events: FarmEvent[]): void {
+  const tx = db.transaction((batch: FarmEvent[]) => {
+    for (const e of batch) insertFarmEvent(e);
+  });
+  tx(events);
+}
+
+/** Every farm event, oldest first. Used by the verification script, which
+ * resets the table per scenario so this stays a small result set. */
+export function allFarmEvents(): FarmEvent[] {
+  const rows = db
+    .prepare(`SELECT * FROM farm_events ORDER BY occurred_at ASC, id ASC`)
+    .all() as FarmEventRow[];
+  return rows.map(toFarmEvent);
+}
+
+/** Farm events for one camera, oldest first (used by the absence assertions in
+ * the camera-dropout scenario). */
+export function farmEventsForCamera(cameraId: string): FarmEvent[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM farm_events WHERE camera_id = ? ORDER BY occurred_at ASC, id ASC`,
+    )
+    .all(cameraId) as FarmEventRow[];
+  return rows.map(toFarmEvent);
+}
+
+export function countFarmEvents(): number {
+  const row = db.prepare(`SELECT COUNT(*) AS n FROM farm_events`).get() as { n: number };
+  return row.n;
+}
+
+/** Delete every farm event. How verify.ts scopes itself to one scenario at a
+ * time against the shared dev DB (Decision 6 in docs/FARM_EVENTS.md) -- there
+ * is no separate test database file. */
+export function resetFarmEvents(): void {
+  db.exec(`DELETE FROM farm_events;`);
 }
