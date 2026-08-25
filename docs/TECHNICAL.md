@@ -169,7 +169,7 @@ flowchart LR
 
 ## Section 3 - Tool contracts
 
-Schemas: [server/src/tools/index.ts](../server/src/tools/index.ts). Executors: dairy in [server/src/tools/reads.ts](../server/src/tools/reads.ts) + [server/src/tools/writes.ts](../server/src/tools/writes.ts); vendor in [server/src/tools/vendorReads.ts](../server/src/tools/vendorReads.ts) + [server/src/tools/vendorWrites.ts](../server/src/tools/vendorWrites.ts); reconciliation in [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts). Which schemas are offered on a given turn is chosen by the dispatcher (`toolsForAgent(agent)`): the dairy set, the vendor set, or all + `get_yield_vs_deliveries` for `both`. Shared types: [shared/src/types.ts](../shared/src/types.ts).
+Schemas: [server/src/tools/index.ts](../server/src/tools/index.ts), except the reconciliation and farm-monitor schemas, which are colocated with their executors. Executors: dairy in [server/src/tools/reads.ts](../server/src/tools/reads.ts) + [server/src/tools/writes.ts](../server/src/tools/writes.ts); vendor in [server/src/tools/vendorReads.ts](../server/src/tools/vendorReads.ts) + [server/src/tools/vendorWrites.ts](../server/src/tools/vendorWrites.ts); reconciliation in [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts); farm monitor in [server/src/tools/farmReads.ts](../server/src/tools/farmReads.ts) + [server/src/tools/farmWrites.ts](../server/src/tools/farmWrites.ts). Which schemas are offered on a given turn is chosen by the dispatcher (`toolsForAgent(agent)`): the dairy set, the vendor set, or all + `get_yield_vs_deliveries` for `both`. The three farm-monitor tools are **agent-agnostic** and appended to every branch (Cycle 5; see [FARM_MONITOR.md](FARM_MONITOR.md) Decision 6). Shared types: [shared/src/types.ts](../shared/src/types.ts).
 
 ### 3.1 Plumbing types
 
@@ -229,6 +229,15 @@ Vendor / reconciliation reads (offered when the dispatcher selects `vendor` or `
 | `get_deliveries` | `{ vendor_id?, from, to }` (`from/to` required) | `{ scope, from, to, count, totalLitres, totalValue, unpaidValue, byVendor: [...] }` | `missing_range`, `unknown_vendor` |
 | `get_yield_vs_deliveries` | `{ from, to }` (required; `both` only) | `{ from, to, producedLitres, deliveredLitres, discrepancyLitres, discrepancyPct, tolerancePct, flagged }` | `missing_range` |
 
+Farm-monitor reads (Cycle 5; offered on **every** dispatcher selection). Dates are farm-local `YYYY-MM-DD`, converted to UTC instant bounds via `FARM_TZ`:
+
+| Tool | Input schema | `modelDigest` shape | Error codes |
+|---|---|---|---|
+| `get_farm_events` | `{ start, end, zone?, identity? }` (`start/end` required) | `{ start, end, farm_tz, count, byEventType, byCamera, flaggedCount, unclassifiedCount, tooMany, events: [...] }` (top-K = 50) | `missing_range`, `invalid_range` |
+| `summarize_daily_activity` | `{ date }` (required) | `{ date, farm_tz, events_examined, newly_classified, severities: { routine, notable, urgent }, flagged: [...], attendance: { enrolled, seen, absent }, cameras: [...], silence_threshold_minutes }` | `missing_date` |
+
+`summarize_daily_activity` classifies the day's unexamined rows as a side effect, then reconciles. It returns structured findings only — no prose and no nested model call, because `runReads()` executes read tools **synchronously** and could not await one. Narration is instructed in `farmSection()` of [systemPrompt.ts](../server/src/agent/systemPrompt.ts), the same division `get_yield_vs_deliveries` uses.
+
 ### 3.3 `get_milk_yield`: digest vs dataset
 
 The single most important contract for "display data is not reasoning data" ([server/src/tools/shaper.ts](../server/src/tools/shaper.ts)). `shapeMilkYield` produces two outputs from one query:
@@ -275,7 +284,13 @@ Vendor writes ([server/src/tools/vendorWrites.ts](../server/src/tools/vendorWrit
 - **`record_delivery`** - input `{ vendor_id, date, litres }` required. The `price_per_litre` is captured from the vendor at call time (a later vendor price change never rewrites past deliveries). Validates a finite `litres > 0`. `execute` inserts a `deliveries` row (`paid = 0`) -> `{ created: true, id, litres, price_per_litre, value }`.
 - **`mark_delivery_paid`** - input `{ delivery_id }` required. `execute` runs `UPDATE deliveries SET paid = 1 WHERE id = ?` -> `{ updated, delivery_id }`.
 
-Card label helper: `tagLabel(animalId)` renders `TAG (name)` when a name exists, otherwise just the tag - so with the current name-less seed, cards read by tag (e.g. `B-001`). Vendor cards use `vendorLabel(vendorId)` (the vendor's name).
+Farm-monitor write ([server/src/tools/farmWrites.ts](../server/src/tools/farmWrites.ts)), same confirmation-gated pattern:
+
+- **`flag_anomaly`** - input `{ event_id, severity, reason }` all required (`severity` in notable | urgent). Manual override for something the automatic classification pass missed, or a correction to its severity. Last-write-wins: no flag history and no unflagging path in this cycle. `execute` calls `setFarmEventFlag()` -> `{ updated, event_id, severity, reason }`.
+
+> **The automatic classification path is not a write executor.** `classifyEvent()` calls the `setFarmEventFlag()` DB helper directly, with no card and no approval, because a pass over a day's camera rows must not prompt per row. `flag_anomaly` is the human-approved entry point onto the same `UPDATE`. Two entry points, one statement - see [FARM_MONITOR.md](FARM_MONITOR.md) Decision 6.
+
+Card label helpers: `tagLabel(animalId)` renders `TAG (name)` when a name exists, otherwise just the tag - so with the current name-less seed, cards read by tag (e.g. `B-001`). Vendor cards use `vendorLabel(vendorId)` (the vendor's name). Farm cards use `eventLabel(eventId)`, which renders the event as `event_type on camera (zone) at YYYY-MM-DD HH:MM` in **farm-local** time.
 
 ---
 
@@ -291,6 +306,14 @@ Card label helper: `tagLabel(animalId)` renders `TAG (name)` when a name exists,
 | Coarsen ->month | range > 365 days | [server/src/tools/shaper.ts](../server/src/tools/shaper.ts) |
 | Inline catalog threshold | `300` animals | [server/src/agent/systemPrompt.ts](../server/src/agent/systemPrompt.ts) |
 | `search_animals` top-K | `8` | [server/src/tools/reads.ts](../server/src/tools/reads.ts) |
+| Reconcile tolerance | `5` % of production | [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts) |
+| `get_farm_events` top-K | `50` rows | [server/src/tools/farmReads.ts](../server/src/tools/farmReads.ts) |
+| Farm timezone | `Asia/Karachi` (also pinned as `TZ` on the farm scripts) | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
+| Farm work hours | `04:00`–`20:00` farm-local (start inclusive, end exclusive) | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
+| Restricted zones | `feed_store` (provisional) | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
+| Confident face match | `>= 0.85`, `face_match` rows only | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
+| Unknown-cluster urgency | notable at occurrence `1`, urgent at `3`, `21`-day event-relative lookback | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
+| Camera-silence threshold | `15` minutes | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
 | Server port | `PORT` env or `4000` | [server/src/index.ts](../server/src/index.ts) |
 | Web dev port | `4200` (Angular `ng serve`, proxies `/api` -> 4000) | [web-angular/proxy.conf.json](../web-angular/proxy.conf.json) |
 | Tracing | opt-in Langfuse (no-op if keys unset) | [server/src/instrumentation.ts](../server/src/instrumentation.ts) |

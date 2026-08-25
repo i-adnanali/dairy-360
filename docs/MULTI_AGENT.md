@@ -183,6 +183,18 @@ flowchart TD
 questions only make sense there, and an over-eager single-domain match is more
 costly to get wrong than an unnecessary merged tool list.
 
+> **Updated in Cycle 5.** The three branches above still describe how the *herd*
+> and *vendor* tool sets are selected, but they are no longer the whole tool
+> list. The farm monitor tools (`get_farm_events`, `summarize_daily_activity`,
+> `flag_anomaly`) are **agent-agnostic**: `toolsForAgent()` appends them to every
+> branch, and `farmSection()` is appended to every system prompt. They were
+> deliberately not given a fourth `AgentKind` or their own dispatcher keywords,
+> because camera questions do not partition along the herd/vendor seam — "who was
+> at the gate last night?" matches no keyword and lands on `both`, but "who fed
+> the animals last night?" matches `animals` and `feed`, routes `dairy`, and
+> would have had the farm tools withheld from exactly the turn that needed them.
+> See [FARM_MONITOR.md](FARM_MONITOR.md) Decision 6.
+
 **Cross-domain follow-ups.** The dispatcher routes on the latest message, but a
 terse follow-up can depend on an earlier turn (e.g. after "how much did we
 produce last week?", the user asks "does that match what we delivered?"). Judged

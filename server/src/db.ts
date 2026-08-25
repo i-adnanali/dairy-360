@@ -4,8 +4,10 @@ import type {
   Animal,
   Delivery,
   FarmEvent,
+  FarmFlagSeverity,
   FeedInventory,
   HealthEvent,
+  IngestedFarmEvent,
   Milking,
   Vendor,
 } from '@dairy/shared';
@@ -112,7 +114,21 @@ CREATE TABLE IF NOT EXISTS farm_events (
   occurred_at     TEXT NOT NULL,
   ingested_at     TEXT NOT NULL,
   snapshot_ref    TEXT,
-  raw_payload     TEXT NOT NULL
+  raw_payload     TEXT NOT NULL,
+  -- Classification (Cycle 5; see docs/FARM_MONITOR.md). Additive and all
+  -- nullable/defaulted, so an ingested row is valid with none of them set.
+  -- NOTE: because this table is CREATE TABLE IF NOT EXISTS, adding columns
+  -- here does NOT alter a dairy.db that already has the table -- the local
+  -- table must be dropped so this runs fresh (FARM_MONITOR.md Decision 2).
+  -- flag_severity is 'notable' | 'urgent', enforced by TypeScript types and the
+  -- flag_anomaly input_schema enum rather than a CHECK: per FARM_EVENTS.md
+  -- Decision 3, CHECKs here are reserved for webhook bodies arriving from
+  -- outside the process. These values come from our own classifier or from a
+  -- model already constrained by a tool schema.
+  classified_at   TEXT,                        -- ISO-8601 UTC; NULL = unexamined
+  flagged         INTEGER NOT NULL DEFAULT 0,
+  flag_severity   TEXT,
+  flag_reason     TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_farm_events_occurred_at ON farm_events(occurred_at);
 CREATE INDEX IF NOT EXISTS idx_farm_events_zone        ON farm_events(zone);
@@ -328,15 +344,22 @@ export function sumDeliveredLitres(from: string, to: string): number {
 // expects -- the same pattern as toDelivery() above.
 // ---------------------------------------------------------------------------
 
-type FarmEventRow = Omit<FarmEvent, 'is_synthetic'> & { is_synthetic: number };
+type FarmEventRow = Omit<FarmEvent, 'is_synthetic' | 'flagged'> & {
+  is_synthetic: number;
+  flagged: number;
+};
 
 function toFarmEvent(row: FarmEventRow): FarmEvent {
-  return { ...row, is_synthetic: !!row.is_synthetic };
+  return { ...row, is_synthetic: !!row.is_synthetic, flagged: !!row.flagged };
 }
 
 /** Insert one normalized farm event. Throws on a CHECK violation -- the caller
- * (farm/routes.ts) catches that and maps it to a 400 rather than a 500. */
-export function insertFarmEvent(e: FarmEvent): void {
+ * (farm/routes.ts) catches that and maps it to a 400 rather than a 500.
+ *
+ * Takes an IngestedFarmEvent, not a FarmEvent: the classification columns are
+ * left to their DB defaults (classified_at NULL, flagged 0) so ingestion stays
+ * entirely unaware of Cycle 5. */
+export function insertFarmEvent(e: IngestedFarmEvent): void {
   db.prepare(
     `INSERT INTO farm_events
        (id, source, source_event_id, is_synthetic, camera_id, zone, event_type,
@@ -349,8 +372,8 @@ export function insertFarmEvent(e: FarmEvent): void {
 
 /** Insert several events in one transaction (one Double Take POST can carry
  * multiple faces, and either all of them land or none do). */
-export function insertFarmEvents(events: FarmEvent[]): void {
-  const tx = db.transaction((batch: FarmEvent[]) => {
+export function insertFarmEvents(events: IngestedFarmEvent[]): void {
+  const tx = db.transaction((batch: IngestedFarmEvent[]) => {
     for (const e of batch) insertFarmEvent(e);
   });
   tx(events);
@@ -383,7 +406,137 @@ export function countFarmEvents(): number {
 
 /** Delete every farm event. How verify.ts scopes itself to one scenario at a
  * time against the shared dev DB (Decision 6 in docs/FARM_EVENTS.md) -- there
- * is no separate test database file. */
+ * is no separate test database file.
+ *
+ * Cycle 5 makes this load-bearing beyond verification: per FARM_MONITOR.md
+ * Decision 2, ANY classification-aware population calls this before each
+ * scenario, because UNKNOWN_CLUSTER_A1 appears in two scenarios and a shared
+ * table corrupts every recurrence count. */
 export function resetFarmEvents(): void {
   db.exec(`DELETE FROM farm_events;`);
+}
+
+// ---------------------------------------------------------------------------
+// Farm event classification (Cycle 5; see docs/FARM_MONITOR.md).
+// ---------------------------------------------------------------------------
+
+/** Id-integrity check for flag_anomaly's event_id, mirroring animalExists() /
+ * vendorExists() so guardIds() can reject an unknown id before execution. */
+export function farmEventExists(id: string): boolean {
+  const row = db
+    .prepare(`SELECT 1 AS x FROM farm_events WHERE id = ?`)
+    .get(id) as { x: number } | undefined;
+  return !!row;
+}
+
+export function getFarmEventById(id: string): FarmEvent | undefined {
+  const row = db.prepare(`SELECT * FROM farm_events WHERE id = ?`).get(id) as
+    | FarmEventRow
+    | undefined;
+  return row ? toFarmEvent(row) : undefined;
+}
+
+/** Farm events in an inclusive-start / exclusive-end instant range, optionally
+ * narrowed by zone and/or identity. Bounds are ISO-8601 UTC strings compared
+ * lexicographically -- safe because every timestamp in this column is written
+ * by isoToIso()/epochSecondsToIso() in canonical `...Z` form. */
+export function farmEventsInRange(scope: {
+  startIso: string;
+  endIso: string;
+  zone?: string;
+  identity?: string;
+}): FarmEvent[] {
+  const clauses = ['occurred_at >= ?', 'occurred_at < ?'];
+  const params: unknown[] = [scope.startIso, scope.endIso];
+  if (scope.zone) {
+    clauses.push('zone = ?');
+    params.push(scope.zone);
+  }
+  if (scope.identity) {
+    clauses.push('identity = ?');
+    params.push(scope.identity);
+  }
+  const rows = db
+    .prepare(
+      `SELECT * FROM farm_events
+       WHERE ${clauses.join(' AND ')}
+       ORDER BY occurred_at ASC, id ASC`,
+    )
+    .all(...params) as FarmEventRow[];
+  return rows.map(toFarmEvent);
+}
+
+/**
+ * How many times this identity was already seen, in the same `event_type`,
+ * strictly BEFORE the given instant and no earlier than `windowStartIso`.
+ *
+ * The window is event-relative, not now-relative (FARM_MONITOR.md Decision 3):
+ * the caller derives windowStartIso from the event's own occurred_at, which is
+ * what makes a classification pass reproducible whenever it runs.
+ *
+ * Ties on occurred_at break by id so an event never counts itself and two rows
+ * sharing an instant still get distinct occurrence numbers -- one Double Take
+ * POST can carry several faces at the same timestamp.
+ */
+export function countPriorSightings(scope: {
+  identity: string;
+  eventType: FarmEvent['event_type'];
+  occurredAt: string;
+  id: string;
+  windowStartIso: string;
+}): number {
+  const row = db
+    .prepare(
+      `SELECT COUNT(*) AS n FROM farm_events
+       WHERE identity = ?
+         AND event_type = ?
+         AND occurred_at >= ?
+         AND (occurred_at < ? OR (occurred_at = ? AND id < ?))`,
+    )
+    .get(
+      scope.identity,
+      scope.eventType,
+      scope.windowStartIso,
+      scope.occurredAt,
+      scope.occurredAt,
+      scope.id,
+    ) as { n: number };
+  return row.n;
+}
+
+/**
+ * The single write path for a classification verdict -- no approval card, no
+ * PendingWrite. classifyEvent() calls this directly for automatic flags, and
+ * flag_anomaly's WRITE_EXECUTOR calls it for the human-approved manual
+ * override (FARM_MONITOR.md Decision 6).
+ *
+ * Last-write-wins: there is deliberately no flag history and no unflagging
+ * path in this cycle. A routine verdict clears the flag columns but still
+ * stamps classified_at, so "examined and fine" stays distinguishable from
+ * "never examined".
+ */
+export function setFarmEventFlag(scope: {
+  id: string;
+  severity: FarmFlagSeverity | null;
+  reason: string | null;
+  classifiedAt: string;
+}): number {
+  const flagged = scope.severity ? 1 : 0;
+  const info = db
+    .prepare(
+      `UPDATE farm_events
+          SET classified_at = @classified_at,
+              flagged       = @flagged,
+              flag_severity = @flag_severity,
+              flag_reason   = @flag_reason
+        WHERE id = @id`,
+    )
+    .run({
+      id: scope.id,
+      classified_at: scope.classifiedAt,
+      flagged,
+      flag_severity: flagged ? scope.severity : null,
+      flag_reason: flagged ? scope.reason : null,
+    });
+  return info.changes;
 }

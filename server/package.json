@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "seed": "tsx src/seed.ts",
-    "simulate:farm": "tsx src/farm/simulate.ts",
-    "verify:farm": "tsx src/farm/verify.ts",
+    "simulate:farm": "TZ=Asia/Karachi tsx src/farm/simulate.ts",
+    "verify:farm": "TZ=Asia/Karachi tsx src/farm/verify.ts",
+    "verify:classify": "TZ=Asia/Karachi tsx src/farm/verifyClassify.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test src/**/*.test.ts",

@@ -82,6 +82,14 @@ export type FarmEventSource = 'frigate' | 'double_take';
  * threshold, and lands here too. `confidence` is the only discriminator. */
 export type FarmEventType = 'detection' | 'face_match' | 'unknown_cluster';
 
+/** Classification severity (Cycle 5; see docs/FARM_MONITOR.md). `routine` is
+ * the absence of a flag, so it is never stored in flag_severity -- a routine
+ * row is `flagged = 0, flag_severity = NULL` with classified_at set. */
+export type FarmEventSeverity = 'routine' | 'notable' | 'urgent';
+
+/** What lands in flag_severity: the two severities that actually flag a row. */
+export type FarmFlagSeverity = Exclude<FarmEventSeverity, 'routine'>;
+
 export interface FarmEvent {
   id: string;
   source: FarmEventSource;
@@ -96,7 +104,23 @@ export interface FarmEvent {
   ingested_at: string; // ISO-8601 UTC
   snapshot_ref: string | null; // derived from the payload, never sent by it
   raw_payload: string; // the request body, verbatim
+  // --- classification (Cycle 5) ---------------------------------------------
+  // Additive, all nullable/defaulted: an ingested row is valid with none of
+  // them set, which is what lets Cycle 4's ingestion stay untouched.
+  classified_at: string | null; // ISO-8601 UTC; null = not yet examined
+  flagged: boolean; // 0/1 in SQLite, normalized like is_synthetic
+  flag_severity: FarmFlagSeverity | null; // null when flagged = false
+  flag_reason: string | null; // null when flagged = false
 }
+
+/** A row as INGESTION produces it: everything except the classification
+ * columns, which the DB defaults and the Cycle 5 classifier owns. Keeping this
+ * distinct from FarmEvent (a row as read back) is what lets Cycle 4's
+ * normalizers stay untouched by Cycle 5's schema addition. */
+export type IngestedFarmEvent = Omit<
+  FarmEvent,
+  'classified_at' | 'flagged' | 'flag_severity' | 'flag_reason'
+>;
 
 // ---------------------------------------------------------------------------
 // Tool plumbing

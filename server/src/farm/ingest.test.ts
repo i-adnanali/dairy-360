@@ -13,7 +13,7 @@ import {
   percentToUnit,
 } from './ingest';
 import type { IngestError, IngestResult, SkipReason } from './ingest';
-import type { FarmEvent } from '@dairy/shared';
+import type { IngestedFarmEvent } from '@dairy/shared';
 
 // Deterministic id/clock so assertions are exact.
 let idSeq = 0;
@@ -26,7 +26,7 @@ const OPTS = {
 // assert.fail() returns `never`, so these narrow the IngestResult union for the
 // type checker as well as asserting at runtime.
 
-function rows(result: IngestResult): FarmEvent[] {
+function rows(result: IngestResult): IngestedFarmEvent[] {
   if (!result.ok) assert.fail(`expected rows, got error ${JSON.stringify(result.error)}`);
   if (result.kind !== 'created') assert.fail(`expected rows, got skip "${result.reason}"`);
   return result.events;

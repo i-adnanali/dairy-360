@@ -15,7 +15,7 @@
 // not a rewrite.
 
 import { randomUUID } from 'node:crypto';
-import type { FarmEvent, FarmEventType } from '@dairy/shared';
+import type { FarmEventType, IngestedFarmEvent } from '@dairy/shared';
 
 /** Valid-but-deliberately-not-persisted outcomes. Each maps to a 202 whose
  * body names the reason, so an ignored event is never silently dropped. */
@@ -29,7 +29,7 @@ export interface IngestError {
 }
 
 export type IngestResult =
-  | { ok: true; kind: 'created'; events: FarmEvent[] }
+  | { ok: true; kind: 'created'; events: IngestedFarmEvent[] }
   | { ok: true; kind: 'skipped'; reason: SkipReason }
   | { ok: false; error: IngestError };
 
@@ -71,7 +71,7 @@ function asList(v: unknown): unknown[] | null {
 
 const fail = (error: IngestError): IngestResult => ({ ok: false, error });
 const skip = (reason: SkipReason): IngestResult => ({ ok: true, kind: 'skipped', reason });
-const created = (events: FarmEvent[]): IngestResult => ({ ok: true, kind: 'created', events });
+const created = (events: IngestedFarmEvent[]): IngestResult => ({ ok: true, kind: 'created', events });
 
 function defaultId(): string {
   return `farm_event_${randomUUID().slice(0, 8)}`;
@@ -246,7 +246,7 @@ export function normalizeDoubleTake(body: unknown, opts: IngestOptions): IngestR
 
   const zone = firstZone(root.zones);
   const rawPayload = JSON.stringify(body);
-  const events: FarmEvent[] = [];
+  const events: IngestedFarmEvent[] = [];
 
   for (const group of groups) {
     for (let i = 0; i < group.entries.length; i++) {

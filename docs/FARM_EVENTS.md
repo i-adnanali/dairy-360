@@ -4,6 +4,23 @@
 payload-rejection cases verify green against the live ingestion endpoints.
 Prerequisite: `docs/REGRESSION.md` (Cycle 3) complete and tagged `v0.6.0`.*
 
+> **Extended by Cycle 5** ([FARM_MONITOR.md](FARM_MONITOR.md), tagged
+> `v0.8.0`). This document remains the record of the ingestion layer and is
+> still accurate about it, but three things here have since changed:
+>
+> - **`farm_events` gained four classification columns** (`classified_at`,
+>   `flagged`, `flag_severity`, `flag_reason`). The DDL and the `FarmEvent`
+>   interface reproduced in Decision 3 are the Cycle 4 shape, not the current
+>   one. Ingestion itself is untouched — it now builds an `IngestedFarmEvent`
+>   (everything except those four), which the DB defaults fill in.
+> - **The farm timezone open item is resolved.** `FARM_TZ = 'Asia/Karachi'`,
+>   and both farm scripts now pin `TZ=Asia/Karachi`. See Decision 4 there.
+> - **`simulate:farm --all` is no longer safe for every purpose.** It is still
+>   correct for the ingestion checks described here, but anything
+>   classification-aware must reset `farm_events` before each scenario, because
+>   `unknown_a1` appears in two scenarios and a shared table corrupts every
+>   recurrence count.
+
 ## Context
 
 Cycles 1–3 built out the dairy/vendor agent: observability
@@ -39,9 +56,10 @@ rewrite; everything below that carries a cost is justified by that one claim.
   model. See *Known fidelity gaps* — this is the one place the
   config-change-not-a-rewrite claim does not hold, and it is deliberate.
 - **No camera health monitoring.** See Decision 1.
-- **No formal regression suite.** Cycle 6 may reuse these fixtures, but the
-  verification script here checks pipeline integrity only — there is no agent
-  behavior to assert against yet.
+- **No formal regression suite.** The verification script here checks pipeline
+  integrity only — there is no agent behavior to assert against yet. (Cycle 5
+  did reuse these fixtures, adding `verify:classify` alongside `verify:farm` to
+  assert the verdicts drawn from these rows.)
 - **No migration framework.** This repo has never had one and this cycle does
   not introduce one. See Decision 3.
 - **No Vitest on the server.** [REGRESSION.md](REGRESSION.md) § *What we're NOT
@@ -204,6 +222,10 @@ cycle costs what it costs:
   build reconciliation logic that assumes real recurring ids will be this
   stable — cluster continuity itself is something Cycle 5 should
   eventually reason about probabilistically, not trust as ground truth.
+  **Cycle 5 honoured this:** recurrence is a weighted signal that can only
+  raise severity within its own rule, and it is outranked by the
+  restricted-zone/off-hours check, so no verdict ever rests on cluster
+  identity being real (see [FARM_MONITOR.md](FARM_MONITOR.md) Decision 8).
 - **Only `type: "new"` is persisted.** `update` and `end` are accepted and
   ignored. Ingesting `end` would give dwell time, which nothing in Cycle 4
   consumes; deferred rather than built speculatively.
@@ -498,6 +520,11 @@ New scripts in [server/package.json](../server/package.json):
 "verify:farm":   "tsx src/farm/verify.ts"
 ```
 
+> Both gained a `TZ=Asia/Karachi` prefix in Cycle 5, and a third script
+> (`verify:classify`) joined them. See [FARM_MONITOR.md](FARM_MONITOR.md)
+> Decision 4 for why the generator's host-local timestamps make that pin
+> necessary.
+
 `verify.ts` must **not** be named `*.test.ts`, or CI would run it without a
 server listening.
 
@@ -684,11 +711,12 @@ unconditional.
 
 ## Open items
 
-- **Farm timezone.** `startTime` is host-local for now (see *Timekeeping*).
-  Once the Cycle 5 agent reasons about "night" or "off-hours" in text, a fixed
-  farm timezone becomes load-bearing and this needs settling — probably a
-  `FARM_TZ` const, given the farm is UTC+5 on the evidence of the `+92` vendor
-  contacts in the seed.
+- ~~**Farm timezone.**~~ **Resolved in Cycle 5:** `FARM_TZ = 'Asia/Karachi'`,
+  confirmed rather than inferred. `classify.ts` converts `occurred_at` into that
+  zone explicitly and never trusts host-local time; `TZ=Asia/Karachi` is pinned
+  on the farm scripts to cover the generator, which still composes `startTime`
+  host-locally. Making the *generator* zone-aware remains open — see
+  [FARM_MONITOR.md](FARM_MONITOR.md) § Open items.
 - **`unknown_cluster` has no real producer** (see *Known fidelity gaps*). The
   Cycle 7 shape — embeddings plus clustering over Double Take's `unknowns[]`,
   or enrolling unknowns on the fly — is genuinely undecided, and it is the one
@@ -697,9 +725,11 @@ unconditional.
   a dropout and a quiet camera are indistinguishable.
 - **Frigate `end` events are dropped**, so dwell time is unavailable. Cheap to
   add when something consumes it.
-- **Multi-zone events lose fidelity in the indexed `zone` column.** If Cycle 5
-  needs real multi-zone reasoning, the options are a `farm_event_zones` join
-  table or a JSON column — deferred until there is a query that wants it.
+- **Multi-zone events lose fidelity in the indexed `zone` column.** Cycle 5
+  turned out not to need multi-zone reasoning — its restricted-zone rule matches
+  the single indexed `zone` against a set — so this stayed deferred. The options
+  remain a `farm_event_zones` join table or a JSON column, still waiting for a
+  query that wants it.
 - **No retention policy.** Real cameras produce orders of magnitude more rows
   than a dairy herd does; `farm_events` will need pruning or rollup long before
   `milkings` does. Out of scope here, but it is the first table in this schema

@@ -58,8 +58,15 @@ Alongside the chat transport there are two webhook endpoints,
 `POST /api/webhooks/frigate` and `POST /api/webhooks/double-take`, which ingest
 camera events into a `farm_events` table. They accept the real Frigate and
 Double Take wire formats and are exercised by a synthetic scenario generator —
-no camera hardware and no agent reasoning involved yet. See
-[docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
+no camera hardware involved. See [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
+
+Those rows are then **read for meaning**: a deterministic classifier scores each
+event `routine` / `notable` / `urgent` from zone, time of day, face confidence,
+and how often an unrecognized face has recurred, and a reconciliation pass
+reports attendance gaps and camera-silence gaps across a day. The agent gets
+three tools over that layer (`get_farm_events`, `summarize_daily_activity`,
+`flag_anomaly`) and does the narrating; no model call happens inside the
+classifier. See [docs/FARM_MONITOR.md](docs/FARM_MONITOR.md).
 
 ## Tech stack
 
@@ -107,13 +114,16 @@ of failing obscurely.
   the data — and the milk-yield trend — is reproducible).
 - `npm run typecheck` — typecheck shared + server.
 - `npm run build:angular` — build shared + the Angular frontend.
-- `npm test -w server` — sanity tests for the digest shaper and the farm event
-  normalizers (no DB or API key needed).
+- `npm test -w server` — sanity tests for the digest shaper, the farm event
+  normalizers, and the event classifier (no DB or API key needed).
 - `npm test -w web-angular` — Vitest unit tests for the Angular frontend.
 - `npm run simulate:farm -w server -- --all --days-ago=14` — replay synthetic
   camera events through the ingestion webhooks (needs the server running).
 - `npm run verify:farm -w server` — prove every farm scenario lands correctly in
   `farm_events` (needs the server running).
+- `npm run verify:classify -w server` — prove every farm scenario is
+  *classified* correctly: severities, attendance gaps, camera silence (needs the
+  server running).
 
 ## Command reference
 
@@ -174,6 +184,32 @@ npm run verify:farm -w server
 > `verify:farm` clears `farm_events` before each scenario and again when it
 > finishes, so it leaves the table empty. It does not touch the dairy tables,
 > and `npm run seed -w server` does not touch `farm_events`.
+
+### Farm event classification
+
+Reads those rows for meaning: routine / notable / urgent per event, plus
+attendance and camera-silence reconciliation across a day. Needs the server
+running; see [docs/FARM_MONITOR.md](docs/FARM_MONITOR.md).
+
+```bash
+# classify + reconcile every scenario and assert the verdicts
+npm run verify:classify -w server
+
+# one scenario only
+npm run verify:classify -w server -- --scenario=recurring-unknown-visitor
+```
+
+> Both farm scripts pin `TZ=Asia/Karachi`: the generator composes scenario start
+> times in the *host's* zone, so an unpinned run on a UTC machine would stamp
+> `night-visitor-unknown` at 02:14 UTC — 07:14 farm-local, inside working hours,
+> silently failing the off-hours flag the scenario exists to produce.
+>
+> `verify:classify` resets `farm_events` before each scenario, and that is
+> required rather than tidy: the `unknown_a1` cluster id appears in two
+> scenarios, so a shared table would give it four sightings in one lookback
+> window and corrupt every recurrence count. `simulate:farm --all` accumulates
+> all six scenarios into one table and is for ingestion checks only — never use
+> it as the basis for a recurrence assertion.
 
 ### Langfuse Docker stack
 

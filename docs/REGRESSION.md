@@ -102,7 +102,7 @@ flowchart TD
 ## Test harness
 
 `server/src/agent/__tests__/` (all `node:test` files, same runner as the
-existing `server/src/tools/shaper.test.ts`):
+unit tests under `server/src/tools/` and `server/src/farm/`):
 
 - `harness.ts` — event-capture `runTurn()` + extractors (`selection`,
   `toolCalls`, `toolResults`, `resultFor`, `pendingCards`, `datasets`,
@@ -136,8 +136,9 @@ The suite is gated behind `RUN_REGRESSION=1` (set only by the
 `test:regression*` scripts) **and** an `ANTHROPIC_API_KEY`; absent either, the
 whole `describe` skips (so its seeding hooks never run). This keeps the plain
 `npm test` unit run free of token cost — and in practice the `src/**/*.test.ts`
-glob only matches one directory deep (`src/tools/`), so the deeper
-`src/agent/__tests__/` files are excluded from it regardless.
+glob only matches one directory deep (`src/tools/`, and since Cycles 4–5 also
+`src/farm/`), so the deeper `src/agent/__tests__/` files are excluded from it
+regardless.
 
 This reuses the exact function the live server calls — no parallel
 implementation of the loop to keep in sync.

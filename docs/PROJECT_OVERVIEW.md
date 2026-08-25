@@ -57,9 +57,12 @@ flowchart LR
         Route["POST /api/agent/run (SSE), /api/health"]
         Loop["runAgentStream() agent loop"]
         Dispatch["selectAgent() -> dairy | vendor | both"]
-        Tools["Tool executors (dairy + vendor reads/writes + reconcile)"]
-        Prompt["buildSystemPrompt(agent) + catalog + vendor catalog"]
+        Tools["Tool executors (dairy + vendor reads/writes, reconcile, farm monitor)"]
+        Prompt["buildSystemPrompt(agent) + catalog + vendor catalog + farm section"]
+        Classify["scoreEvent() / classifyEvent() (deterministic, no model call)"]
     end
+
+    Webhooks["POST /api/webhooks/frigate, /double-take"]
 
     SQLite[("SQLite dairy.db")]
     Anthropic["Anthropic Messages API"]
@@ -74,6 +77,9 @@ flowchart LR
     Dispatch --> Prompt
     Prompt --> Loop
     Tools --> SQLite
+    Tools --> Classify
+    Classify --> SQLite
+    Webhooks --> SQLite
     Loop -->|"digest -> model context"| Anthropic
     Loop -->|"AG-UI events over SSE (text, tool calls, agent.* CUSTOM)"| Store
     Loop -.->|"generation + tool spans"| Langfuse
@@ -163,7 +169,7 @@ Notes tied to the code:
 
 ## 5. Read/write split & human-in-the-loop
 
-Read tools (dairy: [server/src/tools/reads.ts](../server/src/tools/reads.ts); vendor: [server/src/tools/vendorReads.ts](../server/src/tools/vendorReads.ts); reconciliation: [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts)) execute automatically inside the loop. Write tools (dairy: [server/src/tools/writes.ts](../server/src/tools/writes.ts); vendor: [server/src/tools/vendorWrites.ts](../server/src/tools/vendorWrites.ts)) never run on their own: when the model calls one, `runAgentStream` **pauses** - it emits an `agent.pending` CUSTOM event carrying the `PendingWrite` cards and ends the run with a plain `RUN_FINISHED`. The client renders an approve/reject card ([web-angular/src/app/components/confirmation-card.ts](../web-angular/src/app/components/confirmation-card.ts)); nothing is written until the user decides. Both agents share this exact pause/resume mechanism.
+Read tools (dairy: [server/src/tools/reads.ts](../server/src/tools/reads.ts); vendor: [server/src/tools/vendorReads.ts](../server/src/tools/vendorReads.ts); reconciliation: [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts); farm monitor: [server/src/tools/farmReads.ts](../server/src/tools/farmReads.ts)) execute automatically inside the loop. Write tools (dairy: [server/src/tools/writes.ts](../server/src/tools/writes.ts); vendor: [server/src/tools/vendorWrites.ts](../server/src/tools/vendorWrites.ts); farm monitor: [server/src/tools/farmWrites.ts](../server/src/tools/farmWrites.ts)) never run on their own: when the model calls one, `runAgentStream` **pauses** - it emits an `agent.pending` CUSTOM event carrying the `PendingWrite` cards and ends the run with a plain `RUN_FINISHED`. The client renders an approve/reject card ([web-angular/src/app/components/confirmation-card.ts](../web-angular/src/app/components/confirmation-card.ts)); nothing is written until the user decides. Both agents share this exact pause/resume mechanism.
 
 ```mermaid
 sequenceDiagram
@@ -210,6 +216,8 @@ Why this is safe:
 - **Partial approval.** When multiple writes are proposed, each gets its own decision; approved ones execute and the rest get a `declined` tool result, so the model can acknowledge exactly what happened.
 - **Guarded again at execution.** Even approved writes pass through `guardIds` before running.
 
+> **One write path deliberately skips the card.** Cycle 5's automatic event classification writes flag columns on `farm_events` without an approval prompt — a pass over a day's camera rows must not raise a card per row. It does this by calling the `setFarmEventFlag()` DB helper directly rather than going through a write executor. The `flag_anomaly` **tool**, which a person or the model can invoke to flag something the automatic pass missed, is a normal confirmation-gated write and reaches the same UPDATE. Two entry points, one statement — see [FARM_MONITOR.md](FARM_MONITOR.md) Decision 6.
+>
 > **Why the pause is a plain `RUN_FINISHED`, not an AG-UI interrupt outcome.** Signalling the pending write via `RUN_FINISHED { outcome: interrupt }` made `@ag-ui/client` track an open interrupt and reject the next run unless it carried a standard `resume[]` array - which conflicts with this app's stateless `forwardedProps.approvals` resume. The pause therefore ends with a plain `RUN_FINISHED` and carries the pending writes purely over the `agent.pending` CUSTOM event. Full reasoning in [AGUI_MIGRATION.md](./AGUI_MIGRATION.md).
 
 ---
@@ -256,6 +264,8 @@ The system is designed so that mistakes are caught before they become expensive 
 SQLite schema from [server/src/db.ts](../server/src/db.ts). `animals` is the hub; `milkings` and `health_events` reference it by `animal_id`. `feed_inventory` is standalone. As of Cycle 2 (multi-agent, see [MULTI_AGENT.md](MULTI_AGENT.md)) two vendor-domain tables were added: `vendors` and `deliveries`. `deliveries` and `milkings` are **not** linked by a foreign key — they belong to different agents' domains and are only ever joined read-only, by the reconciliation tool `get_yield_vs_deliveries`.
 
 Cycle 4 (farm event ingestion, see [FARM_EVENTS.md](FARM_EVENTS.md)) adds one further table, `farm_events`, with **no** foreign key to anything — camera events are correlated to each other by `source_event_id` (the Frigate event id both webhooks carry), never to the dairy domain. It also sits outside the seed lifecycle: it lives in its own `FARM_SCHEMA` created with `IF NOT EXISTS` and is absent from `resetSchema()`'s DROP list, so `npm run seed` and the Cycle 3 regression suite cannot truncate ingested events.
+
+Cycle 5 (farm monitor, see [FARM_MONITOR.md](FARM_MONITOR.md)) adds no table — it extends `farm_events` with four nullable classification columns (`classified_at`, `flagged`, `flag_severity`, `flag_reason`), a 1:1 relationship where a side table would only have bought a join. `classified_at` carries real meaning of its own: without it, a routine event (`flagged = 0`) would be indistinguishable from one nobody has examined yet. Note the consequence of `IF NOT EXISTS` — adding columns to `FARM_SCHEMA` does **not** alter a `dairy.db` that already has the table, so the local table has to be dropped once and recreated. That was the accepted cost of having no migration framework, taken deliberately for four nullable columns.
 
 ```mermaid
 erDiagram
@@ -324,6 +334,10 @@ erDiagram
         text ingested_at "ISO-8601 UTC"
         text snapshot_ref "nullable; derived, not sent"
         text raw_payload "request body verbatim"
+        text classified_at "nullable; ISO-8601 UTC; null = not yet examined"
+        integer flagged "0 | 1 (Cycle 5)"
+        text flag_severity "nullable; notable | urgent; null when flagged = 0"
+        text flag_reason "nullable; the rule that fired"
     }
 ```
 

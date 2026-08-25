@@ -1,11 +1,19 @@
 import type { ToolError } from '@dairy/shared';
 import type { Agent } from '../agent/dispatch';
-import { animalExists, deliveryExists, groupExists, vendorExists } from '../db';
+import {
+  animalExists,
+  deliveryExists,
+  farmEventExists,
+  groupExists,
+  vendorExists,
+} from '../db';
 import { READ_EXECUTORS as DAIRY_READ_EXECUTORS } from './reads';
 import { WRITE_EXECUTORS as DAIRY_WRITE_EXECUTORS } from './writes';
 import { VENDOR_READ_EXECUTORS } from './vendorReads';
 import { VENDOR_WRITE_EXECUTORS } from './vendorWrites';
 import { RECONCILE_EXECUTORS, RECONCILE_TOOLS } from './reconcile';
+import { FARM_READ_EXECUTORS, FARM_READ_TOOLS } from './farmReads';
+import { FARM_WRITE_EXECUTORS, FARM_WRITE_TOOLS } from './farmWrites';
 
 export interface ToolSchema {
   name: string;
@@ -261,27 +269,47 @@ export const VENDOR_WRITE_TOOLS: ToolSchema[] = [
 // `both` selection, since it's the one tool that legitimately needs both tables.
 export { RECONCILE_TOOLS };
 
+// ---------------------------------------------------------------------------
+// Farm monitor tools (Cycle 5; see docs/FARM_MONITOR.md Decision 6).
+//
+// AGENT-AGNOSTIC: offered in every toolsForAgent() branch, not gated behind an
+// AgentKind and not given dispatcher keywords. The dispatcher routes on herd
+// and vendor vocabulary, and farm questions do not partition along that seam --
+// "who was at the gate last night?" matches no keyword and lands on `both`,
+// but "who fed the animals last night?" matches `animals` and `feed`, routes
+// `dairy`, and would have had the farm tools withheld from exactly the turn
+// that needed them. Registering them everywhere removes the failure mode
+// instead of patching the keyword list.
+// ---------------------------------------------------------------------------
+export { FARM_READ_TOOLS, FARM_WRITE_TOOLS };
+
+const FARM_TOOLS: ToolSchema[] = [...FARM_READ_TOOLS, ...FARM_WRITE_TOOLS];
+
 export const ALL_TOOLS: ToolSchema[] = [
   ...READ_TOOLS,
   ...WRITE_TOOLS,
   ...VENDOR_READ_TOOLS,
   ...VENDOR_WRITE_TOOLS,
   ...RECONCILE_TOOLS,
+  ...FARM_TOOLS,
 ];
 
 export const READ_TOOL_NAMES = new Set(
-  [...READ_TOOLS, ...VENDOR_READ_TOOLS, ...RECONCILE_TOOLS].map((t) => t.name),
+  [...READ_TOOLS, ...VENDOR_READ_TOOLS, ...RECONCILE_TOOLS, ...FARM_READ_TOOLS].map(
+    (t) => t.name,
+  ),
 );
 export const WRITE_TOOL_NAMES = new Set(
-  [...WRITE_TOOLS, ...VENDOR_WRITE_TOOLS].map((t) => t.name),
+  [...WRITE_TOOLS, ...VENDOR_WRITE_TOOLS, ...FARM_WRITE_TOOLS].map((t) => t.name),
 );
 
 /** Tool schemas offered to the model for a given dispatcher selection. The
  * reconciliation tool is offered only to `both`, since it's the one tool that
- * legitimately needs both domains' tables. */
+ * legitimately needs both domains' tables. The farm tools are offered to every
+ * selection -- see the FARM_TOOLS note above. */
 export function toolsForAgent(agent: Agent): ToolSchema[] {
-  if (agent === 'dairy') return [...READ_TOOLS, ...WRITE_TOOLS];
-  if (agent === 'vendor') return [...VENDOR_READ_TOOLS, ...VENDOR_WRITE_TOOLS];
+  if (agent === 'dairy') return [...READ_TOOLS, ...WRITE_TOOLS, ...FARM_TOOLS];
+  if (agent === 'vendor') return [...VENDOR_READ_TOOLS, ...VENDOR_WRITE_TOOLS, ...FARM_TOOLS];
   return ALL_TOOLS;
 }
 
@@ -311,6 +339,13 @@ export function guardIds(args: Record<string, unknown>): ToolError | null {
       return { error: 'unknown_delivery', delivery_id: args.delivery_id };
     }
   }
+  // flag_anomaly's target (Cycle 5). Same contract as the ids above: the model
+  // gets a structured error it can read and retry from, and the tool never runs.
+  if (typeof args.event_id === 'string' && args.event_id) {
+    if (!farmEventExists(args.event_id)) {
+      return { error: 'unknown_farm_event', event_id: args.event_id };
+    }
+  }
   if (Array.isArray(args.entries)) {
     for (const e of args.entries) {
       const aid = (e as Record<string, unknown>)?.animal_id;
@@ -329,5 +364,10 @@ export const READ_EXECUTORS = {
   ...DAIRY_READ_EXECUTORS,
   ...VENDOR_READ_EXECUTORS,
   ...RECONCILE_EXECUTORS,
+  ...FARM_READ_EXECUTORS,
 };
-export const WRITE_EXECUTORS = { ...DAIRY_WRITE_EXECUTORS, ...VENDOR_WRITE_EXECUTORS };
+export const WRITE_EXECUTORS = {
+  ...DAIRY_WRITE_EXECUTORS,
+  ...VENDOR_WRITE_EXECUTORS,
+  ...FARM_WRITE_EXECUTORS,
+};
