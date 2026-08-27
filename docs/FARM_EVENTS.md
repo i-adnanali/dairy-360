@@ -99,6 +99,13 @@ against upstream docs. The earlier flattened mock payloads
 forced an adapter rewrite in Cycle 7, which is exactly the promise this cycle
 exists to keep.
 
+> **Cycle 7 status:** the **Frigate** half of this decision is now verified
+> against a live instance (0.17.2) — zero breaking deltas, no rewrite needed, see
+> *Frigate — measured against a live instance* below. The **Double Take** half is
+> still docs-only and unverified: that slice deliberately deferred Double Take,
+> so every Double Take shape claim on this page remains sourced from upstream
+> documentation alone.
+
 ### Frigate — `frigate/events` envelope
 
 Real shape (fields elided; see
@@ -139,6 +146,69 @@ Differences from the flat mock that actually matter:
 | — | `false_positive` boolean |
 | — | `has_snapshot` boolean; no snapshot path in the payload |
 | `id` | same, format `{epoch}.{micros}-{suffix}` |
+
+### Frigate — measured against a live instance (Cycle 7, 0.17.2)
+
+**The shape above was sourced from public docs in Cycle 4 and has now been
+verified against a real camera.** 250 `frigate/events` messages captured from
+Frigate **0.17.2** over an 18m47s window (21 `new`, 21 `end`, 208 `update`);
+full method and the capture artifact reference in
+[cycle-7-live-camera-validation.md](cycle-7-live-camera-validation.md).
+
+**Verdict: every field documented above is present, at the documented type, and
+`normalizeFrigate` rejected nothing.** No adapter rewrite was needed — the
+Decision 2 promise held. Two categories of correction follow.
+
+#### Corrections to the shape above
+
+| Path | Documented | Actually observed | Consequence |
+| --- | --- | --- | --- |
+| `after.end_time` | `null` | `null` on `new`/`update`, **`number` on `end`** | None — the example above only showed a `new` event. Not read by the normalizer. |
+| `after.entered_zones` | `["yard","driveway"]` | `[]` | Expected: the test camera has **no zones configured**. Confirms the nullable-`zone` path, but leaves the multi-zone case still unexercised against real data. |
+| `after.current_zones` | `["driveway"]` | `[]` | Same. |
+
+The zone arrays being empty is a property of the test camera, not of Frigate —
+so **`entered_zones` / `current_zones` carrying multiple real zone names remains
+unverified.** The normalizer's `entered_zones[0] ?? current_zones[0]` preference
+is still only covered by `ingest.test.ts`, never by live data.
+
+#### 0.17.2 sends 41 fields this doc did not record
+
+All are additive, all ignored by the normalizer, and all preserved in
+`raw_payload`. Ingestion is permissive about unknown fields (see Decision 4), so
+none of them break anything — but this is the list, so the next person diffing
+against a live instance is not surprised by it. Presence is 250/250 unless noted.
+
+- **Nested `after.snapshot` object** (new since this doc was written) — its own
+  `frame_time`, `box[]`, `area`, `region[]`, `score`, `attributes`,
+  `current_estimated_speed`, `velocity_angle`, `path_data`,
+  `recognized_license_plate`, `recognized_license_plate_score`. Note
+  `snapshot.path_data` is `array | empty-array`, and its nested children appear
+  in only **202/250** payloads — the one genuinely optional field in the set.
+  **This is metadata about the snapshot, not image bytes**; nothing in the
+  payload carries pixels (no field exceeds 200 characters, largest whole record
+  4,574 bytes).
+- **Scoring history** — `score_history[]` (`number`).
+- **Speed estimation** — `average_estimated_speed`, `current_estimated_speed`,
+  `velocity_angle` (all `number`).
+- **Object path** — `path_data`, a triply-nested numeric array
+  (`path_data[][][]`).
+- **LPR** — `recognized_license_plate` (`null` throughout this capture; the
+  feature is not enabled).
+- **Review/state flags** — `max_severity` (`string`), `pending_loitering`
+  (`boolean`), `active` (`boolean`).
+- **Geometry and bookkeeping the Cycle 4 example elided rather than missed** —
+  `box[]`, `region[]`, `area`, `ratio`, `frame_time`, `motionless_count`,
+  `position_changes`, `attributes` (`{}`), `current_attributes` (`[]`).
+
+#### `top_score` does not mean what this doc says it means
+
+The table above documents `top_score` as "best over event lifetime", and
+`normalizeFrigate` prefers it (`after.top_score ?? after.score`) on that basis.
+**Live data contradicts this for `new` events — the only type persisted.** See
+[cycle-7-followups.md](cycle-7-followups.md) § FU-1 for the measurement and the
+deferred fix. Until that is resolved, treat `farm_events.confidence` on
+`detection` rows as *a* detection score, not *the best* detection score.
 
 ### Double Take — camera event payload
 
@@ -204,7 +274,17 @@ meaning:
 ### Known fidelity gaps
 
 Recorded rather than papered over, since Decision 2 is the whole reason this
-cycle costs what it costs:
+cycle costs what it costs.
+
+**Cycle 7 update — what live capture closed and what it did not:**
+
+| Gap | Status after live capture |
+| --- | --- |
+| Frigate payload shape unverified | **CLOSED.** 250 real 0.17.2 events, zero breaking deltas. |
+| Double Take payload shape unverified | **STILL OPEN.** Double Take was out of scope; nothing on this page about it has been checked against a live instance. |
+| `unknown_cluster` has no real producer | **STILL OPEN**, and untouched — it needs Double Take, which this slice skipped. |
+| Multi-zone events | **STILL OPEN**, and now known to be *harder* to close: the validation camera has no zones, so real payloads arrived with `entered_zones: []`. Verifying multi-zone behaviour needs a camera with zones configured. |
+| `top_score` semantics | **NEWLY OPENED** by live capture — see [cycle-7-followups.md](cycle-7-followups.md) § FU-1. |
 
 - **`unknown_cluster` has no real producer for cross-event linking.** The
   event type itself is grounded — Double Take genuinely emits `unknowns[]`,
