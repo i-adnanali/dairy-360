@@ -1,6 +1,21 @@
-# Cycle 7, Step 1 — Live Camera Validation: Context Handover
+# Cycle 7, Step 1 — Live Camera Validation
 
-**Purpose of this doc:** hand this to Claude Code with a validate-first kickoff prompt (see bottom). It should inspect the real dairy-agent repo before implementing anything, confirm or correct the assumptions below, and report back blocking issues and open decisions — per our usual working pattern.
+*Status: **step 1 complete**, tagged `v0.9.0`. Frigate's documented payload shape
+is verified against a live 0.17.2 instance — 250 real events, zero breaking
+deltas, definition of done 7/7. **Cycle 7 as a whole is NOT complete:** step 2
+(real end-to-end HTTP wiring via an MQTT-to-webhook bridge) is not started, and
+Double Take has never been stood up. Prerequisite:
+[FARM_EVENTS.md](FARM_EVENTS.md) (Cycle 4) complete and tagged `v0.7.0`.
+Deferred work is tracked in [cycle-7-followups.md](cycle-7-followups.md).*
+
+> **Note on this document's shape.** It began as a pre-implementation handover
+> written before any of the work was done, and it now also carries the results.
+> The early sections are therefore stated as assumptions-to-be-checked, and the
+> later ones as findings. Where an early claim turned out wrong it has been
+> struck through or corrected in place rather than quietly deleted, so the
+> record of what was believed going in is still legible.
+
+**Purpose of this doc:** originally, to hand to Claude Code with a validate-first kickoff prompt (see bottom) — inspect the real repo before implementing anything, confirm or correct the assumptions below, and report back blocking issues and open decisions. That pass ran, the decisions were taken, and the slice was executed; the doc is now the full record of it.
 
 ## Project context
 
@@ -379,9 +394,12 @@ implementation encodes them, and the reasoning is not recoverable from the code.
 | [`farm/captureMqtt.ts`](../server/src/farm/captureMqtt.ts) | `capture:frigate` — subscribes to `frigate/events`, appends JSONL. |
 | [`farm/verifyPayloadShape.ts`](../server/src/farm/verifyPayloadShape.ts) | `verify:payload` — diffs a capture against two baselines, normalizes, asserts the DoD. |
 | [`farm/captureIsolation.test.ts`](../server/src/farm/captureIsolation.test.ts) | Guards decision 1 mechanically. |
-| [`docker-compose.frigate.yml`](../docker-compose.frigate.yml) | Throwaway Frigate + Mosquitto stack, isolated compose project. |
+| [`docker-compose.frigate.yml`](../docker-compose.frigate.yml) | Throwaway Frigate + Mosquitto stack, isolated compose project, ports bound to loopback. |
 | [`frigate/config.example.yml`](../frigate/config.example.yml) | Frigate config; `config.yml` is gitignored. |
-| [`mosquitto/mosquitto.conf`](../mosquitto/mosquitto.conf) | Anonymous broker for the window. |
+| [`mosquitto/mosquitto.conf`](../mosquitto/mosquitto.conf) | Anonymous broker, loopback-only, for the window. |
+
+Shipped as `v0.9.0`. README gained a *Live camera payload validation* section in
+both "Useful scripts" and the command reference.
 
 **Capture is deliberately dumb** — it records payloads verbatim and does not
 normalize. Normalization happens in `verify:payload`, reading the file back.
