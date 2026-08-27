@@ -9,6 +9,8 @@
     "simulate:farm": "TZ=Asia/Karachi tsx src/farm/simulate.ts",
     "verify:farm": "TZ=Asia/Karachi tsx src/farm/verify.ts",
     "verify:classify": "TZ=Asia/Karachi tsx src/farm/verifyClassify.ts",
+    "capture:frigate": "tsx src/farm/captureMqtt.ts",
+    "verify:payload": "tsx src/farm/verifyPayloadShape.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsx --test src/**/*.test.ts",
@@ -35,6 +37,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.9.0",
+    "mqtt": "^5.15.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }

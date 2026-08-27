@@ -124,6 +124,11 @@ of failing obscurely.
 - `npm run verify:classify -w server` — prove every farm scenario is
   *classified* correctly: severities, attendance gaps, camera silence (needs the
   server running).
+- `npm run capture:frigate -w server -- --minutes=120` — capture live Frigate
+  MQTT events to a gitignored JSONL file (needs the Frigate stack running).
+- `npm run verify:payload -w server -- --capture=<file>` — diff a real capture
+  against the payload shape documented in `docs/FARM_EVENTS.md`. Neither of
+  these two opens `dairy.db`.
 
 ## Command reference
 
@@ -184,6 +189,42 @@ npm run verify:farm -w server
 > `verify:farm` clears `farm_events` before each scenario and again when it
 > finishes, so it leaves the table empty. It does not touch the dairy tables,
 > and `npm run seed -w server` does not touch `farm_events`.
+
+### Live camera payload validation (Cycle 7 step 1)
+
+Captures **real** Frigate events off MQTT and diffs their shape against the
+payload documented in [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md). Needs the
+throwaway Frigate stack, not the app server; see
+[docs/cycle-7-live-camera-validation.md](docs/cycle-7-live-camera-validation.md).
+
+```bash
+# camera address + RTSP credentials go in .env (see .env.example)
+cp frigate/config.example.yml frigate/config.yml
+docker compose -f docker-compose.frigate.yml up -d
+# confirm the feed decodes at http://localhost:5000 before spending a window
+
+# short sanity run first, then a real window
+npm run capture:frigate -w server -- --minutes=5 --max=20
+npm run capture:frigate -w server -- --minutes=120
+
+# produce the deltas list
+npm run verify:payload -w server -- --capture=server/captures/<file>.jsonl
+
+# the stack must not outlive the test window
+docker compose -f docker-compose.frigate.yml down -v
+```
+
+> Neither `capture:frigate` nor `verify:payload` opens `dairy.db` — captures land
+> in gitignored JSONL under `server/captures/` and are normalized in memory,
+> enforced by `captureIsolation.test.ts` rather than by convention.
+>
+> That is *why* captures are files. `verify:farm` and `verify:classify` both call
+> an unscoped `DELETE FROM farm_events`, so had captures been persisted as rows,
+> either script would have wiped them mid-window. Keeping them out of the
+> database makes the two suites harmless to a capture instead of hazardous.
+>
+> `--topic='frigate/#'` is the discovery fallback if nothing arrives on
+> `frigate/events`.
 
 ### Farm event classification
 

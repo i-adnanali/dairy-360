@@ -1,0 +1,99 @@
+# Cycle 7 step 1 — throwaway Frigate + MQTT stack for live payload-shape
+# validation. See docs/cycle-7-live-camera-validation.md.
+#
+# This is NOT a deployment. It exists to make one real Frigate instance emit
+# real `frigate/events` messages for a defined test window so their shape can be
+# diffed against FARM_EVENTS.md. Compute placement is explicitly not decided
+# here (handover doc § out of scope).
+#
+# A separate file rather than a service added to something existing, for the
+# same reason docker-compose.langfuse.yml is separate: dairy-agent itself has NO
+# docker services (it runs via npm/tsx), so there is nothing to add to. Bring it
+# up and down independently:
+#
+#   docker compose -f docker-compose.frigate.yml up -d
+#   docker compose -f docker-compose.frigate.yml down -v
+#
+# Credentials: Frigate substitutes any `{FRIGATE_*}` placeholder in its config
+# from the environment, so the camera's address and RTSP credentials live in
+# .env and never in a committed file. Set these in .env before starting:
+#
+#   FRIGATE_CAM_HOST=192.168.x.x
+#   FRIGATE_CAM_USER=...
+#   FRIGATE_CAM_PASS=...
+#   FRIGATE_CAM_PATH=/onvif1        # or /onvif2 for the sub-stream
+#
+# NOTE: mosquitto is reachable from the host at localhost:1883, which is what
+# `npm run capture:frigate` connects to by default. The capture script runs on
+# the HOST, not in a container, so it needs no docker networking.
+
+# An explicit project name, isolated from docker-compose.langfuse.yml.
+# Both files otherwise default to the directory name (`dairy-agent`), which puts
+# them in ONE compose project: `docker compose -f docker-compose.frigate.yml ps`
+# then reports the Langfuse containers as orphans, and a stray
+# `--remove-orphans` would delete the observability stack. Naming this project
+# separately keeps `down -v` here incapable of touching anything Langfuse owns.
+#
+# ---------------------------------------------------------------------------
+# NEVER pass `-p` / `--project-name` to this file. Never set
+# COMPOSE_PROJECT_NAME either.
+# ---------------------------------------------------------------------------
+# Compose resolves the project name in this order, highest first:
+#   1. the `-p` flag            <- overrides everything below
+#   2. COMPOSE_PROJECT_NAME     <- overrides the line below
+#   3. this file's `name:`
+#   4. the directory name (`dairy-agent` = the Langfuse project)
+#
+# So `-p dairy-agent -f docker-compose.frigate.yml down` aims this stack's
+# teardown squarely at Langfuse's project and tries to remove its network. That
+# has already been attempted once during Cycle 7 and only failed because the
+# network was still in use. There is no reason to pass `-p` here: the file names
+# its own project.
+#
+# Levels 2-4 are asserted by server/src/farm/captureStack.test.ts. Level 1
+# cannot be tested -- it is a flag someone types -- hence this comment.
+name: frigate-capture
+
+services:
+  # Frigate needs an external broker; it does not ship one. Anonymous access is
+  # acceptable here per open decision 3 (trusted home network, test window
+  # only) and is the reason this stack must not be left running afterwards.
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: frigate-mosquitto
+    restart: unless-stopped
+    ports:
+      - '1883:1883'
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    container_name: frigate-capture
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    # Frigate writes its own cache and needs a decent shm for the detect
+    # process. 128mb is comfortable for one low-resolution camera.
+    shm_size: '128mb'
+    ports:
+      - '5000:5000' # web UI — useful for confirming the RTSP feed decodes
+    volumes:
+      # NOT read-only: Frigate migrates its own config file in place on startup
+      # and logs "Config file is read-only, unable to migrate config file." if it
+      # cannot. frigate/config.yml is a gitignored local copy of the committed
+      # example, so letting Frigate rewrite it costs nothing.
+      - ./frigate/config.yml:/config/config.yml
+      # Named volumes, so `down -v` genuinely discards everything this pass
+      # produced. Recordings are not the deliverable; the MQTT payloads are.
+      - frigate_media:/media/frigate
+      - frigate_data:/config/model_cache
+    environment:
+      FRIGATE_CAM_HOST: ${FRIGATE_CAM_HOST:?set FRIGATE_CAM_HOST in .env}
+      FRIGATE_CAM_USER: ${FRIGATE_CAM_USER:?set FRIGATE_CAM_USER in .env}
+      FRIGATE_CAM_PASS: ${FRIGATE_CAM_PASS:?set FRIGATE_CAM_PASS in .env}
+      FRIGATE_CAM_PATH: ${FRIGATE_CAM_PATH:-/onvif1}
+
+volumes:
+  frigate_media:
+  frigate_data:

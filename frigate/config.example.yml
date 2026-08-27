@@ -1,0 +1,121 @@
+# Frigate config for the Cycle 7 step 1 payload-shape validation window.
+# See docs/cycle-7-live-camera-validation.md.
+#
+#   cp frigate/config.example.yml frigate/config.yml
+#
+# `frigate/config.yml` is gitignored. This example is safe to commit because it
+# contains no credentials -- Frigate substitutes every `{FRIGATE_*}` placeholder
+# from the environment at startup, and those live in .env.
+#
+# WHY THE COPY STEP AT ALL, if the placeholders keep secrets out: because a
+# local config gets edited during a validation pass (stream path, detect
+# resolution, thresholds), and those edits should not land in git as noise on a
+# committed file.
+
+mqtt:
+  enabled: true
+  # The compose stack's broker. Container-to-container, so the service name.
+  host: mosquitto
+  port: 1883
+  # Frigate publishes events to `<topic_prefix>/events`. Left at the default
+  # because captureMqtt.ts defaults to `frigate/events` to match; change both
+  # together or the capture subscribes to a topic nobody publishes on.
+  topic_prefix: frigate
+
+# ---------------------------------------------------------------------------
+# go2rtc restream — REQUIRED for this camera, not an optimisation.
+# ---------------------------------------------------------------------------
+# The Yoosee A10's SDP is self-contradictory: it advertises `a=rtpmap:96
+# H265/90000` but supplies `sprop-parameter-sets`, which is H.264 SDP syntax,
+# and the parameter set decodes to an H.264 SPS (first byte 0x67 =
+# nal_unit_type 7; profile_idc 0x42 = Baseline). So the camera claims H.265 and
+# sends H.264.
+#
+# Plain ffmpeg trusts the SDP, sets up an HEVC depacketiser, receives H.264 and
+# dies with "Invalid data found when processing input" -- confirmed against this
+# camera on every transport (tcp / udp / udp_multicast / default). Routing
+# through go2rtc first is the workaround: it probes the actual bitstream instead
+# of trusting rtpmap.
+#
+# If go2rtc also chokes, the fallback is to let it re-encode rather than copy,
+# which costs CPU but sidesteps the mislabel entirely:
+#   test_street_cam:
+#     - "ffmpeg:rtsp://...#video=h264"
+go2rtc:
+  streams:
+    test_street_cam:
+      - rtsp://{FRIGATE_CAM_USER}:{FRIGATE_CAM_PASS}@{FRIGATE_CAM_HOST}{FRIGATE_CAM_PATH}
+
+cameras:
+  # ------------------------------------------------------------------------
+  # The camera name IS the `camera_id` that ingestion records.
+  # ------------------------------------------------------------------------
+  # ingest.ts reads `after.camera` verbatim, so this key becomes camera_id with
+  # no transformation. Confirmed as `test_street_cam` (open decision 2). It must
+  # NOT be `gate_cam` even though the camera is physically at the gate:
+  # gate_cam / barn_cam / yard_cam are the real farm cameras in scenarios.ts,
+  # and per finding 5 this name is the ONLY thing keeping this capture separable
+  # from genuine farm data -- `is_synthetic` will be 0 on these rows, because a
+  # real webhook omits the X-Synthetic-Source header.
+  test_street_cam:
+    enabled: true
+    ffmpeg:
+      inputs:
+        # Points at go2rtc's restream, NOT at the camera directly -- see the
+        # go2rtc block above for why that indirection is mandatory here.
+        # 127.0.0.1 because go2rtc runs inside this same container.
+        - path: rtsp://127.0.0.1:8554/test_street_cam
+          input_args: preset-rtsp-restream
+          # No `record` role: recordings are not the deliverable and a
+          # multi-hour window of street footage is a lot of disk for nothing.
+          roles:
+            - detect
+
+    detect:
+      enabled: true
+      # Deliberately modest: this pass validates payload SHAPE, not detection
+      # quality. A low framerate keeps CPU sane on a laptop while still
+      # producing a steady event stream from street traffic.
+      fps: 5
+
+    # ------------------------------------------------------------------------
+    # NO ZONES. This is load-bearing, not an omission.
+    # ------------------------------------------------------------------------
+    # With no zones defined, Frigate sends `entered_zones: []` and
+    # `current_zones: []`, so ingest.ts stores `zone = NULL`. Classification
+    # rule 1 (`restricted_zone_off_hours`) requires a truthy zone
+    # (classify.ts: `event.zone && RESTRICTED_ZONES.has(event.zone)`), so a
+    # NULL zone makes the farm-specific restricted-zone logic structurally
+    # unreachable for this camera. That is the cleanest available guarantee
+    # that street traffic cannot be scored against farm semantics, and
+    # verify:payload asserts it.
+    # zones: {}   # <- leave this absent
+
+    objects:
+      # Street traffic. `person` and `car` give a steady stream; the point is
+      # volume and variety of real payloads, not what is in them.
+      track:
+        - person
+        - car
+
+    snapshots:
+      # Enabled purely to exercise the `has_snapshot` -> snapshot_ref branch in
+      # ingest.ts. Retention is short: these are not the deliverable.
+      enabled: true
+      retain:
+        default: 1
+
+    record:
+      enabled: false
+
+# Frigate refuses to start without a detector; `cpu` needs no accelerator and
+# is fine for one 5fps camera over a few hours.
+detectors:
+  cpu1:
+    type: cpu
+
+# Config-schema version. MUST BE QUOTED: unquoted `0.17` is a YAML float, and
+# Frigate's validator rejects it with "Input should be a valid string", which
+# drops the whole instance into safe mode (no cameras, no events, no MQTT).
+# Matches the pinned image — 0.17.2 at time of writing.
+version: "0.17"

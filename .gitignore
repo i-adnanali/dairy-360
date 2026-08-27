@@ -10,6 +10,14 @@ dist/
 *.db-shm
 *.db-wal
 
+# Cycle 7 live-camera capture artifacts + local Frigate config.
+# The capture is throwaway data (open decision 1: the shared dev DB stays
+# untouched, so captures land in flat files instead). The Frigate config holds
+# the camera's LAN address and RTSP credentials -- see the security note in
+# docs/cycle-7-live-camera-validation.md. Only the .example stays tracked.
+server/captures/
+frigate/config.yml
+
 # os
 .DS_Store
 
