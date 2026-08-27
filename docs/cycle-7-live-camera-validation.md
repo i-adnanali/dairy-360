@@ -12,7 +12,7 @@
 
 Validate the documented Frigate/Double Take webhook payload shapes in `FARM_EVENTS.md` against a live instance, using a real WiFi camera (Yoosee A10) as the RTSP source. Output is a **deltas list** — confirmation the assumptions were right, or a concrete correction list.
 
-**Scope note given camera placement:** this camera is mounted at the main gate facing street traffic, not a farm area. That's fine and deliberate for this slice — the goal is purely pipeline/schema mechanics (does a real payload match the documented shape, does it flow end-to-end into the existing endpoint), not farm-event semantic content. Street traffic gives a steady, realistic stream of motion/person/vehicle detections to exercise the pipeline — it's just not a source of real farm data and shouldn't be treated as one.
+**Scope note given camera placement:** the validation camera does not overlook any farm area. That's fine and deliberate for this slice — the goal is purely pipeline/schema mechanics (does a real payload match the documented shape, does it flow end-to-end into the existing endpoint), not farm-event semantic content. A view of passing traffic gives a steady, realistic stream of motion/person/vehicle detections to exercise the pipeline — it's just not a source of real farm data and shouldn't be treated as one.
 
 ## Explicitly out of scope for this slice
 
@@ -28,7 +28,7 @@ Validate the documented Frigate/Double Take webhook payload shapes in `FARM_EVEN
 - Camera, laptop, and the Yoosee mobile app are confirmed on the same LAN/WiFi network.
 - Camera's local IP and RTSP credentials obtained (held locally — not included in this doc, see security note below).
 - RTSP stream successfully connected and played in VLC — **tested on an Android VLC client**, confirmed working.
-- Camera physical location confirmed: mounted at the **main gate, facing street traffic** — not overlooking the farm's animals or restricted zones (e.g. `feed_store`).
+- Camera placement confirmed as **outside any farm area**, which is what makes this a pipeline-mechanics test rather than a farm-semantics one. Deliberately not more specific: this repo is public, and enumerating which parts of a real property a camera does and does not cover is not something a schema-validation doc needs to record.
 
 ## Camera probe results (2026-08-26) — three open items closed
 
@@ -88,8 +88,9 @@ ffmpeg input points at `rtsp://127.0.0.1:8554/test_street_cam`), because go2rtc
 probes the actual bitstream instead of trusting the SDP. If go2rtc also chokes,
 the documented fallback is to let it re-encode rather than copy
 (`ffmpeg:rtsp://...#video=h264`), which costs CPU but sidesteps the mislabel
-entirely. **This is unverified against the live camera** — it is the correct
-workaround for the defect, not yet a confirmed-working configuration.
+entirely. **CONFIRMED WORKING** against the live camera: Frigate 0.17.2 ran the
+full window through this restream with no ffmpeg errors and detected real
+`person` / `car` objects. The re-encode fallback was never needed.
 
 ### Two smaller corrections
 
@@ -301,34 +302,48 @@ list this slice exists to deliver, mechanically. Roughly 120 lines.
   file, and on macOS Docker Desktop it must reach the host server as
   `http://host.docker.internal:4000` — **not** `localhost:4000`.
 - ~~Point Frigate's webhook config at the existing ingestion endpoint~~ →
-  **this is the assumption most likely to be wrong, and it is the one thing here
-  that repo evidence cannot settle.** Frigate publishes events over MQTT
-  (`frigate/events`); its notification support is web-push, not an arbitrary
-  outbound POST. If no released Frigate version exposes a generic HTTP event
-  webhook, this slice needs an **MQTT-subscriber bridge** that forwards
-  `frigate/events` messages to `/api/webhooks/frigate` — work the current plan
-  does not budget for. Nothing in this repo consumes MQTT today (grep: zero hits
-  outside route names and comments). Verify against the Frigate version you
-  intend to pin before treating this as a one-line config change.
+  **CONFIRMED WRONG, and it reshaped the slice.** Frigate publishes events over
+  MQTT (`frigate/events`); it exposes no generic outbound HTTP webhook for
+  events. Verified in practice on 0.17.2: the live capture read `frigate/events`
+  off a broker, and 250 messages arrived there. Reaching
+  `/api/webhooks/frigate` would require an MQTT-subscriber bridge that this plan
+  never budgeted for — so **decision 5 narrowed the slice to MQTT only**, and the
+  HTTP path is deferred to Cycle 7 step 2. Nothing in this repo consumed MQTT
+  before this slice.
 - Frigate-only, single-camera, motion/object detection, no Double Take —
   unchanged, and consistent with what the endpoint needs.
 - Compute placement on the laptop for a defined test window — unchanged.
 
-## Revalidation approach / definition of done (tightened)
+## Revalidation approach / definition of done — as executed
 
-- Run Frigate against the live A10 feed for a defined test window (a few hours is likely enough to capture real motion events).
-- Capture N real webhook payloads as they reach the existing ingestion endpoint.
-- Diff captured payloads field-by-field against `FARM_EVENTS.md`'s documented shape — same clone-and-diff-against-known-good discipline used elsewhere in this project, applied to payload shape instead of code.
-- **Deliverable:** a short deltas list — either "zero deltas, assumptions confirmed," or an enumerated list of schema mismatches with a fix plan.
-- **Success criterion — CORRECTED.** The original criterion, "N events ingested
-  with zero parse errors," is **too weak to detect the most likely failure.**
-  Finding 2 proves the endpoint returns `201` while silently writing
-  `confidence = NULL`, so a run in which every captured row has a null
-  confidence would pass that criterion while the data is wrong. The criterion
-  must assert on **values, not HTTP status**: every captured row has non-null
-  `confidence`, an `occurred_at` inside the test window, and a non-empty
-  `source_event_id` — or a complete list of corrections needed to
-  `FARM_EVENTS.md` and/or the ingestion endpoint's handling.
+Two corrections to the plan as originally drafted, both consequences of
+decision 5:
+
+- ~~"Capture N real webhook payloads **as they reach the existing ingestion
+  endpoint**"~~ → payloads were captured off **MQTT**, and never reached
+  `/api/webhooks/frigate`. Frigate has no outbound HTTP event webhook, so
+  reaching the endpoint needs a bridge that this slice deliberately excluded.
+  The real normalizer was still exercised — `verify:payload` runs
+  `normalizeFrigate` over every captured payload in memory — but the **HTTP
+  transport and the SQLite insert were not.** That is what Cycle 7 step 2 is for.
+- ~~"a few hours is likely enough"~~ → **18m47s was enough.** 250 messages, and
+  every field except one appears in all 250, so the shape proved stable far
+  faster than budgeted. The one-field exception is
+  `after.snapshot.path_data`'s children (202/250).
+
+**Success criterion — CORRECTED, then met 7/7.** The original criterion, "N
+events ingested with zero parse errors," was **too weak to detect the most likely
+failure.** An absent score field makes the endpoint return `201` while silently
+writing `confidence = NULL`, so a run in which every row had a null confidence
+would have passed that criterion while the data was wrong. The criterion asserts
+on **values, not HTTP status**: non-null `confidence`, `occurred_at` inside the
+window, non-empty `source_event_id`, plus the camera-id and NULL-zone separation
+checks. Implemented as `dodChecks()` in `verifyPayloadShape.ts`.
+
+As it happens the failure that criterion was written to catch **did not occur** —
+0.17.2 sends the score fields where the doc says. The check stays as a regression
+guard for a future release that moves them. Full results in
+[§ DELIVERABLE](#deliverable--the-deltas-list-live-capture-2026-08-26).
 
 ## Decisions taken (2026-08-26)
 
@@ -705,6 +720,9 @@ explicit ignore entry or a `config.local.yml` substitution.
 
 The validate-first pass this prompt asked for is complete; its results are in
 [§ Validation findings](#validation-findings-repo-evidence-pass-2026-08-26)
-above. Implementation is blocked on the five open decisions.
+above. All five open decisions were then resolved, the harness was built, and the
+live capture ran — see [§ DELIVERABLE](#deliverable--the-deltas-list-live-capture-2026-08-26).
+**This slice is closed;** what it deliberately left undone is tracked in
+[cycle-7-followups.md](cycle-7-followups.md).
 
 > Before implementing anything, inspect the real dairy-agent repo and validate the assumptions in this handover doc against it. Specifically: confirm the exact contract (path, method, auth, strict vs. permissive schema validation) of the Cycle 4 farm-events webhook ingestion endpoint, and confirm the current documented payload shape in FARM_EVENTS.md and the synthetic generator. Report back any blocking issues, incorrect assumptions in this doc, and open decisions — before writing the Frigate config or any integration code.

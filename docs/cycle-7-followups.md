@@ -150,13 +150,13 @@ the live capture changed what it would take to close.
 `normalizeFrigate` denormalizes zones to one indexed column, preferring
 `entered_zones[0] ?? current_zones[0]`. The validation camera had **no zones
 configured** — deliberately, so that `zone = NULL` made classification rule 1
-structurally unreachable for street traffic. Consequence: real payloads arrived
+structurally unreachable for the test camera. Consequence: real payloads arrived
 with `entered_zones: []` and `current_zones: []`, so the capture confirmed the
 **nullable-zone** path and left the **multi-zone** path exactly as unverified as
 before.
 
-Closing it needs a Frigate camera with zones defined, which for real coverage
-means a camera pointed at the farm — not the gate-facing test camera. Only
+Closing it needs a Frigate camera with zones defined, which means a camera
+covering a farm area rather than the validation camera used here. Only
 [`ingest.test.ts`](../server/src/farm/ingest.test.ts) covers the preference rule
 today, against synthetic input.
 

@@ -20,6 +20,24 @@ Prerequisite: `docs/REGRESSION.md` (Cycle 3) complete and tagged `v0.6.0`.*
 >   classification-aware must reset `farm_events` before each scenario, because
 >   `unknown_a1` appears in two scenarios and a shared table corrupts every
 >   recurrence count.
+>
+> **Validated by Cycle 7 step 1**
+> ([cycle-7-live-camera-validation.md](cycle-7-live-camera-validation.md)). The
+> Frigate payload shapes on this page were sourced from public docs and have now
+> been checked against a live Frigate 0.17.2 instance — **zero breaking deltas,
+> no adapter rewrite needed.** What that changed here:
+>
+> - **New section** *Frigate — measured against a live instance*, holding the 41
+>   fields 0.17.2 sends that this page did not record, and 3 type-changed
+>   corrections.
+> - **`top_score` no longer means what Decision 2's table says it means** for
+>   `new` events. Tracked as [cycle-7-followups.md](cycle-7-followups.md) § FU-1;
+>   until it is fixed, `confidence` on a `detection` row is *a* detection score,
+>   not *the best* one.
+> - **Two open items resolved with measurements** — `raw_payload` size, and the
+>   volume figures behind the retention item.
+> - **Double Take remains entirely unverified.** That slice covered Frigate only,
+>   so every Double Take claim here is still docs-only (§ FU-3).
 
 ## Context
 
@@ -51,6 +69,10 @@ rewrite; everything below that carries a cost is justified by that one claim.
   concern; the generator here runs in burst mode.
 - **No Telegram notifications.**
 - **No real Frigate/Double Take integration or camera hardware.** Cycle 7.
+  *(Update: Cycle 7 step 1 has since run real Frigate 0.17.2 hardware against a
+  live camera to validate payload shape — but only over MQTT. Nothing has yet
+  reached these HTTP endpoints from a real camera, and Double Take has still
+  never been stood up.)*
 - **No face-embedding computation or face clustering.** Identities and cluster
   ids are asserted as ground truth in synthetic payloads, never derived from a
   model. See *Known fidelity gaps* — this is the one place the
@@ -810,11 +832,20 @@ unconditional.
   the single indexed `zone` against a set — so this stayed deferred. The options
   remain a `farm_event_zones` join table or a JSON column, still waiting for a
   query that wants it.
-- **No retention policy.** Real cameras produce orders of magnitude more rows
-  than a dairy herd does; `farm_events` will need pruning or rollup long before
-  `milkings` does. Out of scope here, but it is the first table in this schema
-  that will ever need it.
-- **`raw_payload` size.** Real Frigate payloads carry `before` *and* `after`
-  with boxes and attributes — roughly 2 KB per row against a `2mb`
-  `express.json()` limit that was set for chat turns. Fine at Cycle 4 volumes,
-  worth re-checking against real event rates in Cycle 7.
+- **No retention policy**, and Cycle 7 step 1 put real numbers on it. A single
+  camera watching moderate passing traffic produced **21 persisted rows in 19
+  minutes — about 67 rows/hour, ~1,600/day**, from 798 MQTT messages/hour (only
+  `type: "new"` persists). At ~1.74 KB of `raw_payload` each that is roughly
+  **2.7 MB/day per camera**, before any farm cameras are added. So the Cycle 4
+  intuition was right — `farm_events` will need pruning or rollup long before
+  `milkings` does — and it is now sized rather than guessed. Still out of scope
+  here; it becomes real the moment anything writes real events continuously
+  (i.e. Cycle 7 step 2).
+- ~~**`raw_payload` size.**~~ **Measured in Cycle 7 step 1 — not a problem, and
+  the Cycle 4 estimate was accurate.** Real Frigate 0.17.2 payloads that actually
+  persist (`type: "new"`) average **1.74 KB** and top out at 1.76 KB — squarely
+  in line with the "roughly 2 KB per row" guess, even though 0.17.2 sends more
+  per event than Cycle 4 assumed (a nested `after.snapshot`, `path_data`,
+  `score_history`). Separately, the largest message of *any* type on the wire was
+  **4,496 bytes** — an `end` event, which is what the `2mb` `express.json()`
+  limit has to survive: **466× headroom**.
