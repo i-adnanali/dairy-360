@@ -40,11 +40,22 @@ test('the capture tooling never loads db.ts, seed.ts or better-sqlite3', () => {
     'a database module was already loaded before this test ran — the check would be meaningless',
   );
 
-  // Load exactly what a capture run loads. Both files guard their CLI entry
-  // behind `require.main === module`, so this imports without running anything.
+  // Load exactly what a capture run loads. Every one of these guards its CLI
+  // entry behind `require.main === module`, so this imports without running
+  // anything.
   require('./captureMqtt');
   require('./verifyPayloadShape');
   require('./payloadShape');
+  // Cycle 7 FU-3 (Double Take) -- same constraint, same reasons. Added here
+  // rather than in a second test so that ONE assertion covers the whole
+  // capture surface: a new module that reaches the database must fail
+  // somewhere, and "somewhere" should not depend on remembering to add a file
+  // to a second list.
+  require('./captureDoubleTake');
+  require('./verifyDoubleTakeShape');
+  require('./doubleTakeGuards');
+  require('./enrollSynthetic');
+  require('./redact');
 
   assert.deepEqual(
     offendingModules(),
@@ -74,8 +85,16 @@ test('./simulate is the transitive trap this guard exists for', () => {
     'seed.ts no longer imports ./db — verifyPayloadShape.ts could reuse stampTimestamps',
   );
 
-  // And the two capture modules must not name the forbidden imports at all.
-  for (const file of ['captureMqtt.ts', 'verifyPayloadShape.ts']) {
+  // And no capture module may name the forbidden imports at all.
+  for (const file of [
+    'captureMqtt.ts',
+    'verifyPayloadShape.ts',
+    'captureDoubleTake.ts',
+    'verifyDoubleTakeShape.ts',
+    'enrollSynthetic.ts',
+    'doubleTakeGuards.ts',
+    'redact.ts',
+  ]) {
     const src = read(file);
     for (const forbidden of ["'../db'", "'../seed'", "'./simulate'"]) {
       assert.ok(

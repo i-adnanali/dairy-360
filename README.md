@@ -127,8 +127,15 @@ of failing obscurely.
 - `npm run capture:frigate -w server -- --minutes=120` — capture live Frigate
   MQTT events to a gitignored JSONL file (needs the Frigate stack running).
 - `npm run verify:payload -w server -- --capture=<file>` — diff a real capture
-  against the payload shape documented in `docs/FARM_EVENTS.md`. Neither of
-  these two opens `dairy.db`.
+  against the payload shape documented in `docs/FARM_EVENTS.md`.
+- `npm run enroll:synthetic -w server` — enrol the single **synthetic** face for
+  the Double Take validation window, restart the detector, and verify
+  recognition actually resolves it (see `double-take/enroll/README.md`).
+- `npm run capture:doubletake -w server -- --minutes=20` — capture live Double
+  Take MQTT payloads. Redacts image bytes on the write path, and refuses to
+  start unless the enrolment gallery holds exactly the synthetic subject.
+- `npm run verify:payload:dt -w server -- --capture=<file>` — diff a Double Take
+  capture against the documented shape. None of these five opens `dairy.db`.
 
 ## Command reference
 
@@ -212,6 +219,22 @@ npm run verify:payload -w server -- --capture=server/captures/<file>.jsonl
 
 # the stack must not outlive the test window
 docker compose -f docker-compose.frigate.yml down -v
+```
+
+Double Take face-payload validation (Cycle 7 FU-3) runs on the same stack:
+
+```bash
+cp double-take/config.example.yml double-take/config.yml
+# put ONE synthetic (machine-generated) portrait at
+# double-take/enroll/synthetic_1.jpg — see double-take/enroll/README.md for why
+# it must not be a photo of a real person, and what provenance to record
+docker compose -f docker-compose.frigate.yml up -d
+
+npm run enroll:synthetic -w server          # enrols, restarts, verifies
+npm run capture:doubletake -w server -- --minutes=20
+npm run verify:payload:dt -w server -- --capture=server/captures/<file>.jsonl
+
+docker compose -f docker-compose.frigate.yml down -v   # destroys embeddings too
 ```
 
 > Neither `capture:frigate` nor `verify:payload` opens `dairy.db` — captures land

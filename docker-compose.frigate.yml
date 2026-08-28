@@ -104,6 +104,93 @@ services:
       FRIGATE_CAM_PASS: ${FRIGATE_CAM_PASS:?set FRIGATE_CAM_PASS in .env}
       FRIGATE_CAM_PATH: ${FRIGATE_CAM_PATH:-/onvif1}
 
+  # ==========================================================================
+  # Cycle 7 FU-3 — Double Take + a face detector.
+  # ==========================================================================
+  # Added to THIS file rather than a docker-compose.doubletake.yml on purpose.
+  # A second compose file would land in its own project and its own network
+  # (captureStack.test.ts requires a distinct `name:` per file), and Double Take
+  # would then have no service-name route to Frigate or the broker. Cross-project
+  # docker networking is exactly the complexity a bounded demo should not buy.
+  # The existing project-isolation guard covers these services for free.
+  #
+  # These two are only needed for the FU-3 window. `--scale` them to zero, or
+  # just run the whole stack for the window and tear it down; the Frigate-only
+  # FU-1 runbook still works unchanged because nothing above depends on them.
+
+  deepstack:
+    # DeepStack, not CompreFace. CompreFace publishes no arm64 image (latest is
+    # 2023-08, linux/amd64 only) and this is an Apple Silicon machine, so it
+    # would run under qemu emulation. deepquestai/deepstack:arm64 is native --
+    # verified with `docker image inspect` and smoke-tested end to end.
+    #
+    # The image is from 2022-01 and unmaintained. That is acceptable for a
+    # throwaway window and is NOT acceptable for anything that outlives it.
+    image: deepquestai/deepstack:arm64
+    platform: linux/arm64
+    container_name: frigate-deepstack
+    restart: unless-stopped
+    environment:
+      # Face detection + recognition only. No object/scene detection: this
+      # stack has Frigate for that, and every extra model is extra startup
+      # time and memory for nothing.
+      VISION-FACE: 'True'
+    volumes:
+      # ====================================================================
+      # A NAMED VOLUME, NEVER A BIND MOUNT INTO THE REPO.
+      # ====================================================================
+      # This is where face EMBEDDINGS live. A bind mount would put biometric
+      # data inside the working tree, one `git add -A` away from being
+      # committed to a public repo. A named volume is destroyed by `down -v`,
+      # which is what makes "nothing survives the window" true rather than
+      # aspirational. Asserted by server/src/farm/doubleTakeStack.test.ts.
+      - deepstack_data:/datastore
+    ports:
+      # Loopback only. Double Take reaches it over the compose network and does
+      # not need this -- but `enroll:synthetic` and `capture:doubletake` run on
+      # the HOST and use it to enrol the one synthetic subject and to assert,
+      # before every capture, that the gallery still holds nothing else and that
+      # recognition actually resolves it. 5051 rather than 5000 because Frigate's
+      # UI already has that host port.
+      - '127.0.0.1:5051:5000'
+
+  double-take:
+    image: jakowenko/double-take:1.13.2
+    container_name: frigate-double-take
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+      - frigate
+      - deepstack
+    volumes:
+      # Named volume for the same reason as deepstack_data above. With
+      # `detect.*.save: false` in the config this should stay empty of crops --
+      # but "should" is why it is a volume that `down -v` destroys rather than
+      # a directory that outlives the window.
+      - doubletake_data:/.storage
+      # -------------------------------------------------------------------
+      # The config MUST land at /.storage/config/config.yml.
+      # -------------------------------------------------------------------
+      # Not /double-take/config.yml, even though that path exists in the image
+      # and looks like the obvious home. Double Take reads
+      # `./.storage/config/config.yml` (constants/system.js: storage.config.path,
+      # overridable only via CONFIG_PATH), and if the file is absent it WRITES A
+      # PLACEHOLDER there and starts on defaults.
+      #
+      # That failure is quiet in the worst way: mounting to the wrong path
+      # produced `error: config requires property "detectors"` -- which reads
+      # like a malformed config rather than an unread one -- while the running
+      # instance had detect.*.save at its TRUE default, i.e. writing face crops.
+      # Mounted after the named volume above so it lands inside it.
+      - ./double-take/config.yml:/.storage/config/config.yml
+    ports:
+      # Loopback only, like every other port in this file. The UI is useful for
+      # confirming the detector is reachable and the gallery holds exactly the
+      # one synthetic subject.
+      - '127.0.0.1:3000:3000'
+
 volumes:
   frigate_media:
   frigate_data:
+  deepstack_data:
+  doubletake_data:

@@ -1,0 +1,31 @@
+synthetic_1.jpg — the sole enrolment subject for Cycle 7 FU-3.
+
+NOT a photograph of a real person. Generated media, and the claim is
+verifiable rather than asserted: the source PNG carries signed C2PA content
+credentials.
+
+  source file        CodexImage28Aug2026, 15_04_24.png (1402x1122 PNG)
+  supplied by        project owner, 2026-08-28
+  c2pa softwareAgent gpt-image v2.0
+  claim_generator    OpenAI Media Service API (specVersion 2.2.0)
+  c2pa actions       c2pa.created (2026-08-28), c2pa.converted,
+                     c2pa.watermarked.unbound
+  digitalSourceType  http://cv.iptc.org/newscodes/digitalsourcetype/
+                     trainedAlgorithmicMedia
+  signature chain    OpenAI OpCo, LLC — OpenAI TSA Root CA
+                     -> OpenAI TSA Issuing CA -> OpenAI TSA Leaf
+
+The IPTC digitalSourceType above is the operative fact: "trainedAlgorithmicMedia"
+means the image was produced by a trained algorithm, not captured from a person.
+That is the entire basis on which enrolling it is acceptable under this slice's
+no-real-enrolment rule.
+
+Converted PNG -> JPEG for enrolment (sips) because Double Take sends JPEG
+frames to the detector; the conversion drops the C2PA manifest, which is why
+the credentials are transcribed here. Re-verify against the source PNG with:
+
+  strings -a "<source>.png" | grep -aiE "softwareAgent|claim_generator|digitalSourceType"
+
+Verified during FU-3: DeepStack detects a single face in this image at
+detection confidence 0.899, box (485,227)-(930,806), and after enrolment +
+restart recognises it as synthetic_1 at confidence 1.0.

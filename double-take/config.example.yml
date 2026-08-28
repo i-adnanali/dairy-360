@@ -1,0 +1,168 @@
+# Double Take config for the Cycle 7 FU-3 payload-shape validation window.
+# See docs/Cycle7-fu3-double-take-validation.md.
+#
+#   cp double-take/config.example.yml double-take/config.yml
+#
+# `double-take/config.yml` is gitignored, for the same reason
+# `frigate/config.yml` is: a local config gets edited during a validation pass
+# and those edits should not land in git as noise on a committed file. This
+# example holds no secrets -- the stack is loopback-only and unauthenticated for
+# the window (see docker-compose.frigate.yml).
+#
+# ===========================================================================
+# THIS IS A THROWAWAY VALIDATION CONFIG, NOT A DEPLOYMENT.
+# ===========================================================================
+# It points a face recogniser at a STREET-FACING camera, so every face it
+# processes belongs to a member of the public who has not consented to
+# biometric processing. Several settings below are load-bearing privacy
+# controls rather than tuning, and each says so in place. They are asserted
+# mechanically by server/src/farm/doubleTakeStack.test.ts -- if you change one,
+# that test fails, which is the point.
+
+mqtt:
+  # The compose stack's broker; container-to-container, so the service name.
+  host: mosquitto
+  topics:
+    # Double Take SUBSCRIBES here (Frigate's own event topic) and PUBLISHES to
+    # the two below. `capture:doubletake` subscribes to `double-take/#`.
+    frigate: frigate/events
+    cameras: double-take/cameras
+    matches: double-take/matches
+
+frigate:
+  # Frigate's INTERNAL, UNAUTHENTICATED port. Confirmed against 0.17.2 during
+  # the FU-3 smoke test: `auth.enabled` is true by default, yet /api/version,
+  # /api/<cam>/latest.jpg and /api/events/<id>/snapshot.jpg all answer on 5000
+  # with no credentials. Frigate documents 5000 as "intended to be used within
+  # the docker network for services that integrate with Frigate and do not
+  # support authentication" -- which Double Take does not, at all (it calls
+  # Frigate with plain axios). Port 8971 is the authenticated one and is
+  # deliberately not published by the compose file.
+  url: http://frigate:5000
+
+  # ------------------------------------------------------------------------
+  # attempts -- turned WAY down from the defaults (10 latest / 10 snapshot).
+  # ------------------------------------------------------------------------
+  # Measured during the FU-3 smoke test: one DeepStack recognize call costs
+  # ~3.4s on this arm64 machine, and the cost is the SAME at full resolution as
+  # at 400x400 (it resizes internally). Double Take processes ONE event at a
+  # time and `stop_on_match` only short-circuits on a MATCH -- which, with a
+  # gallery holding nothing but one synthetic face, essentially never happens
+  # against street traffic. So the defaults would burn 20 sequential calls
+  # (~68s) per event while ~4.8 person-events/minute arrive, and the window
+  # would be spent re-scanning the same handful of events.
+  #
+  # 2 + 1 keeps a little redundancy (the first frame is often mid-motion) while
+  # holding an event to ~10s.
+  attempts:
+    latest: 2
+    snapshot: 1
+    # Do not process the raw MQTT snapshot topic; the two HTTP pulls above are
+    # the paths under test.
+    mqtt: false
+    delay: 0
+
+  # `person` only. Excluding `car` is not tuning -- it is the difference
+  # between processing people and processing vehicles, and Double Take has
+  # nothing to say about a car.
+  labels:
+    - person
+
+  # Do not write recognised names back onto Frigate's events. That would
+  # attach an identity to a stranger's event record in Frigate's own database,
+  # which is exactly what this slice must not do.
+  update_sub_labels: false
+
+  # ------------------------------------------------------------------------
+  # image.height is LEFT AT ITS DEFAULT AND DELIBERATELY NOT WORKING.
+  # ------------------------------------------------------------------------
+  # Double Take hardcodes `?h=${image.height}` into both Frigate URLs, and
+  # Frigate 0.17.2 IGNORES `h=` -- the parameter was renamed to `height=`.
+  # Measured: `?h=500` returns the full 2304x1296 / 323 KB frame, `?height=500`
+  # returns 888x500 / 68.7 KB.
+  #
+  # That looked like a defect worth working around, and it is not -- it helps.
+  # This camera watches a street from the gate, so a person's face is a small
+  # fraction of the frame; downscaling to 500px height is exactly the wrong
+  # move, because it is the face's pixel size that decides whether the detector
+  # resolves it at all. And the cost of the bigger image is nil: a DeepStack
+  # recognize call was measured at ~3.3s on a full-res 2304x1296 frame versus
+  # ~3.4s on a 400x400 one, because it resizes internally.
+  #
+  # So: keep the default, let `h=` be ignored, and get full resolution. Noted
+  # explicitly because a future reader will spot the ignored parameter and be
+  # tempted to "fix" it, which would quietly cut face yield.
+  #
+  # Overriding the URLs is NOT a general option either: `image.snapshot` is
+  # used VERBATIM (config.js does no `{id}` interpolation), so a static
+  # override cannot carry the per-event id. Only `image.latest` is overridable
+  # in practice, and per the above there is no reason to.
+  #
+  # Measured on 0.17.2, because the two endpoints do NOT behave the same:
+  #   /api/<cam>/latest.jpg        honours `height=`, ignores `h=`
+  #   /api/events/<id>/snapshot.jpg  ignores EVERY query param -- height, h,
+  #                                  crop, quality and bbox all return one
+  #                                  byte-identical full-frame image
+  #
+  # The second half matters: `crop=1` not working removes the one real
+  # advantage the snapshot path had over latest. A working `crop=1` would
+  # return just the detected person's bounding box, making the face a much
+  # larger fraction of the image and materially improving face yield at street
+  # distance. It does not, so `snapshot` is simply a second full frame sampled
+  # at a different instant. `attempts.snapshot: 1` is kept for that timing
+  # diversity and nothing more.
+  image:
+    height: 500
+
+detect:
+  # ========================================================================
+  # RETENTION CONTROLS -- privacy, not tuning. Do not "helpfully" re-enable.
+  # ========================================================================
+  # `save: false` is the important one. With it, Double Take never calls
+  # process.util.js's save(), so it writes NO face crop to
+  # /.storage/media/matches/, NO copy to /.storage/media/latest/, and NO row
+  # into its own SQLite. The defaults are `save: true` with an 8h/168h purge --
+  # i.e. by default this would keep strangers' face crops on disk for a week.
+  #
+  # `base64: false` keeps image bytes out of the MQTT payload. The capture
+  # ALSO redacts base64 on the write path (server/src/farm/redact.ts), because
+  # a config setting is one edit away from being wrong and the cost of being
+  # wrong is a stranger's face in a file.
+  match:
+    save: false
+    base64: false
+    confidence: 60
+  unknown:
+    save: false
+    base64: false
+    confidence: 40
+
+detectors:
+  # ------------------------------------------------------------------------
+  # DeepStack, and DELIBERATELY NOTHING ELSE.
+  # ------------------------------------------------------------------------
+  # Only detectors that appear as keys here are active (config.js iterates
+  # Object.entries(CONFIG.detectors)), so absence IS the off switch.
+  #
+  # `rekognition` MUST NOT be added. It is a cloud service: enabling it would
+  # transmit the faces of non-consenting members of the public to a third
+  # party. That is categorically incompatible with this slice, and its absence
+  # is asserted by doubleTakeStack.test.ts rather than left to judgement.
+  #
+  # DeepStack was chosen over CompreFace because CompreFace publishes no arm64
+  # image (latest is 2023-08, linux/amd64 only) and this machine is an M2 Pro;
+  # deepquestai/deepstack:arm64 runs natively. Smoke-tested during FU-3:
+  # detection, /face/register, /face/list and /face/recognize all work.
+  deepstack:
+    url: http://deepstack:5000
+    timeout: 15
+
+time:
+  # Leave `format` UNSET. Unset means luxon's ISO-8601 output, which
+  # ingest.ts's isoToIso() parses; setting a custom format would emit a
+  # non-ISO `timestamp`, and `timestamp` is a REQUIRED field whose failure mode
+  # is a hard 400 from /api/webhooks/double-take.
+  timezone: UTC
+
+logs:
+  level: info

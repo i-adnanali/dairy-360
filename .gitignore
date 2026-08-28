@@ -18,6 +18,23 @@ dist/
 server/captures/
 frigate/config.yml
 
+# Cycle 7 FU-3 (Double Take). The local config is gitignored for the same
+# reason frigate/config.yml is -- it gets edited during a window and those
+# edits are noise on a committed file. Only the .example stays tracked.
+#
+# double-take/enroll/ holds the SYNTHETIC portrait enrolled as the sole gallery
+# subject. It is deliberately not committed: the repo is public, and a face
+# image in git is a face image in git even when the face is machine-generated.
+# See docs/Cycle7-fu3-double-take-validation.md § open decision 1 for the
+# provenance requirement and enroll/README.md for how to supply one.
+double-take/config.yml
+double-take/enroll/*
+!double-take/enroll/README.md
+# PROVENANCE.txt IS tracked, deliberately: it holds no image data, and it is the
+# durable record of why enrolling this face was acceptable at all. The image it
+# describes is gone after the window; the justification should not be.
+!double-take/enroll/PROVENANCE.txt
+
 # os
 .DS_Store
 
