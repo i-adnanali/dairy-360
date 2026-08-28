@@ -36,8 +36,8 @@ Prerequisite: `docs/REGRESSION.md` (Cycle 3) complete and tagged `v0.6.0`.*
 >   not *the best* one.
 > - **Two open items resolved with measurements** — `raw_payload` size, and the
 >   volume figures behind the retention item.
-> - **Double Take remains entirely unverified.** That slice covered Frigate only,
->   so every Double Take claim here is still docs-only (§ FU-3).
+> - **Double Take remained unverified after that slice** (it covered Frigate
+>   only). **Cycle 7 FU-3 has since closed it** — see the bullet below.
 
 ## Context
 
@@ -69,10 +69,11 @@ rewrite; everything below that carries a cost is justified by that one claim.
   concern; the generator here runs in burst mode.
 - **No Telegram notifications.**
 - **No real Frigate/Double Take integration or camera hardware.** Cycle 7.
-  *(Update: Cycle 7 step 1 has since run real Frigate 0.17.2 hardware against a
-  live camera to validate payload shape — but only over MQTT. Nothing has yet
-  reached these HTTP endpoints from a real camera, and Double Take has still
-  never been stood up.)*
+  *(Update: Cycle 7 step 1 ran real Frigate 0.17.2 hardware against a live
+  camera, and FU-3 has since stood up real Double Take v1.13.2 + DeepStack
+  against that same stack. Both validated payload shape over **MQTT only** —
+  nothing has yet reached these HTTP endpoints from a real producer, which
+  remains Cycle 7 step 2.)*
 - **No face-embedding computation or face clustering.** Identities and cluster
   ids are asserted as ground truth in synthetic payloads, never derived from a
   model. See *Known fidelity gaps* — this is the one place the
@@ -121,12 +122,19 @@ against upstream docs. The earlier flattened mock payloads
 forced an adapter rewrite in Cycle 7, which is exactly the promise this cycle
 exists to keep.
 
-> **Cycle 7 status:** the **Frigate** half of this decision is now verified
-> against a live instance (0.17.2) — zero breaking deltas, no rewrite needed, see
-> *Frigate — measured against a live instance* below. The **Double Take** half is
-> still docs-only and unverified: that slice deliberately deferred Double Take,
-> so every Double Take shape claim on this page remains sourced from upstream
-> documentation alone.
+> **Cycle 7 status: BOTH halves of this decision are now verified against live
+> instances, with zero breaking deltas and no adapter rewrite needed.**
+>
+> - **Frigate** — 0.17.2, step 1. See *Frigate — measured against a live
+>   instance* below.
+> - **Double Take** — v1.13.2 driving DeepStack, FU-3. See *Double Take —
+>   measured against a live instance* below. The 0-100 confidence scale, the
+>   `matches`/`misses`/`unknowns` arrays, `counts`, the per-face object and both
+>   MQTT topic shapes are all confirmed. Three undocumented fields were found
+>   (`checks`, `personCount`, `token`), all additive.
+>
+> Decision 2's promise therefore held for both sources: swapping the generator
+> for real webhooks is configuration, not a rewrite.
 
 ### Frigate — `frigate/events` envelope
 
@@ -293,6 +301,96 @@ meaning:
    `confidence` value is the only discriminator; threshold policy belongs to
    the Cycle 5 agent, not to the schema.
 
+### Double Take — measured against a live instance (Cycle 7 FU-3, v1.13.2)
+
+**The shape above was sourced from upstream docs in Cycle 4 and has now been
+checked against a real instance:** Double Take **v1.13.2** driving
+**DeepStack** (`deepquestai/deepstack:arm64`) against the live Frigate 0.17.2
+stack, camera `test_street_cam`. 14 recognition payloads, 15 face entries.
+Method and full deltas in
+[Cycle7-fu3-double-take-validation.md](Cycle7-fu3-double-take-validation.md).
+
+**Verdict: the envelope and the per-face object are correct as documented, and
+`normalizeDoubleTake` rejected nothing — 0 rejects, 14 rows.** One undocumented
+per-face field, two undocumented envelope fields, no breaking deltas.
+
+**The headline Cycle 4 claim is CONFIRMED: confidence really is on a 0–100
+native scale.** Observed range **77.86 – 100** across 15 faces, every value
+non-zero and ≥ 1 pre-normalization. The ÷100 normalization is correct and the
+100× mock error Cycle 4 found was a genuine mock bug, not a misreading of the
+upstream shape.
+
+#### Corrections to the shape above
+
+| Path | Documented | Actually observed | Consequence |
+| --- | --- | --- | --- |
+| `matches` | `[<face>]` | `array \| empty-array` | Populated or empty depending on whether anything cleared `detect.match.confidence`. Not a defect. |
+| `unknowns` | `[]` | `array \| empty-array` | The doc's example simply shows a match; `unknowns` carries entries whenever a face fails the match bar. |
+| `counts` | always present | **present on the camera topic only** | The `double-take/matches/<name>` and `/matches/unknown` topics carry no `counts`. Not read by the normalizer. |
+
+#### Three fields this doc did not record
+
+All additive, all ignored by the normalizer, all preserved in `raw_payload`.
+
+- **`checks`** — a `string[]` on each per-face object, present whenever the face
+  failed a threshold, e.g. `["confidence too low: 77.86 < 90"]`. This is the
+  only undocumented **per-face** field, and it is genuinely useful: it states
+  which threshold rejected the face and against what value.
+- **`personCount`** — a `number` on the camera-topic envelope, duplicating
+  `counts.person`.
+- **`token`** — only when Double Take's own `auth` is enabled (default off), so
+  absent throughout this capture.
+
+#### The two MQTT topic shapes, both confirmed
+
+| Topic | Shape | Confirmed |
+| --- | --- | --- |
+| `double-take/cameras/<camera>` | full envelope + `matches`/`misses`/`unknowns` + `counts` + `personCount` | yes, 7 payloads |
+| `double-take/matches/<name>` | envelope + **singular `match`** object, no arrays, no `counts` | yes, 6 payloads. Note the topic segment is **sanitised**: `synthetic_1` publishes to `.../matches/synthetic1` (non-alphanumerics stripped). |
+| `double-take/matches/unknown` | envelope + **singular `unknown`** object **plus** the full `unknowns` array | yes, 2 payloads |
+
+**A normalizer asymmetry worth recording:** `normalizeDoubleTake` handles a
+singular `match` key but **not** a singular `unknown` key
+([ingest.ts](../server/src/farm/ingest.ts#L237)). That is harmless in practice —
+the unknown topic carries `unknowns[]` alongside the singular, so the right rows
+are produced and the singular is ignored — but it is not the symmetry the code
+reads as having, and a future topic that carried *only* the singular `unknown`
+would produce zero rows.
+
+#### `unknowns[].name` is the literal string `'unknown'`
+
+**Confirmed live, and it matters more than the shape does.** Every unknown face
+carries `name: "unknown"` — not a cluster id, not a per-face id. So
+`farm_events.identity` is that constant on every `unknown_cluster` row, and
+classification rule 2's per-identity occurrence counting has nothing to
+distinguish individuals with.
+
+This corrects the *Known fidelity gaps* note below, which describes the
+generator's stable `unknown_a1` as an over-optimistic simplification of unstable
+real ids. The reality is not unstable ids — **there is no clustering layer in
+Double Take at all.** Tracked, with the downstream consequences, as
+[cycle-7-followups.md](cycle-7-followups.md) § FU-4.
+
+#### Two upstream defects found while configuring retention
+
+Neither affects the payload shape; both affect anyone standing this up.
+
+1. **`detect.match.save: false` is silently ignored.** The save condition in
+   Double Take's `process.util.js` is
+   `if (foundMatch || (UNKNOWN.SAVE && totalFaces))` — it never consults
+   `MATCH.SAVE`. Measured: 7 face crops were written to `/.storage/matches/`
+   and 3 to `/.storage/latest/` with **both** `save` keys set to `false`. Only
+   `detect.unknown.save` actually suppresses writes, and only for results with
+   no match. Tracked as [cycle-7-followups.md](cycle-7-followups.md) § FU-6 —
+   **a gap to close before any real deployment with a live gallery**, because
+   the config, the committed example and the guard test all assert the opposite.
+2. **`detect.unknown.save: false` breaks MQTT publishing for any faces-but-no-match
+   result.** `recognize.util.js`'s `save.latest()` unconditionally
+   `copyFileSync`s the crop that `save: false` prevented from existing; the
+   ENOENT is then masked by an `ERR_HTTP_HEADERS_SENT` in Double Take's error
+   middleware, and `mqtt.recognize()` never runs. So the privacy-correct config
+   silently suppresses exactly the `unknowns` payloads this validation needed.
+
 ### Known fidelity gaps
 
 Recorded rather than papered over, since Decision 2 is the whole reason this
@@ -303,8 +401,8 @@ cycle costs what it costs.
 | Gap | Status after live capture |
 | --- | --- |
 | Frigate payload shape unverified | **CLOSED.** 250 real 0.17.2 events, zero breaking deltas. |
-| Double Take payload shape unverified | **STILL OPEN.** Double Take was out of scope; nothing on this page about it has been checked against a live instance. |
-| `unknown_cluster` has no real producer | **STILL OPEN**, and untouched — it needs Double Take, which this slice skipped. |
+| Double Take payload shape unverified | **CLOSED (Cycle 7 FU-3).** Checked against Double Take v1.13.2 + DeepStack: 14 payloads, 15 faces, zero breaking deltas, and the 0-100 confidence scale confirmed at 77.86-100. See *Double Take — measured against a live instance* above. |
+| `unknown_cluster` has no real producer | **PARTLY CLOSED, and worse than recorded.** Double Take does produce `unknowns[]` rows — but every one carries `identity = 'unknown'`, a single global constant, so there is no per-individual producer and rule 2's occurrence counting cannot distinguish visitors. See [cycle-7-followups.md](cycle-7-followups.md) § FU-4. |
 | Multi-zone events | **STILL OPEN**, and now known to be *harder* to close: the validation camera has no zones, so real payloads arrived with `entered_zones: []`. Verifying multi-zone behaviour needs a camera with zones configured. |
 | `top_score` semantics | **NEWLY OPENED** by live capture — see [cycle-7-followups.md](cycle-7-followups.md) § FU-1. |
 
