@@ -237,7 +237,7 @@ found its *worst* fidelity gap (a mock that was wrong by 100× on confidence). I
 is also a prerequisite for closing the `unknown_cluster` gap, which has no real
 producer without it.
 
-**CLOSED 2026-08-28.** Double Take v1.13.2 + DeepStack was stood up against the
+**CLOSED 2026-08-28, tagged `v0.10.0`.** Double Take v1.13.2 + DeepStack was stood up against the
 live Frigate 0.17.2 stack and its payload shape verified: 14 payloads, 15 faces,
 **zero breaking deltas**, definition of done 12/12, and the 0-100 confidence
 scale confirmed at 77.86-100. Full record in

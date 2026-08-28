@@ -1,6 +1,6 @@
 # Cycle 7, FU-3 — Double Take Live Validation: Context Handover
 
-*Status: **FU-3 COMPLETE (2026-08-28).** Double Take v1.13.2 + DeepStack stood
+*Status: **FU-3 COMPLETE (2026-08-28), tagged `v0.10.0`.** Double Take v1.13.2 + DeepStack stood
 up against the live Frigate 0.17.2 stack; payload shape verified with **zero
 breaking deltas**, definition of done **12/12**, and the 0-100 confidence scale
 **confirmed** at 77.86-100. Deliverable in
