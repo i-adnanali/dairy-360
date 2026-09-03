@@ -9,9 +9,17 @@
 // mislabelled source_form is indistinguishable from a correct one, and the
 // whole point of the column is that `recall` and `daily_herd_sheet` can be told
 // apart when the first calving-interval number is questioned.
+//
+// It also states WHICH DATABASE the session will write to, and when that is a
+// real one it will not open until the operator says so. The gate is the right
+// place for it because it is the one screen guaranteed to be crossed before any
+// write, so no per-form or per-write plumbing is needed -- and because "who is
+// typing, from what source, into which database" is one statement of intent.
+// See target.ts for why the harness deliberately is not asked to confirm.
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Session } from './session';
+import { Target } from './target';
 import type { SourceForm } from './types';
 
 @Component({
@@ -61,6 +69,53 @@ import type { SourceForm } from './types';
         default. Nobody observed a purchase record.
       </p>
 
+      <!-- Which database, stated positively in every case -- including the one
+           where we could not find out. -->
+      @if (target.probed()) {
+        <div class="mt-5 border-t border-farm-200 pt-4" data-role="target">
+          <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
+            Where is this going?
+          </div>
+
+          @switch (target.kind()) {
+            @case ('harness') {
+              <p class="text-sm text-farm-700" data-role="target-harness">
+                <span class="font-medium text-farm-900">Harness</span> —
+                <span class="font-mono text-xs">{{ target.storage() }}</span>. Fixture data,
+                discarded when that process exits. Nothing you enter here is kept.
+              </p>
+            }
+            @case ('real') {
+              <p class="text-sm text-farm-700" data-role="target-real">
+                <span class="font-medium text-farm-900">The real registry</span> —
+                <span class="font-mono text-xs">{{ target.storage() }}</span>. Every record you
+                enter is permanent: corrections are new events, and nothing is deleted.
+              </p>
+            }
+            @case ('unknown') {
+              <p class="text-sm text-farm-700" data-role="target-unknown">
+                {{ target.reachable()
+                  ? 'A server answered but would not say which database it holds — an older build, or something else serving /api. Treated as real, because it cannot be ruled out.'
+                  : 'No server answered. Nothing can be written until one does.' }}
+              </p>
+            }
+          }
+
+          <!-- Asked for the real case AND for the case we could not determine,
+               because "we could not tell" must not resolve in the permissive
+               direction. Not asked on the harness: see target.ts. -->
+          @if (needsAck()) {
+            <label class="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-farm-300 bg-white px-3 py-2 text-sm">
+              <input type="checkbox" data-role="acknowledge-target" class="mt-0.5"
+                [checked]="acked()" (change)="acked.set($any($event.target).checked)" />
+              <span class="text-farm-800">
+                I mean to write to this database. This is not the harness.
+              </span>
+            </label>
+          }
+        </div>
+      }
+
       <button type="button" data-role="start" (click)="start()" [disabled]="!canStart()"
         class="mt-5 w-full rounded-xl bg-farm-600 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
       >Start entering</button>
@@ -69,6 +124,7 @@ import type { SourceForm } from './types';
 })
 export class SessionGate {
   protected readonly session = inject(Session);
+  protected readonly target = inject(Target);
 
   protected readonly forms: { value: SourceForm; label: string; hint: string }[] = [
     { value: 'recall', label: 'Recall', hint: 'reconstructed from memory' },
@@ -80,13 +136,42 @@ export class SessionGate {
 
   protected readonly form = signal<SourceForm | null>(null);
   protected readonly who = signal('');
-  protected readonly canStart = computed(
-    () => this.form() !== null && this.who().trim().length > 0,
+  protected readonly acked = signal(false);
+
+  /**
+   * A target that has to be confirmed out loud before this session opens.
+   *
+   * True for a real database, and also when the target could not be determined
+   * from a server that IS answering -- "we could not tell" must not resolve in
+   * the permissive direction. False when nothing answered at all: a session
+   * cannot be blocked on a server that is merely not started yet, and no write
+   * can reach a database that is not there.
+   */
+  protected readonly needsAck = computed(
+    () =>
+      this.target.kind() === 'real' ||
+      (this.target.kind() === 'unknown' && this.target.probed() && this.target.reachable()),
   );
+
+  protected readonly canStart = computed(
+    () =>
+      this.form() !== null &&
+      this.who().trim().length > 0 &&
+      (!this.needsAck() || this.acked()),
+  );
+
+  constructor() {
+    // Asked fresh every time the gate is shown. The acknowledgement lives on
+    // this component rather than on the service, so it cannot outlive the
+    // screen that asked for it: the gate is reached again precisely when
+    // something changed, and a remembered "yes" would be about the old answer.
+    void this.target.probe();
+  }
 
   protected start(): void {
     const f = this.form();
-    if (f === null) return;
+    if (f === null || !this.canStart()) return;
+    this.target.enter();
     this.session.set(f, this.who());
   }
 }

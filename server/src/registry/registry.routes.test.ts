@@ -526,3 +526,19 @@ test('GET /api/harness says plainly that this is not dairy.db', async () => {
   assert.match(b.warning, /NOT dairy\.db/);
   await ctx.close();
 });
+
+// GET /storage is on the SHARED router, so the real server answers it too --
+// that is what makes "which database am I writing to" a positive fact in both
+// directions rather than an absence the client has to interpret. This suite is
+// :memory: only and writes nothing to disk, so the file-backed answer is not
+// asserted here; `db.name` returns the absolute path and `db.memory` is false
+// for a file handle (measured against better-sqlite3 directly).
+test('GET /storage names the database this router writes to', async () => {
+  const ctx = await serve(cleanHerd());
+  const r = await fetch(`${ctx.base}/storage`);
+  assert.equal(r.status, 200);
+  const b = (await r.json()) as { storage: string; memory: boolean };
+  assert.equal(b.storage, ':memory:');
+  assert.equal(b.memory, true);
+  await ctx.close();
+});

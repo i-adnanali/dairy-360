@@ -5,7 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
-  AnimalDetail, HarnessInfo, HerdRow, LinkCandidate, TimelineEvent, Verification, WireError,
+  AnimalDetail, HerdRow, LinkCandidate, StorageInfo, TimelineEvent, Verification, WireError,
 } from './types';
 
 const BASE = '/api/registry';
@@ -129,12 +129,24 @@ export class RegistryApi {
     return unwrap(firstValueFrom(this.http.get<Verification>(`${BASE}/verification`)));
   }
 
-  /** Present only on the harness. Absent (404) on the real server. */
-  async harnessInfo(): Promise<HarnessInfo | null> {
+  /**
+   * Which database the server writes to, or null if it would not say.
+   *
+   * Deliberately NOT the harness's `/api/harness`: that endpoint answers by
+   * existing, so its absence had to stand in for "this is the real registry" --
+   * and an absence cannot distinguish the real server from an unreachable one,
+   * or state the real case at all. `/storage` is on the shared registry router,
+   * so both servers answer the same question the same way.
+   *
+   * The distinction between "no server" and "a server that did not answer" is
+   * kept, because they call for different words in front of an operator.
+   */
+  async storage(): Promise<{ info: StorageInfo | null; reachable: boolean }> {
     try {
-      return await firstValueFrom(this.http.get<HarnessInfo>('/api/harness'));
-    } catch {
-      return null;
+      return { info: await firstValueFrom(this.http.get<StorageInfo>(`${BASE}/storage`)), reachable: true };
+    } catch (e) {
+      const status = e instanceof HttpErrorResponse ? e.status : 0;
+      return { info: null, reachable: status !== 0 };
     }
   }
 

@@ -128,9 +128,17 @@ export interface WireError {
   message: string;
 }
 
-export interface HarnessInfo {
-  harness: boolean;
+/** `GET /api/registry/storage` -- which database the server writes to. */
+export interface StorageInfo {
   storage: string;
-  warning: string;
-  animals: number;
+  memory: boolean;
 }
+
+/**
+ * What the app knows about the database on the other end.
+ *
+ * `unknown` is a real answer and is kept distinct from both others: a server
+ * that will not say which database it holds must not be shown as the harness,
+ * and it must not be asserted to be the real registry either.
+ */
+export type TargetKind = 'harness' | 'real' | 'unknown';

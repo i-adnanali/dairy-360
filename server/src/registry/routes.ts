@@ -210,6 +210,30 @@ export function registryRouter(db: Db): express.Router {
     }),
   );
 
+  /**
+   * Which database this router writes to. Answered the SAME WAY on the harness
+   * and on the real server, and that symmetry is the whole point.
+   *
+   * Before this, a client could only ask "am I on the harness?" and only by the
+   * ABSENCE of the harness's own `/api/harness` -- and an absence is a bad
+   * signal for the dangerous direction. A 404 from the real server, an older
+   * build, and an unreachable server all look identical, so nothing ever stated
+   * "these writes are real" affirmatively; the operator was asked to notice a
+   * banner that was not there.
+   *
+   * `memory` is the discriminator rather than the path, because an in-memory
+   * database CANNOT be the real registry: nothing in it survives the process.
+   * The path is reported too, since it is the fact that matters if the deferred
+   * two-file design ever lands (Decision 1, "When two database files come back")
+   * -- at that point "not the harness" stops being the same claim as "dairy.db".
+   */
+  router.get(
+    '/storage',
+    handle((_req, res) => {
+      res.json({ storage: db.name, memory: db.memory === true });
+    }),
+  );
+
   /** Everything verify:registry reports, for checking your own work in the UI. */
   router.get(
     '/verification',
