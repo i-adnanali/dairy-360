@@ -102,6 +102,35 @@ So the question to ask after removing a false assertion is not "is it still asse
 false?" but "what is it asserting *instead*, and can anyone tell that apart from the honest case?"
 Where the answer is no, the fix is not finished.
 
+**Third corollary: consistency checking cannot detect a wrong rule applied evenly.** Three findings
+across three passes shared a shape, and the shape is the lesson.
+
+| Finding | Pass |
+|---|---|
+| `2026-01-01` and `2019-01-01` fabricated at day precision | 0 |
+| `0000-01-01` from clearing a year, because `+''` is `0` | 0 |
+| A calved animal under the age threshold projecting as a `calf` | 10 |
+
+**Every one of them passed every invariant.** Not because the invariants were weak — because they
+were answering a different question. The schema CHECKs, `assertDatePrecision()` and invariant 11 all
+ask whether the data is *consistent with the rules*, and in each case the storage conventions were
+satisfied exactly. `2026-01-01` is a valid day-precision date. `0000-01-01` is a valid January 1.
+An 8-month-old is genuinely under 18 months. The rule itself was wrong, and it was wrong
+*uniformly*, so nothing internal to the system had anything to compare against.
+
+That is the general limit. A consistency check finds the row that disagrees with its neighbours; it
+is blind to a whole column that is evenly false. Only **reading a value and knowing it is wrong**
+finds those — which is why:
+
+- **Executed demonstrations are the definition of done**, not an illustration of it. Every one of
+  the three was found by printing a value and looking at it, and two of them were found by writing
+  the demonstration *before* the fix. None was found by review, and one had survived several
+  readings of the comment directly above it.
+- **A value read off a screen by someone who knows the animal is worth more than a green suite.**
+  The operator looking at a milking buffalo labelled `katti` has information no invariant can
+  reach. That is not a fallback for weak tests; it is the only instrument that measures this class
+  of error at all, and it is why the five-animal trial in §11 is a real check and not a formality.
+
 **Recognition over recall.** Any question whose answer is in the database is a query, not a prompt.
 Where the operator must choose, linking to something existing is the default path and creating
 something new is the deliberate one.
@@ -980,19 +1009,66 @@ Two conventions established in pass 1 that pass 2 onward depends on, both record
 
 ## 11. Still open
 
-- Male terminology — katta, jhota, or something else, and whether the boundary matters on a dairy
-  where bulls leave young. The male side of §7.1 is untouched pending this.
+### The five-animal trial — predictions on record
+
+Five animals go through the retrofitted `/add` and `/calving` before §5.1 (roster pass) is decided:
+the murkiest dates and the longest calving histories, deliberately the hard cases. **None of the six
+predictions below has been fixed**, including the one-line ones, because fixing them costs an
+uncontaminated read on the decision they inform. They are recorded before the trial so the outcome
+can be told apart from taste.
+
+Ranked by expected likelihood of actually biting:
+
+1. **`acquired_from` in the tab path.** It sits between `name` and `post_no`, inheriting the identity
+   grid's DOM order, and on a recall backfill it is the least-known of the three. One wasted Tab per
+   animal, on the field reached for most.
+2. **Overshooting the arrival date into the birth date.** The two `date-text` inputs are adjacent in
+   the tab order with only a legend distinguishing them, identical placeholders, and the pause to
+   think about a murky date falls right there. Visible via the reading line, but still a stumble.
+   **The fix is not obvious, which is why it was not applied blind.**
+3. **Ten tab stops, about half of them empty.** `acquired_from`, `tag_no` and `observed_by` are blank
+   for most backfill animals. This is the specific friction that would argue for a list.
+4. **`/calving`'s surviving dam being quietly wrong** when moving from one animal's card to the next.
+   Recoverable via the candidate list and the near-duplicate guard, but it will read as a trap.
+5. **The write announcement being too quiet** — a thin green line in the shell, with focus back in
+   `name` and eyes on paper.
+6. **`Cmd+Enter` doing nothing.** §5.1 specifies it; the retrofit does not have it.
+
+Two predicted to feel *better* than expected, so the comparison stays honest: the printed digit
+accelerators on sex and outcome, and the single date field on murky dates (`2019`, `Mar 2019`).
+
+**Decision rule.** If 1 and 3 are the only real complaints, both are small fixes to `/add` and a
+roster screen is redundant. If 2 recurs, or if the round trip still feels like a stop-and-restart
+rather than a continuation, build §5.1 — those are properties of the form *shape*, which no tab-order
+work reaches.
+
+#### Two answers held against the report, not built
+
+- **Prediction 4 has a third option neither of us proposed:** keep the dam *and* land focus on it
+  after a write. Continuing costs one Tab, switching costs nothing extra, and the silent-wrong case
+  disappears because the eye is already there. Strictly better than either clearing it or leaving it
+  silent. Held until the trial says whether it bit.
+- **Prediction 5 may be item 8's "last five written" strip arriving early as a symptom.** If the
+  announcement is too quiet, the answer is likely to pull that strip forward rather than make the
+  line louder — a louder line is a bigger version of the wrong instrument.
+
+### Other open items
+
+- **Male terminology — partly confirmed, still blocking.** `katta` is the young male. The term for
+  the grown bull is **not** confirmed, and it is not to be guessed from the female pattern.
+
+  The male side of §7.1 stays entirely in English until both are known, and that is deliberate
+  rather than lazy: a half-mapped vocabulary is worse than an unmapped one. `katta` for the calf
+  beside a bare `male` for the adult *looks* like a complete mapping, so the next reader takes the
+  English word for the farm's word. Uniform English is at least honestly incomplete.
 - The cheapest shape for a manual life-stage override event.
 - How boundary ambiguity surfaces in status when birth precision is year-only or estimated.
-- Whether the roster pass survives the per-row year field or should be folded into the workbench.
 - Interval band numbers, to be retuned against real data once the backfill is in.
-- **Whether the roster pass (§5.1) is needed at all.** Resolved to be decided by evidence rather
-  than argument: the keyboard retrofit (§6.7a) was built as if it were the whole answer, and five
-  animals — the hardest dates and longest calving histories — go through the retrofitted `/add`
-  before the question is reopened. The measure is the round trip, not the field count: twenty
-  animals through a form is twenty submit-wait-clear-refocus cycles against a list's one continuous
-  typing motion. Whether that gap still matters depends on how the post-submit reset actually
-  feels.
+- **Whether the roster pass (§5.1) is needed at all** — which absorbs the older question of whether
+  it survives the per-row year field, since both now turn on the same measurement. Decided by
+  evidence rather than argument: the keyboard retrofit (§6.7a) was built as if it were the whole
+  answer, and the five-animal trial above is the check. The measure is the round trip, not the field
+  count.
 - **The override belongs in a column, not the payload.** The reasoning is in `types.ts`: a column is
   uniform across event types, queryable without `json_extract`, and sits beside the other provenance
   fields it resembles. It lives in the payload only because a column costs a migration and the build
