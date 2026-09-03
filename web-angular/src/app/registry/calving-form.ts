@@ -25,11 +25,13 @@
 // calf. That is the server's rule, not a UI preference.
 
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
 import { CalfPicker } from './calf-picker';
+import { IdentifierInput } from './identifier-input';
+import { Identifiers } from './identifiers';
 import { PrecisionDateControl } from './precision-date';
 import type { PrecisionDate } from './precision-date';
 import type { CalfChoice } from './calf-picker';
@@ -40,7 +42,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
 @Component({
   selector: 'app-calving-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CalfPicker, PrecisionDateControl],
+  imports: [CalfPicker, IdentifierInput, PrecisionDateControl, RouterLink],
   template: `
     <div class="mx-auto max-w-2xl space-y-4">
       <header>
@@ -55,8 +57,14 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       <div class="rounded-xl border border-farm-300 bg-white p-4">
         <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Dam</div>
         @if (dams().length === 0) {
+          <!-- Was a dead end with no way out, while /herd's empty state already
+               linked to /add. The asymmetry was the bug: the same nothing-yet
+               state, one screen offering the next step and the other not. -->
           <p class="text-sm text-farm-600" data-role="no-dams">
-            No females in the registry yet. Add one first.
+            No females in the registry yet — a calving needs a dam.
+            <a routerLink="/add" data-role="no-dams-cta"
+              class="font-medium text-farm-800 underline">Add an acquired animal</a>,
+            and it will be here when you come back.
           </p>
         } @else {
           <select data-role="dam" [value]="damId()" (change)="setDam($any($event.target).value)"
@@ -125,19 +133,17 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
         (changed)="onCalfChosen($event)"
       />
 
-      <label class="block">
-        <span class="mb-1 block text-xs font-medium text-farm-700">Sire reference (optional, free text)</span>
-        <input data-role="sire_ref" [value]="sireRef()" (input)="sireRef.set($any($event.target).value)"
-          class="w-full max-w-md rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
-      </label>
+      <app-identifier-input
+        field="sire_ref" label="Sire reference"
+        [value]="sireRef()" [suggestions]="identifiers.values().sire_ref"
+        (changed)="sireRef.set($event)"
+      />
 
-      <label class="block">
-        <span class="mb-1 block text-xs font-medium text-farm-700">
-          Observed by <span class="font-normal text-farm-500">(optional)</span>
-        </span>
-        <input data-role="observed_by" [value]="observedBy()" (input)="observedBy.set($any($event.target).value)"
-          class="w-full max-w-xs rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
-      </label>
+      <app-identifier-input
+        field="observed_by" label="Observed by"
+        [value]="observedBy()" [suggestions]="identifiers.values().observed_by"
+        (changed)="observedBy.set($event)"
+      />
 
       @if (state.formError(fields); as e) {
         <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">
@@ -201,6 +207,7 @@ export class CalvingForm {
   private readonly api = inject(RegistryApi);
   private readonly router = inject(Router);
   private readonly session = inject(Session);
+  protected readonly identifiers = inject(Identifiers);
 
   protected readonly fields = FIELDS;
   protected readonly sexes: RegistrySex[] = ['female', 'male'];
@@ -254,6 +261,7 @@ export class CalvingForm {
 
   constructor() {
     void this.api.damCandidates().then((d) => this.dams.set(d));
+    void this.identifiers.refresh();
 
     // The list has to ARRIVE ON ITS OWN now. It used to be fetched when the
     // operator clicked "yes -- link to it", and that click no longer exists:
@@ -351,6 +359,7 @@ export class CalvingForm {
       // the previous choice must not survive into the next record.
       this.clearCalf();
       this.overrideReason.set('');
+      void this.identifiers.refresh();
       void this.loadCandidates(this.damId(), this.calfSex(), w);
     }
   }

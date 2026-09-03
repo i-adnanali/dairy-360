@@ -481,24 +481,42 @@ correction records its own override and does not inherit the superseded event's.
 The UI captures the reason in the existing "Record it anyway" blocks and shows recorded overrides on
 the timeline row, because a fact nobody reads is barely better than one never stored.
 
-### 6.5 Smaller items
+### 6.5 Smaller items — BUILT
 
-- `datalist` of previously-used values on `observed_by`, `acquired_from` and `sire reference`. Free
-  text across a hundred records produces `abdul`, `Abdul` and `abdul_r`.
-- `observed_by` guidance is inconsistent across three forms — `/add` says "leave blank unless
-  someone actually saw it", `/calving` and the event form say only "(optional)", and `recorded_by`
-  gets "a stable identifier, not a display name". One field, three treatments. Unify, and apply the
-  stable-identifier guidance to `observed_by` too.
-- `/calving` empty state is a dead end with no link, while `/herd`'s empty state already has
-  `data-role="empty-cta"` pointing at `/add`. **Resolved: fix it now, cheaply.** The tempting answer
-  was to skip it on the grounds that §5.1's roster pass makes it unreachable — but §5.2 folds
-  `/calving` into the workbench composer rather than deleting the flow, and the empty state is a
-  property of "no females exist yet", which stays reachable on a fresh database however the herd
-  gets entered. A one-line link is cheaper than reasoning about whether a later item removes it.
-- The duplicated precision explainer is the shared control's internal `hint()`
-  (`precision-date.ts:170`), rendering once per control on a page that has two. The separate
-  paragraph at `animal-form.ts:82-86` is different text. Fixing this means an `explain` input on the
-  shared component rendering on first instance only — not deleting a page paragraph.
+- **`datalist` of previously-used values** on `observed_by`, `acquired_from` and `sire_ref`. Free
+  text across a hundred records produces `abdul`, `Abdul` and `abdul_r` — three identifiers for one
+  person, which makes "everything Abdul observed" unanswerable and cannot be repaired later without
+  guessing which spelling was meant.
+
+  `GET /identifier-values` reads them from the **event log**, not a lookup table, because the log is
+  the only source of truth and a table would be a second one to keep in sync. Superseded events are
+  included: a name on a corrected event is still a name in use on this farm. **Case variants are
+  both listed** — collapsing `abdul` into `Abdul` would hide from the operator that two spellings
+  are already in the log, which is precisely the thing worth seeing.
+
+  A `datalist` rather than a `<select>`, because a select forces every new person through an "add
+  new" flow, which is how a name ends up typed into the wrong field to get past it. The list is
+  refreshed **after** each write, which is the whole point: a name typed on animal four has to be
+  offered on animal five.
+
+- **`observed_by` guidance unified.** It had three treatments across three forms — "leave blank
+  unless someone actually saw it" on `/add`, a bare "(optional)" on the other two — while
+  `recorded_by` was the only field told to be a stable identifier and not a display name. That one
+  piece of guidance is what prevents the `abdul`/`Abdul` split, and it was on none of them. All
+  three fields now share `identifier-input.ts`, so the wording cannot drift again — the same
+  argument as computing `ineligible_reason` on the server.
+
+- **`/calving`'s empty state links out.** It was a dead end while `/herd`'s already had a CTA to
+  `/add`; the asymmetry was the bug — the same nothing-yet state, one screen offering the next step
+  and the other not. Built rather than skipped: §5.2 folds `/calving` into the workbench composer
+  rather than deleting the flow, and "no females exist yet" stays reachable on a fresh database
+  however the herd gets entered, so a one-line link is cheaper than reasoning about whether a later
+  item removes it.
+
+- **The duplicated explainer.** An `explain` input on the shared control, defaulting **true** so a
+  single-control form keeps the full text without asking. `/add`'s second control sets it false.
+  Only the one-sentence *rationale* is gated — the per-precision hints stay on every control,
+  because "Stored as the 1st" is specific to the control it sits under and earns its place there.
 
 ### 6.6 Smart date field
 

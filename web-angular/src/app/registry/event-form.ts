@@ -4,6 +4,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { IdentifierInput } from './identifier-input';
+import { Identifiers } from './identifiers';
 import { PrecisionDateControl } from './precision-date';
 import type { PrecisionDate } from './precision-date';
 import type { AnimalDetail, EnterableEventType } from './types';
@@ -13,7 +15,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
 @Component({
   selector: 'app-event-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PrecisionDateControl],
+  imports: [IdentifierInput, PrecisionDateControl],
   template: `
     <div class="space-y-4">
       <div class="rounded-xl border border-farm-300 bg-white p-4">
@@ -85,13 +87,11 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
           }
         }
 
-        <label class="block">
-          <span class="mb-1 block text-xs font-medium text-farm-700">
-            Observed by <span class="font-normal text-farm-500">(optional)</span>
-          </span>
-          <input data-role="observed_by" [value]="observedBy()" (input)="observedBy.set($any($event.target).value)"
-            class="w-full max-w-xs rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
-        </label>
+        <app-identifier-input
+          field="observed_by" label="Observed by"
+          [value]="observedBy()" [suggestions]="identifiers.values().observed_by"
+          (changed)="observedBy.set($event)"
+        />
 
         @if (state.formError(fields); as e) {
           <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">{{ e }}</p>
@@ -143,6 +143,7 @@ export class EventForm {
 
   private readonly api = inject(RegistryApi);
   private readonly session = inject(Session);
+  protected readonly identifiers = inject(Identifiers);
 
   protected readonly fields = FIELDS;
   protected readonly types: { value: EnterableEventType; label: string }[] = [
@@ -166,6 +167,10 @@ export class EventForm {
   protected readonly canSubmit = computed(
     () => this.type() !== null && this.when() !== null && !this.state.submitting(),
   );
+
+  constructor() {
+    void this.identifiers.refresh();
+  }
 
   protected async submit(): Promise<void> {
     const w = this.when();
@@ -196,6 +201,7 @@ export class EventForm {
       this.to.set('');
       this.text.set('');
       this.overrideReason.set('');
+      void this.identifiers.refresh();
     }
   }
 }

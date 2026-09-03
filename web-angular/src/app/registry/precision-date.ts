@@ -183,6 +183,20 @@ const MONTHS = [
 })
 export class PrecisionDateControl {
   readonly label = input('Date');
+  /**
+   * Whether to carry the full no-default RATIONALE, not just the instruction.
+   *
+   * The rationale is one sentence and it is the same sentence on every control,
+   * so a page with two date fields printed it verbatim twice -- and a reader who
+   * has met it once reads past it the second time, which is how the sentences
+   * that matter stop being read. The per-precision hints below are NOT gated:
+   * "Stored as the 1st" is specific to the control it sits under and earns its
+   * place on each one.
+   *
+   * Defaults TRUE, so a form with a single date control keeps the full text
+   * without having to ask for it. A form with two sets it false on the second.
+   */
+  readonly explain = input(true);
   /** Server refusal text for this control's field, shown verbatim. */
   readonly error = input<string | null>(null);
   readonly changed = output<PrecisionDate | null>();
@@ -220,7 +234,9 @@ export class PrecisionDateControl {
   protected readonly hint = computed(() => {
     switch (this.precision()) {
       case null:
-        return 'Choose one before entering a date. There is no default — a default is how “exact day” gets applied to a guess.';
+        return this.explain()
+          ? 'Choose one before entering a date. There is no default — a default is how “exact day” gets applied to a guess.'
+          : 'Choose one before entering a date.';
       case 'day':
         return 'The date is known.';
       case 'month':

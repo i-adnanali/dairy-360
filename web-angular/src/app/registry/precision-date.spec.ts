@@ -206,4 +206,24 @@ describe('PrecisionDateControl', () => {
     fixture.detectChanges();
     expect(emitted[emitted.length - 1]).toBeNull();
   });
+
+  it('carries the no-default RATIONALE by default, so a single-control form keeps it', () => {
+    const { el } = make();
+    expect(el.textContent).toContain('a default is how');
+  });
+
+  it('drops only the rationale when explain is false, keeping the instruction', () => {
+    // /add has two date controls, and one identical sentence printed twice
+    // trains the reader to skip it. The per-precision hints are NOT gated:
+    // "Stored as the 1st" is specific to the control it sits under.
+    const { fixture, el } = make();
+    fixture.componentRef.setInput('explain', false);
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Choose one before entering a date');
+    expect(el.textContent).not.toContain('a default is how');
+
+    pick(el, 'month');
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Stored as the 1st');
+  });
 });

@@ -230,6 +230,70 @@ describe('CalvingForm', () => {
   });
 });
 
+describe('item 4 — the smaller items', () => {
+  it('says the no-default rationale ONCE on a page with two date controls', async () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    http.expectOne(`${BASE}/identifier-values`).flush({
+      observed_by: [], acquired_from: [], sire_ref: [],
+    });
+    await settle(fixture);
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelectorAll('app-precision-date').length).toBe(2);
+    const occurrences = (el.textContent!.match(/a default is how/g) ?? []).length;
+    expect(occurrences).toBe(1);
+  });
+
+  it('offers previously-used names on /add, and refreshes them after a write', async () => {
+    // The refresh is the point: a name typed on animal four has to be offered
+    // on animal five, and a list fetched once at page load never contains it.
+    const { http } = setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    http.expectOne(`${BASE}/identifier-values`).flush({
+      observed_by: ['abdul'], acquired_from: [], sire_ref: [],
+    });
+    await settle(fixture);
+    const el = fixture.nativeElement as HTMLElement;
+    expect([...el.querySelectorAll('datalist option')].map((o) => o.getAttribute('value')))
+      .toContain('abdul');
+
+    enterDate(fixture, el, 'year', { year: 2019 });
+    click(el, '[data-role="submit"]');
+    http.expectOne(`${BASE}/animals`).flush({
+      animal_id: 'BD-0001',
+      animal: { animal: { id: 'BD-0001', name: null }, status: null, events: [] },
+    });
+    await settle(fixture);
+    http.expectOne(`${BASE}/identifier-values`).flush({
+      observed_by: ['abdul', 'rashid'], acquired_from: [], sire_ref: [],
+    });
+    await settle(fixture);
+    expect([...el.querySelectorAll('datalist option')].map((o) => o.getAttribute('value')))
+      .toContain('rashid');
+  });
+
+  it('/calving with no females links out instead of dead-ending', async () => {
+    // /herd's empty state already had a CTA. The asymmetry was the bug: the
+    // same nothing-yet state, one screen offering the next step and one not.
+    const ctx = setup();
+    const fixture = TestBed.createComponent(CalvingForm);
+    fixture.detectChanges();
+    ctx.http.expectOne(`${BASE}/dam-candidates`).flush({ candidates: [] });
+    ctx.http.expectOne(`${BASE}/identifier-values`).flush({
+      observed_by: [], acquired_from: [], sire_ref: [],
+    });
+    await settle(fixture);
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('[data-role="no-dams"]')).not.toBeNull();
+    const cta = el.querySelector('[data-role="no-dams-cta"]')!;
+    expect(cta.getAttribute('href')).toBe('/add');
+  });
+});
+
 describe('overridden checks', () => {
   // The flag was transient, so an overridden write left no trace. What the UI
   // has to add is the optional reason -- and it must stay optional: requiring

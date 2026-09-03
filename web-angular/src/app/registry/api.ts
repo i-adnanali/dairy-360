@@ -5,7 +5,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
-  AnimalDetail, HerdRow, LinkCandidate, StorageInfo, TimelineEvent, Verification, WireError,
+  AnimalDetail, HerdRow, IdentifierValues, LinkCandidate, StorageInfo, TimelineEvent,
+  Verification, WireError,
 } from './types';
 
 const BASE = '/api/registry';
@@ -117,6 +118,11 @@ export class RegistryApi {
     return unwrap(
       firstValueFrom(this.http.get<{ candidates: LinkCandidate[] }>(`${BASE}/link-candidates?${q}`)),
     ).then((r) => r.candidates);
+  }
+
+  /** Previously-used free-text identifier values, for the datalists. */
+  identifierValues(): Promise<IdentifierValues> {
+    return unwrap(firstValueFrom(this.http.get<IdentifierValues>(`${BASE}/identifier-values`)));
   }
 
   damCandidates(): Promise<LinkCandidate[]> {

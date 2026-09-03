@@ -153,6 +153,66 @@ export function calvingsFor(db: Db, animalId: string): TimelineEvent[] {
 }
 
 // ---------------------------------------------------------------------------
+// Previously-used free-text identifiers
+// ---------------------------------------------------------------------------
+
+/**
+ * Values already used in the three free-text identifier fields.
+ *
+ * WHY THIS EXISTS: free text typed across a hundred records produces `abdul`,
+ * `Abdul` and `abdul_r` -- three identifiers for one person, which makes
+ * "everything Abdul observed" unanswerable and cannot be repaired without
+ * deciding which spelling was meant. A datalist turns the second occurrence
+ * into a pick instead of a retype, which is the cheapest point to stop it.
+ *
+ * NOT A CONSTRAINT, and deliberately not deduplicated case-insensitively. These
+ * are suggestions: a new name must stay typeable without friction, and
+ * collapsing `abdul` into `Abdul` here would hide from the operator that both
+ * are already in the log -- which is exactly the thing worth seeing.
+ *
+ * Read from the EVENT LOG rather than from a lookup table, because the log is
+ * the only source of truth and a table would be a second one to keep in sync.
+ */
+export interface IdentifierValues {
+  /** From every event's `observed_by` column. */
+  observed_by: string[];
+  /** From `acquired` payloads' `from`. */
+  acquired_from: string[];
+  /** From `birth` payloads' `sire_ref`. */
+  sire_ref: string[];
+}
+
+export function identifierValues(db: Db): IdentifierValues {
+  const observed = new Set<string>();
+  const from = new Set<string>();
+  const sire = new Set<string>();
+
+  // Superseded events INCLUDED on purpose: a name typed on an event that was
+  // later corrected is still a name in use on this farm, and suggesting it is
+  // how the next record spells it the same way.
+  for (const e of allEvents(db)) {
+    if (e.observed_by !== null && e.observed_by.length > 0) observed.add(e.observed_by);
+    if (e.type === 'acquired') {
+      const v = e.payload.from;
+      if (typeof v === 'string' && v.length > 0) from.add(v);
+    }
+    if (e.type === 'birth') {
+      const v = e.payload.sire_ref;
+      if (typeof v === 'string' && v.length > 0) sire.add(v);
+    }
+  }
+
+  const sorted = (s: Set<string>): string[] =>
+    [...s].sort((a, b) => a.localeCompare(b));
+
+  return {
+    observed_by: sorted(observed),
+    acquired_from: sorted(from),
+    sire_ref: sorted(sire),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Link candidates
 // ---------------------------------------------------------------------------
 

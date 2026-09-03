@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { IdentifierInput } from './identifier-input';
+import { Identifiers } from './identifiers';
 import { PrecisionDateControl } from './precision-date';
 import type { PrecisionDate } from './precision-date';
 import type { AnimalDetail, RegistrySex } from './types';
@@ -14,7 +16,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
 @Component({
   selector: 'app-animal-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PrecisionDateControl],
+  imports: [IdentifierInput, PrecisionDateControl],
   template: `
     <div class="mx-auto max-w-2xl">
       <header class="mb-4">
@@ -47,11 +49,11 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
               <input data-role="name" [value]="name()" (input)="name.set($any($event.target).value)"
                 class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
             </label>
-            <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Acquired from (optional)</span>
-              <input data-role="from" [value]="from()" (input)="from.set($any($event.target).value)"
-                class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
-            </label>
+            <app-identifier-input
+              field="acquired_from" label="Acquired from"
+              [value]="from()" [suggestions]="identifiers.values().acquired_from"
+              (changed)="from.set($event)"
+            />
             <label class="block">
               <span class="mb-1 block text-xs font-medium text-farm-700">Post no. (optional)</span>
               <input data-role="post_no" [value]="postNo()" (input)="postNo.set($any($event.target).value)"
@@ -74,8 +76,12 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           (changed)="acquired.set($event)"
         />
 
+        <!-- explain=false: the no-default rationale is one sentence and it is
+             identical on both controls, so printing it twice on one page trains
+             the reader to skip it. Said once, above. -->
         <app-precision-date
           label="Birth date — optional, but not its precision"
+          [explain]="false"
           [error]="state.fieldError('birth_on') ?? state.fieldError('birth_precision')"
           (changed)="birth.set($event)"
         />
@@ -85,13 +91,11 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           estimated year is the fix, and saying it is estimated makes that safe.
         </p>
 
-        <label class="block">
-          <span class="mb-1 block text-xs font-medium text-farm-700">
-            Observed by <span class="font-normal text-farm-500">(optional — leave blank unless someone actually saw it)</span>
-          </span>
-          <input data-role="observed_by" [value]="observedBy()" (input)="observedBy.set($any($event.target).value)"
-            class="w-full max-w-xs rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
-        </label>
+        <app-identifier-input
+          field="observed_by" label="Observed by"
+          [value]="observedBy()" [suggestions]="identifiers.values().observed_by"
+          (changed)="observedBy.set($event)"
+        />
 
         @if (state.formError(fields); as e) {
           <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">{{ e }}</p>
@@ -135,6 +139,7 @@ export class AnimalForm {
   private readonly api = inject(RegistryApi);
   private readonly router = inject(Router);
   private readonly session = inject(Session);
+  protected readonly identifiers = inject(Identifiers);
 
   protected readonly fields = FIELDS;
   protected readonly sexes: RegistrySex[] = ['female', 'male'];
@@ -158,6 +163,10 @@ export class AnimalForm {
     () => this.acquired() !== null && !this.state.submitting(),
   );
 
+  constructor() {
+    void this.identifiers.refresh();
+  }
+
   protected async submit(): Promise<void> {
     const a = this.acquired();
     if (!a) return;
@@ -177,6 +186,9 @@ export class AnimalForm {
         ...this.session.provenance(),
       }, key),
     );
+    // Refreshed AFTER the write, so a name typed on this animal is offered on
+    // the next one. That is the whole point of the datalist.
+    void this.identifiers.refresh();
   }
 
   protected open(id: string): void {

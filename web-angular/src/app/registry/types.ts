@@ -150,3 +150,10 @@ export interface StorageInfo {
  * and it must not be asserted to be the real registry either.
  */
 export type TargetKind = 'harness' | 'real' | 'unknown';
+
+/** Previously-used values for the free-text identifier fields. Suggestions only. */
+export interface IdentifierValues {
+  observed_by: string[];
+  acquired_from: string[];
+  sire_ref: string[];
+}

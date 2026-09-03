@@ -57,7 +57,14 @@ import {
   MISSING_KEY_MESSAGE,
   bodyHash,
 } from './idempotency';
-import { animalDetail, calvingsFor, damCandidates, herd, linkCandidates } from './reads';
+import {
+  animalDetail,
+  calvingsFor,
+  damCandidates,
+  herd,
+  identifierValues,
+  linkCandidates,
+} from './reads';
 import { rebuild } from './projectStore';
 import { snapshot } from './store';
 import { checkSnapshot } from './invariants';
@@ -281,6 +288,17 @@ export function registryRouter(db: Db): express.Router {
       res.json({
         candidates: linkCandidates(db, { damId, calfSex, occurredOn, datePrecision }),
       });
+    }),
+  );
+
+  /**
+   * Previously-used values for the free-text identifier fields, for a datalist.
+   * Suggestions, never a constraint -- a new name must stay typeable.
+   */
+  router.get(
+    '/identifier-values',
+    handle((_req, res) => {
+      res.json(identifierValues(db));
     }),
   );
 
