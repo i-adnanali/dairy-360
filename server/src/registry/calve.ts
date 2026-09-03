@@ -40,6 +40,7 @@ const ASSISTANCE = ['none', 'assisted', 'vet'] as const;
 
 const CALVE_FLAGS = [
   'dam',
+  'calf',
   'on',
   'time',
   'precision',
@@ -71,9 +72,20 @@ Required:
   --source-form=<form>        daily_herd_sheet | cycle_card | direct_entry | import | recall
   --recorded-by=<id>
 
+Link mode (attach to an animal that already exists):
+  --calf=BD-0007              instead of minting a new animal, supersede this
+                              animal's 'acquired' origin with a birth event and
+                              promote it to born_on_farm.
+
+  Use this when pass one already entered a farm-born animal as acquired --
+  which happens whenever its dam is still in the herd, because pass one has no
+  calvings yet. Without it, pass two mints a DUPLICATE of an animal already in
+  the registry, and nothing can repair that. Requires --outcome=live, and the
+  animal must not already have a birth event.
+
 Optional:
   --time=HH:MM                only valid with --precision=day
-  --calf-name=<name>
+  --calf-name=<name>          ignored in link mode -- the animal already has one
   --sire-ref=<text>           free text -- an outside bull is not a registry animal
   --assistance=<a>            ${ASSISTANCE.join(' | ')}
   --notes=<text>
@@ -109,12 +121,18 @@ export function calveMain(argv: string[]): void {
 
   const asOf = optStr(flags, 'as-of') ?? farmToday();
 
+  const damId = requireStr(flags, 'dam', 'e.g. BD-0001');
+  const existingCalf = optStr(flags, 'calf');
+
   const r = recordCalving(db, {
-    dam_id: requireStr(flags, 'dam', 'e.g. BD-0001'),
+    dam_id: damId,
     occurred_on: requireDate(flags, 'on', 'the calving date'),
     occurred_time: optStr(flags, 'time'),
     date_precision: requirePrecision(flags),
     calf: {
+      // undefined (not null) means mint mode -- the input type distinguishes
+      // "no id given" from "an id was given", and optStr returns null.
+      existing_id: existingCalf ?? undefined,
       sex: calfSex as RegistrySex,
       name: optStr(flags, 'calf-name'),
       outcome: outcome as CalvingOutcome,
@@ -132,16 +150,23 @@ export function calveMain(argv: string[]): void {
       `SELECT animal_id, status, parity, open_lactation_id
          FROM registry_animal_status WHERE animal_id IN (?, ?) ORDER BY animal_id`,
     )
-    .all(requireStr(flags, 'dam', ''), r.calf_id) as {
+    .all(damId, r.calf_id) as {
     animal_id: string;
     status: string;
     parity: number;
     open_lactation_id: string | null;
   }[];
 
-  console.log(`registry:calve  calf ${r.calf_id}`);
+  console.log(`registry:calve  calf ${r.calf_id}${r.linked ? '  (LINKED, not minted)' : ''}`);
   console.log(`  calving     ${r.calving_event_id}`);
   console.log(`  birth       ${r.birth_event_id}`);
+  if (r.superseded_origin_event_id) {
+    console.log(`  superseded  ${r.superseded_origin_event_id}   (its 'acquired' origin)`);
+    console.log(
+      `  promoted    ${r.calf_id} origin acquired -> born_on_farm; its birth date is now\n` +
+        `              the calving date, replacing whatever the acquired event estimated`,
+    );
+  }
   if (r.departure_event_id) {
     console.log(`  departure   ${r.departure_event_id}   (${outcome} -- the calf still exists)`);
   }

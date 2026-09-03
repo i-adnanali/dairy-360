@@ -82,6 +82,28 @@ export function definitelyBefore(
   return a.on.slice(0, cut) < b.on.slice(0, cut);
 }
 
+/**
+ * The ONE supersession that may change an event's type: a `birth` replacing an
+ * `acquired` origin.
+ *
+ * This is the backfill reconciliation case. Pass one enters an animal as
+ * `acquired`; pass two records its dam's calving and discovers it was born on
+ * the farm. The origin event is exactly the thing being corrected, so the
+ * correction has to change its type -- and every other projection consequence
+ * follows correctly, because effectiveEvents() removes the superseded
+ * `acquired` before findOrigin() ever sees it.
+ *
+ * The REVERSE (`acquired` superseding a `birth`) is deliberately NOT allowed. A
+ * birth event is referenced by a calving on the dam; superseding it away would
+ * leave that calving naming a calf with no birth event, which invariant 6
+ * rejects and which no further event could repair. If an animal really was
+ * bought rather than born, the calving that claims it is the thing that is
+ * wrong, and that is a different (unbuilt) correction.
+ */
+function isOriginPromotion(newType: string, oldType: string): boolean {
+  return newType === 'birth' && oldType === 'acquired';
+}
+
 // ---------------------------------------------------------------------------
 // 3. Exactly one origin event per animal
 // ---------------------------------------------------------------------------
@@ -113,6 +135,32 @@ function checkOrigin(s: RegistrySnapshot): Violation[] {
     if (!known.has(e.animal_id)) {
       out.push(
         v(3, 'one-origin-event', `event ${e.id} references unknown animal ${e.animal_id}`),
+      );
+    }
+  }
+
+  // registry_animals.origin must agree with the effective origin EVENT type.
+  //
+  // This is the one column in the schema that is derivable from the log but is
+  // NOT written by the rebuild -- it lives on the identity table, so it can
+  // drift. It became drift-prone the moment link mode made origin correctable:
+  // promoting an animal from `acquired` to `born_on_farm` writes a superseding
+  // birth event AND updates this column, and those two writes could come apart.
+  // Checking the agreement is cheaper than migrating the column into a
+  // projection, and it fails loudly if they ever do.
+  for (const a of s.animals) {
+    const mine = events.get(a.id) ?? [];
+    const origin = mine.find((e) => e.type === 'birth' || e.type === 'acquired');
+    if (!origin) continue; // already reported above
+    const expected = origin.type === 'birth' ? 'born_on_farm' : 'acquired';
+    if (a.origin !== expected) {
+      out.push(
+        v(
+          3,
+          'one-origin-event',
+          `animal ${a.id}: registry_animals.origin='${a.origin}' but its effective origin ` +
+            `event is a '${origin.type}', which implies '${expected}'`,
+        ),
       );
     }
   }
@@ -403,7 +451,7 @@ function checkSuperseded(s: RegistrySnapshot): Violation[] {
           ),
         );
       }
-      if (target && target.type !== e.type) {
+      if (target && target.type !== e.type && !isOriginPromotion(e.type, target.type)) {
         out.push(
           v(
             9,

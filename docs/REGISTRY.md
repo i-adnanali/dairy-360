@@ -398,10 +398,12 @@ Rules, in order, first match wins:
 
 There is exactly one way to get data in: the CLI. There is **no HTTP route, no agent tool, and no UI** — agent tools are deferred to the tools cycle, and a UI is a cycle of its own. Every command follows the repo convention: `tsx`, hand-parsed `--flag=value` from `process.argv.slice(2)`, a `USAGE` string, and a `require.main === module` guard.
 
+**Six commands: four that write herd data, plus the rebuild and the verifier.**
+
 | Command | Writes |
 |---|---|
 | `registry:add` | one `acquired` animal + its origin event |
-| `registry:calve` | a calving: dam event, calf animal, birth event, parentage, lactation |
+| `registry:calve` | a calving: dam event, calf (minted **or linked**), birth event, parentage, lactation |
 | `registry:correct-calving` | a paired (or triple) date correction |
 | `registry:event` | `dry_off` \| `departure` \| `note` on an existing animal |
 | `registry:rebuild` | projection tables only, from the event log |
@@ -436,6 +438,22 @@ The blocking rules of §11 are enforced by the argument parser, not by a note in
 - **`--source-form` and `--recorded-by` are required.** Defaulting `source_form` to `recall` would be safe in the honesty direction but would silently label a sheet-transcribed event as remembered, and the whole point of the column is that the two are distinguishable.
 - **Unknown flags are rejected.** `--precison=year` must not fall through to "precision missing".
 - **Each command refuses what belongs to another and names it.** `registry:event --type=calving` points at `registry:calve`; `--type=acquired` points at `registry:add`; the ten reserved types are refused with the cycle they belong to.
+
+### Link mode — the two-pass reconciliation
+
+`registry:calve --calf=BD-0002` attaches a calving to an animal that **already exists** instead of minting one.
+
+This is not an optional convenience; without it the two-pass backfill has a hole that eats real records. Pass one enters every animal it can, and a farm-born animal whose dam is still in the herd **must** be entered as `acquired` there, because pass one has no calvings yet. Pass two then records the dam's calving — and mints a *duplicate* of an animal already in the registry. Duplicate animal, duplicate origin event, and nothing able to repair either.
+
+In link mode the calf's `acquired` origin is **superseded by a `birth`**, and `registry_animals.origin` is promoted to `born_on_farm`. No serial is allocated. Its birth date becomes the calving date at the calving's precision, replacing whatever the `acquired` event estimated — usually an improvement, and always worth reading in the command's output.
+
+This is **the only supersession in the schema that changes an event's type**, so it needed a narrow exception to invariant 9. The reverse (`acquired` superseding a `birth`) is deliberately still rejected: a birth event is referenced by a calving on the dam, so superseding it away would leave that calving naming a calf with no birth event, which invariant 6 rejects and no further event could repair.
+
+The projection needed no change — `effectiveEvents()` removes the superseded `acquired` before `findOrigin()` sees it, so invariants 3, 4 and 7 all hold across the promotion. That was verified before the mode was built, not after.
+
+Link mode refuses: an unknown animal (it will not silently mint one instead), an animal that already has a birth event, a sex disagreement, an animal being its own calf, a non-`live` outcome (a calf that did not live would not have been entered separately), and an animal with history predating the proposed birth date.
+
+**Procedure vs safety net.** The correct procedure is still strict ordering: use `registry:add` only for animals with no dam who will ever be in the registry, and let everything farm-born be created by its dam's calving, oldest first. Link mode exists because that procedure is unforgiving and one animal entered in the wrong pass would otherwise leave you stuck.
 
 `registry:add` handles **`acquired` only**. A `born_on_farm` animal is created *by* the calving that produced it, in the same transaction that allocates its serial and links its dam — so letting `registry:add` mint one would produce a calf with no dam edge and no calving on any dam, which nothing could repair because no event would say who the dam was. The two-pass backfill order is therefore enforced by which command exists, not by a note.
 
@@ -546,7 +564,20 @@ Blocking rules:
 - **The registry is empty.** The schema, transaction, projections, entry points and verification are built and tested; no real animal has been entered, because the herd list does not exist yet. Every `verify:registry` run against the live database therefore passes vacuously. The full path — add, calve, correct, dry off, verify — has been exercised end to end against the live database with throwaway data, which was then removed by dropping the registry tables and letting the migration recreate them.
 - **The append-only guarantee is per-connection, not per-database.** See Decision 7. A `sqlite3` CLI session can bypass it; the boot assertion protects the application's own handle only.
 - **`registry:add` cannot record an animal's dam.** An acquired animal gets no parentage edges, so a bought-in animal whose dam is known on the farm cannot have that edge asserted yet. The `certainty` column exists for it; nothing writes it.
-- **There is no way to correct a non-calving event through a command.** `registry:event` appends; superseding an `acquired`, `dry_off`, `departure` or `note` requires calling `appendEvent()` with `supersedes_id` directly. Only the calving pair, the one that is near-certain during a backfill, has a first-class correction API.
+- **There is no way to correct a non-calving event through a command.** `registry:event` appends; superseding a `dry_off`, `departure` or `note` requires calling `appendEvent()` with `supersedes_id` directly. Only the calving pair, the one that is near-certain during a backfill, has a first-class correction API. (`acquired` is the exception: link mode supersedes it, though only into a `birth`.)
+
+  **The concrete instance that will bite: a calf recorded as stillborn that actually lived.** The two directions are not symmetric.
+
+  | Correction | Possible today? |
+  |---|---|
+  | live → stillborn/died | **yes** — `registry:event --type=departure --reason=died` on the calf |
+  | stillborn/died → live | **no** — needs the calf's `departure` superseded, and nothing can do that |
+
+  The reverse direction needs two supersessions: the calving payload's `outcome`, and the `departure` event `recordCalving` wrote on the calf. `correctCalving` deliberately refuses to touch `outcome` (it is what the calf's animal row and departure were built from), and no command supersedes a departure. So a calf wrongly recorded as stillborn stays departed, and its status stays `departed`, until a `correctOutcome()` exists. Worth building before the backfill if the herd history has any uncertainty about which calves survived; the direction that matters more during entry — discovering a calf died — works today.
+
+- **Correcting a calving date moves a same-day departure with it, by design.** `correctCalving` matches the calf's departure by **date**, and a bull calf sold on the day of birth has a same-day departure. So re-dating the calving re-dates the sale.
+
+  That is right far more often than it is wrong — the two facts are the same day *because* they are tied to the birth, and leaving the sale behind would put it before the animal existed (invariant 4). But it is a consequence rather than an intention: if a same-day departure was genuinely independent of the birth date, the correction will move it anyway and the fix is a further superseding `departure` — which, per the gap above, no command can currently write. Read the command's output: it names every event it superseded.
 - **`CALF_MAX_AGE_MONTHS = 12` is provisional** and has no farm evidence behind it — it is awaiting confirmation of how the farm actually talks about the animals.
 - **`DOUBLE_ENTRY_WINDOW_DAYS = 60` is provisional.** It is reasoned from a buffalo's 400+ day calving interval, not measured.
 - **Status goes stale as animals age.** A consequence of the `calf` rule depending on the current date. The fix is a rebuild; `verify:registry` says so when invariant 1 fires.

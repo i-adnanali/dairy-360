@@ -23,6 +23,7 @@ import {
   snapshot,
 } from './store';
 import { lactationIdFor } from './events';
+import { effectiveEvents } from './project';
 import { checkSnapshot } from './invariants';
 import { AS_OF, RECALL, addAcquired, addDeparture, calve, freshDb, resetRecordedSeq } from './fixtures';
 import type { Db } from './schema';
@@ -707,6 +708,256 @@ for (const step of [1, 2, 3, 4, 5] as const) {
       allEvents(db).filter((e) => e.supersedes_id !== null).length,
       0,
       'no half-applied correction survived',
+    );
+    db.close();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Link mode -- attaching a calving to an animal that already exists
+// ---------------------------------------------------------------------------
+//
+// The backfill reconciliation case: pass one enters a farm-born animal as
+// `acquired` (it must, because pass one has no calvings), then pass two records
+// its dam's calving. Without link mode that mints a duplicate of an animal
+// already in the registry -- duplicate animal, duplicate origin event, and no
+// command able to repair either.
+
+function damAndAcquiredCalf(): Db {
+  const db = damOnly();
+  addAcquired(db, {
+    id: 'BD-0002',
+    sex: 'female',
+    name: 'X',
+    acquired_on: '2021-01-01',
+    acquired_precision: 'year',
+    birth_on: '2021-01-01',
+    birth_precision: 'year',
+  });
+  rebuild(db, { asOf: AS_OF });
+  return db;
+}
+
+function linkCalving(db: Db, over: Record<string, unknown> = {}) {
+  return recordCalving(db, {
+    dam_id: 'BD-0001',
+    occurred_on: '2021-06-01',
+    date_precision: 'month',
+    calf: { existing_id: 'BD-0002', sex: 'female', outcome: 'live' },
+    provenance: RECALL,
+    asOf: AS_OF,
+    ...over,
+  } as Parameters<typeof recordCalving>[1]);
+}
+
+test('link mode attaches to the existing animal and mints nothing', () => {
+  const db = damAndAcquiredCalf();
+  const serialBefore = readNextSerial(db);
+  const animalsBefore = counts(db).animals;
+
+  const r = linkCalving(db);
+
+  assert.equal(r.calf_id, 'BD-0002', 'the existing animal was used');
+  assert.equal(r.linked, true);
+  assert.equal(counts(db).animals, animalsBefore, 'no new animal was created');
+  assert.equal(readNextSerial(db), serialBefore, 'no serial was burned');
+  db.close();
+});
+
+test('link mode supersedes the acquired origin with the birth event', () => {
+  const db = damAndAcquiredCalf();
+  const acquired = eventsForAnimal(db, 'BD-0002').find((e) => e.type === 'acquired')!;
+
+  const r = linkCalving(db);
+
+  assert.equal(r.superseded_origin_event_id, acquired.id);
+  const birth = allEvents(db).find((e) => e.id === r.birth_event_id)!;
+  assert.equal(birth.supersedes_id, acquired.id);
+  assert.equal(birth.payload.dam_id, 'BD-0001');
+  assert.equal(birth.payload.calving_event_id, r.calving_event_id);
+  db.close();
+});
+
+test('link mode promotes registry_animals.origin to born_on_farm', () => {
+  const db = damAndAcquiredCalf();
+  assert.equal(getAnimal(db, 'BD-0002')?.origin, 'acquired');
+  linkCalving(db);
+  assert.equal(getAnimal(db, 'BD-0002')?.origin, 'born_on_farm');
+  db.close();
+});
+
+test('the projection treats the superseded acquired as GONE for origin purposes', () => {
+  // The specific worry: this is the only supersession in the schema that
+  // changes an event's TYPE, so findOrigin() must not still see the acquired.
+  const db = damAndAcquiredCalf();
+  linkCalving(db);
+
+  const effective = effectiveEvents(eventsForAnimal(db, 'BD-0002'));
+  assert.equal(
+    effective.filter((e) => e.type === 'acquired').length,
+    0,
+    'the acquired origin is no longer effective',
+  );
+  assert.equal(effective.filter((e) => e.type === 'birth').length, 1, 'exactly one origin remains');
+
+  const status = allStatuses(db).find((s) => s.animal_id === 'BD-0002')!;
+  assert.equal(
+    status.birth_on,
+    '2021-06-01',
+    'the birth date is now the calving date, not the acquired estimate',
+  );
+  assert.equal(status.birth_precision, 'month', 'and it carries the calving precision');
+  db.close();
+});
+
+test('invariants 3 and 7 both hold across the type-changing supersession', () => {
+  // Invariant 3: exactly one origin event. Invariant 7: every born_on_farm
+  // animal has a dam edge. Both are the ones the promotion could break.
+  const db = damAndAcquiredCalf();
+  linkCalving(db);
+
+  const found = checkSnapshot(snapshot(db), AS_OF);
+  assert.deepEqual(found, [], found.map((v) => `[${v.invariant}] ${v.detail}`).join('\n'));
+
+  const edge = allParentage(db).find((p) => p.child_id === 'BD-0002');
+  assert.equal(edge?.relation, 'dam');
+  assert.equal(edge?.parent_ref, 'BD-0001');
+  db.close();
+});
+
+test('invariant 9 permits birth-supersedes-acquired but nothing else', () => {
+  // The narrow exception. Any OTHER type change must still be caught, or the
+  // exception has swallowed the rule.
+  const db = damAndAcquiredCalf();
+  linkCalving(db);
+  assert.deepEqual(
+    checkSnapshot(snapshot(db), AS_OF).filter((v) => v.invariant === 9),
+    [],
+    'birth superseding acquired is allowed',
+  );
+
+  const s = JSON.parse(JSON.stringify(snapshot(db)));
+  const dryOff = s.events.find((e: { type: string }) => e.type === 'birth');
+  dryOff.type = 'note';
+  dryOff.payload = { text: 'x' };
+  assert.ok(
+    checkSnapshot(s, AS_OF).some((v) => v.invariant === 9),
+    'a note superseding an acquired is still rejected',
+  );
+  db.close();
+});
+
+test('the promoted animal survives a rebuild unchanged', () => {
+  const db = damAndAcquiredCalf();
+  linkCalving(db);
+  const before = allStatuses(db).find((s) => s.animal_id === 'BD-0002');
+  rebuild(db, { asOf: AS_OF });
+  assert.deepEqual(allStatuses(db).find((s) => s.animal_id === 'BD-0002'), before);
+  assert.deepEqual(checkSnapshot(snapshot(db), AS_OF), []);
+  db.close();
+});
+
+test('invariant 3 catches registry_animals.origin drifting from the origin event', () => {
+  // origin is the one derivable column the rebuild does NOT write, so it can
+  // come apart from the log. Link mode is what made it drift-prone.
+  const db = damAndAcquiredCalf();
+  linkCalving(db);
+  db.prepare(`UPDATE registry_animals SET origin = 'acquired' WHERE id = 'BD-0002'`).run();
+  const found = checkSnapshot(snapshot(db), AS_OF);
+  assert.ok(found.some((v) => v.invariant === 3 && /implies 'born_on_farm'/.test(v.detail)));
+  db.close();
+});
+
+// --- link mode refusals ----------------------------------------------------
+
+test('link mode refuses an animal that already has a birth event', () => {
+  const db = damOnly();
+  const first = calve(db, { dam_id: 'BD-0001', on: '2021-06-01', precision: 'month' });
+  assert.throws(
+    () =>
+      recordCalving(db, {
+        dam_id: 'BD-0001',
+        occurred_on: '2023-06-01',
+        date_precision: 'month',
+        calf: { existing_id: first.calf_id, sex: 'female', outcome: 'live' },
+        provenance: RECALL,
+        asOf: AS_OF,
+      }),
+    /already has a birth event/,
+  );
+  db.close();
+});
+
+test('link mode refuses an unknown animal rather than minting one', () => {
+  const db = damAndAcquiredCalf();
+  assert.throws(() => linkCalving(db, { calf: { existing_id: 'BD-9999', sex: 'female', outcome: 'live' } }), /unknown calf 'BD-9999'/);
+  db.close();
+});
+
+test('link mode refuses a sex disagreement', () => {
+  const db = damAndAcquiredCalf();
+  assert.throws(
+    () => linkCalving(db, { calf: { existing_id: 'BD-0002', sex: 'male', outcome: 'live' } }),
+    /recorded as female but this calving says male/,
+  );
+  db.close();
+});
+
+test('link mode refuses an animal that is its own dam', () => {
+  const db = damAndAcquiredCalf();
+  assert.throws(
+    () => linkCalving(db, { calf: { existing_id: 'BD-0001', sex: 'female', outcome: 'live' } }),
+    /cannot be its own calf/,
+  );
+  db.close();
+});
+
+test('link mode refuses a non-live outcome', () => {
+  const db = damAndAcquiredCalf();
+  assert.throws(
+    () => linkCalving(db, { calf: { existing_id: 'BD-0002', sex: 'female', outcome: 'stillborn' } }),
+    /link mode requires outcome 'live'/,
+  );
+  db.close();
+});
+
+test('link mode refuses when the calf already calved BEFORE the proposed birth date', () => {
+  const db = damAndAcquiredCalf();
+  // BD-0002 (entered as acquired) has her own calving in 2024...
+  calve(db, { dam_id: 'BD-0002', on: '2024-03-01', precision: 'month' });
+  // ...so linking her birth to a 2025 calving would put her birth after it.
+  assert.throws(
+    () =>
+      linkCalving(db, {
+        occurred_on: '2025-01-01',
+        date_precision: 'month',
+        allow_near_duplicate: true,
+      }),
+    /before the calving date 2025-01-01/,
+  );
+  db.close();
+});
+
+test('link mode still runs the dam validation', () => {
+  const db = damAndAcquiredCalf();
+  addDeparture(db, { animal_id: 'BD-0001', on: '2020-01-01', precision: 'year' });
+  assert.throws(() => linkCalving(db), /has a departure event/);
+  db.close();
+});
+
+for (const step of [1, 2, 3, 4, 5, 6] as const) {
+  test(`link mode: a forced failure after step ${step} leaves ZERO rows written`, () => {
+    const db = damAndAcquiredCalf();
+    const before = counts(db);
+    const originBefore = getAnimal(db, 'BD-0002')?.origin;
+
+    assert.throws(() => linkCalving(db, { __faultAfterStep: step }), new RegExp(`__faultAfterStep=${step}`));
+
+    assert.deepEqual(counts(db), before, `step ${step}: nothing was written`);
+    assert.equal(
+      getAnimal(db, 'BD-0002')?.origin,
+      originBefore,
+      `step ${step}: the origin promotion rolled back too`,
     );
     db.close();
   });

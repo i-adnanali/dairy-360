@@ -10,6 +10,7 @@
 import type { Db } from './schema';
 import { newEventId } from './events';
 import { allocateSerial, appendEvent, eventsForAnimal, getAnimal, insertAnimal } from './store';
+import { definitelyBefore } from './invariants';
 import { effectiveEvents } from './project';
 import { rebuildAnimals } from './projectStore';
 import type {
@@ -39,6 +40,23 @@ export interface RecordCalvingInput {
   occurred_time?: string | null;
   date_precision: DatePrecision;
   calf: {
+    /**
+     * LINK MODE. Attach this calving to an animal that ALREADY EXISTS instead
+     * of minting a new one.
+     *
+     * The backfill reconciliation case, and the reason it is a first-class mode
+     * rather than a manual fix-up: pass one enters every animal it can, and a
+     * farm-born animal whose dam is still in the herd gets entered as
+     * `acquired` because pass one has no calvings yet. Pass two then records
+     * the dam's calving -- and without this, mints a DUPLICATE of an animal
+     * that is already in the registry. Duplicate animal, duplicate origin
+     * event, and no command able to repair either.
+     *
+     * In link mode the calf's `acquired` origin is superseded by a `birth`, and
+     * registry_animals.origin is promoted to 'born_on_farm'. No serial is
+     * allocated.
+     */
+    existing_id?: string;
     sex: RegistrySex;
     name?: string | null;
     outcome: CalvingOutcome;
@@ -79,6 +97,10 @@ export interface RecordCalvingResult {
   birth_event_id: string;
   /** Present when the calf was stillborn or died within 24h. */
   departure_event_id: string | null;
+  /** True when an existing animal was linked rather than a new one minted. */
+  linked: boolean;
+  /** In link mode, the `acquired` origin event the birth superseded. */
+  superseded_origin_event_id: string | null;
 }
 
 export class CalvingError extends Error {
@@ -154,21 +176,93 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
           `allow_near_duplicate: true if it is genuinely a separate event.`,
       );
     }
+    // Link mode validation, all of it here in step 1 alongside the dam checks.
+    let linkedOrigin: RegistryEvent | null = null;
+    if (input.calf.existing_id !== undefined) {
+      const targetId = input.calf.existing_id;
+      if (targetId === dam.id) {
+        throw new CalvingError(`an animal cannot be its own calf ('${targetId}')`);
+      }
+      const target = getAnimal(db, targetId);
+      if (!target) {
+        throw new CalvingError(`unknown calf '${targetId}' -- link mode attaches to an ` +
+          `animal that already exists. Omit the id to mint a new one.`);
+      }
+      if (target.sex !== input.calf.sex) {
+        throw new CalvingError(
+          `calf '${targetId}' is recorded as ${target.sex} but this calving says ` +
+            `${input.calf.sex}. One of the two is wrong; fix that before linking.`,
+        );
+      }
+      if (input.calf.outcome !== 'live') {
+        throw new CalvingError(
+          `link mode requires outcome 'live', got '${input.calf.outcome}'. A calf that did ` +
+            `not live would not have been entered separately as an animal, so linking one ` +
+            `is almost certainly the wrong animal.`,
+        );
+      }
+
+      const targetEvents = effectiveEvents(eventsForAnimal(db, targetId));
+      const origin = targetEvents.find((e) => e.type === 'birth' || e.type === 'acquired');
+      if (!origin) {
+        throw new CalvingError(
+          `calf '${targetId}' has no effective origin event, so there is nothing to ` +
+            `supersede. Run verify:registry -- invariant 3 is already failing.`,
+        );
+      }
+      if (origin.type === 'birth') {
+        throw new CalvingError(
+          `calf '${targetId}' already has a birth event (${origin.id}) dated ` +
+            `${origin.occurred_on}, so it already has a dam. Linking would give it two ` +
+            `origins. If THAT birth is the wrong one, correct the calving that claims it.`,
+        );
+      }
+
+      // Nothing on the calf may predate its new origin (invariant 4). This is
+      // the realistic failure: the animal was entered as acquired years after
+      // it was actually born, and something was recorded in between.
+      const tooEarly = targetEvents.find(
+        (e) =>
+          e.type !== 'note' &&
+          e.id !== origin.id &&
+          definitelyBefore(
+            { on: e.occurred_on, precision: e.date_precision },
+            { on: input.occurred_on, precision: input.date_precision },
+          ),
+      );
+      if (tooEarly) {
+        throw new CalvingError(
+          `calf '${targetId}' has a ${tooEarly.type} on ${tooEarly.occurred_on} ` +
+            `(${tooEarly.date_precision}), before the calving date ${input.occurred_on}. ` +
+            `Its birth cannot postdate its own history -- check which date is wrong.`,
+        );
+      }
+
+      linkedOrigin = origin;
+    }
     faultAt(1);
 
-    // --- 2. Allocate the serial ------------------------------------------
-    // Inside this transaction, so a rolled-back calving does not burn a number.
-    const calfId = allocateSerial(db);
+    // --- 2. Resolve the calf's id ----------------------------------------
+    // Mint mode allocates a serial INSIDE this transaction, so a rolled-back
+    // calving does not burn a number. Link mode allocates nothing: the animal
+    // already exists and already has its serial.
+    const calfId = linkedOrigin ? input.calf.existing_id! : allocateSerial(db);
     faultAt(2);
 
-    // --- 3. Insert the calf ----------------------------------------------
-    insertAnimal(db, {
-      id: calfId,
-      name: input.calf.name ?? null,
-      sex: input.calf.sex,
-      species: input.calf.species ?? dam.species,
-      origin: 'born_on_farm',
-    });
+    // --- 3. Create or promote the calf -----------------------------------
+    if (linkedOrigin) {
+      // registry_animals is identity, not a projection, so the rebuild will
+      // never fix this column -- it is written here and checked by invariant 3.
+      db.prepare(`UPDATE registry_animals SET origin = 'born_on_farm' WHERE id = ?`).run(calfId);
+    } else {
+      insertAnimal(db, {
+        id: calfId,
+        name: input.calf.name ?? null,
+        sex: input.calf.sex,
+        species: input.calf.species ?? dam.species,
+        origin: 'born_on_farm',
+      });
+    }
     faultAt(3);
 
     // --- 4. The calving event, on the dam --------------------------------
@@ -208,6 +302,11 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
         outcome: input.calf.outcome,
       },
       provenance: input.provenance,
+      // Link mode: this birth REPLACES the `acquired` origin. The only
+      // supersession in the schema that changes an event's type -- see
+      // isOriginPromotion() in invariants.ts for why it is allowed here and
+      // not in reverse.
+      supersedes_id: linkedOrigin?.id ?? null,
     });
 
     let departureEventId: string | null = null;
@@ -241,6 +340,8 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
       calving_event_id: calvingEventId,
       birth_event_id: birthEventId,
       departure_event_id: departureEventId,
+      linked: linkedOrigin !== null,
+      superseded_origin_event_id: linkedOrigin?.id ?? null,
     };
   });
 
