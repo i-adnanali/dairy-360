@@ -267,6 +267,12 @@ export function cleanHerd(): Db {
     outcome: 'stillborn',
   });
 
+  // BD-0003 dries off after her stillbirth and does not calve again, so the
+  // herd contains an animal whose status is `dry`. Without her, `dry` is the
+  // one status of six that no fixture produces -- and the herd table is the
+  // view where a missing status is least likely to be noticed.
+  addDryOff(db, { animal_id: 'BD-0003', on: '2025-11-01', precision: 'month' });
+
   // BD-0004 departed.
   addDeparture(db, { animal_id: 'BD-0004', on: '2024-05-01', precision: 'month' });
 

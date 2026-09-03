@@ -10,9 +10,10 @@ import { EventEncoder } from '@ag-ui/encoder';
 import cors from 'cors';
 import express from 'express';
 import type { AgentRunForwardedProps } from '@dairy/shared';
-import { isSeeded } from './db';
+import { db, isSeeded } from './db';
 import { runAgentStream } from './agent/stream';
 import { farmRouter } from './farm/routes';
+import { registryRouter } from './registry/routes';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
@@ -27,6 +28,15 @@ const SEED_HINT =
 // behind the isSeeded() guard: farm_events lives outside the dairy seed
 // lifecycle, so ingestion works against an unseeded database.
 app.use('/api/webhooks', farmRouter);
+
+// Animal registry (see docs/REGISTRY.md). Also outside the isSeeded() guard:
+// the registry has nothing to do with the demo seed, and an unseeded database
+// is the normal state for a machine that only enters herd records.
+//
+// registryRouter is a FACTORY taking a handle, unlike farmRouter -- that is
+// what lets the development harness serve the same routes over an :memory:
+// fixture herd without a synthetic row ever reaching dairy.db.
+app.use('/api/registry', registryRouter(db));
 
 app.get('/api/health', (_req, res) => {
   if (!isSeeded()) {

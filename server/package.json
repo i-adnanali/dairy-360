@@ -18,6 +18,7 @@
     "registry:event": "TZ=Asia/Karachi tsx src/registry/event.ts",
     "registry:calve": "TZ=Asia/Karachi tsx src/registry/calve.ts",
     "registry:correct-calving": "TZ=Asia/Karachi tsx src/registry/correct.ts",
+    "registry:harness": "TZ=Asia/Karachi tsx src/registry/harness.ts",
     "registry:rebuild": "TZ=Asia/Karachi tsx src/registry/rebuild.ts",
     "verify:registry": "TZ=Asia/Karachi tsx src/registry/verifyRegistry.ts",
     "build": "tsc -p tsconfig.json",

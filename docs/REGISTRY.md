@@ -236,7 +236,18 @@ Do not collapse the first two into one timestamp with a qualifier. That forces y
 - `month` → stored as the **1st** of that month. `year` → stored as **January 1**.
 - `estimated` → **January 1**, the same as `year` (added in migration 2). It was originally left unconstrained on the grounds that "even the year is inferred, so no convention would mean anything" — but that left one precision where a caller could write `estimated 2021-04-12`, a fabricated day wearing a humility label, and only the entry form would have stopped it. A convention only a UI enforces is a UI habit, not a convention.
 
-  **`year` and `estimated` therefore store the same shape, and must still stay separate values.** The difference is not cosmetic: `definitelyBefore()` treats an estimated date as **not comparable at all** while a `year` date compares at year grain, so invariants 4 and 5 genuinely behave differently — and the precision histogram splits on them, which is most of what the histogram is for. `year` means "I know the year"; `estimated` means "I am guessing it".
+#### `year` and `estimated` store identically. Do not merge them.
+
+They are the two values that look mergeable, and the reason to keep them apart is **a comparison semantic, not a label**:
+
+```ts
+definitelyBefore({ on: '2020-01-01', precision: 'year'      }, dayDate) // true
+definitelyBefore({ on: '2020-01-01', precision: 'estimated' }, dayDate) // false
+```
+
+`definitelyBefore()` treats an estimated date as **not comparable at all**, while a `year` date compares at year grain. So **invariants 4 and 5 behave differently** depending on which one a row carries: a `year`-precision event can be proven to precede an animal's origin and be flagged; an `estimated` one never can, because a guessed year is not evidence of ordering. Merging the two would either start flagging guesses as timeline violations, or stop flagging real ones.
+
+The histogram splitting on them matters too — `year` means "I know the year", `estimated` means "I am guessing it", and a backfill that is 80% guessed is a different object from one that is 80% known. But that is the softer argument. The hard one is that the comparison rules already differ, and a merge would silently change which invariant violations the registry can detect.
 - `occurred_time` must be `NULL` unless precision is `day`. There is no such thing as knowing the hour but not the day.
 
 These are enforced in **three layers**, deliberately: schema CHECK constraints (catch it in any process, including a hand-written `INSERT`), `assertDatePrecision()` at the write boundary (catches it with a readable message and names the field), and invariants 11/12 (catch historical rows written before a rule existed). All three cover all four precisions.
@@ -503,6 +514,69 @@ The **message is the good part** — written to teach an operator what to do —
 `CalvingError` and `EventPayloadError` are subclasses, so one handler covers every domain refusal. `EventPayloadError` becoming one closed a real hole: it was a bare `Error`, so `runCli()` did not catch it and a precision mistake printed a **stack trace** at an operator mid-backfill. Every date input goes through `assertDatePrecision()`, so that was the most-hit refusal path in the system.
 
 A `CliError` is a different thing — a missing or unparseable flag — and belongs to one transport.
+
+---
+
+## HTTP surface
+
+Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts)), outside the `isSeeded()` guard — the registry has nothing to do with the demo seed, and an unseeded database is the normal state for a machine that only enters herd records.
+
+| | Route | |
+|---|---|---|
+| GET | `/animals` | herd table: identity + derived status + effective event count |
+| GET | `/animals/:id` | one animal, its status, and its **full** event list |
+| GET | `/animals/:id/calvings` | the correction picker's source |
+| GET | `/link-candidates?dam=&calf_sex=&occurred_on=&date_precision=` | link-mode picker |
+| GET | `/dam-candidates` | females, departed ones marked |
+| GET | `/verification?as_of=` | invariants, histogram, intervals |
+| POST | `/animals` | `addAcquiredAnimal` |
+| POST | `/events` | `appendLifeEvent` |
+| POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |
+| POST | `/calvings/:eventId/correction` | `correctCalving` |
+| POST | `/rebuild` | `registry:rebuild` |
+
+`registryRouter` is a **factory taking a `db` handle**, unlike `farmRouter` which is a const importing the singleton. That is what lets the harness serve the same routes over `:memory:`.
+
+### Superseded events are returned, not filtered
+
+`GET /animals/:id` includes every event, each carrying `effective` and — when replaced — `superseded_by_id`, the reverse edge the log does not store.
+
+This view is the only window into whether a correction did what was meant. An event that simply vanished would be indistinguishable from one that was never written, and there would be no way to tell a successful correction from a silent no-op.
+
+### The link picker returns ineligible animals with a reason
+
+Every animal appears; ineligible ones carry `ineligible_reason`. An animal **missing** from a picker reads as data loss to the person entering the herd, who will stop and go looking for it. Greyed with a reason costs one column and answers the question before it is asked.
+
+The reason is computed **server-side** for the same argument as `field` on an error: a client deriving it from other columns is re-implementing a server rule, and the two will drift.
+
+**This is where testing over HTTP earned its keep.** The first version of the picker marked animals eligible that `recordCalving` then refused — it was missing the timeline rule (an animal whose own history predates the proposed birth date cannot be linked, because its birth would postdate its own events). It surfaced immediately against `cleanHerd()`, and would otherwise have surfaced against the first real animal. The endpoint now takes `occurred_on` and `date_precision` and applies the same check; omitting them yields a list that is right about everything else and silent about that one.
+
+### Errors on the wire
+
+A domain refusal is `400` with the `RegistryError` wire shape; anything else is a `500`, because it is a bug and must not be dressed up as something an operator can fix. An unknown animal on a read is `404` in the same shape.
+
+The serialization matters more than it looks: `code` and `field` are class properties, and `JSON.stringify` on an `Error` subclass returns `{}` unless something converts it. One missing `toWire()` and every form receives an empty object — a bug invisible to a function-level test. That is most of why these routes are tested over real HTTP with a real server on an ephemeral port.
+
+`observed_by` is read from the body and **never defaulted** — not to the session person, not to `recorded_by`. Leaving it blank is the cheap path; asserting a witness takes a deliberate act. Same shape as precision-before-date: the honest thing is the default, and the claim requires doing something.
+
+---
+
+## Developing against the registry without touching it
+
+```bash
+npm run registry:harness -w server              # the fixture herd, in memory
+npm run registry:harness -w server -- --empty    # the first-hour state
+```
+
+Serves `/api/registry` over an **`:memory:`** copy of the `cleanHerd()` fixture — 12 animals covering all six statuses, a normally-closed lactation, an inferred close, an open lactation, a stillbirth, two departed animals, a farm-born calf and a paired correction. `GET /api/harness` says plainly that this is not `dairy.db`.
+
+**Nothing synthetic ever touches `registry_animals` in `dairy.db`.** The registry holds the only records in this repo that cannot be regenerated by re-running a seed, and "I will delete them after" is how they stop being the only records — the two preceding cycles each ended with a manual `DROP` of walkthrough data, which worked because someone remembered.
+
+So the rule is enforced by an absence, and [registry.harness.test.ts](../server/src/registry/registry.harness.test.ts) asserts it four ways: the harness's require-graph contains no `db.ts`; no harness-reachable module names `'../db'` in source; **exactly** the six CLI entry points import the singleton and nothing else does; and the harness constructs no database of its own and writes no files.
+
+`--empty` is not a throwaway flag. The empty and one-row states are what the first hour of real entry looks like, and they should be built rather than discovered.
+
+Everything the harness serves is discarded on exit. There is no persistence and there must not be one — a harness that saved its state would be a second registry, and the next question would be how to merge it.
 
 ---
 
