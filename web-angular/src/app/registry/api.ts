@@ -5,8 +5,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
-  AnimalDetail, HerdRow, IdentifierValues, LinkCandidate, StorageInfo, TimelineEvent,
-  Verification, WireError,
+  AnimalDetail, DuplicateCandidate, HerdRow, IdentifierValues, LinkCandidate, StorageInfo,
+  TimelineEvent, Verification, WireError,
 } from './types';
 
 const BASE = '/api/registry';
@@ -117,6 +117,30 @@ export class RegistryApi {
     });
     return unwrap(
       firstValueFrom(this.http.get<{ candidates: LinkCandidate[] }>(`${BASE}/link-candidates?${q}`)),
+    ).then((r) => r.candidates);
+  }
+
+  /**
+   * Animals that might already be the one being entered.
+   *
+   * A soft signal: nothing branches on it and no write consults it. An empty
+   * query is answered with `[]` by the server rather than the whole herd.
+   */
+  duplicateCandidates(opts: {
+    name?: string | null;
+    post_no?: string | null;
+    tag_no?: string | null;
+    sex?: string | null;
+    exclude_id?: string | null;
+  }): Promise<DuplicateCandidate[]> {
+    const q = new URLSearchParams();
+    for (const [k, v] of Object.entries(opts)) {
+      if (typeof v === 'string' && v.length > 0) q.set(k, v);
+    }
+    return unwrap(
+      firstValueFrom(
+        this.http.get<{ candidates: DuplicateCandidate[] }>(`${BASE}/duplicate-candidates?${q}`),
+      ),
     ).then((r) => r.candidates);
   }
 

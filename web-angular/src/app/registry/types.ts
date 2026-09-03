@@ -157,3 +157,19 @@ export interface IdentifierValues {
   acquired_from: string[];
   sire_ref: string[];
 }
+
+export type DuplicateMatchKind = 'post_no' | 'tag_no' | 'name_exact' | 'name_near';
+
+/** An animal that might already be the one being entered. A soft signal only. */
+export interface DuplicateCandidate {
+  id: string;
+  name: string | null;
+  sex: RegistrySex;
+  post_no: string | null;
+  tag_no: string | null;
+  matched_on: DuplicateMatchKind;
+  /** Server-computed, for the same reason `ineligible_reason` is. */
+  match_reason: string;
+  /** When the animal was TYPED -- its origin event's recorded_at, UTC. */
+  recorded_at: string | null;
+}

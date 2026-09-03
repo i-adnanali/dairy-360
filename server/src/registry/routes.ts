@@ -62,6 +62,7 @@ import {
   calvingsFor,
   damCandidates,
   herd,
+  duplicateCandidates,
   identifierValues,
   linkCandidates,
 } from './reads';
@@ -295,6 +296,31 @@ export function registryRouter(db: Db): express.Router {
    * Previously-used values for the free-text identifier fields, for a datalist.
    * Suggestions, never a constraint -- a new name must stay typeable.
    */
+  /**
+   * Animals that might already be the one being entered. A SOFT signal: this
+   * route judges nothing and blocks nothing, and no write consults it.
+   *
+   * Answers `[]` for an empty query rather than returning the whole herd, so a
+   * form that fires on every keystroke gets nothing until something is typed.
+   */
+  router.get(
+    '/duplicate-candidates',
+    handle((req, res) => {
+      const q = req.query;
+      const one = (k: string): string | null =>
+        typeof q[k] === 'string' && q[k] !== '' ? (q[k] as string) : null;
+      res.json({
+        candidates: duplicateCandidates(db, {
+          name: one('name'),
+          post_no: one('post_no'),
+          tag_no: one('tag_no'),
+          sex: q.sex === 'female' || q.sex === 'male' ? (q.sex as RegistrySex) : undefined,
+          exclude_id: one('exclude_id') ?? undefined,
+        }),
+      });
+    }),
+  );
+
   router.get(
     '/identifier-values',
     handle((_req, res) => {

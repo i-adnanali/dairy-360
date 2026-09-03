@@ -329,7 +329,7 @@ open across the whole backfill, so it has an answer immediately below.
 If this app ever grows a second writer or a real deployment, storage is the first decision to
 revisit.
 
-### 6.2a Near-duplicate detection on `/add`
+### 6.2a Near-duplicate detection on `/add` — BUILT
 
 The answer to hole 3. Idempotency cannot see a refresh-and-resubmit or a second tab; a **query
 can**, because the duplicate it would create is sitting in the database by the time the second
@@ -384,8 +384,49 @@ source anyway: it is when the row was *typed*, which is what "recently added" me
 than when the arrival happened.
 
 Revisit only if the herd passes roughly 500 animals, at which point the name comparison wants an
-index and the scan wants a cutoff. Note that in the code rather than pre-optimising for a herd size
-this farm does not have.
+index and the scan wants a cutoff. Noted in the code rather than pre-optimised for a herd size this
+farm does not have.
+
+#### As built
+
+`GET /duplicate-candidates`, and `duplicate-warning.ts` as its own component so §5.1 inherits it —
+it takes `excludeId` for the row being edited, which `/add` does not need but the roster pass does
+(without it, every keystroke would flag the row as a duplicate of itself). Demonstrated over HTTP:
+
+```
+--- the refresh-and-resubmit hole idempotency cannot see ---
+first submit                  -> BD-0001
+after a refresh, before saving -> warns about BD-0001 (same post no. '12')
+
+--- the match rule ---
+exact name + sex    -> BD-0001 via name_exact
+case/space variant  -> BD-0001 via name_exact
+one edit off        -> BD-0001 via name_near
+prefix (abdul_r)    -> BD-0001 via name_near
+same name, male     -> no warning
+post no., male      -> BD-0001 via post_no
+unrelated name      -> no warning
+nothing typed       -> no warning
+
+--- soft: two genuinely different animals are not obstructed ---
+two nameless, same sex/year   -> BD-0002 BD-0003 | warnings: 0
+```
+
+The last block is the one that matters most. Two nameless animals of the same sex and arrival year
+are entered with no warning and no friction, because there is nothing to match on — and even had
+there been, nothing is blocked: no disabled submit, no checkbox to acknowledge. There is no dismiss
+either, deliberately: the warning clears when what was typed stops matching, and an "I know" button
+would only train the reflex of clicking one.
+
+Two implementation notes worth keeping:
+
+- **The prefix rule, not edit distance, is what catches `abdul` / `abdul_r`** — two characters were
+  added, so the distance is 2. `MIN_PREFIX` is 3, or `a` would match every name starting with an a.
+- **The recency tie-break is a DESCENDING serial.** `recorded_at` has millisecond resolution, and
+  two animals from a double-submit land in the same millisecond often enough that a flaky test
+  caught it — at which point an ascending serial put the *older* animal first, contradicting the
+  whole ordering. Serials come from a monotonic counter that never reuses, so a higher serial is
+  always the later one.
 
 ### 6.3 Candidate search replaces the yes/no binary — BUILT (`v0.13.0`)
 

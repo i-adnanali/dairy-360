@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { DuplicateWarning } from './duplicate-warning';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
 import { PrecisionDateControl } from './precision-date';
@@ -16,7 +17,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
 @Component({
   selector: 'app-animal-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IdentifierInput, PrecisionDateControl],
+  imports: [DuplicateWarning, IdentifierInput, PrecisionDateControl],
   template: `
     <div class="mx-auto max-w-2xl">
       <header class="mb-4">
@@ -69,6 +70,14 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
             Post number and ear tag are attributes, not identity — both change over an animal's life.
           </p>
         </div>
+
+        <!-- Placed directly under the identity fields it watches, not near the
+             submit button: the useful moment is while the name is still being
+             typed, not after the decision to save has been made. -->
+        <app-duplicate-warning
+          [name]="name()" [postNo]="postNo()" [tagNo]="tagNo()" [sex]="sex()"
+          [refreshToken]="writes()"
+        />
 
         <app-precision-date
           label="When did it arrive on the farm?"
@@ -153,6 +162,14 @@ export class AnimalForm {
   protected readonly observedBy = signal('');
   protected readonly acquired = signal<PrecisionDate | null>(null);
   protected readonly birth = signal<PrecisionDate | null>(null);
+  /**
+   * Bumped after each write so the duplicate query re-runs.
+   *
+   * The fields usually do not change between a successful submit and the next
+   * record, so nothing else would re-trigger it -- and the animal just created
+   * is exactly the one worth matching against if the operator submits again.
+   */
+  protected readonly writes = signal(0);
 
   /**
    * Submitting without a precision is IMPOSSIBLE, not merely refused: the
@@ -189,6 +206,7 @@ export class AnimalForm {
     // Refreshed AFTER the write, so a name typed on this animal is offered on
     // the next one. That is the whole point of the datalist.
     void this.identifiers.refresh();
+    this.writes.update((n) => n + 1);
   }
 
   protected open(id: string): void {

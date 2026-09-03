@@ -213,6 +213,207 @@ export function identifierValues(db: Db): IdentifierValues {
 }
 
 // ---------------------------------------------------------------------------
+// Near-duplicate animals
+// ---------------------------------------------------------------------------
+
+/**
+ * Animals that might already be the one being entered.
+ *
+ * WHAT THIS EXISTS FOR: idempotency keys cannot see a page refresh or a second
+ * browser tab -- both get a fresh key, so the server has no way to know the two
+ * submits are one. `/add` is where that mints a permanent duplicate with no
+ * calving flow involved, and nothing in this registry can merge two animals
+ * back together. But a QUERY can see it, because by the time the second submit
+ * happens the first animal is sitting in the database.
+ *
+ * A SOFT WARNING, NEVER A REFUSAL, and that is load-bearing rather than a
+ * hedge. Two animals with no name, the same sex and the same arrival year are
+ * genuinely two animals -- that is the roster pass, not a contrived case. A
+ * hard block would force the operator to invent a distinguishing detail, which
+ * is the same dishonesty the precision rules exist to prevent.
+ */
+export type DuplicateMatchKind = 'post_no' | 'tag_no' | 'name_exact' | 'name_near';
+
+export interface DuplicateCandidate {
+  id: string;
+  name: string | null;
+  sex: RegistrySex;
+  post_no: string | null;
+  tag_no: string | null;
+  /** Strongest signal that matched. */
+  matched_on: DuplicateMatchKind;
+  /** Server-computed, for the same reason `ineligible_reason` is. */
+  match_reason: string;
+  /** When the animal was TYPED -- its origin event's recorded_at, UTC. */
+  recorded_at: string | null;
+}
+
+/** Lowercased, trimmed, internal whitespace collapsed. */
+export function normalizeIdentifier(v: string): string {
+  return v.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * Levenshtein distance, but only ever asked "is it at most 1?".
+ *
+ * Bails as soon as the answer is no, so the full matrix is never built. A
+ * length gap above 1 cannot be closed by one edit, which is the cheap first
+ * rejection.
+ */
+export function withinOneEdit(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1) return false;
+
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  let i = 0;
+  let j = 0;
+  let edited = false;
+  while (i < short.length && j < long.length) {
+    if (short[i] === long[j]) {
+      i++;
+      j++;
+      continue;
+    }
+    if (edited) return false;
+    edited = true;
+    // Same length -> a substitution, so advance both. Different -> an
+    // insertion in `long`, so advance only it.
+    if (short.length === long.length) i++;
+    j++;
+  }
+  return true;
+}
+
+/**
+ * One name is a prefix of the other, with at least MIN_PREFIX characters.
+ *
+ * This is the rule that catches `abdul` / `abdul_r`, which edit distance does
+ * not: two characters were added, so the distance is 2. The minimum length
+ * stops `a` matching everything that starts with an a.
+ */
+export const MIN_PREFIX = 3;
+
+export function sharesPrefix(a: string, b: string): boolean {
+  if (Math.min(a.length, b.length) < MIN_PREFIX) return false;
+  return a.startsWith(b) || b.startsWith(a);
+}
+
+export interface DuplicateQuery {
+  name?: string | null;
+  post_no?: string | null;
+  tag_no?: string | null;
+  sex?: RegistrySex;
+  /**
+   * An animal to leave out -- itself. Unused by `/add`, where the animal does
+   * not exist yet; the roster pass needs it, because a row being edited is
+   * already in the registry and would match itself on every keystroke.
+   */
+  exclude_id?: string;
+}
+
+/** Strongest first, which is also the display order. */
+const KIND_RANK: Record<DuplicateMatchKind, number> = {
+  post_no: 0,
+  tag_no: 1,
+  name_exact: 2,
+  name_near: 3,
+};
+
+/**
+ * Matched against the WHOLE registry, with no recency cutoff.
+ *
+ * The memory that actually fails is "did I already enter this one?", and that
+ * fails across sittings rather than within minutes -- so any window short
+ * enough to be called one would miss the case worth catching. At twenty to a
+ * couple of hundred animals a full scan is free; the query is bounded by the
+ * herd, not by time. `recorded_at` is returned so the UI can say how long ago
+ * each was typed, which is a far better signal than a cutoff: minutes ago is
+ * almost certainly the refresh this exists for, last week is a question.
+ *
+ * Revisit past roughly 500 animals, where the name comparison wants an index.
+ */
+export function duplicateCandidates(db: Db, q: DuplicateQuery): DuplicateCandidate[] {
+  const name = q.name ? normalizeIdentifier(q.name) : '';
+  const post = q.post_no ? normalizeIdentifier(q.post_no) : '';
+  const tag = q.tag_no ? normalizeIdentifier(q.tag_no) : '';
+  if (name === '' && post === '' && tag === '') return [];
+
+  // The animal's origin event carries when it was TYPED. registry_animals has
+  // no timestamp, deliberately, and recorded_at is the honest source anyway.
+  const typedAt = new Map<string, string>();
+  for (const e of allEvents(db)) {
+    if (e.type !== 'birth' && e.type !== 'acquired') continue;
+    const seen = typedAt.get(e.animal_id);
+    if (seen === undefined || e.recorded_at < seen) typedAt.set(e.animal_id, e.recorded_at);
+  }
+
+  const out: DuplicateCandidate[] = [];
+
+  for (const a of allAnimals(db)) {
+    if (q.exclude_id !== undefined && a.id === q.exclude_id) continue;
+
+    const aName = a.name ? normalizeIdentifier(a.name) : '';
+    const aPost = a.post_no ? normalizeIdentifier(a.post_no) : '';
+    const aTag = a.tag_no ? normalizeIdentifier(a.tag_no) : '';
+    // A name match needs the sex to agree; an identifier match does not. Names
+    // repeat on a farm, so a shared name across sexes is far more likely to be
+    // two animals than one duplicate. A shared post_no across sexes is not --
+    // it is either a duplicate or a real collision on a working identifier,
+    // and both are worth surfacing.
+    const sexAgrees = q.sex === undefined || q.sex === a.sex;
+
+    const hit = ((): { kind: DuplicateMatchKind; reason: string } | null => {
+      if (post !== '' && aPost !== '' && post === aPost) {
+        return { kind: 'post_no', reason: `same post no. '${a.post_no}'` };
+      }
+      if (tag !== '' && aTag !== '' && tag === aTag) {
+        return { kind: 'tag_no', reason: `same ear tag '${a.tag_no}'` };
+      }
+      if (name !== '' && aName !== '' && sexAgrees) {
+        if (name === aName) {
+          return { kind: 'name_exact', reason: `same name '${a.name}', same sex` };
+        }
+        if (withinOneEdit(name, aName) || sharesPrefix(name, aName)) {
+          return { kind: 'name_near', reason: `name '${a.name}' is nearly the same, same sex` };
+        }
+      }
+      return null;
+    })();
+
+    if (hit === null) continue;
+    out.push({
+      id: a.id,
+      name: a.name,
+      sex: a.sex,
+      post_no: a.post_no,
+      tag_no: a.tag_no,
+      matched_on: hit.kind,
+      match_reason: hit.reason,
+      recorded_at: typedAt.get(a.id) ?? null,
+    });
+  }
+
+  // Strongest signal first, then most recently typed -- a match from minutes ago
+  // is the likeliest refresh-and-resubmit.
+  //
+  // THE TIE-BREAK IS A DESCENDING SERIAL, NOT AN ASCENDING ONE, and that is not
+  // cosmetic. `recorded_at` has millisecond resolution, and two animals entered
+  // by a double-submit land in the same millisecond often enough that a flaky
+  // test caught it -- at which point an ascending serial put the OLDER animal
+  // first, contradicting the whole ordering. Serials are allocated from a
+  // monotonic counter that never reuses, so a higher serial is always the later
+  // one; using it descending agrees with recorded_at instead of fighting it,
+  // and keeps the order total so two calls agree.
+  return out.sort((x, y) => {
+    if (x.matched_on !== y.matched_on) return KIND_RANK[x.matched_on] - KIND_RANK[y.matched_on];
+    const xr = x.recorded_at ?? '';
+    const yr = y.recorded_at ?? '';
+    if (xr !== yr) return xr < yr ? 1 : -1;
+    return x.id < y.id ? 1 : x.id > y.id ? -1 : 0;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Link candidates
 // ---------------------------------------------------------------------------
 
