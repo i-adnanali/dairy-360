@@ -8,6 +8,7 @@
 // picker. No lifetime lane, no pedigree, no herd lanes.
 
 import type { Db } from './schema';
+import { GESTATION_DAYS, calvingTooSoonAfterBirth } from './calving';
 import { definitelyBefore } from './invariants';
 import { daysBetween, effectiveEvents } from './project';
 import { allAnimals, allEvents, allStatuses, eventsForAnimal, getAnimal } from './store';
@@ -572,6 +573,20 @@ export function linkCandidates(
           return (
             `has a ${tooEarly.type} on ${tooEarly.occurred_on}, before the proposed birth ` +
             `date ${opts.occurredOn} -- its birth cannot postdate its own history`
+          );
+        }
+        // The same rule recordCalving refuses on, from the same predicate. The
+        // timeline check above only looks BACKWARDS; this is the animal that
+        // has calved too soon AFTER the proposed birth to be this calf.
+        const tooSoon = calvingTooSoonAfterBirth(mine, {
+          on: opts.occurredOn,
+          precision: opts.datePrecision,
+        });
+        if (tooSoon) {
+          return (
+            `has a calving of its own on ${tooSoon.occurred_on}, less than a gestation ` +
+            `(${GESTATION_DAYS} days) after the proposed birth date ${opts.occurredOn} -- ` +
+            `it would have conceived before it was born`
           );
         }
       }

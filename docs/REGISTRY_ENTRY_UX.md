@@ -110,13 +110,27 @@ across three passes shared a shape, and the shape is the lesson.
 | `2026-01-01` and `2019-01-01` fabricated at day precision | 0 |
 | `0000-01-01` from clearing a year, because `+''` is `0` | 0 |
 | A calved animal under the age threshold projecting as a `calf` | 10 |
+| A **lactating dam accepted as a newborn calf** in link mode | walkthrough |
 
 **Every one of them passed every invariant.** Not because the invariants were weak — because they
 were answering a different question. The schema CHECKs, `assertDatePrecision()` and invariant 11 all
 ask whether the data is *consistent with the rules*, and in each case the storage conventions were
 satisfied exactly. `2026-01-01` is a valid day-precision date. `0000-01-01` is a valid January 1.
-An 8-month-old is genuinely under 18 months. The rule itself was wrong, and it was wrong
+An 8-month-old is genuinely under 18 months. A dam linked as a calf had one origin, a birth event, a
+dam edge and a calving dated after her birth. The rule itself was wrong, and it was wrong
 *uniformly*, so nothing internal to the system had anything to compare against.
+
+The fourth one sharpened the corollary, because it came with a **measurement of the limit rather
+than an argument for it.** Link eligibility is evaluated in two modules, and there is now a test
+asserting they agree over a whole herd — the obvious instrument for this class. Remove the gestation
+floor from the shared predicate and that test stays **green**, while only the three rule-level tests
+go red: the two implementations agree perfectly on the wrong answer. A seam test finds the side that
+disagrees with its neighbour and is structurally blind to a column that is evenly false. Worth
+knowing before reaching for one as protection against this class again.
+
+It also found the bug the same way the other three were found — by printing a value and reading it,
+on a herd built to be *read as a herd* rather than checked as a fixture. The animal was recognisable
+as a milking buffalo, and that is the only instrument that measures this.
 
 That is the general limit. A consistency check finds the row that disagrees with its neighbours; it
 is blind to a whole column that is evenly false. Only **reading a value and knowing it is wrong**

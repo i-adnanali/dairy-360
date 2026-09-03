@@ -525,7 +525,7 @@ Rules, in order, first match wins:
 
 ### Where the calf threshold lives
 
-`CALF_MAX_AGE_MONTHS = 12` sits at the top of `registry/project.ts`, next to the rules that consume it, marked provisional and awaiting the farm's own usage.
+`CALF_MAX_AGE_MONTHS = 18` sits at the top of `registry/project.ts`, next to the rules that consume it, marked provisional and awaiting the farm's own usage. It is **the scheme's only age threshold**, and that is the point: every other life-stage boundary is derived from events the registry already holds. A katti becomes a choti by getting older; a choti becomes a majj by calving, and by nothing else.
 
 **Not** alongside `FARM_TZ` / `WORK_HOURS` / `RESTRICTED_ZONES` — there is no shared constants module in this repo. Those three are exports of `farm/classify.ts`, whose subject is cameras and people. The convention the repo actually has is a named, exported, commented constant at the top of the module that owns the rule, with the comment stating the value's origin and whether it is provisional — which is what this is.
 
@@ -590,7 +590,30 @@ This is **the only supersession in the schema that changes an event's type**, so
 
 The projection needed no change — `effectiveEvents()` removes the superseded `acquired` before `findOrigin()` sees it, so invariants 3, 4 and 7 all hold across the promotion. That was verified before the mode was built, not after.
 
-Link mode refuses: an unknown animal (it will not silently mint one instead), an animal that already has a birth event, a sex disagreement, an animal being its own calf, a non-`live` outcome (a calf that did not live would not have been entered separately), and an animal with history predating the proposed birth date.
+Link mode refuses: an unknown animal (it will not silently mint one instead), an animal that already has a birth event, a sex disagreement, an animal being its own calf, a non-`live` outcome (a calf that did not live would not have been entered separately), an animal with history predating the proposed birth date, and an animal with a **calving of its own less than a gestation after** that date.
+
+#### The gestation floor — the direction `definitelyBefore` cannot see
+
+The timeline refusal above only looks **backwards**: it catches a target whose history predates the proposed birth, which is invariant 4. It is correct and complete for that invariant, and it is blind to the opposite direction — an event dated *after* the proposed birth but impossibly soon after it.
+
+That was reachable, and was reached. A **lactating dam with parity 1**, whose own calving fell four months after the proposed birth date, was accepted as a newborn calf. Demonstrated over HTTP before the fix:
+
+```
+picker:  BD-0011 eligible=true  ineligible_reason=null
+write:   ACCEPTED. linked=true
+after:   origin=born_on_farm  status=lactating  parity=1  birth=2026-03-01 (month)
+/check:  violations: 0
+```
+
+**Every invariant passed**, because nothing was inconsistent: she had one origin, a birth event, a dam edge, and a calving dated after her birth. The rule was simply wrong, and wrong uniformly — the same shape as the parity-before-age bug, and the same reason nothing internal could detect it.
+
+`GESTATION_DAYS = 310` in [calving.ts](../server/src/registry/calving.ts) is the floor, and it is **not a plausibility band**. A female cannot bear a calf until at least a gestation after her own birth, or she conceived before she existed. That is arithmetic on a biological constant, not a policy choice, so unlike `CALF_MAX_AGE_MONTHS` and `DOUBLE_ENTRY_WINDOW_DAYS` it is **not provisional** and there is nothing to retune against farm data.
+
+It is deliberately the **loosest defensible floor**, and that is what earns it a hard refusal with no `allow_*` companion. Real age at first calving is three-and-a-half to four-and-a-half years, so a 400-day gap is also nonsense — but merely implausible rather than impossible, and refusing it would need a provisional threshold. Those are the interval bands, below the cut line. Because the floor refuses only the impossible, it has no false refusals, which is why it can refuse outright rather than warn — and why the legitimate case still works: a dam discovered to be farm-born *years* after her own calvings were entered is a real late reconciliation, and link mode exists precisely so that ordering mistake does not leave you stuck.
+
+Precision gives the animal every benefit of the doubt: the floor is measured from the **earliest** date the proposed precision admits, and `definitelyBefore` declines to compare an `estimated` calving at all — a guess cannot prove an impossibility, the same reason invariants 4 and 5 decline it. The deliberate divergence from the match window, which *does* compare estimated dates, holds here too: proving and suggesting are different jobs.
+
+**One predicate, both callers.** `calvingTooSoonAfterBirth()` is exported from `calving.ts` and imported by `linkCandidates`, because the picker marking an animal eligible that `recordCalving` then refuses is a bug this module has already shipped once. See "The picker and `recordCalving` must agree" below for what the test over that seam does and does not catch.
 
 **Procedure vs safety net.** The correct procedure is still strict ordering: use `registry:add` only for animals with no dam who will ever be in the registry, and let everything farm-born be created by its dam's calving, oldest first. Link mode exists because that procedure is unforgiving and one animal entered in the wrong pass would otherwise leave you stuck.
 
@@ -752,6 +775,14 @@ The warning is **gone rather than softened**. The list is the mitigation, and a 
 The list lives in [calf-picker.ts](../web-angular/src/app/registry/calf-picker.ts) as its own component, not as markup inside the calving form, because the animal workbench needs the same list with the dam fixed by context rather than chosen from a dropdown. `recordCalving` needed no change at all: link mode was already a first-class branch via `calf.existing_id`.
 
 One consequence worth knowing when reading that form: the list now has to **arrive on its own**, driven by an effect on the dam, date and calf sex. It used to be fetched when the operator clicked "yes — link to it", and that click no longer exists; an unfetched list would render as "no animal has a birth date near this calving", which is a false statement about the herd and the worst possible thing to show someone deciding whether to create a duplicate.
+
+### The picker and `recordCalving` must agree
+
+`registry.candidates.test.ts` asserts the property directly over a whole herd: every candidate marked `eligible` links, and every ineligible one is refused. It exists because the two rule sets are evaluated in two modules, and they have drifted twice — once on the timeline rule, once on the gestation floor.
+
+**What it cannot do is find a rule that is wrong in both places, and that limit was measured rather than assumed.** With the gestation floor removed from the shared predicate, the three rule-level tests go red and *both* seam tests stay **green** — the picker and `recordCalving` agree perfectly on the wrong answer.
+
+Which is the "consistency checking cannot detect a wrong rule applied evenly" corollary arriving for the fourth time. A seam test finds the side that disagrees with its neighbour; it is blind to a column that is evenly false. The gestation bug was found by reading a screen and knowing the animal was wrong, and nothing else was going to find it. So the seam test guards the seam, the rule tests guard the rule, and neither substitutes for the other.
 
 **This is where testing over HTTP earned its keep.** The first version of the picker marked animals eligible that `recordCalving` then refused — it was missing the timeline rule (an animal whose own history predates the proposed birth date cannot be linked, because its birth would postdate its own events). It surfaced immediately against `cleanHerd()`, and would otherwise have surfaced against the first real animal. The endpoint now takes `occurred_on` and `date_precision` and applies the same check; omitting them yields a list that is right about everything else and silent about that one.
 
@@ -1019,8 +1050,9 @@ Blocking rules:
 - **Correcting a calving date moves a same-day departure with it, by design.** `correctCalving` matches the calf's departure by **date**, and a bull calf sold on the day of birth has a same-day departure. So re-dating the calving re-dates the sale.
 
   That is right far more often than it is wrong — the two facts are the same day *because* they are tied to the birth, and leaving the sale behind would put it before the animal existed (invariant 4). But it is a consequence rather than an intention: if a same-day departure was genuinely independent of the birth date, the correction will move it anyway and the fix is a further superseding `departure` — which, per the gap above, no command can currently write. Read the command's output: it names every event it superseded.
-- **`CALF_MAX_AGE_MONTHS = 12` is provisional** and has no farm evidence behind it — it is awaiting confirmation of how the farm actually talks about the animals.
-- **`DOUBLE_ENTRY_WINDOW_DAYS = 60` is provisional.** It is reasoned from a buffalo's 400+ day calving interval, not measured.
+- **Link mode refuses an *impossible* first calving, not an implausible one.** `GESTATION_DAYS = 310` is the floor, so a target whose own calving falls 400 days after the proposed birth date — she calved at thirteen months — is still accepted. Real age at first calving is three-and-a-half to four-and-a-half years, so that is nonsense too; it is just not *provably* nonsense, and refusing it needs a provisional threshold rather than a biological constant. Left to the interval bands (REGISTRY_ENTRY_UX.md §7.2, item 11), which are below the cut line and want real data first. The trade is deliberate: the floor as it stands has **no false refusals**, which is what lets it be a hard refusal with no override. A tighter number would need one.
+- **`CALF_MAX_AGE_MONTHS = 18` is provisional** and rests on how the farm talks about the animals rather than on biology — the real katti→choti transition is physical, not arithmetic. An explicit life-stage override event is an open item, as is how boundary ambiguity should surface when birth precision is year-only or estimated.
+- **`DOUBLE_ENTRY_WINDOW_DAYS = 60` is provisional.** It is reasoned from a buffalo's 400+ day calving interval, not measured. `GESTATION_DAYS` is the one constant in this module that is **not** — see the gestation floor above.
 - **`registry_animals.origin` should be written by the rebuild** (step-3 cycle). It is derived state — 1:1 with the effective origin event's type — but it lives on the identity table and is written by a *command* (link mode), which is precisely the §4 violation that made it drift-prone. Invariant 3 checks the agreement, but a detector is not a fix: if the rebuild owned the column, that check would be structurally true rather than a guard against a class of bug that can recur. It is also **the one column stopping "projection tables can be dropped and recreated without data loss" from being literally true** — a property deliberately bought earlier by keeping all derived state out of `registry_animals`, and partly sold back by link mode. Moving it means a migration (into `registry_animal_status`) plus updating invariants 6 and 7, which read `animal.origin`.
 - **`correctOutcome()` is deferred** (step-3 cycle), with a procedural workaround. See the stillborn asymmetry below for what is and is not repairable.
 

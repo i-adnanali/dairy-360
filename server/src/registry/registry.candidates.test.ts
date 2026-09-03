@@ -13,7 +13,9 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 
-import { cleanHerd } from './fixtures';
+import { recordCalving } from './calving';
+import { AS_OF, RECALL, addAcquired, calve, cleanHerd, freshDb } from './fixtures';
+import { rebuild } from './projectStore';
 import {
   MATCH_WINDOW_DAYS,
   MATCH_WINDOW_YEARS,
@@ -196,4 +198,180 @@ test('days_apart is signed, so a UI can say "before" or "after"', () => {
   });
   const five = cands.find((c) => c.id === 'BD-0005')!;
   assert.equal(five.days_apart, 365, '2023-01-01 to 2024-01-01; 2023 is not a leap year');
+});
+
+// ---------------------------------------------------------------------------
+// An animal that has calved is not a newborn
+// ---------------------------------------------------------------------------
+
+/** A dam, plus an acquired female who has a calving of her own. */
+function herdWithAYoungDam(calfOwnCalving: string): ReturnType<typeof freshDb> {
+  const db = freshDb();
+  addAcquired(db, {
+    id: 'BD-0001',
+    sex: 'female',
+    name: 'Bholi',
+    acquired_on: '2016-01-01',
+    acquired_precision: 'year',
+    birth_on: '2012-01-01',
+    birth_precision: 'estimated',
+  });
+  addAcquired(db, {
+    id: 'BD-0002',
+    sex: 'female',
+    name: 'Bhoori',
+    acquired_on: '2021-01-01',
+    acquired_precision: 'year',
+    birth_on: '2021-01-01',
+    birth_precision: 'year',
+  });
+  calve(db, { dam_id: 'BD-0002', on: calfOwnCalving, precision: 'month' });
+  rebuild(db, { asOf: AS_OF });
+  return db;
+}
+
+test('the picker greys an animal that calved too soon after the proposed birth date', () => {
+  // The demonstrated defect: this animal was returned ELIGIBLE, and
+  // recordCalving accepted her, turning a lactating dam into a newborn calf
+  // with every invariant still passing.
+  const db = herdWithAYoungDam('2021-10-01');
+  const cands = linkCandidates(db, {
+    damId: 'BD-0001',
+    calfSex: 'female',
+    occurredOn: '2021-06-01',
+    datePrecision: 'month',
+  });
+
+  const her = cands.find((c) => c.id === 'BD-0002')!;
+  assert.equal(her.eligible, false);
+  assert.match(her.ineligible_reason!, /conceived before it was born/);
+  assert.match(her.ineligible_reason!, /2021-10-01/, 'it names the offending calving');
+  db.close();
+});
+
+test('the picker still offers a dam whose own calvings are years later', () => {
+  const db = herdWithAYoungDam('2025-03-01');
+  const cands = linkCandidates(db, {
+    damId: 'BD-0001',
+    calfSex: 'female',
+    occurredOn: '2021-06-01',
+    datePrecision: 'month',
+  });
+  const her = cands.find((c) => c.id === 'BD-0002')!;
+  assert.equal(her.eligible, true, 'a legitimate late reconciliation stays clickable');
+  assert.equal(her.ineligible_reason, null);
+  db.close();
+});
+
+// ---------------------------------------------------------------------------
+// The picker and recordCalving must agree -- exhaustively
+// ---------------------------------------------------------------------------
+
+/**
+ * The picker's contract is that `eligible` means "recordCalving will take
+ * this", and it is asserted here directly rather than per-rule: every eligible
+ * candidate links, every ineligible one is refused.
+ *
+ * ---------------------------------------------------------------------------
+ * WHAT THIS CATCHES, AND WHAT IT PROVABLY DOES NOT
+ * ---------------------------------------------------------------------------
+ * It catches DRIFT between two implementations of one rule set, which this
+ * module has already shipped once: the first picker marked animals eligible
+ * that recordCalving then refused, because it was missing the timeline rule.
+ * Per-rule tests cannot see that, since each side is tested against its own
+ * idea of the rule.
+ *
+ * It does NOT catch a rule that is wrong in BOTH places -- and that is not a
+ * weakness to fix, it is the shape of the instrument. Measured: with the
+ * gestation floor removed from the shared predicate, the three tests above go
+ * red and this one stays GREEN, because the picker and recordCalving agree
+ * perfectly on the wrong answer. Which is the third corollary in
+ * REGISTRY_ENTRY_UX.md section 3 arriving again: a consistency check finds the
+ * row that disagrees with its neighbours and is blind to a whole column that is
+ * evenly false. The gestation bug was found by reading a screen and knowing the
+ * animal was wrong, and nothing else was ever going to find it.
+ *
+ * So: this guards the seam, the tests above guard the rule, and neither
+ * substitutes for the other.
+ */
+function assertPickerAgreesWithRecordCalving(
+  label: string,
+  herd: () => ReturnType<typeof freshDb>,
+  opts: { damId: string; calfSex: 'female' | 'male'; occurredOn: string; datePrecision: DatePrecision },
+): void {
+  const probe = herd();
+  const cands = linkCandidates(probe, opts);
+  probe.close();
+
+  assert.ok(cands.length >= 3, `${label}: the whole herd is judged`);
+  assert.ok(
+    cands.some((c) => c.eligible) && cands.some((c) => !c.eligible),
+    `${label}: both verdicts occur, so neither branch passes vacuously`,
+  );
+
+  for (const c of cands) {
+    // A fresh herd per attempt: recordCalving writes, and a link must not be
+    // judged against a database an earlier link already changed.
+    const db = herd();
+    let refusal: (Error & { code?: string }) | null = null;
+    try {
+      recordCalving(db, {
+        dam_id: opts.damId,
+        occurred_on: opts.occurredOn,
+        date_precision: opts.datePrecision,
+        calf: { existing_id: c.id, sex: opts.calfSex, outcome: 'live' },
+        provenance: RECALL,
+        asOf: AS_OF,
+      });
+    } catch (e) {
+      refusal = e as Error & { code?: string };
+    }
+    db.close();
+
+    if (c.eligible) {
+      assert.equal(
+        refusal,
+        null,
+        `${label}: picker says ${c.id} is linkable, recordCalving refused: ${refusal?.message}`,
+      );
+    } else {
+      assert.ok(
+        refusal !== null,
+        `${label}: picker greys ${c.id} (${c.ineligible_reason}), recordCalving accepted it`,
+      );
+    }
+  }
+}
+
+test('every animal the picker calls eligible is one recordCalving accepts', () => {
+  assertPickerAgreesWithRecordCalving('fixture herd', cleanHerd, {
+    damId: 'BD-0001',
+    calfSex: 'female',
+    // Far from every existing calving in the fixture, so the dam's own
+    // double-entry guard cannot confound the result.
+    occurredOn: '2020-01-01',
+    datePrecision: 'month',
+  });
+});
+
+test('the two agree on a herd that exercises the gestation floor', () => {
+  // The fixture herd never trips that rule at any date, so the seam over it
+  // would otherwise be untested -- the case for which one side could gain the
+  // rule and the other not.
+  assertPickerAgreesWithRecordCalving(
+    'young-dam herd',
+    () => {
+      const db = herdWithAYoungDam('2021-10-01');
+      addAcquired(db, {
+        id: 'BD-0009',
+        sex: 'female',
+        name: 'Chandni',
+        acquired_on: '2020-01-01',
+        acquired_precision: 'year',
+      });
+      rebuild(db, { asOf: AS_OF });
+      return db;
+    },
+    { damId: 'BD-0001', calfSex: 'female', occurredOn: '2021-06-01', datePrecision: 'month' },
+  );
 });

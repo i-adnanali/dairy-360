@@ -41,6 +41,12 @@ export type RegistryErrorCode =
   | 'near_duplicate_calving'
   | 'self_calf'
   | 'link_requires_live'
+  // Link mode: the target has a calving of its own less than a gestation after
+  // the proposed birth date, so it would have conceived before it was born.
+  // No `allow_*` companion, and deliberately so -- unlike near_duplicate_calving
+  // and animal_departed this names something impossible rather than unusual,
+  // so there is nothing for an operator to know better about.
+  | 'calf_calved_too_soon'
   // --- payload / dates ---
   | 'invalid_payload'
   | 'invalid_precision'

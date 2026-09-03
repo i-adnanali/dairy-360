@@ -36,6 +36,87 @@ import type {
  */
 export const DOUBLE_ENTRY_WINDOW_DAYS = 60;
 
+/**
+ * Buffalo gestation, in days. Used as the floor on how soon after her OWN birth
+ * an animal could possibly have calved.
+ *
+ * NOT A PLAUSIBILITY BAND, and the distinction is the whole reason this is a
+ * hard refusal with no override. A female cannot bear a calf until at least a
+ * gestation after she herself was born, because otherwise she conceived before
+ * she existed. That is arithmetic on a biological constant, not a policy
+ * choice, so unlike CALF_MAX_AGE_MONTHS or DOUBLE_ENTRY_WINDOW_DAYS it is not
+ * provisional and there is nothing here to retune against farm data.
+ *
+ * It is deliberately the LOOSEST defensible floor. Real age at first calving in
+ * Nili-Ravi is three-and-a-half to four-and-a-half years, so a gap of 400 days
+ * is also nonsense -- but it is merely implausible rather than impossible, and
+ * refusing it would need a provisional threshold. Those belong to the interval
+ * bands (REGISTRY_ENTRY_UX.md 7.2), which are below the cut line. Using the
+ * impossibility floor means this check has NO false refusals, which is what
+ * lets it refuse outright instead of warning.
+ */
+export const GESTATION_DAYS = 310;
+
+/** `on` shifted by whole days. Farm-local calendar dates, never instants. */
+function addDays(on: string, days: number): string {
+  const [y, m, d] = on.split('-').map(Number);
+  // Date.UTC takes a 0-INDEXED month; passing it 1-indexed shifts by a month
+  // and only shows up when the two months have different lengths.
+  const t = new Date(Date.UTC(y, m - 1, d) + days * 86_400_000);
+  return t.toISOString().slice(0, 10);
+}
+
+/**
+ * The calving on this animal that its OWN proposed birth date cannot precede,
+ * or null when there is none.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY THIS EXISTS: THE `definitelyBefore` CHECK ONLY LOOKS BACKWARDS
+ * ---------------------------------------------------------------------------
+ * Link mode already refuses a target with history dated BEFORE the proposed
+ * birth date -- its birth cannot postdate its own events (invariant 4). That
+ * check is correct and complete for the invariant it guards, and it is blind to
+ * the opposite direction: an event dated AFTER the proposed birth but impossibly
+ * soon after it.
+ *
+ * Which is reachable, and was reached. A lactating dam with parity 1 whose own
+ * calving fell four months after the proposed birth date was accepted as a
+ * newborn calf, and every invariant passed -- because nothing was
+ * *inconsistent*. She had a birth event, a dam edge, one origin, and a calving
+ * after her birth. The rule was simply wrong, and wrong uniformly, so nothing
+ * internal to the system had anything to compare against. Same shape as the
+ * parity-before-age bug in project.ts, and the same lesson: a consistency check
+ * cannot find a whole column that is evenly false.
+ *
+ * SHARED BY BOTH CALLERS, deliberately. `recordCalving` refuses on it and
+ * `linkCandidates` greys the row on it, and the picker marking an animal
+ * eligible that recordCalving then refuses is a bug this module has already
+ * shipped once -- it is how the missing timeline rule got out. One predicate,
+ * two callers, plus a test asserting the two agree over the whole fixture herd.
+ *
+ * Precision is handled by giving the animal every benefit of the doubt:
+ * `birth.on` is the EARLIEST date its precision admits (month and year both
+ * store the 1st), so the floor is the earliest floor, and `definitelyBefore`
+ * declines to compare an `estimated` calving at all -- a guess is not evidence
+ * of impossibility, the same reason invariants 4 and 5 decline it.
+ */
+export function calvingTooSoonAfterBirth(
+  events: RegistryEvent[],
+  birth: { on: string; precision: DatePrecision },
+): RegistryEvent | null {
+  const floor = addDays(birth.on, GESTATION_DAYS);
+  return (
+    events.find(
+      (e) =>
+        e.type === 'calving' &&
+        definitelyBefore(
+          { on: e.occurred_on, precision: e.date_precision },
+          { on: floor, precision: 'day' },
+        ),
+    ) ?? null
+  );
+}
+
 export interface RecordCalvingInput {
   dam_id: string;
   occurred_on: string;
@@ -249,6 +330,25 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
           `calf '${targetId}' has a ${tooEarly.type} on ${tooEarly.occurred_on} ` +
             `(${tooEarly.date_precision}), before the calving date ${input.occurred_on}. ` +
             `Its birth cannot postdate its own history -- check which date is wrong.`,
+        );
+      }
+
+      // The other direction: a calving on the target dated AFTER the proposed
+      // birth, but sooner after it than a gestation. She would have conceived
+      // before she was born. See calvingTooSoonAfterBirth.
+      const tooSoon = calvingTooSoonAfterBirth(targetEvents, {
+        on: input.occurred_on,
+        precision: input.date_precision,
+      });
+      if (tooSoon) {
+        throw new CalvingError(
+          'calf_calved_too_soon',
+          `calf '${targetId}' has a calving of its own on ${tooSoon.occurred_on} ` +
+            `(${tooSoon.date_precision}), which is less than a gestation ` +
+            `(${GESTATION_DAYS} days) after the proposed birth date ${input.occurred_on}. ` +
+            `It would have had to conceive before it was born, so '${targetId}' is not ` +
+            `this calf. If it really is, the calving recorded on it is the wrong one.`,
+          'calf',
         );
       }
 

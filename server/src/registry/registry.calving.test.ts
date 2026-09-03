@@ -10,7 +10,12 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 
-import { DOUBLE_ENTRY_WINDOW_DAYS, correctCalving, recordCalving } from './calving';
+import {
+  DOUBLE_ENTRY_WINDOW_DAYS,
+  calvingTooSoonAfterBirth,
+  correctCalving,
+  recordCalving,
+} from './calving';
 import { rebuild } from './projectStore';
 import {
   allEvents,
@@ -936,6 +941,90 @@ test('link mode refuses when the calf already calved BEFORE the proposed birth d
     /before the calving date 2025-01-01/,
   );
   db.close();
+});
+
+// The mirror image of the test above, and the one that was missing.
+//
+// The `definitelyBefore` check only looks BACKWARDS -- it catches a calf whose
+// history predates the proposed birth. An event dated AFTER the proposed birth
+// but impossibly soon after it went straight through, and the case is not
+// hypothetical: a lactating dam with parity 1 was accepted as a newborn calf,
+// and checkSnapshot reported zero violations, because nothing was inconsistent.
+test('link mode refuses when the calf calved too soon AFTER the proposed birth date', () => {
+  const db = damAndAcquiredCalf();
+  // BD-0002 calves four months after the birth date about to be proposed for
+  // her. Buffalo gestation is ~310 days, so she would have conceived before she
+  // was born.
+  calve(db, { dam_id: 'BD-0002', on: '2021-10-01', precision: 'month' });
+
+  assert.throws(
+    () => linkCalving(db),
+    (e: Error & { code?: string }) => {
+      assert.equal(e.code, 'calf_calved_too_soon');
+      assert.match(e.message, /conceive before it was born/);
+      assert.match(e.message, /2021-10-01/, 'it names the offending calving');
+      return true;
+    },
+  );
+  db.close();
+});
+
+// The other half of that rule, and the reason it is an impossibility floor
+// rather than a plausibility band: a dam discovered to be farm-born YEARS after
+// her own calvings were entered is a legitimate late reconciliation, and link
+// mode exists precisely so that ordering mistake does not leave you stuck.
+test('link mode still links a calf whose own calvings are years later', () => {
+  const db = damAndAcquiredCalf();
+  calve(db, { dam_id: 'BD-0002', on: '2025-03-01', precision: 'month' });
+
+  const r = linkCalving(db);
+
+  assert.equal(r.calf_id, 'BD-0002');
+  assert.equal(r.linked, true);
+  assert.deepEqual(
+    checkSnapshot(snapshot(db), AS_OF),
+    [],
+    'a legitimate late link leaves every invariant holding',
+  );
+  db.close();
+});
+
+test('the gestation floor is measured from the EARLIEST date the precision admits', () => {
+  // Given every benefit of the doubt: a month-precision birth stores the 1st,
+  // and the floor is computed from there, so the check refuses only what is
+  // impossible even under the most generous reading of both dates.
+  const events = [
+    {
+      id: 'e1',
+      type: 'calving' as const,
+      occurred_on: '2022-05-01',
+      occurred_time: null,
+      date_precision: 'month' as const,
+    },
+  ] as unknown as Parameters<typeof calvingTooSoonAfterBirth>[0];
+
+  // 2021-06-01 + 310 days = 2022-04-07, so a May calving clears it.
+  assert.equal(calvingTooSoonAfterBirth(events, { on: '2021-06-01', precision: 'month' }), null);
+  // A birth three months later does not.
+  assert.ok(calvingTooSoonAfterBirth(events, { on: '2021-09-01', precision: 'month' }));
+});
+
+test('an ESTIMATED calving is not evidence of impossibility, so it is not refused', () => {
+  // Same rule definitelyBefore applies for invariants 4 and 5: this check
+  // PROVES an impossibility, and a guessed date cannot prove anything. The
+  // divergence from the match window -- which does compare estimated dates,
+  // because suggesting and proving are different jobs -- is deliberate.
+  const events = [
+    {
+      id: 'e1',
+      type: 'calving' as const,
+      occurred_on: '2021-10-01',
+      occurred_time: null,
+      date_precision: 'estimated' as const,
+    },
+  ] as unknown as Parameters<typeof calvingTooSoonAfterBirth>[0];
+
+  assert.equal(calvingTooSoonAfterBirth(events, { on: '2021-06-01', precision: 'month' }), null);
 });
 
 test('link mode still runs the dam validation', () => {
