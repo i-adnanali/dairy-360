@@ -117,6 +117,12 @@ separate surface over real herd records and is documented in
 [docs/REGISTRY.md](docs/REGISTRY.md) — including how to run it against fixture
 data instead of the real database.
 
+**[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) is the verified long form of this
+section** — the Node floor and what ignores it, why `.env` is copied twice, the
+two run loops and how to tell which one you are in, the registry CLI, the
+fresh-clone path, and what a skipped test suite does and does not prove. Every
+command in it was run; the handful that could not be are marked unverified.
+
 `GET /api/health` returns `{ status: "ok", seeded: true, anthropicKey: <bool> }`
 once the DB is seeded. If you start the server before seeding, the health check
 and agent endpoint return a friendly "run `npm run seed` first" message instead
