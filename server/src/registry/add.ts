@@ -39,8 +39,7 @@ import {
   runCli,
   wantsHelp,
 } from './cli';
-import { allocateSerial, appendEvent, insertAnimal } from './store';
-import { rebuildAnimals } from './projectStore';
+import { addAcquiredAnimal } from './entry';
 import { farmToday } from './time';
 import type { RegistrySex } from './types';
 
@@ -113,62 +112,38 @@ export function main(argv: string[]): void {
 
   const birthOn = optDate(flags, 'birth-on');
   const birthPrecision = optPrecision(flags, 'birth-precision');
-  if (birthOn !== null && birthPrecision === null) {
-    throw new CliError(
-      '--birth-on was given without --birth-precision.\n' +
-        '  Precision is never defaulted, and a birth date is exactly where `day` would be\n' +
-        '  invented. Use --birth-precision=year or =estimated if that is what you know.',
-    );
-  }
-  if (birthOn === null && birthPrecision !== null) {
-    throw new CliError('--birth-precision was given without --birth-on');
-  }
-
   const asOf = optStr(flags, 'as-of') ?? farmToday();
 
-  // One transaction: the animal, its origin event, and its projections. A calf
-  // row without its origin event would violate invariant 3 and could not be
-  // corrected, since there would be nothing to supersede.
-  const result = db.transaction(() => {
-    const id = allocateSerial(db);
-    insertAnimal(db, {
-      id,
-      name: optStr(flags, 'name'),
-      sex: sex as RegistrySex,
-      species: optStr(flags, 'species') ?? 'buffalo',
-      origin: 'acquired',
-      post_no: optStr(flags, 'post-no'),
-      tag_no: optStr(flags, 'tag-no'),
-    });
-    const event = appendEvent(db, {
-      animal_id: id,
-      type: 'acquired',
-      occurred_on: acquiredOn,
-      date_precision: precision,
-      payload: {
-        from: optStr(flags, 'from'),
-        estimated_birth_on: birthOn,
-        estimated_birth_precision: birthPrecision,
-        notes: optStr(flags, 'notes'),
-      },
-      provenance,
-    });
-    rebuildAnimals(db, { asOf, animalIds: [id] });
-    return { id, eventId: event.id };
-  }).immediate();
+  // Every rule below this line lives in addAcquiredAnimal(). This file only
+  // turns flags into an input object and prints the result.
+  const result = addAcquiredAnimal(db, {
+    sex: sex as RegistrySex,
+    name: optStr(flags, 'name'),
+    species: optStr(flags, 'species'),
+    acquired_on: acquiredOn,
+    date_precision: precision,
+    birth_on: birthOn,
+    birth_precision: birthPrecision,
+    from: optStr(flags, 'from'),
+    post_no: optStr(flags, 'post-no'),
+    tag_no: optStr(flags, 'tag-no'),
+    notes: optStr(flags, 'notes'),
+    provenance,
+    asOf,
+  });
 
   const status = db
     .prepare(`SELECT status, birth_on, birth_precision FROM registry_animal_status WHERE animal_id = ?`)
-    .get(result.id) as { status: string; birth_on: string | null; birth_precision: string | null };
+    .get(result.animal_id) as { status: string; birth_on: string | null; birth_precision: string | null };
 
-  console.log(`registry:add  ${result.id}`);
+  console.log(`registry:add  ${result.animal_id}`);
   console.log(`  acquired    ${acquiredOn} (${precision})`);
   console.log(
     `  birth       ${status.birth_on ? `${status.birth_on} (${status.birth_precision})` : '(unknown)'}`,
   );
   console.log(`  status      ${status.status}   as-of ${asOf}`);
   console.log(`  provenance  ${provenance.source_form} / recorded_by=${provenance.recorded_by}`);
-  console.log(`  event       ${result.eventId}`);
+  console.log(`  event       ${result.event_id}`);
   if (!status.birth_on) {
     console.log(
       '\n  NOTE: no birth date, so this animal cannot project as `calf` -- the age rule\n' +

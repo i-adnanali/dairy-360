@@ -21,6 +21,7 @@
 // from a remembered one, which is the same class of dishonesty in a different
 // column.
 
+import { isRegistryError } from './errors';
 import { DATE_PRECISIONS, SOURCE_FORMS } from './types';
 import type { DatePrecision, Provenance, SourceForm } from './types';
 
@@ -216,7 +217,10 @@ export function runCli(main: () => void): void {
   try {
     main();
   } catch (e) {
-    if (e instanceof CliError) {
+    // CliError is about arguments; RegistryError is about the herd. Both are
+    // the operator's problem to fix and both print as a message rather than a
+    // stack. Anything else is a bug and keeps its stack.
+    if (e instanceof CliError || isRegistryError(e)) {
       console.error(`\n${e.message}\n`);
       process.exitCode = 2;
       return;

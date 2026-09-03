@@ -498,6 +498,33 @@ test('invariant 11: a year-precision row not dated Jan 1 is caught', () => {
   db.close();
 });
 
+test('invariant 11: an estimated-precision row not dated Jan 1 is caught', () => {
+  // Added with migration 2. The CHECK stops new rows; this catches historical
+  // ones written before the convention existed -- the reason invariants and
+  // CHECKs both exist rather than one or the other.
+  const db = cleanHerd();
+  const s = clone(snapshot(db));
+  const e = s.events.find((x) => x.date_precision === 'year')!;
+  e.date_precision = 'estimated';
+  e.occurred_on = '2019-06-14';
+  const found = violations(s);
+  assert.ok(found.some((v) => v.invariant === 11 && /estimated-precision/.test(v.detail)));
+  assert.match(
+    found.find((v) => v.invariant === 11)!.detail,
+    /fabricated day wearing a humility label/,
+  );
+  db.close();
+});
+
+test('invariant 11 accepts estimated dated Jan 1', () => {
+  const db = cleanHerd();
+  const s = clone(snapshot(db));
+  const e = s.events.find((x) => x.date_precision === 'year')!;
+  e.date_precision = 'estimated';
+  assert.ok(!violations(s).some((v) => v.invariant === 11));
+  db.close();
+});
+
 test('invariant 12: a clock time at non-day precision is caught', () => {
   const db = cleanHerd();
   const s = clone(snapshot(db));

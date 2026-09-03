@@ -44,10 +44,16 @@ export type RegistryOrigin = 'born_on_farm' | 'acquired';
  * How well the date is known. NOT NULL with NO DEFAULT in the schema: a default
  * is how `day` gets silently applied to a guess.
  *
- * Storage convention, enforced by CHECK constraints in schema.ts AND by
- * invariant 11: `month` -> the 1st of that month, `year` -> January 1.
- * `estimated` is deliberately unconstrained beyond being a valid date -- it
- * means even the year is inferred, so no convention would mean anything.
+ * Storage convention, enforced by CHECK constraints in schema.ts, by
+ * assertDatePrecision() at the write boundary, AND by invariant 11:
+ * `month` -> the 1st of that month; `year` and `estimated` -> January 1.
+ *
+ * `year` and `estimated` therefore STORE the same shape, but they are not
+ * interchangeable and must stay separate values: `year` means "I know the
+ * year", `estimated` means "I am guessing it". The difference is load-bearing
+ * in two places -- definitelyBefore() treats an estimated date as NOT
+ * COMPARABLE at all (so invariants 4 and 5 behave differently), and the
+ * precision histogram splits on it, which is the point of the histogram.
  */
 export type DatePrecision = 'day' | 'month' | 'year' | 'estimated';
 

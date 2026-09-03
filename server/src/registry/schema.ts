@@ -212,14 +212,126 @@ CREATE TABLE registry_animal_status (
 // The runner
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Migration 2 -- `estimated` stores January 1, like `year`
+// ---------------------------------------------------------------------------
+
+/**
+ * Adding a CHECK to an existing table requires REBUILDING it: SQLite has
+ * ALTER TABLE ADD COLUMN but no ADD CONSTRAINT. So this is the documented
+ * create-copy-drop-rename procedure, and it is the first real exercise of the
+ * migration runner -- deliberately done now, while the table is empty and the
+ * stakes are zero, rather than discovered at step 4.
+ *
+ * Three things the rebuild has to get right, all verified before it was written:
+ *
+ *   - `supersedes_id` is a SELF-referencing foreign key. Dropping the old table
+ *     registers a deferred FK violation that renaming the new one does not
+ *     clear, so `defer_foreign_keys` is NOT enough -- this needs foreign_keys
+ *     OFF, which cannot be set inside a transaction. Hence `rebuildsTables`.
+ *   - Dropping a table drops its indexes AND its triggers. Both are recreated
+ *     below; without that the append-only guarantee would silently vanish.
+ *   - The new table declares its self-FK against the FINAL name, which resolves
+ *     correctly after the rename.
+ */
+const MIGRATION_2_ESTIMATED_JAN_FIRST = `
+CREATE TABLE registry_animal_events_new (
+  id             TEXT PRIMARY KEY,
+  animal_id      TEXT NOT NULL REFERENCES registry_animals(id),
+  type           TEXT NOT NULL CHECK (
+                   type IN ('birth','acquired','calving','dry_off','departure','note')
+                 ),
+  occurred_on    TEXT NOT NULL,
+  occurred_time  TEXT,
+  date_precision TEXT NOT NULL CHECK (
+                   date_precision IN ('day','month','year','estimated')
+                 ),
+  payload        TEXT NOT NULL,
+  source_form    TEXT NOT NULL CHECK (
+                   source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                 ),
+  source_ref     TEXT,
+  observed_by    TEXT,
+  recorded_by    TEXT NOT NULL,
+  recorded_at    TEXT NOT NULL,
+  supersedes_id  TEXT REFERENCES registry_animal_events(id),
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT time_only_at_day_precision
+    CHECK (occurred_time IS NULL OR date_precision = 'day'),
+  CONSTRAINT occurred_time_is_hh_mm
+    CHECK (occurred_time IS NULL OR occurred_time GLOB '[0-2][0-9]:[0-5][0-9]'),
+  CONSTRAINT month_precision_dated_first
+    CHECK (date_precision <> 'month' OR substr(occurred_on, 9, 2) = '01'),
+  CONSTRAINT year_precision_dated_jan_first
+    CHECK (date_precision <> 'year' OR substr(occurred_on, 6, 5) = '01-01'),
+  -- NEW in migration 2. Without it, 'estimated' was the one precision with no
+  -- storage convention, so a route or a direct INSERT could write
+  -- 'estimated 2021-04-12' -- a fabricated day wearing a humility label. The
+  -- convention now fails the same way the other two do, at the database, rather
+  -- than depending on every caller to normalize.
+  CONSTRAINT estimated_precision_dated_jan_first
+    CHECK (date_precision <> 'estimated' OR substr(occurred_on, 6, 5) = '01-01'),
+  CONSTRAINT no_self_supersede
+    CHECK (supersedes_id IS NULL OR supersedes_id <> id)
+);
+
+INSERT INTO registry_animal_events_new
+  SELECT id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+         source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id
+    FROM registry_animal_events;
+
+DROP TABLE registry_animal_events;
+ALTER TABLE registry_animal_events_new RENAME TO registry_animal_events;
+
+CREATE UNIQUE INDEX idx_registry_events_supersedes
+  ON registry_animal_events(supersedes_id)
+  WHERE supersedes_id IS NOT NULL;
+CREATE INDEX idx_registry_events_animal
+  ON registry_animal_events(animal_id, occurred_on);
+CREATE INDEX idx_registry_events_type
+  ON registry_animal_events(type);
+
+CREATE TRIGGER registry_animal_events_no_update
+BEFORE UPDATE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+
+CREATE TRIGGER registry_animal_events_no_delete
+BEFORE DELETE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+`;
+
+export interface Migration {
+  /** Applied inside a transaction that also bumps user_version. */
+  up: (db: Db) => void;
+  /**
+   * Set when the migration REBUILDS a table (create-copy-drop-rename), which is
+   * how SQLite adds a CHECK constraint to an existing table.
+   *
+   * A rebuild needs `foreign_keys` OFF for its duration -- dropping a table
+   * that is the target of a foreign key registers a violation that recreating
+   * it does not clear, and `defer_foreign_keys` does not help. That pragma is a
+   * no-op inside a transaction, so the runner toggles it AROUND the
+   * transaction and runs `PRAGMA foreign_key_check` before committing, which is
+   * the documented procedure and is what keeps the relaxation honest.
+   */
+  rebuildsTables?: boolean;
+}
+
 /**
  * Ordered, append-only. Index i is schema version i+1. NEVER reorder, never
  * edit an applied entry, never remove one -- a database already at version N
  * will not re-run entries below N, so an edit silently produces two different
  * schemas depending on when the database was created.
  */
-export const MIGRATIONS: readonly ((db: Db) => void)[] = [
-  (db) => db.exec(MIGRATION_1_REGISTRY),
+export const MIGRATIONS: readonly Migration[] = [
+  { up: (db) => db.exec(MIGRATION_1_REGISTRY) },
+  { up: (db) => db.exec(MIGRATION_2_ESTIMATED_JAN_FIRST), rebuildsTables: true },
 ];
 
 /** The version a fully-migrated database reports. */
@@ -258,14 +370,42 @@ export function runMigrations(db: Db): MigrationResult {
   let applied = 0;
   for (let i = from; i < MIGRATIONS.length; i++) {
     const version = i + 1;
-    const migrate = MIGRATIONS[i];
-    db.transaction(() => {
-      migrate(db);
+    const migration = MIGRATIONS[i];
+
+    const body = (): void => {
+      migration.up(db);
+      if (migration.rebuildsTables) {
+        // The documented safeguard for running with foreign_keys OFF: prove
+        // nothing was orphaned before committing. Without this, the relaxation
+        // would be a hole rather than a controlled one.
+        const violations = db.pragma('foreign_key_check') as unknown[];
+        if (violations.length > 0) {
+          throw new Error(
+            `migration ${version} left ${violations.length} foreign key violation(s): ` +
+              `${JSON.stringify(violations)}`,
+          );
+        }
+      }
       // Pragmas cannot be parameterized, so the version is interpolated. It is
       // a loop index over a static array, never external input -- do not
       // "fix" this into a bound parameter, which SQLite would silently ignore.
       db.exec(`PRAGMA user_version = ${version}`);
-    })();
+    };
+
+    if (migration.rebuildsTables) {
+      // `foreign_keys` is a no-op inside a transaction, so it must be toggled
+      // around it. The `finally` matters: a failed rebuild must not leave the
+      // connection with foreign keys off, which would silently disable the
+      // constraint for everything that ran afterwards.
+      db.pragma('foreign_keys = OFF');
+      try {
+        db.transaction(body)();
+      } finally {
+        db.pragma('foreign_keys = ON');
+      }
+    } else {
+      db.transaction(body)();
+    }
     applied++;
   }
 
@@ -357,7 +497,12 @@ export function assertRegistryPragmas(db: Db): void {
 export function applyRegistrySchema(db: Db): MigrationResult {
   applyRegistryPragmas(db);
   assertRegistryPragmas(db);
-  return runMigrations(db);
+  const result = runMigrations(db);
+  // Asserted AGAIN after migrating, because a `rebuildsTables` migration turns
+  // foreign_keys off and back on. If one ever failed to restore it, every write
+  // after this point would run without foreign key enforcement -- silently.
+  assertRegistryPragmas(db);
+  return result;
 }
 
 /** Every table this module creates, for the DROP-list guard and the rebuild. */

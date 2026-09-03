@@ -11,6 +11,8 @@
 // rather than a registry one (decision doc §7).
 
 import { randomUUID } from 'node:crypto';
+import { RegistryError } from './errors';
+import type { RegistryErrorCode } from './errors';
 import type {
   AcquiredPayload,
   BirthPayload,
@@ -91,22 +93,31 @@ export function formatSerial(n: number): string {
 // Payload validation
 // ---------------------------------------------------------------------------
 
-export class EventPayloadError extends Error {
-  constructor(message: string) {
-    super(message);
+/**
+ * A payload or date/precision refusal.
+ *
+ * A RegistryError subclass, not a bare Error: these are the refusals the entry
+ * form will hit most often -- every date input goes through
+ * assertDatePrecision -- so they need the same { code, field, message } contract
+ * as every other domain rule. Before this they escaped runCli() entirely and
+ * printed a stack trace at an operator mid-backfill.
+ */
+export class EventPayloadError extends RegistryError {
+  constructor(code: RegistryErrorCode, message: string, field?: string) {
+    super(code, message, field);
     this.name = 'EventPayloadError';
   }
 }
 
-const fail = (msg: string): never => {
-  throw new EventPayloadError(msg);
+const fail = (code: RegistryErrorCode, msg: string, field?: string): never => {
+  throw new EventPayloadError(code, msg, field);
 };
 
 type Rec = Record<string, unknown>;
 
 function requireObject(type: string, payload: unknown): Rec {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
-    fail(`${type}: payload must be an object, got ${describe(payload)}`);
+    fail('invalid_payload', `${type}: payload must be an object, got ${describe(payload)}`);
   }
   return payload as Rec;
 }
@@ -129,8 +140,10 @@ function rejectUnknownKeys(type: string, p: Rec, allowed: readonly string[]): vo
   const unknown = Object.keys(p).filter((k) => !allowed.includes(k));
   if (unknown.length > 0) {
     fail(
+      'invalid_payload',
       `${type}: unknown payload key(s) ${unknown.map((k) => `'${k}'`).join(', ')}; ` +
         `allowed: ${allowed.join(', ')}`,
+      unknown[0],
     );
   }
 }
@@ -138,7 +151,7 @@ function rejectUnknownKeys(type: string, p: Rec, allowed: readonly string[]): vo
 function str(type: string, p: Rec, key: string): string {
   const v = p[key];
   if (typeof v !== 'string' || v.length === 0) {
-    fail(`${type}.${key}: required non-empty string, got ${describe(v)}`);
+    fail('invalid_payload', `${type}.${key}: required non-empty string, got ${describe(v)}`, key);
   }
   return v as string;
 }
@@ -147,7 +160,7 @@ function optStr(type: string, p: Rec, key: string): string | null {
   const v = p[key];
   if (v === undefined || v === null) return null;
   if (typeof v !== 'string') {
-    fail(`${type}.${key}: must be a string when present, got ${describe(v)}`);
+    fail('invalid_payload', `${type}.${key}: must be a string when present, got ${describe(v)}`, key);
   }
   return v as string;
 }
@@ -161,7 +174,9 @@ function enumOf<T extends string>(
   const v = p[key];
   if (typeof v !== 'string' || !(allowed as readonly string[]).includes(v)) {
     fail(
+      'invalid_payload',
       `${type}.${key}: must be one of ${allowed.join(' | ')}, got ${JSON.stringify(v)}`,
+      key,
     );
   }
   return v as T;
@@ -190,7 +205,7 @@ function optDate(type: string, p: Rec, key: string): string | null {
   const v = optStr(type, p, key);
   if (v === null) return null;
   if (!DATE_RE.test(v)) {
-    fail(`${type}.${key}: must be YYYY-MM-DD, got '${v}'`);
+    fail('invalid_payload', `${type}.${key}: must be YYYY-MM-DD, got '${v}'`, key);
   }
   return v;
 }
@@ -209,6 +224,7 @@ export function assertEventPayload<T extends RegistryEventType>(
 ): PayloadFor<T> {
   if ((RESERVED_EVENT_TYPES as readonly string[]).includes(type)) {
     fail(
+      'invalid_payload',
       `'${type}' is a RESERVED event type: named in the taxonomy but not implemented ` +
         `in this cycle. Reserved types are rejected here rather than accepted with a ` +
         `loose payload, so the derivation rules for them are written once, deliberately.`,
@@ -216,7 +232,9 @@ export function assertEventPayload<T extends RegistryEventType>(
   }
   if (!(LIVE_EVENT_TYPES as readonly string[]).includes(type)) {
     fail(
+      'invalid_payload',
       `'${type}' is not a registry event type; expected one of ${LIVE_EVENT_TYPES.join(' | ')}`,
+      'type',
     );
   }
 
@@ -253,13 +271,18 @@ export function assertEventPayload<T extends RegistryEventType>(
       // birth date is exactly the case where 'day' would be invented.
       if (on !== null && prec === null) {
         fail(
+          'precision_not_defaulted',
           `${type}: estimated_birth_on was given without estimated_birth_precision. ` +
             `Precision is never defaulted -- state 'year' or 'estimated' rather than ` +
             `letting a guess read as a known date.`,
         );
       }
       if (on === null && prec !== null) {
-        fail(`${type}: estimated_birth_precision was given without estimated_birth_on`);
+        fail(
+          'invalid_payload',
+          `${type}: estimated_birth_precision was given without estimated_birth_on`,
+          'estimated_birth_on',
+        );
       }
       const out: AcquiredPayload = {
         from: optStr(type, p, 'from'),
@@ -312,7 +335,7 @@ export function assertEventPayload<T extends RegistryEventType>(
     default: {
       // Exhaustiveness: adding a live type without a case here fails to compile.
       const never: never = type;
-      return fail(`unhandled event type '${String(never)}'`);
+      return fail('invalid_payload', `unhandled event type '${String(never)}'`, 'type');
     }
   }
 }
@@ -332,29 +355,44 @@ export function assertDatePrecision(opts: {
   const occurred_time = opts.occurred_time ?? null;
 
   if (!DATE_RE.test(occurred_on)) {
-    fail(`occurred_on must be YYYY-MM-DD, got '${occurred_on}'`);
+    fail('invalid_payload', `occurred_on must be YYYY-MM-DD, got '${occurred_on}'`, 'occurred_on');
   }
   if (!(DATE_PRECISIONS as readonly string[]).includes(date_precision)) {
     fail(
+      'invalid_precision',
       `date_precision must be one of ${DATE_PRECISIONS.join(' | ')}, got '${date_precision}'`,
+      'date_precision',
     );
   }
   if (occurred_time !== null && date_precision !== 'day') {
     fail(
+      'invalid_precision',
       `occurred_time '${occurred_time}' given at ${date_precision} precision. There is no ` +
         `such thing as knowing the hour but not the day.`,
+      'occurred_time',
     );
   }
   if (occurred_time !== null && !/^[0-2]\d:[0-5]\d$/.test(occurred_time)) {
-    fail(`occurred_time must be HH:MM, got '${occurred_time}'`);
+    fail('invalid_payload', `occurred_time must be HH:MM, got '${occurred_time}'`, 'occurred_time');
   }
   if (date_precision === 'month' && !occurred_on.endsWith('-01')) {
     fail(
+      'invalid_precision',
       `month precision must be stored as the 1st of the month, got '${occurred_on}'. ` +
         `A month row dated mid-month means a known date was silently downgraded.`,
+      'occurred_on',
     );
   }
   if (date_precision === 'year' && !occurred_on.endsWith('-01-01')) {
-    fail(`year precision must be stored as January 1, got '${occurred_on}'`);
+    fail('invalid_precision', `year precision must be stored as January 1, got '${occurred_on}'`, 'occurred_on');
+  }
+  if (date_precision === 'estimated' && !occurred_on.endsWith('-01-01')) {
+    fail(
+      'invalid_precision',
+      `estimated precision must be stored as January 1, got '${occurred_on}'. ` +
+        `A specific day at estimated precision is a fabricated day wearing a humility ` +
+        `label -- if the day is actually known, the precision is not 'estimated'.`,
+      'occurred_on',
+    );
   }
 }

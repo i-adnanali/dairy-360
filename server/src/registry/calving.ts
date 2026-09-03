@@ -8,8 +8,10 @@
 // birth event has no dam, and nothing in the log says who it was.
 
 import type { Db } from './schema';
+export { CalvingError } from './errors';
 import { newEventId } from './events';
 import { allocateSerial, appendEvent, eventsForAnimal, getAnimal, insertAnimal } from './store';
+import { CalvingError } from './errors';
 import { definitelyBefore } from './invariants';
 import { effectiveEvents } from './project';
 import { rebuildAnimals } from './projectStore';
@@ -103,13 +105,6 @@ export interface RecordCalvingResult {
   superseded_origin_event_id: string | null;
 }
 
-export class CalvingError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'CalvingError';
-  }
-}
-
 function daysApart(a: string, b: string): number {
   const [ay, am, ad] = a.split('-').map(Number);
   const [by, bm, bd] = b.split('-').map(Number);
@@ -132,7 +127,7 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
   const fault = input.__faultAfterStep;
   const faultAt = (step: number): void => {
     if (fault === step) {
-      throw new CalvingError(`__faultAfterStep=${step} (test-only fault injection)`);
+      throw new CalvingError('invalid_payload', `__faultAfterStep=${step} (test-only fault injection)`);
     }
   };
 
@@ -145,10 +140,10 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
     // --- 1. Validate ------------------------------------------------------
     const dam = getAnimal(db, input.dam_id);
     if (!dam) {
-      throw new CalvingError(`unknown dam '${input.dam_id}'`);
+      throw new CalvingError('unknown_dam', `unknown dam '${input.dam_id}'`, 'dam_id');
     }
     if (dam.sex !== 'female') {
-      throw new CalvingError(`dam '${dam.id}' is recorded as ${dam.sex}, not female`);
+      throw new CalvingError('dam_not_female', `dam '${dam.id}' is recorded as ${dam.sex}, not female`, 'dam_id');
     }
 
     const damEvents = effectiveEvents(eventsForAnimal(db, dam.id));
@@ -158,6 +153,7 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
     );
     if (departure) {
       throw new CalvingError(
+        'animal_departed',
         `dam '${dam.id}' has a departure event on ${departure.occurred_on}, ` +
           `on or before the calving date ${input.occurred_on}`,
       );
@@ -170,6 +166,7 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
     );
     if (near && !input.allow_near_duplicate) {
       throw new CalvingError(
+        'near_duplicate_calving',
         `dam '${dam.id}' already has a calving on ${near.occurred_on}, within ` +
           `${DOUBLE_ENTRY_WINDOW_DAYS} days of ${input.occurred_on}. This is far more ` +
           `likely a double entry than a real second calving. Pass ` +
@@ -181,21 +178,24 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
     if (input.calf.existing_id !== undefined) {
       const targetId = input.calf.existing_id;
       if (targetId === dam.id) {
-        throw new CalvingError(`an animal cannot be its own calf ('${targetId}')`);
+        throw new CalvingError('self_calf', `an animal cannot be its own calf ('${targetId}')`, 'calf');
       }
       const target = getAnimal(db, targetId);
       if (!target) {
-        throw new CalvingError(`unknown calf '${targetId}' -- link mode attaches to an ` +
+        throw new CalvingError(
+        'unknown_animal',`unknown calf '${targetId}' -- link mode attaches to an ` +
           `animal that already exists. Omit the id to mint a new one.`);
       }
       if (target.sex !== input.calf.sex) {
         throw new CalvingError(
+        'sex_mismatch',
           `calf '${targetId}' is recorded as ${target.sex} but this calving says ` +
             `${input.calf.sex}. One of the two is wrong; fix that before linking.`,
         );
       }
       if (input.calf.outcome !== 'live') {
         throw new CalvingError(
+        'link_requires_live',
           `link mode requires outcome 'live', got '${input.calf.outcome}'. A calf that did ` +
             `not live would not have been entered separately as an animal, so linking one ` +
             `is almost certainly the wrong animal.`,
@@ -206,12 +206,14 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
       const origin = targetEvents.find((e) => e.type === 'birth' || e.type === 'acquired');
       if (!origin) {
         throw new CalvingError(
+        'no_origin_event',
           `calf '${targetId}' has no effective origin event, so there is nothing to ` +
             `supersede. Run verify:registry -- invariant 3 is already failing.`,
         );
       }
       if (origin.type === 'birth') {
         throw new CalvingError(
+        'already_has_birth',
           `calf '${targetId}' already has a birth event (${origin.id}) dated ` +
             `${origin.occurred_on}, so it already has a dam. Linking would give it two ` +
             `origins. If THAT birth is the wrong one, correct the calving that claims it.`,
@@ -232,6 +234,7 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
       );
       if (tooEarly) {
         throw new CalvingError(
+        'event_before_origin',
           `calf '${targetId}' has a ${tooEarly.type} on ${tooEarly.occurred_on} ` +
             `(${tooEarly.date_precision}), before the calving date ${input.occurred_on}. ` +
             `Its birth cannot postdate its own history -- check which date is wrong.`,
@@ -433,7 +436,7 @@ export function correctCalving(
   const fault = input.__faultAfterStep;
   const faultAt = (step: number): void => {
     if (fault === step) {
-      throw new CalvingError(`__faultAfterStep=${step} (test-only fault injection)`);
+      throw new CalvingError('invalid_payload', `__faultAfterStep=${step} (test-only fault injection)`);
     }
   };
 
@@ -447,15 +450,17 @@ export function correctCalving(
     const original = all.original;
 
     if (!original) {
-      throw new CalvingError(`unknown event '${input.calving_event_id}'`);
+      throw new CalvingError('unknown_event', `unknown event '${input.calving_event_id}'`, 'calving_event_id');
     }
     if (original.type !== 'calving') {
       throw new CalvingError(
+        'not_a_calving',
         `event '${input.calving_event_id}' is a '${original.type}', not a calving`,
       );
     }
     if (all.supersededBy) {
       throw new CalvingError(
+        'already_superseded',
         `calving '${input.calving_event_id}' has already been superseded by ` +
           `'${all.supersededBy}'. Correct that event instead -- only one event may ` +
           `supersede a given event, so the chain must be extended at its end.`,
@@ -465,13 +470,15 @@ export function correctCalving(
     const damId = original.animal_id;
     const dam = getAnimal(db, damId);
     if (!dam) {
-      throw new CalvingError(`calving '${original.id}' references unknown dam '${damId}'`);
+      throw new CalvingError(
+        'unknown_dam',`calving '${original.id}' references unknown dam '${damId}'`);
     }
 
     const calfId = original.payload.calf_id as string;
     const calf = getAnimal(db, calfId);
     if (!calf) {
-      throw new CalvingError(`calving '${original.id}' names unknown calf '${calfId}'`);
+      throw new CalvingError(
+        'unknown_animal',`calving '${original.id}' names unknown calf '${calfId}'`);
     }
 
     // The calf's effective birth event -- the other half of the pair.
@@ -479,12 +486,14 @@ export function correctCalving(
     const birth = calfEvents.find((e) => e.type === 'birth');
     if (!birth) {
       throw new CalvingError(
+        'inconsistent_pair',
         `calf '${calfId}' has no effective birth event, so the pair cannot be corrected ` +
           `together. Fix that first: invariant 6 would fail either way.`,
       );
     }
     if (birth.payload.calving_event_id !== original.id) {
       throw new CalvingError(
+        'inconsistent_pair',
         `calf '${calfId}' birth event points at calving ` +
           `'${String(birth.payload.calving_event_id)}', not '${original.id}'. The pair is ` +
           `already inconsistent -- run verify:registry before correcting.`,
@@ -499,6 +508,7 @@ export function correctCalving(
     );
     if (departure) {
       throw new CalvingError(
+        'animal_departed',
         `dam '${damId}' has a departure event on ${departure.occurred_on}, on or before ` +
           `the corrected calving date ${input.occurred_on}`,
       );
@@ -512,6 +522,7 @@ export function correctCalving(
     );
     if (near && !input.allow_near_duplicate) {
       throw new CalvingError(
+        'near_duplicate_calving',
         `the corrected date ${input.occurred_on} lands within ${DOUBLE_ENTRY_WINDOW_DAYS} ` +
           `days of dam '${damId}' other calving on ${near.occurred_on}. Pass ` +
           `allow_near_duplicate: true if both are genuinely separate events.`,

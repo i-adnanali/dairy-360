@@ -39,16 +39,13 @@ import {
   runCli,
   wantsHelp,
 } from './cli';
-import { appendEvent, eventsForAnimal, getAnimal } from './store';
-import { effectiveEvents } from './project';
-import { rebuildAnimals } from './projectStore';
+import { ENTERABLE_EVENT_TYPES, appendLifeEvent } from './entry';
+import type { EnterableEventType } from './entry';
 import { farmToday } from './time';
 import { RESERVED_EVENT_TYPES } from './types';
-import type { DepartureReason, DryOffReason } from './types';
 
-/** The types this command owns. */
-const ENTERABLE = ['dry_off', 'departure', 'note'] as const;
-type EnterableType = (typeof ENTERABLE)[number];
+/** The types this command owns -- the core's list, not a second copy of it. */
+const ENTERABLE = ENTERABLE_EVENT_TYPES;
 
 const FLAGS = [
   'animal',
@@ -139,101 +136,41 @@ export function main(argv: string[]): void {
   }
 
   const animalId = requireStr(flags, 'animal', 'e.g. BD-0001');
-  const animal = getAnimal(db, animalId);
-  if (!animal) {
-    throw new CliError(
-      `unknown registry animal '${animalId}'.\n` +
-        '  List what exists with: npm run verify:registry -w server',
-    );
-  }
-
-  const on = requireDate(flags, 'on', 'when it happened, farm-local');
-  const precision = requirePrecision(flags);
-  const time = optStr(flags, 'time');
-  const provenance = requireProvenance(flags);
   const asOf = optStr(flags, 'as-of') ?? farmToday();
 
-  // A departure is terminal. Writing anything but a note after one is almost
-  // always a mistake -- an out-of-order backfill entry -- and invariant 5 would
-  // report it later. Catch it here, where the operator can still fix it, and
-  // allow the override for the genuine case (a sale recorded, then the dry-off
-  // that preceded it remembered afterwards).
-  const existing = effectiveEvents(eventsForAnimal(db, animalId));
-  const departure = existing.find((e) => e.type === 'departure');
-  if (departure && type !== 'note' && !flags.has('allow-after-departure')) {
-    throw new CliError(
-      `animal '${animalId}' departed on ${departure.occurred_on} (${departure.date_precision}), ` +
-        `and departure is terminal.\n` +
-        `  A '${type}' dated ${on} would violate invariant 5.\n` +
-        '  If this event genuinely PRECEDES the departure and you are entering it out of\n' +
-        '  order, that is fine -- check the date. If it genuinely follows, pass\n' +
-        '  --allow-after-departure and expect verify:registry to flag it.',
-    );
-  }
-  if (type === 'departure' && departure) {
-    throw new CliError(
-      `animal '${animalId}' already has a departure event on ${departure.occurred_on}. ` +
-        'An animal leaves once.\n' +
-        '  To correct the date, write a superseding event rather than a second departure.',
-    );
-  }
-
-  const payload = buildPayload(type as EnterableType, flags);
-
-  const result = db.transaction(() => {
-    const event = appendEvent(db, {
-      animal_id: animalId,
-      type: type as EnterableType,
-      occurred_on: on,
-      occurred_time: time,
-      date_precision: precision,
-      payload,
-      provenance,
-    });
-    rebuildAnimals(db, { asOf, animalIds: [animalId] });
-    return event;
-  }).immediate();
+  // Every rule below this line lives in appendLifeEvent(): the unknown-animal
+  // check, the terminal-departure guard, the one-departure rule, and payload
+  // validation. This file only turns flags into an input object.
+  //
+  // The refusals ABOVE stay here on purpose -- they are about which command you
+  // invoked, and their messages name the command to use instead, which is a
+  // fact about this transport rather than about the herd.
+  const result = appendLifeEvent(db, {
+    animal_id: animalId,
+    type: type as EnterableEventType,
+    occurred_on: requireDate(flags, 'on', 'when it happened, farm-local'),
+    occurred_time: optStr(flags, 'time'),
+    date_precision: requirePrecision(flags),
+    reason: optStr(flags, 'reason'),
+    to: optStr(flags, 'to'),
+    cause: optStr(flags, 'cause'),
+    text: optStr(flags, 'text'),
+    notes: optStr(flags, 'notes'),
+    provenance: requireProvenance(flags),
+    asOf,
+    allow_after_departure: flags.has('allow-after-departure'),
+  });
 
   const status = db
     .prepare(`SELECT status, parity, open_lactation_id FROM registry_animal_status WHERE animal_id = ?`)
     .get(animalId) as { status: string; parity: number; open_lactation_id: string | null };
 
   console.log(`registry:event  ${type} on ${animalId}`);
-  console.log(`  occurred    ${on}${time ? ` ${time}` : ''} (${precision})`);
-  console.log(`  provenance  ${provenance.source_form} / recorded_by=${provenance.recorded_by}`);
-  console.log(`  event       ${result.id}`);
+  console.log(`  event       ${result.event_id}`);
   console.log(
     `  status now  ${status.status}  parity ${status.parity}  ` +
       `open lactation ${status.open_lactation_id ?? '(none)'}   as-of ${asOf}`,
   );
-}
-
-function buildPayload(type: EnterableType, flags: ReturnType<typeof parseFlags>): unknown {
-  switch (type) {
-    case 'dry_off': {
-      const reason = optStr(flags, 'reason');
-      const allowed = ['scheduled', 'low_yield', 'health', 'other'];
-      if (reason !== null && !allowed.includes(reason)) {
-        throw new CliError(`--reason for dry_off must be one of ${allowed.join(' | ')}`);
-      }
-      return { reason: reason as DryOffReason | null, notes: optStr(flags, 'notes') };
-    }
-    case 'departure': {
-      const reason = requireStr(flags, 'reason', 'sold | died | culled | lost');
-      const allowed = ['sold', 'died', 'culled', 'lost'];
-      if (!allowed.includes(reason)) {
-        throw new CliError(`--reason for departure must be one of ${allowed.join(' | ')}`);
-      }
-      return {
-        reason: reason as DepartureReason,
-        to: optStr(flags, 'to'),
-        cause: optStr(flags, 'cause'),
-        notes: optStr(flags, 'notes'),
-      };
-    }
-    case 'note':
-      return { text: requireStr(flags, 'text', 'the note body') };
-  }
 }
 
 if (require.main === module) runCli(() => main(process.argv.slice(2)));

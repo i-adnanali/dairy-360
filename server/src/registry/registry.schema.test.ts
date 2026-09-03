@@ -510,3 +510,181 @@ test('applyRegistrySchema asserts, so a broken boot throws at import time', () =
   assert.match(body![0], /applyRegistryPragmas\(db\)/);
   assert.match(body![0], /assertRegistryPragmas\(db\)/);
 });
+
+// ---------------------------------------------------------------------------
+// Migration 2 -- `estimated` stores January 1, and the table rebuild that
+// adding a CHECK to an existing table requires
+// ---------------------------------------------------------------------------
+
+/** A database at schema version 1, for testing the v1 -> v2 upgrade. */
+function dbAtVersion1(): ReturnType<typeof freshDb> {
+  const db = new Database(':memory:');
+  applyRegistryPragmas(db);
+  db.transaction(() => {
+    MIGRATIONS[0].up(db);
+    db.exec('PRAGMA user_version = 1');
+  })();
+  return db;
+}
+
+test('a fresh database lands on the current target version, now 2', () => {
+  const db = freshDb();
+  assert.equal(db.pragma('user_version', { simple: true }), TARGET_VERSION);
+  assert.equal(TARGET_VERSION, 2);
+  db.close();
+});
+
+test('migration 2 upgrades a v1 database and PRESERVES its rows', () => {
+  // The rebuild is create-copy-drop-rename. The copy is the part that would
+  // silently lose data if it were wrong, so it is tested with data present --
+  // even though the real database was empty when this shipped.
+  const db = dbAtVersion1();
+  db.prepare(
+    `INSERT INTO registry_animals (id,name,sex,species,origin,post_no,tag_no)
+     VALUES ('BD-0001','Noor','female','buffalo','acquired',NULL,NULL)`,
+  ).run();
+  const ins = db.prepare(
+    `INSERT INTO registry_animal_events
+       (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+        source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id)
+     VALUES (@id,'BD-0001',@type,@on,NULL,@p,'{}','recall',NULL,NULL,'x',@at,@sup)`,
+  );
+  ins.run({ id: 'aevt_1', type: 'acquired', on: '2019-01-01', p: 'year', at: 't1', sup: null });
+  ins.run({ id: 'aevt_2', type: 'note', on: '2020-03-14', p: 'day', at: 't2', sup: null });
+  // A superseding row, so the self-referencing FK is exercised by the copy.
+  ins.run({ id: 'aevt_3', type: 'note', on: '2020-03-15', p: 'day', at: 't3', sup: 'aevt_2' });
+
+  const result = runMigrations(db);
+  assert.equal(result.from, 1);
+  assert.equal(result.to, 2);
+  assert.equal(result.applied, 1);
+
+  const rows = db
+    .prepare(`SELECT id, supersedes_id FROM registry_animal_events ORDER BY id`)
+    .all() as { id: string; supersedes_id: string | null }[];
+  assert.deepEqual(rows, [
+    { id: 'aevt_1', supersedes_id: null },
+    { id: 'aevt_2', supersedes_id: null },
+    { id: 'aevt_3', supersedes_id: 'aevt_2' },
+  ]);
+  assert.equal(
+    (db.prepare(`SELECT COUNT(*) n FROM registry_animals`).get() as { n: number }).n,
+    1,
+  );
+  db.close();
+});
+
+test('the rebuild restores the indexes and the append-only triggers', () => {
+  // DROP TABLE takes indexes and triggers with it. If migration 2 forgot to
+  // recreate them, the append-only guarantee would vanish silently -- the worst
+  // possible outcome of a migration that looks like it worked.
+  const db = dbAtVersion1();
+  runMigrations(db);
+
+  const objects = (
+    db
+      .prepare(`SELECT name, type FROM sqlite_master WHERE tbl_name='registry_animal_events'`)
+      .all() as { name: string; type: string }[]
+  ).map((r) => `${r.type}:${r.name}`);
+
+  for (const expected of [
+    'trigger:registry_animal_events_no_update',
+    'trigger:registry_animal_events_no_delete',
+    'index:idx_registry_events_supersedes',
+    'index:idx_registry_events_animal',
+    'index:idx_registry_events_type',
+  ]) {
+    assert.ok(objects.includes(expected), `${expected} survived the rebuild`);
+  }
+
+  insertAnimal(db, { id: 'BD-0001', sex: 'female', species: 'buffalo', origin: 'acquired' });
+  const id = appendEvent(db, {
+    animal_id: 'BD-0001', type: 'note', occurred_on: '2026-01-01', date_precision: 'day',
+    payload: { text: 't' }, provenance: RECALL, recorded_at: '2026-01-01T00:00:00.000Z',
+  }).id;
+  assert.throws(
+    () => db.prepare(`UPDATE registry_animal_events SET payload='{}' WHERE id=?`).run(id),
+    /append-only/,
+    'the update trigger works after the rebuild',
+  );
+  assert.throws(
+    () => db.prepare(`DELETE FROM registry_animal_events WHERE id=?`).run(id),
+    /append-only/,
+    'the delete trigger works after the rebuild',
+  );
+  db.close();
+});
+
+test('foreign keys are enforced again after the rebuild ran with them off', () => {
+  // The rebuild needs foreign_keys OFF, which is the one relaxation in the whole
+  // schema. If it were not restored, every write afterwards would run unchecked.
+  const db = dbAtVersion1();
+  runMigrations(db);
+  assert.equal(db.pragma('foreign_keys', { simple: true }), 1);
+  assert.throws(
+    () =>
+      db
+        .prepare(
+          `INSERT INTO registry_animal_events
+             (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+              source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id)
+           VALUES ('aevt_x','BD-NOPE','note','2026-01-01',NULL,'day','{}','recall',NULL,NULL,'x','t',NULL)`,
+        )
+        .run(),
+    /FOREIGN KEY constraint failed/,
+  );
+  db.close();
+});
+
+test('applyRegistrySchema re-asserts the pragmas after migrating', () => {
+  // A rebuildsTables migration toggles foreign_keys. The second assertion is
+  // what catches one that failed to restore it.
+  const db = new Database(':memory:');
+  applyRegistrySchema(db);
+  assertRegistryPragmas(db);
+  assert.equal(db.pragma('foreign_keys', { simple: true }), 1);
+  assert.equal(db.pragma('recursive_triggers', { simple: true }), 1);
+  db.close();
+});
+
+test('estimated precision must be dated January 1 (CHECK)', () => {
+  const db = freshDb();
+  assert.throws(
+    () => rawInsert(db, { date_precision: 'estimated', occurred_on: '2021-04-12' }),
+    /CHECK constraint failed: estimated_precision_dated_jan_first/,
+    'a fabricated day wearing a humility label is rejected at the database',
+  );
+  db.close();
+});
+
+test('estimated precision dated January 1 is accepted', () => {
+  const db = freshDb();
+  assert.doesNotThrow(() =>
+    rawInsert(db, { date_precision: 'estimated', occurred_on: '2021-01-01' }),
+  );
+  db.close();
+});
+
+test('estimated is rejected mid-year even in a month-like position', () => {
+  const db = freshDb();
+  assert.throws(
+    () => rawInsert(db, { date_precision: 'estimated', occurred_on: '2021-06-01' }),
+    /estimated_precision_dated_jan_first/,
+  );
+  db.close();
+});
+
+test('the other three precisions are unaffected by migration 2', () => {
+  for (const [precision, on] of [
+    ['day', '2021-04-12'],
+    ['month', '2021-04-01'],
+    ['year', '2021-01-01'],
+  ] as const) {
+    const db = freshDb();
+    assert.doesNotThrow(
+      () => rawInsert(db, { date_precision: precision, occurred_on: on }),
+      `${precision} ${on} is still accepted`,
+    );
+    db.close();
+  }
+});

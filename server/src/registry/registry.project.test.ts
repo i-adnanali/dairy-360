@@ -30,6 +30,8 @@ import {
   newEventId,
 } from './events';
 import { intervalReport, intervalsForAnimal, precisionHistogram, summarise } from './intervals';
+import { isRegistryError } from './errors';
+import { definitelyBefore } from './invariants';
 import { allEvents } from './store';
 import { cleanHerd } from './fixtures';
 import type { RegistryAnimalRow, RegistryEvent } from './types';
@@ -202,7 +204,17 @@ test('date/precision rules are enforced at the boundary with readable messages',
       date_precision: 'day',
     }),
   );
-  assert.ok(new EventPayloadError('x') instanceof Error);
+  // EventPayloadError now carries the { code, field, message } contract the
+  // entry form needs, and is a RegistryError so runCli() catches it instead of
+  // letting a stack trace reach an operator mid-backfill.
+  const e = new EventPayloadError('invalid_precision', 'x', 'occurred_on');
+  assert.ok(e instanceof Error);
+  assert.ok(isRegistryError(e));
+  assert.deepEqual(e.toWire(), {
+    error: 'invalid_precision',
+    field: 'occurred_on',
+    message: 'x',
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -514,4 +526,54 @@ test('the histogram buckets by source_form x date_precision', () => {
     { source_form: 'daily_herd_sheet', date_precision: 'day', count: 1 },
     { source_form: 'recall', date_precision: 'month', count: 2 },
   ]);
+});
+
+test('every date/precision refusal names the field the form must highlight', () => {
+  // The date inputs are what an operator touches most, so these are the
+  // refusals most likely to need attaching to a specific control.
+  const cases: [() => unknown, string, string][] = [
+    [() => assertDatePrecision({ occurred_on: '2024-03-14', date_precision: 'month' }), 'invalid_precision', 'occurred_on'],
+    [() => assertDatePrecision({ occurred_on: '2024-03-01', date_precision: 'year' }), 'invalid_precision', 'occurred_on'],
+    [() => assertDatePrecision({ occurred_on: '2024-06-01', date_precision: 'estimated' }), 'invalid_precision', 'occurred_on'],
+    [() => assertDatePrecision({ occurred_on: '2024-03-14', occurred_time: '05:30', date_precision: 'month' }), 'invalid_precision', 'occurred_time'],
+    [() => assertDatePrecision({ occurred_on: '14/03/2024', date_precision: 'day' }), 'invalid_payload', 'occurred_on'],
+    [() => assertDatePrecision({ occurred_on: '2024-03-14', date_precision: 'exact' as never }), 'invalid_precision', 'date_precision'],
+  ];
+  for (const [fn, code, field] of cases) {
+    let caught: unknown;
+    try { fn(); } catch (e) { caught = e; }
+    assert.ok(isRegistryError(caught), `threw a RegistryError for ${field}`);
+    assert.equal((caught as EventPayloadError).code, code);
+    assert.equal((caught as EventPayloadError).field, field);
+  }
+});
+
+test('estimated now obeys the January 1 convention like year', () => {
+  assert.doesNotThrow(() =>
+    assertDatePrecision({ occurred_on: '2021-01-01', date_precision: 'estimated' }),
+  );
+  assert.throws(
+    () => assertDatePrecision({ occurred_on: '2021-04-12', date_precision: 'estimated' }),
+    /fabricated day wearing a humility label/,
+  );
+});
+
+test('year and estimated store the same shape but are NOT interchangeable', () => {
+  // Both are Jan 1 now, so the difference lives entirely in the precision value
+  // -- and it is load-bearing in two places, which is why they stay separate.
+  assert.equal(
+    definitelyBefore({ on: '2020-01-01', precision: 'year' }, { on: '2024-03-14', precision: 'day' }),
+    true,
+    'a known year IS comparable',
+  );
+  assert.equal(
+    definitelyBefore({ on: '2020-01-01', precision: 'estimated' }, { on: '2024-03-14', precision: 'day' }),
+    false,
+    'a guessed year is NOT comparable at all',
+  );
+  const h = precisionHistogram([
+    ev({ type: 'note', source_form: 'recall', date_precision: 'year' }),
+    ev({ type: 'note', source_form: 'recall', date_precision: 'estimated' }),
+  ]);
+  assert.equal(h.length, 2, 'and the histogram reports them separately');
 });

@@ -549,6 +549,16 @@ function checkPrecision(s: RegistrySnapshot): Violation[] {
         ),
       );
     }
+    if (e.date_precision === 'estimated' && !e.occurred_on.endsWith('-01-01')) {
+      out.push(
+        v(
+          11,
+          'precision-date-conventions',
+          `event ${e.id} is estimated-precision but dated ${e.occurred_on}, not January 1; ` +
+            `a specific day at estimated precision is a fabricated day wearing a humility label`,
+        ),
+      );
+    }
     if (e.occurred_time !== null && e.date_precision !== 'day') {
       out.push(
         v(

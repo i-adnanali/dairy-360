@@ -102,6 +102,18 @@ registry/schema.ts
 - The runner is **global**, not registry-specific. The registry is its first customer; any future cycle appends to `MIGRATIONS`.
 - It refuses to run against a `user_version` higher than it knows about — an older build must not touch a newer schema.
 
+### Migration 2 — and what it proved about the runner
+
+Adding a CHECK to an existing table means **rebuilding** it: SQLite has `ALTER TABLE ADD COLUMN` but no `ADD CONSTRAINT`. Migration 2 (the `estimated` convention) is therefore the create-copy-drop-rename procedure, and it was done deliberately **now, while the table was empty and the stakes were zero**, rather than discovered at step 4.
+
+Three things it needed, each verified before it was written:
+
+- **`foreign_keys` OFF, not `defer_foreign_keys`.** `supersedes_id` is a self-referencing FK; dropping the old table registers a deferred violation that renaming the new one does not clear. So migrations may declare `rebuildsTables: true`, and the runner toggles the pragma **around** the transaction (it is a no-op inside one) and runs `PRAGMA foreign_key_check` before committing. The `finally` that restores it matters: a failed rebuild must not leave the connection with foreign keys off.
+- **Dropping a table drops its indexes AND its triggers.** Migration 2 recreates all three indexes and both append-only triggers. Without that the append-only guarantee would have vanished silently — the worst outcome of a migration that looks like it worked. A test asserts every one of them survives.
+- **`applyRegistrySchema()` re-asserts the pragmas after migrating**, because a `rebuildsTables` migration is now something that can leave the connection wrong.
+
+The v1 → v2 upgrade is tested **with data present**, including a superseding row that exercises the self-FK during the copy, even though the real database was empty when it shipped.
+
 **Never reorder, edit, or remove an applied migration.** A database already at version N will not re-run entries below N, so an edit silently produces two different schemas depending on when the database was created.
 
 ### Ordering with `FARM_SCHEMA`
@@ -222,10 +234,12 @@ Do not collapse the first two into one timestamp with a qualifier. That forces y
 `day` | `month` | `year` | `estimated`. **`NOT NULL` with no default** — a default is how `day` gets applied to a guess.
 
 - `month` → stored as the **1st** of that month. `year` → stored as **January 1**.
-- `estimated` is deliberately unconstrained beyond being a valid date: it means even the year is inferred, so no convention would mean anything.
+- `estimated` → **January 1**, the same as `year` (added in migration 2). It was originally left unconstrained on the grounds that "even the year is inferred, so no convention would mean anything" — but that left one precision where a caller could write `estimated 2021-04-12`, a fabricated day wearing a humility label, and only the entry form would have stopped it. A convention only a UI enforces is a UI habit, not a convention.
+
+  **`year` and `estimated` therefore store the same shape, and must still stay separate values.** The difference is not cosmetic: `definitelyBefore()` treats an estimated date as **not comparable at all** while a `year` date compares at year grain, so invariants 4 and 5 genuinely behave differently — and the precision histogram splits on them, which is most of what the histogram is for. `year` means "I know the year"; `estimated` means "I am guessing it".
 - `occurred_time` must be `NULL` unless precision is `day`. There is no such thing as knowing the hour but not the day.
 
-These are enforced in **three layers**, deliberately: schema CHECK constraints (catch it in any process, including a hand-written `INSERT`), `assertDatePrecision()` at the write boundary (catches it with a readable message), and invariants 11/12 (catch historical rows written before a rule existed).
+These are enforced in **three layers**, deliberately: schema CHECK constraints (catch it in any process, including a hand-written `INSERT`), `assertDatePrecision()` at the write boundary (catches it with a readable message and names the field), and invariants 11/12 (catch historical rows written before a rule existed). All three cover all four precisions.
 
 Surface precision wherever a date is displayed — "March 2024 (month)", "~2021 (estimated)". Never a bare date.
 
@@ -460,6 +474,35 @@ Link mode refuses: an unknown animal (it will not silently mint one instead), an
 `registry:add` handles **`acquired` only**. A `born_on_farm` animal is created *by* the calving that produced it, in the same transaction that allocates its serial and links its dam — so letting `registry:add` mint one would produce a calf with no dam edge and no calving on any dam, which nothing could repair because no event would say who the dam was. The two-pass backfill order is therefore enforced by which command exists, not by a note.
 
 `registry:event` also guards the terminal-departure rule up front: writing anything but a `note` after a departure is refused with `--allow-after-departure` offered for the genuine out-of-order case, so invariant 5 is not the first place an operator learns about it.
+
+### The domain core, and why the CLI is thin
+
+Every write rule lives in a function taking an explicit `db` handle, and every command is argument parsing over one of them:
+
+| Core function | Module | CLI |
+|---|---|---|
+| `addAcquiredAnimal(db, input)` | `entry.ts` | `registry:add` |
+| `appendLifeEvent(db, input)` | `entry.ts` | `registry:event` |
+| `recordCalving(db, input)` | `calving.ts` | `registry:calve` |
+| `correctCalving(db, input)` | `calving.ts` | `registry:correct-calving` |
+
+`addAcquiredAnimal` and `appendLifeEvent` were extracted from inside their CLI files, where they ran against the imported `db` singleton. That made them unreachable from anything but a command — and, it turned out, **untested**: the only test touching those files imported their `USAGE` strings, so seven domain rules had no coverage at all. The extraction added 32 tests over rules that were shipping unverified.
+
+What stayed in the CLI: argument parsing, and the mis-routing hints that name a specific command ("use `registry:calve`"). Those are about which command you invoked, not about the animals. The core keeps its own backstop refusal for a non-enterable type, which is what a non-CLI caller would hit.
+
+### Domain errors carry a code and a field
+
+Every domain refusal is a `RegistryError` with `{ code, field?, message }`:
+
+```json
+{ "error": "already_departed", "field": "occurred_on", "message": "animal 'BD-0004' already has a departure event on 2024-05-01. …" }
+```
+
+The **message is the good part** — written to teach an operator what to do — and it is never rewritten by a transport. But a form also has to put each message next to the input that caused it, and doing that from prose means string-matching, which works right up until someone improves the wording. So `code` is what a caller branches on, `field` is where the message goes, and `message` is the prose unchanged.
+
+`CalvingError` and `EventPayloadError` are subclasses, so one handler covers every domain refusal. `EventPayloadError` becoming one closed a real hole: it was a bare `Error`, so `runCli()` did not catch it and a precision mistake printed a **stack trace** at an operator mid-backfill. Every date input goes through `assertDatePrecision()`, so that was the most-hit refusal path in the system.
+
+A `CliError` is a different thing — a missing or unparseable flag — and belongs to one transport.
 
 ---
 
