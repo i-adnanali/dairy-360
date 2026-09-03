@@ -156,7 +156,7 @@ export class EventForm {
     const w = this.when();
     const t = this.type();
     if (!w || !t) return;
-    const r = await this.state.run(() =>
+    const r = await this.state.run((key) =>
       this.api.addEvent({
         animal_id: this.animalId(),
         type: t,
@@ -169,7 +169,7 @@ export class EventForm {
         observed_by: blank(this.observedBy()),
         allow_after_departure: this.allowAfterDeparture(),
         ...this.session.provenance(),
-      }),
+      }, key),
     );
     this.allowAfterDeparture.set(false);
     if (r) {

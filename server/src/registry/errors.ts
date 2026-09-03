@@ -44,7 +44,14 @@ export type RegistryErrorCode =
   // --- payload / dates ---
   | 'invalid_payload'
   | 'invalid_precision'
-  | 'precision_not_defaulted';
+  | 'precision_not_defaulted'
+  // --- transport ---
+  //
+  // The one code here that is NOT a rule about the herd. It is about the
+  // REQUEST, and it lives in this union anyway because it has to reach a client
+  // through the same `{ code, field, message }` wire shape as everything else --
+  // a second error vocabulary for one case would mean every caller learning two.
+  | 'missing_idempotency_key';
 
 export interface WireError {
   error: RegistryErrorCode;

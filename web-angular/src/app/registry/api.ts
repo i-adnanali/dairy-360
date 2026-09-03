@@ -151,29 +151,52 @@ export class RegistryApi {
   }
 
   // --- writes --------------------------------------------------------------
+  //
+  // EVERY WRITE TAKES AN IDEMPOTENCY KEY, AND IT IS NOT OPTIONAL. The server
+  // refuses a keyless write with a 400 rather than accepting it unprotected, so
+  // an optional parameter here would only move the failure from compile time to
+  // an operator's screen. FormState.run() hands the key to its callback for the
+  // same reason. See form-state.ts for the one-key-per-attempt-sequence rule.
 
-  addAnimal(body: Record<string, unknown>): Promise<{ animal_id: string; animal: AnimalDetail }> {
-    return unwrap(firstValueFrom(this.http.post<{ animal_id: string; animal: AnimalDetail }>(`${BASE}/animals`, body)));
+  /** The header every write carries. `Idempotency-Key`, cased conventionally. */
+  private static keyed(idempotencyKey: string): { headers: Record<string, string> } {
+    return { headers: { 'Idempotency-Key': idempotencyKey } };
   }
 
-  addEvent(body: Record<string, unknown>): Promise<{ event_id: string; animal: AnimalDetail }> {
-    return unwrap(firstValueFrom(this.http.post<{ event_id: string; animal: AnimalDetail }>(`${BASE}/events`, body)));
+  addAnimal(
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<{ animal_id: string; animal: AnimalDetail }> {
+    return unwrap(firstValueFrom(this.http.post<{ animal_id: string; animal: AnimalDetail }>(
+      `${BASE}/animals`, body, RegistryApi.keyed(idempotencyKey),
+    )));
   }
 
-  recordCalving(body: Record<string, unknown>): Promise<{
+  addEvent(
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<{ event_id: string; animal: AnimalDetail }> {
+    return unwrap(firstValueFrom(this.http.post<{ event_id: string; animal: AnimalDetail }>(
+      `${BASE}/events`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  recordCalving(body: Record<string, unknown>, idempotencyKey: string): Promise<{
     calf_id: string; linked: boolean; superseded_origin_event_id: string | null;
     dam: AnimalDetail; calf: AnimalDetail;
   }> {
-    return unwrap(firstValueFrom(this.http.post<never>(`${BASE}/calvings`, body)));
+    return unwrap(firstValueFrom(
+      this.http.post<never>(`${BASE}/calvings`, body, RegistryApi.keyed(idempotencyKey)),
+    ));
   }
 
-  correctCalving(eventId: string, body: Record<string, unknown>): Promise<{
+  correctCalving(eventId: string, body: Record<string, unknown>, idempotencyKey: string): Promise<{
     dam_id: string; calf_id: string; calving_event_id: string; birth_event_id: string;
     departure_event_id: string | null;
     superseded: { calving_event_id: string; birth_event_id: string; departure_event_id: string | null };
   }> {
-    return unwrap(
-      firstValueFrom(this.http.post<never>(`${BASE}/calvings/${eventId}/correction`, body)),
-    );
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/calvings/${eventId}/correction`, body, RegistryApi.keyed(idempotencyKey),
+    )));
   }
 }

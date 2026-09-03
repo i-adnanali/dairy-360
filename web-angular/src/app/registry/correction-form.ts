@@ -136,7 +136,7 @@ export class CorrectionForm {
   protected async submit(): Promise<void> {
     const w = this.when();
     if (!w) return;
-    const r = await this.state.run(() =>
+    const r = await this.state.run((key) =>
       this.api.correctCalving(this.target(), {
         occurred_on: w.occurred_on,
         occurred_time: w.occurred_time,
@@ -144,7 +144,7 @@ export class CorrectionForm {
         notes: blank(this.notes()),
         allow_near_duplicate: this.allowDuplicate(),
         ...this.session.provenance(),
-      }),
+      }, key),
     );
     this.allowDuplicate.set(false);
     if (r) {

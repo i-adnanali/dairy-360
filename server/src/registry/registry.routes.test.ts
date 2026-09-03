@@ -62,6 +62,18 @@ async function get(ctx: Ctx, path: string): Promise<{ status: number; body: neve
   return { status: r.status, body: (await r.json()) as never };
 }
 
+/**
+ * A FRESH KEY PER CALL, which is the right default for this file.
+ *
+ * The write routes refuse a keyless request (see registry.idempotency.test.ts,
+ * which owns that behaviour). A per-call key keeps these tests about what they
+ * were about: several of them post the same payload twice on purpose to
+ * exercise a domain refusal -- the near-duplicate calving guard -- and a shared
+ * key would silently replay the first response instead, turning a domain
+ * assertion into a test of the replay cache.
+ */
+let keySeq = 0;
+
 async function post(
   ctx: Ctx,
   path: string,
@@ -69,7 +81,10 @@ async function post(
 ): Promise<{ status: number; body: never }> {
   const r = await fetch(`${ctx.base}${path}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      'idempotency-key': `routes-test-${++keySeq}`,
+    },
     body: JSON.stringify(payload),
   });
   return { status: r.status, body: (await r.json()) as never };
@@ -502,10 +517,13 @@ test('provenance is required over HTTP, and observed_by is never defaulted', asy
 });
 
 test('a malformed body is a 400, not a 500', async () => {
+  // Raw fetch rather than post(), because the body is deliberately not an
+  // object. The key still has to be here: the replay check runs BEFORE payload
+  // validation, so without it this would assert on the wrong refusal.
   const ctx = await serve(cleanHerd());
   const r = await fetch(`${ctx.base}/animals`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'idempotency-key': 'routes-test-malformed' },
     body: JSON.stringify(['not', 'an', 'object']),
   });
   assert.equal(r.status, 400);

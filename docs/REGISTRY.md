@@ -602,6 +602,56 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 
 `registryRouter` is a **factory taking a `db` handle**, unlike `farmRouter` which is a const importing the singleton. That is what lets the harness serve the same routes over `:memory:`.
 
+### Every event-appending route requires an `Idempotency-Key`
+
+The four `POST`s above that append events — `/animals`, `/events`, `/calvings` and
+`/calvings/:eventId/correction` — refuse a request without the header, with a 400 and
+`missing_idempotency_key`. `/rebuild` does not, because a rebuild appends nothing: it recomputes
+projections from the log, so running it twice lands on the same rows, which is invariant 0.
+
+**Double-submit was proven, not suspected.** The same payload posted twice minted `BD-0001` and
+`BD-0002`; identical notes and identical dry-offs each appended two events. The client disabled its
+submit button while a request was in flight, which stops a fast double-click on one live form and
+nothing else. `/add` was the dangerous one: it mints a fresh serial with no calving flow involved,
+producing exactly the duplicate that merge/supersede does not yet exist to repair.
+
+The same script re-run after the change, both ways:
+
+```
+--- a fresh key each time (the old behaviour) ---
+same payload twice      -> BD-0001 BD-0002
+identical note twice    -> TWO EVENTS
+identical dry_off twice -> TWO EVENTS
+animals: 2   events: 6
+
+--- one key per submission ---
+same payload twice      -> BD-0001 BD-0001
+identical note twice    -> ONE EVENT (replayed)
+identical dry_off twice -> ONE EVENT (replayed)
+animals: 1   events: 3
+```
+
+Both halves matter. The domain functions are unchanged and still append twice when asked twice —
+two calls **are** two writes unless something says they are one submission, and the key is what says
+so. A change that refused every second write would look identical to a fix in the first half alone.
+
+**Keyed on `(key, body)`, not on the key alone.** The client mints a key on first submit, reuses it
+while a refusal is on screen, and clears it on success ([form-state.ts](../web-angular/src/app/registry/form-state.ts)).
+So a retry after a network fault replays; a failed-submit-then-edit-then-resubmit has a different
+body and is processed as new, with no client wiring and no "you reused a key" error to explain. Only
+successes are remembered — a 400 wrote nothing, and caching a transient failure would make it
+permanent for that key.
+
+**Storage is an in-process `Map`, and these are the holes.** No migration: putting request plumbing
+into the schema holding the one set of unrecoverable records, to close a window measured in seconds
+on a single-user localhost app, is a bad trade. So keys do not survive a restart — and `npm run dev
+-w server` is `tsx watch`, which restarts on every file save. Not a hazard mid-transcription; real
+during development. Nor can any server-side store recognise a page refresh or a second tab, since
+both get a fresh key. Deriving the key from the payload would catch those and break worse: two
+distinct animals with no name, the same sex and the same arrival year post an identical body, which
+is the roster pass, not a hypothetical. If this app ever grows a second writer, this is the first
+decision to revisit.
+
 ### `GET /storage` — the target, as a positive fact
 
 `{ "storage": "/…/server/dairy.db", "memory": false }` on the real server; `{ "storage": ":memory:", "memory": true }` on the harness. Same route, same shape, both directions — that symmetry is the point, and it is why the route is on the shared factory rather than beside the harness's own banner endpoint.
@@ -627,6 +677,8 @@ The reason is computed **server-side** for the same argument as `field` on an er
 ### Errors on the wire
 
 A domain refusal is `400` with the `RegistryError` wire shape; anything else is a `500`, because it is a bug and must not be dressed up as something an operator can fix. An unknown animal on a read is `404` in the same shape.
+
+`missing_idempotency_key` is the one code in `RegistryErrorCode` that is **not** a rule about the herd — it is about the request. It lives in that union anyway because it has to reach a client through the same `{ error, field, message }` shape as everything else, and a second error vocabulary for one case would mean every caller learning two. Its `field` is `idempotency-key`, so a client binds the message the same way it binds any other refusal.
 
 The serialization matters more than it looks: `code` and `field` are class properties, and `JSON.stringify` on an `Error` subclass returns `{}` unless something converts it. One missing `toWire()` and every form receives an empty object — a bug invisible to a function-level test. That is most of why these routes are tested over real HTTP with a real server on an ephemeral port.
 

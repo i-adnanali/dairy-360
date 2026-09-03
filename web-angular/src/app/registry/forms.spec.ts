@@ -73,6 +73,99 @@ function enterDate(
   if (parts.day !== undefined) set('day', parts.day, 'input');
 }
 
+describe('idempotency key', () => {
+  // The rule: one key per submission ATTEMPT SEQUENCE. Minted on first submit,
+  // reused while a refusal is on screen, dropped on success. See form-state.ts.
+
+  it('sends an Idempotency-Key header on a write', () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    enterDate(fixture, el, 'year', { year: 2019 });
+    click(el, '[data-role="submit"]');
+
+    const req = http.expectOne(`${BASE}/animals`);
+    const key = req.request.headers.get('Idempotency-Key');
+    expect(key).toBeTruthy();
+    expect(key!.length).toBeGreaterThan(8);
+  });
+
+  it('REUSES the key when a submit failed — the retry may already have landed', async () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    enterDate(fixture, el, 'year', { year: 2019 });
+
+    click(el, '[data-role="submit"]');
+    const first = http.expectOne(`${BASE}/animals`);
+    const key = first.request.headers.get('Idempotency-Key');
+    // A network fault: the request may have succeeded server-side and failed in
+    // transit, which is exactly the case a reused key exists for.
+    first.error(new ProgressEvent('error'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    click(el, '[data-role="submit"]');
+    const retry = http.expectOne(`${BASE}/animals`);
+    expect(retry.request.headers.get('Idempotency-Key')).toBe(key);
+  });
+
+  it('MINTS A NEW key after a success — the next animal is not a replay of the last', async () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    enterDate(fixture, el, 'year', { year: 2019 });
+
+    click(el, '[data-role="submit"]');
+    const first = http.expectOne(`${BASE}/animals`);
+    const key = first.request.headers.get('Idempotency-Key');
+    first.flush({ animal_id: 'BD-0001', animal: { animal: { id: 'BD-0001', name: null }, status: null, events: [] } });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The same body a second time. Two identical roster rows are two animals,
+    // and a payload-derived key would have silently collapsed them into one --
+    // which is why the key is minted per attempt rather than hashed from the body.
+    click(el, '[data-role="submit"]');
+    const next = http.expectOne(`${BASE}/animals`);
+    expect(next.request.headers.get('Idempotency-Key')).not.toBe(key);
+    expect(next.request.headers.get('Idempotency-Key')).toBeTruthy();
+  });
+
+  it('reuses the key across an override resubmit, where the BODY is what changed', async () => {
+    // `allow_after_departure` flips and the form resubmits on the same key. The
+    // server keys on (key, body), so a changed body is processed as new without
+    // the client having to know anything about it.
+    const { http } = setup();
+    const fixture = TestBed.createComponent(EventForm);
+    fixture.componentRef.setInput('animalId', 'BD-0001');
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    click(el, '[data-type="dry_off"]');
+    fixture.detectChanges();
+    enterDate(fixture, el, 'month', { year: 2024, month: 5 });
+
+    click(el, '[data-role="submit"]');
+    const first = http.expectOne(`${BASE}/events`);
+    const key = first.request.headers.get('Idempotency-Key');
+    expect(first.request.body.allow_after_departure).toBe(false);
+    first.flush(
+      { error: 'animal_departed', field: 'occurred_on', message: 'animal departed on 2024-05-01…' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    click(el, '[data-role="allow-after-departure"]');
+    const override = http.expectOne(`${BASE}/events`);
+    expect(override.request.headers.get('Idempotency-Key')).toBe(key);
+    expect(override.request.body.allow_after_departure).toBe(true);
+  });
+});
+
 describe('SessionGate', () => {
   it('blocks until both source form and recorder are given', () => {
     setup();

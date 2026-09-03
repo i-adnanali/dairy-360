@@ -162,7 +162,7 @@ export class AnimalForm {
     const a = this.acquired();
     if (!a) return;
     const b = this.birth();
-    await this.state.run(() =>
+    await this.state.run((key) =>
       this.api.addAnimal({
         sex: this.sex(),
         name: blank(this.name()),
@@ -175,7 +175,7 @@ export class AnimalForm {
         tag_no: blank(this.tagNo()),
         observed_by: blank(this.observedBy()),
         ...this.session.provenance(),
-      }),
+      }, key),
     );
   }
 

@@ -28,6 +28,22 @@
 //
 // better-sqlite3 is synchronous, so every handler is synchronous and a throw
 // propagates to Express's error handling without an async wrapper.
+//
+// ---------------------------------------------------------------------------
+// EVERY ROUTE THAT APPENDS AN EVENT REQUIRES AN `Idempotency-Key`
+// ---------------------------------------------------------------------------
+// Four of them: POST /animals, /events, /calvings and /calvings/:id/correction.
+// A write without one is refused with a 400 rather than accepted unprotected;
+// see idempotency.ts for what that closes, and for the two holes it does not.
+//
+// NOTE THE COUNT. The decisions document says "the three write routes", which
+// undercounts: the paired correction appends a superseding calving, a
+// superseding birth and sometimes a departure. Replayed without a key it does
+// not merely duplicate -- it hits the partial unique index on `supersedes_id`,
+// which is a raw SQLite constraint error rather than a RegistryError, so it
+// surfaces as a 500. Cheaper to protect it than to explain that.
+//
+// /rebuild is deliberately unkeyed; the comment on it says why.
 
 import express from 'express';
 import type { Request, Response } from 'express';
@@ -35,6 +51,12 @@ import type { Request, Response } from 'express';
 import { addAcquiredAnimal, appendLifeEvent } from './entry';
 import { correctCalving, recordCalving } from './calving';
 import { RegistryError, isRegistryError } from './errors';
+import {
+  IDEMPOTENCY_HEADER,
+  IdempotencyStore,
+  MISSING_KEY_MESSAGE,
+  bodyHash,
+} from './idempotency';
 import { animalDetail, calvingsFor, damCandidates, herd, linkCandidates } from './reads';
 import { rebuild } from './projectStore';
 import { snapshot } from './store';
@@ -144,8 +166,67 @@ function handle(fn: (req: Request, res: Response) => void) {
   };
 }
 
+/**
+ * `handle`, plus replay protection. Every route that APPENDS AN EVENT uses this.
+ *
+ * A missing key is REFUSED, not waved through. A silently unprotected write is
+ * the exact failure this exists to close, and nothing in the repo needs keyless
+ * writes: the CLI does not go through these routes at all -- add.ts, calve.ts,
+ * event.ts and correct.ts call the domain functions directly against the `db`
+ * singleton -- so the only callers are the entry UI and tests.
+ *
+ * The success capture wraps `res.json` rather than sitting after the handler,
+ * because better-sqlite3 is synchronous and these handlers respond inline;
+ * there is no completion callback to hang it off. `res.statusCode` is already
+ * set by the time `.json()` runs, since `res.status(201).json(x)` sets it
+ * first, which is what makes the 2xx test here correct.
+ */
+function write(store: IdempotencyStore, fn: (req: Request, res: Response) => void) {
+  const inner = handle(fn);
+  return (req: Request, res: Response): void => {
+    const key = req.header(IDEMPOTENCY_HEADER)?.trim();
+    if (key === undefined || key.length === 0) {
+      res
+        .status(400)
+        .json(
+          new RegistryError(
+            'missing_idempotency_key',
+            MISSING_KEY_MESSAGE,
+            IDEMPOTENCY_HEADER,
+          ).toWire(),
+        );
+      return;
+    }
+
+    const hash = bodyHash(req.body);
+    const replayed = store.get(key, hash);
+    if (replayed !== undefined) {
+      // The ORIGINAL response, byte for byte, and nothing written. Not a 409:
+      // the caller asked for a state that already holds, and telling it so with
+      // an error would make every retry path have to special-case success.
+      res.status(replayed.status).json(replayed.body);
+      return;
+    }
+
+    const send = res.json.bind(res);
+    res.json = (payload: unknown) => {
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        store.remember(key, hash, { status: res.statusCode, body: payload });
+      }
+      return send(payload);
+    };
+
+    inner(req, res);
+  };
+}
+
 export function registryRouter(db: Db): express.Router {
   const router = express.Router();
+
+  // Per-router, not module-level. registryRouter is a FACTORY precisely so the
+  // harness can serve an `:memory:` database, and a shared store would let one
+  // router replay a response describing rows in the other's database.
+  const replays = new IdempotencyStore();
 
   // --- reads ---------------------------------------------------------------
 
@@ -258,7 +339,7 @@ export function registryRouter(db: Db): express.Router {
 
   router.post(
     '/animals',
-    handle((req, res) => {
+    write(replays, (req, res) => {
       const b = body(req);
       const result = addAcquiredAnimal(db, {
         sex: requireStr(b, 'sex') as RegistrySex,
@@ -281,7 +362,7 @@ export function registryRouter(db: Db): express.Router {
 
   router.post(
     '/events',
-    handle((req, res) => {
+    write(replays, (req, res) => {
       const b = body(req);
       const animalId = requireStr(b, 'animal_id');
       const result = appendLifeEvent(db, {
@@ -305,7 +386,7 @@ export function registryRouter(db: Db): express.Router {
 
   router.post(
     '/calvings',
-    handle((req, res) => {
+    write(replays, (req, res) => {
       const b = body(req);
       const damId = requireStr(b, 'dam_id');
       // `calf_id` present => link mode. Absent => mint mode. The form asks this
@@ -339,7 +420,7 @@ export function registryRouter(db: Db): express.Router {
 
   router.post(
     '/calvings/:eventId/correction',
-    handle((req, res) => {
+    write(replays, (req, res) => {
       const b = body(req);
       const result = correctCalving(db, {
         calving_event_id: req.params.eventId,
@@ -360,6 +441,13 @@ export function registryRouter(db: Db): express.Router {
     }),
   );
 
+  /**
+   * The one POST that is NOT replay-protected, and the reason is not an
+   * oversight: a rebuild appends nothing. It recomputes projection tables from
+   * the event log, so running it twice lands on the same rows -- that is
+   * invariant 0, idempotence, which the suite already asserts. Requiring a key
+   * here would be ceremony over a route that is idempotent by construction.
+   */
   router.post(
     '/rebuild',
     handle((req, res) => {

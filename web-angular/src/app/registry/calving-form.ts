@@ -337,7 +337,7 @@ export class CalvingForm {
     if (!w) return;
     // Re-read candidates on submit in link mode so a stale list cannot be the
     // reason a link is attempted against an animal that has since changed.
-    const r = await this.state.run(() =>
+    const r = await this.state.run((key) =>
       this.api.recordCalving({
         dam_id: this.damId(),
         occurred_on: w.occurred_on,
@@ -351,7 +351,7 @@ export class CalvingForm {
         observed_by: blank(this.observedBy()),
         allow_near_duplicate: this.allowDuplicate(),
         ...this.session.provenance(),
-      }),
+      }, key),
     );
     this.allowDuplicate.set(false);
     if (r) {
