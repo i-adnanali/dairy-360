@@ -1,9 +1,14 @@
 // Append a life event: dry_off, departure, or note.
 
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, computed, inject, input, signal, viewChild, viewChildren,
+} from '@angular/core';
+import type { ElementRef } from '@angular/core';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { WriteLog, focusAfterWrite } from './after-write';
+import { ChipGroup } from './chip-group';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
 import { PrecisionDateControl, dateBlocker } from './precision-date';
@@ -15,19 +20,15 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
 @Component({
   selector: 'app-event-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IdentifierInput, PrecisionDateControl],
+  imports: [ChipGroup, IdentifierInput, PrecisionDateControl],
   template: `
-    <div class="space-y-4">
+    <form class="space-y-4" (submit)="onSubmit($event)">
       <div class="rounded-xl border border-farm-300 bg-white p-4">
         <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">What happened?</div>
-        <div class="flex flex-wrap gap-2">
-          @for (t of types; track t.value) {
-            <button type="button" [attr.data-type]="t.value" (click)="type.set(t.value)"
-              class="rounded-lg border px-3 py-1.5 text-sm"
-              [class]="type() === t.value ? 'border-farm-600 bg-farm-600 text-white' : 'border-farm-300 bg-white text-farm-800'"
-            >{{ t.label }}</button>
-          }
-        </div>
+        <app-chip-group
+          name="event-type" label="What happened?" [options]="types" [value]="type()"
+          (changed)="type.set($any($event))"
+        />
         <p class="mt-1.5 text-xs text-farm-600">
           A calving is not entered here — it creates an animal. Use the calving form.
         </p>
@@ -126,7 +127,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
         }
 
         <div class="flex items-center gap-3">
-          <button type="button" data-role="submit" (click)="submit()" [disabled]="!canSubmit()"
+          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
             class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
           >{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
           @if (blockedReason(); as r) {
@@ -134,16 +135,35 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
           }
         </div>
       }
-    </div>
+    </form>
   `,
 })
 export class EventForm {
+  /**
+   * The NATIVE submit event, not FormsModule's `ngSubmit`.
+   *
+   * `(ngSubmit)` is an output on the `NgForm` directive, so without importing
+   * FormsModule it binds to nothing at all -- the form falls through to a real
+   * browser submission and the page reloads. Caught by the specs, which saw
+   * zero requests. The native event needs `preventDefault()` for the same
+   * reason, and avoids pulling in a forms library this app does not otherwise
+   * use.
+   */
+  protected onSubmit(e: Event): void {
+    e.preventDefault();
+    this.submit();
+  }
+
   readonly animalId = input.required<string>();
   readonly saved = input<((d: AnimalDetail) => void) | null>(null);
 
   private readonly api = inject(RegistryApi);
   private readonly session = inject(Session);
   protected readonly identifiers = inject(Identifiers);
+  private readonly writeLog = inject(WriteLog);
+
+  private readonly dateControl = viewChild(PrecisionDateControl);
+  private readonly typeGroup = viewChild<ElementRef<HTMLElement>>('typeGroup');
 
   protected readonly fields = FIELDS;
   protected readonly types: { value: EnterableEventType; label: string }[] = [
@@ -207,6 +227,10 @@ export class EventForm {
       this.text.set('');
       this.overrideReason.set('');
       void this.identifiers.refresh();
+      this.dateControl()?.reset();
+      this.when.set({ status: 'empty' });
+      this.observedBy.set('');
+      this.writeLog.announce(`Recorded a ${t} on ${this.animalId()}.`);
     }
   }
 }

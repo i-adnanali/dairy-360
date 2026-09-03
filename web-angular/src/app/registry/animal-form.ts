@@ -1,10 +1,15 @@
 // Add an acquired animal. Pass one of the backfill.
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, computed, inject, signal, viewChild, viewChildren,
+} from '@angular/core';
+import type { ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { WriteLog, focusAfterWrite } from './after-write';
+import { ChipGroup } from './chip-group';
 import { DuplicateWarning } from './duplicate-warning';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
@@ -17,9 +22,12 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
 @Component({
   selector: 'app-animal-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DuplicateWarning, IdentifierInput, PrecisionDateControl],
+  imports: [ChipGroup, DuplicateWarning, IdentifierInput, PrecisionDateControl],
   template: `
-    <div class="mx-auto max-w-2xl">
+    <!-- A real <form>, which is what makes Enter submit from any text field.
+         Before this there was no form element anywhere in the registry and
+         every button was type="button", so Enter did nothing on any screen. -->
+    <form class="mx-auto max-w-2xl" (submit)="onSubmit($event)">
       <header class="mb-4">
         <h2 class="text-lg font-semibold text-farm-900">Add an acquired animal</h2>
         <p class="mt-1 text-sm text-farm-600">
@@ -31,15 +39,10 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
       <div class="space-y-4">
         <div class="rounded-xl border border-farm-300 bg-white p-4">
           <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Sex</div>
-          <div class="flex gap-2">
-            @for (s of sexes; track s) {
-              <button
-                type="button" [attr.data-sex]="s" (click)="sex.set(s)"
-                class="rounded-lg border px-3 py-1.5 text-sm capitalize"
-                [class]="sex() === s ? 'border-farm-600 bg-farm-600 text-white' : 'border-farm-300 bg-white text-farm-800'"
-              >{{ s }}</button>
-            }
-          </div>
+          <app-chip-group
+            name="sex" label="Sex" [options]="sexChips" [value]="sex()"
+            (changed)="sex.set($any($event))"
+          />
           @if (state.fieldError('sex'); as e) {
             <p class="mt-2 text-sm text-red-800" data-role="error-sex">{{ e }}</p>
           }
@@ -47,7 +50,8 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
             <label class="block">
               <span class="mb-1 block text-xs font-medium text-farm-700">Name (optional)</span>
-              <input data-role="name" [value]="name()" (input)="name.set($any($event.target).value)"
+              <input #firstField data-role="name" [value]="name()"
+                (input)="name.set($any($event.target).value)"
                 class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
             </label>
             <app-identifier-input
@@ -112,7 +116,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
 
         <div class="flex items-center gap-3">
           <button
-            type="button" data-role="submit" (click)="submit()" [disabled]="!canSubmit()"
+            type="submit" data-role="submit" [disabled]="!canSubmit()"
             class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
           >{{ state.submitting() ? 'Saving…' : 'Add animal' }}</button>
           @if (blockedReason(); as r) {
@@ -139,17 +143,41 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           </div>
         }
       </div>
-    </div>
+    </form>
   `,
 })
 export class AnimalForm {
+  /**
+   * The NATIVE submit event, not FormsModule's `ngSubmit`.
+   *
+   * `(ngSubmit)` is an output on the `NgForm` directive, so without importing
+   * FormsModule it binds to nothing at all -- the form falls through to a real
+   * browser submission and the page reloads. Caught by the specs, which saw
+   * zero requests. The native event needs `preventDefault()` for the same
+   * reason, and avoids pulling in a forms library this app does not otherwise
+   * use.
+   */
+  protected onSubmit(e: Event): void {
+    e.preventDefault();
+    this.submit();
+  }
+
   private readonly api = inject(RegistryApi);
   private readonly router = inject(Router);
   private readonly session = inject(Session);
   protected readonly identifiers = inject(Identifiers);
+  private readonly writeLog = inject(WriteLog);
+
+  /** Where the caret goes after a write, so the next animal is just typing. */
+  private readonly firstField = viewChild<ElementRef<HTMLInputElement>>('firstField');
+  /** Both date controls, cleared together after a write. */
+  private readonly dateControls = viewChildren(PrecisionDateControl);
 
   protected readonly fields = FIELDS;
-  protected readonly sexes: RegistrySex[] = ['female', 'male'];
+  protected readonly sexChips = [
+    { value: 'female', label: 'female' },
+    { value: 'male', label: 'male' },
+  ];
   protected readonly state = new FormState<{ animal_id: string; animal: AnimalDetail }>();
 
   protected readonly sex = signal<RegistrySex>('female');
@@ -199,7 +227,7 @@ export class AnimalForm {
     // Belt and braces behind the disabled button: an incomplete optional date
     // must never reach the wire as a null.
     if (a.status !== 'complete' || b.status === 'incomplete') return;
-    await this.state.run((key) =>
+    const r = await this.state.run((key) =>
       this.api.addAnimal({
         sex: this.sex(),
         name: blank(this.name()),
@@ -218,6 +246,30 @@ export class AnimalForm {
     // the next one. That is the whole point of the datalist.
     void this.identifiers.refresh();
     this.writes.update((n) => n + 1);
+    if (r) this.readyForNext(r.animal_id, r.animal.animal.name);
+  }
+
+  /**
+   * The round trip, collapsed. See after-write.ts for why this is the item that
+   * decides whether a separate roster screen is needed at all.
+   *
+   * `sex` deliberately SURVIVES: it has a strong prior, consecutive animals in
+   * a backfill are usually the same sex, and re-answering it twenty times is
+   * exactly the tax the defaults rule exists to avoid. Everything that is a
+   * fact about THIS animal is cleared, because carrying it forward is how the
+   * next submit becomes a duplicate.
+   */
+  private readyForNext(id: string, name: string | null): void {
+    this.name.set('');
+    this.from.set('');
+    this.postNo.set('');
+    this.tagNo.set('');
+    this.observedBy.set('');
+    for (const c of this.dateControls()) c.reset();
+    this.acquired.set({ status: 'empty' });
+    this.birth.set({ status: 'empty' });
+    this.writeLog.announce(`Wrote ${id}${name ? ` — ${name}` : ''}. Ready for the next.`);
+    focusAfterWrite(this.firstField()?.nativeElement);
   }
 
   protected open(id: string): void {

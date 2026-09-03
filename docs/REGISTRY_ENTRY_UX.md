@@ -86,6 +86,22 @@ pattern is the right tool for a value the test cannot know — a generated id, a
 For a date the test itself supplied, it is a way of not looking. **From here on, every spec names
 the date it typed.** This applies to every spec in the repo, not only the entry surface.
 
+**Second corollary, and the more transferable one: when a fix stops the system asserting something
+false, check where the truth goes.** Item 0 stopped the date control fabricating a confident value.
+It did not thereby make the record honest — on the *optional* birth date the fabrication became a
+**disappearance**: the operator typed a year, the form sent `birth_on: null`, and the row became
+indistinguishable from one where nothing was typed. Item 5 closed that, and it existed only because
+item 0 had closed the other half.
+
+The general shape is worth stating because it will recur. **A null flowing into an optional field is
+a lie of omission wearing a legitimate shape** — legitimate precisely because null is the correct,
+expected, frequently-right value there, which is what makes it invisible. A fabricated value at
+least looks wrong to the next reader; an absent one looks like the truth.
+
+So the question to ask after removing a false assertion is not "is it still asserting something
+false?" but "what is it asserting *instead*, and can anyone tell that apart from the honest case?"
+Where the answer is no, the fix is not finished.
+
 **Recognition over recall.** Any question whose answer is in the database is a query, not a prompt.
 Where the operator must choose, linking to something existing is the default path and creating
 something new is the deliberate one.
@@ -367,11 +383,15 @@ identifier, and both are worth surfacing. The near-equal rule is what catches `a
 and `Kali` / `kali`, which is the same free-text drift §6.5's `datalist` addresses from the other
 end.
 
-#### The recency window: none, and the number is the wrong question
+#### The recency window: none. Age is shown, not filtered on
 
-**Match against the whole registry.** The memory that actually fails is "did I already enter this
-one?", and that fails across sittings, not within minutes — so any cutoff short enough to be called
-a window would miss the case worth catching. At twenty to a couple of hundred animals a full scan is
+**Match against the whole registry, with no cutoff.** The memory that actually fails is "did I
+already enter this one?", and that fails across sittings rather than within minutes — so any cutoff
+short enough to be called a window would miss the case worth catching.
+
+This was originally specified as a *recency window*, with a number to be proposed. The window is the
+wrong instrument: it filters on the axis that carries the information. Showing the age and letting
+the operator read it keeps the same signal and discards nothing. At twenty to a couple of hundred animals a full scan is
 free, and the query is bounded by the herd, not by time.
 
 What is shown instead of filtered is **how long ago each match was typed**: "added 4 minutes ago",
@@ -415,9 +435,13 @@ two nameless, same sex/year   -> BD-0002 BD-0003 | warnings: 0
 
 The last block is the one that matters most. Two nameless animals of the same sex and arrival year
 are entered with no warning and no friction, because there is nothing to match on — and even had
-there been, nothing is blocked: no disabled submit, no checkbox to acknowledge. There is no dismiss
-either, deliberately: the warning clears when what was typed stops matching, and an "I know" button
-would only train the reflex of clicking one.
+there been, nothing is blocked: no disabled submit, no checkbox to acknowledge.
+
+**There is no dismiss button, and that is the anti-reflex-click principle rather than an omission.**
+It is the same argument that keeps the target attestation off the harness (`target.ts`) and keeps
+`/check` from having a badge that turns green: anything you clear by clicking becomes furniture, and
+then it is not a warning. This one clears by the input ceasing to match — so the only way to make it
+go away is to change what the registry is being told, which is the thing worth doing.
 
 Two implementation notes worth keeping:
 
@@ -632,11 +656,55 @@ could detect, and both lived in the one control every entry surface goes through
 paths through it; this closes the fourth and replaces the mechanism, so the rule in the header is
 discharged: real herd data can now go into the real registry.
 
-### 6.7 Keyboard pass
+### 6.7a Keyboard retrofit on the existing screens — BUILT
 
-Bigger than originally billed and it touches every screen: introduce `<form>` elements, Enter-submit,
-sane tab order, and key handling on the radiogroups. Sequenced after the date field so it lands on
-final markup rather than being done twice.
+`<form>` elements, Enter-submit, one tab stop per chip group, and a post-submit contract.
+**Row navigation is not here** — Enter-to-advance between rows belongs inside §5.1's own design,
+because it is that screen's premise rather than a retrofit onto it.
+
+**There was no `<form>` element anywhere in the registry**, and every button was `type="button"`,
+so Enter did nothing on any screen. All five surfaces are forms now, submitting on the **native**
+`submit` event with `preventDefault()`. Not `(ngSubmit)`: that is an output on FormsModule's
+`NgForm` directive, so without importing FormsModule it binds to nothing and the form falls through
+to a real browser submission that reloads the page. Caught by the specs, which saw zero requests.
+
+**`chip-group.ts` replaces five hand-rolled radiogroups.** They carried `role="radiogroup"` with no
+key handling at all, which *advertised* arrow-key navigation to anything reading the ARIA and
+delivered a row of independent tab stops instead — an accessibility defect as much as a speed one.
+One component now: roving tabindex so a group is **one** tab stop, arrows that move and select
+together, Home/End, and **digit accelerators that are printed on the chips** — a shortcut nobody can
+see is a shortcut nobody uses. First-letter selection too, but only where it is unambiguous;
+guessing between two labels sharing a letter moves the selection somewhere nobody asked for.
+
+Item 5 shrank this item considerably by deleting the four-way precision control, which was the
+largest radiogroup, and collapsing four date inputs into one.
+
+#### The post-submit contract, and why it is the interesting part
+
+**Twenty animals through a form is not twenty times eight fields — it is twenty round trips:**
+submit, wait, read the result, clear the fields, put the cursor back, scroll up. A list is one
+continuous typing motion. The field count was the wrong measure.
+
+So the round trip is what this collapses. After a write:
+
+1. **The per-animal fields clear.** `sex` deliberately survives — strong prior, and consecutive
+   animals in a backfill are usually the same sex. On `/calving` **the dam survives**, because a
+   cycle card is one animal's whole history and the next calving entered is almost always hers.
+2. **Focus returns to the first field** of the next record, deferred a frame — focusing before the
+   clearing render lands on an element Angular is about to replace, and focus falls to
+   `document.body`.
+3. **The write is announced** by serial, in an `aria-live="polite"` region and a persistent line in
+   the shell. A cleared form is *ambiguous*: it looks exactly like one never filled in. Polite
+   rather than assertive because it must not interrupt typing, which is the whole activity.
+
+None of the three happened before: `/add` kept the last animal's values, left focus on the submit
+button, and reported success only in a panel below the fold. Submitting twice in a row would have
+produced a near-duplicate — now also caught by §6.2a, but a form that invites the mistake is not
+fixed by a warning about it.
+
+### 6.7b Keyboard pass, remainder — NOT BUILT
+
+Whatever the five-animal trial shows is still missing. Deliberately left open rather than guessed.
 
 ### 6.8 Session band
 
@@ -661,7 +729,7 @@ sheet reference to the gate.
 
 ## 7. Domain model
 
-### 7.1 Terminology and life stage
+### 7.1 Terminology and life stage — FEMALE SIDE BUILT
 
 Local terms and their boundaries:
 
@@ -669,32 +737,61 @@ Local terms and their boundaries:
 - **choti** — grown female that has not yet calved
 - **majj / bhains** — female that has calved
 
-These map exactly onto calf / heifer / cow, so the existing status enum is likely already correct.
-The boundary rules are what need fixing:
+These map exactly onto calf / heifer / cow, so the existing status enum was already correct. Two
+boundary rules were not.
 
-1. `CALF_MAX_AGE_MONTHS = 18`, not 12 (`project.ts:56`).
-2. **The cow boundary is `parity >= 1`, not an age.** A choti becomes a majj by calving and by
-   nothing else. Verify what the status projection actually does — if any age rule contributes to
-   the cow transition, that is a bug, and it surfaces on exactly the animal most worth noticing: one
-   old enough to look like a cow who has never calved.
+**1. `CALF_MAX_AGE_MONTHS` is 18, not 12.** It is the scheme's **only** age threshold; every other
+boundary is derived from events the registry already holds.
 
-So the entire scheme contains one age threshold, and every boundary after it is derived from events
-the registry already holds.
+**2. Parity is checked BEFORE age, and the opposite order was a live bug.** The cow boundary is
+`parity >= 1` and nothing else — a choti becomes a majj by calving, and no amount of age does it.
+The age rule used to be evaluated first, so an animal that **had calved** projected as a `calf`
+whenever its recorded age fell under the threshold. Measured before the fix, at the old 12:
 
-**The age boundary is overridable.** The real katti→choti transition is physical — she gains weight
-and features — not arithmetic. 18 months is the default inference; an explicit event overrides it
-when the operator looks at her and says she is a choti now. Same principle as estimated precision:
-show the computed guess, let stated knowledge beat it. The cheapest shape for this is an open
-question — it may fit `note` with a payload, or need its own type.
+```
+ 8 months old, parity 0              -> calf
+ 8 months old, parity 1 (HAS CALVED) -> calf     <-- wrong
+```
 
-**Ambiguity at the boundary.** An animal with year-only or estimated birth precision sitting near 18
-months cannot be classified honestly. The status should say so rather than pick a side.
+And after, at 18:
 
-**Display the local terms, store the English enum.** `majj` carries the calving-defined meaning
-precisely where "cow" is ambiguous about it, and the local word is what anyone else touching the
-screen reads without thinking.
+```
+ 8 months old, parity 1 (HAS CALVED)  -> lactating
+15 months old, parity 0              -> calf
+ 5 years old, parity 0 (old maiden)  -> heifer
+```
 
-**Open: male terms.** Not yet confirmed. Leave the male side as it is and raise it as a decision.
+Buffalo gestation is about 310 days, so that combination is unreachable by biology. It is very
+reachable by a **birth-year typo during a backfill**, which is exactly what this application is for
+— and raising the threshold to 18 *widened* the window. The consequence was a milking animal
+displayed as a katti, which is the kind of wrong that makes an operator distrust the whole screen.
+
+Note the case most likely to expose an age-contaminated cow boundary — an animal old enough to look
+like a majj who has never calved — was **always right**, because rules 2 and 3 cannot fire at parity
+0. The bug ran the other way.
+
+**The local terms are displayed; the stored enum does not move.** `RegistryAnimalStatus` is what
+every projection and invariant is written against and two of its values are baked into demo tool
+`input_schema`s, so renaming it would be a repo-wide breaking change to achieve a UI improvement.
+`life-stage.ts` is a display mapping, and the stored value is on the element's `title` so the screen
+never hides it from anyone debugging.
+
+**`lactating` and `dry` are both `majj`**, shown as "majj · in milk" and "majj · dry": she has
+calved either way, and drying off does not undo that. The stage and the milking state are different
+facts and neither replaces the other.
+
+**The male side is deliberately untouched.** katta / jhota is unconfirmed, and on a dairy where
+bulls leave young it may not need a boundary at all. A guessed local term is worse than the English
+one, because it reads as authoritative to the next person. Still open.
+
+**The age boundary remains overridable in principle and is not built.** The real katti→choti
+transition is physical — she gains weight and features — not arithmetic. 18 months is the default
+inference; an explicit override event is an open item, as is how boundary ambiguity should surface
+when birth precision is year-only or estimated.
+
+**Anyone with stored projections must run `registry:rebuild`** after this change: status is
+`asOf`-dependent and the rule order moved. Moot today — the registry is empty — but it is a real
+invariant-1 violation if it is skipped.
 
 ### 7.2 Calving interval bands
 
@@ -811,15 +908,21 @@ idempotency keys live in an in-process `Map` precisely to keep it true (§6.2).
 | B2 | Near-duplicate detection on `/add` (§6.2a) | S |
 | 5 | Smart date field + "Estimated year" relabel + the half-entered optional date (§6.6) | M |
 
-**Pass 3 and after:**
+**Pass 3, done:**
 
 | # | Item | Size |
 |---|---|---|
-| 6 | Keyboard pass (§6.7) | M |
-| 7 | Roster pass, per-row estimated year (§5.1) | M |
-| 8 | Animal workbench + last-five-written strip (§5.2) | M |
+| 6a | Keyboard retrofit on existing screens + the post-submit contract (§6.7a) | M |
+| 10 | Life stage, female side: 18 months, parity-driven cow boundary, katti/choti/majj (§7.1) | S |
+
+**Next, and deliberately undecided:**
+
+| # | Item | Note |
+|---|---|---|
+| 7 | Roster pass (§5.1) | **Gated on evidence.** Five animals through the retrofitted `/add` first — see §11 |
+| 8 | Animal workbench + last-five-written strip (§5.2) | Treat its M as optimistic; see below |
 | 9 | Session band: in-place change + `source_ref` capture (§6.8) | S |
-| 10 | Life-stage model: `CALF_MAX_AGE_MONTHS`, parity-driven cow boundary, local terms (§7.1) | S |
+| 6b | Keyboard remainder (§6.7b) | Whatever the five-animal trial shows is missing |
 
 — cut line —
 
@@ -845,14 +948,21 @@ its M as optimistic and re-size it once item 7 has shown whether the pattern rec
 
 0 was a live bug in the control everything else touches. 3 and 4 are independent and cheap. B2 sits
 before 5 because it closes the `/add` duplicate hole (§6.2, hole 3) that would otherwise stay open
-across the whole backfill, and because §5.1 inherits its query. 5 is last in pass 2 and gates the
+across the whole backfill, and because §5.1 inherits its query. 5 was last in pass 2 and gated the
 backfill (§6.6).
 
-5 and 6 rewrite the same component and its specs, so they are adjacent and ordered so the keyboard
-work lands on final markup rather than being done twice. 7 precedes 8 because the workbench needs
-animals to show. 9 sits last above the line because `source_ref` capture earns most on the surface
-that does not exist yet. 10 rides with 8 because the boundary bug is invisible until a header
-renders it.
+**6a came before 7, which inverts the original order, and for a reason the original did not
+anticipate:** once §6.6 landed the gate opened, so 7 no longer unblocks anything — the backfill can
+start on `/add` and `/calving` today. What 6a makes bearable is therefore *the entry that is about
+to happen*, not a screen that does not exist yet. And 7's own keyboard needs are intrinsic to it:
+"Enter moves to the next row" is that screen's premise, not a retrofit onto it.
+
+**10 was pulled forward out of 8**, because a wrong life stage on every young animal — on the one
+screen the operator is about to live in — is not something to look at for a week. Pulling it forward
+is what surfaced the parity/age ordering bug, which no amount of reading the header comment had.
+
+8's M is optimistic: it deletes more implicit triggers than §6.3 did, and §6.3 is what taught us
+that replacing an interaction costs more than adding one. Re-size it after 7 is decided.
 
 ### Test budget
 
@@ -871,15 +981,22 @@ Two conventions established in pass 1 that pass 2 onward depends on, both record
 ## 11. Still open
 
 - Male terminology — katta, jhota, or something else, and whether the boundary matters on a dairy
-  where bulls leave young.
+  where bulls leave young. The male side of §7.1 is untouched pending this.
 - The cheapest shape for a manual life-stage override event.
 - How boundary ambiguity surfaces in status when birth precision is year-only or estimated.
 - Whether the roster pass survives the per-row year field or should be folded into the workbench.
 - Interval band numbers, to be retuned against real data once the backfill is in.
-- Whether items 6 (keyboard) and 7 (roster pass) should swap. 7 unblocks the backfill; 6 makes it
-  bearable. Open until pass 2 lands and the real cost of mouse-driven entry is measurable rather
-  than guessed.
-- `intervals.ts` carries a literal NUL byte as a composite map key separator, which makes git treat
-  the file as binary and every diff of it unreadable. Its join and split agree, so it is correct —
-  just undiffable. `idempotency.ts` had the same and now spells it as an escape behind a named
-  const; `intervals.ts` should follow, as a one-line change nobody has authorised yet.
+- **Whether the roster pass (§5.1) is needed at all.** Resolved to be decided by evidence rather
+  than argument: the keyboard retrofit (§6.7a) was built as if it were the whole answer, and five
+  animals — the hardest dates and longest calving histories — go through the retrofitted `/add`
+  before the question is reopened. The measure is the round trip, not the field count: twenty
+  animals through a form is twenty submit-wait-clear-refocus cycles against a list's one continuous
+  typing motion. Whether that gap still matters depends on how the post-submit reset actually
+  feels.
+- **The override belongs in a column, not the payload.** The reasoning is in `types.ts`: a column is
+  uniform across event types, queryable without `json_extract`, and sits beside the other provenance
+  fields it resembles. It lives in the payload only because a column costs a migration and the build
+  order's standing claim is that everything above the cut line lands without one. **Do not migrate
+  for this alone** — bundle it into whichever migration lands next, most likely item 12
+  (merge/supersede), which needs one anyway. The move is mechanical on a table whose
+  create-copy-drop-rename rebuild is already proven twice.

@@ -38,13 +38,22 @@ import { lactationIdFor } from './events';
 // ---------------------------------------------------------------------------
 
 /**
- * Age below which an animal projects as `calf`, in months.
+ * Age below which an animal projects as `calf` -- a KATTI -- in months.
  *
- * PROVISIONAL, and policy rather than biology. 12 is the decision doc's working
- * value and has no farm evidence behind it yet -- it is awaiting confirmation
- * of how the farm actually talks about the animals (decision doc §14 q7). If it
- * changes, only rule 2 below moves, and `registry:rebuild` republishes every
- * status; nothing stored depends on the old value.
+ * 18, confirmed against how the farm actually talks about the animals. It was
+ * 12, which was a working guess with no farm evidence behind it.
+ *
+ * THIS IS THE SCHEME'S ONLY AGE THRESHOLD, and that is the point: every other
+ * boundary is derived from events the registry already holds. A katti becomes a
+ * choti by getting older; a choti becomes a majj by CALVING, and by nothing
+ * else. See the rule order below for why that distinction is load-bearing.
+ *
+ * Still policy rather than biology, and provisional in one respect: the real
+ * katti->choti transition is physical -- she gains weight and features -- not
+ * arithmetic. 18 months is the default inference, and an explicit life-stage
+ * override event is an open item. If it changes, only rule 4 below moves, and
+ * `registry:rebuild` republishes every status; nothing stored depends on the
+ * old value.
  *
  * Deliberately NOT placed alongside FARM_TZ / WORK_HOURS / RESTRICTED_ZONES.
  * Those are exports of farm/classify.ts, whose subject is cameras and people
@@ -53,7 +62,7 @@ import { lactationIdFor } from './events';
  * named, exported, commented constant at the top of the module that owns the
  * rule -- which is this one.
  */
-export const CALF_MAX_AGE_MONTHS = 12;
+export const CALF_MAX_AGE_MONTHS = 18;
 
 // ---------------------------------------------------------------------------
 // Event-stream helpers
@@ -302,16 +311,40 @@ export function projectParentage(
  * Status rules, evaluated in order, first match wins (decision doc §9).
  *
  *   1. departed  -- a `departure` event exists. Terminal.
- *   2. calf      -- birth date known and age < CALF_MAX_AGE_MONTHS.
- *   3. lactating -- parity >= 1 and an open lactation exists.
- *   4. dry       -- parity >= 1 and no open lactation.
+ *   2. lactating -- parity >= 1 and an open lactation exists.
+ *   3. dry       -- parity >= 1 and no open lactation.
+ *   4. calf      -- birth date known and age < CALF_MAX_AGE_MONTHS.
  *   5. heifer    -- female, parity 0.
  *   6. male      -- male, parity 0.
  *
- * If the birth date is UNKNOWN, rule 2 cannot fire and the animal falls through
- * to heifer/male even if it is visibly a calf. That is a documented consequence,
- * not a bug: the fix is to enter an estimated birth date, which the precision
- * qualifier makes safe to do.
+ * ---------------------------------------------------------------------------
+ * PARITY IS CHECKED BEFORE AGE, AND THE OPPOSITE ORDER WAS A BUG
+ * ---------------------------------------------------------------------------
+ * The cow boundary is `parity >= 1` and NOTHING ELSE. A choti becomes a majj by
+ * calving; no amount of age does it, and no youth undoes it.
+ *
+ * The age rule used to be evaluated FIRST, which meant an animal that HAD
+ * CALVED projected as a `calf` whenever its recorded age fell under the
+ * threshold. Measured before the fix, at the old threshold of 12:
+ *
+ *     8 months old, parity 0              -> calf
+ *     8 months old, parity 1 (HAS CALVED) -> calf     <-- wrong
+ *
+ * Buffalo gestation is about 310 days, so that combination is not reachable by
+ * biology. It is very reachable by a BIRTH-YEAR TYPO during a backfill, which
+ * is precisely what this application is for -- and raising the threshold to 18
+ * widens the window in which one produces it. The consequence was a milking
+ * animal displayed as a katti, which is the kind of wrong that makes an
+ * operator distrust the whole screen.
+ *
+ * The reverse case was always right: an animal old enough to look like a majj
+ * who has never calved projects `heifer`, because rules 2 and 3 cannot fire at
+ * parity 0.
+ *
+ * If the birth date is UNKNOWN, rule 4 cannot fire and a parity-0 animal falls
+ * through to heifer/male even if it is visibly a calf. That is a documented
+ * consequence, not a bug: the fix is to enter an estimated birth date, which
+ * the precision qualifier makes safe to do.
  */
 export function projectStatus(opts: {
   animal: RegistryAnimalRow;
@@ -338,10 +371,11 @@ export function projectStatus(opts: {
 
   const status: RegistryAnimalStatus = (() => {
     if (ordered.some((e) => e.type === 'departure')) return 'departed';
+    // The cow boundary, event-driven and ahead of every age test.
+    if (parity >= 1) return open ? 'lactating' : 'dry';
     if (birth_on !== null && monthsBetween(birth_on, asOf) < CALF_MAX_AGE_MONTHS) {
       return 'calf';
     }
-    if (parity >= 1) return open ? 'lactating' : 'dry';
     return animal.sex === 'female' ? 'heifer' : 'male';
   })();
 

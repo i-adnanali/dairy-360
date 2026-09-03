@@ -3,6 +3,7 @@
 
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
 import { RegistryApi } from './api';
+import { lifeStageLabel } from './life-stage';
 import { EventList } from './event-list';
 import { EventForm } from './event-form';
 import { CorrectionForm } from './correction-form';
@@ -23,8 +24,12 @@ type Tab = 'events' | 'add-event' | 'correct';
           <div class="flex flex-wrap items-baseline gap-x-3">
             <h2 class="font-mono text-xl font-semibold text-farm-900" data-role="serial">{{ d.animal.id }}</h2>
             @if (d.animal.name) { <span class="text-lg text-farm-800">{{ d.animal.name }}</span> }
+            <!-- The farm's word, with the stored enum on hover. 'majj' says in
+                 one word what "cow" is vague about: she has calved. -->
             <span class="rounded-full bg-farm-200 px-2 py-0.5 text-xs font-medium text-farm-800"
-              data-role="status">{{ d.status?.status ?? 'no projection' }}</span>
+              data-role="status"
+              [title]="d.status ? 'stored as ' + d.status.status : ''"
+            >{{ stage(d) }}</span>
           </div>
           <dl class="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
             <div class="flex gap-2"><dt class="text-farm-600">Sex</dt><dd class="text-farm-900">{{ d.animal.sex }}</dd></div>
@@ -76,6 +81,11 @@ type Tab = 'events' | 'add-event' | 'correct';
   `,
 })
 export class AnimalDetailView {
+  /** The farm's word for this animal's stage. Stored enum unchanged. */
+  protected stage(d: Detail): string {
+    return d.status === null ? 'no projection' : lifeStageLabel(d.status.status, d.animal.sex);
+  }
+
   /** The route parameter, bound by withComponentInputBinding(). */
   readonly id = input.required<string>();
 

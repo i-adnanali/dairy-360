@@ -15,6 +15,7 @@ import { CorrectionForm } from './correction-form';
 import { CalvingForm } from './calving-form';
 import { SessionGate } from './session-gate';
 import { Session } from './session';
+import { WriteLog } from './after-write';
 import type { TimelineEvent } from './types';
 
 const BASE = '/api/registry';
@@ -75,6 +76,117 @@ function enterDate(
   input.dispatchEvent(new Event('input'));
   fixture.detectChanges();
 }
+
+describe('item 6a — the keyboard retrofit', () => {
+  /** Flush the identifier-values request /add fires on mount. */
+  function mountAdd(http: HttpTestingController) {
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    http.match((r) => r.url.startsWith(`${BASE}/identifier-values`)).forEach((r) =>
+      r.flush({ observed_by: [], acquired_from: [], sire_ref: [] }),
+    );
+    fixture.detectChanges();
+    return { fixture, el: fixture.nativeElement as HTMLElement };
+  }
+
+  it('ENTER IN A TEXT FIELD SUBMITS, which nothing in the registry used to do', async () => {
+    // There was no <form> element anywhere and every button was type="button",
+    // so Enter did nothing on any screen.
+    const { http } = setup();
+    const { fixture, el } = mountAdd(http);
+    enterDate(fixture, el, '2019');
+
+    const form = el.querySelector('form')!;
+    expect(form).not.toBeNull();
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await settle(fixture);
+
+    const req = http.expectOne(`${BASE}/animals`);
+    expect(req.request.body.acquired_on).toBe('2019-01-01');
+  });
+
+  it('does not let the browser navigate away on submit', async () => {
+    // The native event needs preventDefault. `(ngSubmit)` would not have bound
+    // at all without FormsModule -- the form would have done a real submission
+    // and reloaded the page.
+    const { http } = setup();
+    const { fixture, el } = mountAdd(http);
+    enterDate(fixture, el, '2019');
+    const e = new Event('submit', { bubbles: true, cancelable: true });
+    el.querySelector('form')!.dispatchEvent(e);
+    expect(e.defaultPrevented).toBe(true);
+    http.expectOne(`${BASE}/animals`);
+  });
+
+  it('the submit button is type=submit, so Enter and the mouse take one path', async () => {
+    const { http } = setup();
+    const { el } = mountAdd(http);
+    expect(el.querySelector('[data-role="submit"]')!.getAttribute('type')).toBe('submit');
+  });
+
+  // --- the post-submit contract ------------------------------------------
+
+  async function writeOne() {
+    const ctx = setup();
+    const { fixture, el } = mountAdd(ctx.http);
+    const name = el.querySelector('[data-role="name"]') as HTMLInputElement;
+    name.value = 'Kali';
+    name.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    enterDate(fixture, el, '2019');
+    click(el, '[data-role="submit"]');
+    ctx.http.expectOne(`${BASE}/animals`).flush({
+      animal_id: 'BD-0004',
+      animal: { animal: { id: 'BD-0004', name: 'Kali' }, status: null, events: [] },
+    });
+    await settle(fixture);
+    ctx.http.match((r) => r.url.startsWith(`${BASE}/identifier-values`)).forEach((r) =>
+      r.flush({ observed_by: [], acquired_from: [], sire_ref: [] }),
+    );
+    await settle(fixture);
+    return { ...ctx, fixture, el, name };
+  }
+
+  it('CLEARS the per-animal fields after a write', async () => {
+    // Twenty animals is twenty round trips, not twenty times eight fields.
+    // Leaving the last animal's values in place is what made the next submit a
+    // near-duplicate, and a form that invites the mistake is not fixed by a
+    // warning about it.
+    const { el, name } = await writeOne();
+    expect(name.value).toBe('');
+    const date = el.querySelector('[data-role="date-text"]') as HTMLInputElement;
+    expect(date.value).toBe('');
+  });
+
+  it('KEEPS sex, which has a strong prior', async () => {
+    // Consecutive animals in a backfill are usually the same sex. Re-answering
+    // it twenty times is the tax the defaults rule exists to avoid.
+    const { el } = await writeOne();
+    expect(el.querySelector('[data-chip="female"]')!.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('ANNOUNCES the write, naming the serial, in a live region', async () => {
+    // A cleared form is ambiguous: it looks exactly like one never filled in.
+    // So something has to say which serial was written, without being looked
+    // for -- and aria-live="polite" so it does not interrupt typing.
+    const { fixture } = await writeOne();
+    const shell = TestBed.inject(WriteLog);
+    expect(shell.last()).toContain('BD-0004');
+    expect(shell.last()).toContain('Kali');
+    expect(shell.last()).toContain('Ready for the next');
+    fixture.detectChanges();
+  });
+
+  it('BLOCKS the next submit until the required date is re-entered', async () => {
+    // The reset is honest about what it cleared: an empty required date blocks,
+    // so the cleared form cannot be submitted as a duplicate by a stray Enter.
+    const { el } = await writeOne();
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain(
+      'Enter the arrival date',
+    );
+  });
+});
 
 describe('CalvingForm', () => {
   // There was no spec for this form before. The wiring most likely to break is
@@ -289,7 +401,7 @@ describe('overridden checks', () => {
     fixture.componentRef.setInput('animalId', 'BD-0001');
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    click(el, '[data-type="dry_off"]');
+    click(el, '[data-chip="dry_off"]');
     fixture.detectChanges();
     enterDate(fixture, el, 'Aug 2024');
 
@@ -336,7 +448,7 @@ describe('overridden checks', () => {
     fixture.componentRef.setInput('animalId', 'BD-0001');
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    click(el, '[data-type="dry_off"]');
+    click(el, '[data-chip="dry_off"]');
     fixture.detectChanges();
     enterDate(fixture, el, 'Aug 2024');
     click(el, '[data-role="submit"]');
@@ -397,7 +509,17 @@ describe('idempotency key', () => {
     const first = http.expectOne(`${BASE}/animals`);
     const key = first.request.headers.get('Idempotency-Key');
     first.flush({ animal_id: 'BD-0001', animal: { animal: { id: 'BD-0001', name: null }, status: null, events: [] } });
-    await fixture.whenStable();
+    await settle(fixture);
+    http.match((r) => r.url.startsWith(`${BASE}/identifier-values`)).forEach((r) =>
+      r.flush({ observed_by: [], acquired_from: [], sire_ref: [] }),
+    );
+    await settle(fixture);
+
+    // The date has to be RE-ENTERED, because a successful write now clears the
+    // per-animal fields and returns focus to the first one -- see after-write.ts.
+    // That is the post-submit reset working, and it is why this spec can no
+    // longer just click submit twice.
+    enterDate(fixture, el, '2019');
     fixture.detectChanges();
 
     // The same body a second time. Two identical roster rows are two animals,
@@ -418,7 +540,7 @@ describe('idempotency key', () => {
     fixture.componentRef.setInput('animalId', 'BD-0001');
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    click(el, '[data-type="dry_off"]');
+    click(el, '[data-chip="dry_off"]');
     fixture.detectChanges();
     enterDate(fixture, el, 'May 2024');
 
@@ -450,7 +572,7 @@ describe('SessionGate', () => {
     const start = el.querySelector('[data-role="start"]') as HTMLButtonElement;
     expect(start.disabled).toBe(true);
 
-    click(el, '[data-source-form="recall"]');
+    click(el, '[data-chip="recall"]');
     fixture.detectChanges();
     expect((el.querySelector('[data-role="start"]') as HTMLButtonElement).disabled).toBe(true);
 
@@ -633,7 +755,7 @@ describe('EventForm', () => {
 
   it('requires a reason for a departure and sends it', () => {
     const { http, fixture, el } = mount();
-    click(el, '[data-type="departure"]');
+    click(el, '[data-chip="departure"]');
     fixture.detectChanges();
     enterDate(fixture, el, 'May 2024');
     const sel = el.querySelector('[data-role="reason"]') as HTMLSelectElement;
@@ -655,14 +777,14 @@ describe('EventForm', () => {
     // Not in the event form; this is the calving form's warning. Here we check
     // the departure form at least states that departure is terminal.
     const { fixture, el } = mount();
-    click(el, '[data-type="departure"]');
+    click(el, '[data-chip="departure"]');
     fixture.detectChanges();
     expect(el.textContent).toContain('terminal');
   });
 
   it('offers an explicit override when the server refuses on a terminal departure', async () => {
     const { http, fixture, el } = mount();
-    click(el, '[data-type="dry_off"]');
+    click(el, '[data-chip="dry_off"]');
     fixture.detectChanges();
     enterDate(fixture, el, 'May 2024');
     click(el, '[data-role="submit"]');

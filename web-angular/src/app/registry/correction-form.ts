@@ -4,10 +4,13 @@
 // see calvings -> pick one -> correct, because an event id is not something a
 // human should type.
 
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, computed, inject, input, signal, viewChild,
+} from '@angular/core';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { WriteLog } from './after-write';
 import { PrecisionDateControl, dateBlocker } from './precision-date';
 import type { DateEntry } from './precision-date';
 import type { TimelineEvent } from './types';
@@ -19,7 +22,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PrecisionDateControl],
   template: `
-    <div class="space-y-4">
+    <form class="space-y-4" (submit)="onSubmit($event)">
       <div class="rounded-xl border border-farm-300 bg-white p-4">
         <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
           Which calving is the date wrong on?
@@ -92,7 +95,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
           </div>
         }
 
-        <button type="button" data-role="submit" (click)="submit()" [disabled]="!canSubmit()"
+        <button type="submit" data-role="submit" [disabled]="!canSubmit()"
           class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
         >{{ state.submitting() ? 'Correcting…' : 'Apply correction' }}</button>
       }
@@ -112,15 +115,32 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
           </p>
         </div>
       }
-    </div>
+    </form>
   `,
 })
 export class CorrectionForm {
+  /**
+   * The NATIVE submit event, not FormsModule's `ngSubmit`.
+   *
+   * `(ngSubmit)` is an output on the `NgForm` directive, so without importing
+   * FormsModule it binds to nothing at all -- the form falls through to a real
+   * browser submission and the page reloads. Caught by the specs, which saw
+   * zero requests. The native event needs `preventDefault()` for the same
+   * reason, and avoids pulling in a forms library this app does not otherwise
+   * use.
+   */
+  protected onSubmit(e: Event): void {
+    e.preventDefault();
+    this.submit();
+  }
+
   readonly events = input.required<TimelineEvent[]>();
   readonly done = input<(() => void) | null>(null);
 
   private readonly api = inject(RegistryApi);
   private readonly session = inject(Session);
+  private readonly writeLog = inject(WriteLog);
+  private readonly dateControl = viewChild(PrecisionDateControl);
 
   protected readonly fields = FIELDS;
   protected readonly state = new FormState<{
@@ -164,8 +184,10 @@ export class CorrectionForm {
     this.allowDuplicate.set(false);
     if (r) {
       this.target.set('');
+      this.dateControl()?.reset();
       this.when.set({ status: 'empty' });
       this.overrideReason.set('');
+      this.writeLog.announce('Correction written. The superseded events remain in the log.');
       this.done()?.();
     }
   }

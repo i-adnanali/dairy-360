@@ -2,6 +2,7 @@
 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { WriteLog } from './after-write';
 import { Session } from './session';
 import { SessionBar } from './session-bar';
 import { SessionGate } from './session-gate';
@@ -32,6 +33,23 @@ import { SessionGate } from './session-gate';
         </div>
       </header>
 
+      <!-- WHAT JUST HAPPENED, without looking for it.
+           A cleared form is ambiguous: it looks exactly like a form that was
+           never filled in. So the write says which serial it wrote, in a live
+           region a screen reader announces and in a line that persists until
+           the next write replaces it. Not a toast -- an operator who looks up
+           five seconds later should not have to reconstruct it from the herd
+           list.
+           'aria-live="polite"' rather than assertive: it must not interrupt
+           typing, which is the entire activity here. -->
+      <div aria-live="polite" aria-atomic="true" class="sr-only" data-role="write-announce">
+        {{ writeLog.last() }}
+      </div>
+      @if (writeLog.last(); as msg) {
+        <div class="border-b border-green-200 bg-green-50 px-4 py-1.5 text-center text-xs font-medium text-green-900"
+          data-role="write-log">{{ msg }}</div>
+      }
+
       <main class="flex-1 overflow-y-auto px-4 py-6">
         @if (session.ready()) {
           <router-outlet />
@@ -44,4 +62,5 @@ import { SessionGate } from './session-gate';
 })
 export class RegistryShell {
   protected readonly session = inject(Session);
+  protected readonly writeLog = inject(WriteLog);
 }

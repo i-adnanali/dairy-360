@@ -70,7 +70,7 @@ async function settle(
 
 async function fillProvenance(fixture: { detectChanges: () => void; nativeElement: unknown }) {
   const e = el(fixture);
-  (e.querySelector('[data-source-form="recall"]') as HTMLButtonElement).click();
+  (e.querySelector('[data-chip="recall"]') as HTMLButtonElement).click();
   const who = e.querySelector('[data-role="recorded-by"]') as HTMLInputElement;
   who.value = 'adnan';
   who.dispatchEvent(new Event('input'));

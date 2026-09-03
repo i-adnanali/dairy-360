@@ -381,18 +381,45 @@ test('rule 1: departed is terminal and beats everything below it', () => {
   assert.equal(s.parity, 1, 'parity is still counted for a departed animal');
 });
 
-test('rule 2: calf below the threshold, and not above it', () => {
+test('rule 4: katti below the threshold, choti at or above it', () => {
   const birth = (on: string) =>
     ev({ type: 'birth', occurred_on: on, payload: { dam_id: 'BD-0009' } });
-  assert.equal(statusOf([birth('2026-06-01')], '2026-09-01').status, 'calf');
+  assert.equal(statusOf([birth('2026-06-01')], '2026-09-01').status, 'calf', '3 months');
+  assert.equal(statusOf([birth('2025-06-01')], '2026-09-01').status, 'calf', '15 months');
   // Exactly at the threshold is no longer a calf: the rule is age < MAX.
-  assert.equal(statusOf([birth('2025-09-01')], '2026-09-01').status, 'heifer');
-  assert.equal(CALF_MAX_AGE_MONTHS, 12);
+  assert.equal(statusOf([birth('2025-03-01')], '2026-09-01').status, 'heifer', '18 months');
+  assert.equal(CALF_MAX_AGE_MONTHS, 18);
+});
+
+test('PARITY BEATS AGE: an animal that has calved is never a calf', () => {
+  // The cow boundary is parity >= 1 and nothing else. This ordering used to be
+  // reversed, so an animal with a mistyped birth year that HAD CALVED projected
+  // as a calf -- a milking majj displayed as a katti. Buffalo gestation is ~310
+  // days so biology cannot reach it, but a backfill typo reaches it easily, and
+  // raising the threshold to 18 widened the window.
+  const events = [
+    ev({ type: 'birth', occurred_on: '2026-01-01', payload: { dam_id: 'BD-0009' } }),
+    ev({ type: 'calving', occurred_on: '2026-08-01' }),
+  ];
+  const s = statusOf(events, '2026-09-01');
+  assert.equal(s.status, 'lactating', '8 months old and parity 1 is a majj, not a katti');
+  assert.equal(s.parity, 1);
+});
+
+test('and the reverse was always right: an old maiden is a choti, not a majj', () => {
+  // The case most likely to expose an age-contaminated cow boundary. It never
+  // was contaminated in this direction -- rules 2 and 3 cannot fire at parity 0.
+  const s = statusOf(
+    [ev({ type: 'birth', occurred_on: '2019-01-01', payload: { dam_id: 'BD-0009' } })],
+    '2026-09-01',
+  );
+  assert.equal(s.status, 'heifer');
+  assert.equal(s.parity, 0);
 });
 
 test('an unknown birth date falls through to heifer -- the documented consequence', () => {
   const s = statusOf([ev({ type: 'acquired', occurred_on: '2026-08-01', payload: {} })], '2026-09-01');
-  assert.equal(s.status, 'heifer', 'rule 2 cannot fire without a birth date');
+  assert.equal(s.status, 'heifer', 'rule 4 cannot fire without a birth date');
   assert.equal(s.birth_on, null);
 });
 
@@ -450,7 +477,8 @@ test('asOf is what makes the projection reproducible -- a later date can change 
   // stored status is a real invariant-1 violation.
   const events = [ev({ type: 'birth', occurred_on: '2026-01-01', payload: { dam_id: 'BD-0009' } })];
   assert.equal(projectAnimal({ animal: FEMALE, events, asOf: '2026-06-01' }).status.status, 'calf');
-  assert.equal(projectAnimal({ animal: FEMALE, events, asOf: '2027-06-01' }).status.status, 'heifer');
+  // 18 months after 2026-01-01. At the old threshold of 12 this was 2027-06-01.
+  assert.equal(projectAnimal({ animal: FEMALE, events, asOf: '2027-07-01' }).status.status, 'heifer');
 });
 
 // ---------------------------------------------------------------------------

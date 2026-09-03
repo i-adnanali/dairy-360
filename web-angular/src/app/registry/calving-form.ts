@@ -24,12 +24,17 @@
 // cannot be linked. So the order is still forced: precision, date, then the
 // calf. That is the server's rule, not a UI preference.
 
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild, viewChildren,
+} from '@angular/core';
+import type { ElementRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { WriteLog, focusAfterWrite } from './after-write';
 import { CalfPicker } from './calf-picker';
+import { ChipGroup } from './chip-group';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
 import { PrecisionDateControl, dateBlocker } from './precision-date';
@@ -42,9 +47,10 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
 @Component({
   selector: 'app-calving-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CalfPicker, IdentifierInput, PrecisionDateControl, RouterLink],
+  imports: [CalfPicker, ChipGroup, IdentifierInput, PrecisionDateControl, RouterLink],
   template: `
-    <div class="mx-auto max-w-2xl space-y-4">
+    <!-- A real <form>: Enter submits from any text field. -->
+    <form class="mx-auto max-w-2xl space-y-4" (submit)="onSubmit($event)">
       <header>
         <h2 class="text-lg font-semibold text-farm-900">Record a calving</h2>
         <p class="mt-1 text-sm text-farm-600">
@@ -67,7 +73,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             and it will be here when you come back.
           </p>
         } @else {
-          <select data-role="dam" [value]="damId()" (change)="setDam($any($event.target).value)"
+          <select #firstField data-role="dam" [value]="damId()" (change)="setDam($any($event.target).value)"
             class="w-full max-w-sm rounded-lg border border-farm-300 px-2 py-1.5 text-sm">
             <option value="">Choose a dam…</option>
             @for (d of dams(); track d.id) {
@@ -92,26 +98,18 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       <div class="rounded-xl border border-farm-300 bg-white p-4 space-y-4">
         <div>
           <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Calf sex</div>
-          <div class="flex gap-2">
-            @for (s of sexes; track s) {
-              <button type="button" [attr.data-calf-sex]="s" (click)="setCalfSex(s)"
-                class="rounded-lg border px-3 py-1.5 text-sm capitalize"
-                [class]="calfSex() === s ? 'border-farm-600 bg-farm-600 text-white' : 'border-farm-300 bg-white text-farm-800'"
-              >{{ s }}</button>
-            }
-          </div>
+          <app-chip-group
+            name="calf-sex" label="Calf sex" [options]="sexChips" [value]="calfSex()"
+            (changed)="setCalfSex($any($event))"
+          />
         </div>
 
         <div>
           <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Outcome</div>
-          <div class="flex flex-wrap gap-2">
-            @for (o of outcomes; track o.value) {
-              <button type="button" [attr.data-outcome]="o.value" (click)="setOutcome(o.value)"
-                class="rounded-lg border px-3 py-1.5 text-sm"
-                [class]="outcome() === o.value ? 'border-farm-600 bg-farm-600 text-white' : 'border-farm-300 bg-white text-farm-800'"
-              >{{ o.label }}</button>
-            }
-          </div>
+          <app-chip-group
+            name="outcome" label="Outcome" [options]="outcomes" [value]="outcome()"
+            (changed)="setOutcome($any($event))"
+          />
           <p class="mt-1.5 text-xs text-farm-600">
             A calf that did not live is still recorded as an animal, still opens the lactation, and
             still counts toward parity and the calving interval.
@@ -171,7 +169,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       }
 
       <div class="flex items-center gap-3">
-        <button type="button" data-role="submit" (click)="submit()" [disabled]="!canSubmit()"
+        <button type="submit" data-role="submit" [disabled]="!canSubmit()"
           class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
         >{{ state.submitting() ? 'Saving…' : 'Record calving' }}</button>
         @if (blockedReason(); as r) {
@@ -200,17 +198,39 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
           </div>
         </div>
       }
-    </div>
+    </form>
   `,
 })
 export class CalvingForm {
+  /**
+   * The NATIVE submit event, not FormsModule's `ngSubmit`.
+   *
+   * `(ngSubmit)` is an output on the `NgForm` directive, so without importing
+   * FormsModule it binds to nothing at all -- the form falls through to a real
+   * browser submission and the page reloads. Caught by the specs, which saw
+   * zero requests. The native event needs `preventDefault()` for the same
+   * reason, and avoids pulling in a forms library this app does not otherwise
+   * use.
+   */
+  protected onSubmit(e: Event): void {
+    e.preventDefault();
+    this.submit();
+  }
+
   private readonly api = inject(RegistryApi);
   private readonly router = inject(Router);
   private readonly session = inject(Session);
   protected readonly identifiers = inject(Identifiers);
+  private readonly writeLog = inject(WriteLog);
+
+  private readonly firstField = viewChild<ElementRef<HTMLSelectElement>>('firstField');
+  private readonly dateControls = viewChildren(PrecisionDateControl);
 
   protected readonly fields = FIELDS;
-  protected readonly sexes: RegistrySex[] = ['female', 'male'];
+  protected readonly sexChips = [
+    { value: 'female', label: 'female' },
+    { value: 'male', label: 'male' },
+  ];
   protected readonly outcomes: { value: CalvingOutcome; label: string }[] = [
     { value: 'live', label: 'Live' },
     { value: 'stillborn', label: 'Stillborn' },
@@ -363,6 +383,19 @@ export class CalvingForm {
       this.overrideReason.set('');
       void this.identifiers.refresh();
       void this.loadCandidates(this.damId(), this.calfSex(), w);
+
+      // THE DAM SURVIVES, deliberately. A cycle card is one animal's whole
+      // history, so the next calving entered is almost always the same dam's
+      // next one -- clearing her would mean re-picking her from a dropdown
+      // between every calving, which is the round trip this exists to remove.
+      for (const c of this.dateControls()) c.reset();
+      this.when.set({ status: 'empty' });
+      this.sireRef.set('');
+      this.observedBy.set('');
+      this.writeLog.announce(
+        `Wrote a calving on ${this.damId()} — calf ${r.calf_id}${r.linked ? ', linked' : ', created'}. Ready for the next.`,
+      );
+      focusAfterWrite(this.firstField()?.nativeElement);
     }
   }
 

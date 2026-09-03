@@ -18,6 +18,7 @@
 // See target.ts for why the harness deliberately is not asked to confirm.
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChipGroup } from './chip-group';
 import { Session } from './session';
 import { Target } from './target';
 import type { SourceForm } from './types';
@@ -25,8 +26,10 @@ import type { SourceForm } from './types';
 @Component({
   selector: 'app-session-gate',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ChipGroup],
   template: `
-    <div class="mx-auto max-w-lg rounded-2xl border border-farm-300 bg-white p-6" data-role="gate">
+    <form class="mx-auto max-w-lg rounded-2xl border border-farm-300 bg-white p-6"
+      data-role="gate" (submit)="onSubmit($event)">
       <h2 class="text-lg font-semibold text-farm-900">Before entering anything</h2>
       <p class="mt-1 text-sm text-farm-600">
         Both of these go on every record you write in this session. They are asked once rather
@@ -38,17 +41,10 @@ import type { SourceForm } from './types';
         <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
           Where is this coming from?
         </div>
-        <div class="space-y-1">
-          @for (f of forms; track f.value) {
-            <button type="button" [attr.data-source-form]="f.value" (click)="form.set(f.value)"
-              class="block w-full rounded-lg border px-3 py-2 text-left text-sm"
-              [class]="form() === f.value ? 'border-farm-600 bg-farm-100' : 'border-farm-300 bg-white hover:border-farm-400'"
-            >
-              <span class="font-medium text-farm-900">{{ f.label }}</span>
-              <span class="ml-2 text-xs text-farm-600">{{ f.hint }}</span>
-            </button>
-          }
-        </div>
+        <app-chip-group
+          name="source-form" label="Where is this coming from?" [vertical]="true"
+          [options]="forms" [value]="form()" (changed)="form.set($any($event))"
+        />
       </div>
 
       <label class="mt-5 block">
@@ -116,13 +112,28 @@ import type { SourceForm } from './types';
         </div>
       }
 
-      <button type="button" data-role="start" (click)="start()" [disabled]="!canStart()"
+      <button type="submit" data-role="start" [disabled]="!canStart()"
         class="mt-5 w-full rounded-xl bg-farm-600 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
       >Start entering</button>
-    </div>
+    </form>
   `,
 })
 export class SessionGate {
+  /**
+   * The NATIVE submit event, not FormsModule's `ngSubmit`.
+   *
+   * `(ngSubmit)` is an output on the `NgForm` directive, so without importing
+   * FormsModule it binds to nothing at all -- the form falls through to a real
+   * browser submission and the page reloads. Caught by the specs, which saw
+   * zero requests. The native event needs `preventDefault()` for the same
+   * reason, and avoids pulling in a forms library this app does not otherwise
+   * use.
+   */
+  protected onSubmit(e: Event): void {
+    e.preventDefault();
+    this.start();
+  }
+
   protected readonly session = inject(Session);
   protected readonly target = inject(Target);
 

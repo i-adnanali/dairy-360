@@ -210,6 +210,19 @@ export class PrecisionDateControl {
     });
   }
 
+  /**
+   * Clear the field, for a parent starting the next record.
+   *
+   * The control owns its text, so a parent clearing only its own copy of the
+   * emitted value would leave the date on screen -- the same trap CalfPicker's
+   * reset() exists for.
+   */
+  reset(): void {
+    this.text.set('');
+    this.time.set('');
+    this.estimated.set(false);
+  }
+
   /** The completed value, or null. For a parent that only wants the happy path. */
   readonly value = computed<PrecisionDate | null>(() => {
     const e = this.entry();

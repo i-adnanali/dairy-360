@@ -10,6 +10,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { RegistryApi } from './api';
+import { lifeStageLabel } from './life-stage';
 import type { HerdRow } from './types';
 
 @Component({
@@ -77,9 +78,13 @@ import type { HerdRow } from './types';
                   </td>
                   <td class="px-3 py-2 text-farm-800">{{ r.name ?? '—' }}</td>
                   <td class="px-3 py-2 text-farm-700">{{ r.sex }}</td>
-                  <td class="px-3 py-2" data-role="status">
+                  <!-- The local term, with what the enum actually holds on hover:
+                       the screen shows the farm's word and never hides the
+                       stored value from anyone debugging it. -->
+                  <td class="px-3 py-2" data-role="status"
+                    [title]="r.status ? 'stored as ' + r.status : ''">
                     <span class="rounded-full bg-farm-200 px-2 py-0.5 text-xs font-medium text-farm-800">
-                      {{ r.status ?? 'no projection' }}
+                      {{ r.status ? stage(r) : 'no projection' }}
                     </span>
                   </td>
                   <td class="px-3 py-2 text-right text-farm-800">{{ r.parity ?? '—' }}</td>
@@ -105,6 +110,11 @@ import type { HerdRow } from './types';
   `,
 })
 export class HerdList {
+  /** The farm's word for this animal's stage. Stored enum unchanged. */
+  protected stage(r: HerdRow): string {
+    return lifeStageLabel(r.status, r.sex);
+  }
+
   private readonly api = inject(RegistryApi);
 
   protected readonly rows = signal<HerdRow[] | null>(null);
