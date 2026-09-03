@@ -1,24 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    }).compileComponents();
-  });
-
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it('renders the chat panel shell', async () => {
+  // The root became a router shell in the registry cycle. It used to hold
+  // <app-chat-panel /> directly; the chat panel now lives at /chat, unchanged
+  // in every other respect, and the registry is the root because this build
+  // exists to enter a herd.
+  it('renders a router outlet rather than a fixed panel', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
-    await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('app-chat-panel')).toBeTruthy();
-    expect(compiled.querySelector('h1')?.textContent).toContain('Baghicha Dairy Co.');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
+    expect(compiled.querySelector('app-chat-panel')).toBeNull();
   });
 });

@@ -276,6 +276,30 @@ export function cleanHerd(): Db {
   // BD-0004 departed.
   addDeparture(db, { animal_id: 'BD-0004', on: '2024-05-01', precision: 'month' });
 
+  // A note, and an estimated-precision origin, so that every event type and
+  // every date precision a view branches on appears in the fixture. See
+  // "every view-branching enum is represented" in registry.invariants.test.ts:
+  // one of six statuses missing meant a sixth of the herd table got built
+  // blind, and the same argument applies to every other enum a template
+  // switches on.
+  appendEvent(db, {
+    animal_id: 'BD-0001',
+    type: 'note',
+    occurred_on: '2026-02-01',
+    date_precision: 'day',
+    payload: { text: 'limping on the near hind, watch her' },
+    provenance: SHEET,
+    recorded_at: nextRecordedAt(),
+  });
+  addAcquired(db, {
+    id: 'BD-0013',
+    sex: 'female',
+    acquired_on: '2022-01-01',
+    acquired_precision: 'estimated',
+    birth_on: '2020-01-01',
+    birth_precision: 'estimated',
+  });
+
   // BD-0005 calves RECENTLY, so the herd contains an animal that is actually a
   // `calf` at AS_OF. Without this the fixture has no age-dependent status at
   // all, and every test about asOf-sensitivity would pass vacuously.

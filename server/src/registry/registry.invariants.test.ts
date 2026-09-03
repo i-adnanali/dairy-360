@@ -95,6 +95,54 @@ test('the clean herd exercises the cases the invariants are for', () => {
   db.close();
 });
 
+test('every view-branching enum is represented in the fixture herd', () => {
+  // GENERALIZED FROM A REAL MISS: cleanHerd() produced no animal with status
+  // `dry` -- one of six -- so a sixth of the herd table would have been built
+  // against data that never exercised it. The rule that replaces noticing:
+  // ANY enum a view branches on must have every value present here.
+  //
+  // Where a value is deliberately absent, it is listed with the reason, so the
+  // gap is a decision rather than an oversight.
+  const db = cleanHerd();
+  const s = snapshot(db);
+
+  const statuses = new Set(s.statuses.map((r) => r.status));
+  for (const v of ['departed', 'calf', 'lactating', 'dry', 'heifer', 'male']) {
+    assert.ok(statuses.has(v as never), `status '${v}' is represented`);
+  }
+
+  const types = new Set(s.events.map((e) => e.type));
+  for (const v of ['birth', 'acquired', 'calving', 'dry_off', 'departure', 'note']) {
+    assert.ok(types.has(v as never), `event type '${v}' is represented`);
+  }
+
+  const precisions = new Set(s.events.map((e) => e.date_precision));
+  for (const v of ['day', 'month', 'year', 'estimated']) {
+    assert.ok(precisions.has(v as never), `date precision '${v}' is represented`);
+  }
+
+  const endReasons = new Set(s.lactations.map((l) => l.end_reason).filter((r) => r !== null));
+  for (const v of ['dry_off', 'inferred_at_next_calving']) {
+    assert.ok(endReasons.has(v as never), `lactation end reason '${v}' is represented`);
+  }
+  assert.ok(s.lactations.some((l) => l.end_reason === null), 'and an open lactation');
+
+  // DELIBERATELY NOT FULLY COVERED, with reasons:
+  //
+  //   SourceForm -- the fixture uses `recall` and `daily_herd_sheet`, the two a
+  //     real backfill actually produces. `cycle_card`, `direct_entry` and
+  //     `import` would be invented rows; no view branches on the value beyond
+  //     printing it, and the histogram groups whatever it finds.
+  //   CalvingOutcome -- `live` and `stillborn` are present. `died_within_24h`
+  //     takes the identical code path (recordCalving branches on `!== 'live'`)
+  //     and is covered directly in registry.calving.test.ts.
+  //   ParentCertainty -- only `known` is reachable in this cycle; nothing
+  //     writes `unknown` yet. Recorded as a fidelity gap in REGISTRY.md.
+  const forms = new Set(s.events.map((e) => e.source_form));
+  assert.ok(forms.has('recall') && forms.has('daily_herd_sheet'), 'both realistic forms');
+  db.close();
+});
+
 test('a PAIRED correction is clean, and the correction takes effect', () => {
   const { db, originalId, correctionId } = herdWithCorrection();
   const s = snapshot(db);

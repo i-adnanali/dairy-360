@@ -580,6 +580,82 @@ Everything the harness serves is discarded on exit. There is no persistence and 
 
 ---
 
+## The entry UI
+
+`web-angular`, at `/`. Every animal and every calving goes in through it — no CLI entry. The form is where the schema meets a human, so it tests the model harder than a read view does; entering the first real row by CLI would test the path the UI is meant to replace.
+
+```bash
+npm run registry:harness -w server     # fixture herd on :4000, in memory
+npm start -w web-angular               # the app on :4200, proxying /api
+```
+
+This cycle added the app's **first router, first HttpClient and first forms**. Before it, `@angular/router` and `@angular/forms` were installed dependencies that nothing imported, and the only server call in the app was `@ag-ui/client`'s SSE transport. The chat panel is unchanged and now lives at `/chat`.
+
+### Precision is chosen before the date, and changes which inputs exist
+
+Not "type a date, then qualify it". Choosing precision **changes the form**:
+
+| Chosen | Inputs rendered |
+|---|---|
+| *nothing* | no date input at all |
+| `day` | year, month, day, and an optional time |
+| `month` | year and month. **There is no day field.** |
+| `year` | year only |
+| `estimated` | year only, labelled as inferred |
+
+"Type a full date, then downgrade the precision" is how a month-precision row ends up dated the 14th, and it is **unreachable** — the day input does not exist once you have said you do not know the day. Likewise the time input, since there is no such thing as knowing the hour but not the day.
+
+The control emits nothing until a precision is chosen, which mirrors `NOT NULL` with no default: there is no state of it that yields a date without one. And it emits dates **already in the storage convention**, so the form never sends something the server would have to normalize or refuse.
+
+### Provenance is set once per session; `observed_by` is not
+
+`source_form` and `recorded_by` are asked once, behind a gate — **no form is reachable until both are set** — and shown permanently in the header. A backfill session is one person entering one kind of source, and retyping both on ~35 forms is where transcription errors come from. Defaulting them would be worse: a mislabelled `source_form` reads exactly like a correct one, and the whole point of the column is that `recall` and `daily_herd_sheet` can be told apart when the first calving-interval number is questioned.
+
+`observed_by` is **per-row and blank by default**. Defaulting it to the session person would silently claim they witnessed things they were told about. Leaving it blank is the cheap path; asserting a witness takes a deliberate act — the same shape as precision-before-date.
+
+Nothing is persisted across a reload. That is the tripwire list holding: no local state outliving a page load, and a remembered `recorded_by` is how a second person's entries get attributed to the first.
+
+### The calving form asks link-vs-mint outright
+
+"Is the calf already in the registry?" — no default, both answers a button. It is the flag most likely to be got wrong and the one where getting it wrong creates a duplicate animal that cannot be repaired.
+
+The picker cannot populate until the dam and the date are known, because **eligibility depends on the date**. That ordering is the server's rule, not a UI preference. Ineligible animals are listed greyed with their reason rather than hidden.
+
+The form also warns, when a non-`live` outcome is selected, that an uncertain calf should be recorded as `live` — live → died is repairable, the reverse is not.
+
+### The event list is load-bearing
+
+`/animals/:id` renders every event, **including superseded ones**, struck through and naming what replaced them, with event ids visible. It is the only window into whether a correction did what was meant: a filtered-out event is indistinguishable from one never written, so a successful correction would look identical to a silent no-op.
+
+The correction tab shows the form **and** the list below it, because checking the result is part of the operation.
+
+### Server refusals are the validation
+
+There is no client-side re-implementation of any herd rule. The server already refuses a departure after a departure, a calving on a departed dam, a month date on the 14th — with prose written to teach an operator what to do. A form's job is to collect, submit, and put the message next to the control that `field` names, **verbatim**.
+
+A refusal whose `field` this form does not render is shown at form level rather than dropped: an unknown field is still the server saying something true, and swallowing it would leave a form that refuses and says nothing. A **non**-refusal (a 500, an unreachable server) says so explicitly — it is not something to fix in the form, and presenting it as such sends the operator hunting for a mistake they did not make.
+
+Overrides — `--allow-near-duplicate`, `--allow-after-departure` — are keyed on the error **code**, not nested in the form-level error block. Both refusals name `occurred_on`, so their messages bind to the date control; a button nested in the form-level block was **unreachable**, which a form test caught.
+
+### The `/check` view
+
+`GET /verification` surfaced as numbers to read. Two conditions it is built under:
+
+- **Read-only, and no view branches on it.** Nothing is hidden, enabled or gated by it. The moment something depends on it, it stops being a diagnostic and becomes load-bearing, and a wrong number breaks entry instead of informing it.
+- **Diagnostic, not decorative.** Counts, a histogram you have to interpret, and violations printed in full with their invariant numbers — no badge that turns green. A green tick invites you to glance at the colour and stop looking, which is how a check you do not read stops being a check.
+
+It exists because the alternative was switching to a terminal mid-entry to read the histogram, and nobody keeps doing that past animal five.
+
+### Empty and one-row states are built, not discovered
+
+The first hour of real entry is spent looking at exactly those two. The empty herd is a single call to action with no furniture pretending there is data; at one row it is a real table — header, columns, drill-through — plus a line saying to open it and check the record reads the way you meant. `registry:harness --empty` exists to work on them deliberately.
+
+### What is deliberately absent
+
+Lifetime lane, herd lanes, pedigree, agent tools over the registry, auth. And it stays a **laptop transcription surface**: one viewport, no responsive breakpoints, no touch targets, no draft auto-save, no optimistic UI, server-confirmed writes only. Offline-first with sync conflict resolution is an order-of-magnitude jump, and it is a decision to make on purpose rather than to drift into.
+
+---
+
 ## Verification
 
 **Both a test and a script**, because the two callers need different data:
