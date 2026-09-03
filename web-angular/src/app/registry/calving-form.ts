@@ -1,41 +1,46 @@
 // Record a calving. Pass two of the backfill.
 //
 // ---------------------------------------------------------------------------
-// LINK vs MINT IS AN EXPLICIT QUESTION
+// LINK vs MINT IS A QUERY, NOT A QUESTION
 // ---------------------------------------------------------------------------
-// "Is the calf already in the registry?" is asked outright, with no default,
-// because it is the flag most likely to be got wrong and the one where getting
-// it wrong creates a DUPLICATE ANIMAL -- a duplicate origin event, and nothing
-// able to repair either.
+// This used to ask "is the calf already in the registry?" as a yes/no, warning
+// that answering wrong creates a duplicate nothing can repair. Every word of
+// that was true and it was still the wrong question: it asked the operator to
+// recall the contents of a database one tab away, with an irreversible penalty,
+// at hour two of a transcription session.
 //
-// It happens for a reason that is easy to miss while entering: pass one must
-// enter a farm-born animal as `acquired` whenever its dam is still in the herd,
-// because pass one has no calvings yet. So by pass two, some calves already
-// exist. Inferring the answer from a blank field would make the common case
-// silent.
+// The answer was always in the database. It is a list now -- see calf-picker.ts,
+// which is a separate component because the animal workbench needs the same
+// list with the dam fixed by context rather than chosen from a dropdown.
+//
+// The case that made the old question necessary has not gone away: pass one
+// must enter a farm-born animal as `acquired` whenever its dam is still in the
+// herd, because pass one has no calvings yet. So by pass two, some calves
+// already exist. That is now something the list surfaces rather than something
+// the operator must remember.
 //
 // The picker cannot be populated until the date is known, because eligibility
 // depends on it -- an animal whose own history predates the proposed birth
-// cannot be linked. So the order is forced: precision, date, then the calf
-// question. That is the server's rule, not a UI preference.
+// cannot be linked. So the order is still forced: precision, date, then the
+// calf. That is the server's rule, not a UI preference.
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { CalfPicker } from './calf-picker';
 import { PrecisionDateControl } from './precision-date';
 import type { PrecisionDate } from './precision-date';
+import type { CalfChoice } from './calf-picker';
 import type { CalvingOutcome, LinkCandidate, RegistrySex } from './types';
 
 const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', 'outcome'] as const;
 
-type CalfMode = 'new' | 'existing';
-
 @Component({
   selector: 'app-calving-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PrecisionDateControl],
+  imports: [CalfPicker, PrecisionDateControl],
   template: `
     <div class="mx-auto max-w-2xl space-y-4">
       <header>
@@ -54,7 +59,7 @@ type CalfMode = 'new' | 'existing';
             No females in the registry yet. Add one first.
           </p>
         } @else {
-          <select data-role="dam" [value]="damId()" (change)="damId.set($any($event.target).value)"
+          <select data-role="dam" [value]="damId()" (change)="setDam($any($event.target).value)"
             class="w-full max-w-sm rounded-lg border border-farm-300 px-2 py-1.5 text-sm">
             <option value="">Choose a dam…</option>
             @for (d of dams(); track d.id) {
@@ -72,7 +77,7 @@ type CalfMode = 'new' | 'existing';
       <app-precision-date
         label="When did she calve?"
         [error]="state.fieldError('occurred_on') ?? state.fieldError('date_precision')"
-        (changed)="when.set($event)"
+        (changed)="setWhen($event)"
       />
 
       <!-- calf sex + outcome, needed before the picker can judge eligibility -->
@@ -113,77 +118,12 @@ type CalfMode = 'new' | 'existing';
         </div>
       </div>
 
-      <!-- THE explicit question -->
-      <div class="rounded-xl border border-farm-300 bg-white p-4">
-        <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
-          Is the calf already in the registry?
-        </div>
-        <p class="mb-2 text-xs text-farm-600">
-          It will be if you entered it in pass one — which you had to, if its dam was already here.
-          Answering “new” for an animal that already exists creates a duplicate that cannot be repaired.
-        </p>
-        <div class="flex gap-2">
-          <button type="button" data-role="mode-new" (click)="setMode('new')"
-            class="rounded-lg border px-3 py-1.5 text-sm"
-            [class]="mode() === 'new' ? 'border-farm-600 bg-farm-600 text-white' : 'border-farm-300 bg-white text-farm-800'"
-          >No — create it</button>
-          <button type="button" data-role="mode-existing" (click)="setMode('existing')"
-            class="rounded-lg border px-3 py-1.5 text-sm"
-            [class]="mode() === 'existing' ? 'border-farm-600 bg-farm-600 text-white' : 'border-farm-300 bg-white text-farm-800'"
-          >Yes — link to it</button>
-        </div>
-
-        @if (mode() === 'new') {
-          <label class="mt-3 block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">Calf name (optional)</span>
-            <input data-role="calf_name" [value]="calfName()" (input)="calfName.set($any($event.target).value)"
-              class="w-full max-w-xs rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
-          </label>
-        }
-
-        @if (mode() === 'existing') {
-          @if (!canLoadCandidates()) {
-            <p class="mt-3 text-sm text-farm-600" data-role="candidates-blocked">
-              Choose the dam and the calving date first — which animals can be linked depends on
-              the date, because an animal's birth cannot postdate its own history.
-            </p>
-          } @else if (candidates().length === 0) {
-            <p class="mt-3 text-sm text-farm-600" data-role="candidates-empty">
-              No animals in the registry to link to.
-            </p>
-          } @else {
-            <div class="mt-3 space-y-1" data-role="candidates">
-              @for (c of candidates(); track c.id) {
-                <button type="button" [attr.data-candidate]="c.id" [disabled]="!c.eligible"
-                  (click)="calfId.set(c.id)"
-                  class="flex w-full items-baseline gap-2 rounded-lg border px-3 py-2 text-left text-sm"
-                  [class]="
-                    calfId() === c.id
-                      ? 'border-farm-600 bg-farm-100'
-                      : c.eligible
-                        ? 'border-farm-300 bg-white hover:border-farm-400'
-                        : 'border-farm-200 bg-farm-50 text-farm-400 cursor-not-allowed'
-                  "
-                >
-                  <span class="font-mono">{{ c.id }}</span>
-                  <span>{{ c.name ?? '—' }}</span>
-                  <span class="text-xs">{{ c.sex }}</span>
-                  @if (!c.eligible) {
-                    <span class="ml-auto text-xs italic" data-role="reason">{{ c.ineligible_reason }}</span>
-                  }
-                </button>
-              }
-            </div>
-            <p class="mt-2 text-xs text-farm-500">
-              Animals that cannot be linked are shown greyed with the reason, rather than hidden —
-              an animal missing from this list would read as data loss.
-            </p>
-          }
-          @if (state.fieldError('calf'); as e) {
-            <p class="mt-2 text-sm text-red-800" data-role="error-calf">{{ e }}</p>
-          }
-        }
-      </div>
+      <app-calf-picker
+        [candidates]="candidates()"
+        [ready]="canLoadCandidates()"
+        [error]="state.fieldError('calf')"
+        (changed)="onCalfChosen($event)"
+      />
 
       <label class="block">
         <span class="mb-1 block text-xs font-medium text-farm-700">Sire reference (optional, free text)</span>
@@ -272,9 +212,10 @@ export class CalvingForm {
   protected readonly when = signal<PrecisionDate | null>(null);
   protected readonly calfSex = signal<RegistrySex>('female');
   protected readonly outcome = signal<CalvingOutcome>('live');
-  protected readonly mode = signal<CalfMode | null>(null);
-  protected readonly calfId = signal('');
-  protected readonly calfName = signal('');
+  /** Null until the picker is answered; then an id, or null for "create new". */
+  protected readonly calfChoice = signal<CalfChoice>(null);
+  protected readonly calfAnswered = signal(false);
+  protected readonly calfName = signal<string | null>(null);
   protected readonly sireRef = signal('');
   protected readonly observedBy = signal('');
   protected readonly allowDuplicate = signal(false);
@@ -284,48 +225,87 @@ export class CalvingForm {
     () => this.damId().length > 0 && this.when() !== null,
   );
 
-  protected readonly canSubmit = computed(() => {
-    if (this.state.submitting()) return false;
-    if (this.damId().length === 0 || this.when() === null) return false;
-    if (this.mode() === null) return false;
-    if (this.mode() === 'existing' && this.calfId().length === 0) return false;
-    return true;
-  });
+  protected readonly canSubmit = computed(
+    () =>
+      !this.state.submitting() &&
+      this.damId().length > 0 &&
+      this.when() !== null &&
+      this.calfAnswered(),
+  );
 
   protected readonly blockedReason = computed(() => {
     if (this.damId().length === 0) return 'Choose a dam.';
     if (this.when() === null) return 'Say how well you know the calving date, then enter it.';
-    if (this.mode() === null) return 'Answer whether the calf is already in the registry.';
-    if (this.mode() === 'existing' && this.calfId().length === 0) return 'Pick the calf.';
+    if (!this.calfAnswered()) return 'Pick the calf, or say none of these.';
     return null;
   });
 
+  private readonly picker = viewChild(CalfPicker);
+
   constructor() {
     void this.api.damCandidates().then((d) => this.dams.set(d));
+
+    // The list has to ARRIVE ON ITS OWN now. It used to be fetched when the
+    // operator clicked "yes -- link to it", and that click no longer exists:
+    // the picker is on screen from the start, so an unfetched list would show
+    // as "no animal has a birth date near this calving" -- which is a false
+    // statement about the herd, and the exact wrong thing to tell someone
+    // deciding whether to create a duplicate.
+    effect(() => {
+      const dam = this.damId();
+      const w = this.when();
+      const sex = this.calfSex();
+      if (dam.length === 0 || w === null) return;
+      void this.loadCandidates(dam, sex, w);
+    });
+  }
+
+  /** Choosing a different dam invalidates both the list and anything picked from it. */
+  protected setDam(id: string): void {
+    this.damId.set(id);
+    this.clearCalf();
+  }
+
+  protected setWhen(w: PrecisionDate | null): void {
+    this.when.set(w);
+    // Eligibility is a function of the date, so a changed date can turn the
+    // picked animal ineligible. Dropping the choice forces a fresh look rather
+    // than letting a stale selection ride to submit.
+    this.clearCalf();
   }
 
   protected setCalfSex(s: RegistrySex): void {
     this.calfSex.set(s);
-    this.calfId.set('');
-    void this.refreshCandidates();
+    this.clearCalf();
+  }
+
+  protected onCalfChosen(e: { choice: CalfChoice; name: string | null }): void {
+    this.calfChoice.set(e.choice);
+    this.calfAnswered.set(true);
+    this.calfName.set(e.name);
+  }
+
+  private clearCalf(): void {
+    this.calfChoice.set(null);
+    this.calfAnswered.set(false);
+    this.calfName.set(null);
+    // The picker owns its own selection, so clearing the parent's copy alone
+    // would leave a highlighted row that no longer means anything.
+    this.picker()?.reset();
   }
 
   protected setOutcome(o: CalvingOutcome): void {
     this.outcome.set(o);
   }
 
-  protected setMode(m: CalfMode): void {
-    this.mode.set(m);
-    if (m === 'existing') void this.refreshCandidates();
-    else this.calfId.set('');
-  }
-
-  private async refreshCandidates(): Promise<void> {
-    const w = this.when();
-    if (!this.canLoadCandidates() || !w) return;
+  private async loadCandidates(
+    dam: string,
+    calfSex: RegistrySex,
+    w: PrecisionDate,
+  ): Promise<void> {
     const c = await this.api.linkCandidates({
-      dam: this.damId(),
-      calfSex: this.calfSex(),
+      dam,
+      calfSex,
       occurredOn: w.occurred_on,
       datePrecision: w.date_precision,
     });
@@ -343,9 +323,9 @@ export class CalvingForm {
         occurred_on: w.occurred_on,
         occurred_time: w.occurred_time,
         date_precision: w.date_precision,
-        calf_id: this.mode() === 'existing' ? this.calfId() : null,
+        calf_id: this.calfChoice(),
         calf_sex: this.calfSex(),
-        calf_name: this.mode() === 'new' ? blank(this.calfName()) : null,
+        calf_name: this.calfName(),
         outcome: this.outcome(),
         sire_ref: blank(this.sireRef()),
         observed_by: blank(this.observedBy()),
@@ -356,7 +336,10 @@ export class CalvingForm {
     this.allowDuplicate.set(false);
     if (r) {
       void this.api.damCandidates().then((d) => this.dams.set(d));
-      void this.refreshCandidates();
+      // The calving just minted or linked an animal, so the list is stale and
+      // the previous choice must not survive into the next record.
+      this.clearCalf();
+      void this.loadCandidates(this.damId(), this.calfSex(), w);
     }
   }
 

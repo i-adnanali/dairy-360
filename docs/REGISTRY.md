@@ -672,6 +672,39 @@ Every animal appears; ineligible ones carry `ineligible_reason`. An animal **mis
 
 The reason is computed **server-side** for the same argument as `field` on an error: a client deriving it from other columns is re-implementing a server rule, and the two will drift.
 
+### The picker is ranked, and the ranking is a server rule
+
+Each candidate also carries `days_apart` (signed whole days from its recorded birth date to the proposed calving date) and `within_match_window`. The list arrives sorted and the client does **not** re-sort — same argument as `ineligible_reason`.
+
+**Order:** eligible before ineligible, then no birth date before any birth date, then closest first, then serial so the order is total.
+
+**A null `days_apart` is the strongest signal here, not the weakest.** An animal with no birth date is the likeliest link target there is: the roster pass enters animals without one, and pass one enters a farm-born calf as `acquired` because there are no calvings yet. So nulls rank first. Ineligible animals stay in the list — they teach, and "already has a birth event, so it already has a dam" is exactly what the operator needs to know — but below the ones that can actually be clicked, because a target the eye lands on and the hand cannot click is worse than one further down.
+
+**The match window, by the coarsest precision of the two dates:**
+
+| Coarsest precision | Window |
+|---|---|
+| both `day` | ±7 days |
+| either `month` | ±45 days |
+| either `year` or `estimated` | same calendar year, ±1 |
+| candidate has no birth date | always in, ranked first |
+
+The windows widen with uncertainty because that is what uncertainty means: two month-precision dates both stored on the 1st can be 30 days apart and describe the same week, so a day-grain window would hide the right animal. The values are provisional in the sense `CALF_MAX_AGE_MONTHS` is, and chosen to be generous — a candidate you scroll past costs nothing, one that never appears costs a duplicate animal.
+
+**`estimated` is compared here, at year grain — the deliberate divergence from `definitelyBefore()`,** which refuses to compare an estimated date at all. That function's job is to *prove* a timeline violation, so a guess is not evidence and it declines. This one's job is to *suggest* a match, where a guess is exactly what you want to act on: an animal recorded as "estimated 2019" is a fine candidate for a 2019 calving. Same two dates, opposite correct answers, because proving and suggesting are different jobs.
+
+Out-of-window animals are not dropped from the response. The client collapses them behind a **visible count** ("3 more, with birth dates further from this date"), so nothing is unreachable and nothing is silently absent.
+
+#### What this replaced
+
+`/calving` asked *"is the calf already in the registry?"* as a yes/no, with copy warning that answering "new" for an existing animal creates a duplicate that cannot be repaired. All of that was true and it was still the wrong question: it asked the operator to recall the contents of a database one tab away, with an irreversible penalty for a wrong recall, at hour two of a transcription session. The answer was always in the database.
+
+The warning is **gone rather than softened**. The list is the mitigation, and a warning that no longer names a live risk trains operators to skim warnings — the same reason `/check` has no badge that turns green.
+
+The list lives in [calf-picker.ts](../web-angular/src/app/registry/calf-picker.ts) as its own component, not as markup inside the calving form, because the animal workbench needs the same list with the dam fixed by context rather than chosen from a dropdown. `recordCalving` needed no change at all: link mode was already a first-class branch via `calf.existing_id`.
+
+One consequence worth knowing when reading that form: the list now has to **arrive on its own**, driven by an effect on the dam, date and calf sex. It used to be fetched when the operator clicked "yes — link to it", and that click no longer exists; an unfetched list would render as "no animal has a birth date near this calving", which is a false statement about the herd and the worst possible thing to show someone deciding whether to create a duplicate.
+
 **This is where testing over HTTP earned its keep.** The first version of the picker marked animals eligible that `recordCalving` then refused — it was missing the timeline rule (an animal whose own history predates the proposed birth date cannot be linked, because its birth would postdate its own events). It surfaced immediately against `cleanHerd()`, and would otherwise have surfaced against the first real animal. The endpoint now takes `occurred_on` and `date_precision` and applies the same check; omitting them yields a list that is right about everything else and silent about that one.
 
 ### Errors on the wire

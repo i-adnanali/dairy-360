@@ -12,6 +12,7 @@ import { provideRouter } from '@angular/router';
 import { AnimalForm } from './animal-form';
 import { EventForm } from './event-form';
 import { CorrectionForm } from './correction-form';
+import { CalvingForm } from './calving-form';
 import { SessionGate } from './session-gate';
 import { Session } from './session';
 import type { TimelineEvent } from './types';
@@ -30,6 +31,22 @@ function setup() {
 
 const click = (el: HTMLElement, sel: string) =>
   (el.querySelector(sel) as HTMLButtonElement).click();
+
+/**
+ * Let promise chains finish, then render.
+ *
+ * `fixture.whenStable()` alone is NOT enough for a chain kicked off in a
+ * component constructor -- CalvingForm asks for its dam list there, and without
+ * a macrotask tick the `.then()` has not run, so the form still shows its "no
+ * females in the registry yet" empty state and every selector comes back null.
+ * Measured, not guessed: the dam <select> is absent with whenStable() alone and
+ * present with this.
+ */
+async function settle(fixture: { whenStable(): Promise<unknown>; detectChanges(): void }) {
+  await new Promise((r) => setTimeout(r, 0));
+  await fixture.whenStable();
+  fixture.detectChanges();
+}
 
 /**
  * Choose a precision AND type the date it requires.
@@ -72,6 +89,146 @@ function enterDate(
   if (parts.month !== undefined) set('month', parts.month, 'change');
   if (parts.day !== undefined) set('day', parts.day, 'input');
 }
+
+describe('CalvingForm', () => {
+  // There was no spec for this form before. The wiring most likely to break is
+  // the candidate list ARRIVING: it used to be fetched when the operator
+  // clicked "yes -- link to it", and that click no longer exists.
+
+  const DAMS = [{
+    id: 'BD-0001', name: 'Noor', sex: 'female', origin: 'acquired',
+    birth_on: '2018-01-01', birth_precision: 'year', eligible: true,
+    ineligible_reason: null, days_apart: null, within_match_window: true,
+  }];
+  const CANDIDATES = [{
+    id: 'BD-0006', name: null, sex: 'female', origin: 'acquired',
+    birth_on: null, birth_precision: null, eligible: true,
+    ineligible_reason: null, days_apart: null, within_match_window: true,
+  }];
+
+  // Async because damCandidates() resolves through a promise: without awaiting
+  // stability the dam <select> has not rendered and the form still shows its
+  // "no females in the registry yet" empty state.
+  async function mount() {
+    const ctx = setup();
+    const fixture = TestBed.createComponent(CalvingForm);
+    fixture.detectChanges();
+    ctx.http.expectOne(`${BASE}/dam-candidates`).flush({ candidates: DAMS });
+    await settle(fixture);
+    return { ...ctx, fixture, el: fixture.nativeElement as HTMLElement };
+  }
+
+  const chooseDam = (fixture: { detectChanges(): void }, el: HTMLElement, id: string) => {
+    const sel = el.querySelector('[data-role="dam"]') as HTMLSelectElement;
+    sel.value = id;
+    sel.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  };
+
+  it('fetches candidates as soon as the dam and the date are both known', async () => {
+    const { http, fixture, el } = await mount();
+    chooseDam(fixture, el, 'BD-0001');
+    enterDate(fixture, el, 'day', { year: 2024, month: 6, day: 2 });
+    await settle(fixture);
+
+    // The client builds the query into the URL rather than using HttpParams,
+    // so match on the prefix and read the string.
+    const req = http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`));
+    expect(req.request.url).toContain('dam=BD-0001');
+    expect(req.request.url).toContain('occurred_on=2024-06-02');
+    expect(req.request.url).toContain('date_precision=day');
+    req.flush({ candidates: CANDIDATES });
+    await settle(fixture);
+    expect(el.querySelector('[data-candidate="BD-0006"]')).not.toBeNull();
+  });
+
+  it('cannot submit until the calf question is answered one way or the other', async () => {
+    const { http, fixture, el } = await mount();
+    chooseDam(fixture, el, 'BD-0001');
+    enterDate(fixture, el, 'day', { year: 2024, month: 6, day: 2 });
+    await settle(fixture);
+    http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
+    await settle(fixture);
+
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('none of these');
+
+    (el.querySelector('[data-candidate="BD-0006"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('sends the picked animal as calf_id, and no calf_name', async () => {
+    const { http, fixture, el } = await mount();
+    chooseDam(fixture, el, 'BD-0001');
+    enterDate(fixture, el, 'day', { year: 2024, month: 6, day: 2 });
+    await settle(fixture);
+    http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
+    await settle(fixture);
+
+    (el.querySelector('[data-candidate="BD-0006"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    click(el, '[data-role="submit"]');
+
+    const req = http.expectOne(`${BASE}/calvings`);
+    expect(req.request.body.calf_id).toBe('BD-0006');
+    expect(req.request.body.calf_name).toBeNull();
+    expect(req.request.headers.get('Idempotency-Key')).toBeTruthy();
+  });
+
+  it('sends calf_id null for create-new, carrying the typed name', async () => {
+    const { http, fixture, el } = await mount();
+    chooseDam(fixture, el, 'BD-0001');
+    enterDate(fixture, el, 'day', { year: 2024, month: 6, day: 2 });
+    await settle(fixture);
+    http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
+    await settle(fixture);
+
+    click(el, '[data-role="mode-new"]');
+    fixture.detectChanges();
+    const name = el.querySelector('[data-role="calf_name"]') as HTMLInputElement;
+    name.value = 'Chandni';
+    name.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    click(el, '[data-role="submit"]');
+
+    const req = http.expectOne(`${BASE}/calvings`);
+    expect(req.request.body.calf_id).toBeNull();
+    expect(req.request.body.calf_name).toBe('Chandni');
+  });
+
+  it('a changed date invalidates the choice — eligibility depends on it', async () => {
+    // A picked animal can become ineligible when the date moves, so letting a
+    // stale selection ride to submit would mean a refusal with a real animal in
+    // front of you.
+    const { http, fixture, el } = await mount();
+    chooseDam(fixture, el, 'BD-0001');
+    enterDate(fixture, el, 'day', { year: 2024, month: 6, day: 2 });
+    await settle(fixture);
+    http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
+    await settle(fixture);
+
+    (el.querySelector('[data-candidate="BD-0006"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+
+    const day = el.querySelector('[data-role="day"]') as HTMLInputElement;
+    day.value = '9';
+    day.dispatchEvent(new Event('input'));
+    await settle(fixture);
+
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    http.match((r) => r.url.startsWith(`${BASE}/link-candidates`)).forEach((r) => r.flush({ candidates: CANDIDATES }));
+  });
+
+  it('no longer warns that a duplicate cannot be repaired', async () => {
+    // The list replaced the recall question, so the warning no longer names a
+    // live risk. Removed rather than softened.
+    const { el } = await mount();
+    expect(el.textContent).not.toContain('cannot be repaired');
+    expect(el.querySelector('[data-role="mode-existing"]')).toBeNull();
+  });
+});
 
 describe('idempotency key', () => {
   // The rule: one key per submission ATTEMPT SEQUENCE. Minted on first submit,

@@ -9,7 +9,7 @@
 
 import type { Db } from './schema';
 import { definitelyBefore } from './invariants';
-import { effectiveEvents } from './project';
+import { daysBetween, effectiveEvents } from './project';
 import { allAnimals, allEvents, allStatuses, eventsForAnimal, getAnimal } from './store';
 import type {
   AnimalStatusRow,
@@ -170,6 +170,88 @@ export interface LinkCandidate {
    * is re-implementing a server rule, and the two will drift.
    */
   ineligible_reason: string | null;
+  /**
+   * Whole days between this animal's recorded birth date and the proposed
+   * calving date. Null when either date is missing.
+   *
+   * A NULL IS THE STRONGEST SIGNAL HERE, not the weakest. An animal with no
+   * birth date is the likeliest link target of all: the roster pass enters
+   * animals without one, and pass one enters a farm-born calf as `acquired`
+   * because there are no calvings yet. Which is why the sort puts nulls first
+   * rather than last.
+   */
+  days_apart: number | null;
+  /** Whether this animal falls inside the match window described below. */
+  within_match_window: boolean;
+}
+
+/**
+ * Days either side of a proposed calving within which an existing animal's
+ * recorded birth date makes it a plausible match, by the coarsest precision of
+ * the two dates.
+ *
+ * The windows widen with uncertainty because that is what uncertainty means: two
+ * month-precision dates stored on the 1st can be 30 days apart and describe the
+ * same week, so a ±7 window at that grain would hide the right animal. All three
+ * values are PROVISIONAL, in the sense CALF_MAX_AGE_MONTHS is -- they are chosen
+ * to be generous rather than tight, because the cost of a candidate you scroll
+ * past is nothing and the cost of one that never appears is a duplicate animal.
+ */
+export const MATCH_WINDOW_DAYS = { day: 7, month: 45 } as const;
+/** At year or estimated grain the window is calendar years, not days. */
+export const MATCH_WINDOW_YEARS = 1;
+
+/**
+ * True when `birth` is close enough to `proposed` to be worth offering.
+ *
+ * NOTE THE DEPARTURE FROM definitelyBefore(), which refuses to compare an
+ * `estimated` date at all. That function's job is to PROVE a timeline violation,
+ * so a guess is not evidence and it declines. This one's job is to SUGGEST a
+ * match, where a guess is exactly what you want to act on -- an animal recorded
+ * as "estimated 2019" is a fine candidate for a 2019 calving. Same two dates,
+ * opposite correct answers, because proving and suggesting are different jobs.
+ */
+export function withinMatchWindow(
+  birth: { on: string; precision: DatePrecision },
+  proposed: { on: string; precision: DatePrecision },
+): boolean {
+  const coarse = (p: DatePrecision): 'day' | 'month' | 'year' =>
+    p === 'estimated' ? 'year' : p;
+  const grain =
+    coarse(birth.precision) === 'year' || coarse(proposed.precision) === 'year'
+      ? 'year'
+      : coarse(birth.precision) === 'month' || coarse(proposed.precision) === 'month'
+        ? 'month'
+        : 'day';
+
+  if (grain === 'year') {
+    const by = Number(birth.on.slice(0, 4));
+    const py = Number(proposed.on.slice(0, 4));
+    return Math.abs(by - py) <= MATCH_WINDOW_YEARS;
+  }
+  return Math.abs(daysBetween(birth.on, proposed.on)) <= MATCH_WINDOW_DAYS[grain];
+}
+
+/**
+ * Ranking order for the picker.
+ *
+ * 1. Eligible before ineligible. An ineligible animal cannot be chosen, and one
+ *    sitting at the top of a recognition list is a target the eye lands on and
+ *    the hand cannot click. They stay in the list -- with their reason, which
+ *    teaches -- but below the animals that can actually be picked.
+ * 2. No birth date before any birth date. See `days_apart`.
+ * 3. Closest first.
+ * 4. Serial, so the order is total and stable across calls.
+ */
+function compareCandidates(a: LinkCandidate, b: LinkCandidate): number {
+  if (a.eligible !== b.eligible) return a.eligible ? -1 : 1;
+  const an = a.days_apart === null;
+  const bn = b.days_apart === null;
+  if (an !== bn) return an ? -1 : 1;
+  if (!an && !bn && a.days_apart !== b.days_apart) {
+    return Math.abs(a.days_apart!) - Math.abs(b.days_apart!);
+  }
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
 /**
@@ -235,17 +317,38 @@ export function linkCandidates(
       return null;
     })();
 
+    const birthOn = s?.birth_on ?? null;
+    const birthPrecision = s?.birth_precision ?? null;
+
+    // Proximity needs both dates. Missing either leaves days_apart null and
+    // the animal INSIDE the window -- "we could not judge" must not resolve
+    // into hiding a candidate, which is the same direction target.ts takes
+    // when it cannot tell which database it is pointed at.
+    const comparable =
+      birthOn !== null &&
+      birthPrecision !== null &&
+      opts.occurredOn !== undefined &&
+      opts.datePrecision !== undefined;
+
     return {
       id: a.id,
       name: a.name,
       sex: a.sex,
       origin: a.origin,
-      birth_on: s?.birth_on ?? null,
-      birth_precision: s?.birth_precision ?? null,
+      birth_on: birthOn,
+      birth_precision: birthPrecision,
       eligible: reason === null,
       ineligible_reason: reason,
+      days_apart: comparable ? daysBetween(birthOn!, opts.occurredOn!) : null,
+      within_match_window: comparable
+        ? withinMatchWindow(
+            { on: birthOn!, precision: birthPrecision! },
+            { on: opts.occurredOn!, precision: opts.datePrecision! },
+          )
+        : true,
     };
-  });
+  })
+    .sort(compareCandidates);
 }
 
 /** Females that could be a dam: not departed, and not the calf being linked. */
@@ -267,6 +370,11 @@ export function damCandidates(db: Db): LinkCandidate[] {
         ineligible_reason: departed
           ? 'departed -- a calving on or after a departure is refused'
           : null,
+        // Proximity is meaningless for a DAM: there is no proposed birth date to
+        // be near. Null and in-window rather than omitted, so the shape stays
+        // identical to the link picker's and one component can render both.
+        days_apart: null,
+        within_match_window: true,
       };
     });
 }

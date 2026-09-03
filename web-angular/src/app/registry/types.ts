@@ -85,6 +85,14 @@ export interface LinkCandidate {
   eligible: boolean;
   /** Why not, when not. Shown greyed rather than omitted from the list. */
   ineligible_reason: string | null;
+  /**
+   * Signed whole days from this animal's birth date to the proposed calving
+   * date. Null when either is missing — which ranks the animal FIRST, not last:
+   * an animal with no birth date is the likeliest link target there is.
+   */
+  days_apart: number | null;
+  /** Inside the server's match window. Unjudgeable animals are inside it. */
+  within_match_window: boolean;
 }
 
 export interface Violation {
