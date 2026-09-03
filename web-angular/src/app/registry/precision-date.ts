@@ -24,6 +24,30 @@
 // The value it emits is already in the storage convention -- month gives the
 // 1st, year and estimated give January 1 -- so the form never sends a date the
 // server would have to normalize or refuse.
+//
+// ---------------------------------------------------------------------------
+// AND THE PARTS THEMSELVES START EMPTY. Do not "helpfully" prefill them.
+// ---------------------------------------------------------------------------
+// These three fields used to initialise to the current year, January and the
+// 1st. That made this control -- the one built to stop a guess reading as a
+// known date -- the single easiest way to write one. Proven by execution, three
+// separate ways:
+//
+//   choose 'day', touch nothing   -> emitted 2026-01-01 at day precision
+//   choose 'day', type only 2019  -> emitted 2019-01-01 at day precision
+//   choose 'year', then clear it  -> emitted 0000-01-01
+//
+// Every one of those satisfies the schema CHECKs, assertDatePrecision() and
+// invariant 11, because none of them is INCONSISTENT -- they are merely false,
+// and no invariant can detect a date that is more precise than the memory
+// behind it. The preview line was the only thing standing between the first one
+// and the log.
+//
+// A backfill year has no strong prior whatsoever, which puts these fields on
+// the "lie" side of the defaults rule (docs/REGISTRY.md, "The defaults rule"):
+// a wrong sex is a mistake, a wrong-but-confident date is a lie. So the control
+// emits null until every part the chosen precision NEEDS has actually been
+// typed, and says which part is missing in the meantime.
 
 import {
   ChangeDetectionStrategy, Component, computed, effect, input, output, signal,
@@ -80,8 +104,8 @@ const MONTHS = [
           <label class="block">
             <span class="mb-1 block text-xs font-medium text-farm-700">Year</span>
             <input
-              type="number" data-role="year" min="1900" max="2200"
-              [value]="year()" (input)="year.set(+$any($event.target).value)"
+              type="number" data-role="year" min="1900" max="2200" placeholder="—"
+              [value]="year() ?? ''" (input)="year.set(numOrNull($any($event.target).value))"
               class="w-24 rounded-lg border border-farm-300 px-2 py-1.5 text-sm"
             />
           </label>
@@ -90,10 +114,13 @@ const MONTHS = [
             <label class="block">
               <span class="mb-1 block text-xs font-medium text-farm-700">Month</span>
               <select
-                data-role="month" [value]="month()"
-                (change)="month.set(+$any($event.target).value)"
+                data-role="month" [value]="month() ?? ''"
+                (change)="month.set(numOrNull($any($event.target).value))"
                 class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm"
               >
+                <!-- The empty option is the initial state, not a prompt to
+                     dismiss: an unchosen month must not read as January. -->
+                <option value="">—</option>
                 @for (m of months; track m.n) {
                   <option [value]="m.n">{{ m.name }}</option>
                 }
@@ -108,8 +135,8 @@ const MONTHS = [
             <label class="block">
               <span class="mb-1 block text-xs font-medium text-farm-700">Day</span>
               <input
-                type="number" data-role="day" min="1" [max]="daysInMonth()"
-                [value]="day()" (input)="day.set(+$any($event.target).value)"
+                type="number" data-role="day" min="1" [max]="daysInMonth()" placeholder="—"
+                [value]="day() ?? ''" (input)="day.set(numOrNull($any($event.target).value))"
                 class="w-20 rounded-lg border border-farm-300 px-2 py-1.5 text-sm"
               />
             </label>
@@ -129,11 +156,21 @@ const MONTHS = [
           }
         </div>
 
-        <p class="mt-3 text-sm" data-role="preview">
-          <span class="text-farm-600">Will be recorded as</span>
-          <span class="ml-1 font-mono font-medium text-farm-900">{{ stored() }}</span>
-          <span class="ml-1 text-farm-700">({{ p }})</span>
-        </p>
+        <!-- One or the other, never both: either the date is complete and this
+             says exactly what will be stored, or it is not and this says what
+             is still needed. A preview of a partly-typed date would be the
+             prefill bug wearing a different hat. -->
+        @if (missing().length === 0) {
+          <p class="mt-3 text-sm" data-role="preview">
+            <span class="text-farm-600">Will be recorded as</span>
+            <span class="ml-1 font-mono font-medium text-farm-900">{{ stored() }}</span>
+            <span class="ml-1 text-farm-700">({{ p }})</span>
+          </p>
+        } @else {
+          <p class="mt-3 text-sm text-farm-600" data-role="incomplete">
+            No date yet — still needs the {{ missingLabel() }}.
+          </p>
+        }
       }
 
       @if (error(); as e) {
@@ -159,10 +196,26 @@ export class PrecisionDateControl {
   protected readonly months = MONTHS.map((name, i) => ({ n: i + 1, name }));
 
   protected readonly precision = signal<DatePrecision | null>(null);
-  protected readonly year = signal(new Date().getFullYear());
-  protected readonly month = signal(1);
-  protected readonly day = signal(1);
+  // All three EMPTY. See the header -- prefilling these is how this control
+  // became the easiest way in the app to write a fabricated exact date.
+  protected readonly year = signal<number | null>(null);
+  protected readonly month = signal<number | null>(null);
+  protected readonly day = signal<number | null>(null);
   protected readonly time = signal('');
+
+  /**
+   * An empty numeric input is NOT zero.
+   *
+   * The old handlers were `+$any($event.target).value`, and `+''` is 0 -- which
+   * is how clearing the year produced `0000-01-01` instead of withdrawing the
+   * date. A blank field means "not entered", and only null can say that.
+   */
+  protected numOrNull(v: string): number | null {
+    const t = v.trim();
+    if (t.length === 0) return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
+  }
 
   protected readonly hint = computed(() => {
     switch (this.precision()) {
@@ -179,18 +232,48 @@ export class PrecisionDateControl {
     }
   });
 
-  protected readonly daysInMonth = computed(() =>
-    new Date(this.year(), this.month(), 0).getDate(),
-  );
+  /** 31 while the month is unknown, so the day input is not wrongly clamped. */
+  protected readonly daysInMonth = computed(() => {
+    const y = this.year();
+    const m = this.month();
+    if (y === null || m === null) return 31;
+    return new Date(y, m, 0).getDate();
+  });
 
-  /** The date in the storage convention the server expects. */
+  /**
+   * The parts the chosen precision needs and does not yet have.
+   *
+   * This is the whole mechanism. Precision decides which inputs EXIST (see the
+   * header); this decides whether the ones that exist have been answered. A
+   * date is emitted only when the list is empty.
+   */
+  protected readonly missing = computed<string[]>(() => {
+    const p = this.precision();
+    if (p === null) return [];
+    const out: string[] = [];
+    if (this.year() === null) out.push('year');
+    if ((p === 'day' || p === 'month') && this.month() === null) out.push('month');
+    if (p === 'day' && this.day() === null) out.push('day');
+    return out;
+  });
+
+  protected readonly missingLabel = computed(() => {
+    const m = this.missing();
+    return m.length <= 1 ? m.join('') : `${m.slice(0, -1).join(', ')} and ${m[m.length - 1]}`;
+  });
+
+  /**
+   * The date in the storage convention the server expects, or '' when the parts
+   * are not all in. Never partially composed: a missing part is not a zero.
+   */
   protected readonly stored = computed(() => {
+    if (this.missing().length > 0) return '';
     const y = String(this.year()).padStart(4, '0');
     switch (this.precision()) {
       case 'day':
-        return `${y}-${pad(this.month())}-${pad(Math.min(this.day(), this.daysInMonth()))}`;
+        return `${y}-${pad(this.month()!)}-${pad(Math.min(this.day()!, this.daysInMonth()))}`;
       case 'month':
-        return `${y}-${pad(this.month())}-01`;
+        return `${y}-${pad(this.month()!)}-01`;
       case 'year':
       case 'estimated':
         return `${y}-01-01`;
@@ -200,13 +283,17 @@ export class PrecisionDateControl {
   });
 
   /**
-   * The emitted value. NULL until a precision is chosen -- there is no state of
-   * this control that yields a date without one, which is what mirrors NOT NULL
-   * with no default.
+   * The emitted value. NULL until a precision is chosen AND every part that
+   * precision needs has been typed -- there is no state of this control that
+   * yields a date without one, or a date with an invented part, which is what
+   * mirrors NOT NULL with no default.
+   *
+   * Note this retracts: clearing the year on a complete date emits null again
+   * rather than leaving the parent holding the last good value.
    */
   readonly value = computed<PrecisionDate | null>(() => {
     const p = this.precision();
-    if (p === null) return null;
+    if (p === null || this.missing().length > 0) return null;
     return {
       occurred_on: this.stored(),
       date_precision: p,

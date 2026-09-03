@@ -91,6 +91,18 @@ describe('PrecisionDateControl', () => {
     const { fixture, el, emitted } = make();
     pick(el, 'day');
     fixture.detectChanges();
+
+    // The date has to be TYPED before there is anything for a time to ride on.
+    // This spec used to set only the time and read a complete emission back --
+    // which worked solely because year/month/day were prefilled, making it the
+    // one existing spec that depended on the fabricated-date bug.
+    for (const [role, v, ev] of [['year', '2024', 'input'], ['month', '3', 'change'], ['day', '14', 'input']] as const) {
+      const n = el.querySelector(`[data-role="${role}"]`) as HTMLInputElement;
+      n.value = v;
+      n.dispatchEvent(new Event(ev));
+      fixture.detectChanges();
+    }
+
     const t = el.querySelector('[data-role="time"]') as HTMLInputElement;
     t.value = '05:30';
     t.dispatchEvent(new Event('input'));
@@ -115,5 +127,83 @@ describe('PrecisionDateControl', () => {
   it('explains that there is no default before anything is chosen', () => {
     const { el } = make();
     expect(el.textContent).toContain('no default');
+  });
+
+  // -------------------------------------------------------------------------
+  // The defaults rule, applied to this control's own fields
+  // -------------------------------------------------------------------------
+
+  it('does NOT emit a date when only the precision was chosen', () => {
+    // The bug this closes: year/month/day used to initialise to the current
+    // year, January and the 1st, so clicking "Exact day" and nothing else
+    // emitted a confident, fabricated exact date that satisfied every CHECK,
+    // every write-boundary assertion and every invariant.
+    //
+    // A backfill year has no strong prior at all, which puts these three
+    // fields on the "lie" side of the defaults rule, not the "mistake" side.
+    const { fixture, el, emitted } = make();
+    pick(el, 'day');
+    fixture.detectChanges();
+    expect(emitted[emitted.length - 1]).toBeNull();
+  });
+
+  it('starts every date part empty at every precision', () => {
+    const { fixture, el } = make();
+    pick(el, 'day');
+    fixture.detectChanges();
+    expect((el.querySelector('[data-role="year"]') as HTMLInputElement).value).toBe('');
+    expect((el.querySelector('[data-role="month"]') as HTMLSelectElement).value).toBe('');
+    expect((el.querySelector('[data-role="day"]') as HTMLInputElement).value).toBe('');
+  });
+
+  it('withholds the date until every part the precision needs is entered', () => {
+    const { fixture, el, emitted } = make();
+    const last = () => emitted[emitted.length - 1];
+    const type = (role: string, v: string, ev = 'input') => {
+      const n = el.querySelector(`[data-role="${role}"]`) as HTMLInputElement;
+      n.value = v;
+      n.dispatchEvent(new Event(ev));
+      fixture.detectChanges();
+    };
+
+    pick(el, 'day');
+    fixture.detectChanges();
+
+    type('year', '2019');
+    expect(last()).toBeNull(); // month and day still missing
+    type('month', '6', 'change');
+    expect(last()).toBeNull(); // day still missing
+    type('day', '14');
+    expect(last()).toEqual({
+      occurred_on: '2019-06-14',
+      date_precision: 'day',
+      occurred_time: null,
+    });
+  });
+
+  it('names what is still missing instead of previewing a date', () => {
+    const { fixture, el } = make();
+    pick(el, 'day');
+    fixture.detectChanges();
+    expect(el.querySelector('[data-role="preview"]')).toBeNull();
+    expect(el.querySelector('[data-role="incomplete"]')!.textContent).toContain('year');
+  });
+
+  it('clearing a part withdraws the date again', () => {
+    // Emptying the year after a complete date must retract the emission, not
+    // leave the parent holding the last good value.
+    const { fixture, el, emitted } = make();
+    pick(el, 'year');
+    fixture.detectChanges();
+    const y = el.querySelector('[data-role="year"]') as HTMLInputElement;
+    y.value = '2019';
+    y.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(emitted[emitted.length - 1]).not.toBeNull();
+
+    y.value = '';
+    y.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(emitted[emitted.length - 1]).toBeNull();
   });
 });

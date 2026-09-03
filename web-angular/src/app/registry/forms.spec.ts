@@ -31,6 +31,48 @@ function setup() {
 const click = (el: HTMLElement, sel: string) =>
   (el.querySelector(sel) as HTMLButtonElement).click();
 
+/**
+ * Choose a precision AND type the date it requires.
+ *
+ * THE SECOND HALF USED TO BE UNNECESSARY, AND THAT WAS THE BUG. `PrecisionDate`
+ * initialised year/month/day to the current year, January and the 1st, so
+ * clicking a precision was enough to submit -- and seven specs in this file did
+ * exactly that. Worse, two of them asserted the *shape* of the result
+ * (`acquired_on` matching /^\d{4}-01-01$/, `occurred_on` matching /-01$/) while
+ * staying agnostic about the value, which is precisely what kept the fabricated
+ * date invisible to a green suite.
+ *
+ * Every date these specs submit is now one they typed, and the assertions name
+ * it exactly. See precision-date.ts's header for the three fabrications this
+ * closed.
+ *
+ * `which` indexes the app-precision-date elements, since AnimalForm renders two
+ * (arrival, then birth) and the scoping must not depend on which of them
+ * currently has inputs rendered.
+ */
+function enterDate(
+  fixture: { detectChanges(): void },
+  el: HTMLElement,
+  precision: 'day' | 'month' | 'year' | 'estimated',
+  parts: { year: number; month?: number; day?: number },
+  which = 0,
+): void {
+  const scope = el.querySelectorAll('app-precision-date')[which] as HTMLElement;
+  (scope.querySelector(`[data-precision="${precision}"]`) as HTMLButtonElement).click();
+  fixture.detectChanges();
+
+  const set = (role: string, value: number, ev: string) => {
+    const node = scope.querySelector(`[data-role="${role}"]`) as HTMLInputElement;
+    node.value = String(value);
+    node.dispatchEvent(new Event(ev));
+    fixture.detectChanges();
+  };
+
+  set('year', parts.year, 'input');
+  if (parts.month !== undefined) set('month', parts.month, 'change');
+  if (parts.day !== undefined) set('day', parts.day, 'input');
+}
+
 describe('SessionGate', () => {
   it('blocks until both source form and recorder are given', () => {
     setup();
@@ -80,15 +122,16 @@ describe('AnimalForm', () => {
     const el = fixture.nativeElement as HTMLElement;
 
     // Precision first, on the arrival-date control (the first one rendered).
-    (el.querySelectorAll('[data-precision="year"]')[0] as HTMLButtonElement).click();
-    fixture.detectChanges();
+    enterDate(fixture, el, 'year', { year: 2019 });
     click(el, '[data-role="submit"]');
 
     const req = http.expectOne(`${BASE}/animals`);
     expect(req.request.body.source_form).toBe('recall');
     expect(req.request.body.recorded_by).toBe('adnan');
     expect(req.request.body.date_precision).toBe('year');
-    expect(req.request.body.acquired_on).toMatch(/^\d{4}-01-01$/);
+    // The date the spec typed, named exactly. The old assertion was
+    // /^\d{4}-01-01$/ -- true of any fabricated year, which is why it passed.
+    expect(req.request.body.acquired_on).toBe('2019-01-01');
     expect(req.request.body.observed_by).toBeNull();
     expect(req.request.body.birth_on).toBeNull();
     req.flush({ animal_id: 'BD-0001', animal: { animal: { id: 'BD-0001', name: null }, status: { status: 'heifer', birth_on: null, birth_precision: null }, events: [] } });
@@ -104,8 +147,7 @@ describe('AnimalForm', () => {
     const fixture = TestBed.createComponent(AnimalForm);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    (el.querySelectorAll('[data-precision="year"]')[0] as HTMLButtonElement).click();
-    fixture.detectChanges();
+    enterDate(fixture, el, 'year', { year: 2019 });
     click(el, '[data-role="submit"]');
 
     const prose = "sex must be 'female' or 'male', got 'wombat'";
@@ -125,8 +167,7 @@ describe('AnimalForm', () => {
     const fixture = TestBed.createComponent(AnimalForm);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    (el.querySelectorAll('[data-precision="day"]')[0] as HTMLButtonElement).click();
-    fixture.detectChanges();
+    enterDate(fixture, el, 'day', { year: 2019, month: 6, day: 14 });
     click(el, '[data-role="submit"]');
 
     http.expectOne(`${BASE}/animals`).flush(
@@ -143,8 +184,7 @@ describe('AnimalForm', () => {
     const fixture = TestBed.createComponent(AnimalForm);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    (el.querySelectorAll('[data-precision="day"]')[0] as HTMLButtonElement).click();
-    fixture.detectChanges();
+    enterDate(fixture, el, 'day', { year: 2019, month: 6, day: 14 });
     click(el, '[data-role="submit"]');
     http.expectOne(`${BASE}/animals`).flush('boom', { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
@@ -174,8 +214,7 @@ describe('EventForm', () => {
     const { http, fixture, el } = mount();
     click(el, '[data-type="departure"]');
     fixture.detectChanges();
-    (el.querySelector('[data-precision="month"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    enterDate(fixture, el, 'month', { year: 2024, month: 5 });
     const sel = el.querySelector('[data-role="reason"]') as HTMLSelectElement;
     sel.value = 'sold';
     sel.dispatchEvent(new Event('change'));
@@ -186,7 +225,9 @@ describe('EventForm', () => {
     expect(req.request.body.type).toBe('departure');
     expect(req.request.body.reason).toBe('sold');
     expect(req.request.body.date_precision).toBe('month');
-    expect(req.request.body.occurred_on).toMatch(/-01$/);
+    // Named exactly. The old assertion was /-01$/, which the fabricated
+    // January-the-1st default satisfied without any date being entered.
+    expect(req.request.body.occurred_on).toBe('2024-05-01');
   });
 
   it('warns against recording an uncertain calf as dead — the irreversible direction', () => {
@@ -202,8 +243,7 @@ describe('EventForm', () => {
     const { http, fixture, el } = mount();
     click(el, '[data-type="dry_off"]');
     fixture.detectChanges();
-    (el.querySelector('[data-precision="month"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    enterDate(fixture, el, 'month', { year: 2024, month: 5 });
     click(el, '[data-role="submit"]');
     http.expectOne(`${BASE}/events`).flush(
       { error: 'animal_departed', field: 'occurred_on', message: 'animal departed on 2024-05-01…' },
@@ -264,8 +304,7 @@ describe('CorrectionForm', () => {
     const el = fixture.nativeElement as HTMLElement;
     click(el, '[data-calving="aevt_target"]');
     fixture.detectChanges();
-    (el.querySelector('[data-precision="month"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    enterDate(fixture, el, 'month', { year: 2023, month: 5 });
     click(el, '[data-role="submit"]');
 
     const req = http.expectOne(`${BASE}/calvings/aevt_target/correction`);

@@ -116,7 +116,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
             class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
           >{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
           @if (!when()) {
-            <span class="text-sm text-farm-600" data-role="blocked">Choose how well you know the date.</span>
+            <span class="text-sm text-farm-600" data-role="blocked">Say how well you know the date, then enter it.</span>
           }
         </div>
       }

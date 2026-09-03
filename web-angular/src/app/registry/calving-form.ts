@@ -294,7 +294,7 @@ export class CalvingForm {
 
   protected readonly blockedReason = computed(() => {
     if (this.damId().length === 0) return 'Choose a dam.';
-    if (this.when() === null) return 'Choose how well you know the calving date.';
+    if (this.when() === null) return 'Say how well you know the calving date, then enter it.';
     if (this.mode() === null) return 'Answer whether the calf is already in the registry.';
     if (this.mode() === 'existing' && this.calfId().length === 0) return 'Pick the calf.';
     return null;

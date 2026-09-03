@@ -215,6 +215,68 @@ Untimed events sort before timed ones on the same day. Arbitrary, but **stable a
 
 ---
 
+## The defaults rule
+
+The rule that governs every field on every entry surface. It was followed in the code from the
+start but **stated nowhere**, and only its restrictive half was written down — in four separate
+places, each about one field. Both halves belong here, because the next change will otherwise break
+it in one direction or the other.
+
+> Facts the operator knows with certainty may be defaulted where a strong prior exists — sex
+> defaults to female, calving outcome defaults to live. Questions about the operator's *state of
+> knowledge* — date precision, estimation, source — are never defaulted, because a default is how
+> "exact day" gets applied to a guess. When it is unclear which kind a field is, ask whether a wrong
+> value would be a mistake or a lie. Mistakes may be defaulted; lies may not.
+
+The permissive half is not a concession. A form that defaults nothing is a form that asks twenty
+questions to record one fact, and the operator stops reading all of them — including the ones that
+matter. Defaulting `sex` to female on a dairy buffalo herd costs a correction on the rare male;
+refusing to default it costs attention on every single animal.
+
+The mistake-versus-lie test is what to reach for at the boundary. A wrong `sex` is visibly wrong to
+the next person who looks at the animal, and the log can be corrected. A wrong-but-confident date is
+**not detectable by anything** — not by a CHECK, not by `assertDatePrecision()`, not by any
+invariant — because nothing can detect a date more precise than the memory behind it. That
+asymmetry, not the importance of the field, is what decides it.
+
+### How the code stands against it
+
+| Field | Default | Side |
+|---|---|---|
+| `sex` | `female` | strong prior — a mistake |
+| calving `outcome` | `live` | strong prior — a mistake, and the repairable direction (live → died is a departure event; the reverse is not) |
+| `date_precision` | none | state of knowledge — a lie |
+| year / month / day parts | **none** | state of knowledge — a lie. See below |
+| `source_form` | none, gated | state of knowledge — a lie |
+| `observed_by` | none, blank | a claim about a witness — a lie |
+| link-vs-mint (`/calving`) | none | state of knowledge — a lie |
+
+**The one place this rule was violated was the control built to enforce it.** `precision-date.ts`
+initialised its year, month and day fields to the current year, January and the 1st. Choosing a
+precision and touching nothing else emitted a complete, confident date. Proven by execution three
+separate ways before it was fixed:
+
+```
+choose 'day', touch nothing   -> emitted 2026-01-01 at day precision
+choose 'day', type only 2019  -> emitted 2019-01-01 at day precision
+choose 'year', then clear it  -> emitted 0000-01-01   (`+''` is 0)
+```
+
+None of those is *inconsistent*, which is why all three layers of enforcement passed them: the
+month/year/estimated storage conventions were satisfied, so the CHECK, the write boundary and
+invariant 11 all had nothing to say. They were merely false. The "Will be recorded as" preview line
+was the only thing between the first one and the log.
+
+The control now emits `null` until every part the chosen precision *needs* has actually been typed,
+names the missing part in place of the preview, and retracts if a part is cleared afterwards. Seven
+specs in `forms.spec.ts` had encoded the old behaviour — clicking a precision and submitting with no
+date — and two of them asserted the *shape* of the fabricated value (`acquired_on` matching
+`/^\d{4}-01-01$/`, `occurred_on` matching `/-01$/`) while staying agnostic about the value. That is
+how a fabricated date survived a green suite, and it is the reason to assert the date a spec typed
+rather than the pattern it expects.
+
+---
+
 ## Decision 6 — Time, precision and provenance
 
 ### Three times, three columns

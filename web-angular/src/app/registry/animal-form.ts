@@ -104,7 +104,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           >{{ state.submitting() ? 'Saving…' : 'Add animal' }}</button>
           @if (!acquired()) {
             <span class="text-sm text-farm-600" data-role="blocked">
-              Choose how well you know the arrival date first.
+              Say how well you know the arrival date, then enter it.
             </span>
           }
         </div>
