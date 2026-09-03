@@ -1,10 +1,16 @@
 # Registry entry UX — design decisions
 
-Status: decided, not yet implemented. Supersedes the kickoff brief, the validation reply, and the
-Q5/Q6/calf-age addendum — those three can be deleted once this lands.
+Status: **items 0, 1 and 2 are built and tagged `v0.13.0`.** Items 3, 4, B2 and 5 are pass 2;
+everything below them is decided but unbuilt. Supersedes the kickoff brief, the validation reply,
+and the Q5/Q6/calf-age addendum — those three can be deleted once this lands.
 
-Baseline verified at HEAD `42c0ad2` (`v0.12.0-2-g42c0ad2`). Server tests 385 passing, typecheck
-clean. Frontend has 44 registry specs across 4 files.
+Baseline was verified at `42c0ad2` (`v0.12.0-2-g42c0ad2`): server 385 tests passing, typecheck
+clean, 44 registry specs across 4 frontend files. **At `v0.13.0` that is server 410 and frontend
+106 across 16 files**, 5 of them registry specs — including the first `CalvingForm` spec, which
+had none.
+
+**No herd data enters the real registry until item 5 lands.** That is a rule, not an intention;
+the reason is in §6.6.
 
 This document covers the entry surface only — the screens through which real herd data goes into
 the registry. It does not cover read models, the agent tooling, or the farm events layer.
@@ -62,7 +68,22 @@ a default is how "exact day" gets applied to a guess. When it is unclear which k
 whether a wrong value would be a mistake or a lie. Mistakes may be defaulted; lies may not.
 
 This rule was followed in the code but stated nowhere, and only its restrictive half was documented
-(in four separate places). Both halves belong in `docs/REGISTRY.md`.
+(in four separate places). Both halves are now in `docs/REGISTRY.md` under "The defaults rule".
+
+**Corollary, learned the hard way: a date assertion that matches a pattern instead of naming an
+exact expected value is suspect.** Item 0 found the control emitting a fabricated `2026-01-01`, and
+the reason a green suite had never noticed was that seven of the fifteen specs in `forms.spec.ts`
+asserted the *shape* of the result rather than its value:
+
+```ts
+expect(req.request.body.acquired_on).toMatch(/^\d{4}-01-01$/);   // true of ANY fabricated year
+expect(req.request.body.occurred_on).toMatch(/-01$/);            // true of any January the 1st
+```
+
+Both pass whatever the current year happens to be, and neither spec had entered a date at all. A
+pattern is the right tool for a value the test cannot know — a generated id, a `recorded_at` stamp.
+For a date the test itself supplied, it is a way of not looking. **From here on, every spec names
+the date it typed.** This applies to every spec in the repo, not only the entry surface.
 
 **Recognition over recall.** Any question whose answer is in the database is a query, not a prompt.
 Where the operator must choose, linking to something existing is the default path and creating
@@ -108,21 +129,24 @@ already built; several assumed present were not.
   the whole app belongs to the chat composer. Enter does nothing on any screen. The
   `role="radiogroup"` controls have no key handling at all, so they are not keyboard-navigable in
   the way their ARIA role advertises. This is an accessibility defect as well as a speed one.
-- Any date parsing utility or date library. `time.ts` has `farmToday()` only.
-- Server-side idempotency. Double-submit is confirmed possible by execution, not inference: the same
-  payload twice produces `BD-0001` and `BD-0002`; identical notes and dry-offs produce two events.
-  The client disables the button while submitting, which stops a fast double-click on one live form
-  and nothing else. A refresh-and-resubmit or a second tab produces a permanent duplicate. `/add` is
-  the dangerous one — it mints a fresh serial with no calving flow involved.
+- Any date parsing utility or date library. `time.ts` has `farmToday()` only. Still true — §6.6
+  adds the first one, as a pure sibling module rather than a dependency.
+- ~~Server-side idempotency.~~ **Built in `v0.13.0` (§6.2.)** Double-submit was confirmed possible
+  by execution, not inference: the same payload twice produced `BD-0001` and `BD-0002`; identical
+  notes and dry-offs produced two events. The client disabled the button while submitting, which
+  stops a fast double-click on one live form and nothing else. A refresh-and-resubmit or a second
+  tab still produces a permanent duplicate — that hole is uncoverable by a server-side store and is
+  answered by §6.2a instead. `/add` is the dangerous one: it mints a fresh serial with no calving
+  flow involved.
 - Any persistence of overrides. `allow_near_duplicate` and `allow_after_departure` are transient
   input flags. After the fact, an overridden write is indistinguishable from one that never tripped
-  a check.
+  a check. Still true — item 3 (§6.4).
 - Any history beyond the last result — `FormState.result` holds one, per form instance, lost on
   navigation.
 
-### Live bug found during validation
+### Live bug found during validation — three fabrications, not one
 
-`precision-date.ts:162-164` initialises its internal fields:
+`precision-date.ts` initialised its internal fields:
 
 ```
 protected readonly year  = signal(new Date().getFullYear());
@@ -130,11 +154,27 @@ protected readonly month = signal(1);
 protected readonly day   = signal(1);
 ```
 
-Choose "Exact day", touch nothing, submit: you have written `2026-01-01` at day precision. It
-satisfies every CHECK, every write-boundary assertion and every invariant. Only the "Will be
-recorded as" preview stands between that and the log, and the year of a backfill has no strong prior
-at all. This is the defaults rule being violated by the very control built to enforce it, and it is
-the most serious finding of the validation pass.
+Validation found one path. Writing the fix's specs first, and running them against the unfixed
+control, found three:
+
+| Action | Emitted |
+|---|---|
+| "Exact day", touch nothing | `2026-01-01` at **day** precision |
+| "Exact day", type only `2019` | `2019-01-01` at **day** precision |
+| "Year only", then *clear* the year | `0000-01-01` — because `+''` is `0` |
+
+The second is worse than the first, because typing a year and stopping is a plausible thing to do
+rather than an omission. The third is worse again: it needs no fabrication at all, only a
+correction that the operator abandons halfway.
+
+**None of the three is *inconsistent*, which is why all three enforcement layers waved them
+through.** The month/year/estimated storage conventions were satisfied, so the schema CHECK,
+`assertDatePrecision()` and invariant 11 each had nothing to say. They were merely false, and
+nothing can detect a date more precise than the memory behind it. Only the "Will be recorded as"
+preview stood between the first one and the log.
+
+This is the defaults rule being violated by the very control built to enforce it, and it was the
+most serious finding of the validation pass. Fixed in `v0.13.0`; see §6.1.
 
 ---
 
@@ -218,44 +258,200 @@ What it becomes instead is covered in §9.
 
 Each item: intent, what validation established, and the decision.
 
-### 6.1 Empty date fields, and write down the defaults rule
+### 6.1 Empty date fields, and write down the defaults rule — BUILT (`v0.13.0`)
 
-Fix `precision-date.ts` so year, month and day start empty. Add both halves of the defaults rule to
-`docs/REGISTRY.md`. First commit, independent of everything else. The fix must be demonstrated by
-execution — show the fabricated-date path actually closed, the way double-submit was proven open.
+Year, month and day start empty. The control emits `null` until every part the chosen precision
+*needs* has been typed, names the missing part where the preview would otherwise be
+(`data-role="incomplete"`), and **retracts** if a part is later cleared. Empty numeric inputs parse
+to `null`, not `0` — `+''` being `0` was the third fabrication. The `PrecisionDate` output contract
+is unchanged, so §6.6 can replace the internals without touching any consumer.
 
-Check whether any of the 8 existing `precision-date` specs assert the old initialisation. If so,
-that is worth calling out rather than quietly updating.
+Submit blockers now read "Say how well you know the *X* date, then enter it", which is accurate for
+both the no-precision and half-entered states.
 
-### 6.2 Server-side idempotency
+**Eight specs had encoded the old behaviour, and not the eight expected.** One of the 8
+`precision-date` specs (it set only a *time* at day precision and read back a complete emission),
+plus **seven of the fifteen in `forms.spec.ts`**, which clicked a precision and submitted with no
+date at all. Two of those asserted a pattern rather than a value — see the corollary in §3, which
+is the durable lesson from this item.
 
-An `Idempotency-Key` header on the three write routes, stored per key, returning the original result
-on replay. Not in the original brief and it should have been: it is the cheapest reduction of
-permanent-duplicate risk, and it covers the `/add` path that no amount of calving-flow care would
-protect.
+### 6.2 Server-side idempotency — BUILT (`v0.13.0`)
 
-### 6.3 Candidate search replaces the yes/no binary
+An `Idempotency-Key` header, stored per key, returning the original result on replay. Not in the
+original brief and it should have been: it is the cheapest reduction of permanent-duplicate risk,
+and it covers the `/add` path that no amount of calving-flow care would protect.
 
-`/link-candidates` already computes eligibility, the "dam is unset" condition, and returns
-`birth_on` and `birth_precision` per candidate. What is missing is proximity ranking. Add
-`days_apart: number | null` to `LinkCandidate` and sort.
+**Four routes, not three.** `/animals`, `/events`, `/calvings` **and
+`/calvings/:eventId/correction`** — the last appends a superseding calving, a superseding birth and
+sometimes a departure. Replayed without a key it does not merely duplicate: it hits the partial
+unique index on `supersedes_id`, which is a raw SQLite constraint error rather than a
+`RegistryError`, so it surfaces as a **500**. Cheaper to protect than to explain. `/rebuild` is
+deliberately unkeyed — it appends nothing, and idempotence is invariant 0.
 
-`recordCalving` needs no change — link mode is already a first-class branch via `calf.existing_id`,
-and the whole mint-birth-departure-projection sequence runs in one transaction with test-only fault
-injection at six points. This is a UI reshape plus a sort key.
+A missing key is a **400 `missing_idempotency_key`**, not a pass-through, because a silently
+unprotected write is the failure this closes. Nothing depended on keyless writes: the CLI does not
+go through these routes at all.
 
-**Match window:**
+**Keyed on `(key, body)`, not the key alone.** The client mints a key on first submit, reuses it
+while a refusal is on screen, and clears it on success. So a retry after a network fault replays,
+while failed-submit → edit → resubmit has a different body and is processed as new — no client
+wiring, and no "you reused a key" error to explain. Only successes are remembered: a 400 wrote
+nothing, and caching a transient failure would make it permanent for that key.
+
+**Deriving the key from the payload was rejected, and this is the reason to keep rejecting it.** Two
+identical bodies really can be two animals — no name, same sex, same arrival year is the roster pass
+of §5.1, not a contrived case — and silently returning the first one's result is worse than a
+duplicate, because a duplicate is visible and a missing animal is not.
+
+#### The residual holes, and where they are not covered
+
+Storage is an in-process `Map` (bounded LRU, 500 entries, no TTL — a TTL would only manufacture a
+window in which a replay silently duplicates). No migration, which is what keeps the "everything
+above the cut line lands without a schema migration" claim in §10 true. The trade was deliberate:
+putting request plumbing into the schema holding the one set of unrecoverable records, to close a
+window measured in seconds on a single-user localhost app, is a bad bargain.
+
+What that leaves open:
+
+1. **Keys die with the process.** A restart between a write and its replay loses the key.
+2. **`npm run dev -w server` is `tsx watch`**, so the server restarts on *every file save*. Not a
+   hazard mid-transcription — nobody edits source while typing a herd in — but real during
+   development, and the most likely way to see a duplicate while working on this code.
+3. **A page refresh, or a second tab, is uncoverable by any server-side store.** Both get a fresh
+   `FormState` and therefore a fresh key. This is not a gap in the implementation; it is what a
+   client-minted key cannot do, and the alternative that would cover it is the payload-derived key
+   rejected above.
+
+Hole 3 is the one that matters, because `/add` is where it mints a permanent duplicate with no
+calving flow involved — which is the risk that justified deferring merge (§8). It should not sit
+open across the whole backfill, so it has an answer immediately below.
+
+If this app ever grows a second writer or a real deployment, storage is the first decision to
+revisit.
+
+### 6.2a Near-duplicate detection on `/add`
+
+The answer to hole 3. Idempotency cannot see a refresh-and-resubmit or a second tab; a **query
+can**, because the duplicate it would create is sitting in the database by the time the second
+submit happens.
+
+**A soft warning, never a refusal.** Recently-added animals matching on some combination of name,
+post no., tag no. and sex are surfaced at entry — "is this a new one?" — with a one-click way to
+open the match and check.
+
+**Soft is load-bearing, not a hedge.** The roster case is real: no name, same sex, same arrival
+year, genuinely two animals. That must stay possible with no friction beyond acknowledging the
+warning. A hard block here would force the operator to invent a distinguishing detail, which is the
+same dishonesty the precision rules exist to prevent.
+
+**Built where item §5.1 inherits it**, the way `calf-picker.ts` was built for §5.2. The roster pass
+needs exactly this query for its inline duplicate detection, and writing it twice is how the two
+drift.
+
+#### The match rule
+
+Any one of these makes an animal a candidate:
+
+| Signal | Comparison | Sex must match? |
+|---|---|---|
+| `post_no` | equal, trimmed, case-insensitive | no |
+| `tag_no` | equal, trimmed, case-insensitive | no |
+| `name` | equal after normalising — lowercased, trimmed, internal whitespace collapsed | yes |
+| `name` | near-equal: edit distance ≤ 1 on the normalised form, or one is a prefix of the other with at least 3 characters | yes |
+
+**Why name matches require the same sex and identifier matches do not.** A shared name across sexes
+is far more likely to be two animals than one duplicate — names repeat on a farm. A shared
+`post_no` across sexes is not; it is either a duplicate or a real collision on a working
+identifier, and both are worth surfacing. The near-equal rule is what catches `abdul` / `abdul_r`
+and `Kali` / `kali`, which is the same free-text drift §6.5's `datalist` addresses from the other
+end.
+
+#### The recency window: none, and the number is the wrong question
+
+**Match against the whole registry.** The memory that actually fails is "did I already enter this
+one?", and that fails across sittings, not within minutes — so any cutoff short enough to be called
+a window would miss the case worth catching. At twenty to a couple of hundred animals a full scan is
+free, and the query is bounded by the herd, not by time.
+
+What is shown instead of filtered is **how long ago each match was typed**: "added 4 minutes ago",
+"added yesterday". A match from minutes ago is almost certainly the refresh-and-resubmit this item
+exists for; one from last week is a question worth a moment. The operator can tell those apart at a
+glance, and neither is hidden.
+
+The age comes from the animal's **origin event's `recorded_at`**, not from a column on
+`registry_animals` — that table has no timestamp, deliberately, and `recorded_at` is the honest
+source anyway: it is when the row was *typed*, which is what "recently added" means here, rather
+than when the arrival happened.
+
+Revisit only if the herd passes roughly 500 animals, at which point the name comparison wants an
+index and the scan wants a cutoff. Note that in the code rather than pre-optimising for a herd size
+this farm does not have.
+
+### 6.3 Candidate search replaces the yes/no binary — BUILT (`v0.13.0`)
+
+`/link-candidates` already computed eligibility, the "dam is unset" condition, and `birth_on` /
+`birth_precision` per candidate. What was missing was proximity ranking: `days_apart: number | null`
+(signed, so a UI can say "3d earlier" / "3d later") and `within_match_window`.
+
+`recordCalving` needed no change — link mode was already a first-class branch via
+`calf.existing_id`, and the whole mint-birth-departure-projection sequence runs in one transaction
+with test-only fault injection at six points.
+
+**Match window, by the coarsest precision of the two dates:**
 
 | Coarsest of the two precisions | Window |
 |---|---|
 | both day | ±7 days |
 | either month | ±45 days |
 | either year or estimated | same calendar year, ±1 year |
-| candidate has no birth date | always shown, ranked first |
+| candidate has no birth date | always in window, ranked first |
+| outside the window | still returned; collapsed behind a visible count |
 
-That last row matters most — an animal entered in the roster pass without a birth date is the most
-likely link target, and a proximity filter would hide it. Rank by no-birth-date first, then by
-absolute days apart.
+The windows widen with uncertainty because that is what uncertainty means: two month-precision dates
+both stored on the 1st can be 30 days apart and describe the same week, so a day-grain window would
+hide the right animal. The values are provisional in the sense `CALF_MAX_AGE_MONTHS` is, and chosen
+generous — a candidate you scroll past costs nothing, one that never appears costs a duplicate.
+
+**`estimated` is compared here, at year grain.** That is a deliberate divergence from
+`definitelyBefore()`, which refuses to compare an estimated date at all. That function *proves* a
+timeline violation, so a guess is not evidence and it declines; this one *suggests* a match, where a
+guess is exactly what you want to act on. An animal recorded as "estimated 2019" is a fine candidate
+for a 2019 calving. Same two dates, opposite correct answers, because proving and suggesting are
+different jobs.
+
+**Ordering — three keys, and eligibility is the first of them.**
+
+1. **Eligible before ineligible.** An ineligible row at the top of a recognition list is a target
+   the eye lands on and the hand cannot click. Ineligible animals stay in the list, with the
+   server-computed reason, because "already has a birth event, so it already has a dam" teaches
+   something that hiding the row does not — but they sit below the animals that can be picked.
+2. **No birth date before any birth date.** An animal entered in the roster pass without one is the
+   likeliest link target there is, and a proximity filter would rank it nowhere.
+3. **Closest first**, by absolute `days_apart`. Then serial, so the order is total and two calls
+   agree.
+
+These are different populations and the sort does not conflate them: an *eligible* acquired animal
+with no birth date still ranks top, which is the case the second key exists for.
+
+**Nothing is hidden.** Out-of-window animals are returned by the endpoint and collapsed by the
+client behind a count that is always on screen — "3 more, with birth dates further from this date".
+An animal silently absent from a picker reads as data loss to the person entering the herd, who
+stops and goes looking for it.
+
+**The list lives in `calf-picker.ts` as its own component**, not as markup inside the calving form,
+because §5.2's workbench needs the same list with the dam fixed by context. It does not re-sort —
+the ranking is a server rule, the same argument as `ineligible_reason`.
+
+The warning about unrepairable duplicates is **gone, not softened**. The list is the mitigation, and
+a warning that no longer names a live risk trains operators to skim warnings — the same reason
+`/check` has no badge that turns green.
+
+**One consequence worth knowing before touching that form.** The list now has to *arrive on its
+own*, driven by an effect on dam, date and calf sex, and a change to any of those invalidates the
+selection. Both were implicit in the deleted click: the fetch was triggered by "yes — link to it",
+and an unfetched list renders as "no animal in the registry has a birth date near this calving" —
+a false statement about the herd, shown to exactly the person deciding whether to create a
+duplicate. Expect the same class of surprise in §5.2, which deletes more triggers than this did.
 
 ### 6.4 Persist overrides
 
@@ -272,9 +468,12 @@ cheap. Small, and separate from the soft-warning work below the line.
   someone actually saw it", `/calving` and the event form say only "(optional)", and `recorded_by`
   gets "a stable identifier, not a display name". One field, three treatments. Unify, and apply the
   stable-identifier guidance to `observed_by` too.
-- `/calving` empty state (`calving-form.ts:52-55`) is a dead end with no link, while `/herd`'s empty
-  state already has `data-role="empty-cta"` pointing at `/add`. Fix the asymmetry — or make it
-  unreachable once the roster pass exists.
+- `/calving` empty state is a dead end with no link, while `/herd`'s empty state already has
+  `data-role="empty-cta"` pointing at `/add`. **Resolved: fix it now, cheaply.** The tempting answer
+  was to skip it on the grounds that §5.1's roster pass makes it unreachable — but §5.2 folds
+  `/calving` into the workbench composer rather than deleting the flow, and the empty state is a
+  property of "no females exist yet", which stays reachable on a fresh database however the herd
+  gets entered. A one-line link is cheaper than reasoning about whether a later item removes it.
 - The duplicated precision explainer is the shared control's internal `hint()`
   (`precision-date.ts:170`), rendering once per control on a page that has two. The separate
   paragraph at `animal-form.ts:82-86` is different text. Fixing this means an `explain` input on the
@@ -297,6 +496,37 @@ word (6 Jul 2023) or use 2023-07-06." Refuse *all* of them uniformly, including 
 like `25/12/2023`, because accepting those trains a habit that silently breaks on `06/07`. The farm
 is in Pakistan (DD/MM by convention) and the tooling is US-influenced (MM/DD); a wrong guess produces
 a date that passes every check in the system.
+
+#### And it must close the half-entered OPTIONAL date
+
+§6.1 fixed the required date. The same class of bug survives one step over, on an *optional* one,
+and it is worse in one respect.
+
+On `/add`, choose a precision on the birth-date control and leave the year blank. The control
+correctly says "No date yet — still needs the year", and the form submits anyway with
+`birth_on: null`. §6.1 was a **fabrication**; this is a **disappearance** — the operator types a
+birth year, the record is written without it, and the result is indistinguishable from never having
+typed anything. A fabricated date is at least visible to whoever reads the row later. A vanished one
+is not visible to anyone, ever.
+
+The cause is that "not started" and "half-entered" are both `null` to the parent, so the form cannot
+tell a date nobody began from one someone abandoned. **Definition of done: a three-state output —
+not started / half-entered / complete — with half-entered blocking submit on an optional date
+exactly as on a required one.** Demonstrated by execution, as §6.1 was.
+
+This item replaces the control's internals anyway, which is why it lands here rather than as its own
+change: adding a third state to a control that is about to be rewritten twice is work done twice.
+
+#### THE BACKFILL WAITS FOR THIS ITEM
+
+**No herd data enters the real registry until §6.6 lands.** Not a preference about polish — the two
+date bugs found so far both write something false that nothing downstream can detect, and both live
+in the one control every entry surface goes through. §6.1 closed three paths through it; this item
+closes the fourth and replaces the mechanism. Entering twenty animals and their calving histories
+before that is entering them into a control that has produced a silent falsehood twice.
+
+The registry is empty, so waiting costs nothing but time. Re-entering twenty animals because their
+birth years vanished costs an evening and the confidence that the rest of the rows are right.
 
 ### 6.7 Keyboard pass
 
@@ -457,16 +687,30 @@ that it is currently always blank.
 
 ## 10. Build order
 
-Everything above the cut line lands without a schema migration.
+Everything above the cut line lands without a schema migration. **This claim survived pass 1** —
+idempotency keys live in an in-process `Map` precisely to keep it true (§6.2).
+
+**Pass 1, done — tagged `v0.13.0`:**
+
+| # | Item | Size est. | Actual |
+|---|---|---|---|
+| 0 | Empty date fields + defaults rule in docs (§6.1) | XS | XS to fix, S with the spec fallout |
+| 1 | Server-side idempotency keys (§6.2) | S | S |
+| 2 | Candidate search replaces the binary (§6.3) | S | **M** — see below |
+
+**Pass 2, in order:**
 
 | # | Item | Size |
 |---|---|---|
-| 0 | Empty date fields + defaults rule in docs (§6.1) | XS |
-| 1 | Server-side idempotency keys (§6.2) | S |
-| 2 | Candidate search replaces the binary (§6.3) | S |
 | 3 | Persist override flags (§6.4) | S |
 | 4 | Smaller items — datalists, `observed_by` wording, empty-state link, explainer (§6.5) | S |
-| 5 | Smart date field + "Estimated year" relabel (§6.6) | M |
+| B2 | Near-duplicate detection on `/add` (§6.2a) | S |
+| 5 | Smart date field + "Estimated year" relabel + the half-entered optional date (§6.6) | M |
+
+**Pass 3 and after:**
+
+| # | Item | Size |
+|---|---|---|
 | 6 | Keyboard pass (§6.7) | M |
 | 7 | Roster pass, per-row estimated year (§5.1) | M |
 | 8 | Animal workbench + last-five-written strip (§5.2) | M |
@@ -481,17 +725,44 @@ Everything above the cut line lands without a schema migration.
 | 12 | Merge / supersede (§8) |
 | — | Daily workflow (§9) — separate cycle |
 
-Sequencing reasons: 0 is a live bug in the control everything else touches. 5 and 6 rewrite the same
-component and its 8 specs, so they are adjacent and ordered so the keyboard work lands on final
-markup. 7 precedes 8 because the workbench needs animals to show. 9 sits last above the line because
-`source_ref` capture earns most on the surface that does not exist yet. 10 rides with 8 because the
-boundary bug is invisible until a header renders it.
+### Why item 2 came in at M, and what it predicts
 
-Budget for the 44 existing frontend specs — items 5, 6 and 8 all rewrite code beneath them. Keep the
-`data-role` selector convention; it is consistent across every component and is what makes those
-specs cheap to maintain.
+The `days_apart` and sort work *was* small, as estimated. What was not costed is that **deleting the
+yes/no removed the trigger the whole flow hung off.** Two behaviours that had been implicit in a
+click had to become explicit — fetching the list, and invalidating the selection when the dam, date
+or calf sex changes — and neither was visible until the click was gone.
 
----
+That is a general shape, not a one-off: **replacing an interaction costs more than adding one,
+because the interaction being removed was carrying state transitions nobody wrote down.** Items 5,
+7 and 8 all replace interactions. §5.2 in particular deletes more triggers than §6.3 did, so treat
+its M as optimistic and re-size it once item 7 has shown whether the pattern recurs.
+
+### Sequencing reasons
+
+0 was a live bug in the control everything else touches. 3 and 4 are independent and cheap. B2 sits
+before 5 because it closes the `/add` duplicate hole (§6.2, hole 3) that would otherwise stay open
+across the whole backfill, and because §5.1 inherits its query. 5 is last in pass 2 and gates the
+backfill (§6.6).
+
+5 and 6 rewrite the same component and its specs, so they are adjacent and ordered so the keyboard
+work lands on final markup rather than being done twice. 7 precedes 8 because the workbench needs
+animals to show. 9 sits last above the line because `source_ref` capture earns most on the surface
+that does not exist yet. 10 rides with 8 because the boundary bug is invisible until a header
+renders it.
+
+### Test budget
+
+Keep the `data-role` selector convention; it is consistent across every component and is what makes
+the frontend specs cheap to maintain. Items 5, 6 and 8 all rewrite code beneath existing specs.
+
+Two conventions established in pass 1 that pass 2 onward depends on, both recorded in
+[DEVELOPMENT.md](DEVELOPMENT.md) § 5 rather than only in the file that discovered them:
+
+- **`settle()`, not `whenStable()` alone.** A promise chain started in a component *constructor*
+  needs a macrotask tick before the DOM reflects it. `CalvingForm` asks for its dam list there, and
+  without the tick the form still renders its empty state and every selector returns `null`. Items
+  5 through 8 will all hit this.
+- **Name the date a spec typed; never assert its pattern.** See the corollary in §3.
 
 ## 11. Still open
 
@@ -501,3 +772,10 @@ specs cheap to maintain.
 - How boundary ambiguity surfaces in status when birth precision is year-only or estimated.
 - Whether the roster pass survives the per-row year field or should be folded into the workbench.
 - Interval band numbers, to be retuned against real data once the backfill is in.
+- Whether items 6 (keyboard) and 7 (roster pass) should swap. 7 unblocks the backfill; 6 makes it
+  bearable. Open until pass 2 lands and the real cost of mouse-driven entry is measurable rather
+  than guessed.
+- `intervals.ts` carries a literal NUL byte as a composite map key separator, which makes git treat
+  the file as binary and every diff of it unreadable. Its join and split agree, so it is correct —
+  just undiffable. `idempotency.ts` had the same and now spells it as an escape behind a named
+  const; `intervals.ts` should follow, as a one-line change nobody has authorised yet.

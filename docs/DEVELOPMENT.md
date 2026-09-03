@@ -34,9 +34,12 @@ npm error code 3
 ```
 
 It is an **Angular CLI floor, not a repo-wide one.** Measured under node 22.3.0:
-`npm test -w server` still passes 385/385, and the server itself runs. So a
+`npm test -w server` still passes in full, and the server itself runs. So a
 too-old node produces a confusing split — the backend works, the frontend will
-not start. Run `nvm use` first and the question never arises.
+not start, and `npm test -w web-angular` refuses before running a single spec.
+A green server suite next to a frontend suite that never executed reads exactly
+like the regression-skip trap in § 5. Run `nvm use` first and the question never
+arises.
 
 npm 10.9.8 ships with that node. Any npm 7+ works; the repo only needs
 workspace support.
@@ -138,8 +141,8 @@ notice is about `shared/` emitting CJS.
 ## 5. Test
 
 ```bash
-npm test -w server           # 385 tests, node:test via tsx
-npm test -w web-angular      # 75 tests, Vitest (jsdom) via @angular/build:unit-test
+npm test -w server           # 410 tests, node:test via tsx
+npm test -w web-angular      # 106 tests, Vitest (jsdom) via @angular/build:unit-test
 ```
 
 Both green on a fresh clone, and both need **no database file and no API key** —
@@ -148,8 +151,46 @@ whole writes nothing to disk.
 
 | Suite | Expected | Notes |
 |---|---|---|
-| `npm test -w server` | `# tests 385 / # pass 385 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
-| `npm test -w web-angular` | `Test Files 15 passed / Tests 75 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
+| `npm test -w server` | `# tests 410 / # pass 410 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
+| `npm test -w web-angular` | `Test Files 16 passed / Tests 106 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
+
+**`npm test -w web-angular` needs the node version `.nvmrc` pins** — the Angular CLI refuses below
+its floor and runs nothing, so `nvm use` first. See § 1; the failure mode is a green server suite
+beside a frontend suite that never executed, which deserves the same suspicion as a skipped
+regression run below.
+
+### Two spec conventions worth following
+
+Both were established the hard way while building the registry entry surface, and both cost real
+debugging time before they were written down.
+
+**Name the date a spec typed. Never assert its pattern.** A `precision-date` bug had the control
+emitting a fabricated `2026-01-01`, and the suite was green because seven form specs asserted the
+*shape* of the result rather than its value:
+
+```ts
+expect(req.request.body.acquired_on).toMatch(/^\d{4}-01-01$/);   // true of ANY fabricated year
+```
+
+Those specs had entered no date at all. A pattern is right for a value the test cannot know — a
+generated id, a `recorded_at` stamp. For a date the test itself supplied, it is a way of not
+looking. See [REGISTRY.md](REGISTRY.md) § "The defaults rule".
+
+**`fixture.whenStable()` is not enough for a promise chain started in a constructor.** Angular
+component specs need a macrotask tick first, or the DOM has not caught up:
+
+```ts
+async function settle(fixture) {
+  await new Promise((r) => setTimeout(r, 0));   // let the .then() run
+  await fixture.whenStable();
+  fixture.detectChanges();
+}
+```
+
+`CalvingForm` requests its dam list in its constructor. With `whenStable()` alone the form still
+renders its "no females in the registry yet" empty state, and every `querySelector` returns `null` —
+which surfaces as `TypeError: Cannot set properties of null`, several layers away from the cause.
+The helper lives in `web-angular/src/app/registry/forms.spec.ts`.
 
 **The server suite deliberately does not glob.** `src/**/*.test.ts` is expanded by
 `sh`, where `**` is not globstar, so it silently meant one level deep;
