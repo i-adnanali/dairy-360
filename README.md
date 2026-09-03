@@ -95,6 +95,31 @@ classifier. See [docs/FARM_MONITOR.md](docs/FARM_MONITOR.md).
 
 ## Setup & run
 
+### Just looking? One command, no key, no database
+
+```bash
+nvm use && npm install     # first time only
+npm run harness:app
+```
+
+Open <http://localhost:4200>. You get the **animal registry entry UI** over an
+in-memory herd of 31 animals — every life stage, calvings entered out of order,
+a paired date correction, an overridden check, dates at all four precisions —
+and `server/dairy.db` is never opened by any process this starts. No
+`ANTHROPIC_API_KEY`, no `npm run seed`, nothing to clean up afterwards.
+
+Two things that path does **not** give you, so you are not left hunting. The
+**agent chat at `/chat` will not answer**: the harness mounts only
+`/api/registry` and `/api/harness`, so `/api/health` and `/api/agent/run` are
+absent entirely (404, not the friendly `unseeded` message) — the chat needs the
+full setup below. And nothing is persisted, so a restart is a fresh herd.
+
+`npm run harness:app` and `npm run seed` are two separate dummy-data systems for
+two separate surfaces; the difference is tabulated in
+[docs/DEVELOPMENT.md § 6](docs/DEVELOPMENT.md).
+
+### The full setup
+
 ```bash
 # 1. install (compiles the better-sqlite3 native binding)
 npm install
@@ -139,10 +164,20 @@ of failing obscurely.
   transaction, projections, invariants, HTTP routes). No DB file or API key
   needed: the registry suites run against `:memory:` and write nothing to disk.
 - `npm test -w web-angular` — Vitest unit tests for the Angular frontend.
+- `npm run harness:app` — **the whole app over dummy data, in one command.**
+  Harness on `:4000` (in-memory), a 31-animal herd seeded into it, Angular on
+  `:4200`. Touches no real database and needs no API key. See
+  [docs/DEVELOPMENT.md § 6](docs/DEVELOPMENT.md).
+- `npm run harness:seed` — re-seed a harness that is already running. Every
+  write carries a fixed `Idempotency-Key`, so a second run replays and changes
+  nothing.
+- `npm run harness:serve` — serve the **production** bundle (`npm run
+  build:angular` first) with a `/api` proxy and an SPA fallback, which
+  `ng serve` provides in development and a static host does not.
 - `npm run registry:harness -w server -- --port=4000` — serve the registry API
   over an **in-memory** fixture herd, so the entry UI can be driven without a
   synthetic row reaching the real database. The explicit port matters; see
-  [docs/REGISTRY.md](docs/REGISTRY.md).
+  [docs/REGISTRY.md](docs/REGISTRY.md). `harness:app` wraps this.
 - `npm run verify:registry -w server` — invariants, precision histogram and
   calving intervals against the live registry.
 - `npm run registry:rebuild -w server` — recompute the registry's projection
@@ -195,6 +230,42 @@ npm run dev -w server
 lsof -tiTCP:4000 -sTCP:LISTEN | xargs -r kill
 lsof -tiTCP:4200 -sTCP:LISTEN | xargs -r kill
 ```
+
+### Dummy data — the app with a herd in it, and no real database
+
+```bash
+# harness (:4000, in-memory) + a 31-animal seeded herd + Angular (:4200)
+npm run harness:app
+open http://localhost:4200
+
+# re-seed a harness that is already up (replays; does not duplicate)
+npm run harness:seed
+
+# confirm which database is behind /api -- `memory` is the discriminator
+curl http://localhost:4000/api/registry/storage
+# harness -> {"storage":":memory:","memory":true}
+# real    -> {"storage":"/.../server/dairy.db","memory":false}
+
+# confirm the real file was never touched. THIS is the durable check: it opens
+# no database, so it has no failure mode and stays true after real entry starts.
+stat -f '%Sm  %z bytes' server/dairy.db && shasum -a 256 server/dairy.db
+
+# row counts, if you want them. NOTE: `immutable=1`, not `-readonly`.
+# dairy.db is in WAL mode, and a read-only connection cannot create the -shm
+# file WAL needs -- so `sqlite3 -readonly` fails with "unable to open database
+# file (14)" whenever the sidecars are absent, which is their normal state once
+# the last connection closes. `immutable=1` skips WAL entirely and creates
+# nothing; it assumes no writer is active, which is what you are asserting.
+sqlite3 'file:server/dairy.db?immutable=1' 'select count(*) from registry_animals'
+
+# the PRODUCTION bundle instead of ng serve, on :4300
+npm run build:angular && npm run harness:serve -- --port=4300
+```
+
+`harness:app` and `npm run seed` fill **different tables for different
+screens** — registry vs the six demo tables, entry UI vs the agent chat. Under
+`harness:app` the chat at `/chat` will report unseeded, which is correct. The
+comparison is in [docs/DEVELOPMENT.md § 6](docs/DEVELOPMENT.md).
 
 ### Status / health checks
 

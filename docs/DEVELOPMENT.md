@@ -10,6 +10,14 @@ Checked against `package.json` (root, `server/`, `web-angular/`, `shared/`),
 `.nvmrc`, `web-angular/proxy.conf.json` and `web-angular/angular.json`. Where
 this document and those files disagree, they are right and this is stale.
 
+**Re-run on 2026-09-03 at `06034d9`:** § 6's new one-command subsection in full,
+plus `npm install`, `build:shared`, `typecheck`, `build -w server`,
+`build:angular` and both test suites — which is what corrected the two test
+counts in § 5 (410 → **450**, 106 → **196**) and the budget overrun in § 4
+(11.67 → **16.53 kB**). Those three numbers were true at `a6c4842` and had gone
+stale; nothing else in this document was re-measured, so anything not listed
+here still carries its original `a6c4842` verification.
+
 ---
 
 ## 1. Prerequisites — do this first
@@ -129,7 +137,7 @@ All three ran clean. How to tell each worked:
 treat them as failures:
 
 ```
-▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 11.67 kB ...
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 16.53 kB ...
 ▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
 ```
 
@@ -141,8 +149,8 @@ notice is about `shared/` emitting CJS.
 ## 5. Test
 
 ```bash
-npm test -w server           # 410 tests, node:test via tsx
-npm test -w web-angular      # 106 tests, Vitest (jsdom) via @angular/build:unit-test
+npm test -w server           # 450 tests, node:test via tsx
+npm test -w web-angular      # 196 tests, Vitest (jsdom) via @angular/build:unit-test
 ```
 
 Both green on a fresh clone, and both need **no database file and no API key** —
@@ -151,8 +159,8 @@ whole writes nothing to disk.
 
 | Suite | Expected | Notes |
 |---|---|---|
-| `npm test -w server` | `# tests 410 / # pass 410 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
-| `npm test -w web-angular` | `Test Files 16 passed / Tests 106 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
+| `npm test -w server` | `# tests 450 / # pass 450 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
+| `npm test -w web-angular` | `Test Files 21 passed / Tests 196 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
 
 **`npm test -w web-angular` needs the node version `.nvmrc` pins** — the Angular CLI refuses below
 its floor and runs nothing, so `nvm use` first. See § 1; the failure mode is a green server suite
@@ -234,12 +242,126 @@ the 12/12 live result. The last recorded clean pass is at `v0.6.0`
 Both serve the same routes on the same port. The difference is which database is
 behind them, and that is not visible from the UI unless you look.
 
+### Just want to see it work? One command
+
+*Added 2026-09-03 at `06034d9`; every command and every number in this
+subsection was run.*
+
+```bash
+nvm use
+npm install                # first time only
+npm run harness:app
+```
+
+Then open <http://localhost:4200>. You get the entry UI over an **in-memory**
+herd of 31 animals, and `server/dairy.db` is never opened by any process this
+command starts.
+
+It is not a fourth run loop — it is the harness loop below, with the two
+terminals collapsed into one and a readable herd seeded into it:
+
+```
+build:shared
+  ├─ harness   registry:harness --port=4000 --empty
+  ├─ seed      scripts/harness-seed.mjs --wait=90
+  └─ angular   ng serve
+```
+
+`concurrently` does not order its processes, so the seed polls for the harness
+rather than assuming it won. Measured from cold: the seed logged
+`http://localhost:4000/api/registry` before the harness had bound the port,
+waited, and then printed `target :memory: (memory: true) -- harness confirmed`.
+
+What lands, and why each row is there:
+
+| What | Why it is in the seed |
+|---|---|
+| 31 animals, 70 events, 17 lactations | zero invariant violations at `as_of` today |
+| all six statuses | `katti` · `choti` · `majj · in milk` · `majj · dry` · `male` · `departed` |
+| `BD-0011 Bhoori` | 15 months old **and** parity 1 → reads `majj`, not `katti`. The §7.1 rule-order case |
+| `BD-0009 Guddi` | ~8 years, parity 0 → `choti`. The other side of the same boundary |
+| `BD-0006 Chandni` | no birth date at all → `choti` despite her age, and ranked **first** in the calf picker |
+| `BD-0003 Kali` | carries a pre-applied **paired** date correction — superseded rows on her timeline and her calf's |
+| `BD-0014 Reshma` | entered as `acquired`, then **linked**: her origin event is superseded and her birth date sharpens from *estimated 2018* to *2018-06 (month)* |
+| `BD-0008 Zeba` | an **overridden** write with its reason, plus a note dated after her departure |
+| `BD-0002 Sohni` | calvings typed out of order — her daughters' serials are not chronological |
+| dates | `day`, `month`, `year` and `estimated`, across `recall`, `cycle_card` and `daily_herd_sheet` |
+| names / post nos. / ear tags | close enough to trip the near-duplicate warning by typing `Kali`, `Noor`, post `3` or tag `pk-4412` |
+| intervals | 2 `measured` (523, 538 d) and 5 `approximate` (487–550 d), reported separately |
+
+**This is not the same dummy data as `npm run seed`, and the two are
+deliberately separate systems.** Confusing them is the likeliest first mistake:
+
+| | `npm run harness:app` | `npm run seed -w server` |
+|---|---|---|
+| Writes to | an in-memory database, discarded on exit | **`server/dairy.db`**, on disk |
+| Fills | `registry_*` — the herd | the six demo tables (`animals`, `milkings`, `vendors`, …) |
+| Feeds | the entry UI at `/herd`, `/add`, `/calving`, `/check` | the **agent chat** at `/chat` |
+| Needs an API key | no | for the chat to answer, yes |
+| Repeatable | yes — and it never touches a real record | yes, by dropping and recreating those six tables |
+
+So under `harness:app` the **chat panel at `/chat` will not work** — and not for
+the reason you would guess. It is not the `unseeded` message from § 8: the
+harness mounts **only** `/api/registry` and `/api/harness` (`harnessApp()`), so
+every other `/api` path is simply absent. Measured:
+
+```
+/api/registry/storage    -> 200
+/api/harness             -> 200
+/api/health              -> 404
+/api/agent/run           -> 404
+/api/farm/events         -> 404
+```
+
+That is correct behaviour, not a broken build — the harness exists to serve the
+registry over `:memory:` and nothing else, and giving it the agent surface would
+mean giving it `db.ts`, which is the one thing it must never import. If you want
+the chat, you want the real loop below plus `npm run seed -w server` and a key.
+
+Two supporting commands:
+
+```bash
+npm run harness:seed         # re-seed a harness that is already running
+npm run harness:serve        # serve the PRODUCTION bundle instead of ng serve
+```
+
+`harness:seed` is **re-runnable**: every write carries a fixed
+`Idempotency-Key`, so a second run against a live harness replays all 51 writes
+and changes nothing. Verified — two consecutive runs both ended at 31 animals /
+70 events / 17 lactations.
+
+The one sharp edge, found by hitting it: keys are keyed on `(key, **body**)`, so
+**editing `scripts/harness-seed.mjs` invalidates the replay** — the bodies no
+longer match, the writes are processed as new, and `dry_off` and `note` have no
+uniqueness guard, so they append a second time. It fails by *compounding*, not
+by erroring. The script now refuses when the herd size does not match what it
+produces, and names the only reset there is: restart the harness. The log is
+append-only and the harness has no persistence, by design.
+
+`harness:serve` exists because `RegistryApi` addresses the backend at a
+**relative** path (`BASE = '/api/registry'`), and a production bundle has no dev
+server and therefore no proxy — so `ng build` output on a plain static host
+answers `/api/registry/animals` with its own 404 and the app renders "no server
+answered", which reads like a broken backend rather than a missing proxy. It
+serves `web-angular/dist/web-angular/browser` with a `/api` reverse proxy and an
+SPA fallback (`/herd` and `/animals/BD-0003` are client routes with no such
+files, so a hard reload 404s without it). Run `npm run build:angular` first.
+
+Unlike the seed it **refuses nothing** — serving the built app against the real
+registry is a legitimate thing to want, and the app's own gate already asks. It
+states which database is behind `/api` at boot instead, in both directions.
+
 ### Harness loop — fixture data, safe
 
 ```bash
 npm run registry:harness -w server -- --port=4000    # in-memory fixture herd
 npm start -w web-angular                             # app on :4200, proxies /api
 ```
+
+Add `--empty` and `npm run harness:seed` to get the herd above instead of the
+13-animal `cleanHerd()` fixture. Without `--empty` the fixture animals are
+mostly nameless with no post number or ear tag, so nothing trips the
+near-duplicate warning.
 
 **`--port=4000` is not optional.** The harness defaults to **4100**;
 [`proxy.conf.json`](../web-angular/proxy.conf.json) targets **4000**. Omit the
@@ -281,6 +403,39 @@ curl localhost:4000/api/registry/storage
 # harness -> {"storage":":memory:","memory":true}
 # real    -> {"storage":"/…/server/dairy.db","memory":false}
 ```
+
+And from the other end — confirming the real file was not written to. The
+durable check opens no database at all, so it has no failure mode:
+
+```bash
+stat -f '%Sm  %z bytes' server/dairy.db && shasum -a 256 server/dairy.db
+```
+
+For row counts, use **`immutable=1`, not `-readonly`:**
+
+```bash
+sqlite3 'file:server/dairy.db?immutable=1' 'select count(*) from registry_animals'
+```
+
+`sqlite3 -readonly` **is not reliable here, and fails in a confusing way.**
+`dairy.db` is in WAL mode (§ 7 of [REGISTRY.md](REGISTRY.md)), a WAL reader needs
+the `-shm` file, and a read-only connection cannot create one — so with the
+sidecars absent, which is their normal state once the last connection closes,
+you get:
+
+```
+Error: in prepare, unable to open database file (14)
+```
+
+Measured both ways from a clean state: `-readonly` fails, `immutable=1` answers
+and creates **no** `-wal` or `-shm`, with the main file's checksum unchanged. A
+plain `sqlite3 server/dairy.db` also answers, but opens read-write and leaves
+both sidecars behind — harmless (they are gitignored, and the data file is
+untouched) but it makes "was anything written?" harder to eyeball. `immutable=1`
+assumes no writer is active, which is exactly the state this check asserts.
+
+Do not confuse either with editing rows: the append-only guarantee is
+**per-connection**, and a `sqlite3` CLI session does not have it. Read only.
 
 In the app, the gate at the entry UI states the target before a session opens and
 **will not open a session against a real database until you acknowledge it**; the
@@ -431,6 +586,8 @@ invariant 13 as a source-level check.
 | The entry UI's gate will not open — a checkbox asking you to confirm the database | Working as intended: the target is real (or could not be determined from a server that *is* answering), and the session needs one deliberate act. The harness never asks | Read the path it names. Tick it, or point at the harness |
 | Registry commands refuse with `--precision is required` | Not a bug. Precision is never defaulted; a missing one is an error | `--precision=day\|month\|year\|estimated` |
 | Regression suite "passes" instantly | It skipped. No API key | Check `# tests` is 12, not 0 |
+| `sqlite3 -readonly server/dairy.db` → `Error: in prepare, unable to open database file (14)` | WAL mode needs a `-shm`, and a read-only connection cannot create one. Normal whenever the sidecars are absent, so this fails *intermittently* depending on what last opened the file | `sqlite3 'file:server/dairy.db?immutable=1' '…'`, or just checksum it — see § 6 "Which one am I on?" |
+| `npm run harness:app` → the chat at `/chat` does nothing, `/api/health` is 404 | Working as intended. The harness mounts only `/api/registry` and `/api/harness`; it must never import `db.ts`, which is where the agent surface lives | For the chat, use the real loop plus `npm run seed -w server` and a key |
 
 ---
 

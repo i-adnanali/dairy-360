@@ -772,6 +772,7 @@ The serialization matters more than it looks: `code` and `field` are class prope
 ```bash
 npm run registry:harness -w server              # the fixture herd, in memory
 npm run registry:harness -w server -- --empty    # the first-hour state
+npm run harness:app                              # harness + a seeded herd + the app
 ```
 
 Serves `/api/registry` over an **`:memory:`** copy of the `cleanHerd()` fixture — 13 animals (six entered, six minted by calvings, one link candidate) covering all six statuses, a normally-closed lactation, an inferred close, an open lactation, a stillbirth, two departed animals, a farm-born calf and a paired correction. `GET /api/harness` says plainly that this is not `dairy.db`.
