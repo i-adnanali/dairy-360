@@ -637,6 +637,14 @@ A refusal whose `field` this form does not render is shown at form level rather 
 
 Overrides — `--allow-near-duplicate`, `--allow-after-departure` — are keyed on the error **code**, not nested in the form-level error block. Both refusals name `occurred_on`, so their messages bind to the date control; a button nested in the form-level block was **unreachable**, which a form test caught.
 
+#### The general rule: a refusal with an escape hatch binds on `code`, in its own block
+
+**Field-binding is right for validation and wrong for anything with a way past it.** Bind a *message* by `field` — that is what `field` is for, and it is why the controls are named after domain columns. But bind the *override* by `code`, in a block of its own, never nested inside the form-level error block.
+
+The reason is that the two placements are driven by different things and only look like one decision. `field` decides where the message goes; whether an override exists is a property of the `code`. So an override nested in the form-level block is reachable **only for refusals that name no field** — and `animal_departed` and `near_duplicate_calving`, the only two codes that have overrides, both name `occurred_on`. Every refusal that could offer a way past was therefore the one refusal whose way past did not render, and the failure is silent in the worst way: the message appears, correctly placed, and reads as a hard wall.
+
+`FormState.hasCode()` exists for exactly this, and the rule generalizes to any code added later with an `allow_*` companion: if the server offers a way past, the way past is keyed on the code.
+
 ### The `/check` view
 
 `GET /verification` surfaced as numbers to read. Two conditions it is built under:
