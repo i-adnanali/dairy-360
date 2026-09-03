@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'node:path';
+import { applyRegistrySchema } from './registry/schema';
 import type {
   Animal,
   Delivery,
@@ -139,6 +140,22 @@ CREATE INDEX IF NOT EXISTS idx_farm_events_source_ref  ON farm_events(source_eve
 // Applied at module load: idempotent, and every farm code path needs the table
 // to exist regardless of seed state.
 db.exec(FARM_SCHEMA);
+
+// ---------------------------------------------------------------------------
+// Animal registry (see docs/REGISTRY.md). Migration-managed via
+// `PRAGMA user_version`, unlike the two consts above -- registry tables hold
+// real, unrecoverable records and are expected to change at steps 3, 4 and 5,
+// which is exactly what `CREATE TABLE IF NOT EXISTS` cannot express.
+//
+// Order-independent with respect to FARM_SCHEMA above: the two touch disjoint
+// tables and FARM_SCHEMA is re-appliable, so either order converges to the same
+// schema and the same user_version.
+//
+// Registry tables are deliberately ABSENT from resetSchema()'s DROP list and
+// from SCHEMA -- asserted by registry.schema.test.ts, because seed() drops
+// everything in SCHEMA and the regression suite calls seed() in beforeEach.
+// ---------------------------------------------------------------------------
+applyRegistrySchema(db);
 
 /** Drop everything and recreate the schema. Used by the seed script.
  * Deliberately does NOT touch farm_events -- see FARM_SCHEMA above. */
