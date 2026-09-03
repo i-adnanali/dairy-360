@@ -230,6 +230,75 @@ describe('CalvingForm', () => {
   });
 });
 
+describe('overridden checks', () => {
+  // The flag was transient, so an overridden write left no trace. What the UI
+  // has to add is the optional reason -- and it must stay optional: requiring
+  // prose to clear a guard makes the guard a wall, and the operator types "yes".
+
+  async function tripDeparture() {
+    const ctx = setup();
+    const fixture = TestBed.createComponent(EventForm);
+    fixture.componentRef.setInput('animalId', 'BD-0001');
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    click(el, '[data-type="dry_off"]');
+    fixture.detectChanges();
+    enterDate(fixture, el, 'month', { year: 2024, month: 8 });
+
+    click(el, '[data-role="submit"]');
+    ctx.http.expectOne(`${BASE}/events`).flush(
+      { error: 'animal_departed', field: 'occurred_on', message: 'animal departed on 2024-05-01…' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await settle(fixture);
+    return { ...ctx, fixture, el };
+  }
+
+  it('offers a reason field only once a guard has actually been tripped', async () => {
+    const { el } = await tripDeparture();
+    expect(el.querySelector('[data-role="override_reason"]')).not.toBeNull();
+  });
+
+  it('sends the typed reason with the override', async () => {
+    const { http, fixture, el } = await tripDeparture();
+    const why = el.querySelector('[data-role="override_reason"]') as HTMLInputElement;
+    why.value = 'sold in May but stayed on the farm until August';
+    why.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    click(el, '[data-role="allow-after-departure"]');
+    const req = http.expectOne(`${BASE}/events`);
+    expect(req.request.body.allow_after_departure).toBe(true);
+    expect(req.request.body.override_reason).toBe('sold in May but stayed on the farm until August');
+  });
+
+  it('overrides fine with no reason — null, not an empty string', async () => {
+    // A blank must reach the server as null. '' would be stored as a reason
+    // that says nothing, which reads as one that was given rather than skipped.
+    const { http, el } = await tripDeparture();
+    click(el, '[data-role="allow-after-departure"]');
+    const req = http.expectOne(`${BASE}/events`);
+    expect(req.request.body.allow_after_departure).toBe(true);
+    expect(req.request.body.override_reason).toBeNull();
+  });
+
+  it('does not send an override reason on a write that tripped nothing', async () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(EventForm);
+    fixture.componentRef.setInput('animalId', 'BD-0001');
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    click(el, '[data-type="dry_off"]');
+    fixture.detectChanges();
+    enterDate(fixture, el, 'month', { year: 2024, month: 8 });
+    click(el, '[data-role="submit"]');
+
+    const req = http.expectOne(`${BASE}/events`);
+    expect(req.request.body.allow_after_departure).toBe(false);
+    expect(req.request.body.override_reason).toBeNull();
+  });
+});
+
 describe('idempotency key', () => {
   // The rule: one key per submission ATTEMPT SEQUENCE. Minted on first submit,
   // reused while a refusal is on screen, dropped on success. See form-state.ts.

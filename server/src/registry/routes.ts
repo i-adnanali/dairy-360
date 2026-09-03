@@ -379,6 +379,7 @@ export function registryRouter(db: Db): express.Router {
         provenance: provenance(b),
         asOf: asOfFrom(b),
         allow_after_departure: b.allow_after_departure === true,
+        override_reason: str(b, 'override_reason'),
       });
       res.status(201).json({ ...result, animal: animalDetail(db, animalId) });
     }),
@@ -409,6 +410,7 @@ export function registryRouter(db: Db): express.Router {
         provenance: provenance(b),
         asOf: asOfFrom(b),
         allow_near_duplicate: b.allow_near_duplicate === true,
+        override_reason: str(b, 'override_reason'),
       });
       res.status(201).json({
         ...result,
@@ -432,6 +434,7 @@ export function registryRouter(db: Db): express.Router {
         provenance: provenance(b),
         asOf: asOfFrom(b),
         allow_near_duplicate: b.allow_near_duplicate === true,
+        override_reason: str(b, 'override_reason'),
       });
       res.status(201).json({
         ...result,

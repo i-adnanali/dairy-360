@@ -149,9 +149,18 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
            names occurred_on, so its message goes to the date control. -->
       @if (state.hasCode('near_duplicate_calving')) {
         <div class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900" data-role="override">
-          Far more likely a double entry than a real second calving — check the date first.
+          <p>Far more likely a double entry than a real second calving — check the date first.</p>
+          <label class="mt-2 block">
+            <span class="mb-1 block text-xs font-medium">
+              Why, if you want it on the record <span class="font-normal">(optional)</span>
+            </span>
+            <input data-role="override_reason" [value]="overrideReason()"
+              (input)="overrideReason.set($any($event.target).value)"
+              placeholder="twin born the following month, confirmed against the cycle card"
+              class="w-full rounded-lg border border-amber-300 bg-white px-2 py-1.5 text-sm" />
+          </label>
           <button type="button" data-role="allow-duplicate" (click)="allowDuplicate.set(true); submit()"
-            class="ml-2 font-medium underline">Record it anyway</button>
+            class="mt-2 font-medium underline">Record it anyway</button>
         </div>
       }
 
@@ -219,6 +228,7 @@ export class CalvingForm {
   protected readonly sireRef = signal('');
   protected readonly observedBy = signal('');
   protected readonly allowDuplicate = signal(false);
+  protected readonly overrideReason = signal('');
 
   /** Eligibility depends on the date, so the picker waits for it. */
   protected readonly canLoadCandidates = computed(
@@ -330,6 +340,7 @@ export class CalvingForm {
         sire_ref: blank(this.sireRef()),
         observed_by: blank(this.observedBy()),
         allow_near_duplicate: this.allowDuplicate(),
+        override_reason: blank(this.overrideReason()),
         ...this.session.provenance(),
       }, key),
     );
@@ -339,6 +350,7 @@ export class CalvingForm {
       // The calving just minted or linked an animal, so the list is stale and
       // the previous choice must not survive into the next record.
       this.clearCalf();
+      this.overrideReason.set('');
       void this.loadCandidates(this.damId(), this.calfSex(), w);
     }
   }

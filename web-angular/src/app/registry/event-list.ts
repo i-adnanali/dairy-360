@@ -76,6 +76,16 @@ import type { TimelineEvent } from './types';
                 data-role="summary">{{ s }}</p>
             }
 
+            <!-- An overridden check is part of how the record explains itself:
+                 without this the log holds the fact and nobody ever sees it. -->
+            @if (override(e); as o) {
+              <p class="mt-1.5 rounded-lg bg-amber-50 px-2 py-1 text-xs text-amber-900"
+                data-role="override">
+                Written over the <span class="font-mono">{{ o.check }}</span> check{{ o.reason ? ' — ' + o.reason : '' }}
+                @if (!o.reason) { <span class="italic">— no reason recorded</span> }
+              </p>
+            }
+
             <p class="mt-1.5 text-xs text-farm-500" data-role="provenance">
               {{ e.source_form }}{{ e.source_ref ? ' · ' + e.source_ref : '' }}
               · recorded by {{ e.recorded_by }}
@@ -90,6 +100,15 @@ import type { TimelineEvent } from './types';
 })
 export class EventList {
   readonly events = input.required<TimelineEvent[]>();
+
+  /** The override record on an event, when a guard was stepped past to write it. */
+  protected override(e: TimelineEvent): { check: string; reason: string | null } | null {
+    const o = e.payload['override'];
+    if (o === null || typeof o !== 'object') return null;
+    const rec = o as { check?: unknown; reason?: unknown };
+    if (typeof rec.check !== 'string') return null;
+    return { check: rec.check, reason: typeof rec.reason === 'string' ? rec.reason : null };
+  }
 
   protected label(t: string): string {
     switch (t) {

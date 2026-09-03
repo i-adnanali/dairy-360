@@ -78,9 +78,17 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
              button nested in that block would be unreachable. -->
         @if (state.hasCode('near_duplicate_calving')) {
           <div class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900" data-role="override">
-            The corrected date lands near another calving on this dam — check it first.
+            <p>The corrected date lands near another calving on this dam — check it first.</p>
+            <label class="mt-2 block">
+              <span class="mb-1 block text-xs font-medium">
+                Why, if you want it on the record <span class="font-normal">(optional)</span>
+              </span>
+              <input data-role="override_reason" [value]="overrideReason()"
+                (input)="overrideReason.set($any($event.target).value)"
+                class="w-full rounded-lg border border-amber-300 bg-white px-2 py-1.5 text-sm" />
+            </label>
             <button type="button" data-role="allow-duplicate" (click)="allowDuplicate.set(true); submit()"
-              class="ml-2 font-medium underline">Correct it anyway</button>
+              class="mt-2 font-medium underline">Correct it anyway</button>
           </div>
         }
 
@@ -123,6 +131,7 @@ export class CorrectionForm {
   protected readonly when = signal<PrecisionDate | null>(null);
   protected readonly notes = signal('');
   protected readonly allowDuplicate = signal(false);
+  protected readonly overrideReason = signal('');
 
   /** Only EFFECTIVE calvings. A superseded one must be corrected at the chain's end. */
   protected readonly correctable = computed(() =>
@@ -143,6 +152,7 @@ export class CorrectionForm {
         date_precision: w.date_precision,
         notes: blank(this.notes()),
         allow_near_duplicate: this.allowDuplicate(),
+        override_reason: blank(this.overrideReason()),
         ...this.session.provenance(),
       }, key),
     );
@@ -150,6 +160,7 @@ export class CorrectionForm {
     if (r) {
       this.target.set('');
       this.when.set(null);
+      this.overrideReason.set('');
       this.done()?.();
     }
   }

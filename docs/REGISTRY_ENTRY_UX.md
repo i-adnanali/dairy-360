@@ -453,12 +453,33 @@ and an unfetched list renders as "no animal in the registry has a birth date nea
 a false statement about the herd, shown to exactly the person deciding whether to create a
 duplicate. Expect the same class of surprise in §5.2, which deletes more triggers than this did.
 
-### 6.4 Persist overrides
+### 6.4 Persist overrides — BUILT
 
-`allow_near_duplicate` and `allow_after_departure` are transient today, so an overridden write leaves
-no trace of having been overridden. In an append-only log whose premise is that the record explains
-itself, that is a provenance hole. Persist the flags on the event, with a free-text reason if it is
-cheap. Small, and separate from the soft-warning work below the line.
+`allow_near_duplicate` and `allow_after_departure` were transient, so an overridden write left no
+trace of having been overridden. In an append-only log whose premise is that the record explains
+itself, that was a provenance hole.
+
+The effective event now carries `override: { check, reason }` in its payload — payload rather than a
+column, which keeps the no-migration property; the reasoning is in `types.ts` and in
+[REGISTRY.md](REGISTRY.md) § "An overridden check leaves a trace".
+
+**The load-bearing detail is that it is recorded from the CONDITION, not from the flag.** A caller
+passing `allow_*` unconditionally must not have every write claim an override, or the field carries
+no information and the log is worse than when it said nothing. Demonstrated by execution:
+
+```
+flag + tripped    -> override: check=near_duplicate_calving reason="twin, confirmed…"
+flag, no reason   -> override: check=near_duplicate_calving reason=null
+flag, NOT tripped -> override: null
+```
+
+`reason` is optional and stays so: requiring prose to clear a guard makes it a wall, and the
+operator types "yes", which looks like a reason and is worse than a blank. `note` has no override
+field at all — it is always allowed after a departure, so there is no guard to step past. A
+correction records its own override and does not inherit the superseded event's.
+
+The UI captures the reason in the existing "Record it anyway" blocks and shows recorded overrides on
+the timeline row, because a fact nobody reads is barely better than one never stored.
 
 ### 6.5 Smaller items
 

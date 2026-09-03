@@ -324,6 +324,54 @@ Surface precision wherever a date is displayed — "March 2024 (month)", "~2021 
 
 **`recall` is first-class, not a fallback.** Most of the step-2 backfill will be `recall` at `month` precision or worse. If recall rows are indistinguishable from sheet rows, the first calving-interval number is unfalsifiable.
 
+### An overridden check leaves a trace
+
+Two guards can be stepped past: `near_duplicate_calving` (a second calving within
+`DOUBLE_ENTRY_WINDOW_DAYS` of an existing one) and `animal_departed` (a non-note event after a
+departure). Both are hard refusals with an explicit opt-out — the caller passes
+`allow_near_duplicate` / `allow_after_departure` and the guard steps aside.
+
+Those flags used to be **transient input only**, so stepping aside left nothing behind: an
+overridden write was indistinguishable from one that never tripped a check. In an append-only log
+whose premise is that the record explains itself, that was a provenance hole.
+
+The effective event now carries `override: { check, reason }` in its payload:
+
+```
+no flag           -> REFUSED: near_duplicate_calving
+flag + tripped    -> override: check=near_duplicate_calving reason="twin, confirmed against the cycle card"
+flag, no reason   -> override: check=near_duplicate_calving reason=null
+flag, NOT tripped -> override: null   <-- the flag alone claims nothing
+```
+
+**Recorded from the CONDITION, not from the flag.** That last line is the load-bearing one. A caller
+that passes `allow_near_duplicate` unconditionally — a script, or a form that always sends it —
+must not have every write claim an override happened, because a field that is always set carries no
+information. The override is a fact about *this write meeting this guard*, so it is derived from
+whether the guard actually matched.
+
+**`reason` is optional and stays optional.** Requiring prose to clear a guard makes the guard a
+wall, and the operator types "yes" to get past it — which is worse than a null, because a null is
+honest about knowing nothing while "yes" looks like a reason. The flag is what is load-bearing.
+
+**`note` has no `override` field at all**, and the write boundary rejects one. A note is always
+allowed after a departure — somebody ringing about a sold animal is a real thing to record — so
+there is no guard for a note to be pushed past.
+
+**A correction records its own override and does not inherit the superseded event's.** Copying it
+forward would claim the operator stepped past a guard they never saw; dropping it is safe because
+the superseded event is still in the log holding its own record.
+
+**Why the payload and not a column.** A column would be the better shape — uniform across event
+types, queryable without `json_extract`, sitting beside the other provenance fields it resembles —
+and it would cost migration 3. The payload is already TEXT JSON on the event, already exhaustively
+validated at the write boundary, and read by no projection, so this fits with no schema change. If a
+later cycle needs "every event written over a warning" often enough for `json_extract` to hurt,
+promoting it is a mechanical migration on a table whose rebuild procedure is already proven twice.
+
+The entry UI shows it on the timeline row, because a fact nobody reads is not much better than one
+that was never stored.
+
 ### Corrections
 
 `supersedes_id`, nullable, self-referencing, with a **partial unique index** so two events cannot claim to replace the same one — which would make the correction chain ambiguous. Projections ignore superseded events; chains resolve to the last event.

@@ -96,4 +96,38 @@ describe('EventList — the correction window', () => {
     expect(el.querySelector('[data-role="empty"]')).not.toBeNull();
     expect(el.textContent).toContain('origin event');
   });
+
+  it('surfaces a recorded override, so the log explaining itself is visible', () => {
+    // The fact was already in the payload; without this nobody ever reads it.
+    const el = render([
+      ev({
+        id: 'aevt_over', type: 'dry_off',
+        payload: {
+          reason: null,
+          notes: null,
+          override: { check: 'animal_departed', reason: 'stayed on the farm until August' },
+        },
+      }),
+    ]);
+    const o = el.querySelector('[data-role="override"]')!;
+    expect(o.textContent).toContain('animal_departed');
+    expect(o.textContent).toContain('stayed on the farm until August');
+  });
+
+  it('says a reason was not recorded rather than showing a blank', () => {
+    const el = render([
+      ev({
+        id: 'aevt_over', type: 'dry_off',
+        payload: { reason: null, notes: null, override: { check: 'animal_departed', reason: null } },
+      }),
+    ]);
+    expect(el.querySelector('[data-role="override"]')!.textContent).toContain('no reason recorded');
+  });
+
+  it('shows no override block on an ordinary event', () => {
+    const el = render([
+      ev({ id: 'aevt_plain', type: 'dry_off', payload: { reason: null, notes: null, override: null } }),
+    ]);
+    expect(el.querySelector('[data-role="override"]')).toBeNull();
+  });
 });

@@ -103,11 +103,25 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
              there left it unreachable. -->
         @if (state.hasCode('animal_departed')) {
           <div class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900" data-role="override">
-            If the event genuinely follows the departure, record it anyway — verification will
-            flag it, which is the honest outcome.
+            <p>
+              If the event genuinely follows the departure, record it anyway — verification will
+              flag it, which is the honest outcome.
+            </p>
+            <!-- Optional, and stays optional. Requiring prose to clear a guard
+                 makes the guard a wall, and the operator types "yes" -- which
+                 looks like a reason and is worse than a blank. -->
+            <label class="mt-2 block">
+              <span class="mb-1 block text-xs font-medium">
+                Why, if you want it on the record <span class="font-normal">(optional)</span>
+              </span>
+              <input data-role="override_reason" [value]="overrideReason()"
+                (input)="overrideReason.set($any($event.target).value)"
+                placeholder="sold in May but stayed on the farm until August"
+                class="w-full rounded-lg border border-amber-300 bg-white px-2 py-1.5 text-sm" />
+            </label>
             <button type="button" data-role="allow-after-departure"
               (click)="allowAfterDeparture.set(true); submit()"
-              class="ml-2 font-medium underline">Record it anyway</button>
+              class="mt-2 font-medium underline">Record it anyway</button>
           </div>
         }
 
@@ -147,6 +161,7 @@ export class EventForm {
   protected readonly text = signal('');
   protected readonly observedBy = signal('');
   protected readonly allowAfterDeparture = signal(false);
+  protected readonly overrideReason = signal('');
 
   protected readonly canSubmit = computed(
     () => this.type() !== null && this.when() !== null && !this.state.submitting(),
@@ -168,6 +183,7 @@ export class EventForm {
         text: blank(this.text()),
         observed_by: blank(this.observedBy()),
         allow_after_departure: this.allowAfterDeparture(),
+        override_reason: blank(this.overrideReason()),
         ...this.session.provenance(),
       }, key),
     );
@@ -179,6 +195,7 @@ export class EventForm {
       this.reason.set('');
       this.to.set('');
       this.text.set('');
+      this.overrideReason.set('');
     }
   }
 }

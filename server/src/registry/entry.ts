@@ -25,6 +25,7 @@ import type {
   DatePrecision,
   DepartureReason,
   DryOffReason,
+  OverrideRecord,
   Provenance,
   RegistrySex,
 } from './types';
@@ -184,6 +185,8 @@ export interface AppendLifeEventInput {
    * later" into "fix the date now, while you remember".
    */
   allow_after_departure?: boolean;
+  /** Free text recorded alongside an exercised override. Optional. */
+  override_reason?: string | null;
 }
 
 export interface AppendLifeEventResult {
@@ -256,7 +259,15 @@ export function appendLifeEvent(
     );
   }
 
-  const payload = buildLifeEventPayload(input);
+  // ONLY when the guard was actually stepped past, which is not the same as
+  // the flag being set. A caller that always passes allow_after_departure --
+  // a script, or a form that sends it unconditionally -- must not have every
+  // write claim an override happened. The override is a fact about THIS write
+  // meeting THIS guard, so it is recorded from the condition, not the input.
+  const overrode =
+    departure !== undefined && input.type !== 'note' && input.allow_after_departure === true;
+
+  const payload = buildLifeEventPayload(input, overrode);
 
   const event = db.transaction(() => {
     const written = appendEvent(db, {
@@ -275,7 +286,14 @@ export function appendLifeEvent(
   return { event_id: event.id };
 }
 
-function buildLifeEventPayload(input: AppendLifeEventInput): unknown {
+function buildLifeEventPayload(
+  input: AppendLifeEventInput,
+  overrode: boolean,
+): unknown {
+  const override: OverrideRecord | null = overrode
+    ? { check: 'animal_departed', reason: input.override_reason ?? null }
+    : null;
+
   switch (input.type) {
     case 'dry_off': {
       const reason = input.reason ?? null;
@@ -286,7 +304,7 @@ function buildLifeEventPayload(input: AppendLifeEventInput): unknown {
           'reason',
         );
       }
-      return { reason: reason as DryOffReason | null, notes: input.notes ?? null };
+      return { reason: reason as DryOffReason | null, notes: input.notes ?? null, override };
     }
     case 'departure': {
       const reason = input.reason ?? null;
@@ -309,6 +327,7 @@ function buildLifeEventPayload(input: AppendLifeEventInput): unknown {
         to: input.to ?? null,
         cause: input.cause ?? null,
         notes: input.notes ?? null,
+        override,
       };
     }
     case 'note': {

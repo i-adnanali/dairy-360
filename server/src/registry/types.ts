@@ -123,6 +123,55 @@ export const RESERVED_EVENT_TYPES = [
 
 export type ReservedEventType = (typeof RESERVED_EVENT_TYPES)[number];
 
+// ---------------------------------------------------------------------------
+// Overridden checks
+// ---------------------------------------------------------------------------
+
+/**
+ * The soft checks a write can be pushed past, named so the log can say which.
+ *
+ * Both are hard refusals with an explicit opt-out rather than warnings: the
+ * caller passes `allow_near_duplicate` / `allow_after_departure` and the guard
+ * steps aside. What was missing is that stepping aside left NO TRACE -- an
+ * overridden write was indistinguishable from one that never tripped a check,
+ * in an append-only log whose whole premise is that the record explains itself.
+ */
+export type OverriddenCheck = 'near_duplicate_calving' | 'animal_departed';
+
+export const OVERRIDDEN_CHECKS: readonly OverriddenCheck[] = [
+  'near_duplicate_calving',
+  'animal_departed',
+];
+
+/**
+ * A record that a check was overridden, and why.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY THIS LIVES IN THE PAYLOAD AND NOT IN A COLUMN
+ * ---------------------------------------------------------------------------
+ * A column would be the better shape -- uniform across event types, queryable
+ * without json_extract, sitting with the other provenance fields it resembles.
+ * It would also cost migration 3, and the build order's standing claim is that
+ * everything above the cut line lands without a schema migration. The payload
+ * is already TEXT JSON on the event, is already exhaustively validated at the
+ * write boundary, and no projection reads it, so this fits with no schema
+ * change and no risk to the projection rules.
+ *
+ * If a later cycle needs to ask "every event written over a warning" often
+ * enough for `json_extract` to hurt, promoting it to a column is a mechanical
+ * migration on a table whose rebuild procedure is already proven twice.
+ *
+ * `reason` is OPTIONAL, deliberately. Requiring prose to get past a guard would
+ * make the guard a wall, and the operator would type "yes" to clear it -- which
+ * is worse than a null, because a null is honest about knowing nothing while
+ * "yes" looks like a reason. The FLAG is the load-bearing part; the prose is a
+ * bonus when someone bothers.
+ */
+export interface OverrideRecord {
+  check: OverriddenCheck;
+  reason: string | null;
+}
+
 export type CalvingOutcome = 'live' | 'stillborn' | 'died_within_24h';
 export type CalvingAssistance = 'none' | 'assisted' | 'vet';
 export type DryOffReason = 'scheduled' | 'low_yield' | 'health' | 'other';
@@ -150,11 +199,15 @@ export interface CalvingPayload {
   outcome: CalvingOutcome;
   assistance?: CalvingAssistance | null;
   notes?: string | null;
+  /** Set only when the near-duplicate guard was actually stepped past. */
+  override?: OverrideRecord | null;
 }
 
 export interface DryOffPayload {
   reason?: DryOffReason | null;
   notes?: string | null;
+  /** Set only when the terminal-departure guard was actually stepped past. */
+  override?: OverrideRecord | null;
 }
 
 export interface DeparturePayload {
@@ -162,8 +215,15 @@ export interface DeparturePayload {
   to?: string | null;
   cause?: string | null;
   notes?: string | null;
+  /** Set only when the terminal-departure guard was actually stepped past. */
+  override?: OverrideRecord | null;
 }
 
+/**
+ * No `override` here, and that is not an omission: a note is ALWAYS allowed
+ * after a departure (somebody ringing about a sold animal is a real thing to
+ * record), so there is no guard for a note to be pushed past.
+ */
 export interface NotePayload {
   text: string;
 }

@@ -175,8 +175,12 @@ test('acquired: a birth date without its precision is rejected', () => {
 });
 
 test('validation normalizes optionals to explicit null so serialization is stable', () => {
+  // deepEqual on the WHOLE object, not a subset: absent-vs-null and a changed
+  // key set both read as a change to the rebuild-diff, so the key set is part
+  // of the contract. `override` joined it when overridden checks became
+  // persisted -- null here because nothing was overridden.
   const a = assertEventPayload('dry_off', {});
-  assert.deepEqual(a, { reason: null, notes: null });
+  assert.deepEqual(a, { reason: null, notes: null, override: null });
 });
 
 test('date/precision rules are enforced at the boundary with readable messages', () => {

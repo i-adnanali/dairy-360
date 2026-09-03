@@ -74,6 +74,8 @@ export interface RecordCalvingInput {
    * says "yes, really" in the input rather than the code guessing.
    */
   allow_near_duplicate?: boolean;
+  /** Free text recorded alongside an exercised override. Optional. */
+  override_reason?: string | null;
   /**
    * The date the projections are computed as of. Explicit for the reason given
    * in project.ts's header: status depends on the current date, so a hidden
@@ -137,6 +139,10 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
   const birthEventId = newEventId();
 
   const run = db.transaction((): RecordCalvingResult => {
+    // Set in step 1 when the near-duplicate guard is actually stepped past, and
+    // read in step 2 where the calving payload is built.
+    let overrode = false;
+
     // --- 1. Validate ------------------------------------------------------
     const dam = getAnimal(db, input.dam_id);
     if (!dam) {
@@ -164,6 +170,11 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
         e.type === 'calving' &&
         daysApart(e.occurred_on, input.occurred_on) <= DOUBLE_ENTRY_WINDOW_DAYS,
     );
+    // Recorded from the CONDITION, not from the input flag. A caller that
+    // always passes allow_near_duplicate must not have every calving claim an
+    // override happened -- the override is a fact about this write meeting this
+    // guard, and it is only true when `near` actually matched.
+    overrode = near !== undefined && input.allow_near_duplicate === true;
     if (near && !input.allow_near_duplicate) {
       throw new CalvingError(
         'near_duplicate_calving',
@@ -282,6 +293,9 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
         outcome: input.calf.outcome,
         assistance: input.assistance ?? null,
         notes: input.notes ?? null,
+        override: overrode
+          ? { check: 'near_duplicate_calving', reason: input.override_reason ?? null }
+          : null,
       },
       provenance: input.provenance,
     });
@@ -376,6 +390,8 @@ export interface CorrectCalvingInput {
   asOf: string;
   /** As on recordCalving: accept a corrected date near another calving. */
   allow_near_duplicate?: boolean;
+  /** Free text recorded alongside an exercised override. Optional. */
+  override_reason?: string | null;
   /** TEST-ONLY fault injection, per step. See recordCalving. */
   __faultAfterStep?: 1 | 2 | 3 | 4 | 5;
 }
@@ -520,6 +536,7 @@ export function correctCalving(
         e.id !== original.id && // never compare the event being corrected to itself
         daysApart(e.occurred_on, input.occurred_on) <= DOUBLE_ENTRY_WINDOW_DAYS,
     );
+    const overrode = near !== undefined && input.allow_near_duplicate === true;
     if (near && !input.allow_near_duplicate) {
       throw new CalvingError(
         'near_duplicate_calving',
