@@ -8,8 +8,8 @@ import { Session } from './session';
 import { DuplicateWarning } from './duplicate-warning';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
-import { PrecisionDateControl } from './precision-date';
-import type { PrecisionDate } from './precision-date';
+import { PrecisionDateControl, dateBlocker } from './precision-date';
+import type { DateEntry } from './precision-date';
 import type { AnimalDetail, RegistrySex } from './types';
 
 const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_precision'] as const;
@@ -97,7 +97,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
         <p class="-mt-2 px-1 text-xs text-farm-600">
           Leave the birth date blank if you do not know it. Without one the animal shows as
           heifer or male even if it is visibly a calf — the age rule has no date to test. An
-          estimated year is the fix, and saying it is estimated makes that safe.
+          estimated year is the fix: type the year and tick the guess box.
         </p>
 
         <app-identifier-input
@@ -115,10 +115,8 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
             type="button" data-role="submit" (click)="submit()" [disabled]="!canSubmit()"
             class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
           >{{ state.submitting() ? 'Saving…' : 'Add animal' }}</button>
-          @if (!acquired()) {
-            <span class="text-sm text-farm-600" data-role="blocked">
-              Say how well you know the arrival date, then enter it.
-            </span>
+          @if (blockedReason(); as r) {
+            <span class="text-sm text-farm-600" data-role="blocked">{{ r }}</span>
           }
         </div>
 
@@ -160,8 +158,8 @@ export class AnimalForm {
   protected readonly postNo = signal('');
   protected readonly tagNo = signal('');
   protected readonly observedBy = signal('');
-  protected readonly acquired = signal<PrecisionDate | null>(null);
-  protected readonly birth = signal<PrecisionDate | null>(null);
+  protected readonly acquired = signal<DateEntry>({ status: 'empty' });
+  protected readonly birth = signal<DateEntry>({ status: 'empty' });
   /**
    * Bumped after each write so the duplicate query re-runs.
    *
@@ -172,12 +170,23 @@ export class AnimalForm {
   protected readonly writes = signal(0);
 
   /**
-   * Submitting without a precision is IMPOSSIBLE, not merely refused: the
-   * button is disabled until the arrival date's precision is chosen, because
-   * the control emits null until then.
+   * THE BIRTH DATE IS OPTIONAL AND STILL BLOCKS WHEN HALF-TYPED.
+   *
+   * That asymmetry is the point. `required` decides only whether an EMPTY field
+   * blocks; a field with text in it that does not parse blocks either way,
+   * because the alternative is sending `birth_on: null` for a birth year the
+   * operator typed -- a record indistinguishable from one where nothing was
+   * entered. A fabrication is visible to the next reader; a disappearance is
+   * visible to nobody.
    */
+  protected readonly blockedReason = computed(
+    () =>
+      dateBlocker(this.acquired(), { label: 'arrival date', required: true }) ??
+      dateBlocker(this.birth(), { label: 'birth date', required: false }),
+  );
+
   protected readonly canSubmit = computed(
-    () => this.acquired() !== null && !this.state.submitting(),
+    () => this.blockedReason() === null && !this.state.submitting(),
   );
 
   constructor() {
@@ -186,16 +195,18 @@ export class AnimalForm {
 
   protected async submit(): Promise<void> {
     const a = this.acquired();
-    if (!a) return;
     const b = this.birth();
+    // Belt and braces behind the disabled button: an incomplete optional date
+    // must never reach the wire as a null.
+    if (a.status !== 'complete' || b.status === 'incomplete') return;
     await this.state.run((key) =>
       this.api.addAnimal({
         sex: this.sex(),
         name: blank(this.name()),
-        acquired_on: a.occurred_on,
-        date_precision: a.date_precision,
-        birth_on: b?.occurred_on ?? null,
-        birth_precision: b?.date_precision ?? null,
+        acquired_on: a.value.occurred_on,
+        date_precision: a.value.date_precision,
+        birth_on: b.status === 'complete' ? b.value.occurred_on : null,
+        birth_precision: b.status === 'complete' ? b.value.date_precision : null,
         from: blank(this.from()),
         post_no: blank(this.postNo()),
         tag_no: blank(this.tagNo()),

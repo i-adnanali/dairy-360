@@ -9,8 +9,9 @@ clean, 44 registry specs across 4 frontend files. **At `v0.13.0` that is server 
 106 across 16 files**, 5 of them registry specs — including the first `CalvingForm` spec, which
 had none.
 
-**No herd data enters the real registry until item 5 lands.** That is a rule, not an intention;
-the reason is in §6.6.
+**The backfill gate is now open.** No herd data was to enter the real registry until item 5 landed
+— a rule, not an intention, because both date bugs wrote something false that nothing downstream
+could detect. Item 5 has landed; see §6.6.
 
 This document covers the entry surface only — the screens through which real herd data goes into
 the registry. It does not cover read models, the agent tooling, or the farm events layer.
@@ -559,54 +560,77 @@ the timeline row, because a fact nobody reads is barely better than one never st
   Only the one-sentence *rationale* is gated — the per-precision hints stay on every control,
   because "Stored as the 1st" is specific to the control it sits under and earns its place there.
 
-### 6.6 Smart date field
+### 6.6 Smart date field — BUILT
 
-One text input that parses what was typed, infers precision, and displays the inference back for
-confirmation. `2019` → year, `mar 2019` → month, `6 Jul 2023` → day. The estimated checkbox swaps
-precision to `estimated`, legal only where the parse yielded a bare year — which keeps the Jan-1
-storage convention intact and requires no migration.
+One text input. `2019` → year, `Mar 2019` → month, `6 Jul 2023` → day, plus ISO at both grains.
+The parser is `date-parse.ts`, a pure sibling module with no dependency — the repo has no date
+library and this adds none.
 
-`precision-date.ts` is already the single shared control imported by all three write forms. Replace
-its internals, keep the `PrecisionDate` output contract, and all surfaces benefit. The parser itself
-is a pure sibling module so it can be unit-tested without a component.
+**Precision is read, not asked, and the old guarantee survives inverted.** The segmented control's
+real property was that there is no way to type a full date and then downgrade the precision. That
+still holds, for the simplest possible reason: the day is absent at month precision because you did
+not type one. **The inference cannot be overridden upward** — there is no control anywhere that says
+"treat this as an exact day", because one would rebuild the fabrication §6.1 closed. To get day
+precision you type a day, and retyping is the only escape.
 
-**Ambiguous numeric dates are refused, not guessed.** Accept ISO `2023-07-06`, `6 Jul 2023`,
-`Jul 2023`, `2023`. On any bare `NN/NN/YYYY`, refuse and teach: "Ambiguous — type the month as a
-word (6 Jul 2023) or use 2023-07-06." Refuse *all* of them uniformly, including unambiguous cases
-like `25/12/2023`, because accepting those trains a habit that silently breaks on `06/07`. The farm
-is in Pakistan (DD/MM by convention) and the tooling is US-influenced (MM/DD); a wrong guess produces
-a date that passes every check in the system.
+**The reading is always shown back**, since an inference the operator cannot see is a default by
+another name: *"reading as month only — 2019-03, stored as the 1st"*.
 
-#### And it must close the half-entered OPTIONAL date
+**The "Estimated year" relabel became a checkbox**, which says the same thing more directly: "Even
+the year is a guess", **disabled with its reason visible** on anything but a bare year — an estimate
+stores January 1, so a specific day at estimated precision is the fabricated day the write boundary
+rejects by name. A stale tick cannot alter a month or a day; the parser ignores it above a year.
 
-§6.1 fixed the required date. The same class of bug survives one step over, on an *optional* one,
-and it is worse in one respect.
+**Ambiguous numeric dates are refused, uniformly.** `06/07/2023` and `25/12/2023` alike, because
+accepting the unambiguous ones teaches a habit that breaks silently the first time the day is under
+13. ISO is matched *before* the slash rule, so the escape the message offers is never itself
+refused.
 
-On `/add`, choose a precision on the birth-date control and leave the year blank. The control
-correctly says "No date yet — still needs the year", and the form submits anyway with
-`birth_on: null`. §6.1 was a **fabrication**; this is a **disappearance** — the operator types a
-birth year, the record is written without it, and the result is indistinguishable from never having
-typed anything. A fabricated date is at least visible to whoever reads the row later. A vanished one
-is not visible to anyone, ever.
+#### The half-entered OPTIONAL date — closed
 
-The cause is that "not started" and "half-entered" are both `null` to the parent, so the form cannot
-tell a date nobody began from one someone abandoned. **Definition of done: a three-state output —
-not started / half-entered / complete — with half-entered blocking submit on an optional date
-exactly as on a required one.** Demonstrated by execution, as §6.1 was.
+§6.1 fixed the required date. The same class survived one step over, on an optional one, and worse:
+§6.1 was a **fabrication**, this was a **disappearance**. The operator typed a birth year, the form
+sent `birth_on: null`, and the record became indistinguishable from one where nothing was typed. A
+fabricated date is at least visible to the next reader; a vanished one is visible to nobody, ever.
 
-This item replaces the control's internals anyway, which is why it lands here rather than as its own
-change: adding a third state to a control that is about to be rewritten twice is work done twice.
+Worth stating plainly: **§6.1 is what created this.** Before it, a half-entered birth date was
+fabricated into a confident value; after it, the control emitted `null` and the form sent nothing.
+Fixing the fabrication converted it into a disappearance, which is why this had to follow.
 
-#### THE BACKFILL WAITS FOR THIS ITEM
+The cause, in the code at `v0.13.0`:
 
-**No herd data enters the real registry until §6.6 lands.** Not a preference about polish — the two
-date bugs found so far both write something false that nothing downstream can detect, and both live
-in the one control every entry surface goes through. §6.1 closed three paths through it; this item
-closes the fourth and replaces the mechanism. Entering twenty animals and their calving histories
-before that is entering them into a control that has produced a silent falsehood twice.
+```ts
+canSubmit = computed(() => this.acquired() !== null && !this.state.submitting());
+// ...
+birth_on: b?.occurred_on ?? null,
+```
 
-The registry is empty, so waiting costs nothing but time. Re-entering twenty animals because their
-birth years vanished costs an evening and the confidence that the rest of the rows are right.
+`canSubmit` never consulted the birth date at all, and both "not started" and "not enough typed"
+arrived as `null`.
+
+**The fix is a three-state output** — `empty | incomplete | complete` — and one shared
+`dateBlocker(entry, { label, required })`, so three forms cannot disagree about the one case each
+would get wrong alone. `required` decides only whether **empty** blocks; **incomplete blocks either
+way**. Demonstrated by execution:
+
+```
+  birth field ""                     -> birth_on=null birth_precision=null
+  birth field "2017"                 -> birth_on="2017-01-01" birth_precision="year"
+  birth field "06/07/2023"           -> BLOCKED — nothing sent
+                                        The birth date is not understood yet — finish it or clear it.
+  birth field "sometime in spring"   -> BLOCKED — nothing sent
+                                        The birth date is not understood yet — finish it or clear it.
+```
+
+Row one is the honest null: nothing typed, nothing claimed. Row two is the value surviving. Rows
+three and four are the disappearance closed.
+
+#### The backfill can start
+
+**This was the last gate.** The two date bugs both wrote something false that nothing downstream
+could detect, and both lived in the one control every entry surface goes through. §6.1 closed three
+paths through it; this closes the fourth and replaces the mechanism, so the rule in the header is
+discharged: real herd data can now go into the real registry.
 
 ### 6.7 Keyboard pass
 

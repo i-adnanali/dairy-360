@@ -1,117 +1,175 @@
 import { TestBed } from '@angular/core/testing';
-import { PrecisionDateControl } from './precision-date';
-import type { PrecisionDate } from './precision-date';
+import { PrecisionDateControl, dateBlocker } from './precision-date';
+import type { DateEntry } from './precision-date';
 
 function make() {
   const fixture = TestBed.createComponent(PrecisionDateControl);
-  const emitted: (PrecisionDate | null)[] = [];
+  const emitted: DateEntry[] = [];
   fixture.componentInstance.changed.subscribe((v) => emitted.push(v));
   fixture.detectChanges();
-  return { fixture, el: fixture.nativeElement as HTMLElement, emitted };
+  const el = fixture.nativeElement as HTMLElement;
+
+  const type = (v: string) => {
+    const n = el.querySelector('[data-role="date-text"]') as HTMLInputElement;
+    n.value = v;
+    n.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  };
+  const last = () => emitted[emitted.length - 1];
+  /** The completed value, or a failure naming the state that came back instead. */
+  const val = () => {
+    const e = last();
+    if (e.status !== 'complete') throw new Error(`expected complete, got ${e.status}`);
+    return e.value;
+  };
+  return { fixture, el, emitted, type, last, val };
 }
 
-const pick = (el: HTMLElement, p: string) =>
-  (el.querySelector(`[data-precision="${p}"]`) as HTMLButtonElement).click();
-
-describe('PrecisionDateControl', () => {
-  it('shows NO date input until a precision is chosen, and emits nothing usable', () => {
-    // Mirrors NOT NULL with no default: there is no state of this control that
-    // produces a date without a precision.
-    const { el, emitted } = make();
-    expect(el.querySelector('[data-role="year"]')).toBeNull();
-    expect(el.querySelector('[data-role="preview"]')).toBeNull();
-    expect(emitted.every((v) => v === null)).toBe(true);
+describe('PrecisionDateControl — one field, precision read from it', () => {
+  it('starts empty and emits EMPTY, not a date', () => {
+    const { el, last } = make();
+    expect((el.querySelector('[data-role="date-text"]') as HTMLInputElement).value).toBe('');
+    expect(last().status).toBe('empty');
   });
 
-  it('has NO day field at month precision -- the mechanism, not a validation', () => {
-    // "Type a full date, then downgrade the precision" is how a month row ends
-    // up dated the 14th. It is unreachable because the input does not exist.
-    const { fixture, el } = make();
-    pick(el, 'month');
-    fixture.detectChanges();
-    expect(el.querySelector('[data-role="year"]')).not.toBeNull();
-    expect(el.querySelector('[data-role="month"]')).not.toBeNull();
-    expect(el.querySelector('[data-role="day"]')).toBeNull();
+  it('reads a year, a month and a day from what was typed', () => {
+    const { type, val } = make();
+    type('2019');
+    expect(val()).toEqual({
+      occurred_on: '2019-01-01',
+      date_precision: 'year',
+      occurred_time: null,
+    });
+    type('Mar 2019');
+    expect(val().date_precision).toBe('month');
+    type('6 Jul 2023');
+    expect(val().occurred_on).toBe('2023-07-06');
+  });
+
+  it('SHOWS THE READING BACK, because an unseen inference is a default', () => {
+    const { el, type } = make();
+    type('Mar 2019');
+    const reading = el.querySelector('[data-role="reading"]')!;
+    expect(reading.textContent).toContain('month only');
+    expect(reading.textContent).toContain('stored as the 1st');
+  });
+
+  it('offers retyping as the escape, and no way to claim a day that was not typed', () => {
+    // The whole guarantee. A control that could assert day precision over
+    // `Mar 2019` would rebuild the fabrication the empty-fields fix closed.
+    const { el, type } = make();
+    type('Mar 2019');
+    expect(el.querySelector('[data-role="reading-escape"]')!.textContent).toContain(
+      'Nothing here can claim a day you did not type',
+    );
+    expect(el.querySelector('[data-precision="day"]')).toBeNull();
+  });
+
+  it('offers a time input ONLY once a day has been typed', () => {
+    const { el, type } = make();
+    type('Mar 2019');
     expect(el.querySelector('[data-role="time"]')).toBeNull();
-  });
-
-  it('has no month or day field at year precision', () => {
-    const { fixture, el } = make();
-    pick(el, 'year');
-    fixture.detectChanges();
-    expect(el.querySelector('[data-role="year"]')).not.toBeNull();
-    expect(el.querySelector('[data-role="month"]')).toBeNull();
-    expect(el.querySelector('[data-role="day"]')).toBeNull();
-  });
-
-  it('offers a time input ONLY at day precision', () => {
-    const { fixture, el } = make();
-    pick(el, 'day');
-    fixture.detectChanges();
+    type('6 Jul 2023');
     expect(el.querySelector('[data-role="time"]')).not.toBeNull();
-    pick(el, 'month');
-    fixture.detectChanges();
-    expect(el.querySelector('[data-role="time"]')).toBeNull();
   });
 
-  it('emits dates already in the storage convention', () => {
-    const { fixture, el, emitted } = make();
-    const last = () => emitted[emitted.length - 1]!;
-
-    pick(el, 'day');
-    fixture.detectChanges();
-    const y = el.querySelector('[data-role="year"]') as HTMLInputElement;
-    y.value = '2024';
-    y.dispatchEvent(new Event('input'));
-    const m = el.querySelector('[data-role="month"]') as HTMLSelectElement;
-    m.value = '3';
-    m.dispatchEvent(new Event('change'));
-    const d = el.querySelector('[data-role="day"]') as HTMLInputElement;
-    d.value = '14';
-    d.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(last()).toEqual({ occurred_on: '2024-03-14', date_precision: 'day', occurred_time: null });
-
-    // Month -> the 1st. Note the day was 14 a moment ago and does NOT survive.
-    pick(el, 'month');
-    fixture.detectChanges();
-    expect(last()).toEqual({ occurred_on: '2024-03-01', date_precision: 'month', occurred_time: null });
-
-    // Year and estimated -> January 1.
-    pick(el, 'year');
-    fixture.detectChanges();
-    expect(last()).toEqual({ occurred_on: '2024-01-01', date_precision: 'year', occurred_time: null });
-
-    pick(el, 'estimated');
-    fixture.detectChanges();
-    expect(last()).toEqual({ occurred_on: '2024-01-01', date_precision: 'estimated', occurred_time: null });
-  });
-
-  it('drops a time when precision leaves day, so it cannot be sent above it', () => {
-    const { fixture, el, emitted } = make();
-    pick(el, 'day');
-    fixture.detectChanges();
-
-    // The date has to be TYPED before there is anything for a time to ride on.
-    // This spec used to set only the time and read a complete emission back --
-    // which worked solely because year/month/day were prefilled, making it the
-    // one existing spec that depended on the fabricated-date bug.
-    for (const [role, v, ev] of [['year', '2024', 'input'], ['month', '3', 'change'], ['day', '14', 'input']] as const) {
-      const n = el.querySelector(`[data-role="${role}"]`) as HTMLInputElement;
-      n.value = v;
-      n.dispatchEvent(new Event(ev));
-      fixture.detectChanges();
-    }
-
+  it('drops a time when the date stops being a day, so it cannot be sent above it', () => {
+    const { fixture, el, type, val } = make();
+    type('6 Jul 2023');
     const t = el.querySelector('[data-role="time"]') as HTMLInputElement;
     t.value = '05:30';
     t.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(emitted[emitted.length - 1]!.occurred_time).toBe('05:30');
+    expect(val().occurred_time).toBe('05:30');
 
-    pick(el, 'month');
+    type('Mar 2019');
+    expect(val().occurred_time).toBeNull();
+  });
+});
+
+describe('PrecisionDateControl — the three states', () => {
+  it('text that does not parse is INCOMPLETE and says why, without emitting a date', () => {
+    const { el, type, last } = make();
+    type('06/07/2023');
+    expect(last().status).toBe('incomplete');
+    expect(el.querySelector('[data-role="incomplete"]')!.textContent).toContain('Ambiguous');
+    expect(el.querySelector('[data-role="reading"]')).toBeNull();
+  });
+
+  it('goes back to EMPTY when cleared, which is a different state from incomplete', () => {
+    const { type, last } = make();
+    type('06/07/2023');
+    expect(last().status).toBe('incomplete');
+    type('');
+    expect(last().status).toBe('empty');
+  });
+
+  it('retracts a complete date when the text is emptied', () => {
+    const { type, last } = make();
+    type('2019');
+    expect(last().status).toBe('complete');
+    type('');
+    expect(last().status).toBe('empty');
+  });
+});
+
+describe('PrecisionDateControl — the estimated modifier', () => {
+  const box = (el: HTMLElement) => el.querySelector('[data-role="estimated"]') as HTMLInputElement;
+  const tick = (fixture: { detectChanges(): void }, el: HTMLElement) => {
+    box(el).checked = true;
+    box(el).dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(emitted[emitted.length - 1]!.occurred_time).toBeNull();
+  };
+
+  it('turns a bare year into an estimated year', () => {
+    const { fixture, el, type, val } = make();
+    type('2019');
+    tick(fixture, el);
+    expect(val().date_precision).toBe('estimated');
+    expect(el.querySelector('[data-role="reading"]')!.textContent).toContain('estimated year');
+  });
+
+  it('stores January 1 either way, so the convention is untouched', () => {
+    const { fixture, el, type, val } = make();
+    type('2019');
+    const plain = val().occurred_on;
+    tick(fixture, el);
+    expect(val().occurred_on).toBe(plain);
+  });
+
+  it('is DISABLED with the reason showing where it cannot apply', () => {
+    // Disabled rather than hidden, so the answer is readable before it is
+    // needed. An estimate stores January 1, so it can only qualify a year.
+    const { el, type } = make();
+    type('6 Jul 2023');
+    expect(box(el).disabled).toBe(true);
+    expect(el.querySelector('[data-role="estimated-why"]')!.textContent).toContain(
+      'only applies to a bare year',
+    );
+  });
+
+  it('a stale tick cannot alter a month or a day', () => {
+    const { fixture, el, type, val } = make();
+    type('2019');
+    tick(fixture, el);
+    type('6 Jul 2023');
+    expect(val().date_precision).toBe('day');
+  });
+});
+
+describe('PrecisionDateControl — the explainer', () => {
+  it('carries the no-default rationale by default', () => {
+    const { el } = make();
+    expect(el.querySelector('[data-role="hint"]')!.textContent).toContain('a default is how');
+  });
+
+  it('drops only the rationale when explain is false', () => {
+    const { fixture, el } = make();
+    fixture.componentRef.setInput('explain', false);
+    fixture.detectChanges();
+    const hint = el.querySelector('[data-role="hint"]')!.textContent!;
+    expect(hint).toContain('read from what you type');
+    expect(hint).not.toContain('a default is how');
   });
 
   it('shows the server refusal verbatim', () => {
@@ -123,107 +181,46 @@ describe('PrecisionDateControl', () => {
     fixture.detectChanges();
     expect(el.querySelector('[data-role="error"]')!.textContent!.trim()).toBe(prose);
   });
+});
 
-  it('explains that there is no default before anything is chosen', () => {
-    const { el } = make();
-    expect(el.textContent).toContain('no default');
+describe('dateBlocker — the shared rule three forms must not disagree about', () => {
+  const entry = (status: DateEntry['status']): DateEntry =>
+    status === 'complete'
+      ? {
+          status: 'complete',
+          value: { occurred_on: '2019-01-01', date_precision: 'year', occurred_time: null },
+          reading: 'x',
+        }
+      : status === 'incomplete'
+        ? { status: 'incomplete', message: 'x' }
+        : { status: 'empty' };
+
+  it('blocks an INCOMPLETE date whether it is required or not', () => {
+    // Half-typed text on an OPTIONAL field would otherwise be sent as null --
+    // a birth year the operator typed, gone without a trace.
+    for (const required of [true, false]) {
+      expect(dateBlocker(entry('incomplete'), { label: 'birth date', required })).toContain(
+        'not understood yet',
+      );
+    }
   });
 
-  // -------------------------------------------------------------------------
-  // The defaults rule, applied to this control's own fields
-  // -------------------------------------------------------------------------
-
-  it('does NOT emit a date when only the precision was chosen', () => {
-    // The bug this closes: year/month/day used to initialise to the current
-    // year, January and the 1st, so clicking "Exact day" and nothing else
-    // emitted a confident, fabricated exact date that satisfied every CHECK,
-    // every write-boundary assertion and every invariant.
-    //
-    // A backfill year has no strong prior at all, which puts these three
-    // fields on the "lie" side of the defaults rule, not the "mistake" side.
-    const { fixture, el, emitted } = make();
-    pick(el, 'day');
-    fixture.detectChanges();
-    expect(emitted[emitted.length - 1]).toBeNull();
+  it('blocks an EMPTY date only when it is required', () => {
+    expect(dateBlocker(entry('empty'), { label: 'arrival date', required: true })).toContain(
+      'Enter the arrival date',
+    );
+    expect(dateBlocker(entry('empty'), { label: 'birth date', required: false })).toBeNull();
   });
 
-  it('starts every date part empty at every precision', () => {
-    const { fixture, el } = make();
-    pick(el, 'day');
-    fixture.detectChanges();
-    expect((el.querySelector('[data-role="year"]') as HTMLInputElement).value).toBe('');
-    expect((el.querySelector('[data-role="month"]') as HTMLSelectElement).value).toBe('');
-    expect((el.querySelector('[data-role="day"]') as HTMLInputElement).value).toBe('');
+  it('never blocks a complete date', () => {
+    for (const required of [true, false]) {
+      expect(dateBlocker(entry('complete'), { label: 'd', required })).toBeNull();
+    }
   });
 
-  it('withholds the date until every part the precision needs is entered', () => {
-    const { fixture, el, emitted } = make();
-    const last = () => emitted[emitted.length - 1];
-    const type = (role: string, v: string, ev = 'input') => {
-      const n = el.querySelector(`[data-role="${role}"]`) as HTMLInputElement;
-      n.value = v;
-      n.dispatchEvent(new Event(ev));
-      fixture.detectChanges();
-    };
-
-    pick(el, 'day');
-    fixture.detectChanges();
-
-    type('year', '2019');
-    expect(last()).toBeNull(); // month and day still missing
-    type('month', '6', 'change');
-    expect(last()).toBeNull(); // day still missing
-    type('day', '14');
-    expect(last()).toEqual({
-      occurred_on: '2019-06-14',
-      date_precision: 'day',
-      occurred_time: null,
-    });
-  });
-
-  it('names what is still missing instead of previewing a date', () => {
-    const { fixture, el } = make();
-    pick(el, 'day');
-    fixture.detectChanges();
-    expect(el.querySelector('[data-role="preview"]')).toBeNull();
-    expect(el.querySelector('[data-role="incomplete"]')!.textContent).toContain('year');
-  });
-
-  it('clearing a part withdraws the date again', () => {
-    // Emptying the year after a complete date must retract the emission, not
-    // leave the parent holding the last good value.
-    const { fixture, el, emitted } = make();
-    pick(el, 'year');
-    fixture.detectChanges();
-    const y = el.querySelector('[data-role="year"]') as HTMLInputElement;
-    y.value = '2019';
-    y.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(emitted[emitted.length - 1]).not.toBeNull();
-
-    y.value = '';
-    y.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(emitted[emitted.length - 1]).toBeNull();
-  });
-
-  it('carries the no-default RATIONALE by default, so a single-control form keeps it', () => {
-    const { el } = make();
-    expect(el.textContent).toContain('a default is how');
-  });
-
-  it('drops only the rationale when explain is false, keeping the instruction', () => {
-    // /add has two date controls, and one identical sentence printed twice
-    // trains the reader to skip it. The per-precision hints are NOT gated:
-    // "Stored as the 1st" is specific to the control it sits under.
-    const { fixture, el } = make();
-    fixture.componentRef.setInput('explain', false);
-    fixture.detectChanges();
-    expect(el.textContent).toContain('Choose one before entering a date');
-    expect(el.textContent).not.toContain('a default is how');
-
-    pick(el, 'month');
-    fixture.detectChanges();
-    expect(el.textContent).toContain('Stored as the 1st');
+  it('names the field, so a form with two dates says which one', () => {
+    expect(dateBlocker(entry('incomplete'), { label: 'birth date', required: false })).toContain(
+      'birth date',
+    );
   });
 });

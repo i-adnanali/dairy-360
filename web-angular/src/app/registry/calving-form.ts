@@ -32,8 +32,8 @@ import { Session } from './session';
 import { CalfPicker } from './calf-picker';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
-import { PrecisionDateControl } from './precision-date';
-import type { PrecisionDate } from './precision-date';
+import { PrecisionDateControl, dateBlocker } from './precision-date';
+import type { DateEntry, PrecisionDate } from './precision-date';
 import type { CalfChoice } from './calf-picker';
 import type { CalvingOutcome, LinkCandidate, RegistrySex } from './types';
 
@@ -225,7 +225,7 @@ export class CalvingForm {
   protected readonly candidates = signal<LinkCandidate[]>([]);
 
   protected readonly damId = signal('');
-  protected readonly when = signal<PrecisionDate | null>(null);
+  protected readonly when = signal<DateEntry>({ status: 'empty' });
   protected readonly calfSex = signal<RegistrySex>('female');
   protected readonly outcome = signal<CalvingOutcome>('live');
   /** Null until the picker is answered; then an id, or null for "create new". */
@@ -239,20 +239,21 @@ export class CalvingForm {
 
   /** Eligibility depends on the date, so the picker waits for it. */
   protected readonly canLoadCandidates = computed(
-    () => this.damId().length > 0 && this.when() !== null,
+    () => this.damId().length > 0 && this.when().status === 'complete',
   );
 
   protected readonly canSubmit = computed(
     () =>
       !this.state.submitting() &&
       this.damId().length > 0 &&
-      this.when() !== null &&
+      this.when().status === 'complete' &&
       this.calfAnswered(),
   );
 
   protected readonly blockedReason = computed(() => {
     if (this.damId().length === 0) return 'Choose a dam.';
-    if (this.when() === null) return 'Say how well you know the calving date, then enter it.';
+    const d = dateBlocker(this.when(), { label: 'calving date', required: true });
+    if (d !== null) return d;
     if (!this.calfAnswered()) return 'Pick the calf, or say none of these.';
     return null;
   });
@@ -273,8 +274,8 @@ export class CalvingForm {
       const dam = this.damId();
       const w = this.when();
       const sex = this.calfSex();
-      if (dam.length === 0 || w === null) return;
-      void this.loadCandidates(dam, sex, w);
+      if (dam.length === 0 || w.status !== 'complete') return;
+      void this.loadCandidates(dam, sex, w.value);
     });
   }
 
@@ -284,7 +285,7 @@ export class CalvingForm {
     this.clearCalf();
   }
 
-  protected setWhen(w: PrecisionDate | null): void {
+  protected setWhen(w: DateEntry): void {
     this.when.set(w);
     // Eligibility is a function of the date, so a changed date can turn the
     // picked animal ineligible. Dropping the choice forces a fresh look rather
@@ -331,8 +332,9 @@ export class CalvingForm {
   }
 
   protected async submit(): Promise<void> {
-    const w = this.when();
-    if (!w) return;
+    const entry = this.when();
+    if (entry.status !== 'complete') return;
+    const w = entry.value;
     // Re-read candidates on submit in link mode so a stale list cannot be the
     // reason a link is attempted against an animal that has since changed.
     const r = await this.state.run((key) =>

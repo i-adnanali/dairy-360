@@ -6,8 +6,8 @@ import { FormState } from './form-state';
 import { Session } from './session';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
-import { PrecisionDateControl } from './precision-date';
-import type { PrecisionDate } from './precision-date';
+import { PrecisionDateControl, dateBlocker } from './precision-date';
+import type { DateEntry } from './precision-date';
 import type { AnimalDetail, EnterableEventType } from './types';
 
 const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_time', 'reason', 'text'] as const;
@@ -129,8 +129,8 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
           <button type="button" data-role="submit" (click)="submit()" [disabled]="!canSubmit()"
             class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
           >{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
-          @if (!when()) {
-            <span class="text-sm text-farm-600" data-role="blocked">Say how well you know the date, then enter it.</span>
+          @if (blockedReason(); as r) {
+            <span class="text-sm text-farm-600" data-role="blocked">{{ r }}</span>
           }
         </div>
       }
@@ -156,7 +156,7 @@ export class EventForm {
   protected readonly state = new FormState<{ event_id: string; animal: AnimalDetail }>();
 
   protected readonly type = signal<EnterableEventType | null>(null);
-  protected readonly when = signal<PrecisionDate | null>(null);
+  protected readonly when = signal<DateEntry>({ status: 'empty' });
   protected readonly reason = signal('');
   protected readonly to = signal('');
   protected readonly text = signal('');
@@ -165,7 +165,11 @@ export class EventForm {
   protected readonly overrideReason = signal('');
 
   protected readonly canSubmit = computed(
-    () => this.type() !== null && this.when() !== null && !this.state.submitting(),
+    () => this.type() !== null && this.blockedReason() === null && !this.state.submitting(),
+  );
+
+  protected readonly blockedReason = computed(() =>
+    dateBlocker(this.when(), { label: 'date', required: true }),
   );
 
   constructor() {
@@ -173,9 +177,10 @@ export class EventForm {
   }
 
   protected async submit(): Promise<void> {
-    const w = this.when();
+    const entry = this.when();
     const t = this.type();
-    if (!w || !t) return;
+    if (entry.status !== 'complete' || !t) return;
+    const w = entry.value;
     const r = await this.state.run((key) =>
       this.api.addEvent({
         animal_id: this.animalId(),
@@ -196,7 +201,7 @@ export class EventForm {
     if (r) {
       this.saved()?.(r.animal);
       this.type.set(null);
-      this.when.set(null);
+      this.when.set({ status: 'empty' });
       this.reason.set('');
       this.to.set('');
       this.text.set('');

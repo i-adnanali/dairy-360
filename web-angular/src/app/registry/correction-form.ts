@@ -8,8 +8,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
-import { PrecisionDateControl } from './precision-date';
-import type { PrecisionDate } from './precision-date';
+import { PrecisionDateControl, dateBlocker } from './precision-date';
+import type { DateEntry } from './precision-date';
 import type { TimelineEvent } from './types';
 
 const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
@@ -128,7 +128,7 @@ export class CorrectionForm {
   }>();
 
   protected readonly target = signal('');
-  protected readonly when = signal<PrecisionDate | null>(null);
+  protected readonly when = signal<DateEntry>({ status: 'empty' });
   protected readonly notes = signal('');
   protected readonly allowDuplicate = signal(false);
   protected readonly overrideReason = signal('');
@@ -139,11 +139,16 @@ export class CorrectionForm {
   );
 
   protected readonly canSubmit = computed(
-    () => this.target().length > 0 && this.when() !== null && !this.state.submitting(),
+    () =>
+      this.target().length > 0 &&
+      dateBlocker(this.when(), { label: 'corrected date', required: true }) === null &&
+      !this.state.submitting(),
   );
 
   protected async submit(): Promise<void> {
-    const w = this.when();
+    const entry = this.when();
+    if (entry.status !== 'complete') return;
+    const w = entry.value;
     if (!w) return;
     const r = await this.state.run((key) =>
       this.api.correctCalving(this.target(), {
@@ -159,7 +164,7 @@ export class CorrectionForm {
     this.allowDuplicate.set(false);
     if (r) {
       this.target.set('');
-      this.when.set(null);
+      this.when.set({ status: 'empty' });
       this.overrideReason.set('');
       this.done()?.();
     }
