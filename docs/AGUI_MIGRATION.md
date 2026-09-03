@@ -140,8 +140,9 @@ new-run resume) stands.
 
 ### Turn model (parity with the old loop)
 
-The streaming loop in `server/src/agent/stream.ts` mirrors `runTurn` in
-`server/src/agent/loop.ts` exactly: reads are (re)executed idempotently, writes
+The streaming loop in `server/src/agent/stream.ts` mirrored `runTurn` in
+`server/src/agent/loop.ts` exactly (that file has since been deleted along with
+`/api/chat` — see below): reads are (re)executed idempotently, writes
 pause for approval, and after an approved/declined write the loop continues so
 the model can summarise the result. That post-approval model turn is the same
 extra round-trip the old `/api/chat` did, so the assistant's wording after an

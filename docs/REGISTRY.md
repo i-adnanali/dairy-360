@@ -173,7 +173,7 @@ One status rule depends on the current date: an animal is a `calf` until it is `
 
 A hidden `new Date()` inside `project.ts` would make the rebuild non-reproducible and turn invariants 0 and 1 into checks that cannot fail meaningfully — two runs a day apart could legitimately disagree. So `asOf` is passed in, and the consequence is stated rather than hidden:
 
-> **Stored projections go stale as animals age.** A stale row is a real invariant-1 violation, and the correct response is `npm run registry:rebuild`, not a loosened comparison.
+> **Stored projections go stale as animals age.** A stale row is a real invariant-1 violation, and the correct response is `npm run registry:rebuild -w server`, not a loosened comparison.
 
 `verify:registry` prints that diagnosis when invariant 1 fires, so "stale" is distinguishable from "wrong".
 
@@ -189,7 +189,9 @@ Zero-padded to four digits so lexical sort matches numeric sort. Not derived fro
 
 ### Event id: `aevt_` + a full `randomUUID()`
 
-**The repo's 8-character convention is deliberately not followed here.** Nine sites use `<prefix>_${randomUUID().slice(0, 8)}` — `animal_`, `milking_`, `health_`, `vendor_`, `delivery_`, `farm_event_`, `ds_`. Eight hex characters is 32 bits: a birthday collision around 77k rows, with non-trivial risk far below that.
+**The repo's 8-character convention is deliberately not followed here.** Eight sites use `<prefix>_${randomUUID().slice(0, 8)}` — `animal_`, `milking_`, `health_`, `vendor_`, `delivery_`, `farm_event_`, `ds_`. Eight hex characters is 32 bits: a birthday collision around 77k rows, with non-trivial risk far below that.
+
+> This said **nine** until a documentation sweep counted them. Worth recording, because it is a small live specimen of what that sweep was for: revision 1 of the decision document asserted the number without repo access, revision 2 repeated it while correcting the ULID claim in the same sentence, and it arrived here by inheritance. `git grep` at `v0.10.0` returns eight, so it was never right. The ninth hit today is the doc-comment in [events.ts](../server/src/registry/events.ts) quoting the convention this file explains it does not follow — a number that verified itself by describing itself.
 
 That matters more here than anywhere else in the repo, because the lactation id is derived from a calving event id and step 4's yield rows will carry it as a foreign key. A collision would silently point yield at the wrong lactation — the exact failure the id-stability decision exists to prevent, reintroduced through the id format instead of the numbering scheme.
 
@@ -268,7 +270,7 @@ Surface precision wherever a date is displayed — "March 2024 (month)", "~2021 
 
 When the outcome was `stillborn` or `died_within_24h` there is a **third** event at the same date — the calf's `departure` — and moving only two leaves the calf departed before it was born (invariants 4 and 5 both fire).
 
-Do not do this by hand. `correctCalving()` and `npm run registry:correct-calving` write every half in one transaction; see Decision 9.
+Do not do this by hand. `correctCalving()` and `npm run registry:correct-calving -w server` write every half in one transaction; see Decision 9.
 
 ---
 
@@ -355,7 +357,7 @@ It exists because steps 4, 5 and 6 have no natural failure mode a test can trigg
 
 ### Correcting a calving date
 
-`correctCalving()` / `npm run registry:correct-calving`. Same shape as recording: one `BEGIN IMMEDIATE` transaction, the same validation, per-step fault injection proving atomicity.
+`correctCalving()` / `npm run registry:correct-calving -w server`. Same shape as recording: one `BEGIN IMMEDIATE` transaction, the same validation, per-step fault injection proving atomicity.
 
 ```
 1. Validate    the event exists, is a calving, is NOT already superseded,

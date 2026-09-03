@@ -6,6 +6,31 @@
 
 ---
 
+> ## ⚠ SUPERSEDED — revision 1, kept for its reasoning only
+>
+> **This document was not implemented.** It is superseded in full by
+> [ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md](ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md),
+> and what was actually built is documented in [REGISTRY.md](REGISTRY.md). It is
+> kept because revision 2 §0 disposes of every item here by name, and the
+> reasoning that was *wrong* is the useful part of the record — do not read any
+> decision below as current.
+>
+> It was written **without repo access**, which is the single cause of most of
+> what follows. Four things in particular are withdrawn or false:
+>
+> | Below | Actually |
+> |---|---|
+> | Two database files, `dairy.real.db` / `dairy.synthetic.db` (§2) | **Withdrawn** (V2 §2). One file, disjoint `registry_*` table names, plus a migration runner. The env-var mechanism could not defend against `npm run seed`, because the process would be configured correctly and the *command* would be wrong |
+> | "The **100** synthetic buffaloes are load-bearing" (§2) | There are **14** ([seed.ts](../server/src/seed.ts)) |
+> | Tables `animals`, `animal_events`, `lactations`, `parentage`, `animal_status`, `dataset_meta`; projection columns on `animals` | Six `registry_*` tables; no `dataset_meta` (deleted with the split, V2 §10); `registry_animals` carries **no** projection columns at all, deliberately |
+> | "ULID (or UUIDv7) as TEXT. Sortable by creation" (§5) | `aevt_` + a full `randomUUID()`, with the sortability claim dropped: no such dependency exists in this repo, and creation order is recoverable from `recorded_at` |
+>
+> Revision 2 §0 records the rest, including three errors that shared one cause —
+> treating a handover summary as repo evidence. That is what the validate-first
+> step exists to catch, and it caught all three.
+
+---
+
 ## 1. What this cycle builds
 
 A registry layer that holds **real animals from the real farm**, structured as an append-only event log with rebuildable projections over it.
@@ -255,9 +280,9 @@ Notes:
 
 Two commands, following the existing `verify:classify` precedent.
 
-**`npm run registry:rebuild [--animal=BD-0001]`** — recomputes all projection tables from `animal_events`. Idempotent. Safe to run at any time.
+**`npm run registry:rebuild -w server [-- --animal=BD-0001]`** — recomputes all projection tables from `animal_events`. Idempotent. Safe to run at any time.
 
-**`npm run verify:registry`** — snapshots the projection tables, rebuilds into a temporary database, diffs, and additionally asserts these invariants:
+**`npm run verify:registry -w server`** — snapshots the projection tables, rebuilds into a temporary database, diffs, and additionally asserts these invariants:
 
 1. Projection rebuild is byte-identical to stored projections.
 2. Lactation ids are unchanged across rebuild.

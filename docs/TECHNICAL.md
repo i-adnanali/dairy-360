@@ -316,7 +316,11 @@ Card label helpers: `tagLabel(animalId)` renders `TAG (name)` when a name exists
 | Camera-silence threshold | `15` minutes | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
 | Server port | `PORT` env or `4000` | [server/src/index.ts](../server/src/index.ts) |
 | Web dev port | `4200` (Angular `ng serve`, proxies `/api` -> 4000) | [web-angular/proxy.conf.json](../web-angular/proxy.conf.json) |
+| Registry harness port | `4100` by default — **pass `--port=4000`** to reach it through the proxy | [server/src/registry/harness.ts](../server/src/registry/harness.ts) |
+| Calf age threshold | `12` months (provisional) | [server/src/registry/project.ts](../server/src/registry/project.ts) |
+| Double-entry window | `60` days (provisional) | [server/src/registry/calving.ts](../server/src/registry/calving.ts) |
+| Farm timezone (registry) | `Asia/Karachi` — a deliberate second copy, not imported from `classify.ts` | [server/src/registry/time.ts](../server/src/registry/time.ts) |
 | Tracing | opt-in Langfuse (no-op if keys unset) | [server/src/instrumentation.ts](../server/src/instrumentation.ts) |
-| Env vars | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `PORT`, `AGENT_MAX_ITERATIONS`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL` | `.env` (loaded from `server/.env` by `dotenv/config`) |
+| Env vars | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `PORT`, `AGENT_MAX_ITERATIONS`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`, plus `RUN_REGRESSION` (regression gate), `FARM_BASE_URL` + `FRIGATE_MQTT_URL` + `DEEPSTACK_URL` (farm scripts), and `TZ` / `NODE_ENV` | `server/.env`, loaded by `dotenv/config` — **cwd-relative, and dotenv does not search parents**, so a repo-root `.env` is invisible to the server. `.env.example` explains both destinations |
 
 See [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md) for the request lifecycle, architecture, and data-model diagrams.

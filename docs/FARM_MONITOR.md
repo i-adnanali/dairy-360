@@ -135,6 +135,21 @@ nullable columns; the resolution is simply to **drop the local table and let
 decision, not a bug report, when someone's local `verify:farm` starts failing
 with a missing-column error.
 
+> **Superseded in part by Cycle 8.** "This repo has no migration system" was
+> true when written and is the reason for the decision above; it is no longer
+> true. [REGISTRY.md](REGISTRY.md) Decision 2 built one — `PRAGMA user_version`,
+> global rather than registry-specific, applied at `db.ts` load — and cites
+> *this section* as its motivation: `IF NOT EXISTS` doing nothing to an existing
+> table is tolerable for four nullable columns on a table that holds zero rows
+> by design, and intolerable for the one set of tables whose rows cannot be
+> regenerated from software.
+>
+> Nothing here changes. `farm_events` is still `CREATE TABLE IF NOT EXISTS` and
+> still not retrofitted into migration history — a migration claiming to have
+> created it would be a lie — so the drop-and-recreate step remains what a
+> pre-Cycle-5 `dairy.db` needs. What changed is that a *future* column addition
+> has somewhere to go.
+
 ### Standing rule — classification-aware population resets per scenario
 
 `simulate:farm --all` replays all six scenarios cumulatively into one table at

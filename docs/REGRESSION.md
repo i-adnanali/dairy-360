@@ -135,10 +135,25 @@ How it works:
 The suite is gated behind `RUN_REGRESSION=1` (set only by the
 `test:regression*` scripts) **and** an `ANTHROPIC_API_KEY`; absent either, the
 whole `describe` skips (so its seeding hooks never run). This keeps the plain
-`npm test` unit run free of token cost — and in practice the `src/**/*.test.ts`
-glob only matches one directory deep (`src/tools/`, and since Cycles 4–5 also
-`src/farm/`), so the deeper `src/agent/__tests__/` files are excluded from it
-regardless.
+`npm test` unit run free of token cost.
+
+> **Superseded by Cycle 8.** This document originally added that the
+> `src/**/*.test.ts` glob "only matches one directory deep, so the deeper
+> `src/agent/__tests__/` files are excluded from it regardless" — offered as a
+> convenient property. It was true and it was an **accident**: npm runs scripts
+> through `sh`, where `**` is not globstar. The accident cut both ways, because
+> a test placed one level deeper would also never run and would report nothing,
+> while quoting the glob to "fix" it hands globbing to node, which *does*
+> recurse and pulls in these regression files — where, without an API key, they
+> emit `ok N … # SKIP` that the TAP summary counts as **passing**. CI would go
+> green for a suite that never executed.
+>
+> So the script now **enumerates** its directories, and
+> `src/testWiring.test.ts` asserts the listing is complete — every `*.test.ts`
+> under `src/` is either matched by a pattern or on an `EXCLUDED` list with a
+> reason and a `test:regression:*` script that reaches it. Do not rely on the
+> glob property described above; rely on the wiring test. See
+> [REGISTRY.md](REGISTRY.md) § "How `npm test` finds these tests".
 
 This reuses the exact function the live server calls — no parallel
 implementation of the loop to keep in sync.

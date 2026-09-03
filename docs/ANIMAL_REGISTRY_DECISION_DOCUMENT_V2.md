@@ -152,7 +152,7 @@ Worth noting: this does not collide with the demo table's `animal_<8hex>` ids, s
 **`aevt_` + full `randomUUID()`.** Revision 1 said "ULID (or UUIDv7) as TEXT" and claimed sortability. The report is right on both counts:
 
 - The repo has no ULID or UUIDv7 library, and adding one is a real new runtime dependency.
-- The repo convention, at nine sites, is `randomUUID().slice(0, 8)`. Following it here would be actively wrong: 32 bits gives a birthday collision around 77k rows and non-trivial risk far below that, and a collision means a lactation id silently points at the wrong lactation — reintroducing the exact failure §5 exists to prevent, through the id format instead of the numbering scheme.
+- The repo convention, at eight sites, is `randomUUID().slice(0, 8)`. Following it here would be actively wrong: 32 bits gives a birthday collision around 77k rows and non-trivial risk far below that, and a collision means a lactation id silently points at the wrong lactation — reintroducing the exact failure §5 exists to prevent, through the id format instead of the numbering scheme.
 
 So: keep the type prefix convention, drop the truncation, add no dependency. Creation order is recoverable from `recorded_at`, which §6 makes `NOT NULL` and exact, so the sortability property is not needed. **The sortability claim in revision 1 is withdrawn.** Note in the code that the 8-char convention is deliberately not followed here, and why.
 
@@ -297,9 +297,9 @@ But picking one is wrong, because the two callers need different data:
 So: the invariants live as pure functions in `registry/invariants.ts` (events + projections in, violations out), with two callers.
 
 - **`registry.invariants.test.ts`** — builds an `:memory:` DB via `applyRegistrySchema`, seeds fixture herds including the nasty cases (superseded events, stillbirth, calving with no dry-off, month-precision backfill), asserts zero violations, and asserts each invariant fires on a deliberately corrupted fixture. Runs in CI. Writes nothing to disk.
-- **`npm run verify:registry`** — runs the same functions against the live `dairy.db`, plus the rebuild-diff, plus the precision histogram (§11). Follows the repo CLI convention: `npm run verify:registry -w server` → `tsx`, `process.argv.slice(2)` hand-parsed as `--flag=value`, `if (require.main === module)` guard. `--animal=BD-0001` fits that convention exactly.
+- **`npm run verify:registry -w server`** — runs the same functions against the live `dairy.db`, plus the rebuild-diff, plus the precision histogram (§11). Follows the repo CLI convention: `npm run verify:registry -w server` → `tsx`, `process.argv.slice(2)` hand-parsed as `--flag=value`, `if (require.main === module)` guard. `--animal=BD-0001` fits that convention exactly.
 
-### `npm run registry:rebuild [--animal=BD-0001]`
+### `npm run registry:rebuild -w server [-- --animal=BD-0001]`
 
 Recomputes all projection tables from the event log. Idempotent.
 
@@ -323,6 +323,8 @@ Recomputes all projection tables from the event log. Idempotent.
 13. `resetSchema()`'s DROP list contains no `registry_` table. (New, per B1. Lives with the other invariants but is a source-level check.)
 
 The `dataset_meta` invariant from revision 1 is deleted with the two-file split.
+
+**Implementation strengthened three of these; [REGISTRY.md](REGISTRY.md) carries the current wording.** Invariant 6 also checks the calf's **sex** and a matching back-reference, not only date and precision; invariant 8 also checks that every lactation id derives from its opening calving; invariant 13 checks the `SCHEMA` const as well as `resetSchema()`'s DROP list. A spec being narrower than what was built is fine — but read the invariants from REGISTRY.md, not from here.
 
 ---
 
@@ -391,6 +393,26 @@ Repo-evidence questions are all answered by the validation report. These remain,
 
 ## 15. Definition of done
 
+> **Status: steps 1 and 2 shipped.** Tagged `v0.11.0` (schema, migration runner,
+> calving transactions with link mode, invariants, backfill CLI), `v0.11.1`
+> (HTTP surface and the `:memory:` harness) and `v0.12.0` (entry UI, plus the
+> storage gate). What was built — including where implementation departed from
+> or strengthened this spec — is documented in [REGISTRY.md](REGISTRY.md), which
+> is authoritative from here on.
+>
+> **The boxes below are deliberately left unticked.** Ticking them would assert
+> a verification pass against this list, item by item, that nobody has run; the
+> evidence that exists is the test suite, the tags, and REGISTRY.md. Three items
+> are known to be genuinely open, and they are the herd-data ones rather than
+> the code ones:
+>
+> - **Real herd backfilled with explicit precision on every date** — not
+>   started. The registry holds zero rows; `GET /api/registry/animals` against
+>   the live `dairy.db` returns `{"animals":[]}`.
+> - **Histogram reviewed by hand** — nothing to review until the backfill runs.
+> - **Regression suite recorded before and after** — not re-run for this cycle.
+>   It is API-key and `RUN_REGRESSION=1` gated, and a skip is a skip, not a pass.
+
 - [ ] Migration runner using `PRAGMA user_version`; existing tables not retrofitted; registry schema is migration 1; applied at `db.ts` load and callable against any handle.
 - [ ] `registry/schema.ts` exports `applyRegistrySchema(db)`; `db.ts` singleton design otherwise untouched.
 - [ ] Six `registry_*` tables created by migration. No demo table altered.
@@ -409,7 +431,7 @@ Repo-evidence questions are all answered by the validation report. These remain,
 - [ ] Prior lactation closed with `inferred_at_next_calving` when no `dry_off` exists.
 - [ ] Projection logic split pure / DB-shell; only the rebuild writes projection tables.
 - [ ] `registry.invariants.test.ts` runs in CI against `:memory:`, asserts zero violations on clean fixtures and that each invariant fires on a corrupted one. `npm test -w server` still writes nothing to disk.
-- [ ] `npm run verify:registry` passes invariants 0–13 against the live DB and prints the precision histogram.
+- [ ] `npm run verify:registry -w server` passes invariants 0–13 against the live DB and prints the precision histogram.
 - [ ] `registry:rebuild` idempotent (invariant 0).
 - [ ] Real herd backfilled with explicit precision on every date; histogram reviewed by hand.
 - [ ] Calving-interval report emits `measured` and `approximate` separately with counts; no blended average.

@@ -18,7 +18,11 @@ jobs:
       - run: npm ci
       - run: npm run build:shared
       - run: npm run typecheck            # shared + server
-      - run: npm test -w server           # pure shaper/ingest/classify tests, no DB/key
+      # Shaper, farm ingest/classify, and the animal registry (schema,
+      # migrations, calving transaction, projections, invariants, HTTP routes).
+      # No DB file and no API key: the registry suites use :memory: and the
+      # suite as a whole writes nothing to disk.
+      - run: npm test -w server
       - run: npm test -w web-angular      # Vitest (jsdom); CI=true is auto-set
       - run: npm run build -w web-angular
       # Regression & eval suite (Cycle 3). Runs against the live Anthropic API,

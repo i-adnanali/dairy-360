@@ -60,6 +60,14 @@ camera events into a `farm_events` table. They accept the real Frigate and
 Double Take wire formats and are exercised by a synthetic scenario generator —
 no camera hardware involved. See [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
 
+A third surface, `/api/registry`, is not part of the agent at all: it is the
+**animal registry** (Cycle 8), an append-only event log over the real herd with
+rebuildable projections, served to a transcription UI that is the app's root
+route. It has no agent tools yet, deliberately. Its schema, entry rules, date-
+precision conventions and known gaps are in
+[docs/REGISTRY.md](docs/REGISTRY.md), which is the only description of them —
+this README does not restate it.
+
 Those rows are then **read for meaning**: a deterministic classifier scores each
 event `routine` / `notable` / `urgent` from zone, time of day, face confidence,
 and how often an unrecognized face has recurred, and a reconciliation pass
@@ -91,8 +99,10 @@ classifier. See [docs/FARM_MONITOR.md](docs/FARM_MONITOR.md).
 # 1. install (compiles the better-sqlite3 native binding)
 npm install
 
-# 2. configure your key
-cp .env.example .env        # then edit .env and add ANTHROPIC_API_KEY
+# 2. configure your key -- TWO destinations, see the header of .env.example
+cp .env.example server/.env   # the SERVER reads this one (dotenv is cwd-relative)
+cp .env.example .env          # docker compose reads this one (camera stack)
+# then edit BOTH and add ANTHROPIC_API_KEY to server/.env
 
 # 3. create + seed the SQLite database (idempotent: drop + recreate)
 npm run seed -w server      # creates server/dairy.db
@@ -101,7 +111,11 @@ npm run seed -w server      # creates server/dairy.db
 npm run dev:angular
 ```
 
-Then open <http://localhost:4200> (Angular).
+Then open <http://localhost:4200> (Angular). The app opens on the **animal
+registry** (`/herd`); the agent chat panel is at `/chat`. The registry is a
+separate surface over real herd records and is documented in
+[docs/REGISTRY.md](docs/REGISTRY.md) — including how to run it against fixture
+data instead of the real database.
 
 `GET /api/health` returns `{ status: "ok", seeded: true, anthropicKey: <bool> }`
 once the DB is seeded. If you start the server before seeding, the health check
@@ -114,9 +128,19 @@ of failing obscurely.
   the data — and the milk-yield trend — is reproducible).
 - `npm run typecheck` — typecheck shared + server.
 - `npm run build:angular` — build shared + the Angular frontend.
-- `npm test -w server` — sanity tests for the digest shaper, the farm event
-  normalizers, and the event classifier (no DB or API key needed).
+- `npm test -w server` — the digest shaper, the farm event normalizers, the
+  event classifier, and the animal registry (schema, migrations, the calving
+  transaction, projections, invariants, HTTP routes). No DB file or API key
+  needed: the registry suites run against `:memory:` and write nothing to disk.
 - `npm test -w web-angular` — Vitest unit tests for the Angular frontend.
+- `npm run registry:harness -w server -- --port=4000` — serve the registry API
+  over an **in-memory** fixture herd, so the entry UI can be driven without a
+  synthetic row reaching the real database. The explicit port matters; see
+  [docs/REGISTRY.md](docs/REGISTRY.md).
+- `npm run verify:registry -w server` — invariants, precision histogram and
+  calving intervals against the live registry.
+- `npm run registry:rebuild -w server` — recompute the registry's projection
+  tables from its event log.
 - `npm run simulate:farm -w server -- --all --days-ago=14` — replay synthetic
   camera events through the ingestion webhooks (needs the server running).
 - `npm run verify:farm -w server` — prove every farm scenario lands correctly in
