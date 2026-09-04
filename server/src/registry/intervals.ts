@@ -10,6 +10,27 @@
 import { canonicalOrder, daysBetween, effectiveEvents } from './project';
 import type { DatePrecision, RegistryEvent } from './types';
 
+/**
+ * Events grouped by animal, each list in canonical order -- the input shape
+ * `intervalReport` takes.
+ *
+ * Lives here rather than beside each caller because it had reached three
+ * copies: routes.ts (`/verification`), verifyRegistry.ts, and now the agent's
+ * `get_calving_intervals`. All three built the identical map to feed the
+ * identical function, so the third was the point to stop. It belongs next to
+ * `intervalReport` for the same reason `summarise` takes a pre-filtered list:
+ * the module owns the shape of its own input.
+ */
+export function groupByAnimal(events: RegistryEvent[]): Map<string, RegistryEvent[]> {
+  const out = new Map<string, RegistryEvent[]>();
+  for (const e of canonicalOrder(events)) {
+    const list = out.get(e.animal_id);
+    if (list) list.push(e);
+    else out.set(e.animal_id, [e]);
+  }
+  return out;
+}
+
 export type IntervalQuality = 'measured' | 'approximate';
 
 export interface CalvingInterval {

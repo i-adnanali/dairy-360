@@ -49,6 +49,10 @@ const EXCLUDED: Record<string, string> = {
   'agent/__tests__/regression.cap.test.ts': 'live-model suite: API-gated, run by test:regression:cap',
   'agent/__tests__/regression.fallback.test.ts':
     'live-model suite: API-gated, run by test:regression:fallback',
+  'agent/__tests__/registryPrecision.test.ts':
+    'live-model eval: API-gated, run by test:regression:registry. Asserts on the ' +
+    'assistant PROSE (does it pool a measured calving interval with an approximate ' +
+    'one?), which no unit test can check -- see docs/REGISTRY_TOOLS.md.',
 };
 
 /** Every *.test.ts under src/, as a path relative to src/, using forward slashes. */

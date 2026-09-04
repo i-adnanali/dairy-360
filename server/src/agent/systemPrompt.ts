@@ -1,4 +1,5 @@
-import { buildCatalog, buildVendorCatalog } from './catalog';
+import type { RegistryCatalog } from './catalog';
+import { buildCatalog, buildRegistryCatalog, buildVendorCatalog } from './catalog';
 import type { Agent } from './dispatch';
 
 // Above this herd size, the inline animal list is omitted and the model is
@@ -23,7 +24,19 @@ function dairySection(): string {
 
   const feedTypes = catalog.feedTypes.join(', ');
 
-  return `HERD & MILK — THE FARM RIGHT NOW:
+  // THE HEADING NAMES THIS DATA AS THE DEMO, and that is not cosmetic. It used
+  // to read "THE FARM RIGHT NOW", which was true while the demo tables were the
+  // only animals in the system. Cycle 9 put the real herd one tool call away
+  // (registrySection below), so the old heading became the most load-bearing
+  // false sentence in the prompt: it is what the model resolves names against,
+  // and it invited answering a question about the farm's actual animals from
+  // fourteen fixtures. See docs/REGISTRY_TOOLS.md §2.
+  return `HERD & MILK — DEMO DATA (scripted fixtures, NOT the real herd):
+These ${catalog.animalCount} animals are seeded demo records with ids like
+animal_001. They are a scripted demo of milk/feed/health features and are not a
+record of any actual animal. The farm's REAL animals live in the registry, have
+serials like BD-0001, and are reached with the registry tools described below.
+When the user asks about their actual herd, use those.
 Groups:
 ${groupList}
 ${animalSection}
@@ -106,6 +119,68 @@ function farmSection(): string {
   confirmation-gated like any other write, and it cannot be undone.`;
 }
 
+/**
+ * Animal registry guidance (Cycle 9; see docs/REGISTRY_TOOLS.md).
+ *
+ * Offered to EVERY agent selection, matching the agent-agnostic tool
+ * registration in tools/index.ts, for the same reason farmSection() is.
+ *
+ * THIS SECTION IS WHERE THE PRODUCT LIVES. The registry's whole design is a
+ * record that refuses to overstate what it knows: dates carry a precision,
+ * calving intervals split measured from approximate and are never pooled, and
+ * milk splits measured from milked-but-unmeasured because one is a near-zero
+ * and the other is missing data. The tools carry all of that in their digests
+ * -- `intervalReport` even ships its `caveat` as a field so a consumer has to
+ * actively drop it -- but NOTHING IN A DIGEST CAN STOP A MODEL AVERAGING
+ * ACROSS QUALITIES. That instruction is prose, and this is where it goes.
+ *
+ * Same division of labour as farmSection(), which owns "severity is already
+ * decided for you; report those verdicts, do not re-litigate them".
+ */
+function registrySection(catalog: RegistryCatalog): string {
+  const animalSection =
+    catalog.animalCount === 0
+      ? `Animals: NONE YET. The registry is empty -- no real animals have been
+  entered. This is the expected state before the herd is transcribed, not an
+  error. If asked about the real herd, say plainly that no records exist yet.
+  NEVER answer such a question from the demo animals above.`
+      : `Animals (serial | name — sex — status — parity):
+${catalog.animalLines.map((l) => '  ' + l).join('\n')}`;
+
+  return `THE REAL HERD — THE ANIMAL REGISTRY:
+This is the farm's actual record of its actual animals: an append-only event log
+with ${catalog.animalCount} animal(s), serials like BD-0001. Distinct from the demo data above.
+${animalSection}
+
+THE REAL HERD — HOW TO WORK:
+- Call list_registry_animals, get_registry_animal or get_calving_intervals. Pass
+  the animal's \`serial\` (BD-0001), never an \`animal_id\`.
+- This record is DELIBERATELY HONEST ABOUT WHAT IT DOES NOT KNOW, and your
+  answers must preserve that. It is the point of the whole system.
+- PRECISION. Every date carries a date_precision: \`day\` is exact; \`month\` and
+  \`year\` are known only to that granularity; \`estimated\` is a guess. Say so.
+  A month-precision calving is "in April 2023", NEVER "on 1 April 2023" -- the
+  stored day is a placeholder, not a fact. Never present a non-day date as exact.
+- CALVING INTERVALS. Each is \`measured\` (both calvings known to the day) or
+  \`approximate\` (either one is not). NEVER average, pool, rank or compare
+  across the two, and never report one blended herd figure. An approximate
+  interval carries roughly +/-60 days -- larger than the difference between a
+  good interval and a bad one -- so two approximate intervals are NOT a trend
+  and a 10-day gap between an approximate and a measured one means nothing.
+  Report the tool's two summaries separately, and pass its \`caveat\` on.
+- SAMPLE SIZE. This herd is a case series, not a dataset. Do not describe
+  patterns with the confidence a large sample would earn.
+- CORRECTIONS. get_registry_animal returns superseded events marked
+  \`superseded: true\`. Those were replaced by a correction. Use them to explain
+  why a value changed; never report a superseded value as current.
+- MISSING IS NOT ZERO. A null birth date, a null parity or an absent interval
+  means unrecorded, not none. "I don't have that recorded" is a correct and
+  useful answer here; a fabricated one is not.
+- You can only READ the registry. There are no registry write tools yet: real
+  animal records are entered through the registry entry screens, deliberately.
+  If the user wants to record something, say that is where it happens.`;
+}
+
 /** Reconciliation guidance, only offered when both domains are in scope. */
 function reconcileSection(): string {
   return `RECONCILIATION:
@@ -116,15 +191,17 @@ function reconcileSection(): string {
   likely causes rather than just stating the number.`;
 }
 
-// Every role mentions camera monitoring, because the farm tools are offered to
-// every selection (Cycle 5, Decision 6).
+// Every role mentions camera monitoring AND the animal registry, because both
+// tool sets are offered to every selection (Cycle 5 Decision 6; Cycle 9
+// Decision 5). A role that omitted one would describe a narrower assistant than
+// the tool list it is handed.
 const ROLE: Record<Agent, string> = {
   dairy:
-    'You are the herd & milk operations assistant for a dairy farm. You help the user understand their herd, milk yields, feed, and animal health, and you can perform actions on those records through tools. You also answer questions about camera and security activity on the farm.',
+    "You are the herd & milk operations assistant for a dairy farm. You help the user understand their herd, milk yields, feed, and animal health, and you can perform actions on those records through tools. You also answer questions about the farm's real animal registry and about camera and security activity on the farm.",
   vendor:
-    'You are the vendor & sales assistant for a dairy farm. You help the user manage milk vendors, deliveries, balances, and payments, and you can perform actions on those records through tools. You also answer questions about camera and security activity on the farm.',
+    "You are the vendor & sales assistant for a dairy farm. You help the user manage milk vendors, deliveries, balances, and payments, and you can perform actions on those records through tools. You also answer questions about the farm's real animal registry and about camera and security activity on the farm.",
   both:
-    'You are the operations assistant for a dairy farm, covering herd & milk operations, vendor & sales, and camera & security monitoring. You help the user across all of it and can reconcile production against deliveries.',
+    "You are the operations assistant for a dairy farm, covering herd & milk operations, vendor & sales, the farm's real animal registry, and camera & security monitoring. You help the user across all of it and can reconcile production against deliveries.",
 };
 
 const SHARED = `HOW TO WORK (all tools):
@@ -155,13 +232,41 @@ STYLE: concise, plain, practical. Report numbers with units (litres, kg, and
 the farm's local currency for balances). Don't fabricate data you didn't
 retrieve.`;
 
-export function buildSystemPrompt(agent: Agent, today: string): string {
+/**
+ * `registryCatalog` overrides the real herd block.
+ *
+ * Used by the precision eval, and only by it. The live registry holds no
+ * animals until the five-animal trial runs, so an eval that composed this
+ * prompt from the singleton could only ever test the empty case -- and the
+ * claim under test (does the model pool a measured interval with an
+ * approximate one?) needs both kinds of interval present. The fixture herd has
+ * exactly that pair. See REGISTRY_TOOLS.md § "The eval that matters".
+ *
+ * Deliberately narrow: it overrides the CATALOG, not the guidance. The prose
+ * the eval tests is the same prose production sends.
+ */
+export interface SystemPromptOverrides {
+  registryCatalog?: RegistryCatalog;
+}
+
+export function buildSystemPrompt(
+  agent: Agent,
+  today: string,
+  overrides?: SystemPromptOverrides,
+): string {
   const contextBlocks: string[] = [];
   if (agent === 'dairy' || agent === 'both') contextBlocks.push(dairySection());
   if (agent === 'vendor' || agent === 'both') contextBlocks.push(vendorSection());
   if (agent === 'both') contextBlocks.push(reconcileSection());
-  // Unconditional: the farm tools are in every toolsForAgent() result, so the
-  // guidance for reading them must be too.
+  // Unconditional: the farm tools and the registry tools are in every
+  // toolsForAgent() result, so the guidance for reading them must be too.
+  //
+  // The registry block goes BEFORE the camera block and after the demo herd, so
+  // the two herds are adjacent in the prompt. The distinction between them is
+  // the one the model is most likely to get wrong, and it is easiest to hold
+  // when the contrast is next to itself rather than separated by a section
+  // about cameras.
+  contextBlocks.push(registrySection(overrides?.registryCatalog ?? buildRegistryCatalog()));
   contextBlocks.push(farmSection());
 
   return `${ROLE[agent]}

@@ -2,6 +2,7 @@ import type { ToolError } from '@dairy/shared';
 import type { Agent } from '../agent/dispatch';
 import {
   animalExists,
+  db,
   deliveryExists,
   farmEventExists,
   groupExists,
@@ -14,6 +15,11 @@ import { VENDOR_WRITE_EXECUTORS } from './vendorWrites';
 import { RECONCILE_EXECUTORS, RECONCILE_TOOLS } from './reconcile';
 import { FARM_READ_EXECUTORS, FARM_READ_TOOLS } from './farmReads';
 import { FARM_WRITE_EXECUTORS, FARM_WRITE_TOOLS } from './farmWrites';
+import {
+  REGISTRY_READ_TOOLS,
+  guardSerial,
+  registryReadExecutors,
+} from './registryReads';
 
 export interface ToolSchema {
   name: string;
@@ -285,6 +291,26 @@ export { FARM_READ_TOOLS, FARM_WRITE_TOOLS };
 
 const FARM_TOOLS: ToolSchema[] = [...FARM_READ_TOOLS, ...FARM_WRITE_TOOLS];
 
+// ---------------------------------------------------------------------------
+// Registry read tools (Cycle 9; see docs/REGISTRY_TOOLS.md).
+//
+// AGENT-AGNOSTIC, for the same reason as FARM_TOOLS above and by the same
+// argument: the dairy/vendor seam does not partition registry questions either.
+// "What does the record say about BD-0004?" matches no keyword in either list
+// and lands on `both`; "how long between her last two calvings?" reads like a
+// dairy question but matches nothing -- DAIRY_KEYWORDS has `calf` and `calves`,
+// and anyMatch is word-boundary anchored, so `\bcalf\b` does NOT match
+// "calving". Registering everywhere removes the failure mode instead of
+// patching the keyword list, which is also why REGISTRY.md's open item about
+// `heifer`/`male`/`departed` missing from DAIRY_KEYWORDS needs no fix: it only
+// mattered if these were dairy-gated.
+//
+// Reads only. Writes are a later cycle -- REGISTRY.md's deferral is "reads
+// unrestricted, writes confirmation-gated", and `record_calving` in particular
+// creates an animal.
+// ---------------------------------------------------------------------------
+export { REGISTRY_READ_TOOLS };
+
 export const ALL_TOOLS: ToolSchema[] = [
   ...READ_TOOLS,
   ...WRITE_TOOLS,
@@ -292,12 +318,17 @@ export const ALL_TOOLS: ToolSchema[] = [
   ...VENDOR_WRITE_TOOLS,
   ...RECONCILE_TOOLS,
   ...FARM_TOOLS,
+  ...REGISTRY_READ_TOOLS,
 ];
 
 export const READ_TOOL_NAMES = new Set(
-  [...READ_TOOLS, ...VENDOR_READ_TOOLS, ...RECONCILE_TOOLS, ...FARM_READ_TOOLS].map(
-    (t) => t.name,
-  ),
+  [
+    ...READ_TOOLS,
+    ...VENDOR_READ_TOOLS,
+    ...RECONCILE_TOOLS,
+    ...FARM_READ_TOOLS,
+    ...REGISTRY_READ_TOOLS,
+  ].map((t) => t.name),
 );
 export const WRITE_TOOL_NAMES = new Set(
   [...WRITE_TOOLS, ...VENDOR_WRITE_TOOLS, ...FARM_WRITE_TOOLS].map((t) => t.name),
@@ -308,15 +339,24 @@ export const WRITE_TOOL_NAMES = new Set(
  * legitimately needs both domains' tables. The farm tools are offered to every
  * selection -- see the FARM_TOOLS note above. */
 export function toolsForAgent(agent: Agent): ToolSchema[] {
-  if (agent === 'dairy') return [...READ_TOOLS, ...WRITE_TOOLS, ...FARM_TOOLS];
-  if (agent === 'vendor') return [...VENDOR_READ_TOOLS, ...VENDOR_WRITE_TOOLS, ...FARM_TOOLS];
+  if (agent === 'dairy') {
+    return [...READ_TOOLS, ...WRITE_TOOLS, ...FARM_TOOLS, ...REGISTRY_READ_TOOLS];
+  }
+  if (agent === 'vendor') {
+    return [
+      ...VENDOR_READ_TOOLS,
+      ...VENDOR_WRITE_TOOLS,
+      ...FARM_TOOLS,
+      ...REGISTRY_READ_TOOLS,
+    ];
+  }
   return ALL_TOOLS;
 }
 
 /**
  * ID-integrity guard (spec 4.3): before executing ANY tool, validate that every
- * animal_id / group referenced in the args exists. On failure, returns a
- * structured ToolError so the model can self-correct -- the tool never runs.
+ * animal_id / group / serial referenced in the args exists. On failure, returns
+ * a structured ToolError so the model can self-correct -- the tool never runs.
  */
 export function guardIds(args: Record<string, unknown>): ToolError | null {
   if (typeof args.animal_id === 'string' && args.animal_id) {
@@ -324,6 +364,8 @@ export function guardIds(args: Record<string, unknown>): ToolError | null {
       return { error: 'unknown_animal', animal_id: args.animal_id };
     }
   }
+  const serialErr = guardSerial(db, args);
+  if (serialErr) return serialErr;
   if (typeof args.group === 'string' && args.group) {
     if (!groupExists(args.group)) {
       return { error: 'unknown_group', group: args.group };
@@ -365,6 +407,10 @@ export const READ_EXECUTORS = {
   ...VENDOR_READ_EXECUTORS,
   ...RECONCILE_EXECUTORS,
   ...FARM_READ_EXECUTORS,
+  // The one place the registry tools reach the singleton. registryReads.ts
+  // takes a handle throughout so its tests can run on an `:memory:` fixture
+  // herd, and so `npm test` never opens dairy.db -- see that file's header.
+  ...registryReadExecutors(db),
 };
 export const WRITE_EXECUTORS = {
   ...DAIRY_WRITE_EXECUTORS,

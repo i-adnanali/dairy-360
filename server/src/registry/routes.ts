@@ -81,11 +81,10 @@ import {
 import { rebuild } from './projectStore';
 import { snapshot } from './store';
 import { checkSnapshot } from './invariants';
-import { intervalReport, precisionHistogram } from './intervals';
-import { canonicalOrder } from './project';
+import { groupByAnimal, intervalReport, precisionHistogram } from './intervals';
 import { farmToday } from './time';
 import type { Db } from './schema';
-import type { Provenance, RegistryEvent, RegistrySex, SourceForm } from './types';
+import type { Provenance, RegistrySex, SourceForm } from './types';
 import { SOURCE_FORMS } from './types';
 
 type Body = Record<string, unknown>;
@@ -159,16 +158,6 @@ function requirePrecision(b: Body, key = 'date_precision'): string {
 
 function asOfFrom(b: Body): string {
   return str(b, 'as_of') ?? farmToday();
-}
-
-function groupByAnimal(events: RegistryEvent[]): Map<string, RegistryEvent[]> {
-  const out = new Map<string, RegistryEvent[]>();
-  for (const e of canonicalOrder(events)) {
-    const list = out.get(e.animal_id);
-    if (list) list.push(e);
-    else out.set(e.animal_id, [e]);
-  }
-  return out;
 }
 
 /** Wrap a handler so a RegistryError becomes a 400 and nothing else does. */

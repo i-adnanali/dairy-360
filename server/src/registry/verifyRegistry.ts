@@ -27,13 +27,11 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { db } from '../db';
-import { canonicalOrder } from './project';
 import { allEvents, snapshot } from './store';
-import { intervalReport, precisionHistogram } from './intervals';
+import { groupByAnimal, intervalReport, precisionHistogram } from './intervals';
 import { milkingReport } from './milking';
 import { farmToday } from './time';
 import { verifyAll } from './verify';
-import type { RegistryEvent } from './types';
 
 interface Args {
   asOf?: string;
@@ -69,16 +67,6 @@ Checks invariants 0-13 from docs/REGISTRY.md against server/dairy.db, then
 prints the precision histogram and the calving-interval report. Needs no
 running server.
 `.trim();
-
-function groupByAnimal(events: RegistryEvent[]): Map<string, RegistryEvent[]> {
-  const out = new Map<string, RegistryEvent[]>();
-  for (const e of canonicalOrder(events)) {
-    const list = out.get(e.animal_id);
-    if (list) list.push(e);
-    else out.set(e.animal_id, [e]);
-  }
-  return out;
-}
 
 function main(): void {
   const args = parseArgs(process.argv.slice(2));

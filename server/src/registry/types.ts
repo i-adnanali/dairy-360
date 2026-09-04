@@ -23,14 +23,22 @@
  * more precise `milking`: gratuitous divergence in a small codebase is a tax
  * paid at every future read. `heifer`, `male` and `departed` have no demo
  * equivalent. `pregnant` is absent until breeding events exist at step 5.
+ *
+ * A const array with the type derived from it, following LIVE_EVENT_TYPES
+ * below: the agent's `list_registry_animals` needs the vocabulary as VALUES for
+ * its input_schema enum, and a hand-copied list in a tool schema is exactly
+ * what would still say six words after step 5 adds `pregnant`.
  */
-export type RegistryAnimalStatus =
-  | 'departed'
-  | 'calf'
-  | 'lactating'
-  | 'dry'
-  | 'heifer'
-  | 'male';
+export const REGISTRY_ANIMAL_STATUSES = [
+  'departed',
+  'calf',
+  'lactating',
+  'dry',
+  'heifer',
+  'male',
+] as const;
+
+export type RegistryAnimalStatus = (typeof REGISTRY_ANIMAL_STATUSES)[number];
 
 export type RegistrySex = 'female' | 'male';
 

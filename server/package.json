@@ -25,10 +25,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "_test_note": "Test dirs are ENUMERATED, not globbed. `src/**/*.test.ts` is expanded by sh, where ** is NOT globstar, so it silently meant src/<dir>/<file> only -- correct by accident. Quoting it hands globbing to node, which DOES recurse and would pull in src/agent/__tests__/regression*.test.ts: those load ../db and report `ok # SKIP` without an API key, i.e. the API-gated suite reads as passing. node 22 has no --test-exclude-pattern (only name/skip patterns, which still LOAD the file). So: list the dirs, and let testWiring.test.ts fail loudly when a *.test.ts appears outside them.",
     "test": "tsx --test src/*.test.ts src/farm/*.test.ts src/registry/*.test.ts src/tools/*.test.ts",
-    "test:regression": "npm run test:regression:core && npm run test:regression:cap && npm run test:regression:fallback",
+    "test:regression": "npm run test:regression:core && npm run test:regression:cap && npm run test:regression:fallback && npm run test:regression:registry",
     "test:regression:core": "RUN_REGRESSION=1 tsx --test src/agent/__tests__/regression.test.ts",
     "test:regression:cap": "RUN_REGRESSION=1 AGENT_MAX_ITERATIONS=1 tsx --test src/agent/__tests__/regression.cap.test.ts",
-    "test:regression:fallback": "RUN_REGRESSION=1 ANTHROPIC_MODEL=claude-not-a-real-model-999 tsx --test src/agent/__tests__/regression.fallback.test.ts"
+    "test:regression:fallback": "RUN_REGRESSION=1 ANTHROPIC_MODEL=claude-not-a-real-model-999 tsx --test src/agent/__tests__/regression.fallback.test.ts",
+    "test:regression:registry": "RUN_REGRESSION=1 TZ=Asia/Karachi tsx --test src/agent/__tests__/registryPrecision.test.ts"
   },
   "dependencies": {
     "@ag-ui/core": "^0.0.57",

@@ -60,15 +60,24 @@ camera events into a `farm_events` table. They accept the real Frigate and
 Double Take wire formats and are exercised by a synthetic scenario generator —
 no camera hardware involved. See [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
 
-A third surface, `/api/registry`, is not part of the agent at all: it is the
-**animal registry** (Cycle 8), an append-only event log over the real herd with
-rebuildable projections, served to a transcription UI that is the app's root
-route. It has no agent tools yet, deliberately. Its schema, entry rules, date-
+A third surface, `/api/registry`, is the **animal registry** (Cycle 8): an
+append-only event log over the real herd with rebuildable projections, served to
+a transcription UI that is the app's root route. Its schema, entry rules, date-
 precision conventions and known gaps are in
 [docs/REGISTRY.md](docs/REGISTRY.md); the entry surface is
 [docs/REGISTRY_ENTRY_UX.md](docs/REGISTRY_ENTRY_UX.md) and per-animal milk yield
 is [docs/REGISTRY_MILKING.md](docs/REGISTRY_MILKING.md). Those three are the only
 description of any of it — this README does not restate them.
+
+The agent reads that registry through three tools (`list_registry_animals`,
+`get_registry_animal`, `get_calving_intervals`) as of Cycle 9. **Reads only** —
+real animal records are still entered through the registry UI, deliberately. The
+point of those tools is not chat-over-a-database: every digest carries how well
+the record knows what it reports, so calving intervals stay split into
+`measured` and `approximate` and are never pooled, and a month-precision date is
+never narrated as an exact day. A live eval asserts the assistant's *prose* on
+exactly that. See [docs/REGISTRY_TOOLS.md](docs/REGISTRY_TOOLS.md), which also
+records what is deferred to the writes cycle and why.
 
 Those rows are then **read for meaning**: a deterministic classifier scores each
 event `routine` / `notable` / `urgent` from zone, time of day, face confidence,
