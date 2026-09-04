@@ -10,6 +10,29 @@
 # ClickHouse, Redis, MinIO), pinned to the v3 image line and bound to localhost.
 # The default secrets below are fine for a single-operator LOCAL demo only.
 # Do NOT deploy this as-is to a shared or public host.
+
+# ---------------------------------------------------------------------------
+# AN EXPLICIT PROJECT NAME. Do not remove it, and do not let it drift from the
+# volume names below.
+# ---------------------------------------------------------------------------
+# This file used to declare none, so the project name fell through to compose's
+# last resort: THE DIRECTORY NAME. That made the identity of ~577 MB of trace
+# volumes depend on what the checkout happened to be called -- and when the repo
+# was renamed dairy-agent -> dairy-360, the next `up` would have looked for
+# `dairy-360_langfuse_*`, found nothing, silently created five empty volumes, and
+# left every historical trace stranded in the old ones. A working Langfuse with
+# no history in it, and nothing anywhere saying why.
+#
+# The volumes were migrated (copied, not moved -- the `dairy-agent_langfuse_*`
+# set still exists as a rollback) and the name is now stated here, so the
+# directory is free to be called anything.
+#
+# docker-compose.frigate.yml learned this the hard way first and carries the
+# same warning: NEVER pass `-p` / `--project-name` to either file, and never set
+# COMPOSE_PROJECT_NAME. Both override this line, and aiming one stack's teardown
+# at the other's project is how you delete something you meant to keep.
+name: dairy-360
+
 services:
   langfuse-worker:
     image: docker.io/langfuse/langfuse-worker:3

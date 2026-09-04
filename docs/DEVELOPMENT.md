@@ -599,7 +599,7 @@ because conflating them is how a backup gets trusted for something it does not d
 |---|---|
 | Backup repo | `~/dairy-registry-backups` — a **local** git repo, **no remote** |
 | Script | [`scripts/backup-daily.sh`](../scripts/backup-daily.sh) |
-| Schedule | `com.dairy-agent.registry-backup`, daily at 21:00 Asia/Karachi |
+| Schedule | `com.dairy-360.registry-backup`, daily at 21:00 Asia/Karachi |
 | Log | `~/Library/Logs/dairy-registry-backup.log`, append-only |
 
 **What this protects against today:**
@@ -636,7 +636,7 @@ that repo has been deleted, and it only ever held dumps of an empty registry.)
 ```bash
 scripts/backup-daily.sh                     # run it by hand, any time
 scripts/backup-daily.sh /some/other/dest    # or into a different repo
-launchctl kickstart -p gui/$(id -u)/com.dairy-agent.registry-backup
+launchctl kickstart -p gui/$(id -u)/com.dairy-360.registry-backup
 ```
 
 Git is the mechanism even while there is no remote, because the dumps are text:
@@ -830,7 +830,7 @@ Note that `launchd` runs no login shell: give it absolute paths and expect no
 Verified in a real clone with no `dairy.db`, no `.env` and no `node_modules`.
 
 ```bash
-git clone <repo> dairy-agent && cd dairy-agent
+git clone <repo> dairy-360 && cd dairy-360
 nvm use                        # 22.22.3 -- before anything else
 npm install                    # ~9 s here
 npm run build:shared           # required; server imports @dairy/shared at runtime

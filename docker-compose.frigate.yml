@@ -7,7 +7,7 @@
 # here (handover doc § out of scope).
 #
 # A separate file rather than a service added to something existing, for the
-# same reason docker-compose.langfuse.yml is separate: dairy-agent itself has NO
+# same reason docker-compose.langfuse.yml is separate: dairy-360 itself has NO
 # docker services (it runs via npm/tsx), so there is nothing to add to. Bring it
 # up and down independently:
 #
@@ -28,11 +28,17 @@
 # the HOST, not in a container, so it needs no docker networking.
 
 # An explicit project name, isolated from docker-compose.langfuse.yml.
-# Both files otherwise default to the directory name (`dairy-agent`), which puts
-# them in ONE compose project: `docker compose -f docker-compose.frigate.yml ps`
-# then reports the Langfuse containers as orphans, and a stray
-# `--remove-orphans` would delete the observability stack. Naming this project
-# separately keeps `down -v` here incapable of touching anything Langfuse owns.
+# Without a `name:` a file defaults to the DIRECTORY name, which once put both
+# files in ONE compose project: `docker compose -f docker-compose.frigate.yml ps`
+# then reported the Langfuse containers as orphans, and a stray
+# `--remove-orphans` would have deleted the observability stack. Naming this
+# project separately keeps `down -v` here incapable of touching anything
+# Langfuse owns.
+#
+# Both files now pin a name (`frigate-capture` here, `dairy-360` there), so
+# neither depends on what the checkout is called any more -- which is what made
+# the dairy-agent -> dairy-360 rename safe. The hazard below is unchanged
+# regardless, because `-p` still outranks both.
 #
 # ---------------------------------------------------------------------------
 # NEVER pass `-p` / `--project-name` to this file. Never set
@@ -42,13 +48,13 @@
 #   1. the `-p` flag            <- overrides everything below
 #   2. COMPOSE_PROJECT_NAME     <- overrides the line below
 #   3. this file's `name:`
-#   4. the directory name (`dairy-agent` = the Langfuse project)
+#   4. the directory name -- no longer reachable, since both files pin a `name:`
 #
-# So `-p dairy-agent -f docker-compose.frigate.yml down` aims this stack's
+# So `-p dairy-360 -f docker-compose.frigate.yml down` aims this stack's
 # teardown squarely at Langfuse's project and tries to remove its network. That
-# has already been attempted once during Cycle 7 and only failed because the
-# network was still in use. There is no reason to pass `-p` here: the file names
-# its own project.
+# has already been attempted once during Cycle 7 (as `-p dairy-agent`, the
+# project's name at the time) and only failed because the network was still in
+# use. There is no reason to pass `-p` here: the file names its own project.
 #
 # Levels 2-4 are asserted by server/src/farm/captureStack.test.ts. Level 1
 # cannot be tested -- it is a flag someone types -- hence this comment.

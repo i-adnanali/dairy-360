@@ -97,7 +97,7 @@ app.post('/api/agent/run', async (req, res) => {
 });
 
 const server = app.listen(PORT, () => {
-  console.log(`dairy-agent server listening on http://localhost:${PORT}`);
+  console.log(`dairy-360 server listening on http://localhost:${PORT}`);
   if (!isSeeded()) console.warn(`[warn] ${SEED_HINT}`);
 });
 

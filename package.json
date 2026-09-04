@@ -1,5 +1,5 @@
 {
-  "name": "dairy-agent",
+  "name": "dairy-360",
   "private": true,
   "version": "1.0.0",
   "description": "AI agent for dairy farm management (read/write tool split with human-in-the-loop confirmation).",

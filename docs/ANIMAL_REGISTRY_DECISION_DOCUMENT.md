@@ -1,6 +1,6 @@
 # Animal Registry — Decision Document: Build Steps 1 & 2
 
-**Repo:** `dairy-agent` · **Precedes:** implementation cycle for the registry layer
+**Repo:** `dairy-360` (named `dairy-agent` when this was written) · **Precedes:** implementation cycle for the registry layer
 **Scope:** Animals, parentage, status projection (step 1); lactations and calvings, backfilled (step 2)
 **Status:** Written without repo access. Validate before implementing — see §14.
 

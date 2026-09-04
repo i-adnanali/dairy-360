@@ -17,7 +17,7 @@ import { Session } from './session';
 import { Target } from './target';
 
 const STORAGE = '/api/registry/storage';
-const REAL = '/Users/x/dairy-agent/server/dairy.db';
+const REAL = '/Users/x/dairy-360/server/dairy.db';
 
 function setup() {
   TestBed.configureTestingModule({

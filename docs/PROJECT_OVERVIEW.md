@@ -30,7 +30,7 @@ Four principles are made **observably true** in the running app:
 npm-workspaces monorepo:
 
 ```text
-dairy-agent/
+dairy-360/
   shared/       # TypeScript types shared by server + web (single source of truth)
   server/       # Express + Anthropic SDK orchestrator, SQLite, tools, agent loop
   web-angular/  # Angular 22 (standalone, zoneless) + Tailwind + ng2-charts frontend

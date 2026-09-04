@@ -1,5 +1,12 @@
 # Cycle 7, Step 1 — Live Camera Validation
 
+> **Naming note (2026-09-04):** this repository was renamed `dairy-agent` →
+> `dairy-360`, and the Langfuse compose project with it. Every `dairy-agent`
+> below is left **verbatim on purpose** — these are commands that were actually
+> run and volume and project names that were actually observed. Rewriting them
+> would falsify the record. The volume names in particular still exist under the
+> old prefix.
+
 *Status: **step 1 complete**, tagged `v0.9.0`. Frigate's documented payload shape
 is verified against a live 0.17.2 instance — 250 real events, zero breaking
 deltas, definition of done 7/7. **Cycle 7 as a whole is NOT complete:** step 2

@@ -4,7 +4,7 @@
 #
 #   scripts/backup-daily.sh [destination-repo]
 #
-# Run by the launchd agent com.dairy-agent.registry-backup (see
+# Run by the launchd agent com.dairy-360.registry-backup (see
 # docs/DEVELOPMENT.md § 8), and safe to run by hand at any time.
 #
 # WHAT IT DOES, and why in this order:

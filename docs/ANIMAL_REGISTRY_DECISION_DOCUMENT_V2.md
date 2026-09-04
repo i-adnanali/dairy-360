@@ -1,6 +1,6 @@
 # Animal Registry — Decision Document: Build Steps 1 & 2 (revision 2)
 
-**Repo:** `dairy-agent` · **Supersedes:** revision 1 · **Baseline tag:** `v0.10.0`
+**Repo:** `dairy-360` (named `dairy-agent` when this was written) · **Supersedes:** revision 1 · **Baseline tag:** `v0.10.0`
 **Scope:** Animals, parentage, status projection (step 1); lactations and calvings, backfilled (step 2)
 **Status:** Revised against the validation report. Ready to implement, with three re-checks named in §16.
 

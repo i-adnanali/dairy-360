@@ -373,7 +373,7 @@ export function dumpRecordTables(db: Db, meta: { source: string; stamp: string }
   const counts = recordRowCounts(db);
 
   const lines: string[] = [
-    `-- dairy-agent animal registry -- logical backup of the record tables.`,
+    `-- dairy-360 animal registry -- logical backup of the record tables.`,
     `--`,
     `--   taken     ${meta.stamp} (farm-local, Asia/Karachi)`,
     `--   source    ${meta.source}`,

@@ -5,13 +5,19 @@
 // --------------------
 // docker-compose.frigate.yml and docker-compose.langfuse.yml sit in the same
 // directory. Compose derives a project name from the directory when a file does
-// not declare one, so without `name:` BOTH files resolve to project
-// `dairy-agent` -- and then `docker compose -f docker-compose.frigate.yml ps`
-// reports the Langfuse containers as orphans, `down --remove-orphans` deletes
-// the observability stack, and `down -v` reaches for Langfuse's network.
+// not declare one, so without `name:` BOTH files resolved to the same project --
+// the directory's name -- and then `docker compose -f docker-compose.frigate.yml
+// ps` reports the Langfuse containers as orphans, `down --remove-orphans`
+// deletes the observability stack, and `down -v` reaches for Langfuse's network.
 //
 // That happened once for real. The fix was `name: frigate-capture` in
-// docker-compose.frigate.yml. This test exists so a THIRD occurrence fails here
+// docker-compose.frigate.yml; docker-compose.langfuse.yml pins one too now, so
+// the directory fallback is unreachable from either file. This test asserts the
+// property rather than the names, so it keeps holding across a rename -- it
+// compares each file's resolved project against `path.basename(REPO_ROOT)`
+// rather than against a hardcoded `dairy-agent`.
+//
+// This test exists so a THIRD occurrence fails here
 // instead of at the moment someone loses their Langfuse data.
 //
 // WHAT THIS TEST CANNOT CATCH
@@ -28,7 +34,7 @@
 // nothing in .env/.env.example sets COMPOSE_PROJECT_NAME (which would silently
 // override the file and is invisible at the call site).
 //
-// It CANNOT cover level 1: `docker compose -p dairy-agent -f
+// It CANNOT cover level 1: `docker compose -p dairy-360 -f
 // docker-compose.frigate.yml down` overrides `name:` by design and will target
 // Langfuse's project. Never pass `-p` to the frigate stack. There is no reason
 // to: the file names its own project.

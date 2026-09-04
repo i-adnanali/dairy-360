@@ -9,7 +9,7 @@ now done: see [REGRESSION.md](REGRESSION.md) (Cycle 3, tagged `v0.6.0`).*
 
 ## Context
 
-`dairy-agent` (Cycle 1, `v0.4.0`) covers one domain: herd, health, and milk
+`dairy-360` — then named `dairy-agent` — (Cycle 1, `v0.4.0`) covers one domain: herd, health, and milk
 yield — single agent, single Angular/AG-UI transport, traced end-to-end via
 self-hosted Langfuse. The real farm this models — Baghicha Dairy Co. — also
 sells milk to vendors, and that side of the operation has no representation in

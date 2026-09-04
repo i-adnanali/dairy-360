@@ -23,7 +23,7 @@ It is built as an npm-workspaces monorepo with an **Angular frontend** backed by
 one Express server:
 
 ```
-dairy-agent/
+dairy-360/
   shared/       # TypeScript types shared by server + web (single source of truth)
   server/       # Express + Anthropic SDK orchestrator, SQLite, tools, dispatcher, two agents
   web-angular/  # Angular 22 (standalone, zoneless) + Tailwind + ng2-charts frontend
