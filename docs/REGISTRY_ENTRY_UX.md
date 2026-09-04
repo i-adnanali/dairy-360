@@ -1074,7 +1074,7 @@ work reaches.
 #### Pre-trial amendment — 2026-09-04, at `v0.15.0-3-g212dfe0`
 
 Recorded **before** the trial runs, not reconstructed after it. A separate refinement document
-(`docs/REGISTRY_UI_REFINEMENT.md`) was written against screenshots without repo access, then
+(`docs/archive/REGISTRY_UI_REFINEMENT.md`) was written against screenshots without repo access, then
 validated against the code. Most of it fell to things already built; two defects survived and were
 fixed, and both touch surfaces this trial measures. Frontend suite at the time of writing: **198
 tests across 21 files**, up from 106 across 16 at `v0.13.0`.

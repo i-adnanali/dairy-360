@@ -87,6 +87,25 @@ three tools over that layer (`get_farm_events`, `summarize_daily_activity`,
 `flag_anomaly`) and does the narrating; no model call happens inside the
 classifier. See [docs/FARM_MONITOR.md](docs/FARM_MONITOR.md).
 
+## Documentation
+
+**[docs/README.md](docs/README.md) is the index.** It separates *reference* (what
+is true now — keep it current) from *record* (what was decided then, one per
+cycle, tied to a git tag), and routes by intent.
+
+The three you are most likely to want:
+
+- **[docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md)** — how the system fits
+  together: the agentic workflow end to end, the data model, the wire contract.
+  This README summarises it below; that document is the full version.
+- **[docs/TECHNICAL.md](docs/TECHNICAL.md)** — the loop internals, the eight
+  guardrails, and the tool contracts, at source-line depth.
+- **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — setup, test, run and backups,
+  with every command verified against a real run.
+
+**[docs/OPEN.md](docs/OPEN.md)** is the single list of everything unfinished —
+blocking items, known-safe defects, deferred capability, and undecided questions.
+
 ## Tech stack
 
 - **Server:** Node, TypeScript, Express, official Anthropic SDK
@@ -464,7 +483,9 @@ runs normally.
 ## How this demonstrates assistant → agent
 
 This demo is built to make four principles **observably true** in the running
-app. Here is exactly where each one lives in the code:
+app. Here is exactly where each one lives in the code. The same four are covered
+at more depth in [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) §§4–7, and
+at source-line depth in [docs/TECHNICAL.md](docs/TECHNICAL.md) §§1–3.
 
 ### 1. The agent loop (interpret → execute → digest)
 

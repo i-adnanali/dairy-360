@@ -10,7 +10,7 @@
 >
 > **This document was not implemented.** It is superseded in full by
 > [ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md](ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md),
-> and what was actually built is documented in [REGISTRY.md](REGISTRY.md). It is
+> and what was actually built is documented in [REGISTRY.md](../REGISTRY.md). It is
 > kept because revision 2 §0 disposes of every item here by name, and the
 > reasoning that was *wrong* is the useful part of the record — do not read any
 > decision below as current.
@@ -21,7 +21,7 @@
 > | Below | Actually |
 > |---|---|
 > | Two database files, `dairy.real.db` / `dairy.synthetic.db` (§2) | **Withdrawn** (V2 §2). One file, disjoint `registry_*` table names, plus a migration runner. The env-var mechanism could not defend against `npm run seed`, because the process would be configured correctly and the *command* would be wrong |
-> | "The **100** synthetic buffaloes are load-bearing" (§2) | There are **14** ([seed.ts](../server/src/seed.ts)) |
+> | "The **100** synthetic buffaloes are load-bearing" (§2) | There are **14** ([seed.ts](../../server/src/seed.ts)) |
 > | Tables `animals`, `animal_events`, `lactations`, `parentage`, `animal_status`, `dataset_meta`; projection columns on `animals` | Six `registry_*` tables; no `dataset_meta` (deleted with the split, V2 §10); `registry_animals` carries **no** projection columns at all, deliberately |
 > | "ULID (or UUIDv7) as TEXT. Sortable by creation" (§5) | `aevt_` + a full `randomUUID()`, with the sortability claim dropped: no such dependency exists in this repo, and creation order is recoverable from `recorded_at` |
 >

@@ -49,17 +49,16 @@ Reasoning, in order of weight:
 
 ## Addendum — React frontend and `/api/chat` archived
 
-**Decision (reversal of the earlier "keep React as a frozen reference implementation" call):** `web-react/`, the `/api/chat` route in `server/src/index.ts`, and `server/src/agent/loop.ts` are archived, not maintained going forward.
+`web-react/`, the `POST /api/chat` route and `server/src/agent/loop.ts` were
+archived (not maintained) once Angular became the sole actively developed target.
+That decision, its reversal of the earlier "keep React as a live parity reference"
+call, and the pre-removal verification are recorded in full in
+[AGUI_MIGRATION.md § Section 3](AGUI_MIGRATION.md#section-3---react-frontend-and-apichat-archived) —
+this document previously repeated them almost verbatim and no longer does.
 
-**Why the earlier decision changed:** the original reasoning for keeping React alive rested on two things — using it as a cross-check while requirements were still evolving, and a narrative parallel to the FDS/`fc-ui` positioning conversation at Facelift. Both weaken once the project's requirements are settled and Angular is confirmed as the only actively developed target: maintaining a second frontend stops buying protection against an unknown future and just becomes upkeep against a target that no longer moves. The Facelift positioning argument stands on its own merits regardless of what this repo does, so it doesn't require a live two-frontend demo to hold.
-
-**What's preserved instead of a running app:** the migration is already proven and permanently checkable via git history — the `angular-port/*` and `v0.2.0` tags — plus the corrected reasoning documented in `docs/AGUI_MIGRATION.md`. Archiving the code doesn't erase that evidence; it just stops paying an ongoing maintenance cost for a comparison that's already been made and published (Hashnode posts 3 and 4).
-
-**Verified before archiving (not assumed):** `server/src/agent/loop.ts` is a self-contained blocking wrapper — it imports from `../tools` and `./systemPrompt`, the same shared modules `stream.ts` uses, but nothing in the codebase imports `loop.ts` itself. Removing it, the React app, and the `/api/chat` route does not touch `stream.ts`, `../tools`, or `systemPrompt.ts` — the AG-UI/Angular path is unaffected.
-
-**Practical mechanics:** tag the current state (e.g. `archive/react-frontend-final`) before removing the code from `main`, so the git history — not a running app — remains the permanent proof, and `main` stays scoped to the one actively developed path.
-
-**Simplification this gives Cycle 1 and Cycle 2:** the "derive a session key by hashing `messages[0]` because `/api/chat` has no identifier" problem no longer applies — there's only one transport left, with `threadId` as its natural, already-existing session key. Cycle 3's regression suite likewise only needs to assert against AG-UI event sequences; no protocol-agnostic subset run against two endpoints is needed.
+What it means *for observability*: there is one transport left, so `threadId` is
+the natural session key and the "hash `messages[0]`" workaround this cycle would
+otherwise have needed never had to be built.
 
 ## Implementation (complete)
 
