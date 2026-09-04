@@ -10,6 +10,16 @@ dist/
 *.db-shm
 *.db-wal
 
+# Registry backups (`npm run registry:backup -w server`). The .db snapshots are
+# already covered by *.db above; this also excludes the .sql dumps, which are
+# text and would otherwise look committable.
+#
+# THIS EXCLUSION IS DELIBERATE AND SHOULD STAY. The dumps contain the real herd
+# records, and this repository is public. Off-machine copies go to the SEPARATE,
+# PRIVATE backup repo instead -- ~/dairy-registry-backups, filled daily by
+# scripts/backup-daily.sh. See docs/DEVELOPMENT.md § 8.
+server/backups/
+
 # Cycle 7 live-camera capture artifacts + local Frigate config.
 # The capture is throwaway data (open decision 1: the shared dev DB stays
 # untouched, so captures land in flat files instead). The Frigate config holds

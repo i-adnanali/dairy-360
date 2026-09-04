@@ -31,3 +31,36 @@ const FARM_DATE_FORMAT = new Intl.DateTimeFormat('en-CA', {
 export function farmToday(now: Date = new Date()): string {
   return FARM_DATE_FORMAT.format(now);
 }
+
+/**
+ * Wall-clock time of day, farm-local, as `HH:MM:SS`.
+ *
+ * `hourCycle: 'h23'` rather than `hour12: false`. The two agree on this Node,
+ * but they are not the same request: `hour12: false` leaves the cycle to the
+ * locale, and for some locale/ICU pairings that resolves to `h24`, which renders
+ * midnight as `24:00:00`. Asking for h23 makes 00-23 the contract rather than a
+ * property of whichever ICU the host was built with.
+ */
+const FARM_TIME_FORMAT = new Intl.DateTimeFormat('en-GB', {
+  timeZone: FARM_TZ,
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23',
+});
+
+/**
+ * A farm-local instant as `YYYY-MM-DDTHHMMSS`, for naming backup files.
+ *
+ * Farm-local rather than UTC so a snapshot sorts next to the farm day whose
+ * records it holds -- at UTC+5 a UTC stamp puts anything entered before 05:00
+ * local under the previous date, which is the one property a backup filename
+ * must not have.
+ *
+ * The time part is deliberately UNPUNCTUATED. `HH:MM:SS` is the readable form,
+ * but `:` is a path separator on some filesystems and needs quoting in every
+ * shell, and these strings exist to become filenames.
+ */
+export function farmStamp(now: Date = new Date()): string {
+  return `${farmToday(now)}T${FARM_TIME_FORMAT.format(now).replace(/:/g, '')}`;
+}

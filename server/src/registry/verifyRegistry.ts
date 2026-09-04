@@ -23,10 +23,17 @@
 // Everything it checks lives in verify.ts / invariants.ts, which take a handle
 // and are exercised against fixtures by registry.verify.test.ts.
 
-import { readFileSync } from 'node:fs';
+import Database from 'better-sqlite3';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { db } from '../db';
+import { expandHome } from './backup';
+import type { Db } from './schema';
+import {
+  TARGET_VERSION,
+  applyRegistryPragmas,
+  assertRegistryPragmas,
+} from './schema';
 import { allEvents, snapshot } from './store';
 import { groupByAnimal, intervalReport, precisionHistogram } from './intervals';
 import { milkingReport } from './milking';
@@ -35,6 +42,7 @@ import { verifyAll } from './verify';
 
 interface Args {
   asOf?: string;
+  dbPath?: string;
   help: boolean;
 }
 
@@ -45,6 +53,10 @@ export function parseArgs(argv: string[]): Args {
     switch (flag) {
       case '--as-of':
         args.asOf = value;
+        break;
+      case '--db':
+        if (!value) throw new Error(`--db needs a path\n\n${USAGE}`);
+        args.dbPath = value;
         break;
       case '--help':
       case '-h':
@@ -59,14 +71,60 @@ export function parseArgs(argv: string[]): Args {
 
 const USAGE = `
 Usage:
-  npm run verify:registry -w server [-- --as-of=YYYY-MM-DD]
+  npm run verify:registry -w server [-- --as-of=YYYY-MM-DD] [-- --db=<path>]
 
   --as-of=<date>   farm-local date to evaluate status against (default: today).
+  --db=<path>      verify this database file instead of server/dairy.db. Opened
+                   READ-ONLY and never migrated -- this is how a backup taken by
+                   \`npm run registry:backup -w server\` gets checked.
 
 Checks invariants 0-13 from docs/REGISTRY.md against server/dairy.db, then
 prints the precision histogram and the calving-interval report. Needs no
 running server.
 `.trim();
+
+/**
+ * The handle to verify.
+ *
+ * `../db` is reached for through `require`, LAZILY, and this is the only reason
+ * why: importing it at module scope opens dairy.db and RUNS ITS MIGRATIONS as an
+ * import side effect. Under `--db` that would mean checking a backup while
+ * silently migrating the live database -- and, since db.ts wires the
+ * pre-migration hook, snapshotting it too. A verification pass must not have
+ * side effects on a database it was not pointed at.
+ *
+ * A file given by path is opened read-only and deliberately NOT migrated: it may
+ * be an older backup, and quietly upgrading a record you are trying to verify
+ * destroys the thing you were checking. Pragmas still get applied and asserted,
+ * because they are per-connection and the invariants depend on them.
+ */
+function openTarget(dbPath?: string): { db: Db; label: string } {
+  if (!dbPath) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { db } = require('../db') as { db: Db };
+    return { db, label: db.name };
+  }
+  // Resolved and existence-checked before opening, so a mistyped path names
+  // itself. `npm run ... -w server` runs with cwd = server/, NOT the repo root,
+  // so `--db=server/backups/x.db` -- the path you see from the repo root and the
+  // obvious thing to type -- resolves to server/server/backups/x.db. Left to
+  // better-sqlite3 that surfaces as "Cannot open database because the directory
+  // does not exist", which names neither the path it tried nor the cwd.
+  const resolved = path.resolve(expandHome(dbPath));
+  if (!existsSync(resolved)) {
+    throw new Error(
+      `verify:registry: no such database '${resolved}'.\n` +
+        `  --db was given '${dbPath}', resolved against cwd ${process.cwd()}.\n` +
+        `  npm runs workspace scripts from server/, so a repo-root-relative path ` +
+        `needs one fewer segment:\n` +
+        `    npm run verify:registry -w server -- --db=backups/<file>.db`,
+    );
+  }
+  const handle = new Database(resolved, { readonly: true });
+  applyRegistryPragmas(handle);
+  assertRegistryPragmas(handle);
+  return { db: handle, label: `${resolved} (read-only)` };
+}
 
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
@@ -75,9 +133,22 @@ function main(): void {
     return;
   }
   const asOf = args.asOf ?? farmToday();
+  const { db, label } = openTarget(args.dbPath);
+
+  const version = db.pragma('user_version', { simple: true }) as number;
+  if (version !== TARGET_VERSION) {
+    // Reported, not fatal. Verifying an older backup against today's invariants
+    // is a legitimate thing to do; being unaware that is what you are doing is
+    // not, because a violation may be the schema gap rather than the data.
+    console.log(
+      `NOTE: ${label} is at user_version ${version}; this build targets ` +
+        `${TARGET_VERSION}. Invariants below are today's rules applied to an ` +
+        `older schema -- read violations with that in mind.\n`,
+    );
+  }
 
   const snap = snapshot(db);
-  console.log(`verify:registry  as-of=${asOf}`);
+  console.log(`verify:registry  as-of=${asOf}  db=${label}`);
   console.log(
     `  ${snap.animals.length} animal(s), ${snap.events.length} event(s), ` +
       `${snap.lactations.length} lactation(s)`,

@@ -455,7 +455,17 @@ test('db.ts still applies FARM_SCHEMA at module load, unchanged', () => {
   // The registry addition must not have disturbed the farm path. Asserted on
   // source text so it needs no database.
   assert.match(dbSource(), /^db\.exec\(FARM_SCHEMA\);$/m);
-  assert.match(dbSource(), /^applyRegistrySchema\(db\);$/m);
+  assert.match(dbSource(), /^applyRegistrySchema\(db,/m);
+});
+
+test('db.ts wires the pre-migration backup hook', () => {
+  // The hook is INJECTED, not imported by schema.ts, which means nothing inside
+  // the migration runner can enforce that it is present -- db.ts is the only
+  // place it exists, and dropping the option silently returns the system to
+  // migrating irreplaceable records with no snapshot. That is precisely the
+  // "guard that silently stops checking" this file already refuses to allow.
+  assert.match(dbSource(), /beforeMigrate:.*preMigrationBackup/s);
+  assert.match(dbSource(), /from '\.\/registry\/backup'/);
 });
 
 // ---------------------------------------------------------------------------

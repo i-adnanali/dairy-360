@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'node:path';
+import { preMigrationBackup } from './registry/backup';
 import { applyRegistrySchema } from './registry/schema';
 import type {
   Animal,
@@ -154,8 +155,16 @@ db.exec(FARM_SCHEMA);
 // Registry tables are deliberately ABSENT from resetSchema()'s DROP list and
 // from SCHEMA -- asserted by registry.schema.test.ts, because seed() drops
 // everything in SCHEMA and the regression suite calls seed() in beforeEach.
+//
+// `beforeMigrate` snapshots dairy.db to server/backups/ before any migration
+// touches it, and REFUSES TO MIGRATE if that snapshot cannot be written (see
+// registry/backup.ts). This is the one place the hook is wired: migrations run
+// at module load, so a pending one fires the moment anything imports this file
+// -- including a one-off script -- and migration 2 already rebuilds the event
+// log by create-copy-drop-rename. Only the file singleton gets the hook; every
+// `:memory:` handle in the test suite calls applyRegistrySchema with no options.
 // ---------------------------------------------------------------------------
-applyRegistrySchema(db);
+applyRegistrySchema(db, { beforeMigrate: (pending) => preMigrationBackup(db, pending) });
 
 /** Drop everything and recreate the schema. Used by the seed script.
  * Deliberately does NOT touch farm_events -- see FARM_SCHEMA above. */

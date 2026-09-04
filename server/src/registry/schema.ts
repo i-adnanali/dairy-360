@@ -585,19 +585,59 @@ export function assertRegistryPragmas(db: Db): void {
   }
 }
 
+/** What `beforeMigrate` is told: the version the database is at, and the one it
+ * is about to be moved to. Not a MigrationResult -- nothing has been applied
+ * yet, and a result type with `applied: 0` would invite reading it as one. */
+export interface PendingMigrations {
+  from: number;
+  to: number;
+}
+
+export interface ApplySchemaOptions {
+  /**
+   * Called once, BEFORE the first migration runs, and only when there is at
+   * least one to run. A throw here aborts the migration.
+   *
+   * INJECTED RATHER THAN IMPORTED, which is why this module still imports
+   * nothing but a better-sqlite3 type. db.ts wires `preMigrationBackup` from
+   * backup.ts; backup.ts needs this module's table lists, so importing it here
+   * would be a require cycle -- and one that resolves during db.ts's own module
+   * load, which is the worst place to have one.
+   *
+   * The same reason registryRouter is a factory: a handle, or a hook, passed in
+   * beats a dependency reached for.
+   */
+  beforeMigrate?: (pending: PendingMigrations) => void;
+}
+
 /**
  * The single entry point. Sets the required pragmas, asserts them, migrates.
  *
- * `db.ts` calls this once at module load against the singleton. Tests and the
- * rebuild-diff call it against `new Database(':memory:')`.
+ * `db.ts` calls this once at module load against the singleton, with the
+ * pre-migration backup hook. Tests and the rebuild-diff call it against
+ * `new Database(':memory:')` with no options, which is what keeps a suite of
+ * hundreds of in-memory migrations from writing a single file.
  *
  * Note for in-memory handles: `journal_mode = WAL` is silently ignored by
  * SQLite for `:memory:` databases (it returns "memory", not an error), which is
  * why this function does not set or assert a journal mode.
  */
-export function applyRegistrySchema(db: Db): MigrationResult {
+export function applyRegistrySchema(
+  db: Db,
+  opts: ApplySchemaOptions = {},
+): MigrationResult {
   applyRegistryPragmas(db);
   assertRegistryPragmas(db);
+  // Read before migrating and gated on there being work to do, so the hook does
+  // not fire on the overwhelmingly common no-op boot. runMigrations re-reads the
+  // version itself and remains the authority on what actually gets applied --
+  // this is a notification, not a decision.
+  if (opts.beforeMigrate) {
+    const from = readUserVersion(db);
+    if (from < MIGRATIONS.length) {
+      opts.beforeMigrate({ from, to: MIGRATIONS.length });
+    }
+  }
   const result = runMigrations(db);
   // Asserted AGAIN after migrating, because a `rebuildsTables` migration turns
   // foreign_keys off and back on. If one ever failed to restore it, every write

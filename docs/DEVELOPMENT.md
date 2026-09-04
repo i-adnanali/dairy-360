@@ -315,7 +315,7 @@ deliberately separate systems.** Confusing them is the likeliest first mistake:
 | Repeatable | yes — and it never touches a real record | yes, by dropping and recreating those six tables |
 
 So under `harness:app` the **chat panel at `/chat` will not work** — and not for
-the reason you would guess. It is not the `unseeded` message from § 8: the
+the reason you would guess. It is not the `unseeded` message from § 9: the
 harness mounts **only** `/api/registry` and `/api/harness` (`harnessApp()`), so
 every other `/api` path is simply absent. Measured:
 
@@ -474,9 +474,17 @@ Every command takes `--help`, and every date-bearing one **requires an explicit
 > The herd goes in through the **UI**, not through these. They remain the
 > scriptable path and the thing the domain core was extracted out of.
 
-All six ran successfully against a throwaway clone's `dairy.db` — real rows, then
-a real correction, then a non-vacuous `verify:registry`. None was run against the
-repo's own `dairy.db`, whose registry is still empty by design.
+The first six ran successfully against a throwaway clone's `dairy.db` — real rows,
+then a real correction, then a non-vacuous `verify:registry`. None was run against
+the repo's own `dairy.db`, whose registry is still empty by design.
+
+**`registry:backup` and `verify:registry --db` were added later and verified
+differently** (2026-09-04): `registry:backup` was run against the repo's own
+`dairy.db` — it only reads — and `verify:registry --db` against the snapshot it
+produced, with `dairy.db` confirmed byte-identical either side. Because that
+registry is empty, the round trip on *populated* data was proven separately, in
+process, against a temp file database carrying a superseded correction chain. See
+§ 8.
 
 ```bash
 # an animal that arrived from elsewhere -> BD-0001
@@ -504,10 +512,25 @@ npm run registry:rebuild -w server -- --as-of=2026-03-01
 
 # invariants + precision histogram + calving intervals. Writes nothing
 npm run verify:registry -w server
+
+# verify a BACKUP instead of the live database. Read-only, never migrated
+npm run verify:registry -w server -- --db=backups/dairy-2026-09-04T163125.db
+
+# snapshot + text dump of the record tables -> server/backups/
+npm run registry:backup -w server
 ```
 
 `--event=` for `correct-calving` is the **currently effective** calving event id,
 printed by `registry:calve` and listed by `verify:registry`.
+
+`--db=` paths are resolved from **`server/`**, not the repo root — npm runs
+workspace scripts with the workspace as cwd. So the path you read off a repo-root
+listing needs one segment fewer. Getting it wrong is caught and named:
+
+```
+verify:registry: no such database '/…/server/server/backups/dairy-….db'.
+  --db was given 'server/backups/dairy-….db', resolved against cwd /…/server.
+```
 
 On an empty registry, `verify:registry` says so rather than reporting a
 misleading green:
@@ -519,7 +542,226 @@ NOTE: the registry is EMPTY, so every invariant passes vacuously.
 
 ---
 
-## 8. Fresh clone, start to finish
+## 8. Backups — the one database you cannot re-create
+
+Everything else in this repo regenerates. The demo tables come back from
+`npm run seed`, `farm_events` from a webhook replay, and the registry's three
+projection tables from `registry:rebuild`. The registry's **four record tables**
+come back from nothing:
+
+| Table | Regenerable? |
+|---|---|
+| `registry_animal_events` | **No** — the sole source of truth |
+| `registry_animals` | **No** — identity, not projection |
+| `registry_milkings` | **No** — a measurement; derivable from nothing |
+| `registry_serial_counter` | **No** — allocation position |
+| `registry_animal_status`, `registry_lactations`, `registry_parentage` | Yes — `registry:rebuild` |
+
+That table is not maintained by hand: `SOURCE_OF_TRUTH_TABLES` in
+[backup.ts](../server/src/registry/backup.ts) is `REGISTRY_TABLES` minus
+`REGISTRY_PROJECTION_TABLES`, so a record table added by a future migration is
+backed up without anyone remembering to add it.
+
+### Taking one
+
+```bash
+npm run registry:backup -w server
+npm run registry:backup -w server -- --out=~/Dropbox/dairy-backups
+npm run registry:backup -w server -- --no-dump      # snapshot only
+```
+
+Two files land in `server/backups/`, stamped with the farm-local instant:
+
+```
+dairy-2026-09-04T163125.db      VACUUM INTO snapshot, integrity-checked after writing
+registry-2026-09-04T163125.sql  deterministic text dump of the four record tables
+```
+
+They fail differently, which is why there are two. The `.db` is exact and
+restores instantly but is opaque — you cannot see what changed between Tuesday
+and Wednesday. The `.sql` is ordered by primary key with a stable column list, so
+two of them `diff` to exactly the rows that changed, which is what makes *"when
+did this animal's birth date change?"* answerable.
+
+**Do not `cp dairy.db`.** It is in WAL mode, so committed transactions can sit in
+the `-wal` sidecar until a checkpoint: copying the main file alone gives you a
+snapshot that opens cleanly and is missing yesterday. `VACUUM INTO` needs no
+downtime and writes a consistent, fully-checkpointed file. Its output is **not**
+in WAL mode, so unlike `dairy.db` a backup reads fine from a plain read-only
+open — the `immutable=1` trap in § 6 does not apply to these.
+
+### Getting it off the machine
+
+`server/backups/` is on the same disk as `dairy.db`. That protects you from a bad
+migration and a mistaken `DELETE`; it does **not** protect you from losing the
+machine, which is the failure that loses everything at once.
+
+**This is set up and running.** A private git repo holds the text dumps, and a
+`launchd` agent fills it daily:
+
+| | |
+|---|---|
+| Backup repo | `~/dairy-registry-backups` → [`iadnanali/dairy-registry-backups`](https://github.com/iadnanali/dairy-registry-backups) (**private**) |
+| Script | [`scripts/backup-daily.sh`](../scripts/backup-daily.sh) |
+| Schedule | `com.dairy-agent.registry-backup`, daily at 21:00 Asia/Karachi |
+| Log | `~/Library/Logs/dairy-registry-backup.log`, append-only |
+
+```bash
+scripts/backup-daily.sh                     # run it by hand, any time
+scripts/backup-daily.sh /some/other/dest    # or into a different repo
+launchctl kickstart -p gui/$(id -u)/com.dairy-agent.registry-backup
+```
+
+Git, not a synced folder, because the dumps are text: you get deduplicated
+history, an audit trail, and a real diff between any two days. A synced folder
+would give you a mirror, and a mirror faithfully replicates your mistakes.
+
+**What is tracked, and what is not.** `registry.sql` in that repo is the tracked
+file and is **overwritten every run** — safe precisely because git keeps every
+version, and it is what makes the history readable:
+
+```bash
+cd ~/dairy-registry-backups
+git log -p registry.sql            # every change to the herd, newest first
+git diff HEAD~1 -- registry.sql    # what the last run changed
+```
+
+Verified: an added animal and a corrected name show up as exactly two lines.
+
+The stamped `.db` snapshots stay **local**, in `~/dairy-registry-backups/snapshots/`
+and gitignored there. A 460 kB binary committed daily would bloat the repo forever
+and give no readable history, which is the one thing git is here for.
+
+A commit lands on every run, including runs where nothing changed — the
+provenance header carries the timestamp, so the history doubles as proof the job
+actually ran, and the commit message carries the row counts.
+
+`server/backups/` is **gitignored on purpose, and should stay that way** — this
+repository is public and the dumps hold real herd records. That is the whole
+reason the backup repo is separate and private.
+
+At the current size — the whole database is well under a megabyte and a real
+herd's dump will be tens of kilobytes of text — **keep every snapshot**. Rotation
+logic costs more than the disk it saves, and backups are never overwritten:
+`VACUUM INTO` refuses an existing target, and `runBackup` checks first so the
+message names the collision.
+
+### `launchd`, and the node version it will pick for you
+
+`launchd` rather than `cron`: cron does not fire for the interval a laptop spent
+asleep, and launchd runs a missed `StartCalendarInterval` job shortly after wake.
+For a machine that is closed more often than open, that is the difference between
+a daily backup and an occasional one.
+
+**The trap, measured rather than reasoned about.** launchd runs no login shell —
+no `PATH`, no `nvm`. The obvious fix is to source `nvm.sh` and take what you get,
+which selects nvm's `default` **alias**: node 16 on this machine. better-sqlite3's
+binding is compiled for node 22's ABI, so the job failed with
+
+```
+Error: … better_sqlite3.node was compiled against a different Node.js version
+using NODE_MODULE_VERSION 127. This version of Node.js requires 93.
+```
+
+It failed *safely* — `set -e` aborted before the commit step and the backup repo
+was untouched — but it failed silently and daily, which is the worst property a
+backup job can have. An interactive run never reproduces it, because a login
+shell has already put a usable node on `PATH`.
+
+So the script `cd`s to the repo first and then runs `nvm use`, honouring
+`.nvmrc`, and falls back to the highest installed node ≥ 22 if that pin is not
+installed. It refuses to run rather than proceed on a node that cannot load the
+binding. Confirmed under launchd: `last exit code = 0`, on `v22.22.3`.
+
+Both the plist and the script exist to be read — the plist explains why
+`RunAtLoad` is deliberately absent (every login would take a backup and commit
+it), and the script explains the ordering of its three steps.
+
+### The automatic one: before every migration
+
+`applyRegistrySchema` runs at **module load** in [db.ts](../server/src/db.ts), so
+a pending migration fires the moment anything imports the singleton — including a
+one-off script. Migration 2 already rebuilds `registry_animal_events` by
+create-copy-drop-rename with foreign keys off. So `db.ts` wires a
+`beforeMigrate` hook that snapshots first:
+
+```
+[registry] migration 3 -> 4 pending. Backed up {…} to …/backups/dairy-…-pre-v4.db
+```
+
+**A failed backup aborts the migration and the boot.** If the snapshot cannot be
+written, not migrating is the safe action. The override is explicit:
+
+```bash
+REGISTRY_SKIP_PREMIGRATION_BACKUP=1 npm run dev -w server
+```
+
+The hook skips when there is nothing to protect — no record tables yet, or all of
+them empty. That is the state of every clean clone and of CI, and it is the state
+`dairy.db` is in until a herd is entered.
+
+### Restoring
+
+From the `.db` snapshot — the fast path:
+
+```bash
+# stop the server first; then, from the repo root
+mv server/dairy.db server/dairy.db.before-restore
+cp server/backups/dairy-2026-09-04T163125.db server/dairy.db
+rm -f server/dairy.db-wal server/dairy.db-shm    # stale sidecars of the old file
+npm run registry:rebuild -w server
+npm run verify:registry -w server
+```
+
+From the `.sql` dump — into a database that has been migrated but holds no
+registry rows. The dump is **data only**; the schema is the `MIGRATIONS` array:
+
+```bash
+sqlite3 server/dairy.db < server/backups/registry-2026-09-04T163125.sql
+npm run registry:rebuild -w server
+npm run verify:registry -w server
+```
+
+`registry:rebuild` is required in both cases, because the projection tables are
+deliberately not in the dump. `verify:registry` is what makes the restore
+trustworthy rather than hopeful — it runs invariants 0–13, so it reports that the
+restored data is *semantically* valid and not merely readable.
+
+**Verify a backup without restoring it**, which is the check worth running before
+you need it:
+
+```bash
+npm run verify:registry -w server -- --db=backups/dairy-2026-09-04T163125.db
+```
+
+Opened read-only and never migrated. Verified: the live `dairy.db` is
+byte-identical before and after. If the backup predates the current schema you
+are told, because a violation may then be the schema gap rather than the data:
+
+```
+NOTE: …/dairy-….db is at user_version 3; this build targets 4.
+```
+
+The whole loop — populated registry → backup → restore from the `.sql` → rebuild
+→ invariants — is exercised end to end, including a superseded correction chain,
+and the projections come back identical.
+
+### Scheduling it
+
+Not wired up, because where the copies live is your decision. On macOS prefer
+`launchd` over `cron` — it survives sleep/wake, which is most of what a laptop
+does. A daily agent runs:
+
+```
+npm run registry:backup -w server -- --out=<your private destination>
+```
+
+Note that `launchd` runs no login shell: give it absolute paths and expect no
+`PATH`. `--out=` expands a leading `~` itself, for exactly this reason.
+
+---
+
+## 9. Fresh clone, start to finish
 
 Verified in a real clone with no `dairy.db`, no `.env` and no `node_modules`.
 
@@ -586,7 +828,7 @@ invariant 13 as a source-level check.
 
 ---
 
-## 9. Common failures
+## 10. Common failures
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -605,7 +847,7 @@ invariant 13 as a source-level check.
 
 ---
 
-## 10. What was not run
+## 11. What was not run
 
 - **The live regression suite** (`test:regression*` with a key) — real API calls,
   and it re-seeds `dairy.db`. Skip path verified; the 12/12 result is not.

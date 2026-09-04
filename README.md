@@ -190,9 +190,14 @@ of failing obscurely.
   synthetic row reaching the real database. The explicit port matters; see
   [docs/REGISTRY.md](docs/REGISTRY.md). `harness:app` wraps this.
 - `npm run verify:registry -w server` — invariants, precision histogram, calving
-  intervals and milk-record completeness against the live registry.
+  intervals and milk-record completeness against the live registry. Add
+  `-- --db=backups/<file>.db` to check a **backup** instead, read-only.
 - `npm run registry:rebuild -w server` — recompute the registry's projection
   tables from its event log.
+- `npm run registry:backup -w server` — snapshot the registry's four
+  irreplaceable record tables to `server/backups/`, as both a `VACUUM INTO` file
+  and a diffable `.sql` dump. Also runs automatically before any migration. See
+  [docs/DEVELOPMENT.md § 8](docs/DEVELOPMENT.md).
 - `npm run simulate:farm -w server -- --all --days-ago=14` — replay synthetic
   camera events through the ingestion webhooks (needs the server running).
 - `npm run verify:farm -w server` — prove every farm scenario lands correctly in

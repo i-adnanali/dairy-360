@@ -104,15 +104,31 @@ test('exactly the CLI entry points import ../db, and nothing else does', () => {
   // something that should take a handle stopped doing so.
   const dir = path.join(__dirname);
   const { readdirSync } = require('node:fs') as typeof import('node:fs');
+
+  // BOTH forms, deliberately. This used to match `from '../db';` alone, which
+  // meant a module could reach the singleton through `require('../db')` and not
+  // register here at all -- and two files now do exactly that on purpose
+  // (verifyRegistry.ts under --db, and backup.ts, whose static import would be a
+  // require cycle since db.ts imports IT for the pre-migration hook). Matching
+  // only the static form would have quietly turned this guard off for them.
+  const reachesSingleton = /(from '\.\.\/db';|require\('\.\.\/db'\))/;
   const importers = readdirSync(dir)
     .filter((f) => f.endsWith('.ts') && !f.endsWith('.test.ts'))
-    .filter((f) => /from '\.\.\/db';/.test(readFileSync(path.join(dir, f), 'utf8')))
+    .filter((f) => reachesSingleton.test(readFileSync(path.join(dir, f), 'utf8')))
     .sort();
 
   assert.deepEqual(
     importers,
-    ['add.ts', 'calve.ts', 'correct.ts', 'event.ts', 'rebuild.ts', 'verifyRegistry.ts'],
-    'only the six CLI entry points may import the db singleton',
+    [
+      'add.ts',
+      'backup.ts',
+      'calve.ts',
+      'correct.ts',
+      'event.ts',
+      'rebuild.ts',
+      'verifyRegistry.ts',
+    ],
+    'only the seven CLI entry points may reach the db singleton',
   );
 });
 

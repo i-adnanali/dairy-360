@@ -141,6 +141,21 @@ for it alone — so it waits for migration 4.
 
 **Never reorder, edit, or remove an applied migration.** A database already at version N will not re-run entries below N, so an edit silently produces two different schemas depending on when the database was created.
 
+### Every migration is preceded by a backup
+
+Migrations here are **automatic and implicit**: `applyRegistrySchema` runs at `db.ts` module load, so a pending one fires the moment anything imports the singleton — a one-off script, a test, an editor's language server. Migration 2 above rebuilds `registry_animal_events` by create-copy-drop-rename with foreign keys off. An unattended table rebuild against the only irreplaceable data in the repo is the event most worth a guaranteed snapshot.
+
+So `applyRegistrySchema` takes an optional `beforeMigrate` hook, called once, only when there is at least one migration to apply, and `db.ts` wires `preMigrationBackup` to it:
+
+```
+applyRegistrySchema(db, { beforeMigrate: (pending) => preMigrationBackup(db, pending) })
+  ->  server/backups/dairy-<stamp>-pre-v<to>.db
+```
+
+- **A failed backup aborts the migration**, by throwing. If the snapshot cannot be written, not migrating is the safe action. `REGISTRY_SKIP_PREMIGRATION_BACKUP=1` is the explicit override.
+- **The hook is injected, not imported.** `schema.ts` still imports nothing but a `better-sqlite3` type; a static import of `backup.ts` would be a require cycle, since `db.ts` imports `backup.ts` for this. Same reasoning as `registryRouter(db)` being a factory — a hook passed in beats a dependency reached for. It also means nothing inside the runner can *enforce* that the hook is present, so `registry.schema.test.ts` asserts on `db.ts` that it is still wired.
+- **It skips when there is nothing to protect** — no record tables yet, or all of them empty. That is not an optimization: a fresh database is at version 0, where the record tables *do not exist*, and counting rows in them threw `no such table`. Since a failed backup refuses the migration, the first version of this made every clean clone unable to boot. The test found it, not the reasoning.
+
 ### Ordering with `FARM_SCHEMA`
 
 `db.ts` applies `FARM_SCHEMA` and then `applyRegistrySchema(db)`. The two are **order-independent** — they touch disjoint tables and `FARM_SCHEMA` is re-appliable — and `registry.schema.test.ts` asserts the reverse order converges to the same tables and the same `user_version`, so the independence is proven rather than assumed.
@@ -173,6 +188,18 @@ Two consequences, enforced rather than documented:
 
 `registry_animal_status` deliberately has **no `computed_at` column**. Invariants 0 and 1 compare projection row-sets across rebuilds; a wall-clock stamp would differ on every run and make both unfalsifiable.
 
+### What this makes a backup
+
+The same split decides what has to be saved. Four tables are **records** — `registry_animal_events`, `registry_animals`, `registry_milkings` and `registry_serial_counter` — and nothing in this repo can reproduce them. The other three are derived, so a backup that omits them loses nothing:
+
+```
+restore the four record tables  ->  registry:rebuild  ->  verify:registry
+```
+
+`SOURCE_OF_TRUTH_TABLES` in `backup.ts` is computed as `REGISTRY_TABLES` minus `REGISTRY_PROJECTION_TABLES` rather than listed, so a record table added by a future migration is backed up without anyone remembering to add it — and the failure mode a hardcoded list would have is the silent one, where the backup keeps succeeding while omitting the new table.
+
+`registry_milkings` is the row of that table most easily got wrong. It is absent from `REGISTRY_PROJECTION_TABLES` for the reason given in Decision 4's rule — a milk figure is derivable from nothing — and that same absence is what puts it in a backup. See [DEVELOPMENT.md § 8](DEVELOPMENT.md) for the commands and the restore procedure.
+
 ### Pure core / DB shell
 
 The same split as `classify.ts` / `classifyStore.ts`, for the same reason:
@@ -188,9 +215,17 @@ The same split as `classify.ts` / `classifyStore.ts`, for the same reason:
 | `projectStore.ts` | DB shell — the only projection writer |
 | `calving.ts` | DB shell — the transaction |
 | `verify.ts` | DB shell — the rebuild-diff, takes a handle |
-| `verifyRegistry.ts`, `rebuild.ts` | CLI shells — the only files importing `../db` |
+| `backup.ts` | DB shell — snapshot, dump and the pre-migration hook; takes a handle |
+| `add.ts`, `calve.ts`, `correct.ts`, `event.ts`, `rebuild.ts`, `verifyRegistry.ts`, `backup.ts` | CLI shells — the only files that reach `../db` |
 
 Every function that touches SQLite takes an explicit `db` handle rather than importing the module singleton. That seam is what lets the same code run against the live `dairy.db` and against `new Database(':memory:')` in a test — and it means `db.ts`'s singleton design is untouched.
+
+**Two of those CLI shells reach `../db` through a lazy `require` inside `main()` rather than a top-level `import`,** and both have a reason that is not style:
+
+- `backup.ts` — a static import would be a require **cycle**, because `db.ts` imports `backup.ts` for the pre-migration hook, and the cycle would resolve during `db.ts`'s own module load.
+- `verifyRegistry.ts` — importing `../db` *runs its migrations as an import side effect*. Under `--db=<path>` that would mean verifying a backup while silently migrating the live database, and a verification pass must not have side effects on a database it was not pointed at.
+
+`registry.harness.test.ts` matches **both** forms when it asserts the list above. It used to match `from '../db'` alone, which would have quietly stopped guarding these two.
 
 ### `asOf` is a parameter, not a clock read
 
@@ -562,7 +597,7 @@ Rules, in order, first match wins:
 
 The CLI came first and was the only way in for most of this cycle. **It is no longer the way the herd goes in** — that is the entry UI over the HTTP surface, both documented below, and agent tools are still deferred to the tools cycle. The commands remain, as the scriptable path and as the thing the domain core was extracted out of; every one follows the repo convention: `tsx`, hand-parsed `--flag=value` from `process.argv.slice(2)`, a `USAGE` string, and a `require.main === module` guard.
 
-**Six commands: four that write herd data, plus the rebuild and the verifier.**
+**Seven commands: four that write herd data, plus the rebuild, the verifier and the backup.**
 
 | Command | Writes |
 |---|---|
@@ -571,7 +606,10 @@ The CLI came first and was the only way in for most of this cycle. **It is no lo
 | `registry:correct-calving` | a paired (or triple) date correction |
 | `registry:event` | `dry_off` \| `departure` \| `note` on an existing animal |
 | `registry:rebuild` | projection tables only, from the event log |
+| `registry:backup` | nothing in the database — a snapshot + dump into `server/backups/` |
 | `verify:registry` | nothing |
+
+`verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–13 rather than inventing a second notion of "valid".
 
 ```bash
 # pass one -- the animals that arrived from elsewhere
