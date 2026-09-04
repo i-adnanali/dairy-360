@@ -1,13 +1,17 @@
 # Registry entry UX — design decisions
 
-Status: **items 0, 1 and 2 are built and tagged `v0.13.0`.** Items 3, 4, B2 and 5 are pass 2;
-everything below them is decided but unbuilt. Supersedes the kickoff brief, the validation reply,
-and the Q5/Q6/calf-age addendum — those three can be deleted once this lands.
+Status: **passes 1, 2 and 3 are built** — items 0, 1 and 2 (`v0.13.0`); items 3, 4, B2 and 5
+(`v0.14.0`); items 6a and 10 (`v0.15.0`). Items 7, 8, 9 and 6b are next and deliberately undecided:
+**7 and 8 are gated on the five-animal trial**, which has not run — see §11. Everything below the
+cut line is decided but unbuilt. Supersedes the kickoff brief, the validation reply, and the
+Q5/Q6/calf-age addendum — those three can be deleted once this lands.
 
 Baseline was verified at `42c0ad2` (`v0.12.0-2-g42c0ad2`): server 385 tests passing, typecheck
-clean, 44 registry specs across 4 frontend files. **At `v0.13.0` that is server 410 and frontend
-106 across 16 files**, 5 of them registry specs — including the first `CalvingForm` spec, which
-had none.
+clean, 44 registry specs across 4 frontend files. At `v0.13.0` that was server 410 and frontend 106
+across 16 files. **Current: server 458, frontend 198 across 21 files**, 10 of them registry specs.
+
+Test counts and tag references in this document go stale silently. When one disagrees with a run,
+the run is right.
 
 **The backfill gate is now open.** No herd data was to enter the real registry until item 5 landed
 — a rule, not an intention, because both date bugs wrote something false that nothing downstream
@@ -1065,6 +1069,113 @@ work reaches.
 - **Prediction 5 may be item 8's "last five written" strip arriving early as a symptom.** If the
   announcement is too quiet, the answer is likely to pull that strip forward rather than make the
   line louder — a louder line is a bigger version of the wrong instrument.
+
+#### Pre-trial amendment — 2026-09-04, at `v0.15.0-3-g212dfe0`
+
+Recorded **before** the trial runs, not reconstructed after it. A separate refinement document
+(`docs/REGISTRY_UI_REFINEMENT.md`) was written against screenshots without repo access, then
+validated against the code. Most of it fell to things already built; two defects survived and were
+fixed, and both touch surfaces this trial measures. Frontend suite at the time of writing: **198
+tests across 21 files**, up from 106 across 16 at `v0.13.0`.
+
+**Two contaminations, both one-directional.** This matters more than the fact of the contamination:
+the trial is not uniformly compromised, and reading it as if it were would waste it.
+
+| Fix | Prediction it touches | Clean reading | Confounded reading |
+|---|---|---|---|
+| `:host{display:block}` on the registry components — component hosts are `display: inline` by default and vertical margins do not apply to inline boxes, so every `space-y-*` container was silently contributing nothing between a component and its siblings | **2** (overshooting the arrival date into the birth date). The two `/add` date fields were flush against their neighbours | **If it still bites** — the defect was removed and the problem survived, which is *stronger* evidence than before that the fix is in the form shape | **Only a null result.** Part of the reason may be the spacing rather than the design being sound |
+| `calfSex` default removed on `/calving` (starts unanswered, gates the picker, clears after a write). It was `female`, and the value filters `linkCandidates` — a guessed default greys out the right calf and leaves "create a new animal" as the only reachable path | **"Printed digit accelerators on sex and outcome"**, one of the two things predicted to feel *better* than expected. The accelerator now fires every record instead of rarely | **If they feel bad** — they are being exercised harder than the prediction assumed, so a negative reading is *stronger* evidence against them | **Only a positive result.** "Feels good" is now measured on a form where the chip is mandatory, which is a different test from the one predicted |
+
+So: in both cases a **negative reading is clean and a positive reading needs the caveat.**
+
+**Why these two were built when the standing rule is to fix nothing before the trial.** Both are
+defects with a causal chain to a wrong record, not friction. The calf-sex default manufactures the
+duplicate `CalfPicker` exists to prevent, from a question nobody was asked — the same shape as the
+`precision-date.ts` fabrications in §4, and the same reason those were fixed immediately. The
+spacing defect had collapsed the vertical rhythm of `/add` entirely. Neither is a preference, and
+neither is anything the trial was going to measure the value of.
+
+**What the spacing defect actually was, since the refinement document got the mechanism wrong.** It
+reported the paragraph *overlapping* the `Observed by` label. Measured before and after by reverting
+the rule: the boxes never intersected in either state — the gap was **0px, and is now 16px**, and
+every fieldset on the page was butted against its neighbour, not just that one pair. One host rule
+fixed the whole page. This is worth recording because it is the same failure as the amber diagnosis
+and as assumption A6: **visual review is reliable about what looks wrong and unreliable about why,
+and that document stated the why with the same confidence as the what.** Three instances of one
+error, not three errors.
+
+**A third code change, which is the other half of fix #2 rather than a new one.** Removing the
+default changed `CalfPicker`'s `ready` preconditions from two to three and left its copy describing
+the old ones, so with the dam and date both answered the panel told the operator to do what they had
+already done — the exact failure that message exists to prevent. The copy, the `ready` doc comment
+and the `calving-form.ts` header now all name dam, date and sex. It gets no contamination row: it
+restores what the fix was supposed to say, rather than changing anything the trial measures.
+
+Two specs were added alongside, because a behaviour nobody pins rots: one asserts the calf sex is
+cleared after a write while the dam survives, one asserts the blocked copy names all three
+preconditions. Both were checked by reverting the code and confirming they fail.
+
+**Two other defaults were considered and kept, and they are kept for different reasons — defaults
+are not settled by this amendment.**
+
+- `outcome: 'live'` on `/calving` — **settled on the merits, not held.** Its asymmetry is
+  load-bearing and argued at the control: live → died is repairable with a departure event, the
+  reverse is not, and would leave the animal permanently departed. A default that fails safe is not
+  the same object as one that fabricates. No trial data would change this.
+- `sex: 'female'` on `/add` — **held for the trial.** It has no chain to a picker filter, so by the
+  rule used above it is a preference rather than a defect, and it sits on the form prediction 3 and
+  the roster-pass question both measure. It is also the one default with real evidence behind it:
+  consecutive acquired animals arrive in same-sex runs, which is why it deliberately *survives* a
+  write (§6.7a) and why a spec pins that. If the trial says the sex chip is friction, it is in scope
+  then; it was not in scope now.
+
+**Three items struck from the refinement document, so nobody reads them later as open work.**
+
+- **Session ledger / "recent entries with undo" — struck entirely.** It was called the highest-value
+  item in that document and is the most precisely pre-registered thing in this section: it *is*
+  prediction 5's held answer, two bullets above. Building it would have spent the measurement it was
+  meant to be evidence for. Separately, the **undo half is dead on the merits** — see the retraction
+  finding below.
+- **`DamSelector` (search + timeline) — split, and the search half is struck.** Prediction 4's held
+  answer above (keep the dam *and* land focus on it) addresses the survival problem for a fraction of
+  what search-plus-timeline costs. The **entry-time ordering flag is orthogonal and stays live as a
+  post-trial item**: it addresses ordering, not re-selection. Note it does not remove the constraint
+  either — `recordCalving` mints the calf, so a later-discovered earlier calving still arrives after
+  its own consequences (§5.2). Keep the instruction *and* flag the violation; a sentence at the top
+  of a form asks the operator to hold a rule, a flag at the moment of violation tells them they have
+  broken it.
+- **Token layer and `(optional)` markers — held, treated as adjacent to prediction 3.** Prediction 3
+  ("ten tab stops, about half of them empty") is the same observation approached from the keyboard.
+  These are preferences on forms the trial measures, so there is no cost to waiting. `Recheck` to the
+  top of `/check` is held on the same grounds — uncontaminating, since `/check` is not in the trial,
+  but not worth a commit now.
+
+**The retraction finding, which changes a deferral in §8 and one in that document.** Assumption
+"there is no event type that retracts or corrects a prior event" is false: `supersedes_id`,
+`supersededIds()`/`effectiveEvents()` and `correctCalving()` already exist and are wired to the UI.
+So the cost that document assigned to retraction — "every projection must learn to skip retracted
+events" — is already paid, at one line in `project.ts`. But **supersession is replacement, not
+retraction**: the target dies and the replacement lives, so an undo needs an event that removes both.
+Adding one costs migration 3 (the `type IN (…)` CHECK), an invariant 9 allowance, and a date it has
+no honest value for — and that is the cheap half. The expensive half is that **every write on both
+entry screens creates an animal row**, and `registry_animals` is identity with no delete path:
+retracting an `/add` leaves invariant 3 failing immediately, and retracting a link-mode calving would
+need to un-supersede an origin promotion, which invariant 9 forbids by name. Undo is therefore not a
+retraction event but animal deletion or an animal-level void state — **item 12, merge/supersede,
+below the cut line**, exactly where §8 already put it. The cut line holds; there is no migration 3.
+
+**One measurement added, and it is not a prediction.** §5 of the refinement document deferred a
+review-before-commit step on the grounds that undo would cover it more cheaply. Undo is now dead, so
+that argument is gone — but the step does not automatically return, because `correctCalving` from the
+success panel is real recourse. The question becomes: **is correction fast enough that a pre-commit
+gate is not worth two clicks per record?** Answering it needs a number this trial would not otherwise
+record — how long a correction takes from noticing the error — and that number cannot be recovered
+afterwards without re-running the trial.
+
+Kept **observational**: if a correction happens naturally, time it. Deliberately entering a wrong
+record to time the fix would contaminate the stumble count, which is a worse trade than having no
+number. Five animals may well produce zero corrections; that is **weak evidence against needing a
+gate**, and the question stays open rather than being resolved on nothing.
 
 ### Other open items
 
