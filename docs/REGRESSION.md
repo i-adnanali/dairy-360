@@ -164,13 +164,50 @@ Add one job to the existing `.github/workflows/ci.yml`, after the current
 steps (`npm ci` → `npm run build:shared` → `npm run typecheck` → `npm test
 -w server` → `npm test -w web-angular` → `npm run build -w web-angular`):
 
+> **This section prescribed a broken workflow until 2026-09-04, and it was
+> wired in as written.** `secrets` is **not** an available context in a step's
+> `if` — GitHub rejects the *entire workflow file* at validation, not just the
+> step. Every CI run from at least 2026-08-25 failed in 0s with "likely ... a
+> workflow file issue" and **nothing ran**: no typecheck, no unit tests, no
+> build. The guard meant to keep this suite honest silenced every other check
+> in the file. `actionlint` reports it precisely; the GitHub UI does not.
+
+Presence has to be computed in a step, because `steps.<id>.outputs` **is**
+available in `if`:
+
 ```yaml
-  - name: Regression suite (live model)
-    if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
-    run: npm run test:regression -w server
+  - name: Is an API key available?
+    id: apikey
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    run: |
+      if [ -n "$ANTHROPIC_API_KEY" ]; then
+        echo 'present=true' >> "$GITHUB_OUTPUT"
+      else
+        echo 'present=false' >> "$GITHUB_OUTPUT"
+        echo '::warning::live regression suite did NOT run. A skip is not a pass.'
+      fi
+
+  - name: Regression suite (live model)
+    if: >-
+      steps.apikey.outputs.present == 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+       startsWith(github.ref, 'refs/tags/v'))
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    run: npm run test:regression -w server
 ```
+
+Two deliberate choices in there:
+
+- **A job-level `env:` would be shorter and is the usual advice — don't.** It
+  hands the secret to every step, including `npm ci`, where any dependency's
+  install script could read it. Computing presence in its own step keeps the
+  key scoped to the two steps that need it.
+- **A key being available is not a reason to spend it.** On `main` this suite
+  would bill on *every push*, which is precisely how API spend becomes
+  unexplained usage nobody can attribute later. It runs on a manual
+  `workflow_dispatch` or a `v*` tag — moments where someone asked.
 
 `test:regression` chains three sub-scripts so each env-variant runs in its
 own process (the aggregate is what the CI job invokes):
@@ -182,20 +219,27 @@ own process (the aggregate is what the CI job invokes):
 "test:regression:fallback": "RUN_REGRESSION=1 ANTHROPIC_MODEL=claude-not-a-real-model-999 tsx --test src/agent/__tests__/regression.fallback.test.ts"
 ```
 
-The `if:` guard matters: this repo already has a house convention for a
-missing key — `GET /api/health` returns a friendly "run seed first" 503 and
-the chat endpoint emits a `RUN_ERROR` (`unavailable`) with a degrade-
-gracefully message rather than failing obscurely when things aren't
-configured. The regression job follows the same convention: absent the
-secret, the step is skipped (visibly, in the Actions log) rather than
+The guard matters: this repo already has a house convention for a missing
+key — `GET /api/health` returns a friendly "run seed first" 503 and the chat
+endpoint emits a `RUN_ERROR` (`unavailable`) with a degrade-gracefully message
+rather than failing obscurely when things aren't configured. The regression job
+follows the same convention: absent the secret, the step is skipped rather than
 failing CI for contributors or forks that don't have it.
+
+**But skipped visibly, and that word is load-bearing.** § "a skip is not a
+pass" below is about this exact suite: it emits `ok N … # SKIP`, which TAP
+counts as passing. So the absent-key branch raises a `::warning::` annotation —
+a green run that states on its face that one thing was not checked. Silence
+would satisfy the convention and defeat the point of it.
 
 ```mermaid
 flowchart TD
     Push["push / PR to main"] --> Existing["Existing steps: ci install, build:shared, typecheck, unit tests, build"]
     Existing --> KeyCheck{"ANTHROPIC_API_KEY secret set?"}
-    KeyCheck -- "yes" --> Run["Run regression suite against live API"]
-    KeyCheck -- "no" --> Skip["Skip step, log why — CI still green"]
+    KeyCheck -- "no" --> Skip["Skip, raise ::warning:: — CI green, and says so"]
+    KeyCheck -- "yes" --> Asked{"manual run, or a v* tag?"}
+    Asked -- "no" --> Skip2["Skip — a key is not a reason to spend it"]
+    Asked -- "yes" --> Run["Run regression suite against live API"]
 ```
 
 ## Implementation plan

@@ -3,15 +3,20 @@ name: CI
 on:
   push:
     branches: [main]
+    # Version tags too, so a release gets the full check -- and so the live
+    # regression suite has an automatic moment to run that is NOT every push.
+    tags: ['v*']
   pull_request:
     branches: [main]
+  # Lets the live regression suite be run on demand without a commit.
+  workflow_dispatch:
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -55,7 +60,7 @@ jobs:
         run: |
           if [ -n "$ANTHROPIC_API_KEY" ]; then
             echo 'present=true' >> "$GITHUB_OUTPUT"
-            echo '::notice::ANTHROPIC_API_KEY is set -- the live regression suite will run and will spend real tokens.'
+            echo '::notice::ANTHROPIC_API_KEY is set. The live regression suite runs (and spends real tokens) only on a manual run or a v* tag -- see the gate below.'
           else
             echo 'present=false' >> "$GITHUB_OUTPUT"
             # A warning, not a silent pass. docs/DEVELOPMENT.md § 5: "a skip is
@@ -64,8 +69,24 @@ jobs:
             echo '::warning::ANTHROPIC_API_KEY is not set -- the live regression suite did NOT run. A skip is not a pass.'
           fi
 
+      # TWO CONDITIONS, and the second one is about money.
+      #
+      # A key being available is not a reason to spend it. This suite calls the
+      # live Anthropic API, so on `main` it would bill on every single push --
+      # which is exactly the kind of spend that shows up later as unexplained
+      # usage nobody can attribute. So it runs only when someone asked for it:
+      # a manual `workflow_dispatch`, or a `v*` tag, where re-checking that the
+      # agent still behaves is worth the money.
+      #
+      # Note this is currently moot and deliberately kept anyway: as of
+      # 2026-09-04 ANTHROPIC_API_KEY is NOT set on this repository, so the step
+      # above takes its absent branch and this never runs. The gate exists so
+      # that setting the secret does not silently turn on per-push billing.
       - name: Regression suite (live model)
-        if: steps.apikey.outputs.present == 'true'
+        if: >-
+          steps.apikey.outputs.present == 'true' &&
+          (github.event_name == 'workflow_dispatch' ||
+           startsWith(github.ref, 'refs/tags/v'))
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npm run test:regression -w server
