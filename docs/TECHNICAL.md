@@ -317,9 +317,12 @@ Card label helpers: `tagLabel(animalId)` renders `TAG (name)` when a name exists
 | Server port | `PORT` env or `4000` | [server/src/index.ts](../server/src/index.ts) |
 | Web dev port | `4200` (Angular `ng serve`, proxies `/api` -> 4000) | [web-angular/proxy.conf.json](../web-angular/proxy.conf.json) |
 | Registry harness port | `4100` by default — **pass `--port=4000`** to reach it through the proxy | [server/src/registry/harness.ts](../server/src/registry/harness.ts) |
-| Calf age threshold | `12` months (provisional) | [server/src/registry/project.ts](../server/src/registry/project.ts) |
+| Calf age threshold | `18` months (provisional) — the scheme's **only** age threshold; every other life-stage boundary is event-driven | [server/src/registry/project.ts](../server/src/registry/project.ts) |
 | Double-entry window | `60` days (provisional) | [server/src/registry/calving.ts](../server/src/registry/calving.ts) |
-| Farm timezone (registry) | `Asia/Karachi` — a deliberate second copy, not imported from `classify.ts` | [server/src/registry/time.ts](../server/src/registry/time.ts) |
+| Gestation floor | `310` days — a biological constant, **not** provisional and with no override | [server/src/registry/calving.ts](../server/src/registry/calving.ts) |
+| Milk: recent-mean window | `7` measured rows, **same session only** — morning and evening are never pooled | [server/src/registry/milking.ts](../server/src/registry/milking.ts) |
+| Milk: out-of-band hint | `0.5` (±50% of her recent mean), provisional; a warning, never a refusal | [web-angular/src/app/registry/milking-roster.ts](../web-angular/src/app/registry/milking-roster.ts) |
+| Farm timezone | `Asia/Karachi` — **three deliberate copies**, none importing the others: the classifier, the registry server, and the browser | [classify.ts](../server/src/farm/classify.ts), [registry/time.ts](../server/src/registry/time.ts), [registry/today.ts](../web-angular/src/app/registry/today.ts) |
 | Tracing | opt-in Langfuse (no-op if keys unset) | [server/src/instrumentation.ts](../server/src/instrumentation.ts) |
 | Env vars | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `PORT`, `AGENT_MAX_ITERATIONS`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`, plus `RUN_REGRESSION` (regression gate), `FARM_BASE_URL` + `FRIGATE_MQTT_URL` + `DEEPSTACK_URL` (farm scripts), and `TZ` / `NODE_ENV` | `server/.env`, loaded by `dotenv/config` — **cwd-relative, and dotenv does not search parents**, so a repo-root `.env` is invisible to the server. `.env.example` explains both destinations |
 

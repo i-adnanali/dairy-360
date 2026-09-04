@@ -30,6 +30,7 @@ import { db } from '../db';
 import { canonicalOrder } from './project';
 import { allEvents, snapshot } from './store';
 import { intervalReport, precisionHistogram } from './intervals';
+import { milkingReport } from './milking';
 import { farmToday } from './time';
 import { verifyAll } from './verify';
 import type { RegistryEvent } from './types';
@@ -144,6 +145,36 @@ function main(): void {
     }
   }
   console.log(`  ${report.caveat}`);
+
+  // A third reported artifact, and the same kind of thing as the other two: a
+  // number to read, asserting nothing, with nothing branching on it. It answers
+  // the question the milk table exists to make answerable -- whether what has
+  // been collected can carry the weight of a conclusion.
+  console.log('\nMilk record completeness');
+  const milk = milkingReport(snap.milkings, snap.lactations);
+  if (milk.rows === 0) {
+    console.log('  (no milking recorded yet)');
+  } else {
+    console.log(
+      `  ${milk.rows} row(s) over ${milk.sessions} session(s), ` +
+        `${milk.complete_sessions} complete   ${milk.first_on} -> ${milk.last_on}`,
+    );
+    console.log(
+      `  measured ${milk.measured}   milked, not measured ${milk.milked_not_measured}   ` +
+        `not milked ${milk.not_milked}`,
+    );
+    for (const c of milk.recent) {
+      // `!` marks a session an animal in milk has no row in. Not a violation --
+      // a gap is a legitimate thing to record -- but the thing worth seeing.
+      const flag = c.recorded >= c.expected ? ' ' : '!';
+      console.log(
+        `  ${flag} ${c.occurred_on}  ${c.session.padEnd(8)} ` +
+          `${String(c.recorded).padStart(3)}/${String(c.expected).padEnd(3)} recorded, ` +
+          `${c.measured} measured`,
+      );
+    }
+    console.log(`  ${milk.caveat}`);
+  }
 
   // --- verdict --------------------------------------------------------------
 

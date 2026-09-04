@@ -65,7 +65,7 @@ This achieves the actual goal of revision 1 §2 — no query can silently mix re
 
 `resetSchema()` drops only the six demo tables. Registry tables are not in its DROP list and never will be. Belt and braces, because this is the failure that loses real records: **a test that reads `resetSchema()`'s DROP list and asserts no `registry_` table appears in it.** Cheap, permanent, and it fails loudly the day someone adds one.
 
-The prefix goes on all five tables, not only the colliding `animals`. The set is the unit; a consistent prefix makes the boundary legible at a glance and makes any future rename mechanical.
+The prefix goes on all five tables, not only the colliding `animals`. *(Seven as of step 4 — `registry_milkings` and `registry_animal_status` joined later.)* The set is the unit; a consistent prefix makes the boundary legible at a glance and makes any future rename mechanical.
 
 ### 2.3 On `farm_events.is_synthetic`
 
@@ -90,7 +90,7 @@ Build a minimal runner:
 
 Two animal tables in one database is a fork. Name its end explicitly so it does not drift:
 
-- Step 4 (yield) will hit this. `milkings.animal_id` FKs the demo `animals`, so real yield cannot go there. Step 4 gets `registry_milkings`. Expect the fork to widen before it closes.
+- Step 4 (yield) will hit this. `milkings.animal_id` FKs the demo `animals`, so real yield cannot go there. Step 4 gets `registry_milkings`. Expect the fork to widen before it closes. **(Built. Volume turned out to be a second, independent reason for a separate table — see [REGISTRY_MILKING.md](REGISTRY_MILKING.md) §3.)**
 - **The merge point is the tools cycle** (open question 3). When the agent gets `get_animal` / `get_lactation_history` over the registry, the demo `animals` table becomes redundant: `list_animals`, `search_animals`, `add_animal` and `guardIds()` get repointed, the demo fixtures move to `registry_*` seed data or are deleted, and the regression suite's assertions are rewritten once. Do that as one deliberate cycle, not incrementally.
 - Until then, the demo tables are **fixtures for a scripted demo, not a record of anything**. Say that in `REGISTRY.md`, because it is the fact that makes the fork tolerable.
 
@@ -160,7 +160,9 @@ So: keep the type prefix convention, drop the truncation, add no dependency. Cre
 
 **`lact_` + the UUID portion of the opening calving event's id.** Stability comes from deriving it from an immutable event, not from the id format, so nothing here depended on ULID.
 
-The reason remains: a sequence-encoded id (`BD-0042-L3`) renumbers every later lactation for an animal when an earlier calving is discovered during backfill, which will happen, and step 4's yield rows would then point at the wrong lactation silently. The display sequence number is computed at read time, where being wrong is visible and harmless.
+The reason remains: a sequence-encoded id (`BD-0042-L3`) renumbers every later lactation for an animal when an earlier calving is discovered during backfill, which will happen. The display sequence number is computed at read time, where being wrong is visible and harmless.
+
+> **Corrected at step 4.** This said yield rows would then point at the wrong lactation, i.e. that they would carry the lactation id as a **foreign key**. They do not. The derived id is stable enough to be an identifier and not stable enough to be a key — correcting a calving supersedes it and the id changes, and with no correction at all, recording a calving re-cuts the *previous* lactation's `ended_on` so yield in the overlap silently belongs elsewhere. Yield is keyed on `(animal_id, occurred_on, session)` and derives its lactation by date range. Both failures are demonstrated by execution in [REGISTRY_MILKING.md](REGISTRY_MILKING.md) §2. The general rule: `registry_lactations` is a projection the rebuild drops and recreates, so a record must never carry a foreign key into it.
 
 ### Canonical ordering
 
@@ -365,7 +367,7 @@ Output is a small table — per animal: parity, each interval, its quality, curr
 |---|---|
 | **Agent tools over the registry** | v1 is a service layer. Pure-core / DB-shell (§4) makes wrapping mechanical later. **This is also the fork's merge point (§2.5)** — when tools arrive, the demo `animals` table is retired in the same cycle. Reads unrestricted, writes confirmation-gated `WRITE_EXECUTOR`; `record_calving` must be gated, it creates an animal. |
 | **Sheet transcription** | Out of v1. It is the first real justification for vision and reuses the confirmation gate, but it should be built against a schema that has survived manual entry of a real herd. |
-| **Yield capture** | Step 4, as `registry_milkings` — `milkings.animal_id` FKs the demo table (§2.5). Hangs off `registry_lactations.id`, which is why §5's stability decision matters now. |
+| **Yield capture** | Step 4, as `registry_milkings` — `milkings.animal_id` FKs the demo table (§2.5). **Built; see [REGISTRY_MILKING.md](REGISTRY_MILKING.md).** It does *not* hang off `registry_lactations.id` — that plan was wrong and §5's correction note says why. |
 | **Breeding, heat, cycle prior** | Step 5. Also seasonally gated: most heats fall September–January, so anything built now is evaluated against an empty season. |
 | **Null-observation events** | Belongs with transcription (step 3); the source is the signed round on the daily sheet. Reserved in the taxonomy. Cite the Cycle 5 camera-silence finding when it is built — same insight, human domain. |
 | **`event_links` / `getAnimalTimeline`** | `farm_events.identity` holds people, never animals. Nothing to link to. |

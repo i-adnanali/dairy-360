@@ -3,6 +3,11 @@
 **Implements:** [ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md](ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md) · **Baseline tag:** `v0.10.0`
 **Scope:** animals, parentage, status projection (step 1); lactations and calvings (step 2)
 
+Two siblings carry what came after: the entry surface is
+[REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md), and per-animal milk yield (step 4) is
+[REGISTRY_MILKING.md](REGISTRY_MILKING.md). Where any of the three disagrees with the code, the code
+is right and the document is stale.
+
 A registry layer holding **real animals from the real farm**, structured as an append-only event log with rebuildable projections over it, living alongside the existing demo tables without touching them.
 
 ---
@@ -39,7 +44,7 @@ The decisive reason it *cannot* extend `animals`: `resetSchema()` ([db.ts](../se
 
 **The tools cycle.** When the agent gets `get_animal` / `get_lactation_history` over the registry, the demo `animals` table becomes redundant: `list_animals`, `search_animals`, `add_animal` and `guardIds()` get repointed, the demo fixtures move to `registry_*` seed data or are deleted, and the regression suite's assertions are rewritten once. Do that as one deliberate cycle, not incrementally.
 
-Until then the fork will widen before it closes. Step 4 (yield) will hit it: `milkings.animal_id` has a foreign key to the demo `animals`, so real yield cannot go there and step 4 gets `registry_milkings`.
+Until then the fork widens before it closes, and step 4 (yield) is where it did: `milkings.animal_id` has a foreign key to the demo `animals`, so real yield could not go there and step 4 got its own `registry_milkings`. Volume turned out to be a second and independent reason — see [REGISTRY_MILKING.md](REGISTRY_MILKING.md) §3.
 
 Serial format helps here — `BD-0001` cannot collide with `animal_<8hex>`, so if the tables are ever merged the two id spaces stay unambiguous.
 
@@ -55,14 +60,21 @@ If `farm_events` ever holds real camera rows alongside synthetic ones, that colu
 
 ## Decision 1 — Registry tables are `registry_*` in one database
 
-Six tables, all prefixed, all disjoint from the demo tables:
+Seven tables, all prefixed, all disjoint from the demo tables:
 
 ```
 registry_animals            registry_lactations        registry_serial_counter
 registry_animal_events      registry_parentage         registry_animal_status
+registry_milkings
 ```
 
-The prefix goes on all six, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
+`registry_milkings` arrived with step 4 (migration 3) — see
+[REGISTRY_MILKING.md](REGISTRY_MILKING.md). It is a **record**, not a projection:
+the rebuild never touches it, because nothing in it is derivable from the event
+log. It is also the only registry table that permits `DELETE`, and that
+divergence is argued where it is declared.
+
+The prefix goes on all seven, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
 
 **No registry table has a foreign key to a demo table, and none ever may.** `resetSchema()` drops the demo tables children-first, which is the only reason `foreign_keys = ON` does not abort it; a registry → demo foreign key would start failing that DROP and would couple the two lifecycles.
 
@@ -113,6 +125,19 @@ Three things it needed, each verified before it was written:
 - **`applyRegistrySchema()` re-asserts the pragmas after migrating**, because a `rebuildsTables` migration is now something that can leave the connection wrong.
 
 The v1 → v2 upgrade is tested **with data present**, including a superseding row that exercises the self-FK during the copy, even though the real database was empty when it shipped.
+
+### Migration 3 — the milking table
+
+A plain `CREATE TABLE`, so no `rebuildsTables` and no foreign-keys relaxation: nothing existing is
+touched. It is the cheap kind of migration, and it is worth naming the contrast — migration 2 had to
+rebuild `registry_animal_events` to add one CHECK, which is why that one was done while the table was
+empty. See [REGISTRY_MILKING.md](REGISTRY_MILKING.md) §7 for the schema and the reasoning behind each
+constraint.
+
+**The `override`-to-column move did NOT ride along**, though `REGISTRY_ENTRY_UX.md` §11 says to bundle
+it into whichever migration lands next. It rebuilds a different table, and bundling would have put two
+unrelated schema changes behind one review for no shared work. The rule is unchanged — do not migrate
+for it alone — so it waits for migration 4.
 
 **Never reorder, edit, or remove an applied migration.** A database already at version N will not re-run entries below N, so an edit silently produces two different schemas depending on when the database was created.
 
@@ -663,24 +688,36 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 | GET | `/animals` | herd table: identity + derived status + effective event count |
 | GET | `/animals/:id` | one animal, its status, and its **full** event list |
 | GET | `/animals/:id/calvings` | the correction picker's source |
+| GET | `/animals/:id/milkings` | one animal's yield, each row's lactation **derived** rather than stored |
 | GET | `/link-candidates?dam=&calf_sex=&occurred_on=&date_precision=` | link-mode picker |
 | GET | `/dam-candidates` | females, departed ones marked |
+| GET | `/duplicate-candidates?name=&post_no=&tag_no=&sex=&exclude_id=` | near-duplicate animals; a soft signal no write consults |
+| GET | `/identifier-values` | previously-used `observed_by` / `acquired_from` / `sire_ref`, for the datalists |
+| GET | `/milking/roster?on=&session=` | who was in milk on that date, with days-in-milk and the comparable session |
 | GET | `/storage` | which database this router writes to |
-| GET | `/verification?as_of=` | invariants, histogram, intervals |
+| GET | `/verification?as_of=` | invariants, histogram, intervals, milk completeness |
 | POST | `/animals` | `addAcquiredAnimal` |
 | POST | `/events` | `appendLifeEvent` |
 | POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |
 | POST | `/calvings/:eventId/correction` | `correctCalving` |
+| POST | `/milking/session` | one whole session, all rows or none |
+| POST | `/milking/session/delete` | remove a session, or one animal's row in it — the only `DELETE` any route exposes |
 | POST | `/rebuild` | `registry:rebuild` |
 
 `registryRouter` is a **factory taking a `db` handle**, unlike `farmRouter` which is a const importing the singleton. That is what lets the harness serve the same routes over `:memory:`.
 
-### Every event-appending route requires an `Idempotency-Key`
+### Every WRITING route requires an `Idempotency-Key`
 
-The four `POST`s above that append events — `/animals`, `/events`, `/calvings` and
-`/calvings/:eventId/correction` — refuse a request without the header, with a 400 and
-`missing_idempotency_key`. `/rebuild` does not, because a rebuild appends nothing: it recomputes
-projections from the log, so running it twice lands on the same rows, which is invariant 0.
+Six of the `POST`s above — `/animals`, `/events`, `/calvings`,
+`/calvings/:eventId/correction`, `/milking/session` and `/milking/session/delete` — refuse a request
+without the header, with a 400 and `missing_idempotency_key`. `/rebuild` does not, because a rebuild
+appends nothing: it recomputes projections from the log, so running it twice lands on the same rows,
+which is invariant 0.
+
+This heading used to read "every EVENT-APPENDING route", which the milking routes broke: they write
+a measurement table and append nothing. The rule was never about events — it is about any request
+that changes state and could arrive twice, and the roster is a dozen numbers typed in one go, which
+is exactly the shape of thing that gets double-submitted.
 
 **Double-submit was proven, not suspected.** The same payload posted twice minted `BD-0001` and
 `BD-0002`; identical notes and identical dry-offs each appended two events. The client disabled its
@@ -989,6 +1026,12 @@ npm run verify:registry  -w server
 | 11 | `month` rows dated the 1st; `year` rows dated Jan 1 |
 | 12 | `occurred_time` null wherever precision ≠ `day` |
 | 13 | `resetSchema()`'s DROP list and `SCHEMA` contain no `registry_` table |
+| 14 | Every milking falls inside a lactation covering its date |
+| 15 | No milking after a `departure` |
+| 16 | One milking row per animal per date per session |
+| 17 | A milking is `measured` if and only if it carries a number; a reason only with `not_milked` |
+
+14 and 15 are the two that **cannot** be constraints, because they depend on the projection and the projection MOVES: a backdated dry-off or a late-entered calving re-cuts a lactation boundary under rows that were legitimate when written. That is the one place a milk row and the event log can drift apart, and only recomputing can see it.
 
 **Invariant 1 is a multiset comparison under a canonical row key, not a byte comparison.** SQLite files differ in page layout, freelists and WAL state for identical content, so a file hash would fail for reasons that mean nothing. This is the same approach [verify.ts](../server/src/farm/verify.ts) already uses for farm events.
 

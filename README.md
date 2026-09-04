@@ -65,8 +65,10 @@ A third surface, `/api/registry`, is not part of the agent at all: it is the
 rebuildable projections, served to a transcription UI that is the app's root
 route. It has no agent tools yet, deliberately. Its schema, entry rules, date-
 precision conventions and known gaps are in
-[docs/REGISTRY.md](docs/REGISTRY.md), which is the only description of them —
-this README does not restate it.
+[docs/REGISTRY.md](docs/REGISTRY.md); the entry surface is
+[docs/REGISTRY_ENTRY_UX.md](docs/REGISTRY_ENTRY_UX.md) and per-animal milk yield
+is [docs/REGISTRY_MILKING.md](docs/REGISTRY_MILKING.md). Those three are the only
+description of any of it — this README does not restate them.
 
 Those rows are then **read for meaning**: a deterministic classifier scores each
 event `routine` / `notable` / `urgent` from zone, time of day, face confidence,
@@ -178,8 +180,8 @@ of failing obscurely.
   over an **in-memory** fixture herd, so the entry UI can be driven without a
   synthetic row reaching the real database. The explicit port matters; see
   [docs/REGISTRY.md](docs/REGISTRY.md). `harness:app` wraps this.
-- `npm run verify:registry -w server` — invariants, precision histogram and
-  calving intervals against the live registry.
+- `npm run verify:registry -w server` — invariants, precision histogram, calving
+  intervals and milk-record completeness against the live registry.
 - `npm run registry:rebuild -w server` — recompute the registry's projection
   tables from its event log.
 - `npm run simulate:farm -w server -- --all --days-ago=14` — replay synthetic

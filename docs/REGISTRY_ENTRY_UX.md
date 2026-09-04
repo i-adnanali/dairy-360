@@ -244,7 +244,8 @@ most serious finding of the validation pass. Fixed in `v0.13.0`; see §6.1.
 
 ## 5. The screens
 
-Navigation changes from `Add animal / Record calving / Herd / Check` to `Roster / Herd / Check`,
+Navigation changes from `Add animal / Record calving / Milking / Herd / Check` to
+`Roster / Milking / Herd / Check`,
 with the animal workbench reached from either list.
 
 ### 5.1 Roster pass
@@ -886,7 +887,7 @@ opened on the survivor — so every `rebuildAnimals(db, { animalIds: [id] })` ca
 silently produce a stale survivor. One piece of luck: lactation ids derive from the opening calving
 event id, so they stay stable across a merge.
 
-The decisive argument for deferring is recovery cost. With five tables at zero rows, a bad duplicate
+The decisive argument for deferring is recovery cost. With the registry tables at zero rows, a bad duplicate
 in session one is repaired by dropping the file and re-entering twenty animals — an evening. Merge
 becomes worth its size when re-entry costs more than building it. Until then, prevention (§6.2,
 §6.3, §6.5) is the cheaper protection.

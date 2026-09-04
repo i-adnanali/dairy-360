@@ -273,6 +273,12 @@ build:shared
   └─ angular   ng serve
 ```
 
+The seed is an **HTTP client, not a fixture module**, and every row goes in
+through the real write path — so it cannot express a herd the production code
+would refuse. Measured, not asserted: its first milk version computed a yield
+from `id.charCodeAt(8)`, which is `NaN` on a seven-character serial like
+`BD-0001`; it serialized to `null` and the write boundary refused it by name.
+
 `concurrently` does not order its processes, so the seed polls for the harness
 rather than assuming it won. Measured from cold: the seed logged
 `http://localhost:4000/api/registry` before the harness had bound the port,
@@ -294,6 +300,8 @@ What lands, and why each row is there:
 | dates | `day`, `month`, `year` and `estimated`, across `recall`, `cycle_card` and `daily_herd_sheet` |
 | names / post nos. / ear tags | close enough to trip the near-duplicate warning by typing `Kali`, `Noor`, post `3` or tag `pk-4412` |
 | intervals | 2 `measured` (523, 538 d) and 5 `approximate` (487–550 d), reported separately |
+| milk | 5 sessions over the last 3 days across the 6 animals in milk — **one deliberately incomplete** (4 of 6 recorded) and one `not_milked` with a reason, so `/check`'s completeness panel has something other than a green wall to show |
+| milkers | `abdul` on mornings, `imran` on evenings, so `observed_by` on a milk row reaches the datalist |
 
 **This is not the same dummy data as `npm run seed`, and the two are
 deliberately separate systems.** Confusing them is the likeliest first mistake:
@@ -534,14 +542,14 @@ then `FARM_SCHEMA` and the migration runner apply.
 after the first server start, before any seed:
 
 ```
-user_version = 2
+user_version = 3
 tables: farm_events, registry_animal_events, registry_animal_status,
-        registry_animals, registry_lactations, registry_parentage,
-        registry_serial_counter
+        registry_animals, registry_lactations, registry_milkings,
+        registry_parentage, registry_serial_counter
 ```
 
-Both registry migrations applied; the six `registry_*` tables exist and are
-empty. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
+All three registry migrations applied; the seven `registry_*` tables exist and
+are empty. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
 `feed_inventory`, `health_events`. Those are `resetSchema()`'s tables and only
 `seed()` creates them.
 
