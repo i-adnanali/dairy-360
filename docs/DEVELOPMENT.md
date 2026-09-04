@@ -10,6 +10,14 @@ Checked against `package.json` (root, `server/`, `web-angular/`, `shared/`),
 `.nvmrc`, `web-angular/proxy.conf.json` and `web-angular/angular.json`. Where
 this document and those files disagree, they are right and this is stale.
 
+**Scope, against the README.** This document owns setup, the two run loops, the
+test suites (including the four live-model regression splits), the registry CLI
+and backups — with the *why* and the failure modes. The README's
+[Command reference](../README.md#command-reference) owns the operational surface
+this one does not cover: farm-event ingestion and classification, the live-camera
+captures, and the Langfuse stack. Neither file is a superset of the other, and
+neither should grow into one.
+
 **Re-run on 2026-09-03 at `06034d9`:** § 6's new one-command subsection in full,
 plus `npm install`, `build:shared`, `typecheck`, `build -w server`,
 `build:angular` and both test suites — which is what corrected the two test

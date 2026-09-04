@@ -19,6 +19,9 @@ service/A2A, no orchestrator LLM, no auth) is documented in
 ![Digest table returned by the agent](docs/images/digest_table.png)
 ![Milk-yield chart with hover interaction](docs/images/chart_hover_demo.gif)
 
+**Just want to see it run?** `npm run harness:app` — [one command, no key, no
+database](#just-looking-one-command-no-key-no-database).
+
 It is built as an npm-workspaces monorepo with an **Angular frontend** backed by
 one Express server:
 
@@ -87,6 +90,80 @@ three tools over that layer (`get_farm_events`, `summarize_daily_activity`,
 `flag_anomaly`) and does the narrating; no model call happens inside the
 classifier. See [docs/FARM_MONITOR.md](docs/FARM_MONITOR.md).
 
+## How this demonstrates assistant → agent
+
+This demo is built to make four principles **observably true** in the running
+app. Here is exactly where each one lives in the code. The same four are covered
+at more depth in [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) §§4–7, and
+at source-line depth in [docs/TECHNICAL.md](docs/TECHNICAL.md) §§1–3.
+
+### 1. The agent loop (interpret → execute → digest)
+
+The model's native tool-calling drives everything — there is no hand-written
+intent parsing. The loop in
+[`server/src/agent/stream.ts`](server/src/agent/stream.ts) sends the conversation
+and tool schemas to the model, runs whatever tools it calls, feeds results back,
+and repeats until the model stops calling tools and writes the final answer. Tool
+schemas live in [`server/src/tools/index.ts`](server/src/tools/index.ts) and the
+system prompt (with a live farm catalog injected) in
+[`server/src/agent/systemPrompt.ts`](server/src/agent/systemPrompt.ts).
+
+The one deliberate, narrow exception to "no hand-written intent parsing" is the
+**dispatcher** ([`server/src/agent/dispatch.ts`](server/src/agent/dispatch.ts)):
+per turn it selects which agent — `dairy`, `vendor`, or `both` (the safe
+default) — sees the turn, and the loop offers only that agent's tools + system
+prompt. It only *routes*; each agent still reasons over its own tools exactly as
+above. Reconciliation (`get_yield_vs_deliveries`) is offered only to `both`,
+since it's the one tool that spans both domains.
+
+### 2. Read/write split (writes are human-gated)
+
+Read tools (dairy: [`server/src/tools/reads.ts`](server/src/tools/reads.ts);
+vendor: [`server/src/tools/vendorReads.ts`](server/src/tools/vendorReads.ts))
+execute automatically inside the loop. Write tools (dairy:
+[`server/src/tools/writes.ts`](server/src/tools/writes.ts); vendor:
+[`server/src/tools/vendorWrites.ts`](server/src/tools/vendorWrites.ts)) never run
+on their own: when the model calls one, `runAgentStream` **pauses** and emits a
+`PendingWrite` confirmation card (via the `agent.pending` CUSTOM event). Nothing is written until the
+user approves; the resume path executes only the approved writes and records a
+"declined" tool result for the rest. Re-sending the same approval does not
+double-write, because the server is stateless and only mutates on an explicit
+approval decision in that request. Both agents share this exact pause/resume
+mechanism.
+
+### 3. Display data is not reasoning data
+
+`get_milk_yield` runs through the digest shaper in
+[`server/src/tools/shaper.ts`](server/src/tools/shaper.ts). The **full time
+series** (every bucket) is shipped to the client as a `Dataset` and rendered as
+a chart — it **never enters the model's context**. The model receives only a
+small **digest** (totals, mean, min/max, first/last, period-over-period %). You
+can watch this in Langfuse: each read tool call is traced as its own observation,
+with the model digest (not the raw rows) recorded as its output.
+
+### 4. Wrong cheaply, never expensively
+
+- **Bad args → structured errors the model can retry.** Read tools return
+  `{ error: ... }` digests (e.g. `missing_scope`, `unknown_group`) instead of
+  throwing.
+- **Hallucinated IDs are blocked for free.** The ID-integrity guard
+  (`guardIds` in [`server/src/tools/index.ts`](server/src/tools/index.ts)) checks
+  every `animal_id`/`group`/`vendor_id`/`delivery_id` against the DB *before* any
+  tool runs.
+- **Oversized requests are capped deterministically.** The shaper coarsens
+  `day → week` past 90 days and `→ month` past a year before doing any work, so a
+  huge range can't blow up the dataset or the digest.
+- **The loop is bounded.** `max_tokens` per call and a max-iteration cap (with a
+  graceful "narrow it down" message) live in `stream.ts`.
+
+## Scale design
+
+The herd is ~14 animals, so the full catalog fits cheaply in the system prompt.
+But `search_animals` is already implemented with a top-K bound (8) and a
+`tooMany` flag, and `buildSystemPrompt` will omit the inline animal list and
+steer the model to `search_animals` once the herd exceeds a threshold (300).
+The seam is wired even though the demo never crosses it.
+
 ## Documentation
 
 **[docs/README.md](docs/README.md) is the index.** It separates *reference* (what
@@ -97,7 +174,7 @@ The three you are most likely to want:
 
 - **[docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md)** — how the system fits
   together: the agentic workflow end to end, the data model, the wire contract.
-  This README summarises it below; that document is the full version.
+  This README summarises it above; that document is the full version.
 - **[docs/TECHNICAL.md](docs/TECHNICAL.md)** — the loop internals, the eight
   guardrails, and the tool contracts, at source-line depth.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — setup, test, run and backups,
@@ -172,77 +249,31 @@ separate surface over real herd records and is documented in
 [docs/REGISTRY.md](docs/REGISTRY.md) — including how to run it against fixture
 data instead of the real database.
 
-**[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) is the verified long form of this
-section** — the Node floor and what ignores it, why `.env` is copied twice, the
-two run loops and how to tell which one you are in, the registry CLI, the
-fresh-clone path, and what a skipped test suite does and does not prove. Every
-command in it was run; the handful that could not be are marked unverified.
+**[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) is the verified long form of setup**
+— the Node floor and what ignores it, why `.env` is copied twice, the two run
+loops and how to tell which one you are in, the registry CLI, the fresh-clone
+path, and what a skipped test suite does and does not prove. Every command in it
+was run; the handful that could not be are marked unverified.
+
+The two files own different halves and neither contains the other: the **registry
+CLI** (`registry:add`, `registry:calve`, `registry:event`,
+`registry:correct-calving`) and the **four regression suites** are documented only
+there; the **camera, ingestion and Langfuse** commands only here. The
+[Command reference](#command-reference) below is the operational cheat sheet.
 
 `GET /api/health` returns `{ status: "ok", seeded: true, anthropicKey: <bool> }`
 once the DB is seeded. If you start the server before seeding, the health check
 and agent endpoint return a friendly "run `npm run seed` first" message instead
 of failing obscurely.
 
-### Useful scripts
-
-- `npm run seed -w server` — recreate and seed `server/dairy.db` (fixed RNG, so
-  the data — and the milk-yield trend — is reproducible).
-- `npm run typecheck` — typecheck shared + server.
-- `npm run build:angular` — build shared + the Angular frontend.
-- `npm test -w server` — the digest shaper, the farm event normalizers, the
-  event classifier, and the animal registry (schema, migrations, the calving
-  transaction, projections, invariants, HTTP routes). No DB file or API key
-  needed: the registry suites run against `:memory:` and write nothing to disk.
-- `npm test -w web-angular` — Vitest unit tests for the Angular frontend.
-- `npm run harness:app` — **the whole app over dummy data, in one command.**
-  Harness on `:4000` (in-memory), a 31-animal herd seeded into it, Angular on
-  `:4200`. Touches no real database and needs no API key. See
-  [docs/DEVELOPMENT.md § 6](docs/DEVELOPMENT.md).
-- `npm run harness:seed` — re-seed a harness that is already running. Every
-  write carries a fixed `Idempotency-Key`, so a second run replays and changes
-  nothing.
-- `npm run harness:serve` — serve the **production** bundle (`npm run
-  build:angular` first) with a `/api` proxy and an SPA fallback, which
-  `ng serve` provides in development and a static host does not.
-- `npm run registry:harness -w server -- --port=4000` — serve the registry API
-  over an **in-memory** fixture herd, so the entry UI can be driven without a
-  synthetic row reaching the real database. The explicit port matters; see
-  [docs/REGISTRY.md](docs/REGISTRY.md). `harness:app` wraps this.
-- `npm run verify:registry -w server` — invariants, precision histogram, calving
-  intervals and milk-record completeness against the live registry. Add
-  `-- --db=backups/<file>.db` to check a **backup** instead, read-only.
-- `npm run registry:rebuild -w server` — recompute the registry's projection
-  tables from its event log.
-- `npm run registry:backup -w server` — snapshot the registry's four
-  irreplaceable record tables to `server/backups/`, as both a `VACUUM INTO` file
-  and a diffable `.sql` dump. Also runs automatically before any migration. See
-  [docs/DEVELOPMENT.md § 8](docs/DEVELOPMENT.md).
-- `npm run simulate:farm -w server -- --all --days-ago=14` — replay synthetic
-  camera events through the ingestion webhooks (needs the server running).
-- `npm run verify:farm -w server` — prove every farm scenario lands correctly in
-  `farm_events` (needs the server running).
-- `npm run verify:classify -w server` — prove every farm scenario is
-  *classified* correctly: severities, attendance gaps, camera silence (needs the
-  server running).
-- `npm run capture:frigate -w server -- --minutes=120` — capture live Frigate
-  MQTT events to a gitignored JSONL file (needs the Frigate stack running).
-- `npm run verify:payload -w server -- --capture=<file>` — diff a real capture
-  against the payload shape documented in `docs/FARM_EVENTS.md`.
-- `npm run enroll:synthetic -w server` — enrol the single **synthetic** face for
-  the Double Take validation window, restart the detector, and verify
-  recognition actually resolves it (see `double-take/enroll/README.md`).
-- `npm run capture:doubletake -w server -- --minutes=20` — capture live Double
-  Take MQTT payloads. Redacts image bytes on the write path, and refuses to
-  start unless the enrolment gallery holds exactly the synthetic subject.
-- `npm run verify:payload:dt -w server -- --capture=<file>` — diff a Double Take
-  capture against the documented shape. None of these five opens `dairy.db`.
-
 ## Command reference
 
-A consolidated cheat sheet for starting and stopping everything — the frontend,
-the backend, and the self-hosted Langfuse Docker stack. See
-[Setup & run](#setup--run) for the first-time flow and
-[Observability](#observability-langfuse) for what the Langfuse stack is.
+Every command worth running, grouped by task: the app, build and test, dummy
+data, the registry, farm-event ingestion and classification, and the self-hosted
+Langfuse stack. Each appears once. See [Setup & run](#setup--run) for the
+first-time flow, [Observability](#observability-langfuse) for what the Langfuse
+stack is, and [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the registry CLI and
+the regression suites, which are documented only there.
 
 > **Node version first.** The Angular frontend needs Node
 > `^22.22.3 || ^24.15.0 || >=26`. If you use `nvm`, the repo pins a version in
@@ -265,6 +296,22 @@ npm run dev -w server
 lsof -tiTCP:4000 -sTCP:LISTEN | xargs -r kill
 lsof -tiTCP:4200 -sTCP:LISTEN | xargs -r kill
 ```
+
+### Build, typecheck, test
+
+```bash
+npm run typecheck            # shared + server
+npm run build:angular        # shared + the Angular frontend
+
+npm test -w server           # digest shaper, farm normalizers, classifier, registry
+npm test -w web-angular      # Vitest unit tests for the frontend
+```
+
+> `npm test -w server` needs no DB file and no API key — the registry suites run
+> against `:memory:` and write nothing to disk. The **live-model regression
+> suites** (`test:regression`, and the `:core` / `:cap` / `:fallback` splits) do
+> need a key and are documented in [docs/DEVELOPMENT.md § 5](docs/DEVELOPMENT.md);
+> a skipped run is not a pass.
 
 ### Dummy data — the app with a herd in it, and no real database
 
@@ -302,6 +349,31 @@ screens** — registry vs the six demo tables, entry UI vs the agent chat. Under
 `harness:app` the chat at `/chat` will report unseeded, which is correct. The
 comparison is in [docs/DEVELOPMENT.md § 6](docs/DEVELOPMENT.md).
 
+### Registry — the real records
+
+```bash
+# serve the registry API over an in-memory fixture herd; the explicit port matters
+npm run registry:harness -w server -- --port=4000
+
+# invariants, precision histogram, calving intervals, milk-record completeness
+npm run verify:registry -w server
+# ...against a backup instead, read-only
+npm run verify:registry -w server -- --db=backups/<file>.db
+
+# recompute the projection tables from the event log
+npm run registry:rebuild -w server
+
+# snapshot the four irreplaceable tables (VACUUM INTO + a diffable .sql dump)
+npm run registry:backup -w server
+```
+
+> `registry:backup` also runs automatically before any migration; see
+> [docs/DEVELOPMENT.md § 8](docs/DEVELOPMENT.md). `harness:app` wraps
+> `registry:harness`. Entering and correcting records from the CLI —
+> `registry:add`, `registry:calve`, `registry:event`, `registry:correct-calving`
+> — is in [docs/DEVELOPMENT.md § 7](docs/DEVELOPMENT.md) and
+> [docs/REGISTRY.md](docs/REGISTRY.md).
+
 ### Status / health checks
 
 ```bash
@@ -333,57 +405,22 @@ npm run verify:farm -w server
 > finishes, so it leaves the table empty. It does not touch the dairy tables,
 > and `npm run seed -w server` does not touch `farm_events`.
 
-### Live camera payload validation (Cycle 7 step 1)
+### Live camera validation (Cycle 7)
 
-Captures **real** Frigate events off MQTT and diffs their shape against the
-payload documented in [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md). Needs the
-throwaway Frigate stack, not the app server; see
-[docs/cycle-7-live-camera-validation.md](docs/cycle-7-live-camera-validation.md).
+Captures **real** Frigate and Double Take events off MQTT and diffs their shape
+against the payload documented in [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
+Hardware-gated, run once per window, and destructive to set up — so the full
+procedure lives with the record of the run rather than here:
 
-```bash
-# camera address + RTSP credentials go in .env (see .env.example)
-cp frigate/config.example.yml frigate/config.yml
-docker compose -f docker-compose.frigate.yml up -d
-# confirm the feed decodes at http://localhost:5000 before spending a window
+- Frigate — [docs/cycle-7-live-camera-validation.md § To run the capture](docs/cycle-7-live-camera-validation.md)
+  (`capture:frigate`, `verify:payload`)
+- Double Take — [docs/Cycle7-fu3-double-take-validation.md § To run the capture](docs/Cycle7-fu3-double-take-validation.md)
+  (`enroll:synthetic`, `capture:doubletake`, `verify:payload:dt`)
 
-# short sanity run first, then a real window
-npm run capture:frigate -w server -- --minutes=5 --max=20
-npm run capture:frigate -w server -- --minutes=120
-
-# produce the deltas list
-npm run verify:payload -w server -- --capture=server/captures/<file>.jsonl
-
-# the stack must not outlive the test window
-docker compose -f docker-compose.frigate.yml down -v
-```
-
-Double Take face-payload validation (Cycle 7 FU-3) runs on the same stack:
-
-```bash
-cp double-take/config.example.yml double-take/config.yml
-# put ONE synthetic (machine-generated) portrait at
-# double-take/enroll/synthetic_1.jpg — see double-take/enroll/README.md for why
-# it must not be a photo of a real person, and what provenance to record
-docker compose -f docker-compose.frigate.yml up -d
-
-npm run enroll:synthetic -w server          # enrols, restarts, verifies
-npm run capture:doubletake -w server -- --minutes=20
-npm run verify:payload:dt -w server -- --capture=server/captures/<file>.jsonl
-
-docker compose -f docker-compose.frigate.yml down -v   # destroys embeddings too
-```
-
-> Neither `capture:frigate` nor `verify:payload` opens `dairy.db` — captures land
-> in gitignored JSONL under `server/captures/` and are normalized in memory,
-> enforced by `captureIsolation.test.ts` rather than by convention.
->
-> That is *why* captures are files. `verify:farm` and `verify:classify` both call
-> an unscoped `DELETE FROM farm_events`, so had captures been persisted as rows,
-> either script would have wiped them mid-window. Keeping them out of the
-> database makes the two suites harmless to a capture instead of hazardous.
->
-> `--topic='frigate/#'` is the discovery fallback if nothing arrives on
-> `frigate/events`.
+Both carry caveats this section used to omit — the DeepStack restart without
+which every face resolves as unknown and the window is wasted, and
+`--topic='frigate/#'` for topic discovery when nothing arrives. Neither stack
+may outlive its capture window; both teardowns take `-v`.
 
 ### Farm event classification
 
@@ -479,80 +516,6 @@ What gets traced, per turn:
 
 If the `LANGFUSE_*` keys are unset, tracing is silently disabled and the agent
 runs normally.
-
-## How this demonstrates assistant → agent
-
-This demo is built to make four principles **observably true** in the running
-app. Here is exactly where each one lives in the code. The same four are covered
-at more depth in [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) §§4–7, and
-at source-line depth in [docs/TECHNICAL.md](docs/TECHNICAL.md) §§1–3.
-
-### 1. The agent loop (interpret → execute → digest)
-
-The model's native tool-calling drives everything — there is no hand-written
-intent parsing. The loop in
-[`server/src/agent/stream.ts`](server/src/agent/stream.ts) sends the conversation
-+ tool schemas to the model, runs whatever tools it calls, feeds results back,
-and repeats until the model stops calling tools and writes the final answer. Tool
-schemas live in [`server/src/tools/index.ts`](server/src/tools/index.ts) and the
-system prompt (with a live farm catalog injected) in
-[`server/src/agent/systemPrompt.ts`](server/src/agent/systemPrompt.ts).
-
-The one deliberate, narrow exception to "no hand-written intent parsing" is the
-**dispatcher** ([`server/src/agent/dispatch.ts`](server/src/agent/dispatch.ts)):
-per turn it selects which agent — `dairy`, `vendor`, or `both` (the safe
-default) — sees the turn, and the loop offers only that agent's tools + system
-prompt. It only *routes*; each agent still reasons over its own tools exactly as
-above. Reconciliation (`get_yield_vs_deliveries`) is offered only to `both`,
-since it's the one tool that spans both domains.
-
-### 2. Read/write split (writes are human-gated)
-
-Read tools (dairy: [`server/src/tools/reads.ts`](server/src/tools/reads.ts);
-vendor: [`server/src/tools/vendorReads.ts`](server/src/tools/vendorReads.ts))
-execute automatically inside the loop. Write tools (dairy:
-[`server/src/tools/writes.ts`](server/src/tools/writes.ts); vendor:
-[`server/src/tools/vendorWrites.ts`](server/src/tools/vendorWrites.ts)) never run
-on their own: when the model calls one, `runAgentStream` **pauses** and emits a
-`PendingWrite` confirmation card (via the `agent.pending` CUSTOM event). Nothing is written until the
-user approves; the resume path executes only the approved writes and records a
-"declined" tool result for the rest. Re-sending the same approval does not
-double-write, because the server is stateless and only mutates on an explicit
-approval decision in that request. Both agents share this exact pause/resume
-mechanism.
-
-### 3. Display data is not reasoning data
-
-`get_milk_yield` runs through the digest shaper in
-[`server/src/tools/shaper.ts`](server/src/tools/shaper.ts). The **full time
-series** (every bucket) is shipped to the client as a `Dataset` and rendered as
-a chart — it **never enters the model's context**. The model receives only a
-small **digest** (totals, mean, min/max, first/last, period-over-period %). You
-can watch this in Langfuse: each read tool call is traced as its own observation,
-with the model digest (not the raw rows) recorded as its output.
-
-### 4. Wrong cheaply, never expensively
-
-- **Bad args → structured errors the model can retry.** Read tools return
-  `{ error: ... }` digests (e.g. `missing_scope`, `unknown_group`) instead of
-  throwing.
-- **Hallucinated IDs are blocked for free.** The ID-integrity guard
-  (`guardIds` in [`server/src/tools/index.ts`](server/src/tools/index.ts)) checks
-  every `animal_id`/`group`/`vendor_id`/`delivery_id` against the DB *before* any
-  tool runs.
-- **Oversized requests are capped deterministically.** The shaper coarsens
-  `day → week` past 90 days and `→ month` past a year before doing any work, so a
-  huge range can't blow up the dataset or the digest.
-- **The loop is bounded.** `max_tokens` per call and a max-iteration cap (with a
-  graceful "narrow it down" message) live in `stream.ts`.
-
-## Scale design
-
-The herd is ~14 animals, so the full catalog fits cheaply in the system prompt.
-But `search_animals` is already implemented with a top-K bound (8) and a
-`tooMany` flag, and `buildSystemPrompt` will omit the inline animal list and
-steer the model to `search_animals` once the herd exceeds a threshold (300).
-The seam is wired even though the demo never crosses it.
 
 ## Out of scope
 
