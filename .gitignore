@@ -24,9 +24,10 @@ dist/
 # Reason 1 is listed first on purpose: if this repo ever goes private, reason 2
 # stops applying and reason 1 still decides it.
 #
-# Off-machine copies go to the separate PRIVATE backup repo instead --
-# ~/dairy-registry-backups, filled daily by scripts/backup-daily.sh.
-# See docs/DEVELOPMENT.md § 8.
+# Copies go to the separate backup repo instead -- ~/dairy-registry-backups,
+# filled daily by scripts/backup-daily.sh. That repo is LOCAL ONLY today: it gives
+# per-day history but no protection against losing the machine. If it is ever
+# given a remote, that remote must be PRIVATE. See docs/DEVELOPMENT.md § 8.
 server/backups/
 
 # Cycle 7 live-camera capture artifacts + local Frigate config.

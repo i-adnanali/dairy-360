@@ -590,21 +590,48 @@ downtime and writes a consistent, fully-checkpointed file. Its output is **not**
 in WAL mode, so unlike `dairy.db` a backup reads fine from a plain read-only
 open — the `immutable=1` trap in § 6 does not apply to these.
 
-### Getting it off the machine
+### Versioned history — running. Off-machine — not yet.
 
-`server/backups/` is on the same disk as `dairy.db`. That protects you from a bad
-migration and a mistaken `DELETE`; it does **not** protect you from losing the
-machine, which is the failure that loses everything at once.
-
-**This is set up and running.** A private git repo holds the text dumps, and a
-`launchd` agent fills it daily:
+Two different protections, and only one of them is in place. Stated separately
+because conflating them is how a backup gets trusted for something it does not do.
 
 | | |
 |---|---|
-| Backup repo | `~/dairy-registry-backups` → [`i-adnanali/dairy-registry-backups`](https://github.com/i-adnanali/dairy-registry-backups) (**private**) |
+| Backup repo | `~/dairy-registry-backups` — a **local** git repo, **no remote** |
 | Script | [`scripts/backup-daily.sh`](../scripts/backup-daily.sh) |
 | Schedule | `com.dairy-agent.registry-backup`, daily at 21:00 Asia/Karachi |
 | Log | `~/Library/Logs/dairy-registry-backup.log`, append-only |
+
+**What this protects against today:**
+
+- a bad migration (the pre-migration hook, below)
+- a mistaken `DELETE`, a wrong correction, a bad rebuild — anything where you need
+  yesterday's records back, which the git history gives you per-day
+- `rm server/dairy.db`
+
+**What it does NOT protect against:** losing the machine. Disk failure, theft, a
+wiped laptop. `~/dairy-registry-backups` is on the same disk as `dairy.db`, so
+that one failure takes both. This is a known, accepted gap — not an oversight.
+
+The job says so on every run, rather than leaving it to be inferred:
+
+```
+[backup-daily] WARNING: no 'origin' remote — the backup is local only
+```
+
+**To close it**, create a private repo and point the local one at it — the script
+picks up the remote with no change:
+
+```bash
+cd ~/dairy-registry-backups
+git remote add origin git@github-personal:i-adnanali/dairy-registry-backups.git
+git push -u origin main
+```
+
+It must be **private**, and on the personal account. The dumps hold real herd
+records, and `i-adnanali` is where this project lives — a work profile is the
+wrong home for a farm's records. (An earlier attempt put it on the wrong account;
+that repo has been deleted, and it only ever held dumps of an empty registry.)
 
 ```bash
 scripts/backup-daily.sh                     # run it by hand, any time
@@ -612,9 +639,11 @@ scripts/backup-daily.sh /some/other/dest    # or into a different repo
 launchctl kickstart -p gui/$(id -u)/com.dairy-agent.registry-backup
 ```
 
-Git, not a synced folder, because the dumps are text: you get deduplicated
-history, an audit trail, and a real diff between any two days. A synced folder
-would give you a mirror, and a mirror faithfully replicates your mistakes.
+Git is the mechanism even while there is no remote, because the dumps are text:
+it is what gives you the per-day history, the audit trail and a real diff between
+any two days. A synced folder — the obvious alternative once a remote is added —
+would give you a mirror instead, and a mirror faithfully replicates your
+mistakes.
 
 **What is tracked, and what is not.** `registry.sql` in that repo is the tracked
 file and is **overwritten every run** — safe precisely because git keeps every
@@ -628,9 +657,11 @@ git diff HEAD~1 -- registry.sql    # what the last run changed
 
 Verified: an added animal and a corrected name show up as exactly two lines.
 
-The stamped `.db` snapshots stay **local**, in `~/dairy-registry-backups/snapshots/`
-and gitignored there. A 460 kB binary committed daily would bloat the repo forever
-and give no readable history, which is the one thing git is here for.
+The stamped `.db` snapshots are **untracked**, in
+`~/dairy-registry-backups/snapshots/` and gitignored there — so they stay on this
+machine even after a remote is added. A 460 kB binary committed daily would bloat
+the repo forever and give no readable history, which is the one thing git is here
+for.
 
 A commit lands on every run, including runs where nothing changed — the
 provenance header carries the timestamp, so the history doubles as proof the job
