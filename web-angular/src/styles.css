@@ -18,6 +18,47 @@ app-root {
   display: block;
 }
 
+/*
+ * Component host elements are `display: inline` by default, and VERTICAL
+ * MARGINS DO NOT APPLY TO INLINE BOXES.
+ *
+ * So every `space-y-*` container holding a component as a direct child was
+ * silently contributing nothing between it and its siblings. On /add the whole
+ * page had collapsed: measured before this rule, the gap between the "Leave the
+ * birth date blank…" paragraph and the `Observed by` label below it was 0px,
+ * and every fieldset was butted against its neighbour.
+ *
+ * That zero gap was reported as the paragraph OVERLAPPING the label. It never
+ * did -- the boxes did not intersect in either state. The label simply had no
+ * top margin, because the margin was applied to an inline box that ignored it.
+ *
+ * Not per-component `styles: [':host{display:block}']`, for the same reason
+ * identifier-input.ts holds the wording for three fields: one place cannot
+ * drift. `app-root` above is the same fix for the same reason and predates this.
+ *
+ * The routed components are deliberately absent. They are never siblings of
+ * anything -- the router inserts them alone after <router-outlet> -- so they
+ * gain nothing, and app-registry-shell in particular carries the flex/height
+ * chain the scroll container depends on. Flex and grid children (the identity
+ * grid on /add, the session bar) are already blockified by CSS, so listing them
+ * here changes nothing and costs nothing.
+ *
+ * ADD NEW REGISTRY COMPONENTS HERE. A missing one fails silently and looks like
+ * a spacing bug, which is exactly how this went unnoticed.
+ */
+app-calf-picker,
+app-chip-group,
+app-correction-form,
+app-duplicate-warning,
+app-event-form,
+app-event-list,
+app-identifier-input,
+app-precision-date,
+app-session-bar,
+app-session-gate {
+  display: block;
+}
+
 /* compact markdown inside assistant bubbles */
 .prose-chat p {
   margin: 0 0 0.5rem;

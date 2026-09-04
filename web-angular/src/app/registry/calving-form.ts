@@ -19,10 +19,11 @@
 // already exist. That is now something the list surfaces rather than something
 // the operator must remember.
 //
-// The picker cannot be populated until the date is known, because eligibility
-// depends on it -- an animal whose own history predates the proposed birth
-// cannot be linked. So the order is still forced: precision, date, then the
-// calf. That is the server's rule, not a UI preference.
+// The picker cannot be populated until the date AND the calf's sex are known,
+// because eligibility depends on both -- an animal whose own history predates
+// the proposed birth cannot be linked, and neither can one recorded as the
+// other sex. So the order is still forced: dam, date, sex, then the calf. That
+// is the server's rule, not a UI preference.
 
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild, viewChildren,
@@ -246,7 +247,27 @@ export class CalvingForm {
 
   protected readonly damId = signal('');
   protected readonly when = signal<DateEntry>({ status: 'empty' });
-  protected readonly calfSex = signal<RegistrySex>('female');
+  /**
+   * NO DEFAULT, and this one is a defect fix rather than a preference.
+   *
+   * `female` was pre-selected here on the same reasoning /add's `sex` carries
+   * one -- a strong prior, a field re-answered on every record. Neither half
+   * holds for a calf. Consecutive acquired animals genuinely arrive in same-sex
+   * runs (a batch purchase); consecutive calvings are a coin flip, so there is
+   * no prior to lean on.
+   *
+   * And the consequence is worse than a wrong column, because this value is not
+   * only recorded -- it FILTERS THE PICKER. `linkCandidates` marks an animal
+   * ineligible when its sex disagrees (reads.ts), so an unanswered default
+   * greys out the right calf and leaves "create a new animal" as the only path
+   * the operator can take. That mints the duplicate CalfPicker exists to
+   * prevent, from a question nobody was asked.
+   *
+   * So it starts null, the picker waits for it alongside the dam and the date,
+   * and it CLEARS after a write -- carrying the last calf's sex forward would
+   * rebuild the same default from record two onward.
+   */
+  protected readonly calfSex = signal<RegistrySex | null>(null);
   protected readonly outcome = signal<CalvingOutcome>('live');
   /** Null until the picker is answered; then an id, or null for "create new". */
   protected readonly calfChoice = signal<CalfChoice>(null);
@@ -257,9 +278,19 @@ export class CalvingForm {
   protected readonly allowDuplicate = signal(false);
   protected readonly overrideReason = signal('');
 
-  /** Eligibility depends on the date, so the picker waits for it. */
+  /**
+   * Eligibility depends on the date AND the sex, so the picker waits for both.
+   *
+   * Sex is a precondition rather than a filter applied afterwards: a list built
+   * without it would show animals the server will refuse, and one built with a
+   * guessed sex would hide animals it will accept. Neither is a list worth
+   * putting in front of someone deciding whether to create a duplicate.
+   */
   protected readonly canLoadCandidates = computed(
-    () => this.damId().length > 0 && this.when().status === 'complete',
+    () =>
+      this.damId().length > 0 &&
+      this.when().status === 'complete' &&
+      this.calfSex() !== null,
   );
 
   protected readonly canSubmit = computed(
@@ -267,6 +298,7 @@ export class CalvingForm {
       !this.state.submitting() &&
       this.damId().length > 0 &&
       this.when().status === 'complete' &&
+      this.calfSex() !== null &&
       this.calfAnswered(),
   );
 
@@ -274,6 +306,8 @@ export class CalvingForm {
     if (this.damId().length === 0) return 'Choose a dam.';
     const d = dateBlocker(this.when(), { label: 'calving date', required: true });
     if (d !== null) return d;
+    // Named before the calf, because it is what the picker is waiting on.
+    if (this.calfSex() === null) return 'Say whether the calf is female or male.';
     if (!this.calfAnswered()) return 'Pick the calf, or say none of these.';
     return null;
   });
@@ -294,7 +328,7 @@ export class CalvingForm {
       const dam = this.damId();
       const w = this.when();
       const sex = this.calfSex();
-      if (dam.length === 0 || w.status !== 'complete') return;
+      if (dam.length === 0 || w.status !== 'complete' || sex === null) return;
       void this.loadCandidates(dam, sex, w.value);
     });
   }
@@ -354,6 +388,10 @@ export class CalvingForm {
   protected async submit(): Promise<void> {
     const entry = this.when();
     if (entry.status !== 'complete') return;
+    // Belt and braces behind the disabled button: an unanswered calf sex must
+    // never reach the wire as a guess.
+    const calfSex = this.calfSex();
+    if (calfSex === null) return;
     const w = entry.value;
     // Re-read candidates on submit in link mode so a stale list cannot be the
     // reason a link is attempted against an animal that has since changed.
@@ -364,7 +402,7 @@ export class CalvingForm {
         occurred_time: w.occurred_time,
         date_precision: w.date_precision,
         calf_id: this.calfChoice(),
-        calf_sex: this.calfSex(),
+        calf_sex: calfSex,
         calf_name: this.calfName(),
         outcome: this.outcome(),
         sire_ref: blank(this.sireRef()),
@@ -382,14 +420,20 @@ export class CalvingForm {
       this.clearCalf();
       this.overrideReason.set('');
       void this.identifiers.refresh();
-      void this.loadCandidates(this.damId(), this.calfSex(), w);
 
       // THE DAM SURVIVES, deliberately. A cycle card is one animal's whole
       // history, so the next calving entered is almost always the same dam's
       // next one -- clearing her would mean re-picking her from a dropdown
       // between every calving, which is the round trip this exists to remove.
+      //
+      // THE CALF SEX DOES NOT, for the reason on its signal. Clearing it also
+      // makes the stale candidate list unreachable rather than merely unshown,
+      // so it is emptied here instead of refetched -- the effect repopulates it
+      // once the dam, the date and the sex are all answered again.
       for (const c of this.dateControls()) c.reset();
       this.when.set({ status: 'empty' });
+      this.calfSex.set(null);
+      this.candidates.set([]);
       this.sireRef.set('');
       this.observedBy.set('');
       this.writeLog.announce(

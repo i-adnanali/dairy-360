@@ -18,6 +18,11 @@ counts in § 5 (410 → **450**, 106 → **196**) and the budget overrun in § 4
 stale; nothing else in this document was re-measured, so anything not listed
 here still carries its original `a6c4842` verification.
 
+**Re-run on 2026-09-04:** `typecheck`, both test suites and `build:angular`,
+which moved § 5 again (450 → **458**, 196 → **198**) and § 4's overrun by the
+~190 bytes of the new host rule in `styles.css` (16.53 → **16.72 kB**). Same
+caveat: nothing else was re-measured.
+
 ---
 
 ## 1. Prerequisites — do this first
@@ -137,7 +142,7 @@ All three ran clean. How to tell each worked:
 treat them as failures:
 
 ```
-▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 16.53 kB ...
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 16.72 kB ...
 ▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
 ```
 
@@ -149,8 +154,8 @@ notice is about `shared/` emitting CJS.
 ## 5. Test
 
 ```bash
-npm test -w server           # 450 tests, node:test via tsx
-npm test -w web-angular      # 196 tests, Vitest (jsdom) via @angular/build:unit-test
+npm test -w server           # 458 tests, node:test via tsx
+npm test -w web-angular      # 198 tests, Vitest (jsdom) via @angular/build:unit-test
 ```
 
 Both green on a fresh clone, and both need **no database file and no API key** —
@@ -159,8 +164,8 @@ whole writes nothing to disk.
 
 | Suite | Expected | Notes |
 |---|---|---|
-| `npm test -w server` | `# tests 450 / # pass 450 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
-| `npm test -w web-angular` | `Test Files 21 passed / Tests 196 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
+| `npm test -w server` | `# tests 458 / # pass 458 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
+| `npm test -w web-angular` | `Test Files 21 passed / Tests 198 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
 
 **`npm test -w web-angular` needs the node version `.nvmrc` pins** — the Angular CLI refuses below
 its floor and runs nothing, so `nvm use` first. See § 1; the failure mode is a green server suite

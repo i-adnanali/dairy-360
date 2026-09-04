@@ -29,9 +29,18 @@ function make(candidates: LinkCandidate[], ready = true) {
 }
 
 describe('CalfPicker', () => {
-  it('says what it is waiting for before the dam and date are known', () => {
+  it('says what it is waiting for before the dam, date and calf sex are known', () => {
     const { el } = make([], false);
-    expect(el.querySelector('[data-role="picker-blocked"]')).not.toBeNull();
+    const blocked = el.querySelector('[data-role="picker-blocked"]')!;
+    expect(blocked).not.toBeNull();
+    // ALL THREE preconditions, named. `ready` gates on dam, date and sex; the
+    // copy used to name only the first two, so with both of those answered the
+    // panel told the operator to do what they had already done. A precondition
+    // list shorter than the real one is the failure this message exists to
+    // prevent.
+    for (const precondition of ['dam', 'calving date', "calf's sex"]) {
+      expect(blocked.textContent).toContain(precondition);
+    }
     expect(el.querySelector('[data-role="candidates"]')).toBeNull();
     // Not even the create-new option: choosing it before the list can be shown
     // would be the old binary with extra steps.

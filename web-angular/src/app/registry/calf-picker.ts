@@ -46,8 +46,9 @@ export type CalfChoice = string | null;
 
       @if (!ready()) {
         <p class="text-sm text-farm-600" data-role="picker-blocked">
-          Choose the dam and the calving date first — which animals can be linked depends on the
-          date, because an animal's birth cannot postdate its own history.
+          Choose the dam, the calving date and the calf's sex first — which animals can be linked
+          depends on all three: an animal's birth cannot postdate its own history, and one recorded
+          as the other sex is not this calf.
         </p>
       } @else {
         <p class="mb-2 text-xs text-farm-600">
@@ -159,7 +160,12 @@ export type CalfChoice = string | null;
 export class CalfPicker {
   /** Server-ranked. This component does not re-sort; the order is a server rule. */
   readonly candidates = input<LinkCandidate[]>([]);
-  /** False until the dam and the date are known, since eligibility needs both. */
+  /**
+   * False until the dam, the date AND the calf's sex are known, since
+   * eligibility needs all three. The blocked message names all three too: a
+   * precondition list that is shorter than the real one tells the operator to
+   * do something they have already done.
+   */
   readonly ready = input(false);
   readonly error = input<string | null>(null);
 

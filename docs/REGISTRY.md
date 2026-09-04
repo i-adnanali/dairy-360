@@ -884,11 +884,13 @@ The gate asks a third thing alongside `source_form` and `recorded_by`: **where t
 
 Becoming *unreachable* is not drift and clears nothing: the anchor is kept through the outage precisely so the change is still caught when the server comes back as something else. Not a poll — a timer would be liveness machinery this surface has no use for.
 
-### The calving form asks link-vs-mint outright
+### The calving form answers link-vs-mint by query, not by asking
 
-"Is the calf already in the registry?" — no default, both answers a button. It is the flag most likely to be got wrong and the one where getting it wrong creates a duplicate animal that cannot be repaired.
+The yes/no *"is the calf already in the registry?"* is **gone** — see "The link picker returns ineligible animals with a reason" above for the list that replaced it and why. This section was left describing the deleted control for one cycle; what follows is the form's actual side of that contract.
 
-The picker cannot populate until the dam and the date are known, because **eligibility depends on the date**. That ordering is the server's rule, not a UI preference. Ineligible animals are listed greyed with their reason rather than hidden.
+The picker cannot populate until the dam, the date **and the calf's sex** are known, because eligibility depends on all three: an animal's birth cannot postdate its own history, and one recorded as the other sex is not this calf. That ordering is the server's rule, not a UI preference. Ineligible animals are listed greyed with their reason rather than hidden.
+
+**Calf sex therefore carries no default**, and that is a correctness rule rather than a preference. Because the value *filters the picker*, a guessed default greys out the right calf and leaves "create a new animal" as the only reachable path — minting the duplicate the picker exists to prevent, from a question nobody was asked. It clears after every write for the same reason: carried forward, it rebuilds the default from record two onward. `outcome` keeps its `live` default, which fails safe in the opposite direction.
 
 The form also warns, when a non-`live` outcome is selected, that an uncertain calf should be recorded as `live` — live → died is repairable, the reverse is not.
 

@@ -223,10 +223,28 @@ describe('CalvingForm', () => {
     fixture.detectChanges();
   };
 
-  it('fetches candidates as soon as the dam and the date are both known', async () => {
+  /**
+   * Answer the calf sex. NOT OPTIONAL in these flows any more, and that is the
+   * point: it starts unanswered, and the picker will not load a list without it
+   * because the server filters candidates on it.
+   *
+   * Scoped to the group rather than matching `[data-chip="female"]` loose, since
+   * the outcome row is a second chip group on the same form.
+   */
+  const chooseCalfSex = (
+    fixture: { detectChanges(): void },
+    el: HTMLElement,
+    sex: 'female' | 'male',
+  ) => {
+    click(el, `[data-role="calf-sex-group"] [data-chip="${sex}"]`);
+    fixture.detectChanges();
+  };
+
+  it('fetches candidates once the dam, the date AND the calf sex are known', async () => {
     const { http, fixture, el } = await mount();
     chooseDam(fixture, el, 'BD-0001');
     enterDate(fixture, el, '2 Jun 2024');
+    chooseCalfSex(fixture, el, 'female');
     await settle(fixture);
 
     // The client builds the query into the URL rather than using HttpParams,
@@ -240,10 +258,39 @@ describe('CalvingForm', () => {
     expect(el.querySelector('[data-candidate="BD-0006"]')).not.toBeNull();
   });
 
+  it('STARTS WITH NO CALF SEX, and fetches nothing until it is answered', async () => {
+    // The default was `female`, and it did more than record a wrong column:
+    // linkCandidates marks an animal ineligible when its sex disagrees, so a
+    // guessed default greys out the right calf and leaves "create a new animal"
+    // as the only reachable path -- minting the duplicate the picker exists to
+    // prevent, from a question nobody was asked.
+    const { http, fixture, el } = await mount();
+    const group = el.querySelector('[data-role="calf-sex-group"]')!;
+    for (const chip of Array.from(group.querySelectorAll('[data-chip]'))) {
+      expect(chip.getAttribute('aria-checked')).toBe('false');
+    }
+
+    chooseDam(fixture, el, 'BD-0001');
+    enterDate(fixture, el, '2 Jun 2024');
+    await settle(fixture);
+
+    // No list, and the submit blocker names the field that is holding it up.
+    http.expectNone((r) => r.url.startsWith(`${BASE}/link-candidates`));
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('female or male');
+
+    chooseCalfSex(fixture, el, 'female');
+    await settle(fixture);
+    http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
+    await settle(fixture);
+    expect(el.querySelector('[data-candidate="BD-0006"]')).not.toBeNull();
+  });
+
   it('cannot submit until the calf question is answered one way or the other', async () => {
     const { http, fixture, el } = await mount();
     chooseDam(fixture, el, 'BD-0001');
     enterDate(fixture, el, '2 Jun 2024');
+    chooseCalfSex(fixture, el, 'female');
     await settle(fixture);
     http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
     await settle(fixture);
@@ -260,6 +307,7 @@ describe('CalvingForm', () => {
     const { http, fixture, el } = await mount();
     chooseDam(fixture, el, 'BD-0001');
     enterDate(fixture, el, '2 Jun 2024');
+    chooseCalfSex(fixture, el, 'female');
     await settle(fixture);
     http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
     await settle(fixture);
@@ -271,6 +319,7 @@ describe('CalvingForm', () => {
     const req = http.expectOne(`${BASE}/calvings`);
     expect(req.request.body.calf_id).toBe('BD-0006');
     expect(req.request.body.calf_name).toBeNull();
+    expect(req.request.body.calf_sex).toBe('female');
     expect(req.request.headers.get('Idempotency-Key')).toBeTruthy();
   });
 
@@ -278,6 +327,7 @@ describe('CalvingForm', () => {
     const { http, fixture, el } = await mount();
     chooseDam(fixture, el, 'BD-0001');
     enterDate(fixture, el, '2 Jun 2024');
+    chooseCalfSex(fixture, el, 'female');
     await settle(fixture);
     http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
     await settle(fixture);
@@ -295,6 +345,73 @@ describe('CalvingForm', () => {
     expect(req.request.body.calf_name).toBe('Chandni');
   });
 
+  it('CLEARS the calf sex after a write, while the dam survives', async () => {
+    // The dam survives because a cycle card is one animal's whole history, so
+    // the next calving is almost always hers. The calf's sex must NOT: carrying
+    // it forward would rebuild the default this change removed, from record two
+    // onward -- and because the value filters the picker, a stale answer hides
+    // the right calf on the very next calving rather than merely recording a
+    // wrong column.
+    const { http, fixture, el } = await mount();
+    chooseDam(fixture, el, 'BD-0001');
+    enterDate(fixture, el, '2 Jun 2024');
+    chooseCalfSex(fixture, el, 'male');
+    await settle(fixture);
+    http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: [] });
+    await settle(fixture);
+
+    click(el, '[data-role="mode-new"]');
+    fixture.detectChanges();
+    click(el, '[data-role="submit"]');
+
+    const req = http.expectOne(`${BASE}/calvings`);
+    // The answered value reaches the wire, not the removed default.
+    expect(req.request.body.calf_sex).toBe('male');
+    req.flush({
+      calf_id: 'BD-0007',
+      linked: false,
+      superseded_origin_event_id: null,
+      dam: { animal: { id: 'BD-0001' }, status: { status: 'lactating', parity: 1 }, events: [] },
+      calf: { animal: { id: 'BD-0007' }, status: null, events: [] },
+    });
+    await settle(fixture);
+    // The two refreshes the success path fires.
+    http.match((r) => r.url.startsWith(`${BASE}/dam-candidates`))
+      .forEach((r) => r.flush({ candidates: DAMS }));
+    http.match((r) => r.url.startsWith(`${BASE}/identifier-values`))
+      .forEach((r) => r.flush({ observed_by: [], acquired_from: [], sire_ref: [] }));
+    await settle(fixture);
+
+    // Sex is back to unanswered.
+    const chips = [...el.querySelectorAll('[data-role="calf-sex-group"] [data-chip]')];
+    expect(chips.map((c) => c.getAttribute('aria-checked'))).toEqual(['false', 'false']);
+
+    // The dam is still selected.
+    expect((el.querySelector('[data-role="dam"]') as HTMLSelectElement).value).toBe('BD-0001');
+
+    // `outcome` survives, and that asymmetry is deliberate: live -> died is
+    // repairable with a departure event and the reverse is not, so its default
+    // fails safe in a way the sex default did not.
+    expect(
+      el.querySelector('[data-role="outcome-group"] [data-chip="live"]')!.getAttribute('aria-checked'),
+    ).toBe('true');
+
+    // And the picker is unreachable again rather than showing a stale list.
+    expect(el.querySelector('[data-role="picker-blocked"]')).not.toBeNull();
+    expect(el.querySelectorAll('[data-candidate]').length).toBe(0);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    // The date cleared too, and it is named FIRST -- blockedReason reports the
+    // earliest unanswered field, not every one of them.
+    expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('Enter the calving date');
+
+    // Typing the next record's date hands the block to the sex, which proves
+    // the cleared sex is really gating and not just visually deselected.
+    enterDate(fixture, el, '9 Sep 2025');
+    await settle(fixture);
+    expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('female or male');
+    http.expectNone((r) => r.url.startsWith(`${BASE}/link-candidates`));
+  });
+
   it('a changed date invalidates the choice — eligibility depends on it', async () => {
     // A picked animal can become ineligible when the date moves, so letting a
     // stale selection ride to submit would mean a refusal with a real animal in
@@ -302,6 +419,7 @@ describe('CalvingForm', () => {
     const { http, fixture, el } = await mount();
     chooseDam(fixture, el, 'BD-0001');
     enterDate(fixture, el, '2 Jun 2024');
+    chooseCalfSex(fixture, el, 'female');
     await settle(fixture);
     http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
     await settle(fixture);

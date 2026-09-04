@@ -26,11 +26,14 @@
 // animals and stops looking at the row entirely.
 //
 // NOTHING IS SELECTED BY DEFAULT unless the parent says so. The defaults rule
-// decides that, not this component: sex arrives with `female` already chosen
-// because a strong prior exists, while the gate's source form arrives with
-// nothing, because it is a question about the operator's state of knowledge.
-// When nothing is selected the FIRST chip is the tab stop, so the group is
-// still reachable -- being reachable is not the same as being answered.
+// decides that, not this component, and the three cases in the app are not
+// alike: /add's sex arrives with `female` chosen because consecutive acquired
+// animals really do come in same-sex runs; /calving's CALF sex arrives with
+// nothing, because a calf is a coin flip and the value filters the link picker;
+// the gate's source form arrives with nothing, because it is a question about
+// the operator's state of knowledge. When nothing is selected the FIRST chip is
+// the tab stop, so the group is still reachable -- being reachable is not the
+// same as being answered.
 
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
