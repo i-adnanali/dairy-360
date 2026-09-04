@@ -601,7 +601,7 @@ machine, which is the failure that loses everything at once.
 
 | | |
 |---|---|
-| Backup repo | `~/dairy-registry-backups` → [`iadnanali/dairy-registry-backups`](https://github.com/iadnanali/dairy-registry-backups) (**private**) |
+| Backup repo | `~/dairy-registry-backups` → [`i-adnanali/dairy-registry-backups`](https://github.com/i-adnanali/dairy-registry-backups) (**private**) |
 | Script | [`scripts/backup-daily.sh`](../scripts/backup-daily.sh) |
 | Schedule | `com.dairy-agent.registry-backup`, daily at 21:00 Asia/Karachi |
 | Log | `~/Library/Logs/dairy-registry-backup.log`, append-only |
@@ -636,9 +636,16 @@ A commit lands on every run, including runs where nothing changed — the
 provenance header carries the timestamp, so the history doubles as proof the job
 actually ran, and the commit message carries the row counts.
 
-`server/backups/` is **gitignored on purpose, and should stay that way** — this
-repository is public and the dumps hold real herd records. That is the whole
-reason the backup repo is separate and private.
+`server/backups/` is **gitignored on purpose, and should stay that way**, for two
+reasons in this order:
+
+1. **A backup must not share a fate with the thing it backs up.** A force-push, a
+   bad `reset` or a lost account should not take the herd records with it. This
+   reason does not depend on a setting anyone can change.
+2. This repository is public, and the dumps hold real herd records.
+
+The order matters: if this repo ever goes private, the second reason stops
+applying and the first still decides it.
 
 At the current size — the whole database is well under a megabyte and a real
 herd's dump will be tens of kilobytes of text — **keep every snapshot**. Rotation
@@ -676,6 +683,32 @@ binding. Confirmed under launchd: `last exit code = 0`, on `v22.22.3`.
 Both the plist and the script exist to be read — the plist explains why
 `RunAtLoad` is deliberately absent (every login would take a backup and commit
 it), and the script explains the ordering of its three steps.
+
+### What keeps real records out of a public repo
+
+This repository is public and will be running on real herd data. Those two facts
+coexist because **the data never enters the repo**, which is a boundary worth
+stating rather than rediscovering. Verified with `git check-ignore` and
+`git ls-files`:
+
+| Path | Status |
+|---|---|
+| `server/dairy.db` (+ `-wal`, `-shm`) | ignored by `*.db*` |
+| `server/backups/` | ignored — snapshots and dumps |
+| `server/captures/` | ignored — live camera capture artifacts |
+| `.env`, `server/.env` | ignored |
+| `frigate/config.yml`, `double-take/config.yml` | ignored — LAN address, RTSP credentials. Only `.example` is tracked |
+| `double-take/enroll/*` | ignored — **face images of real people**. Only `README.md` and `PROVENANCE.txt` are tracked |
+
+**The one path that is not covered is `docs/images/`,** and it is not covered on
+purpose — those screenshots are documentation. It is also the likeliest way real
+records ever get published, because a screenshot of the app is the natural thing
+to put in a blog post or a decisions doc.
+
+**So screenshot the harness, not the real herd.** `npm run harness:app` serves the
+31-animal fixture herd from § 6 — real-shaped, with the date precisions, the
+correction chain and the incomplete milking session that make a screenshot worth
+looking at, and not one real animal in it. That is what the fixture herd is for.
 
 ### The automatic one: before every migration
 

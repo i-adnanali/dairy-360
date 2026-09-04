@@ -14,10 +14,19 @@ dist/
 # already covered by *.db above; this also excludes the .sql dumps, which are
 # text and would otherwise look committable.
 #
-# THIS EXCLUSION IS DELIBERATE AND SHOULD STAY. The dumps contain the real herd
-# records, and this repository is public. Off-machine copies go to the SEPARATE,
-# PRIVATE backup repo instead -- ~/dairy-registry-backups, filled daily by
-# scripts/backup-daily.sh. See docs/DEVELOPMENT.md § 8.
+# THIS EXCLUSION IS DELIBERATE AND SHOULD STAY, for two reasons in this order:
+#
+#   1. A backup must not share a fate with the thing it backs up. A force-push, a
+#      bad `reset` or a lost account should not take the herd records with it.
+#      This reason does not depend on a setting anyone can change.
+#   2. This repository is public, and the dumps hold real herd records.
+#
+# Reason 1 is listed first on purpose: if this repo ever goes private, reason 2
+# stops applying and reason 1 still decides it.
+#
+# Off-machine copies go to the separate PRIVATE backup repo instead --
+# ~/dairy-registry-backups, filled daily by scripts/backup-daily.sh.
+# See docs/DEVELOPMENT.md § 8.
 server/backups/
 
 # Cycle 7 live-camera capture artifacts + local Frigate config.
