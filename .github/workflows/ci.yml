@@ -29,8 +29,43 @@ jobs:
       # so it is gated on the secret: absent the key (forks, contributors), the
       # step is skipped visibly rather than failing CI -- the same
       # degrade-gracefully convention as GET /api/health. See docs/REGRESSION.md.
-      - name: Regression suite (live model)
-        if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
-        run: npm run test:regression -w server
+      #
+      # ---------------------------------------------------------------------
+      # WHY THE GATE IS TWO STEPS, AND NOT `if: secrets.X != ''`
+      # ---------------------------------------------------------------------
+      # It used to be exactly that, and it took the entire workflow down.
+      # `secrets` is NOT among the contexts available in a step's `if` -- only
+      # env, github, inputs, job, matrix, needs, runner, steps, strategy, vars.
+      # GitHub rejects the whole FILE at validation, so from 2026-08-25 until
+      # this was fixed every run failed in 0s with "workflow file issue" and
+      # nothing ran at all: not the typecheck, not either test suite, not the
+      # build. The guard written to keep this suite honest is what silenced
+      # every other check in the file. Reproduce with `actionlint`, which names
+      # it exactly; the GitHub UI only says "likely ... a workflow file issue".
+      #
+      # `steps.<id>.outputs` IS allowed in `if`, so presence is computed in its
+      # own step. That has a second benefit: the secret stays out of every other
+      # step's environment. A job-level `env:` would be shorter but would also
+      # hand the key to `npm ci`, where any dependency's install script could
+      # read it.
+      - name: Is an API key available?
+        id: apikey
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo 'present=true' >> "$GITHUB_OUTPUT"
+            echo '::notice::ANTHROPIC_API_KEY is set -- the live regression suite will run and will spend real tokens.'
+          else
+            echo 'present=false' >> "$GITHUB_OUTPUT"
+            # A warning, not a silent pass. docs/DEVELOPMENT.md § 5: "a skip is
+            # not a pass" -- the whole reason that section exists is that this
+            # suite reports `ok # SKIP` without a key, which reads as green.
+            echo '::warning::ANTHROPIC_API_KEY is not set -- the live regression suite did NOT run. A skip is not a pass.'
+          fi
+
+      - name: Regression suite (live model)
+        if: steps.apikey.outputs.present == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run test:regression -w server
