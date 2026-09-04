@@ -3,9 +3,11 @@
 > **Naming note (2026-09-04):** this repository was renamed `dairy-agent` →
 > `dairy-360`, and the Langfuse compose project with it. Every `dairy-agent`
 > below is left **verbatim on purpose** — these are commands that were actually
-> run and volume and project names that were actually observed. Rewriting them
-> would falsify the record. The volume names in particular still exist under the
-> old prefix.
+> run and project and network names that were actually observed. Rewriting them
+> would falsify the record. Note that the `dairy-agent` compose project and its
+> `dairy-agent_default` network no longer exist: the Langfuse stack now pins
+> `name: dairy-360`, and its volumes were migrated. So the hazard described below
+> is real history, and the specific names in it are no longer live targets.
 
 *Status: **step 1 complete**, tagged `v0.9.0`. Frigate's documented payload shape
 is verified against a live 0.17.2 instance — 250 real events, zero breaking

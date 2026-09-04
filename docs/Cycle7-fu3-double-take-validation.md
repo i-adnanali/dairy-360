@@ -1,11 +1,13 @@
 # Cycle 7, FU-3 — Double Take Live Validation: Context Handover
 
 > **Naming note (2026-09-04):** this repository was renamed `dairy-agent` →
-> `dairy-360`, and the Langfuse compose project with it. Every `dairy-agent`
-> below is left **verbatim on purpose** — these are commands that were actually
-> run and volume and project names that were actually observed. Rewriting them
-> would falsify the record. The volume names in particular still exist under the
-> old prefix.
+> `dairy-360`, and the Langfuse compose project with it. The `dairy-agent`
+> references below are left **verbatim on purpose** — they are volume names that
+> were actually observed. Rewriting them would falsify the record, and in this
+> case they are also still accurate: `dairy-agent_frigate_data` and
+> `dairy-agent_frigate_media` both still exist, still 0 B, still unattached.
+> (The five `dairy-agent_langfuse_*` volumes are gone — migrated to
+> `dairy-360_langfuse_*` and the originals deleted once verified.)
 
 *Status: **FU-3 COMPLETE (2026-08-28), tagged `v0.10.0`.** Double Take v1.13.2 + DeepStack stood
 up against the live Frigate 0.17.2 stack; payload shape verified with **zero
