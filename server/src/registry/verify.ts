@@ -120,10 +120,17 @@ export function checkRebuildFidelity(live: Db, asOf: string): Violation[] {
 /**
  * Invariant 2 -- lactation ids survive a rebuild unchanged.
  *
- * Its own check rather than a line in the fidelity diff, because this is the
- * failure that is silent and permanent: step 4's yield rows will carry these
- * ids as foreign keys, and an id that shifts repoints yield at the wrong
- * lactation with nothing to notice.
+ * Its own check rather than a line in the fidelity diff, because an id that
+ * shifts across a rebuild means the projection is not reproducible from the log,
+ * and every display and read model that names a lactation would silently point
+ * somewhere else.
+ *
+ * This check is about REBUILD stability -- same events in, same ids out -- and
+ * that is a different claim from the one this comment used to make. It said
+ * step 4's yield rows would carry these ids as foreign keys. They do not: a
+ * correction supersedes the opening calving and legitimately produces a new id,
+ * which this check does not and should not flag. See events.ts's lactationIdFor
+ * and docs/REGISTRY_MILKING.md §2.
  */
 export function checkLactationIdStability(live: Db, asOf: string): Violation[] {
   const before = allLactations(live)

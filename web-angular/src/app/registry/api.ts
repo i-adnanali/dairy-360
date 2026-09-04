@@ -5,7 +5,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
-  AnimalDetail, DuplicateCandidate, HerdRow, IdentifierValues, LinkCandidate, StorageInfo,
+  AnimalDetail, DuplicateCandidate, HerdRow, IdentifierValues, LinkCandidate,
+  MilkingHistoryRow, MilkingRoster, StorageInfo,
   TimelineEvent, Verification, WireError,
 } from './types';
 
@@ -72,6 +73,7 @@ export interface ProvenanceFields {
   recorded_by: string;
 }
 type SourceFormValue = import('./types').SourceForm;
+type MilkingSessionValue = import('./types').MilkingSession;
 
 @Injectable({ providedIn: 'root' })
 export class RegistryApi {
@@ -160,6 +162,26 @@ export class RegistryApi {
   }
 
   /**
+   * Who was in milk on that date, with the context that catches typos.
+   *
+   * `on` is required rather than defaulted to today HERE, even though the server
+   * would default it: the screen already knows which date it is showing, and a
+   * client that could omit it would be able to disagree with its own header.
+   */
+  milkingRoster(on: string, session: MilkingSessionValue): Promise<MilkingRoster> {
+    const q = new URLSearchParams({ on, session });
+    return unwrap(firstValueFrom(this.http.get<MilkingRoster>(`${BASE}/milking/roster?${q}`)));
+  }
+
+  milkings(animalId: string): Promise<MilkingHistoryRow[]> {
+    return unwrap(
+      firstValueFrom(
+        this.http.get<{ milkings: MilkingHistoryRow[] }>(`${BASE}/animals/${animalId}/milkings`),
+      ),
+    ).then((r) => r.milkings);
+  }
+
+  /**
    * Which database the server writes to, or null if it would not say.
    *
    * Deliberately NOT the harness's `/api/harness`: that endpoint answers by
@@ -218,6 +240,23 @@ export class RegistryApi {
     return unwrap(firstValueFrom(
       this.http.post<never>(`${BASE}/calvings`, body, RegistryApi.keyed(idempotencyKey)),
     ));
+  }
+
+  /**
+   * A whole session, all rows or none.
+   *
+   * Keyed like every other write, and the replay case is real here rather than
+   * theoretical: the roster is a dozen numbers typed in one go, so a
+   * double-submit is exactly the shape of mistake that happens.
+   */
+  saveMilkingSession(body: Record<string, unknown>, idempotencyKey: string): Promise<{
+    occurred_on: string; session: MilkingSessionValue;
+    written: number; measured: number; milked_not_measured: number; not_milked: number;
+    updated: number;
+  }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/milking/session`, body, RegistryApi.keyed(idempotencyKey),
+    )));
   }
 
   correctCalving(eventId: string, body: Record<string, unknown>, idempotencyKey: string): Promise<{

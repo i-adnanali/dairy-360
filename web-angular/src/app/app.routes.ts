@@ -31,6 +31,11 @@ export const routes: Routes = [
         loadComponent: () => import('./registry/calving-form').then((m) => m.CalvingForm),
       },
       {
+        path: 'milking',
+        loadComponent: () =>
+          import('./registry/milking-roster').then((m) => m.MilkingRosterScreen),
+      },
+      {
         path: 'check',
         loadComponent: () =>
           import('./registry/verification-panel').then((m) => m.VerificationPanel),

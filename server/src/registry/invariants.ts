@@ -26,6 +26,7 @@ import {
   supersededIds,
 } from './project';
 import { lactationIdFor } from './events';
+import { lactationCovering } from './milking';
 import { formatSerial, SERIAL_PREFIX } from './events';
 import type {
   DatePrecision,
@@ -574,6 +575,137 @@ function checkPrecision(s: RegistrySnapshot): Violation[] {
 }
 
 // ---------------------------------------------------------------------------
+// 14-17. Milk yield (step 4; docs/REGISTRY_MILKING.md §10)
+// ---------------------------------------------------------------------------
+
+/**
+ * The rules a milk row has to satisfy that no CHECK constraint can see.
+ *
+ * The status/yield agreement (17) IS enforced by a CHECK, and is checked again
+ * here for the same reason invariant 11 re-checks the date conventions: a CHECK
+ * only defends rows written after it existed, and this catches the ones that
+ * were not.
+ *
+ * 14 and 15 are the ones that matter, and neither is expressible as a
+ * constraint, because both depend on the PROJECTION -- and the projection moves.
+ * A backdated dry-off or a late-entered calving re-cuts a lactation boundary
+ * under rows that were legitimate when they were written. That is not corruption
+ * and it is not the operator's mistake; it is the one place where a milk row and
+ * the event log can drift apart, and the only way to see it is to recompute.
+ */
+function checkMilkings(s: RegistrySnapshot): Violation[] {
+  const out: Violation[] = [];
+  if (s.milkings.length === 0) return out;
+
+  const known = new Set(s.animals.map((a) => a.id));
+
+  const lactsByAnimal = new Map<string, LactationRow[]>();
+  for (const l of s.lactations) {
+    const list = lactsByAnimal.get(l.animal_id);
+    if (list) list.push(l);
+    else lactsByAnimal.set(l.animal_id, [l]);
+  }
+  for (const list of lactsByAnimal.values()) {
+    list.sort((a, b) => (a.started_on < b.started_on ? -1 : a.started_on > b.started_on ? 1 : 0));
+  }
+
+  const departureOf = new Map<string, RegistryEvent>();
+  for (const e of effectiveEvents(s.events)) {
+    if (e.type === 'departure') departureOf.set(e.animal_id, e);
+  }
+
+  const seen = new Set<string>();
+
+  for (const m of s.milkings) {
+    // 14 -- the animal exists at all.
+    if (!known.has(m.animal_id)) {
+      out.push(
+        v(14, 'milking-inside-lactation', `milking ${m.id} references unknown animal ${m.animal_id}`),
+      );
+      continue;
+    }
+
+    // 14 -- the row falls inside a lactation. Covers "before the first calving",
+    // "after a dry-off" and "she has never calved" in one statement.
+    const covering = lactationCovering(lactsByAnimal.get(m.animal_id) ?? [], m.occurred_on);
+    if (covering === null) {
+      out.push(
+        v(
+          14,
+          'milking-inside-lactation',
+          `animal ${m.animal_id} has a ${m.session} milking on ${m.occurred_on} but no lactation ` +
+            `covering that date -- she was not in milk then. Either the row's date is wrong, or a ` +
+            `calving or dry-off has moved underneath it.`,
+        ),
+      );
+    }
+
+    // 15 -- nothing after a departure. The yield equivalent of invariant 5, and
+    // unlike a note there is no reading of it that makes sense: a sold animal
+    // is not being milked here.
+    const dep = departureOf.get(m.animal_id);
+    if (dep && definitelyBefore(
+      { on: dep.occurred_on, precision: dep.date_precision },
+      { on: m.occurred_on, precision: 'day' },
+    )) {
+      out.push(
+        v(
+          15,
+          'no-milking-after-departure',
+          `animal ${m.animal_id} has a ${m.session} milking on ${m.occurred_on}, after its ` +
+            `departure on ${dep.occurred_on}`,
+        ),
+      );
+    }
+
+    // 16 -- one row per animal per session. Enforced by UNIQUE; checked here so
+    // a database that predates the constraint still reports it.
+    const key = `${m.animal_id} ${m.occurred_on} ${m.session}`;
+    if (seen.has(key)) {
+      out.push(
+        v(
+          16,
+          'one-milking-per-session',
+          `animal ${m.animal_id} has more than one ${m.session} row on ${m.occurred_on}, which ` +
+            `makes the session's completeness uncountable`,
+        ),
+      );
+    }
+    seen.add(key);
+
+    // 17 -- status and yield agree.
+    const hasNumber = m.yield_litres !== null;
+    if ((m.status === 'measured') !== hasNumber) {
+      out.push(
+        v(
+          17,
+          'milking-status-matches-yield',
+          `milking ${m.id} is '${m.status}' with yield_litres ${JSON.stringify(m.yield_litres)}. ` +
+            `'measured' means a number was taken and every other status means one was not.`,
+        ),
+      );
+    }
+    if (m.yield_litres !== null && m.yield_litres < 0) {
+      out.push(
+        v(17, 'milking-status-matches-yield', `milking ${m.id} has a negative yield ${m.yield_litres}`),
+      );
+    }
+    if (m.reason !== null && m.status !== 'not_milked') {
+      out.push(
+        v(
+          17,
+          'milking-status-matches-yield',
+          `milking ${m.id} carries a reason with status '${m.status}'; a reason only belongs with ` +
+            `'not_milked'`,
+        ),
+      );
+    }
+  }
+
+  return out;
+}
+
+// ---------------------------------------------------------------------------
 // 13. resetSchema()'s DROP list contains no registry table (source-level)
 // ---------------------------------------------------------------------------
 
@@ -668,6 +800,7 @@ export function checkSnapshot(s: RegistrySnapshot, asOf: string): Violation[] {
     ...checkSuperseded(s),
     ...checkSerials(s),
     ...checkPrecision(s),
+    ...checkMilkings(s),
     ...checkProjectionAgreement(s, asOf),
   ];
 }

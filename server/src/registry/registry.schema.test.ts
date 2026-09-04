@@ -527,14 +527,17 @@ function dbAtVersion1(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('a fresh database lands on the current target version, now 2', () => {
+test('a fresh database lands on the current target version, now 3', () => {
+  // The literal is deliberate and this test is meant to fail when a migration is
+  // added: it forces whoever adds one to state the new number here rather than
+  // letting TARGET_VERSION verify itself against itself.
   const db = freshDb();
   assert.equal(db.pragma('user_version', { simple: true }), TARGET_VERSION);
-  assert.equal(TARGET_VERSION, 2);
+  assert.equal(TARGET_VERSION, 3);
   db.close();
 });
 
-test('migration 2 upgrades a v1 database and PRESERVES its rows', () => {
+test('migrations 2 and 3 upgrade a v1 database and PRESERVE its rows', () => {
   // The rebuild is create-copy-drop-rename. The copy is the part that would
   // silently lose data if it were wrong, so it is tested with data present --
   // even though the real database was empty when this shipped.
@@ -556,8 +559,8 @@ test('migration 2 upgrades a v1 database and PRESERVES its rows', () => {
 
   const result = runMigrations(db);
   assert.equal(result.from, 1);
-  assert.equal(result.to, 2);
-  assert.equal(result.applied, 1);
+  assert.equal(result.to, 3);
+  assert.equal(result.applied, 2, 'the estimated-convention rebuild AND the milking table');
 
   const rows = db
     .prepare(`SELECT id, supersedes_id FROM registry_animal_events ORDER BY id`)
@@ -570,6 +573,11 @@ test('migration 2 upgrades a v1 database and PRESERVES its rows', () => {
   assert.equal(
     (db.prepare(`SELECT COUNT(*) n FROM registry_animals`).get() as { n: number }).n,
     1,
+  );
+  // Migration 3 rode along on the same run and created its table.
+  assert.equal(
+    (db.prepare(`SELECT COUNT(*) n FROM registry_milkings`).get() as { n: number }).n,
+    0,
   );
   db.close();
 });

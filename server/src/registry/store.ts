@@ -19,6 +19,7 @@ import type {
   RegistryEvent,
   RegistryEventRow,
   RegistryEventType,
+  RegistryMilkingRow,
   RegistryOrigin,
   RegistrySex,
   RegistrySnapshot,
@@ -98,6 +99,20 @@ export function allStatuses(db: Db): AnimalStatusRow[] {
     .all() as AnimalStatusRow[];
 }
 
+/**
+ * Every milk row. The one read here whose size grows with TIME rather than with
+ * the herd -- see RegistrySnapshot in types.ts for why it is in the snapshot
+ * anyway, and what to do if verification ever gets slow.
+ */
+export function allMilkings(db: Db): RegistryMilkingRow[] {
+  return db
+    .prepare(
+      `SELECT * FROM registry_milkings
+        ORDER BY animal_id, occurred_on, CASE session WHEN 'morning' THEN 0 ELSE 1 END`,
+    )
+    .all() as RegistryMilkingRow[];
+}
+
 export function readNextSerial(db: Db): number {
   const row = db
     .prepare(`SELECT next_serial FROM registry_serial_counter WHERE id = 1`)
@@ -119,6 +134,7 @@ export function snapshot(db: Db): RegistrySnapshot {
     lactations: allLactations(db),
     parentage: allParentage(db),
     statuses: allStatuses(db),
+    milkings: allMilkings(db),
     nextSerial: readNextSerial(db),
   };
 }

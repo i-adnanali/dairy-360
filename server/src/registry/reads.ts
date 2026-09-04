@@ -188,6 +188,18 @@ export function identifierValues(db: Db): IdentifierValues {
   const from = new Set<string>();
   const sire = new Set<string>();
 
+  // Milk rows carry `observed_by` too, and they will soon be the overwhelming
+  // majority of it: two sessions a day against two or three names, versus a
+  // handful of life events a year. Reading only the event log would mean the
+  // milker who has been named on a thousand rows is not offered on the next
+  // one -- which is exactly how `imran` and `Imran` become two people, on the
+  // table where "everything Imran milked" is a question worth being able to ask.
+  for (const r of db
+    .prepare(`SELECT DISTINCT observed_by FROM registry_milkings WHERE observed_by IS NOT NULL`)
+    .all() as { observed_by: string }[]) {
+    if (r.observed_by.length > 0) observed.add(r.observed_by);
+  }
+
   // Superseded events INCLUDED on purpose: a name typed on an event that was
   // later corrected is still a name in use on this farm, and suggesting it is
   // how the next record spells it the same way.

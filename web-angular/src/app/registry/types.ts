@@ -109,9 +109,95 @@ export interface IntervalSummary {
   max_days: number | null;
 }
 
+// ---------------------------------------------------------------------------
+// Milk yield (step 4 -- docs/REGISTRY_MILKING.md)
+// ---------------------------------------------------------------------------
+
+export type MilkingSession = 'morning' | 'evening';
+
+/**
+ * THREE VALUES, and the difference between the last two is the point.
+ *
+ *   measured            -- a number was taken
+ *   milked_not_measured -- milk was taken, nobody weighed it. MISSING DATA.
+ *   not_milked          -- no milk was taken. Behaves like a zero.
+ *
+ * Collapsing the last two drags every per-animal mean down with milkings that
+ * did happen, which corrupts exactly the drop-detection this exists for.
+ */
+export type MilkingStatus = 'measured' | 'milked_not_measured' | 'not_milked';
+
+export interface MilkingRow {
+  id: string;
+  animal_id: string;
+  occurred_on: string;
+  session: MilkingSession;
+  status: MilkingStatus;
+  yield_litres: number | null;
+  reason: string | null;
+  occurred_time: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  source_form: SourceForm;
+  note: string | null;
+}
+
+export interface RosterRow {
+  animal_id: string;
+  name: string | null;
+  days_in_milk: number;
+  lactation_started_on: string;
+  /** Already saved for THIS session, when re-opening one. */
+  existing: MilkingRow | null;
+  /** The previous session's figure -- the strongest error-catcher on the screen. */
+  previous: {
+    session: MilkingSession; occurred_on: string;
+    status: MilkingStatus; yield_litres: number | null;
+  } | null;
+  recent_mean: number | null;
+  recent_n: number;
+}
+
+export interface MilkingRoster {
+  occurred_on: string;
+  session: MilkingSession;
+  previous_session: { occurred_on: string; session: MilkingSession };
+  rows: RosterRow[];
+  saved: number;
+}
+
+export interface SessionCompleteness {
+  occurred_on: string;
+  session: MilkingSession;
+  expected: number;
+  recorded: number;
+  measured: number;
+  milked_not_measured: number;
+  not_milked: number;
+}
+
+export interface MilkingReport {
+  rows: number;
+  measured: number;
+  milked_not_measured: number;
+  not_milked: number;
+  sessions: number;
+  complete_sessions: number;
+  first_on: string | null;
+  last_on: string | null;
+  recent: SessionCompleteness[];
+  caveat: string;
+}
+
+export interface MilkingHistoryRow extends MilkingRow {
+  lactation_id: string | null;
+  days_in_milk: number | null;
+}
+
 export interface Verification {
   as_of: string;
-  counts: { animals: number; events: number; lactations: number };
+  counts: { animals: number; events: number; lactations: number; milkings: number };
   violations: Violation[];
   histogram: { source_form: string; date_precision: DatePrecision; count: number }[];
   intervals: {
@@ -123,6 +209,7 @@ export interface Verification {
     approximate: IntervalSummary;
     caveat: string;
   };
+  milking: MilkingReport;
 }
 
 /**

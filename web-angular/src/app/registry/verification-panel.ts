@@ -132,6 +132,66 @@ import type { Verification } from './types';
           <p class="mt-3 text-xs text-farm-600" data-role="caveat">{{ data.intervals.caveat }}</p>
         </section>
 
+        <section class="rounded-xl border border-farm-300 bg-white p-4">
+          <h3 class="text-sm font-medium text-farm-800">How complete the milk record is</h3>
+          <p class="mt-1 text-xs text-farm-600">
+            A session is complete when every animal in milk has a row — not when every row carries a
+            number. The two are separate on purpose: a session of all “not measured” is a complete
+            record and empty data, and one blended percentage would hide exactly that.
+          </p>
+          @if (data.milking.rows === 0) {
+            <p class="mt-2 text-sm italic text-farm-500" data-role="milking-empty">
+              No milking recorded yet.
+            </p>
+          } @else {
+            <div class="mt-2 grid gap-2 sm:grid-cols-3" data-role="milking-summary">
+              <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="text-xs uppercase tracking-wide text-farm-600">sessions</div>
+                <div class="text-farm-900">
+                  {{ data.milking.complete_sessions }} complete of {{ data.milking.sessions }}
+                </div>
+                <div class="text-xs text-farm-600">{{ data.milking.first_on }} → {{ data.milking.last_on }}</div>
+              </div>
+              <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="text-xs uppercase tracking-wide text-farm-600">measured</div>
+                <div class="text-farm-900">{{ data.milking.measured }} row(s)</div>
+                <div class="text-xs text-farm-600">carry a number</div>
+              </div>
+              <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="text-xs uppercase tracking-wide text-farm-600">not measured</div>
+                <div class="text-farm-900">{{ data.milking.milked_not_measured }} row(s)</div>
+                <div class="text-xs text-farm-600">
+                  milked, unweighed · {{ data.milking.not_milked }} not milked
+                </div>
+              </div>
+            </div>
+
+            <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
+              <thead class="text-xs uppercase tracking-wide text-farm-600">
+                <tr>
+                  <th class="py-1">Date</th><th class="py-1">Session</th>
+                  <th class="py-1 text-right">Recorded</th><th class="py-1 text-right">In milk</th>
+                  <th class="py-1 text-right">Measured</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of data.milking.recent; track s.occurred_on + s.session) {
+                  <tr class="border-t border-farm-100">
+                    <td class="py-1 text-farm-700">{{ s.occurred_on }}</td>
+                    <td class="py-1 text-farm-700">{{ s.session }}</td>
+                    <td class="py-1 text-right font-medium"
+                      [class]="s.recorded >= s.expected ? 'text-farm-900' : 'text-amber-800'"
+                    >{{ s.recorded }}</td>
+                    <td class="py-1 text-right text-farm-700">{{ s.expected }}</td>
+                    <td class="py-1 text-right text-farm-700">{{ s.measured }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+          <p class="mt-3 text-xs text-farm-600" data-role="milking-caveat">{{ data.milking.caveat }}</p>
+        </section>
+
         <button type="button" data-role="refresh" (click)="load()"
           class="rounded-xl border border-farm-300 bg-white px-4 py-2 text-sm font-medium text-farm-800"
         >Recheck</button>

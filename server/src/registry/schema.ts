@@ -306,6 +306,104 @@ BEGIN
 END;
 `;
 
+// ---------------------------------------------------------------------------
+// Migration 3 -- per-animal milk yield (step 4; docs/REGISTRY_MILKING.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * A TABLE, NOT AN EVENT TYPE, and for two reasons.
+ *
+ * `milking` stays in RESERVED_EVENT_TYPES -- removing it would let a loose
+ * `milking` event through the write boundary, which is the opposite of what the
+ * reserved list is for.
+ *
+ *   1. The demo `milkings` table has a foreign key to the demo `animals`, which
+ *      `resetSchema()` drops on every seed, so real yield can never go there.
+ *      Decided in REGISTRY.md long before this landed.
+ *   2. VOLUME. `herd()` loads every event into JavaScript on every render and
+ *      `checkSnapshot` runs over a whole-registry snapshot. The herd is 31
+ *      animals and 70 events; two sessions a day is thousands of rows a year,
+ *      for rows no projection reads. In the event log that would make every herd
+ *      page scale with milking history.
+ *
+ * The reserved list conflates two kinds of thing, and this is where the seam
+ * shows: `heat_observed`, `insemination`, `pregnancy_check`, `abortion`,
+ * `treatment` and `vet_visit` are sparse LIFE EVENTS that change what an animal
+ * is and have derived consequences. `milking`, `weight` and `body_condition` are
+ * repeating MEASUREMENTS that describe what it did and derive nothing. Only the
+ * first group belongs in the event log; steps 5 and 6 will meet this again.
+ *
+ * ---------------------------------------------------------------------------
+ * THIS IS A RECORD, NOT A PROJECTION
+ * ---------------------------------------------------------------------------
+ * It is in REGISTRY_TABLES and deliberately NOT in REGISTRY_PROJECTION_TABLES.
+ * The rebuild must never touch it: nothing here is derivable from the event log,
+ * which is the test that decides which list a table belongs in.
+ *
+ * ---------------------------------------------------------------------------
+ * AND IT IS THE FIRST REGISTRY TABLE THAT PERMITS DELETE
+ * ---------------------------------------------------------------------------
+ * No append-only triggers, unlike registry_animal_events. A yield is a
+ * MEASUREMENT, not a claim about history: nothing is derived from it but
+ * aggregates that recompute, and a wrong number is a mis-reading rather than a
+ * false assertion about the past. So it is corrected by UPDATE, and a whole
+ * session entered against the wrong date is repaired by DELETE and re-entry --
+ * there is no superseding event to write, and the UNIQUE below means the wrong
+ * date keeps holding rows until they are removed.
+ *
+ * That divergence is stated here rather than left to be inferred from the
+ * absence of a trigger. What keeps it honest is scope: deletion is per-row and
+ * per-session from the roster, never a bulk statement, and it must never become
+ * reachable for any other registry_* table.
+ */
+const MIGRATION_3_MILKINGS = `
+CREATE TABLE registry_milkings (
+  id            TEXT PRIMARY KEY,
+  animal_id     TEXT NOT NULL REFERENCES registry_animals(id),
+  -- FARM-LOCAL calendar date, same convention and same reasons as events.
+  occurred_on   TEXT NOT NULL,
+  session       TEXT NOT NULL CHECK (session IN ('morning','evening')),
+  status        TEXT NOT NULL CHECK (
+                  status IN ('measured','milked_not_measured','not_milked')
+                ),
+  yield_litres  REAL,
+  reason        TEXT,
+  occurred_time TEXT,
+  observed_by   TEXT,
+  recorded_by   TEXT NOT NULL,
+  recorded_at   TEXT NOT NULL,
+  source_form   TEXT NOT NULL CHECK (
+                  source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                ),
+  note          TEXT,
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT occurred_time_is_hh_mm
+    CHECK (occurred_time IS NULL OR occurred_time GLOB '[0-2][0-9]:[0-5][0-9]'),
+
+  -- The storage convention of the status vocabulary, enforced at the database
+  -- as well as at the write boundary. A row claiming 'measured' with no number
+  -- is not a measurement, and a number filed under 'not_milked' is a
+  -- contradiction rather than a typo.
+  CONSTRAINT measured_has_a_number
+    CHECK ((status = 'measured') = (yield_litres IS NOT NULL)),
+  CONSTRAINT yield_is_not_negative
+    CHECK (yield_litres IS NULL OR yield_litres >= 0),
+  CONSTRAINT reason_only_when_not_milked
+    CHECK (reason IS NULL OR status = 'not_milked'),
+
+  -- One row per animal per session. This is what makes a session's COMPLETENESS
+  -- a countable fact rather than an interpretation, and it is what an update
+  -- conflicts on when a figure is corrected.
+  CONSTRAINT one_row_per_animal_per_session
+    UNIQUE (animal_id, occurred_on, session)
+);
+
+CREATE INDEX idx_registry_milkings_animal ON registry_milkings(animal_id, occurred_on);
+CREATE INDEX idx_registry_milkings_date   ON registry_milkings(occurred_on, session);
+`;
+
 export interface Migration {
   /** Applied inside a transaction that also bumps user_version. */
   up: (db: Db) => void;
@@ -332,6 +430,9 @@ export interface Migration {
 export const MIGRATIONS: readonly Migration[] = [
   { up: (db) => db.exec(MIGRATION_1_REGISTRY) },
   { up: (db) => db.exec(MIGRATION_2_ESTIMATED_JAN_FIRST), rebuildsTables: true },
+  // A plain CREATE TABLE: no existing table is rebuilt, so no `rebuildsTables`
+  // and no foreign_keys relaxation.
+  { up: (db) => db.exec(MIGRATION_3_MILKINGS) },
 ];
 
 /** The version a fully-migrated database reports. */
@@ -511,11 +612,19 @@ export const REGISTRY_TABLES = [
   'registry_animal_status',
   'registry_animals',
   'registry_lactations',
+  'registry_milkings',
   'registry_parentage',
   'registry_serial_counter',
 ] as const;
 
-/** The projection tables -- the ones the rebuild is allowed to clear. */
+/**
+ * The projection tables -- the ones the rebuild is allowed to clear.
+ *
+ * `registry_milkings` is deliberately ABSENT. The test for this list is whether
+ * every row is derivable from the event log; a milk figure is not derivable from
+ * anything, so clearing it would destroy the only copy. It is a record, like the
+ * event log and registry_animals.
+ */
 export const REGISTRY_PROJECTION_TABLES = [
   'registry_animal_status',
   'registry_lactations',

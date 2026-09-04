@@ -278,6 +278,85 @@ export interface RegistryEvent extends Omit<RegistryEventRow, 'payload'> {
   payload: Record<string, unknown>;
 }
 
+// ---------------------------------------------------------------------------
+// Milk yield (step 4 -- see docs/REGISTRY_MILKING.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * Which milking. A CATEGORY, never derived from a clock time.
+ *
+ * Milking times move with the season and with who is available; only a window is
+ * guaranteed. A stored clock time would therefore usually be a reconstruction,
+ * so `occurred_time` on a milking is optional and never defaulted -- the same
+ * rule as on an event.
+ *
+ * THE CONSEQUENCE, stated so it is not discovered later: yield depends on the
+ * interval since the previous milking, and with variable times that interval is
+ * unknown. Morning and evening figures must therefore never be POOLED or
+ * compared to each other. A per-animal DAILY TOTAL is legitimate, because it is
+ * the sum of a real day. "Morning average vs evening average" is not a
+ * comparison this data supports and no read model may offer it.
+ */
+export type MilkingSession = 'morning' | 'evening';
+
+export const MILKING_SESSIONS: readonly MilkingSession[] = ['morning', 'evening'];
+
+/**
+ * What is known about one animal at one session. THREE VALUES, and the
+ * distinction between the last two is the whole point.
+ *
+ *   - `measured`             -- a number was taken.
+ *   - `milked_not_measured`  -- an ordinary milking nobody weighed. Milk exists;
+ *                               the quantity is MISSING DATA.
+ *   - `not_milked`           -- sick, treated, away, dried off. NO MILK WAS
+ *                               TAKEN. For a daily total this behaves like zero.
+ *
+ * Collapse the last two into one blank and every per-animal mean is dragged down
+ * by milkings that did happen -- which corrupts precisely the drop-detection
+ * this feature exists for. The farm's current practice is to measure only when a
+ * drop is noticed, so `milked_not_measured` is expected to be the MAJORITY state
+ * for the first months. It is a first-class value, not an error.
+ *
+ * There is deliberately no fourth value for "not entered". An animal with no row
+ * for a session is exactly that, and session completeness is countable because
+ * of it.
+ */
+export type MilkingStatus = 'measured' | 'milked_not_measured' | 'not_milked';
+
+export const MILKING_STATUSES: readonly MilkingStatus[] = [
+  'measured',
+  'milked_not_measured',
+  'not_milked',
+];
+
+/**
+ * One animal, one session, as stored.
+ *
+ * NOTE WHAT IS ABSENT: there is no `lactation_id`. The lactation is DERIVED at
+ * read time by date range, because a lactation id is not a stable key -- see
+ * events.ts's lactationIdFor and docs/REGISTRY_MILKING.md §2. The general rule
+ * is that registry_lactations is a projection the rebuild drops and recreates,
+ * so a permanent record must never carry a foreign key into it.
+ */
+export interface RegistryMilkingRow {
+  id: string;
+  animal_id: string;
+  occurred_on: string;
+  session: MilkingSession;
+  status: MilkingStatus;
+  /** NOT NULL exactly when status is `measured`, enforced by CHECK. */
+  yield_litres: number | null;
+  /** Why no milk was taken. Only ever set with `not_milked`. */
+  reason: string | null;
+  occurred_time: string | null;
+  /** The MILKER -- who actually took it. Not the app user. */
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  source_form: SourceForm;
+  note: string | null;
+}
+
 export type LactationEndReason = 'dry_off' | 'inferred_at_next_calving';
 
 export interface LactationRow {
@@ -327,12 +406,26 @@ export interface AnimalProjection {
   parentage: ParentageRow[];
 }
 
-/** A whole-registry snapshot, the unit the invariant checks operate on. */
+/**
+ * A whole-registry snapshot, the unit the invariant checks operate on.
+ *
+ * NOTE ON `milkings`, which is the one member that grows with TIME rather than
+ * with herd size. Everything else here is bounded by the number of animals and
+ * their life events -- tens of rows each. Milk yield is two rows per milking
+ * animal per day, so it is thousands a year and it never stops.
+ *
+ * It is included anyway, because the alternative is making the milk invariants
+ * impure and the purity of this module is what lets every rule run in CI with no
+ * database. `/check` is an occasional diagnostic rather than a hot path, so the
+ * cost is paid where it is affordable. If verification ever gets slow, this is
+ * the member to page or to date-bound, and nothing else here needs touching.
+ */
 export interface RegistrySnapshot {
   animals: RegistryAnimalRow[];
   events: RegistryEvent[];
   lactations: LactationRow[];
   parentage: ParentageRow[];
   statuses: AnimalStatusRow[];
+  milkings: RegistryMilkingRow[];
   nextSerial: number;
 }

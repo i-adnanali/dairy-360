@@ -47,6 +47,15 @@ export type RegistryErrorCode =
   // and animal_departed this names something impossible rather than unusual,
   // so there is nothing for an operator to know better about.
   | 'calf_calved_too_soon'
+  // --- milk yield (step 4) ---
+  //
+  // No `allow_*` companion, deliberately. Unlike near_duplicate_calving this
+  // names something contradictory rather than unusual: an animal with no open
+  // lactation on that date was not producing milk, so the row is either the
+  // wrong animal or the wrong date, and both are fixed by correcting the input
+  // rather than by insisting.
+  | 'no_open_lactation'
+  | 'empty_session'
   // --- payload / dates ---
   | 'invalid_payload'
   | 'invalid_precision'

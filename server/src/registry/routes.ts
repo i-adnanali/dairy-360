@@ -30,11 +30,16 @@
 // propagates to Express's error handling without an async wrapper.
 //
 // ---------------------------------------------------------------------------
-// EVERY ROUTE THAT APPENDS AN EVENT REQUIRES AN `Idempotency-Key`
+// EVERY ROUTE THAT WRITES REQUIRES AN `Idempotency-Key`
 // ---------------------------------------------------------------------------
-// Four of them: POST /animals, /events, /calvings and /calvings/:id/correction.
-// A write without one is refused with a 400 rather than accepted unprotected;
-// see idempotency.ts for what that closes, and for the two holes it does not.
+// Six of them: POST /animals, /events, /calvings, /calvings/:id/correction,
+// /milking/session and /milking/session/delete. A write without one is refused
+// with a 400 rather than accepted unprotected; see idempotency.ts for what that
+// closes, and for the two holes it does not.
+//
+// The heading used to say "appends an event", which the milking routes broke:
+// they write a measurement table and append nothing. The rule was never about
+// events -- it is about any request that changes state and could arrive twice.
 //
 // NOTE THE COUNT. The decisions document says "the three write routes", which
 // undercounts: the paired correction appends a superseding calving, a
@@ -50,6 +55,13 @@ import type { Request, Response } from 'express';
 
 import { addAcquiredAnimal, appendLifeEvent } from './entry';
 import { correctCalving, recordCalving } from './calving';
+import {
+  deleteMilkings,
+  milkingReport,
+  milkingRoster,
+  milkingsForAnimal,
+  saveMilkingSession,
+} from './milking';
 import { RegistryError, isRegistryError } from './errors';
 import {
   IDEMPOTENCY_HEADER,
@@ -272,6 +284,30 @@ export function registryRouter(db: Db): express.Router {
     }),
   );
 
+  /** One animal's yield history, each row's lactation derived rather than stored. */
+  router.get(
+    '/animals/:id/milkings',
+    handle((req, res) => {
+      res.json({ milkings: milkingsForAnimal(db, req.params.id) });
+    }),
+  );
+
+  /**
+   * The milking roster for one session -- who was in milk on that date.
+   *
+   * Derived from the LACTATION ROWS rather than from the status projection, so
+   * opening a past date shows who was in milk THEN. Entering yesterday evening's
+   * session is an ordinary thing to do.
+   */
+  router.get(
+    '/milking/roster',
+    handle((req, res) => {
+      const on = typeof req.query.on === 'string' ? req.query.on : farmToday();
+      const session = req.query.session === 'evening' ? 'evening' : 'morning';
+      res.json(milkingRoster(db, { occurred_on: on, session }));
+    }),
+  );
+
   /** Link-mode picker. Includes ineligible animals, each with its reason. */
   router.get(
     '/link-candidates',
@@ -371,10 +407,12 @@ export function registryRouter(db: Db): express.Router {
           animals: snap.animals.length,
           events: snap.events.length,
           lactations: snap.lactations.length,
+          milkings: snap.milkings.length,
         },
         violations: checkSnapshot(snap, asOf),
         histogram: precisionHistogram(snap.events),
         intervals: intervalReport(groupByAnimal(snap.events)),
+        milking: milkingReport(snap.milkings, snap.lactations),
       });
     }),
   );
@@ -485,6 +523,58 @@ export function registryRouter(db: Db): express.Router {
         dam: animalDetail(db, result.dam_id),
         calf: animalDetail(db, result.calf_id),
       });
+    }),
+  );
+
+  /**
+   * A whole milking session, all rows or none.
+   *
+   * Keyed like every other write. The replay case is not hypothetical here: the
+   * roster is a dozen numbers typed in one go, and a double-submit or a retry
+   * over a flaky connection would otherwise re-run an upsert whose `recorded_at`
+   * has moved -- writing a second, indistinguishable version of the same
+   * session.
+   */
+  router.post(
+    '/milking/session',
+    write(replays, (req, res) => {
+      const b = body(req);
+      const raw = b.entries;
+      if (!Array.isArray(raw)) {
+        throw new RegistryError('invalid_payload', 'entries must be an array', 'entries');
+      }
+      const result = saveMilkingSession(db, {
+        occurred_on: requireStr(b, 'occurred_on'),
+        session: requireStr(b, 'session') as never,
+        occurred_time: str(b, 'occurred_time'),
+        observed_by: str(b, 'observed_by'),
+        entries: raw as never[],
+        provenance: provenance(b),
+      });
+      res.status(201).json(result);
+    }),
+  );
+
+  /**
+   * Remove a session, or one animal's row in it.
+   *
+   * The repair path for a session entered against the wrong date, which
+   * update-in-place leaves no other way to fix. Deliberately narrow -- a date
+   * and a session, never a range -- so there is no shape of call that clears
+   * history. This is the only DELETE any registry route exposes, and it reaches
+   * the one registry table that is a measurement rather than a record of what
+   * happened; see milking.ts.
+   */
+  router.post(
+    '/milking/session/delete',
+    write(replays, (req, res) => {
+      const b = body(req);
+      const removed = deleteMilkings(db, {
+        occurred_on: requireStr(b, 'occurred_on'),
+        session: requireStr(b, 'session') as never,
+        animal_id: str(b, 'animal_id') ?? undefined,
+      });
+      res.status(200).json({ removed });
     }),
   );
 

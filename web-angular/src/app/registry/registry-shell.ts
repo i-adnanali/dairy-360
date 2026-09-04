@@ -24,6 +24,8 @@ import { SessionGate } from './session-gate';
                 class="text-farm-600 hover:text-farm-800">Add animal</a>
               <a routerLink="/calving" routerLinkActive="font-medium text-farm-900"
                 class="text-farm-600 hover:text-farm-800">Record calving</a>
+              <a routerLink="/milking" routerLinkActive="font-medium text-farm-900"
+                class="text-farm-600 hover:text-farm-800">Milking</a>
               <a routerLink="/herd" routerLinkActive="font-medium text-farm-900"
                 class="text-farm-600 hover:text-farm-800">Herd</a>
               <a routerLink="/check" routerLinkActive="font-medium text-farm-900"

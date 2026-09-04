@@ -52,10 +52,12 @@ export const SERIAL_PAD = 4;
  * birthday collision around 77k rows and non-trivial risk far below that.
  *
  * That matters more here than anywhere else in the repo, because a lactation id
- * is derived from a calving event id (below) and step 4's yield rows will carry
- * it as a foreign key. A collision would silently point yield at the wrong
- * lactation -- the exact failure the id-stability decision exists to prevent,
- * reintroduced through the id format instead of the numbering scheme.
+ * is derived from a calving event id (below), and a collision would give two
+ * lactations one id -- the exact failure the id-stability decision exists to
+ * prevent, reintroduced through the id format instead of the numbering scheme.
+ *
+ * This comment used to say step 4's yield rows would carry that id as a FOREIGN
+ * KEY. They will not; see lactationIdFor() below and docs/REGISTRY_MILKING.md §2.
  *
  * No ULID/UUIDv7 dependency is added, and no sortability is claimed: creation
  * order is recoverable from `recorded_at`, which is NOT NULL and exact.
@@ -70,10 +72,34 @@ export function newEventId(): string {
  * Stability comes from deriving it from an immutable event, not from the id
  * format. A sequence-encoded id (`BD-0042-L3`) renumbers every later lactation
  * for an animal the moment an earlier calving is discovered during backfill --
- * which will happen -- and any yield row pointing at the old id would then
- * point at the wrong lactation, silently. The display sequence number ("3rd
- * lactation") is computed at read time, where being wrong is visible and
- * harmless.
+ * which will happen. The display sequence number ("3rd lactation") is computed
+ * at read time, where being wrong is visible and harmless.
+ *
+ * ---------------------------------------------------------------------------
+ * THIS ID IS STABLE ENOUGH TO BE AN IDENTIFIER AND NOT ENOUGH TO BE A KEY
+ * ---------------------------------------------------------------------------
+ * The plan recorded here until now was that step 4's yield rows would carry it
+ * as a foreign key. They do not, and the reason is worth keeping because the
+ * distinction is easy to lose:
+ *
+ *   - Correcting a calving's DATE supersedes it, so the effective calving has a
+ *     new id, so this returns a new lactation id and the rebuild deletes the old
+ *     row. A yield row keyed on it would DANGLE.
+ *   - Worse, and with no correction involved at all: a lactation's `ended_on` is
+ *     the NEXT calving's date, so simply recording a calving re-cuts the
+ *     previous lactation's boundary. Yield already written into the overlap now
+ *     belongs to a different lactation, while its key still names the old one.
+ *     It does not dangle -- it is silently WRONG, and no invariant can see it
+ *     because both rows exist.
+ *
+ * The second case is why a rewrite-on-correction would not have saved it. So
+ * yield is keyed on (animal_id, occurred_on, session) and its lactation is
+ * DERIVED at read time by date range. Both failures are demonstrated by
+ * execution in docs/REGISTRY_MILKING.md §2.
+ *
+ * The general rule, which outlives this instance: registry_lactations is a
+ * PROJECTION table that the rebuild drops and recreates, so a permanent record
+ * must never carry a foreign key into it.
  */
 export function lactationIdFor(calvingEventId: string): string {
   if (!calvingEventId.startsWith(EVENT_ID_PREFIX)) {

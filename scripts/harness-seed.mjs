@@ -62,6 +62,13 @@ const WAIT_SECONDS = (() => {
 // Session-level provenance, the way the entry UI's gate sets it.
 const RECORDER = 'adnan';
 
+/** Farm-local today, and N days before it. Matches the server's convention. */
+const FARM_DATE = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Karachi', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+const today = () => FARM_DATE.format(new Date());
+const dayAgo = (n) => FARM_DATE.format(new Date(Date.now() - n * 86400000));
+
 // ---------------------------------------------------------------------------
 // The guard. This is the load-bearing part of the file.
 // ---------------------------------------------------------------------------
@@ -545,6 +552,82 @@ async function seedSteps() {
   }
 }
 
+/**
+ * A few milking sessions over the most recent lactations.
+ *
+ * DELIBERATELY NOT COMPLETE, and not uniform. The point of the /check
+ * completeness panel is to show the difference between a session where everyone
+ * has a row and one where they do not, and between a row that carries a number
+ * and one that says nobody weighed it -- so the fixture has to contain both or
+ * the panel has nothing to display but a green wall.
+ *
+ * The dates are relative to today so the roster opens on something the moment
+ * the app starts, rather than on an empty screen dated whenever this was
+ * written.
+ */
+async function seedMilkings() {
+  const roster = await get(`/milking/roster?on=${today()}&session=morning`);
+  if (roster.rows.length === 0) {
+    console.log('\nmilking  nobody is in milk today -- skipped');
+    return;
+  }
+
+  const ids = roster.rows.map((r) => r.animal_id);
+  // A plausible curve: more milk earlier in the lactation, and a per-animal
+  // constant so the same animal reads consistently across sessions.
+  // A per-animal constant from the SERIAL DIGITS, so the same animal reads
+  // consistently across sessions. `id.charCodeAt(8)` was the first attempt and
+  // it is NaN -- 'BD-0001' is seven characters -- which made yield_litres NaN,
+  // serialized to null, and the write boundary refused it by name. Left
+  // recorded because it is a small live specimen of the thing this seed is for:
+  // every row goes through the real write path, so the fixture cannot express a
+  // herd the production code would reject.
+  const serial = (id) => Number(id.slice(3)) || 0;
+  const base = (id, dim) =>
+    Math.round((9 - Math.min(dim, 300) / 60 + (serial(id) % 3)) * 10) / 10;
+
+  const plan = [
+    { back: 2, session: 'morning', cover: 1.0, measure: 1.0 },
+    { back: 2, session: 'evening', cover: 1.0, measure: 0.6 },
+    { back: 1, session: 'morning', cover: 1.0, measure: 1.0 },
+    // An INCOMPLETE session: two animals never got a row at all. This is what
+    // the completeness panel exists to surface.
+    { back: 1, session: 'evening', cover: 0.6, measure: 0.5 },
+    { back: 0, session: 'morning', cover: 1.0, measure: 0.8 },
+  ];
+
+  for (const p of plan) {
+    const on = dayAgo(p.back);
+    const r = await get(`/milking/roster?on=${on}&session=${p.session}`);
+    if (r.rows.length === 0) continue;
+    const take = Math.max(1, Math.round(r.rows.length * p.cover));
+    const entries = r.rows.slice(0, take).map((row, i) => {
+      // `not_milked` on exactly one animal, so the third status is present.
+      if (p.back === 1 && p.session === 'morning' && i === 0) {
+        return { animal_id: row.animal_id, status: 'not_milked', reason: 'under treatment' };
+      }
+      if (i < Math.round(take * p.measure)) {
+        return {
+          animal_id: row.animal_id,
+          status: 'measured',
+          yield_litres: base(row.animal_id, row.days_in_milk),
+        };
+      }
+      return { animal_id: row.animal_id, status: 'milked_not_measured' };
+    });
+
+    await post('/milking/session', `milking:${on}:${p.session}`, {
+      occurred_on: on,
+      session: p.session,
+      observed_by: p.session === 'morning' ? 'abdul' : 'imran',
+      entries,
+      source_form: 'direct_entry',
+      recorded_by: RECORDER,
+    });
+  }
+  console.log(`\nmilking  ${plan.length} sessions across ${ids.length} animals in milk`);
+}
+
 async function report() {
   const { animals } = await get('/animals');
   const verification = await get('/verification');
@@ -583,6 +666,23 @@ async function report() {
       : `n=${c.count} mean ${Math.round(c.mean_days)}d range ${c.min_days}-${c.max_days}d`;
   console.log(`  intervals   measured ${fmt(iv.measured)}`);
   console.log(`              approximate ${fmt(iv.approximate)}`);
+
+  const mk = verification.milking;
+  console.log(
+    `\nmilk     ${mk.rows} row(s) over ${mk.sessions} session(s), ` +
+      `${mk.complete_sessions} complete`,
+  );
+  console.log(
+    `  measured ${mk.measured}  |  milked, not measured ${mk.milked_not_measured}  |  ` +
+      `not milked ${mk.not_milked}`,
+  );
+  for (const s2 of mk.recent) {
+    const flag = s2.recorded >= s2.expected ? ' ' : '!';
+    console.log(
+      `  ${flag} ${s2.occurred_on} ${s2.session.padEnd(8)} ` +
+        `${s2.recorded}/${s2.expected} recorded, ${s2.measured} measured`,
+    );
+  }
 
   console.log('\nidentifier values now offered by the datalists');
   const idv = await get('/identifier-values');
@@ -641,6 +741,7 @@ async function main() {
 
   await seedAcquired();
   await seedSteps();
+  await seedMilkings();
   await report();
 }
 
