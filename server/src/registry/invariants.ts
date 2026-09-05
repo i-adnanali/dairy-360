@@ -27,9 +27,11 @@ import {
 } from './project';
 import { lactationIdFor } from './events';
 import { lactationCovering } from './milking';
+import { activeOn, priceInForce } from './destinations';
 import { formatSerial, SERIAL_PREFIX } from './events';
 import type {
   DatePrecision,
+  DestinationPriceRow,
   LactationRow,
   RegistryEvent,
   RegistrySnapshot,
@@ -660,7 +662,7 @@ function checkMilkings(s: RegistrySnapshot): Violation[] {
 
     // 16 -- one row per animal per session. Enforced by UNIQUE; checked here so
     // a database that predates the constraint still reports it.
-    const key = `${m.animal_id} ${m.occurred_on} ${m.session}`;
+    const key = `${m.animal_id}\0${m.occurred_on}\0${m.session}`;
     if (seen.has(key)) {
       out.push(
         v(
@@ -781,6 +783,226 @@ export function checkDbSourceIsolation(dbSource: string): Violation[] {
 // The suite
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// 18-22. Milk sales, home use and the ledger
+// (docs/REGISTRY_SALES.md §13)
+// ---------------------------------------------------------------------------
+
+/**
+ * The rules the sales tables have to satisfy.
+ *
+ * 18, 19 and part of 22 ARE enforced by constraints, and are checked again here
+ * for the same reason invariant 11 re-checks the date conventions: a constraint
+ * only defends rows written after it existed.
+ *
+ * 20 and 21 are the ones no constraint can see, because both reach ACROSS
+ * tables -- a dispatch against a destination's range, and a dispatch against
+ * the price schedule in force on its date. Those are the two that catch a real
+ * mistake rather than a corrupted write:
+ *
+ *   - A destination's range moved after rows were written against it. Closing a
+ *     buyer at the end of last month, when the last delivery was on the 2nd of
+ *     this one, leaves rows outside the range that were legitimate when made.
+ *   - A billable dispatch whose captured price has no agreement behind it. That
+ *     is either a rate that was never recorded, or a price row deleted after the
+ *     fact, and in both cases the row is billed at a figure nobody can point at.
+ *
+ * NOTE WHAT IS DELIBERATELY NOT HERE: "a dispatch on a day with no milking
+ * rows". It would fire on every day of the backfill and on every day the milking
+ * sheet is skipped, which is many of them. It is a /check report line, not a
+ * violation.
+ */
+function checkSales(s: RegistrySnapshot): Violation[] {
+  const out: Violation[] = [];
+  if (s.destinations.length === 0 && s.dispatches.length === 0 && s.payments.length === 0) {
+    return out;
+  }
+
+  const byId = new Map(s.destinations.map((d) => [d.id, d]));
+
+  const pricesBy = new Map<string, DestinationPriceRow[]>();
+  for (const p of s.prices) {
+    const list = pricesBy.get(p.destination_id);
+    if (list) list.push(p);
+    else pricesBy.set(p.destination_id, [p]);
+  }
+
+  // --- 18. One row per destination per session ----------------------------
+  const seen = new Set<string>();
+  for (const d of s.dispatches) {
+    const key = `${d.destination_id}\0${d.occurred_on}\0${d.session}`;
+    if (seen.has(key)) {
+      out.push(
+        v(
+          18,
+          'duplicate_dispatch',
+          `${d.destination_id} has more than one row for ${d.occurred_on} ${d.session}. ` +
+            `One row per destination per session is what makes completeness countable.`,
+        ),
+      );
+    }
+    seen.add(key);
+  }
+
+  for (const d of s.dispatches) {
+    const dest = byId.get(d.destination_id);
+
+    // --- 19. Status, litres and price agree -------------------------------
+    if ((d.status === 'taken') !== (d.litres !== null)) {
+      out.push(
+        v(
+          19,
+          'dispatch_status_disagrees',
+          `dispatch ${d.id} is '${d.status}' with litres=${JSON.stringify(d.litres)}. ` +
+            `'taken' means a number and 'none' means no milk left the bulk.`,
+        ),
+      );
+    }
+    if ((d.price_minor === null) !== (d.price_unit_litres === null)) {
+      out.push(
+        v(
+          19,
+          'dispatch_half_a_price',
+          `dispatch ${d.id} carries ${d.price_minor === null ? 'a lot size with no rate' : 'a rate with no lot size'}. ` +
+            `A figure without its unit is not a price -- it is a factor-of-forty error waiting to happen.`,
+        ),
+      );
+    }
+    if (dest !== undefined) {
+      const wantsPrice = dest.billable && d.status === 'taken';
+      if (wantsPrice && d.price_minor === null) {
+        out.push(
+          v(
+            19,
+            'billable_dispatch_unpriced',
+            `dispatch ${d.id} to ${dest.name} took ${d.litres} L and captured no price, so it ` +
+              `is billed at nothing.`,
+          ),
+        );
+      }
+      if (!dest.billable && d.price_minor !== null) {
+        out.push(
+          v(
+            19,
+            'unbillable_dispatch_priced',
+            `dispatch ${d.id} to ${dest.name} carries a price, but ${dest.name} is not billed. ` +
+              `Milk kept for the house must never reach anyone's balance.`,
+          ),
+        );
+      }
+    }
+
+    // --- 20. Nothing outside the destination's active range ---------------
+    if (dest === undefined) {
+      out.push(
+        v(20, 'dispatch_unknown_destination', `dispatch ${d.id} names unknown destination '${d.destination_id}'`),
+      );
+    } else if (!activeOn(dest, d.occurred_on)) {
+      out.push(
+        v(
+          20,
+          'dispatch_outside_range',
+          `dispatch ${d.id} is dated ${d.occurred_on}, outside ${dest.name}'s range ` +
+            `(${dest.started_on} to ${dest.ended_on ?? 'open'}). Either the row or the range is wrong.`,
+        ),
+      );
+    }
+
+    // --- 21. A billable dispatch has an agreement behind its price --------
+    if (dest !== undefined && dest.billable && d.status === 'taken') {
+      if (priceInForce(pricesBy.get(d.destination_id) ?? [], d.occurred_on) === null) {
+        out.push(
+          v(
+            21,
+            'no_price_agreement',
+            `dispatch ${d.id} to ${dest.name} on ${d.occurred_on} was billed, but no price ` +
+              `agreement covers that date. The figure on the row is one nobody can point at.`,
+          ),
+        );
+      }
+    }
+  }
+
+  // --- 21. Price agreements are unambiguous -------------------------------
+  const priceSeen = new Set<string>();
+  for (const p of s.prices) {
+    const key = `${p.destination_id}\0${p.effective_from}`;
+    if (priceSeen.has(key)) {
+      out.push(
+        v(
+          21,
+          'duplicate_price',
+          `${p.destination_id} has two prices effective from ${p.effective_from}. ` +
+            `A second price on the same date is a typo, not a change, and which one wins is silent.`,
+        ),
+      );
+    }
+    priceSeen.add(key);
+
+    // --- 22. Nothing bills a non-billable destination --------------------
+    const dest = byId.get(p.destination_id);
+    if (dest === undefined) {
+      out.push(v(22, 'price_unknown_destination', `price ${p.id} names unknown destination '${p.destination_id}'`));
+    } else if (!dest.billable) {
+      out.push(
+        v(
+          22,
+          'unbillable_priced',
+          `${dest.name} is not billed but has a price agreement. Pricing home milk would put ` +
+            `the farm's own milk in somebody's balance.`,
+        ),
+      );
+    }
+  }
+
+  // --- 22. Payments, and the signed-adjustment rule -----------------------
+  for (const p of s.payments) {
+    const dest = byId.get(p.destination_id);
+    if (dest === undefined) {
+      out.push(v(22, 'payment_unknown_destination', `payment ${p.id} names unknown destination '${p.destination_id}'`));
+      continue;
+    }
+    if (!dest.billable) {
+      out.push(
+        v(22, 'unbillable_paid', `${dest.name} is not billed but has a payment against it`),
+      );
+    }
+    if (p.method !== 'adjustment' && p.amount_minor <= 0) {
+      out.push(
+        v(
+          22,
+          'payment_not_positive',
+          `payment ${p.id} is a ${p.method} of ${p.amount_minor} paisa. Cash and bank are money ` +
+            `that changed hands; only an adjustment may be signed.`,
+        ),
+      );
+    }
+    if (p.method === 'adjustment' && (p.note === null || p.note.trim().length === 0)) {
+      out.push(
+        v(
+          22,
+          'silent_adjustment',
+          `payment ${p.id} is an adjustment with no note. A signed number with no sentence ` +
+            `attached cannot be audited later.`,
+        ),
+      );
+    }
+    // 20, for payments.
+    if (!activeOn(dest, p.occurred_on)) {
+      out.push(
+        v(
+          20,
+          'payment_outside_range',
+          `payment ${p.id} is dated ${p.occurred_on}, outside ${dest.name}'s range ` +
+            `(${dest.started_on} to ${dest.ended_on ?? 'open'})`,
+        ),
+      );
+    }
+  }
+
+  return out;
+}
+
 /**
  * Invariants 3 through 12, plus a projection-agreement check.
  *
@@ -801,6 +1023,7 @@ export function checkSnapshot(s: RegistrySnapshot, asOf: string): Violation[] {
     ...checkSerials(s),
     ...checkPrecision(s),
     ...checkMilkings(s),
+    ...checkSales(s),
     ...checkProjectionAgreement(s, asOf),
   ];
 }

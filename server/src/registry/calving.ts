@@ -393,10 +393,14 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
         outcome: input.calf.outcome,
         assistance: input.assistance ?? null,
         notes: input.notes ?? null,
-        override: overrode
-          ? { check: 'near_duplicate_calving', reason: input.override_reason ?? null }
-          : null,
       },
+      // A SIBLING of the payload since migration 4, and still derived from
+      // `overrode` -- whether the guard actually matched -- never from the
+      // caller's flag. A caller that always passes allow_near_duplicate must
+      // not have every write claim an override happened.
+      override: overrode
+        ? { check: 'near_duplicate_calving', reason: input.override_reason ?? null }
+        : null,
       provenance: input.provenance,
     });
     faultAt(4);

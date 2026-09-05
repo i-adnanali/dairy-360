@@ -15,6 +15,11 @@ import { SessionGate } from './session-gate';
     <div class="flex h-full flex-col bg-farm-50 text-farm-900">
       <app-session-bar />
 
+      <!-- SEVEN nav items, which is over the line where a flat row stops
+           working. The grouping decision -- probably record versus review -- is
+           real and is deliberately NOT made here: it should be made when the
+           seventh item exists and is being used, not predicted from six.
+           See docs/REGISTRY_SALES.md §12.4. -->
       <header class="border-b border-farm-200 bg-white px-4 py-3">
         <div class="mx-auto flex max-w-4xl flex-wrap items-baseline gap-x-6 gap-y-2">
           <h1 class="text-base font-semibold tracking-tight">Animal registry</h1>
@@ -26,6 +31,10 @@ import { SessionGate } from './session-gate';
                 class="text-farm-600 hover:text-farm-800">Record calving</a>
               <a routerLink="/milking" routerLinkActive="font-medium text-farm-900"
                 class="text-farm-600 hover:text-farm-800">Milking</a>
+              <a routerLink="/dispatch" routerLinkActive="font-medium text-farm-900"
+                class="text-farm-600 hover:text-farm-800">Dispatch</a>
+              <a routerLink="/buyers" routerLinkActive="font-medium text-farm-900"
+                class="text-farm-600 hover:text-farm-800">Buyers</a>
               <a routerLink="/herd" routerLinkActive="font-medium text-farm-900"
                 class="text-farm-600 hover:text-farm-800">Herd</a>
               <a routerLink="/check" routerLinkActive="font-medium text-farm-900"

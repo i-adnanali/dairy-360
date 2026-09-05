@@ -628,6 +628,156 @@ async function seedMilkings() {
   console.log(`\nmilking  ${plan.length} sessions across ${ids.length} animals in milk`);
 }
 
+// ---------------------------------------------------------------------------
+// Milk sales, home use and the ledger (docs/REGISTRY_SALES.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * The shape the farm actually reported: ONE dodhi, TWO households, plus home.
+ *
+ * Names are invented and must stay invented. The standing rule cuts both ways:
+ * nothing synthetic reaches dairy.db, and the real buyers are entered through
+ * /buyers by the farm -- never into a seed file.
+ *
+ * `standing` is the load-bearing field. The dodhi and home are answered in
+ * EVERY session and block the save when untouched; the households take surplus
+ * and appear only when they came. Seeding them the other way round would make
+ * the sheet demand ~1,400 "took nothing" answers a year, which is exactly the
+ * failure the split exists to prevent.
+ */
+const DESTINATIONS = [
+  { ref: 'dodhi', name: 'Bashir (dodhi)',      kind: 'dodhi',     standing: true,  rate: 700000 },
+  { ref: 'home',  name: 'Home',                kind: 'home',      standing: true,  rate: null },
+  { ref: 'ali',   name: 'Ali (next door)',     kind: 'household', standing: false, rate: 900000 },
+  { ref: 'bibi',  name: 'Bibi (corner house)', kind: 'household', standing: false, rate: 900000 },
+];
+
+/** Rs 7,000 per 40 litres -- the rate is TWO numbers and the lot size is one. */
+const LOT_LITRES = 40;
+
+const destinations = new Map(); // ref -> dst_...
+
+async function seedDestinations() {
+  for (const d of DESTINATIONS) {
+    const r = await post('/destinations', `destination:${d.ref}`, {
+      name: d.name,
+      kind: d.kind,
+      standing: d.standing,
+      billable: d.kind !== 'home',
+      started_on: dayAgo(120),
+      recorded_by: RECORDER,
+    });
+    destinations.set(d.ref, r.id);
+
+    if (d.rate !== null) {
+      await post(`/destinations/${r.id}/prices`, `price:${d.ref}`, {
+        effective_from: dayAgo(120),
+        price_minor: d.rate,
+        price_unit_litres: LOT_LITRES,
+        recorded_by: RECORDER,
+      });
+    }
+  }
+  console.log(`\ndest     ${DESTINATIONS.length} destinations (1 dodhi, 2 households, home)`);
+}
+
+/**
+ * Dispatch over the SAME sessions the milk seed covers, so the reconciliation
+ * has both halves.
+ *
+ * The dodhi and home answer every session; the households appear on some. One
+ * session has the dodhi as `none` with a reason, so the third state is present
+ * and "he did not come" is visibly a recorded fact rather than a missing row.
+ */
+async function seedDispatches() {
+  // SCALED TO THIS HERD. Six animals in milk give roughly 27 L a session, so a
+  // dodhi taking 12-15 leaves a 40% gap that is an artefact of the fixture and
+  // nothing else -- and a reconciliation panel opening on a 40% gap reads as
+  // broken software. The same mistake was made once already in
+  // `tradingHerd()`; see REGISTRY_SALES.md §17.1.
+  //
+  // The evening the dodhi does not come is the interesting row: the milk still
+  // exists, so the neighbours take far more than usual. That is the households
+  // being a surplus outlet rather than a schedule, which is the whole reason
+  // they are `standing: false`.
+  const plan = [
+    { back: 2, session: 'morning', dodhi: 21.0, home: 3,   extra: { ali: 4 } },
+    { back: 2, session: 'evening', dodhi: 18.5, home: 2,   extra: {} },
+    { back: 1, session: 'morning', dodhi: 20.0, home: 3,   extra: { ali: 4, bibi: 2.5 } },
+    { back: 1, session: 'evening', dodhi: null, home: 6,   extra: { ali: 9, bibi: 7 } },
+    { back: 0, session: 'morning', dodhi: 19.0, home: 2.5, extra: { bibi: 2.5 } },
+  ];
+
+  for (const p of plan) {
+    const on = dayAgo(p.back);
+    const entries = [
+      p.dodhi === null
+        ? { destination_id: destinations.get('dodhi'), status: 'none', reason: 'did not come' }
+        : { destination_id: destinations.get('dodhi'), status: 'taken', litres: p.dodhi },
+      { destination_id: destinations.get('home'), status: 'taken', litres: p.home },
+      ...Object.entries(p.extra).map(([ref, litres]) => ({
+        destination_id: destinations.get(ref),
+        status: 'taken',
+        litres,
+      })),
+    ];
+
+    await post('/dispatch/session', `dispatch:${on}:${p.session}`, {
+      occurred_on: on,
+      session: p.session,
+      observed_by: p.session === 'morning' ? 'abdul' : 'imran',
+      entries,
+      source_form: 'direct_entry',
+      recorded_by: RECORDER,
+    });
+  }
+
+  // A PART payment, so the dodhi's statement shows a running balance rather
+  // than either zero or the whole month outstanding. Partial payment is the
+  // thing the demo `deliveries.paid` boolean cannot express at all.
+  await post('/payments', 'payment:dodhi:part', {
+    destination_id: destinations.get('dodhi'),
+    occurred_on: dayAgo(1),
+    amount_minor: 500000,
+    method: 'cash',
+    reference: 'khata p.14',
+    recorded_by: RECORDER,
+  });
+
+  console.log(`dispatch ${plan.length} sessions + 1 part payment`);
+}
+
+async function reportSales() {
+  const { destinations: rows } = await get('/destinations');
+  console.log('\nbuyers');
+  for (const d of rows) {
+    const rate = d.price
+      ? `Rs ${(d.price.price_minor / 100).toLocaleString('en-US')} / ${d.price.price_unit_litres} L`
+      : 'not billed';
+    console.log(
+      `  ${d.name.padEnd(22)} ${d.kind.padEnd(10)} ` +
+        `${(d.standing ? 'every session' : 'when they come').padEnd(15)} ${rate}`,
+    );
+  }
+
+  const { balances } = await get('/balances');
+  console.log('\nbalances');
+  for (const b of balances) {
+    console.log(`  ${b.name.padEnd(22)} Rs ${(b.balance_minor / 100).toFixed(2)}`);
+  }
+
+  const r = await get(`/reconcile?from=${dayAgo(2)}&to=${today()}`);
+  console.log('\nwhere the milk went');
+  console.log(`  measured   ${r.produced_measured} L  (${r.not_measured_rows} milked, not weighed)`);
+  console.log(`  sold       ${r.dispatched_sold} L`);
+  console.log(`  kept home  ${r.dispatched_home} L`);
+  console.log(
+    `  gap        ${r.gap_litres} L  ` +
+      (r.gap_pct === null ? '(no percentage -- production is a lower bound)' : `${r.gap_pct}%`),
+  );
+  console.log(`  sessions   ${r.complete_sessions}/${r.sessions} with every standing buyer answered`);
+}
+
 async function report() {
   const { animals } = await get('/animals');
   const verification = await get('/verification');
@@ -742,7 +892,10 @@ async function main() {
   await seedAcquired();
   await seedSteps();
   await seedMilkings();
+  await seedDestinations();
+  await seedDispatches();
   await report();
+  await reportSales();
 }
 
 main().catch((e) => die(e.stack ?? String(e)));

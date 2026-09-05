@@ -56,6 +56,8 @@ function ev(over: Partial<RegistryEvent> & Pick<RegistryEvent, 'type'>): Registr
     recorded_by: 'tester',
     recorded_at: `2026-01-01T00:00:${String(seq % 60).padStart(2, '0')}.000Z`,
     supersedes_id: null,
+    override_check: null,
+    override_reason: null,
     ...over,
   };
 }
@@ -177,10 +179,11 @@ test('acquired: a birth date without its precision is rejected', () => {
 test('validation normalizes optionals to explicit null so serialization is stable', () => {
   // deepEqual on the WHOLE object, not a subset: absent-vs-null and a changed
   // key set both read as a change to the rebuild-diff, so the key set is part
-  // of the contract. `override` joined it when overridden checks became
-  // persisted -- null here because nothing was overridden.
+  // of the contract. `override` was briefly a member and LEFT the payload in
+  // migration 4, which is exactly the kind of change this assertion exists to
+  // make visible rather than silent.
   const a = assertEventPayload('dry_off', {});
-  assert.deepEqual(a, { reason: null, notes: null, override: null });
+  assert.deepEqual(a, { reason: null, notes: null });
 });
 
 test('date/precision rules are enforced at the boundary with readable messages', () => {

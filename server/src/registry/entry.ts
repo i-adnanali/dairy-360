@@ -267,7 +267,12 @@ export function appendLifeEvent(
   const overrode =
     departure !== undefined && input.type !== 'note' && input.allow_after_departure === true;
 
-  const payload = buildLifeEventPayload(input, overrode);
+  const payload = buildLifeEventPayload(input);
+  // A SIBLING of the payload since migration 4. Still derived from `overrode`
+  // above -- the condition, not the flag.
+  const override: OverrideRecord | null = overrode
+    ? { check: 'animal_departed', reason: input.override_reason ?? null }
+    : null;
 
   const event = db.transaction(() => {
     const written = appendEvent(db, {
@@ -277,6 +282,7 @@ export function appendLifeEvent(
       occurred_time: input.occurred_time ?? null,
       date_precision: input.date_precision,
       payload,
+      override,
       provenance: input.provenance,
     });
     rebuildAnimals(db, { asOf: input.asOf, animalIds: [input.animal_id] });
@@ -286,14 +292,7 @@ export function appendLifeEvent(
   return { event_id: event.id };
 }
 
-function buildLifeEventPayload(
-  input: AppendLifeEventInput,
-  overrode: boolean,
-): unknown {
-  const override: OverrideRecord | null = overrode
-    ? { check: 'animal_departed', reason: input.override_reason ?? null }
-    : null;
-
+function buildLifeEventPayload(input: AppendLifeEventInput): unknown {
   switch (input.type) {
     case 'dry_off': {
       const reason = input.reason ?? null;
@@ -304,7 +303,7 @@ function buildLifeEventPayload(
           'reason',
         );
       }
-      return { reason: reason as DryOffReason | null, notes: input.notes ?? null, override };
+      return { reason: reason as DryOffReason | null, notes: input.notes ?? null };
     }
     case 'departure': {
       const reason = input.reason ?? null;
@@ -327,7 +326,6 @@ function buildLifeEventPayload(
         to: input.to ?? null,
         cause: input.cause ?? null,
         notes: input.notes ?? null,
-        override,
       };
     }
     case 'note': {

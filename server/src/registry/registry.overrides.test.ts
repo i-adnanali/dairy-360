@@ -10,6 +10,11 @@
 // flag: a caller passing allow_* unconditionally must not have every write
 // claim an override happened, or the field means nothing and the log is worse
 // than it was when it said nothing at all.
+//
+// MIGRATION 4 moved the record from payload.override to the override_check and
+// override_reason COLUMNS. Everything above is unchanged by that; what changed
+// is that the vocabulary is now enforced by the database as well as by the
+// write boundary, which is what the last two tests here cover.
 
 import assert from 'node:assert';
 import { test } from 'node:test';
@@ -17,8 +22,8 @@ import { test } from 'node:test';
 import { addAcquired, addDeparture, calve, cleanHerd, freshDb } from './fixtures';
 import { appendLifeEvent } from './entry';
 import { recordCalving, correctCalving } from './calving';
-import { assertEventPayload } from './events';
-import { eventsForAnimal } from './store';
+import { assertEventPayload, assertOverride } from './events';
+import { appendEvent, eventsForAnimal } from './store';
 import { effectiveEvents } from './project';
 import { rebuild } from './projectStore';
 import type { OverrideRecord, RegistryEvent } from './types';
@@ -26,8 +31,11 @@ import type { OverrideRecord, RegistryEvent } from './types';
 const AS_OF = '2026-09-01';
 const PROV = { source_form: 'recall' as const, recorded_by: 'adnan' };
 
+// Columns since migration 4, not payload. The two are read back as one record
+// so every assertion below is unchanged by the move -- which is the point: the
+// storage changed and the guarantee did not.
 const overrideOf = (e: RegistryEvent): OverrideRecord | null =>
-  (e.payload.override as OverrideRecord | null) ?? null;
+  e.override_check === null ? null : { check: e.override_check, reason: e.override_reason };
 
 function latest(db: ReturnType<typeof freshDb>, animalId: string, type: string): RegistryEvent {
   const all = effectiveEvents(eventsForAnimal(db, animalId)).filter((e) => e.type === type);
@@ -212,7 +220,8 @@ test('a note after a departure records no override -- there is no guard to step 
     allow_after_departure: true,
   });
   const note = latest(db, 'BD-0001', 'note');
-  assert.equal(note.payload.override, undefined, 'a note payload has no override key');
+  assert.equal(overrideOf(note), null);
+  assert.equal(note.payload.override, undefined, 'and nothing left behind in the payload');
 });
 
 // ---------------------------------------------------------------------------
@@ -246,52 +255,111 @@ test('a correction records its OWN override, and does not inherit the superseded
 
 test('an override naming an unknown check is refused', () => {
   assert.throws(
-    () =>
-      assertEventPayload('dry_off', {
-        override: { check: 'made_it_up', reason: null },
-      }),
+    () => assertOverride({ check: 'made_it_up', reason: null }),
     /must be one of near_duplicate_calving \| animal_departed/,
   );
 });
 
 test('an override with an unknown key is refused', () => {
-  // A typo'd key would otherwise be stored as JSON and read back as undefined,
-  // which is the same silent-wrong-value class rejectUnknownKeys exists for.
+  // A typo'd key would otherwise be dropped silently and read back as
+  // undefined, which is the same silent-wrong-value class rejectUnknownKeys
+  // exists for.
   assert.throws(
-    () =>
-      assertEventPayload('departure', {
-        reason: 'sold',
-        override: { check: 'animal_departed', why: 'typo for reason' },
-      }),
+    () => assertOverride({ check: 'animal_departed', why: 'typo for reason' }),
     /unknown payload key\(s\) 'why'/,
   );
 });
 
-test('a note payload REFUSES an override, because a note has no guard', () => {
+test('absent and explicit-null are the same override', () => {
+  assert.equal(assertOverride(undefined), null);
+  assert.equal(assertOverride(null), null);
+});
+
+test('THE PAYLOAD NO LONGER CARRIES AN OVERRIDE AT ALL -- migration 4', () => {
+  // The key is gone from all three payload vocabularies, so a caller still
+  // passing the old shape is REFUSED rather than silently ignored. A silent
+  // ignore is how an override would stop being recorded without anyone
+  // noticing, which is the failure this whole file exists to prevent.
+  for (const [type, base] of [
+    ['calving', { calf_id: 'BD-0002', calf_sex: 'female', outcome: 'live' }],
+    ['dry_off', {}],
+    ['departure', { reason: 'sold' }],
+  ] as const) {
+    assert.throws(
+      () => assertEventPayload(type, { ...base, override: { check: 'animal_departed' } }),
+      /unknown payload key\(s\) 'override'/,
+      `${type} still accepts a payload override`,
+    );
+  }
+
+  // And nothing writes one either: the normalised payload has no such key.
+  assert.deepEqual(assertEventPayload('dry_off', {}), { reason: null, notes: null });
+});
+
+test('appendEvent REFUSES an override on a note, because a note has no guard', () => {
+  const db = departedAnimal();
   assert.throws(
-    () => assertEventPayload('note', { text: 'hi', override: { check: 'animal_departed' } }),
-    /unknown payload key\(s\) 'override'/,
+    () =>
+      appendEvent(db, {
+        animal_id: 'BD-0001',
+        type: 'note',
+        occurred_on: '2024-09-01',
+        date_precision: 'month',
+        payload: { text: 'hi' },
+        override: { check: 'animal_departed', reason: null },
+        provenance: PROV,
+      }),
+    /a note is always allowed/,
   );
 });
 
-test('override normalises to null so serialization stays stable', () => {
-  // Same contract as every other optional: absent and explicit-null must
-  // serialize identically, or the rebuild-diff reads a change that is not one.
-  assert.deepEqual(assertEventPayload('dry_off', {}), {
-    reason: null,
-    notes: null,
-    override: null,
-  });
-  assert.deepEqual(assertEventPayload('dry_off', { override: null }), {
-    reason: null,
-    notes: null,
-    override: null,
-  });
+test('the DATABASE refuses an unknown check and a reason with no check', () => {
+  // New in migration 4 and the reason the move was worth a migration: in the
+  // payload this vocabulary was enforced only by the write boundary, so a
+  // hand-written INSERT could store any string at all.
+  const db = departedAnimal();
+  const row = {
+    id: 'aevt_handwritten',
+    animal_id: 'BD-0001',
+    type: 'dry_off',
+    occurred_on: '2024-08-01',
+    date_precision: 'month',
+    payload: '{}',
+    source_form: 'recall',
+    source_ref: null,
+    observed_by: null,
+    recorded_by: 'sqlite3',
+    recorded_at: '2026-01-01T00:00:00.000Z',
+    supersedes_id: null,
+  };
+  const insert = (extra: Record<string, unknown>) =>
+    db
+      .prepare(
+        `INSERT INTO registry_animal_events
+           (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+            source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+            override_check, override_reason)
+         VALUES
+           (@id, @animal_id, @type, @occurred_on, NULL, @date_precision, @payload,
+            @source_form, @source_ref, @observed_by, @recorded_by, @recorded_at, @supersedes_id,
+            @override_check, @override_reason)`,
+      )
+      .run({ ...row, override_check: null, override_reason: null, ...extra });
+
+  assert.throws(() => insert({ override_check: 'made_it_up' }), /override_check_is_known/);
+  assert.throws(
+    () => insert({ override_reason: 'prose about nothing' }),
+    /override_reason_needs_a_check/,
+  );
+  assert.throws(
+    () => insert({ type: 'note', payload: '{"text":"hi"}', override_check: 'animal_departed' }),
+    /note_never_overrides/,
+  );
 });
 
 test('a recorded override survives a projection rebuild untouched', () => {
-  // It lives in the payload, and no projection reads the payload's override --
-  // so a rebuild must neither drop it nor act on it.
+  // It lives on the event row, and no projection reads it -- so a rebuild must
+  // neither drop it nor act on it.
   const db = damWithOneCalving();
   recordCalving(db, {
     dam_id: 'BD-0001',

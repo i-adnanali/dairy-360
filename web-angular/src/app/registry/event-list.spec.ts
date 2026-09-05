@@ -7,7 +7,7 @@ function ev(over: Partial<TimelineEvent> & Pick<TimelineEvent, 'id' | 'type'>): 
     occurred_on: '2024-01-01', occurred_time: null, date_precision: 'day', payload: {},
     source_form: 'recall', source_ref: null, observed_by: null, recorded_by: 'adnan',
     recorded_at: '2026-01-01T00:00:00.000Z', supersedes_id: null, superseded_by_id: null,
-    effective: true, ...over,
+    override_check: null, override_reason: null, effective: true, ...over,
   };
 }
 
@@ -98,15 +98,14 @@ describe('EventList — the correction window', () => {
   });
 
   it('surfaces a recorded override, so the log explaining itself is visible', () => {
-    // The fact was already in the payload; without this nobody ever reads it.
+    // The fact is already on the row; without this nobody ever reads it.
+    // Columns since migration 4 -- it was payload.override before.
     const el = render([
       ev({
         id: 'aevt_over', type: 'dry_off',
-        payload: {
-          reason: null,
-          notes: null,
-          override: { check: 'animal_departed', reason: 'stayed on the farm until August' },
-        },
+        payload: { reason: null, notes: null },
+        override_check: 'animal_departed',
+        override_reason: 'stayed on the farm until August',
       }),
     ]);
     const o = el.querySelector('[data-role="override"]')!;
@@ -118,7 +117,8 @@ describe('EventList — the correction window', () => {
     const el = render([
       ev({
         id: 'aevt_over', type: 'dry_off',
-        payload: { reason: null, notes: null, override: { check: 'animal_departed', reason: null } },
+        payload: { reason: null, notes: null },
+        override_check: 'animal_departed',
       }),
     ]);
     expect(el.querySelector('[data-role="override"]')!.textContent).toContain('no reason recorded');
@@ -126,7 +126,7 @@ describe('EventList — the correction window', () => {
 
   it('shows no override block on an ordinary event', () => {
     const el = render([
-      ev({ id: 'aevt_plain', type: 'dry_off', payload: { reason: null, notes: null, override: null } }),
+      ev({ id: 'aevt_plain', type: 'dry_off', payload: { reason: null, notes: null } }),
     ]);
     expect(el.querySelector('[data-role="override"]')).toBeNull();
   });

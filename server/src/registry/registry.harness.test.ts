@@ -87,6 +87,15 @@ test('no harness-reachable module names the forbidden imports at all', () => {
     'time.ts',
     'types.ts',
     'cli.ts',
+    // The sales modules (docs/REGISTRY_SALES.md). Reachable from routes.ts, so
+    // they are covered by the same rule for the same reason -- and `milking.ts`
+    // was missing from this list before they were added, which is what a list
+    // maintained by hand does.
+    'milking.ts',
+    'money.ts',
+    'destinations.ts',
+    'dispatch.ts',
+    'ledger.ts',
   ]) {
     const src = read(file);
     for (const forbidden of ["'../db'", "'../seed'"]) {

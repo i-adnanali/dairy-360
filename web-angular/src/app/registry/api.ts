@@ -5,8 +5,9 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
-  AnimalDetail, DuplicateCandidate, HerdRow, IdentifierValues, LinkCandidate,
-  MilkingHistoryRow, MilkingRoster, StorageInfo,
+  AnimalDetail, BalanceRow, DestinationListRow, DestinationPrice, DispatchSheet,
+  DuplicateCandidate, HerdRow, IdentifierValues, LinkCandidate,
+  MilkingHistoryRow, MilkingRoster, Reconciliation, Statement, StorageInfo,
   TimelineEvent, Verification, WireError,
 } from './types';
 
@@ -268,4 +269,108 @@ export class RegistryApi {
       `${BASE}/calvings/${eventId}/correction`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
+
+  // --- sales, home use and the ledger (docs/REGISTRY_SALES.md) -------------
+
+  destinations(asOf?: string): Promise<DestinationListRow[]> {
+    const q = asOf ? `?${new URLSearchParams({ as_of: asOf })}` : '';
+    return unwrap(
+      firstValueFrom(
+        this.http.get<{ destinations: DestinationListRow[] }>(`${BASE}/destinations${q}`),
+      ),
+    ).then((r) => r.destinations);
+  }
+
+  statement(id: string): Promise<Statement> {
+    return unwrap(firstValueFrom(this.http.get<Statement>(`${BASE}/destinations/${id}`)));
+  }
+
+  balances(): Promise<BalanceRow[]> {
+    return unwrap(
+      firstValueFrom(this.http.get<{ balances: BalanceRow[] }>(`${BASE}/balances`)),
+    ).then((r) => r.balances);
+  }
+
+  dispatchSheet(on: string, session: MilkingSessionValue): Promise<DispatchSheet> {
+    const q = new URLSearchParams({ on, session });
+    return unwrap(firstValueFrom(this.http.get<DispatchSheet>(`${BASE}/dispatch/sheet?${q}`)));
+  }
+
+  reconcile(from: string, to: string): Promise<Reconciliation> {
+    const q = new URLSearchParams({ from, to });
+    return unwrap(firstValueFrom(this.http.get<Reconciliation>(`${BASE}/reconcile?${q}`)));
+  }
+
+  addDestination(body: Record<string, unknown>, idempotencyKey: string): Promise<DestinationListRow> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/destinations`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  updateDestination(
+    id: string,
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<DestinationListRow> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/destinations/${id}`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  /**
+   * Agree a price from a date.
+   *
+   * `price_unit_litres` is a REQUIRED argument rather than an optional field on
+   * the body, so a caller cannot omit the lot size and get a rate read as
+   * per-litre -- which would be the same numbers at forty times the price.
+   */
+  setPrice(
+    id: string,
+    body: {
+      effective_from: string;
+      price_minor: number;
+      price_unit_litres: number;
+      note?: string | null;
+      recorded_by: string;
+    },
+    idempotencyKey: string,
+  ): Promise<DestinationPrice> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/destinations/${id}/prices`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  saveDispatchSession(body: Record<string, unknown>, idempotencyKey: string): Promise<{
+    occurred_on: string; session: MilkingSessionValue;
+    written: number; taken: number; none: number; updated: number;
+    litres: number; amount_minor: number;
+  }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/dispatch/session`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  deleteDispatchSession(
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<{ removed: number }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/dispatch/session/delete`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  recordPayment(body: Record<string, unknown>, idempotencyKey: string): Promise<{
+    id: string; amount_minor: number; method: string;
+  }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/payments`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  deletePayment(id: string, idempotencyKey: string): Promise<{ removed: number }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/payments/${id}/delete`, {}, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
 }

@@ -155,19 +155,22 @@ export const OVERRIDDEN_CHECKS: readonly OverriddenCheck[] = [
  * A record that a check was overridden, and why.
  *
  * ---------------------------------------------------------------------------
- * WHY THIS LIVES IN THE PAYLOAD AND NOT IN A COLUMN
+ * IT LIVES IN TWO COLUMNS, AS OF MIGRATION 4
  * ---------------------------------------------------------------------------
- * A column would be the better shape -- uniform across event types, queryable
- * without json_extract, sitting with the other provenance fields it resembles.
- * It would also cost migration 3, and the build order's standing claim is that
- * everything above the cut line lands without a schema migration. The payload
- * is already TEXT JSON on the event, is already exhaustively validated at the
- * write boundary, and no projection reads it, so this fits with no schema
- * change and no risk to the projection rules.
+ * It lived in the event payload first, for one reason only: a column cost a
+ * migration, and the entry-UX build order's standing claim was that everything
+ * above its cut line landed without one. REGISTRY_ENTRY_UX.md §11 recorded the
+ * debt -- "do not migrate for this alone, bundle it into whichever migration
+ * lands next" -- and migration 4 is where it was paid.
  *
- * If a later cycle needs to ask "every event written over a warning" often
- * enough for `json_extract` to hurt, promoting it to a column is a mechanical
- * migration on a table whose rebuild procedure is already proven twice.
+ * `override_check` and `override_reason` are now columns on
+ * registry_animal_events: uniform across event types, queryable without
+ * json_extract, sitting beside the other provenance fields they resemble, and
+ * -- new -- constrained by the database rather than only by this module. See
+ * the migration 4 comment in schema.ts for what else the move bought.
+ *
+ * This interface survives as the in-memory shape passed to appendEvent() and
+ * returned to readers. It is no longer part of any payload.
  *
  * `reason` is OPTIONAL, deliberately. Requiring prose to get past a guard would
  * make the guard a wall, and the operator would type "yes" to clear it -- which
@@ -208,14 +211,12 @@ export interface CalvingPayload {
   assistance?: CalvingAssistance | null;
   notes?: string | null;
   /** Set only when the near-duplicate guard was actually stepped past. */
-  override?: OverrideRecord | null;
 }
 
 export interface DryOffPayload {
   reason?: DryOffReason | null;
   notes?: string | null;
   /** Set only when the terminal-departure guard was actually stepped past. */
-  override?: OverrideRecord | null;
 }
 
 export interface DeparturePayload {
@@ -224,7 +225,6 @@ export interface DeparturePayload {
   cause?: string | null;
   notes?: string | null;
   /** Set only when the terminal-departure guard was actually stepped past. */
-  override?: OverrideRecord | null;
 }
 
 /**
@@ -279,6 +279,17 @@ export interface RegistryEventRow {
   recorded_by: string;
   recorded_at: string;
   supersedes_id: string | null;
+  /**
+   * The guard this write stepped past, or null. Migration 4 moved these out of
+   * the payload; see OverrideRecord.
+   *
+   * Recorded from the CONDITION, never from the caller's flag -- a caller that
+   * passes `allow_near_duplicate` unconditionally must not have every write
+   * claim an override happened, because a field that is always set carries no
+   * information.
+   */
+  override_check: OverriddenCheck | null;
+  override_reason: string | null;
 }
 
 /** An event row with its payload parsed -- what the pure core consumes. */
@@ -414,6 +425,128 @@ export interface AnimalProjection {
   parentage: ParentageRow[];
 }
 
+// ---------------------------------------------------------------------------
+// Milk sales, home use and the buyer ledger (docs/REGISTRY_SALES.md)
+// ---------------------------------------------------------------------------
+
+/**
+ * Where milk goes when it leaves the bulk.
+ *
+ * `home` is in this list because home use is a DISPOSITION, not a sale, and the
+ * two ways of keeping it out of here are both worse -- see the migration 5
+ * comment in schema.ts. Money is a property of the destination (`billable`),
+ * not of the act.
+ */
+export const DESTINATION_KINDS = ['dodhi', 'household', 'shop', 'home', 'other'] as const;
+export type DestinationKind = (typeof DESTINATION_KINDS)[number];
+
+/**
+ * A destination.
+ *
+ * `billable` and `standing` are stored as 0/1 and normalized to booleans on the
+ * way out, the same convention as the demo `Delivery.paid`.
+ *
+ * THE TWO FLAGS ARE INDEPENDENT and neither is derived from `kind`:
+ *
+ *   - `billable` -- does money follow the milk. Home is never billable, which
+ *     the schema enforces.
+ *   - `standing` -- must the daily sheet account for this destination in EVERY
+ *     session (the dodhi, home), or is it only a row when it took something
+ *     (the households, who take surplus and whose pattern varies with the
+ *     season)? See REGISTRY_SALES.md §4.1a for why this exists instead of the
+ *     morning/evening column it replaced.
+ *
+ * `started_on` / `ended_on` are an ACTIVE RANGE rather than a status flag, so
+ * the sheet can open a past date and show who was buying then.
+ */
+export interface DestinationRow {
+  id: string;
+  name: string;
+  kind: DestinationKind;
+  billable: boolean;
+  standing: boolean;
+  contact: string | null;
+  started_on: string;
+  ended_on: string | null;
+  note: string | null;
+  recorded_by: string;
+  recorded_at: string;
+}
+
+/**
+ * One effective-dated price agreement.
+ *
+ * A PRICE IS TWO NUMBERS: `price_minor` (paisa) and `price_unit_litres` (the lot
+ * it covers). Rs 7,000 per 40 L is `(700000, 40)`, stored as it was agreed.
+ * money.ts holds the arithmetic and the reasoning.
+ */
+export interface DestinationPriceRow {
+  id: string;
+  destination_id: string;
+  effective_from: string;
+  price_minor: number;
+  price_unit_litres: number;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
+/**
+ * Milk taken, or deliberately not taken, by one destination in one session.
+ *
+ * THREE STATES, NOT FOUR. `registry_milkings` needs `milked_not_measured`
+ * because a fabricated yield is worse than a recorded gap; a dispatch has a
+ * counterparty whose money depends on the figure, so the litres IS the
+ * transaction and an unmeasured one does not happen.
+ */
+export type DispatchStatus = 'taken' | 'none';
+
+export const DISPATCH_STATUSES: readonly DispatchStatus[] = ['taken', 'none'];
+
+export interface DispatchRow {
+  id: string;
+  destination_id: string;
+  occurred_on: string;
+  session: MilkingSession;
+  status: DispatchStatus;
+  litres: number | null;
+  /** Captured at entry time, with its lot size, never looked up later. */
+  price_minor: number | null;
+  price_unit_litres: number | null;
+  reason: string | null;
+  occurred_time: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  source_form: SourceForm;
+  note: string | null;
+}
+
+/**
+ * Money received, or an adjustment.
+ *
+ * `adjustment` is the only signed kind and it must carry a note: a written-off
+ * balance, a rounding settlement or a figure carried forward from the khata is
+ * a decision somebody made, and a signed number with no sentence attached is
+ * unauditable a month later.
+ */
+export type PaymentMethod = 'cash' | 'bank' | 'adjustment';
+
+export const PAYMENT_METHODS: readonly PaymentMethod[] = ['cash', 'bank', 'adjustment'];
+
+export interface PaymentRow {
+  id: string;
+  destination_id: string;
+  occurred_on: string;
+  amount_minor: number;
+  method: PaymentMethod;
+  reference: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
 /**
  * A whole-registry snapshot, the unit the invariant checks operate on.
  *
@@ -435,5 +568,14 @@ export interface RegistrySnapshot {
   parentage: ParentageRow[];
   statuses: AnimalStatusRow[];
   milkings: RegistryMilkingRow[];
+  /**
+   * The sales tables (invariants 18-22). Like `milkings` above, `dispatches`
+   * grows with time rather than with herd size -- a handful of destinations
+   * twice a day -- and is included for the same reason and at the same cost.
+   */
+  destinations: DestinationRow[];
+  prices: DestinationPriceRow[];
+  dispatches: DispatchRow[];
+  payments: PaymentRow[];
   nextSerial: number;
 }

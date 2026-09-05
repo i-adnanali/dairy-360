@@ -404,6 +404,423 @@ CREATE INDEX idx_registry_milkings_animal ON registry_milkings(animal_id, occurr
 CREATE INDEX idx_registry_milkings_date   ON registry_milkings(occurred_on, session);
 `;
 
+// ---------------------------------------------------------------------------
+// Migration 4 -- the override moves from the payload to two columns
+// ---------------------------------------------------------------------------
+
+/**
+ * REGISTRY_ENTRY_UX.md §11 carried a standing instruction: the override record
+ * belongs in a column rather than the payload, "do not migrate for this alone --
+ * bundle it into whichever migration lands next". This is that moment, and it
+ * goes as its OWN migration rather than riding with the sales tables, because
+ * this one rebuilds a table with foreign keys off and those are plain CREATEs.
+ * Putting both behind one review is what REGISTRY.md refused at migration 3.
+ *
+ * WHY A COLUMN IS THE BETTER SHAPE (the reasoning that was in types.ts):
+ * uniform across event types, queryable without json_extract, and sitting beside
+ * the other provenance fields it resembles. Three things it also buys that the
+ * payload could not:
+ *
+ *   - A CHECK on the vocabulary. In the payload, `check` was validated only at
+ *     the write boundary, so a hand-written INSERT could store any string. Now
+ *     the database refuses an unknown check, and refuses a `reason` with no
+ *     `check` -- prose about a guard that was never stepped past.
+ *   - No nested object in the payload. `stableStringify` sorts keys ONE level
+ *     deep because "payloads are flat", which was true of everything except
+ *     this. The nested override rode on JSON.stringify's insertion order, and
+ *     the rebuild-diff compares payload TEXT. That fragility is now gone rather
+ *     than documented.
+ *   - The payload of every calving, dry_off and departure gets shorter, which is
+ *     the shape the model sees through get_registry_animal.
+ *
+ * THE COPY IS DONE IN JAVASCRIPT, NOT WITH json_remove(). Two reasons, and the
+ * second is the load-bearing one:
+ *
+ *   - The rebuild-diff compares stored payload text, so the rewritten payload
+ *     must be byte-identical to what the writer would produce. SQLite's JSON
+ *     functions re-render rather than edit, and matching their output to
+ *     JSON.stringify's is an assumption, not a guarantee.
+ *   - A migration must be FROZEN. Calling the live `stableStringify` would mean
+ *     a future edit to that helper silently changes what migration 4 did to
+ *     databases migrated after the edit. So the serializer is inlined here, and
+ *     it must never be replaced with an import.
+ */
+const MIGRATION_4_CREATE = `
+CREATE TABLE registry_animal_events_new (
+  id             TEXT PRIMARY KEY,
+  animal_id      TEXT NOT NULL REFERENCES registry_animals(id),
+  type           TEXT NOT NULL CHECK (
+                   type IN ('birth','acquired','calving','dry_off','departure','note')
+                 ),
+  occurred_on    TEXT NOT NULL,
+  occurred_time  TEXT,
+  date_precision TEXT NOT NULL CHECK (
+                   date_precision IN ('day','month','year','estimated')
+                 ),
+  payload        TEXT NOT NULL,
+  source_form    TEXT NOT NULL CHECK (
+                   source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                 ),
+  source_ref     TEXT,
+  observed_by    TEXT,
+  recorded_by    TEXT NOT NULL,
+  recorded_at    TEXT NOT NULL,
+  supersedes_id  TEXT REFERENCES registry_animal_events(id),
+
+  -- NEW in migration 4. Was payload.override.{check,reason}.
+  override_check  TEXT,
+  override_reason TEXT,
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT time_only_at_day_precision
+    CHECK (occurred_time IS NULL OR date_precision = 'day'),
+  CONSTRAINT occurred_time_is_hh_mm
+    CHECK (occurred_time IS NULL OR occurred_time GLOB '[0-2][0-9]:[0-5][0-9]'),
+  CONSTRAINT month_precision_dated_first
+    CHECK (date_precision <> 'month' OR substr(occurred_on, 9, 2) = '01'),
+  CONSTRAINT year_precision_dated_jan_first
+    CHECK (date_precision <> 'year' OR substr(occurred_on, 6, 5) = '01-01'),
+  CONSTRAINT estimated_precision_dated_jan_first
+    CHECK (date_precision <> 'estimated' OR substr(occurred_on, 6, 5) = '01-01'),
+  CONSTRAINT no_self_supersede
+    CHECK (supersedes_id IS NULL OR supersedes_id <> id),
+
+  -- The vocabulary, enforced at the database for the first time. In the payload
+  -- this was a write-boundary check only.
+  CONSTRAINT override_check_is_known
+    CHECK (override_check IS NULL OR
+           override_check IN ('near_duplicate_calving','animal_departed')),
+  -- A reason with no check is prose about a guard nobody stepped past. The
+  -- converse is fine and deliberate: the flag is load-bearing, the prose is
+  -- optional (see OverrideRecord in types.ts).
+  CONSTRAINT override_reason_needs_a_check
+    CHECK (override_reason IS NULL OR override_check IS NOT NULL),
+  -- A note is always allowed after a departure, so it can never carry an
+  -- override. The write boundary already refused one; now the schema does too.
+  CONSTRAINT note_never_overrides
+    CHECK (override_check IS NULL OR type <> 'note')
+);
+`;
+
+const MIGRATION_4_FINISH = `
+DROP TABLE registry_animal_events;
+ALTER TABLE registry_animal_events_new RENAME TO registry_animal_events;
+
+CREATE UNIQUE INDEX idx_registry_events_supersedes
+  ON registry_animal_events(supersedes_id)
+  WHERE supersedes_id IS NOT NULL;
+CREATE INDEX idx_registry_events_animal
+  ON registry_animal_events(animal_id, occurred_on);
+CREATE INDEX idx_registry_events_type
+  ON registry_animal_events(type);
+
+CREATE TRIGGER registry_animal_events_no_update
+BEFORE UPDATE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+
+CREATE TRIGGER registry_animal_events_no_delete
+BEFORE DELETE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+`;
+
+/**
+ * Frozen copy of `stableStringify` from store.ts. DO NOT replace with an import:
+ * see the note above. If store.ts's serializer ever changes, this one must not.
+ */
+function migration4Json(o: Record<string, unknown>): string {
+  const sorted: Record<string, unknown> = {};
+  for (const k of Object.keys(o).sort()) sorted[k] = o[k];
+  return JSON.stringify(sorted);
+}
+
+interface Migration4Row {
+  id: string;
+  animal_id: string;
+  type: string;
+  occurred_on: string;
+  occurred_time: string | null;
+  date_precision: string;
+  payload: string;
+  source_form: string;
+  source_ref: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  supersedes_id: string | null;
+}
+
+function migration4(db: Db): void {
+  db.exec(MIGRATION_4_CREATE);
+
+  const rows = db.prepare(`SELECT * FROM registry_animal_events`).all() as Migration4Row[];
+  const insert = db.prepare(
+    `INSERT INTO registry_animal_events_new
+       (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+        source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+        override_check, override_reason)
+     VALUES
+       (@id, @animal_id, @type, @occurred_on, @occurred_time, @date_precision, @payload,
+        @source_form, @source_ref, @observed_by, @recorded_by, @recorded_at, @supersedes_id,
+        @override_check, @override_reason)`,
+  );
+
+  for (const r of rows) {
+    const payload = JSON.parse(r.payload) as Record<string, unknown>;
+    // `override: null` was stored explicitly whenever a guard was not tripped,
+    // so `delete` rather than a truthiness test -- both shapes must leave the
+    // payload with no `override` key at all.
+    const raw = payload.override as { check?: unknown; reason?: unknown } | null | undefined;
+    delete payload.override;
+    insert.run({
+      ...r,
+      payload: migration4Json(payload),
+      override_check: typeof raw?.check === 'string' ? raw.check : null,
+      override_reason: typeof raw?.reason === 'string' ? raw.reason : null,
+    });
+  }
+
+  db.exec(MIGRATION_4_FINISH);
+}
+
+// ---------------------------------------------------------------------------
+// Migration 5 -- milk sales, home use and the buyer ledger
+// (docs/REGISTRY_SALES.md §9)
+// ---------------------------------------------------------------------------
+
+/**
+ * FOUR TABLES, ALL RECORDS, NONE A PROJECTION.
+ *
+ * They go in REGISTRY_TABLES and stay out of REGISTRY_PROJECTION_TABLES, by the
+ * test that decides the question: nothing in them is derivable from the event
+ * log. The rebuild must never touch them. Because backup.ts computes
+ * SOURCE_OF_TRUTH_TABLES as REGISTRY_TABLES minus the projections rather than
+ * listing it, they are backed up with nothing to remember -- which is that
+ * design paying for itself for the first time.
+ *
+ * THE FIRST REGISTRY TABLES WITH NO `animal_id`. Every registry table before
+ * this hangs off an animal; these four hang off a counterparty. That is why
+ * this is not "step 5" -- it is a different axis from the animal record, and
+ * the registry's step numbering should not absorb it.
+ *
+ * A PLAIN SET OF CREATEs: nothing existing is touched, so no `rebuildsTables`
+ * and no foreign-keys relaxation. The cheap kind of migration, unlike the one
+ * immediately before it.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY `registry_dispatches` AND NOT `registry_sales`
+ * ---------------------------------------------------------------------------
+ * Because milk kept for the house has to go somewhere, and the two ways of
+ * forcing it into a sales table are both worse: a "sale" at price zero to
+ * yourself is a lie in the one table that must not contain any, and a separate
+ * registry_home_use table duplicates the key, the row states, the save path and
+ * the completeness count -- and makes every future disposition a third table.
+ *
+ * The row records milk LEAVING THE BULK to a destination in a session. Selling
+ * is the dominant disposition, not the only one, and money is a property of the
+ * destination rather than of the act.
+ *
+ * The payoff is not tidiness: home use becomes a row on the daily sheet that
+ * blocks the save when untouched, exactly as an unrecorded animal blocks the
+ * milking roster. Home use is the most forgettable quantity on a dairy, and at
+ * month end it is the whole of the unexplained difference.
+ */
+const MIGRATION_5_SALES = `
+-- Who milk goes to: buyers AND home. See registry_dispatches below for why
+-- those are one table.
+CREATE TABLE registry_destinations (
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  kind        TEXT NOT NULL CHECK (kind IN ('dodhi','household','shop','home','other')),
+
+  -- billable is its OWN column, not a filter on kind. REGISTRY.md records the
+  -- farm_events.is_synthetic failure -- a discriminator that exists and that
+  -- nothing filters on, whose correctness has therefore never been exercised.
+  -- The defence here is structural instead: a non-billable destination has no
+  -- rows in registry_destination_prices, so it cannot produce an amount, cannot
+  -- appear in a balance and cannot be invoiced. This column makes the intent
+  -- legible and gives invariant 22 something to check.
+  billable    INTEGER NOT NULL CHECK (billable IN (0,1)),
+
+  -- Standing destinations are on every sheet and BLOCK THE SAVE when untouched;
+  -- occasional ones are not rows until they took something.
+  --
+  -- This exists instead of the 'sessions' column the farm was asked for. The
+  -- answer -- "the dodhi comes both times, the households can vary ... depends
+  -- on how much milking animals are in that season and time of the month" --
+  -- means a fixed morning/evening pattern would be FICTION, wrong for half the
+  -- year. What varies is availability, so what is stored is whether the sheet
+  -- must account for them, not when they come.
+  --
+  -- NOT derived from kind: kind is who they are, standing is how the sheet
+  -- treats them, and a household moves between the two with the season.
+  standing    INTEGER NOT NULL CHECK (standing IN (0,1)),
+
+  contact     TEXT,
+  -- The ACTIVE RANGE, not a status flag. Membership on a past date is a range
+  -- test, which is what lets the sheet open last Tuesday and show who was
+  -- buying THEN -- the same argument milking.ts makes for deriving the roster
+  -- from lactation rows rather than from the status projection.
+  started_on  TEXT NOT NULL,
+  ended_on    TEXT,
+  note        TEXT,
+  recorded_by TEXT NOT NULL,
+  recorded_at TEXT NOT NULL,
+
+  CONSTRAINT started_on_is_a_date
+    CHECK (started_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT ended_on_is_a_date
+    CHECK (ended_on IS NULL OR ended_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT the_range_runs_forwards
+    CHECK (ended_on IS NULL OR ended_on >= started_on),
+  CONSTRAINT a_destination_is_named
+    CHECK (length(trim(name)) > 0),
+  -- Home milk is never billed, and that is structural rather than a habit.
+  CONSTRAINT home_is_never_billable
+    CHECK (kind <> 'home' OR billable = 0)
+);
+CREATE INDEX idx_registry_destinations_active
+  ON registry_destinations(started_on, ended_on);
+
+-- NOTE THE ABSENCE OF A UNIQUE INDEX pinning a single non-billable destination.
+-- Splitting home use into household and staff milk, or adding calves or
+-- spoilage, must not cost a migration -- that is what makes "calves are a row,
+-- not a schema change" literally true rather than aspirational.
+
+-- The AGREEMENT. Effective-dated: a price change is a new row, never an UPDATE
+-- to the old one, and the price in force on a date is the latest row at or
+-- before it.
+--
+-- A PRICE IS TWO NUMBERS. price_minor is the amount and price_unit_litres is
+-- the lot it covers: Rs 7,000 per 40 L is (700000, 40), stored as agreed. See
+-- money.ts for why normalising to per-litre would be wrong in three separate
+-- ways.
+--
+-- NO APPEND-ONLY TRIGGERS, unlike registry_animal_events, and that is safe
+-- BECAUSE OF THE CAPTURE below: every dispatch already holds its own figure, so
+-- correcting an agreement changes only the default offered to future entry and
+-- rewrites no history.
+CREATE TABLE registry_destination_prices (
+  id                TEXT PRIMARY KEY,
+  destination_id    TEXT NOT NULL REFERENCES registry_destinations(id),
+  effective_from    TEXT NOT NULL,
+  price_minor       INTEGER NOT NULL CHECK (price_minor >= 0),
+  price_unit_litres REAL    NOT NULL CHECK (price_unit_litres > 0),
+  recorded_by       TEXT NOT NULL,
+  recorded_at       TEXT NOT NULL,
+  note              TEXT,
+
+  CONSTRAINT effective_from_is_a_date
+    CHECK (effective_from GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  -- A second price on the same date for the same destination is not a price
+  -- change, it is a typo -- and which one won would be silent.
+  CONSTRAINT one_price_per_destination_per_day
+    UNIQUE (destination_id, effective_from)
+);
+CREATE INDEX idx_registry_destination_prices_dest
+  ON registry_destination_prices(destination_id, effective_from);
+
+-- Milk leaving the bulk. One row per destination per session.
+--
+-- THREE ROW STATES, NOT FOUR, and the asymmetry with registry_milkings is the
+-- point. A yield needs 'milked_not_measured' because a fabricated number is
+-- worse than a recorded gap and nobody is harmed by an unweighed milking. A
+-- dispatch has a counterparty whose money depends on the figure, so an
+-- unmeasured one is not a thing that happens -- the litres IS the transaction.
+-- Whoever copies the milking table to build the next one of these will look for
+-- the fourth state; this comment is where they find out where it went.
+CREATE TABLE registry_dispatches (
+  id                TEXT PRIMARY KEY,
+  destination_id    TEXT NOT NULL REFERENCES registry_destinations(id),
+  occurred_on       TEXT NOT NULL,          -- farm-local calendar date
+  session           TEXT NOT NULL CHECK (session IN ('morning','evening')),
+  status            TEXT NOT NULL CHECK (status IN ('taken','none')),
+  litres            REAL,
+  -- CAPTURED at entry time, not looked up -- and the LOT SIZE travels with the
+  -- amount, because a figure without its unit is not a price.
+  price_minor       INTEGER,
+  price_unit_litres REAL,
+  reason            TEXT,                   -- why nothing was taken
+  occurred_time     TEXT,                   -- optional, never defaulted
+  observed_by       TEXT,                   -- who handed the milk over
+  recorded_by       TEXT NOT NULL,
+  recorded_at       TEXT NOT NULL,
+  source_form       TEXT NOT NULL CHECK (
+                      source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                    ),
+  note              TEXT,
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT occurred_time_is_hh_mm
+    CHECK (occurred_time IS NULL OR occurred_time GLOB '[0-2][0-9]:[0-5][0-9]'),
+  CONSTRAINT taken_has_litres
+    CHECK ((status = 'taken') = (litres IS NOT NULL)),
+  CONSTRAINT litres_is_not_negative
+    CHECK (litres IS NULL OR litres >= 0),
+  CONSTRAINT reason_only_when_none
+    CHECK (reason IS NULL OR status = 'none'),
+  CONSTRAINT price_only_when_taken
+    CHECK (price_minor IS NULL OR status = 'taken'),
+  CONSTRAINT price_is_not_negative
+    CHECK (price_minor IS NULL OR price_minor >= 0),
+  -- Both halves of a price or neither. A rate with no lot size is unpriceable
+  -- and a lot size with no rate is meaningless.
+  CONSTRAINT a_price_is_both_halves
+    CHECK ((price_minor IS NULL) = (price_unit_litres IS NULL)),
+  CONSTRAINT price_unit_is_positive
+    CHECK (price_unit_litres IS NULL OR price_unit_litres > 0),
+  -- One row per destination per session. What makes a session's COMPLETENESS a
+  -- countable fact rather than an interpretation, and what an update conflicts
+  -- on when a figure is corrected.
+  CONSTRAINT one_row_per_destination_per_session
+    UNIQUE (destination_id, occurred_on, session)
+);
+CREATE INDEX idx_registry_dispatches_dest ON registry_dispatches(destination_id, occurred_on);
+CREATE INDEX idx_registry_dispatches_date ON registry_dispatches(occurred_on, session);
+
+-- The credit half of the ledger.
+--
+-- THERE IS NO 'paid' COLUMN ANYWHERE, and that is the whole reason this table
+-- exists. The demo deliveries.paid is a per-row boolean, and a dodhi handing
+-- over Rs 40,000 against three weeks of collections is paying against no row in
+-- particular -- partial payment, overpayment, an advance and a running balance
+-- are not hard to express with a flag, they are UNREPRESENTABLE.
+--
+-- balance = SUM(amountMinor over taken billable dispatches) - SUM(payments),
+-- derived on every read and never cached: a stored balance is a number that can
+-- disagree with the rows it came from.
+CREATE TABLE registry_payments (
+  id             TEXT PRIMARY KEY,
+  destination_id TEXT NOT NULL REFERENCES registry_destinations(id),
+  occurred_on    TEXT NOT NULL,
+  amount_minor   INTEGER NOT NULL,
+  method         TEXT NOT NULL CHECK (method IN ('cash','bank','adjustment')),
+  reference      TEXT,                   -- cheque no., transfer ref, khata page
+  observed_by    TEXT,                   -- who took the money
+  recorded_by    TEXT NOT NULL,
+  recorded_at    TEXT NOT NULL,
+  note           TEXT,
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  -- Only an adjustment may be signed. Cash and bank are money that changed
+  -- hands, and a negative one is a different fact wearing the wrong label.
+  CONSTRAINT cash_and_bank_are_positive
+    CHECK (method = 'adjustment' OR amount_minor > 0),
+  -- A signed number with no sentence attached is unauditable a month later, and
+  -- an adjustment is always a decision somebody made rather than a transaction.
+  CONSTRAINT an_adjustment_explains_itself
+    CHECK (method <> 'adjustment'
+           OR (amount_minor <> 0 AND note IS NOT NULL AND length(trim(note)) > 0))
+);
+CREATE INDEX idx_registry_payments_dest ON registry_payments(destination_id, occurred_on);
+`;
+
 export interface Migration {
   /** Applied inside a transaction that also bumps user_version. */
   up: (db: Db) => void;
@@ -433,6 +850,13 @@ export const MIGRATIONS: readonly Migration[] = [
   // A plain CREATE TABLE: no existing table is rebuilt, so no `rebuildsTables`
   // and no foreign_keys relaxation.
   { up: (db) => db.exec(MIGRATION_3_MILKINGS) },
+  // Rebuilds registry_animal_events to add two columns and three CHECKs, and
+  // rewrites every payload to drop the key they replace. Same self-referencing
+  // foreign key as migration 2, so the same relaxation.
+  { up: migration4, rebuildsTables: true },
+  // Four plain CREATEs (docs/REGISTRY_SALES.md). Nothing existing is touched,
+  // so no `rebuildsTables` and no foreign_keys relaxation.
+  { up: (db) => db.exec(MIGRATION_5_SALES) },
 ];
 
 /** The version a fully-migrated database reports. */
@@ -651,19 +1075,24 @@ export const REGISTRY_TABLES = [
   'registry_animal_events',
   'registry_animal_status',
   'registry_animals',
+  'registry_destination_prices',
+  'registry_destinations',
+  'registry_dispatches',
   'registry_lactations',
   'registry_milkings',
   'registry_parentage',
+  'registry_payments',
   'registry_serial_counter',
 ] as const;
 
 /**
  * The projection tables -- the ones the rebuild is allowed to clear.
  *
- * `registry_milkings` is deliberately ABSENT. The test for this list is whether
- * every row is derivable from the event log; a milk figure is not derivable from
- * anything, so clearing it would destroy the only copy. It is a record, like the
- * event log and registry_animals.
+ * `registry_milkings` is deliberately ABSENT, and so are the four sales tables
+ * added by migration 5. The test for this list is whether every row is derivable
+ * from the event log; a milk figure is not, a litre sold is not, and neither is
+ * a payment. Clearing any of them would destroy the only copy. They are records,
+ * like the event log and registry_animals.
  */
 export const REGISTRY_PROJECTION_TABLES = [
   'registry_animal_status',

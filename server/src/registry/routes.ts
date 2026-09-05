@@ -32,21 +32,28 @@
 // ---------------------------------------------------------------------------
 // EVERY ROUTE THAT WRITES REQUIRES AN `Idempotency-Key`
 // ---------------------------------------------------------------------------
-// Six of them: POST /animals, /events, /calvings, /calvings/:id/correction,
-// /milking/session and /milking/session/delete. A write without one is refused
-// with a 400 rather than accepted unprotected; see idempotency.ts for what that
-// closes, and for the two holes it does not.
+// Thirteen of them: POST /animals, /events, /calvings, /calvings/:id/correction,
+// /milking/session, /milking/session/delete, /destinations, /destinations/:id,
+// /destinations/:id/prices, /dispatch/session, /dispatch/session/delete,
+// /payments and /payments/:id/delete. A write without one is refused with a 400
+// rather than accepted unprotected; see idempotency.ts for what that closes,
+// and for the two holes it does not.
 //
 // The heading used to say "appends an event", which the milking routes broke:
 // they write a measurement table and append nothing. The rule was never about
 // events -- it is about any request that changes state and could arrive twice.
 //
-// NOTE THE COUNT. The decisions document says "the three write routes", which
-// undercounts: the paired correction appends a superseding calving, a
-// superseding birth and sometimes a departure. Replayed without a key it does
-// not merely duplicate -- it hits the partial unique index on `supersedes_id`,
-// which is a raw SQLite constraint error rather than a RegistryError, so it
-// surfaces as a 500. Cheaper to protect it than to explain that.
+// NOTE THE COUNT, WHICH HAS NOW BEEN WRONG TWICE. The decisions document said
+// "the three write routes"; this comment then said six, and step 5 added seven
+// more. It is an enumeration in a comment beside the code it enumerates, and it
+// has gone stale every single time the code moved -- so if it disagrees with
+// the router below, the router is right.
+//
+// Why the correction route in particular needs a key: it appends a superseding
+// calving, a superseding birth and sometimes a departure. Replayed without one
+// it does not merely duplicate -- it hits the partial unique index on
+// `supersedes_id`, which is a raw SQLite constraint error rather than a
+// RegistryError, so it surfaces as a 500. Cheaper to protect than to explain.
 //
 // /rebuild is deliberately unkeyed; the comment on it says why.
 
@@ -54,6 +61,20 @@ import express from 'express';
 import type { Request, Response } from 'express';
 
 import { addAcquiredAnimal, appendLifeEvent } from './entry';
+import {
+  addDestination,
+  destinationList,
+  pricesFor,
+  setPrice,
+  updateDestination,
+} from './destinations';
+import {
+  deleteDispatches,
+  dispatchSheet,
+  reconcileRange,
+  saveDispatchSession,
+} from './dispatch';
+import { balances, deletePayment, recordPayment, statement } from './ledger';
 import { correctCalving, recordCalving } from './calving';
 import {
   deleteMilkings,
@@ -84,7 +105,7 @@ import { checkSnapshot } from './invariants';
 import { groupByAnimal, intervalReport, precisionHistogram } from './intervals';
 import { farmToday } from './time';
 import type { Db } from './schema';
-import type { Provenance, RegistrySex, SourceForm } from './types';
+import type { DestinationKind, PaymentMethod, Provenance, RegistrySex, SourceForm } from './types';
 import { SOURCE_FORMS } from './types';
 
 type Body = Record<string, unknown>;
@@ -158,6 +179,65 @@ function requirePrecision(b: Body, key = 'date_precision'): string {
 
 function asOfFrom(b: Body): string {
   return str(b, 'as_of') ?? farmToday();
+}
+
+function num(b: Body, key: string): number | null {
+  const v = b[key];
+  if (v === undefined || v === null || v === '') return null;
+  if (typeof v !== 'number' || !Number.isFinite(v)) {
+    throw new RegistryError('invalid_payload', `${key} must be a number`, key);
+  }
+  return v;
+}
+
+function requireNum(b: Body, key: string): number {
+  const v = num(b, key);
+  if (v === null) throw new RegistryError('invalid_payload', `${key} is required`, key);
+  return v;
+}
+
+/**
+ * A boolean that is REQUIRED and never coerced.
+ *
+ * `standing` and `billable` decide whether the daily sheet demands an answer
+ * and whether money follows the milk. A missing one silently becoming `false`
+ * would turn off the sheet's only completeness guarantee, so a non-boolean is
+ * refused rather than read as falsy.
+ */
+function requireBool(b: Body, key: string): boolean {
+  const v = b[key];
+  if (typeof v !== 'boolean') {
+    throw new RegistryError(
+      'invalid_payload',
+      `${key} must be true or false, got ${JSON.stringify(v)}`,
+      key,
+    );
+  }
+  return v;
+}
+
+function optBool(b: Body, key: string): boolean | undefined {
+  const v = b[key];
+  if (v === undefined) return undefined;
+  if (typeof v !== 'boolean') {
+    throw new RegistryError(
+      'invalid_payload',
+      `${key} must be true or false, got ${JSON.stringify(v)}`,
+      key,
+    );
+  }
+  return v;
+}
+
+function sessionOf(v: unknown): 'morning' | 'evening' {
+  if (v !== 'morning' && v !== 'evening') {
+    throw new RegistryError(
+      'invalid_payload',
+      `session must be morning | evening, got ${JSON.stringify(v)}`,
+      'session',
+    );
+  }
+  return v;
 }
 
 /** Wrap a handler so a RegistryError becomes a 400 and nothing else does. */
@@ -564,6 +644,241 @@ export function registryRouter(db: Db): express.Router {
         animal_id: str(b, 'animal_id') ?? undefined,
       });
       res.status(200).json({ removed });
+    }),
+  );
+
+  // --- destinations, prices, dispatch and the ledger -----------------------
+  //
+  // docs/REGISTRY_SALES.md. Note that NONE of these touches an animal: they are
+  // the first registry routes that do not, which is why the sales half works
+  // against an empty herd.
+
+  /** Every destination, with the price in force on `as_of` (default today). */
+  router.get(
+    '/destinations',
+    handle((req, res) => {
+      const asOf = typeof req.query.as_of === 'string' ? req.query.as_of : farmToday();
+      res.json({ as_of: asOf, destinations: destinationList(db, asOf) });
+    }),
+  );
+
+  /** One destination's statement: dispatches and payments by month, plus the balance. */
+  router.get(
+    '/destinations/:id',
+    handle((req, res) => {
+      const s = statement(db, req.params.id);
+      if (!s) {
+        res
+          .status(404)
+          .json(
+            new RegistryError(
+              'unknown_destination',
+              `unknown destination '${req.params.id}'`,
+              'destination_id',
+            ).toWire(),
+          );
+        return;
+      }
+      res.json({ ...s, prices: pricesFor(db, req.params.id) });
+    }),
+  );
+
+  /** Balances for the billable destinations. Home is absent, not zero. */
+  router.get(
+    '/balances',
+    handle((_req, res) => {
+      res.json({ balances: balances(db) });
+    }),
+  );
+
+  router.post(
+    '/destinations',
+    write(replays, (req, res) => {
+      const b = body(req);
+      const kind = requireStr(b, 'kind') as DestinationKind;
+      res.status(201).json(
+        addDestination(db, {
+          name: requireStr(b, 'name'),
+          kind,
+          // `billable` defaults to true for every kind but home, where the
+          // schema forbids anything else. `standing` is REQUIRED: it decides
+          // whether the sheet demands an answer, which is a question about how
+          // the farm works rather than a fact about the buyer.
+          billable: optBool(b, 'billable'),
+          standing: requireBool(b, 'standing'),
+          contact: str(b, 'contact'),
+          started_on: requireStr(b, 'started_on'),
+          ended_on: str(b, 'ended_on'),
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * Amend a destination.
+   *
+   * `kind`, `billable` and `started_on` are absent on purpose -- see
+   * updateDestination(). A destination set up wrongly is closed and a new one
+   * opened, which is also what actually happened if the milk was going
+   * somewhere else.
+   */
+  router.post(
+    '/destinations/:id',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.json(
+        updateDestination(db, req.params.id, {
+          name: str(b, 'name') ?? undefined,
+          standing: optBool(b, 'standing'),
+          contact: b.contact === undefined ? undefined : str(b, 'contact'),
+          ended_on: b.ended_on === undefined ? undefined : str(b, 'ended_on'),
+          note: b.note === undefined ? undefined : str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * Agree a price from a date.
+   *
+   * TWO NUMBERS, and `price_unit_litres` is required with no default. A rate of
+   * Rs 7,000 per 40 litres is (700000, 40); a default of 1 would store the same
+   * agreement as forty times the price and it would still look like a price.
+   */
+  router.post(
+    '/destinations/:id/prices',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.status(201).json(
+        setPrice(db, {
+          destination_id: req.params.id,
+          effective_from: requireStr(b, 'effective_from'),
+          price_minor: requireNum(b, 'price_minor'),
+          price_unit_litres: requireNum(b, 'price_unit_litres'),
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * The dispatch sheet for one session -- who milk went to on that date.
+   *
+   * Derived from the destinations' ACTIVE RANGES rather than a current status,
+   * so opening a past date shows who was buying THEN. Same argument as the
+   * milking roster reading lactation rows.
+   */
+  router.get(
+    '/dispatch/sheet',
+    handle((req, res) => {
+      const on = typeof req.query.on === 'string' ? req.query.on : farmToday();
+      const session = req.query.session === 'evening' ? 'evening' : 'morning';
+      res.json(dispatchSheet(db, { occurred_on: on, session }));
+    }),
+  );
+
+  /**
+   * Save a whole session. ALL ROWS OR NONE, and keyed like every other write.
+   *
+   * The replay case is not hypothetical: a double-submit would otherwise re-run
+   * an upsert whose `recorded_at` has moved, writing a second indistinguishable
+   * version of the same session.
+   */
+  router.post(
+    '/dispatch/session',
+    write(replays, (req, res) => {
+      const b = body(req);
+      const raw = b.entries;
+      if (!Array.isArray(raw)) {
+        throw new RegistryError('invalid_payload', 'entries must be an array', 'entries');
+      }
+      res.status(201).json(
+        saveDispatchSession(db, {
+          occurred_on: requireStr(b, 'occurred_on'),
+          session: sessionOf(b.session),
+          occurred_time: str(b, 'occurred_time'),
+          observed_by: str(b, 'observed_by'),
+          entries: raw as never[],
+          provenance: provenance(b),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * Remove a session, or one destination's row in it.
+   *
+   * The repair path for a session entered against the wrong date. Deliberately
+   * narrow -- a date and a session, never a range. The second DELETE any
+   * registry route exposes, and it reaches a measurement-shaped table for the
+   * same reason the first one does.
+   */
+  router.post(
+    '/dispatch/session/delete',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.json({
+        removed: deleteDispatches(db, {
+          occurred_on: requireStr(b, 'occurred_on'),
+          session: sessionOf(b.session),
+          destination_id: str(b, 'destination_id') ?? undefined,
+        }),
+      });
+    }),
+  );
+
+  /**
+   * Produced against dispatched, over a range.
+   *
+   * `gap_pct` comes back NULL whenever production is incomplete, with
+   * `gap_pct_withheld_because` saying which. That escalates past a caveat field
+   * on purpose: this number ends up in front of a buyer, and a caveat can be
+   * dropped by a consumer while a null cannot be quoted.
+   */
+  router.get(
+    '/reconcile',
+    handle((req, res) => {
+      const to = typeof req.query.to === 'string' ? req.query.to : farmToday();
+      const from = typeof req.query.from === 'string' ? req.query.from : to;
+      res.json(reconcileRange(db, from, to));
+    }),
+  );
+
+  /** Money received, or a signed adjustment that has to say why. */
+  router.post(
+    '/payments',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.status(201).json(
+        recordPayment(db, {
+          destination_id: requireStr(b, 'destination_id'),
+          occurred_on: requireStr(b, 'occurred_on'),
+          amount_minor: requireNum(b, 'amount_minor'),
+          method: requireStr(b, 'method') as PaymentMethod,
+          reference: str(b, 'reference'),
+          observed_by: str(b, 'observed_by'),
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * Remove one payment, by id.
+   *
+   * A payment entered against the wrong buyer has no other repair: correcting
+   * it in place would move money between two people's balances without either
+   * statement saying so.
+   */
+  router.post(
+    '/payments/:id/delete',
+    write(replays, (req, res) => {
+      res.json({ removed: deletePayment(db, req.params.id) });
     }),
   );
 

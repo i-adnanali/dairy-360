@@ -926,7 +926,7 @@ describe('CorrectionForm', () => {
       type: 'calving', occurred_on: '2023-04-01', occurred_time: null, date_precision: 'month',
       payload: {}, source_form: 'recall', source_ref: null, observed_by: null,
       recorded_by: 'adnan', recorded_at: 't', supersedes_id: null, superseded_by_id: null,
-      effective: true, ...over,
+      override_check: null, override_reason: null, effective: true, ...over,
     };
   }
 

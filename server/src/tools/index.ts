@@ -20,6 +20,7 @@ import {
   guardSerial,
   registryReadExecutors,
 } from './registryReads';
+import { SALES_READ_TOOLS, salesReadExecutors } from './salesReads';
 
 export interface ToolSchema {
   name: string;
@@ -311,6 +312,21 @@ const FARM_TOOLS: ToolSchema[] = [...FARM_READ_TOOLS, ...FARM_WRITE_TOOLS];
 // ---------------------------------------------------------------------------
 export { REGISTRY_READ_TOOLS };
 
+// ---------------------------------------------------------------------------
+// SALES READ TOOLS (docs/REGISTRY_SALES.md)
+//
+// Offered to EVERY agent selection, like the farm tools and for a sharper
+// reason: "what does the dodhi owe?" is a vendor question, "does what we
+// produce match what we sell?" is a dairy question, and they read the same four
+// tables. Gating them by selection would make the dispatcher decide which half
+// of one ledger the model can see.
+//
+// Reads only, per REGISTRY_TOOLS.md Decision 1. The entry screens are the way
+// sales go in, and a second write path competing with a surface under
+// measurement contaminates the reading of that surface.
+// ---------------------------------------------------------------------------
+export { SALES_READ_TOOLS };
+
 export const ALL_TOOLS: ToolSchema[] = [
   ...READ_TOOLS,
   ...WRITE_TOOLS,
@@ -319,6 +335,7 @@ export const ALL_TOOLS: ToolSchema[] = [
   ...RECONCILE_TOOLS,
   ...FARM_TOOLS,
   ...REGISTRY_READ_TOOLS,
+  ...SALES_READ_TOOLS,
 ];
 
 export const READ_TOOL_NAMES = new Set(
@@ -328,6 +345,7 @@ export const READ_TOOL_NAMES = new Set(
     ...RECONCILE_TOOLS,
     ...FARM_READ_TOOLS,
     ...REGISTRY_READ_TOOLS,
+    ...SALES_READ_TOOLS,
   ].map((t) => t.name),
 );
 export const WRITE_TOOL_NAMES = new Set(
@@ -340,7 +358,13 @@ export const WRITE_TOOL_NAMES = new Set(
  * selection -- see the FARM_TOOLS note above. */
 export function toolsForAgent(agent: Agent): ToolSchema[] {
   if (agent === 'dairy') {
-    return [...READ_TOOLS, ...WRITE_TOOLS, ...FARM_TOOLS, ...REGISTRY_READ_TOOLS];
+    return [
+      ...READ_TOOLS,
+      ...WRITE_TOOLS,
+      ...FARM_TOOLS,
+      ...REGISTRY_READ_TOOLS,
+      ...SALES_READ_TOOLS,
+    ];
   }
   if (agent === 'vendor') {
     return [
@@ -348,6 +372,7 @@ export function toolsForAgent(agent: Agent): ToolSchema[] {
       ...VENDOR_WRITE_TOOLS,
       ...FARM_TOOLS,
       ...REGISTRY_READ_TOOLS,
+      ...SALES_READ_TOOLS,
     ];
   }
   return ALL_TOOLS;
@@ -411,6 +436,7 @@ export const READ_EXECUTORS = {
   // takes a handle throughout so its tests can run on an `:memory:` fixture
   // herd, and so `npm test` never opens dairy.db -- see that file's header.
   ...registryReadExecutors(db),
+  ...salesReadExecutors(db),
 };
 export const WRITE_EXECUTORS = {
   ...DAIRY_WRITE_EXECUTORS,

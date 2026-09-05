@@ -36,6 +36,22 @@ export const routes: Routes = [
           import('./registry/milking-roster').then((m) => m.MilkingRosterScreen),
       },
       {
+        path: 'dispatch',
+        loadComponent: () =>
+          import('./registry/dispatch-sheet').then((m) => m.DispatchSheetScreen),
+      },
+      {
+        path: 'buyers',
+        loadComponent: () =>
+          import('./registry/destinations-list').then((m) => m.DestinationsList),
+      },
+      {
+        // `:id` is bound to DestinationDetail.id by withComponentInputBinding().
+        path: 'buyers/:id',
+        loadComponent: () =>
+          import('./registry/destination-detail').then((m) => m.DestinationDetail),
+      },
+      {
         path: 'check',
         loadComponent: () =>
           import('./registry/verification-panel').then((m) => m.VerificationPanel),

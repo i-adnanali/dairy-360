@@ -537,17 +537,17 @@ function dbAtVersion1(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('a fresh database lands on the current target version, now 3', () => {
+test('a fresh database lands on the current target version, now 5', () => {
   // The literal is deliberate and this test is meant to fail when a migration is
   // added: it forces whoever adds one to state the new number here rather than
   // letting TARGET_VERSION verify itself against itself.
   const db = freshDb();
   assert.equal(db.pragma('user_version', { simple: true }), TARGET_VERSION);
-  assert.equal(TARGET_VERSION, 3);
+  assert.equal(TARGET_VERSION, 5);
   db.close();
 });
 
-test('migrations 2 and 3 upgrade a v1 database and PRESERVE its rows', () => {
+test('migrations 2 through 5 upgrade a v1 database and PRESERVE its rows', () => {
   // The rebuild is create-copy-drop-rename. The copy is the part that would
   // silently lose data if it were wrong, so it is tested with data present --
   // even though the real database was empty when this shipped.
@@ -569,8 +569,13 @@ test('migrations 2 and 3 upgrade a v1 database and PRESERVE its rows', () => {
 
   const result = runMigrations(db);
   assert.equal(result.from, 1);
-  assert.equal(result.to, 3);
-  assert.equal(result.applied, 2, 'the estimated-convention rebuild AND the milking table');
+  assert.equal(result.to, 5);
+  assert.equal(
+    result.applied,
+    4,
+    'the estimated-convention rebuild, the milking table, the override columns ' +
+      'AND the four sales tables',
+  );
 
   const rows = db
     .prepare(`SELECT id, supersedes_id FROM registry_animal_events ORDER BY id`)
@@ -589,6 +594,191 @@ test('migrations 2 and 3 upgrade a v1 database and PRESERVE its rows', () => {
     (db.prepare(`SELECT COUNT(*) n FROM registry_milkings`).get() as { n: number }).n,
     0,
   );
+  db.close();
+});
+
+// ---------------------------------------------------------------------------
+// Migration 4 -- the override moves from the payload to two columns
+// ---------------------------------------------------------------------------
+
+/** A database at schema version 3, for testing the v3 -> v4 upgrade. */
+function dbAtVersion3(): ReturnType<typeof freshDb> {
+  const db = new Database(':memory:');
+  applyRegistryPragmas(db);
+  db.transaction(() => {
+    MIGRATIONS[0].up(db);
+    MIGRATIONS[1].up(db);
+    MIGRATIONS[2].up(db);
+    db.exec('PRAGMA user_version = 3');
+  })();
+  return db;
+}
+
+test('migration 4 MOVES a payload override into the columns, and out of the payload', () => {
+  // The copy is the part that would silently lose data if it were wrong, so it
+  // runs with data present -- and unlike migration 2 this one REWRITES every
+  // payload, which is a strictly larger blast radius than copying one across.
+  const db = dbAtVersion3();
+  db.prepare(
+    `INSERT INTO registry_animals (id,name,sex,species,origin,post_no,tag_no)
+     VALUES ('BD-0001','Noor','female','buffalo','acquired',NULL,NULL)`,
+  ).run();
+  const ins = db.prepare(
+    `INSERT INTO registry_animal_events
+       (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+        source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id)
+     VALUES (@id,'BD-0001',@type,@on,NULL,'day',@payload,'recall',NULL,NULL,'x',@at,@sup)`,
+  );
+  // An override WITH a reason, one WITHOUT (the flag is the load-bearing part),
+  // the explicit `override: null` that every untripped write stored, and a row
+  // that never had the key at all.
+  ins.run({
+    id: 'aevt_1',
+    type: 'dry_off',
+    on: '2024-01-01',
+    at: 't1',
+    sup: null,
+    payload: JSON.stringify({
+      notes: null,
+      override: { check: 'animal_departed', reason: 'stayed on until August' },
+      reason: null,
+    }),
+  });
+  ins.run({
+    id: 'aevt_2',
+    type: 'dry_off',
+    on: '2024-01-02',
+    at: 't2',
+    sup: null,
+    payload: JSON.stringify({ notes: null, override: { check: 'animal_departed' }, reason: null }),
+  });
+  ins.run({
+    id: 'aevt_3',
+    type: 'dry_off',
+    on: '2024-01-03',
+    at: 't3',
+    sup: null,
+    payload: JSON.stringify({ notes: null, override: null, reason: 'scheduled' }),
+  });
+  // Superseding, so the self-referencing FK is exercised by this copy too.
+  ins.run({
+    id: 'aevt_4',
+    type: 'note',
+    on: '2024-01-04',
+    at: 't4',
+    sup: 'aevt_3',
+    payload: JSON.stringify({ text: 'hello' }),
+  });
+
+  const result = runMigrations(db);
+  assert.equal(result.from, 3);
+  assert.equal(result.to, 5);
+  assert.equal(result.applied, 2, 'the override rebuild and the sales tables');
+
+  const rows = db
+    .prepare(
+      `SELECT id, payload, override_check, override_reason, supersedes_id
+         FROM registry_animal_events ORDER BY id`,
+    )
+    .all() as {
+    id: string;
+    payload: string;
+    override_check: string | null;
+    override_reason: string | null;
+    supersedes_id: string | null;
+  }[];
+
+  assert.deepEqual(rows, [
+    {
+      id: 'aevt_1',
+      payload: '{"notes":null,"reason":null}',
+      override_check: 'animal_departed',
+      override_reason: 'stayed on until August',
+      supersedes_id: null,
+    },
+    {
+      id: 'aevt_2',
+      payload: '{"notes":null,"reason":null}',
+      override_check: 'animal_departed',
+      override_reason: null,
+      supersedes_id: null,
+    },
+    {
+      id: 'aevt_3',
+      payload: '{"notes":null,"reason":"scheduled"}',
+      override_check: null,
+      override_reason: null,
+      supersedes_id: null,
+    },
+    {
+      id: 'aevt_4',
+      payload: '{"text":"hello"}',
+      override_check: null,
+      override_reason: null,
+      supersedes_id: 'aevt_3',
+    },
+  ]);
+  db.close();
+});
+
+test('migration 4 rewrites payloads with SORTED keys, like the writer does', () => {
+  // The rebuild-diff compares stored payload TEXT, so a payload rewritten in a
+  // different key order than appendEvent would produce reads as a change that
+  // is not one. This is why the copy is JavaScript and not json_remove().
+  const db = dbAtVersion3();
+  db.prepare(
+    `INSERT INTO registry_animals (id,name,sex,species,origin,post_no,tag_no)
+     VALUES ('BD-0001',NULL,'female','buffalo','acquired',NULL,NULL)`,
+  ).run();
+  db.prepare(
+    `INSERT INTO registry_animal_events
+       (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+        source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id)
+     VALUES ('aevt_1','BD-0001','departure','2024-01-01',NULL,'day',@payload,
+             'recall',NULL,NULL,'x','t1',NULL)`,
+  ).run({
+    // Deliberately unsorted on the way in.
+    payload: JSON.stringify({
+      to: 'market',
+      reason: 'sold',
+      override: { check: 'animal_departed', reason: 'why' },
+      cause: null,
+      notes: null,
+    }),
+  });
+
+  runMigrations(db);
+
+  const { payload } = db
+    .prepare(`SELECT payload FROM registry_animal_events WHERE id='aevt_1'`)
+    .get() as { payload: string };
+  assert.equal(payload, '{"cause":null,"notes":null,"reason":"sold","to":"market"}');
+  assert.deepEqual(Object.keys(JSON.parse(payload)), ['cause', 'notes', 'reason', 'to']);
+  db.close();
+});
+
+test('migration 4 restores the indexes and the append-only triggers too', () => {
+  // The SECOND rebuild of this table. Migration 2 proved the recreation once;
+  // this asserts migration 4 did not quietly drop half of it, because a lost
+  // trigger is the failure that looks exactly like success.
+  const db = dbAtVersion3();
+  runMigrations(db);
+
+  const objects = (
+    db
+      .prepare(`SELECT name, type FROM sqlite_master WHERE tbl_name='registry_animal_events'`)
+      .all() as { name: string; type: string }[]
+  ).map((r) => `${r.type}:${r.name}`);
+
+  for (const expected of [
+    'trigger:registry_animal_events_no_update',
+    'trigger:registry_animal_events_no_delete',
+    'index:idx_registry_events_supersedes',
+    'index:idx_registry_events_animal',
+    'index:idx_registry_events_type',
+  ]) {
+    assert.ok(objects.includes(expected), `${expected} survived migration 4`);
+  }
   db.close();
 });
 

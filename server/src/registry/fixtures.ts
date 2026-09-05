@@ -16,7 +16,11 @@ import { applyRegistrySchema } from './schema';
 import { appendEvent, insertAnimal } from './store';
 import { recordCalving } from './calving';
 import { rebuild } from './projectStore';
-import type { DatePrecision, Provenance, RegistrySex } from './types';
+import { addDestination, setPrice } from './destinations';
+import { saveDispatchSession } from './dispatch';
+import { recordPayment } from './ledger';
+import { saveMilkingSession } from './milking';
+import type { DatePrecision, DestinationKind, Provenance, RegistrySex } from './types';
 
 /** A fresh, migrated, in-memory registry. Writes nothing to disk. */
 export function freshDb(): Db {
@@ -427,4 +431,218 @@ export function correctionOnlyOnDam(): Db {
 
   rebuild(db, { asOf: AS_OF });
   return db;
+}
+
+// ---------------------------------------------------------------------------
+// Milk yield and sales fixtures
+// ---------------------------------------------------------------------------
+
+/**
+ * FIXTURE DATA IS SYNTHETIC AND MUST STAY THAT WAY.
+ *
+ * The standing rule for this cycle is that nothing synthetic touches dairy.db,
+ * and it cuts both ways: the real buyers belong in the live database, entered
+ * by the farm through the screen, and never in a file a test can load. The
+ * names below are invented and the shape -- one dodhi, two households, home --
+ * is the only thing taken from the real farm.
+ */
+export const FIXTURE_PRICE_MINOR = 700_000; // Rs 7,000
+export const FIXTURE_PRICE_UNIT_LITRES = 40; // ...per 40 litres
+export const FIXTURE_HOUSEHOLD_PRICE_MINOR = 900_000; // households pay retail
+
+export interface SalesFixture {
+  dodhi: string;
+  home: string;
+  ali: string;
+  bibi: string;
+}
+
+/**
+ * Three buyers and home, priced from 2026-01-01.
+ *
+ * Takes a db so it can ride on top of `cleanHerd()` or stand on its own -- the
+ * sales half has no foreign key to an animal, which is exactly the property
+ * worth having a fixture prove.
+ */
+export function addSalesDestinations(db: Db): SalesFixture {
+  const mk = (name: string, kind: DestinationKind, standing: boolean) =>
+    addDestination(db, {
+      name,
+      kind,
+      standing,
+      started_on: '2026-01-01',
+      recorded_by: 'adnan',
+      recorded_at: nextRecordedAt(),
+    }).id;
+
+  const f: SalesFixture = {
+    dodhi: mk('Bashir (dodhi)', 'dodhi', true),
+    home: mk('Home', 'home', true),
+    ali: mk('Ali (next door)', 'household', false),
+    bibi: mk('Bibi (corner house)', 'household', false),
+  };
+
+  setPrice(db, {
+    destination_id: f.dodhi,
+    effective_from: '2026-01-01',
+    price_minor: FIXTURE_PRICE_MINOR,
+    price_unit_litres: FIXTURE_PRICE_UNIT_LITRES,
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+  for (const h of [f.ali, f.bibi]) {
+    setPrice(db, {
+      destination_id: h,
+      effective_from: '2026-01-01',
+      price_minor: FIXTURE_HOUSEHOLD_PRICE_MINOR,
+      price_unit_litres: FIXTURE_PRICE_UNIT_LITRES,
+      recorded_by: 'adnan',
+      recorded_at: nextRecordedAt(),
+    });
+  }
+  return f;
+}
+
+/**
+ * Milk rows for the animals in milk, over `days` ending at `lastOn`.
+ *
+ * ALL THREE STATUSES APPEAR, and that is the point rather than decoration:
+ * fixtures.ts had ZERO milking rows before this, which is why
+ * REGISTRY_TOOLS.md had to defer `get_milking_record` -- the three-status split
+ * had no fixture behind it, so the one thing worth testing about milk yield was
+ * untestable. A fixture of all-measured rows would have reintroduced exactly
+ * that gap while looking like coverage.
+ */
+export function addMilkings(db: Db, opts: { lastOn: string; days: number }): number {
+  const open = db
+    .prepare(`SELECT animal_id FROM registry_lactations WHERE ended_on IS NULL ORDER BY animal_id`)
+    .all() as { animal_id: string }[];
+  if (open.length === 0) return 0;
+
+  const [y, m, d] = opts.lastOn.split('-').map(Number);
+  let written = 0;
+  let n = 0;
+
+  for (let back = opts.days - 1; back >= 0; back--) {
+    const day = new Date(Date.UTC(y, m - 1, d - back)).toISOString().slice(0, 10);
+    for (const session of ['morning', 'evening'] as const) {
+      const entries = open.map(({ animal_id }) => {
+        n += 1;
+        // A deterministic rotation rather than a random one: the same fixture
+        // every run is what lets an assertion name an exact number.
+        if (n % 7 === 0) return { animal_id, status: 'milked_not_measured' as const };
+        if (n % 11 === 0) {
+          return { animal_id, status: 'not_milked' as const, reason: 'under treatment' };
+        }
+        return {
+          animal_id,
+          status: 'measured' as const,
+          yield_litres: Math.round((6 + ((n * 37) % 40) / 10) * 10) / 10,
+        };
+      });
+      written += saveMilkingSession(db, {
+        occurred_on: day,
+        session,
+        observed_by: n % 2 === 0 ? 'imran' : 'abdul',
+        entries,
+        provenance: { source_form: 'direct_entry', recorded_by: 'adnan' },
+      }).written;
+    }
+  }
+  return written;
+}
+
+/**
+ * Dispatch rows to match, over the same range.
+ *
+ * The dodhi and home answer EVERY session (they are standing); the households
+ * appear only on some, which is the shape §4.1a describes and the reason an
+ * absent occasional row must never read as missing data.
+ */
+export function addDispatches(db: Db, f: SalesFixture, opts: { lastOn: string; days: number }): number {
+  const [y, m, d] = opts.lastOn.split('-').map(Number);
+  let written = 0;
+  let n = 0;
+
+  for (let back = opts.days - 1; back >= 0; back--) {
+    const day = new Date(Date.UTC(y, m - 1, d - back)).toISOString().slice(0, 10);
+    for (const session of ['morning', 'evening'] as const) {
+      n += 1;
+      const entries: {
+        destination_id: string;
+        status: 'taken' | 'none';
+        litres?: number;
+        reason?: string;
+      }[] = [
+        // The dodhi takes the bulk of it, and occasionally does not come.
+        // SCALED TO THE HERD. The first version of this fixture had the dodhi
+        // taking 30-39 L a session from a herd of three animals giving about
+        // 22 -- which reconciled to a gap of -454 L over two weeks and made
+        // every screen built against it look broken. Fixture numbers that
+        // cannot happen are worse than no fixture, because the screen looks
+        // wrong and the code is not.
+        n % 9 === 0
+          ? { destination_id: f.dodhi, status: 'none', reason: 'did not come' }
+          : { destination_id: f.dodhi, status: 'taken', litres: 12 + ((n * 13) % 55) / 10 },
+        { destination_id: f.home, status: 'taken', litres: 2 + (n % 3) },
+      ];
+      // The households take surplus -- neither on a fixed session, which is
+      // why there is no `sessions` column to encode.
+      if (n % 3 === 0) entries.push({ destination_id: f.ali, status: 'taken', litres: 4 });
+      if (n % 5 === 0) entries.push({ destination_id: f.bibi, status: 'taken', litres: 2.5 });
+
+      written += saveDispatchSession(db, {
+        occurred_on: day,
+        session,
+        observed_by: n % 2 === 0 ? 'imran' : 'abdul',
+        entries,
+        provenance: { source_form: 'direct_entry', recorded_by: 'adnan' },
+      }).written;
+    }
+  }
+  return written;
+}
+
+/** How many days of milk and sales `tradingHerd()` writes. */
+export const TRADING_DAYS = 14;
+
+/**
+ * The clean herd, plus two weeks of milk yield and sales.
+ *
+ * The fixture the sales and reconciliation screens are developed against, and
+ * the first one in this repo where the two halves meet: the reconciliation has
+ * production on one side and dispatch on the other, and a fixture with only one
+ * of them would leave the number it computes untested.
+ *
+ * ---------------------------------------------------------------------------
+ * `lastOn` IS A PARAMETER, AND IT DEFAULTS TO AS_OF RATHER THAN TO TODAY
+ * ---------------------------------------------------------------------------
+ * Found by rendering the thing rather than by reading it. The first version
+ * ended at AS_OF unconditionally, so the harness -- whose clock is the real one
+ * -- opened `/dispatch` onto TODAY, four days past the last fixture row, and
+ * every screen showed a correct and completely empty state. The code was right
+ * and the screen looked broken, which is the worst kind of fixture.
+ *
+ * A default of `farmToday()` would have fixed the harness and broken the tests:
+ * a fixture whose dates move with the calendar cannot carry an assertion about
+ * an exact number. So the default stays frozen and the HARNESS passes today.
+ */
+export function tradingHerd(lastOn: string = AS_OF): { db: Db; sales: SalesFixture } {
+  const db = cleanHerd();
+  const sales = addSalesDestinations(db);
+  addMilkings(db, { lastOn, days: TRADING_DAYS });
+  addDispatches(db, sales, { lastOn, days: TRADING_DAYS });
+
+  // A part payment, so the ledger fixture has a settled month behind an open
+  // one rather than a single running balance.
+  recordPayment(db, {
+    destination_id: sales.dodhi,
+    occurred_on: lastOn,
+    amount_minor: 2_000_000,
+    method: 'cash',
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+
+  return { db, sales };
 }

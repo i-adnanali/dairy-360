@@ -9,10 +9,21 @@
 // job in projectStore.ts.
 
 import type { Db } from './schema';
-import { assertDatePrecision, assertEventPayload, formatSerial, newEventId } from './events';
+import {
+  assertDatePrecision,
+  assertEventPayload,
+  assertOverride,
+  formatSerial,
+  newEventId,
+} from './events';
+import { RegistryError } from './errors';
+import { allDestinations, allPrices } from './destinations';
 import type {
   AnimalStatusRow,
+  DispatchRow,
   LactationRow,
+  OverrideRecord,
+  PaymentRow,
   ParentageRow,
   Provenance,
   RegistryAnimalRow,
@@ -113,6 +124,28 @@ export function allMilkings(db: Db): RegistryMilkingRow[] {
     .all() as RegistryMilkingRow[];
 }
 
+/**
+ * The sales tables' bulk reads live HERE rather than in ledger.ts, and the
+ * reason is a require cycle rather than taste: snapshot() below needs them, and
+ * ledger.ts reaches dispatch.ts -> milking.ts -> back to this module. Keeping
+ * the plain SELECTs beside allMilkings() -- which is what they are -- leaves the
+ * import graph acyclic.
+ */
+export function allDispatches(db: Db): DispatchRow[] {
+  return db
+    .prepare(
+      `SELECT * FROM registry_dispatches
+        ORDER BY occurred_on, CASE session WHEN 'morning' THEN 0 ELSE 1 END, destination_id`,
+    )
+    .all() as DispatchRow[];
+}
+
+export function allPayments(db: Db): PaymentRow[] {
+  return db
+    .prepare(`SELECT * FROM registry_payments ORDER BY destination_id, occurred_on, id`)
+    .all() as PaymentRow[];
+}
+
 export function readNextSerial(db: Db): number {
   const row = db
     .prepare(`SELECT next_serial FROM registry_serial_counter WHERE id = 1`)
@@ -135,6 +168,13 @@ export function snapshot(db: Db): RegistrySnapshot {
     parentage: allParentage(db),
     statuses: allStatuses(db),
     milkings: allMilkings(db),
+    // The sales tables (invariants 18-22). Read through their own modules so
+    // the 0/1-to-boolean normalization on destinations happens in exactly one
+    // place -- the invariants must not be the second implementation of it.
+    destinations: allDestinations(db),
+    prices: allPrices(db),
+    dispatches: allDispatches(db),
+    payments: allPayments(db),
     nextSerial: readNextSerial(db),
   };
 }
@@ -205,6 +245,14 @@ export interface AppendEventInput {
   provenance: Provenance;
   recorded_at?: string;
   supersedes_id?: string | null;
+  /**
+   * The guard this write stepped past, or null/absent. Migration 4 moved this
+   * out of the payload, so it arrives here as a sibling of it.
+   *
+   * Callers must derive it from whether the guard ACTUALLY matched, never from
+   * the caller's opt-out flag -- see OverrideRecord in types.ts.
+   */
+  override?: OverrideRecord | null;
 }
 
 /**
@@ -225,6 +273,19 @@ export function appendEvent(db: Db, input: AppendEventInput): RegistryEventRow {
     date_precision: input.date_precision,
   });
 
+  const override = assertOverride(input.override);
+  // A note is always allowed after a departure -- somebody ringing about a sold
+  // animal is a real thing to record -- so there is no guard for it to step
+  // past. Refused here with a readable message; migration 4's CHECK is the
+  // backstop for any process that bypasses this path.
+  if (override !== null && input.type === 'note') {
+    throw new RegistryError(
+      'invalid_payload',
+      'note.override: a note is always allowed, so there is no check for it to override',
+      'override',
+    );
+  }
+
   const row: RegistryEventRow = {
     id: input.id ?? newEventId(),
     animal_id: input.animal_id,
@@ -242,15 +303,19 @@ export function appendEvent(db: Db, input: AppendEventInput): RegistryEventRow {
     recorded_by: input.provenance.recorded_by,
     recorded_at: input.recorded_at ?? new Date().toISOString(),
     supersedes_id: input.supersedes_id ?? null,
+    override_check: override?.check ?? null,
+    override_reason: override?.reason ?? null,
   };
 
   db.prepare(
     `INSERT INTO registry_animal_events
        (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
-        source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id)
+        source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+        override_check, override_reason)
      VALUES
        (@id, @animal_id, @type, @occurred_on, @occurred_time, @date_precision, @payload,
-        @source_form, @source_ref, @observed_by, @recorded_by, @recorded_at, @supersedes_id)`,
+        @source_form, @source_ref, @observed_by, @recorded_by, @recorded_at, @supersedes_id,
+        @override_check, @override_reason)`,
   ).run(row);
 
   return row;

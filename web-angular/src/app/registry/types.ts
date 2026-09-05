@@ -26,6 +26,12 @@ export type RegistryEventType =
   | 'birth' | 'acquired' | 'calving' | 'dry_off' | 'departure' | 'note';
 
 export type EnterableEventType = 'dry_off' | 'departure' | 'note';
+
+/**
+ * The two guards a write can be recorded as having stepped past. Mirrors
+ * OverriddenCheck on the server; columns on the event since migration 4.
+ */
+export type OverriddenCheck = 'near_duplicate_calving' | 'animal_departed';
 export type CalvingOutcome = 'live' | 'stillborn' | 'died_within_24h';
 
 export interface HerdRow {
@@ -57,6 +63,12 @@ export interface TimelineEvent {
   recorded_by: string;
   recorded_at: string;
   supersedes_id: string | null;
+  /**
+   * The guard this write stepped past, or null. Columns since migration 4 --
+   * these used to live inside `payload.override`.
+   */
+  override_check: OverriddenCheck | null;
+  override_reason: string | null;
   /** The event that REPLACED this one. Rendered, not filtered. */
   superseded_by_id: string | null;
   effective: boolean;
@@ -259,4 +271,196 @@ export interface DuplicateCandidate {
   match_reason: string;
   /** When the animal was TYPED -- its origin event's recorded_at, UTC. */
   recorded_at: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Milk sales, home use and the buyer ledger (docs/REGISTRY_SALES.md)
+// ---------------------------------------------------------------------------
+
+export type DestinationKind = 'dodhi' | 'household' | 'shop' | 'home' | 'other';
+export type DispatchStatus = 'taken' | 'none';
+export type PaymentMethod = 'cash' | 'bank' | 'adjustment';
+
+export interface Destination {
+  id: string;
+  name: string;
+  kind: DestinationKind;
+  /** Does money follow the milk. Home never does. */
+  billable: boolean;
+  /** Must the sheet account for this destination in EVERY session? */
+  standing: boolean;
+  contact: string | null;
+  started_on: string;
+  ended_on: string | null;
+  note: string | null;
+  recorded_by: string;
+  recorded_at: string;
+}
+
+/**
+ * A price agreement, AS QUOTED.
+ *
+ * Two numbers, never one: `price_minor` is paisa and `price_unit_litres` is the
+ * lot it covers. Rs 7,000 per 40 L is `(700000, 40)`. Never normalise this to
+ * per-litre for storage or for display -- see money.ts.
+ */
+export interface DestinationPrice {
+  id: string;
+  destination_id: string;
+  effective_from: string;
+  price_minor: number;
+  price_unit_litres: number;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
+export interface DestinationListRow extends Destination {
+  price: DestinationPrice | null;
+  active: boolean;
+}
+
+export interface Dispatch {
+  id: string;
+  destination_id: string;
+  occurred_on: string;
+  session: MilkingSession;
+  status: DispatchStatus;
+  litres: number | null;
+  price_minor: number | null;
+  price_unit_litres: number | null;
+  reason: string | null;
+  occurred_time: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  source_form: SourceForm;
+  note: string | null;
+}
+
+export interface SheetRow {
+  destination_id: string;
+  name: string;
+  kind: DestinationKind;
+  billable: boolean;
+  standing: boolean;
+  existing: Dispatch | null;
+  previous: { occurred_on: string; status: DispatchStatus; litres: number | null } | null;
+  price: DestinationPrice | null;
+}
+
+/** What the herd gave this session, as far as anyone measured it. */
+export interface SessionProduction {
+  measured_litres: number;
+  measured: number;
+  not_measured: number;
+  not_milked: number;
+  expected: number;
+  recorded: number;
+}
+
+export interface DispatchSheet {
+  occurred_on: string;
+  session: MilkingSession;
+  previous_session: { occurred_on: string; session: MilkingSession };
+  /** Must be answered. Untouched blocks the save. */
+  standing: SheetRow[];
+  /** Offered, never required. */
+  occasional: SheetRow[];
+  litres: number;
+  amount_minor: number;
+  produced: SessionProduction;
+}
+
+export interface Payment {
+  id: string;
+  destination_id: string;
+  occurred_on: string;
+  amount_minor: number;
+  method: PaymentMethod;
+  reference: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
+export interface StatementMonth {
+  month: string;
+  litres: number;
+  billed_minor: number;
+  paid_minor: number;
+  closing_minor: number;
+  dispatches: Dispatch[];
+  payments: Payment[];
+}
+
+export interface Statement {
+  destination_id: string;
+  name: string;
+  billable: boolean;
+  months: StatementMonth[];
+  litres: number;
+  billed_minor: number;
+  paid_minor: number;
+  balance_minor: number;
+  prices: DestinationPrice[];
+}
+
+export interface BalanceRow {
+  destination_id: string;
+  name: string;
+  billable: boolean;
+  balance_minor: number;
+  last_dispatch_on: string | null;
+  last_payment_on: string | null;
+}
+
+export interface OffSchedule {
+  dispatch_id: string;
+  destination_id: string;
+  name: string;
+  occurred_on: string;
+  session: MilkingSession;
+  captured_minor: number;
+  captured_unit_litres: number;
+  agreed_minor: number;
+  agreed_unit_litres: number;
+}
+
+export interface SessionCompleteness {
+  occurred_on: string;
+  session: MilkingSession;
+  expected_standing: number;
+  recorded_standing: number;
+}
+
+/**
+ * Produced against dispatched.
+ *
+ * `gap_pct` is NULL whenever production is incomplete, and
+ * `gap_pct_withheld_because` says which. The view must render the reason rather
+ * than a dash -- a missing number with no explanation reads as a bug.
+ */
+export interface Reconciliation {
+  from: string;
+  to: string;
+  produced_measured: number;
+  measured_rows: number;
+  not_measured_rows: number;
+  not_milked_rows: number;
+  expected_milking_rows: number;
+  missing_milking_rows: number;
+  dispatched_sold: number;
+  dispatched_home: number;
+  dispatched_total: number;
+  billed_minor: number;
+  gap_litres: number;
+  gap_pct: number | null;
+  gap_pct_withheld_because: string | null;
+  sessions: number;
+  complete_sessions: number;
+  incomplete: SessionCompleteness[];
+  off_schedule: OffSchedule[];
+  interpretation: string;
 }

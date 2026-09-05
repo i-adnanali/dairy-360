@@ -231,22 +231,27 @@ const DEPARTURE_REASONS = ['sold', 'died', 'culled', 'lost'] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
- * The `override` sub-object, validated as strictly as the payload around it.
+ * The override record, validated as strictly as the payload it used to sit in.
  *
  * A loosely-accepted override would be the worst of both worlds: the log would
  * claim a check was stepped past without saying which, which is less useful
  * than the nothing it replaced.
+ *
+ * MIGRATION 4 MOVED THIS OUT OF THE PAYLOAD, so it is validated on its own
+ * rather than as a sub-object, and appendEvent() takes it as a sibling of the
+ * payload. It is exported because the write boundary is now the only caller.
+ * The schema CHECKs added by migration 4 are the backstop; this exists to
+ * produce a readable refusal, the same arrangement as the date conventions.
  */
-function optOverride(type: string, p: Rec): OverrideRecord | null {
-  const v = p.override;
+export function assertOverride(v: unknown): OverrideRecord | null {
   if (v === undefined || v === null) return null;
   if (typeof v !== 'object' || Array.isArray(v)) {
-    fail('invalid_payload', `${type}.override: must be an object, got ${describe(v)}`, 'override');
+    fail('invalid_payload', `override: must be an object, got ${describe(v)}`, 'override');
   }
   const o = v as Rec;
-  rejectUnknownKeys(`${type}.override`, o, ['check', 'reason']);
-  const check = enumOf(`${type}.override`, o, 'check', OVERRIDDEN_CHECKS as readonly OverriddenCheck[]);
-  return { check, reason: optStr(`${type}.override`, o, 'reason') };
+  rejectUnknownKeys('override', o, ['check', 'reason']);
+  const check = enumOf('override', o, 'check', OVERRIDDEN_CHECKS as readonly OverriddenCheck[]);
+  return { check, reason: optStr('override', o, 'reason') };
 }
 
 function optDate(type: string, p: Rec, key: string): string | null {
@@ -347,7 +352,6 @@ export function assertEventPayload<T extends RegistryEventType>(
         'outcome',
         'assistance',
         'notes',
-        'override',
       ]);
       const out: CalvingPayload = {
         calf_id: str(type, p, 'calf_id'),
@@ -355,27 +359,24 @@ export function assertEventPayload<T extends RegistryEventType>(
         outcome: enumOf(type, p, 'outcome', OUTCOMES),
         assistance: optEnumOf(type, p, 'assistance', ASSISTANCE),
         notes: optStr(type, p, 'notes'),
-        override: optOverride(type, p),
       };
       return out as PayloadFor<T>;
     }
     case 'dry_off': {
-      rejectUnknownKeys(type, p, ['reason', 'notes', 'override']);
+      rejectUnknownKeys(type, p, ['reason', 'notes']);
       const out: DryOffPayload = {
         reason: optEnumOf(type, p, 'reason', DRY_OFF_REASONS),
         notes: optStr(type, p, 'notes'),
-        override: optOverride(type, p),
       };
       return out as PayloadFor<T>;
     }
     case 'departure': {
-      rejectUnknownKeys(type, p, ['reason', 'to', 'cause', 'notes', 'override']);
+      rejectUnknownKeys(type, p, ['reason', 'to', 'cause', 'notes']);
       const out: DeparturePayload = {
         reason: enumOf(type, p, 'reason', DEPARTURE_REASONS),
         to: optStr(type, p, 'to'),
         cause: optStr(type, p, 'cause'),
         notes: optStr(type, p, 'notes'),
-        override: optOverride(type, p),
       };
       return out as PayloadFor<T>;
     }

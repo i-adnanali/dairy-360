@@ -1,0 +1,388 @@
+// `/buyers` -- destinations, and what they pay (docs/REGISTRY_SALES.md §12.2).
+//
+// ---------------------------------------------------------------------------
+// THE PRICE CONTROL TAKES THE RATE IN THE FARM'S UNIT
+// ---------------------------------------------------------------------------
+// Two inputs side by side, reading "Rs [7000] per [40] litres", with the
+// derived per-litre rate shown back underneath as a check the operator can read
+// but not type. That is the same parse-then-show-back contract as
+// PrecisionDateControl, for the same reason: the operator enters what they
+// know, the system shows what it understood, and the difference between the two
+// is where a factor-of-forty slip becomes visible instead of silent.
+//
+// A per-litre-only field would make an operator who thinks in 40-litre lots
+// divide by forty every time, and a slip between 17.50 and 175.00 would be
+// invisible on a form that expects per-litre anyway.
+//
+// ---------------------------------------------------------------------------
+// NO BATCH PRICE CHANGE, AND THAT IS A MEASUREMENT RATHER THAN A PREFERENCE
+// ---------------------------------------------------------------------------
+// The design called for one, justified as "five forms and four chances to miss
+// one" -- written before the farm was counted. The farm has one dodhi and two
+// households, and the wholesale and retail rates do not move together, so a
+// batch screen would mostly be used to change one row. Build it if the list
+// grows past about six.
+
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import { ChipGroup } from './chip-group';
+import { FormState } from './form-state';
+import { RegistryApi } from './api';
+import { Session } from './session';
+import { WriteLog } from './after-write';
+import { formatMinor, formatRate, minorToRupees, perLitreLabel, rupeesToMinor } from './money';
+import { farmToday } from './today';
+import type { DestinationKind, DestinationListRow } from './types';
+
+@Component({
+  selector: 'app-destinations-list',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ChipGroup, RouterLink],
+  template: `
+    <div class="mx-auto max-w-4xl space-y-6">
+      <header>
+        <h2 class="text-lg font-semibold text-farm-900">Buyers</h2>
+        <p class="mt-1 text-sm text-farm-600">
+          Everyone milk goes to, and what they pay for it. The house is here too — milk kept at
+          home is a disposition, not a sale, so it has no price and never appears in a balance.
+        </p>
+      </header>
+
+      @if (loadError(); as e) {
+        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+      }
+
+      @if (rows(); as list) {
+        @if (list.length === 0) {
+          <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
+            data-role="empty">
+            No destinations yet. Add the dodhi, the neighbours who buy, and
+            <strong>the house</strong> — without a home row, milk kept for the family disappears
+            into the reconciliation gap instead of being recorded.
+          </p>
+        } @else {
+          <div class="overflow-hidden rounded-xl border border-farm-300 bg-white">
+            <table class="w-full text-left text-sm">
+              <thead class="border-b border-farm-200 text-xs uppercase tracking-wide text-farm-600">
+                <tr>
+                  <th class="px-3 py-2">Name</th>
+                  <th class="px-3 py-2">Kind</th>
+                  <th class="px-3 py-2">On every sheet</th>
+                  <th class="px-3 py-2">Rate today</th>
+                  <th class="px-3 py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (d of list; track d.id) {
+                  <tr class="border-t border-farm-100" [attr.data-row]="d.id"
+                    [class.opacity-50]="!d.active">
+                    <td class="px-3 py-2">
+                      @if (d.billable) {
+                        <a [routerLink]="['/buyers', d.id]" class="font-medium text-farm-800 underline"
+                          [attr.data-role]="'open-' + d.id">{{ d.name }}</a>
+                      } @else {
+                        <span class="text-farm-800">{{ d.name }}</span>
+                      }
+                      @if (!d.active) {
+                        <span class="ml-2 text-xs text-farm-500" data-role="closed">
+                          stopped {{ d.ended_on }}
+                        </span>
+                      }
+                    </td>
+                    <td class="px-3 py-2 text-farm-700">{{ d.kind }}</td>
+                    <td class="px-3 py-2 text-farm-700" [attr.data-role]="'standing-' + d.id">
+                      {{ d.standing ? 'yes — must be answered' : 'only when they come' }}
+                    </td>
+                    <td class="px-3 py-2 text-farm-700" [attr.data-role]="'rate-' + d.id">
+                      @if (!d.billable) {
+                        <span class="text-farm-500">not billed</span>
+                      } @else if (d.price) {
+                        {{ rate(d) }}
+                        <span class="ml-1 text-xs text-farm-500">({{ perLitre(d) }})</span>
+                      } @else {
+                        <span class="text-amber-800">no price agreed</span>
+                      }
+                    </td>
+                    <td class="px-3 py-2 text-right">
+                      @if (d.billable) {
+                        <button type="button" [attr.data-role]="'price-' + d.id"
+                          (click)="openPrice(d)"
+                          class="rounded-lg border border-farm-300 px-2 py-1 text-xs text-farm-700 hover:border-farm-400"
+                        >change rate</button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else if (!loadError()) {
+        <p class="text-sm text-farm-600" data-role="loading">Loading…</p>
+      }
+
+      <!-- change a rate ------------------------------------------------- -->
+      @if (pricing(); as d) {
+        <form class="space-y-3 rounded-xl border border-farm-300 bg-white p-4"
+          data-role="price-form" (submit)="submitPrice($event)">
+          <h3 class="text-sm font-semibold text-farm-900">Rate for {{ d.name }}</h3>
+
+          <div class="flex flex-wrap items-end gap-3">
+            <label class="block">
+              <span class="mb-1 block text-xs font-medium text-farm-700">Amount (Rs)</span>
+              <input data-role="price-amount" inputmode="decimal" [value]="priceAmount()"
+                (input)="priceAmount.set($any($event.target).value)"
+                class="w-32 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+            </label>
+            <span class="pb-2 text-sm text-farm-600">per</span>
+            <label class="block">
+              <span class="mb-1 block text-xs font-medium text-farm-700">Litres</span>
+              <input data-role="price-unit" inputmode="decimal" [value]="priceUnit()"
+                (input)="priceUnit.set($any($event.target).value)"
+                class="w-24 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-xs font-medium text-farm-700">From</span>
+              <input type="date" data-role="price-from" [value]="priceFrom()"
+                (change)="priceFrom.set($any($event.target).value)"
+                class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+            </label>
+          </div>
+
+          <!-- SHOWN BACK, never typed. Where a factor-of-forty slip surfaces. -->
+          <p class="text-xs text-farm-600" data-role="price-preview">
+            @if (pricePreview(); as p) {
+              Will be recorded as <strong>{{ p.rate }}</strong> — that is {{ p.perLitre }}.
+            } @else {
+              Enter an amount and the litres it covers.
+            }
+          </p>
+          <p class="text-xs text-farm-500" data-role="price-note">
+            A rate change is a new agreement from that date. Milk already dispatched keeps the
+            rate it was billed at — changing this never re-prices what is already recorded.
+          </p>
+
+          @if (priceState.formError(priceFields); as e) {
+            <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="price-error">{{ e }}</p>
+          }
+
+          <div class="flex gap-2">
+            <button type="submit" data-role="price-submit" [disabled]="pricePreview() === null || priceState.submitting()"
+              class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+            >{{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}</button>
+            <button type="button" data-role="price-cancel" (click)="pricing.set(null)"
+              class="rounded-xl border border-farm-300 px-4 py-2 text-sm text-farm-700">Cancel</button>
+          </div>
+        </form>
+      }
+
+      <!-- add a destination ---------------------------------------------- -->
+      <form class="space-y-3 rounded-xl border border-farm-300 bg-white p-4"
+        data-role="add-form" (submit)="submitDestination($event)">
+        <h3 class="text-sm font-semibold text-farm-900">Add a destination</h3>
+
+        <div class="flex flex-wrap items-end gap-3">
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-farm-700">Name</span>
+            <input data-role="name" [value]="name()" (input)="name.set($any($event.target).value)"
+              class="w-56 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+          </label>
+          <div>
+            <div class="mb-1 text-xs font-medium text-farm-700">Kind</div>
+            <app-chip-group name="kind" label="Kind" [options]="kindChips" [value]="kind()"
+              (changed)="setKind($any($event))" />
+          </div>
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-farm-700">Buying since</span>
+            <input type="date" data-role="started-on" [value]="startedOn()"
+              (change)="startedOn.set($any($event.target).value)"
+              class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+          </label>
+        </div>
+
+        <div>
+          <div class="mb-1 text-xs font-medium text-farm-700">On every sheet?</div>
+          <app-chip-group name="standing" label="On every sheet" [options]="standingChips"
+            [value]="standing()" (changed)="standing.set($any($event))" />
+          <!-- NOT defaulted: it decides whether the sheet demands an answer,
+               which is a question about how the farm works rather than a fact
+               about the buyer. -->
+          <p class="mt-1 text-xs text-farm-600" data-role="standing-help">
+            <strong>Every session</strong> for someone who is always accounted for — the dodhi, the
+            house. <strong>Only when they come</strong> for a neighbour who takes surplus: they
+            will never be marked absent, so nothing trains anyone to click past the sheet.
+          </p>
+        </div>
+
+        @if (kind() === 'home') {
+          <p class="rounded-lg bg-farm-50 px-3 py-2 text-xs text-farm-700" data-role="home-note">
+            Milk kept at home is never billed and can never carry a price or a payment. Recording
+            it is what keeps it out of the unexplained gap.
+          </p>
+        }
+
+        @if (addState.formError(addFields); as e) {
+          <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="add-error">{{ e }}</p>
+        }
+
+        <button type="submit" data-role="add-submit" [disabled]="!canAdd()"
+          class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+        >{{ addState.submitting() ? 'Saving…' : 'Add destination' }}</button>
+      </form>
+    </div>
+  `,
+})
+export class DestinationsList {
+  private readonly api = inject(RegistryApi);
+  private readonly session = inject(Session);
+  private readonly writeLog = inject(WriteLog);
+
+  protected readonly rows = signal<DestinationListRow[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
+
+  protected readonly addFields = ['name', 'kind', 'standing', 'started_on', 'billable'] as const;
+  protected readonly priceFields = ['price_minor', 'price_unit_litres', 'effective_from'] as const;
+  protected readonly addState = new FormState<DestinationListRow>();
+  protected readonly priceState = new FormState<unknown>();
+
+  protected readonly name = signal('');
+  protected readonly kind = signal<DestinationKind>('dodhi');
+  protected readonly standing = signal<'yes' | 'no'>('yes');
+  protected readonly startedOn = signal(farmToday());
+
+  protected readonly pricing = signal<DestinationListRow | null>(null);
+  protected readonly priceAmount = signal('');
+  protected readonly priceUnit = signal('40');
+  protected readonly priceFrom = signal(farmToday());
+
+  protected readonly kindChips = [
+    { value: 'dodhi', label: 'Dodhi' },
+    { value: 'household', label: 'Household' },
+    { value: 'shop', label: 'Shop' },
+    { value: 'home', label: 'Home (kept)' },
+    { value: 'other', label: 'Other' },
+  ];
+  protected readonly standingChips = [
+    { value: 'yes', label: 'Every session' },
+    { value: 'no', label: 'Only when they come' },
+  ];
+
+  constructor() {
+    void this.load();
+  }
+
+  private async load(): Promise<void> {
+    try {
+      this.rows.set(await this.api.destinations(farmToday()));
+      this.loadError.set(null);
+    } catch (e) {
+      this.loadError.set(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  protected rate(d: DestinationListRow): string {
+    return d.price ? formatRate(d.price.price_minor, d.price.price_unit_litres) : '—';
+  }
+
+  protected perLitre(d: DestinationListRow): string {
+    return d.price ? perLitreLabel(d.price.price_minor, d.price.price_unit_litres) : '—';
+  }
+
+  protected setKind(k: DestinationKind): void {
+    this.kind.set(k);
+    // Home is always on every sheet: it is the row whose whole purpose is to
+    // stop kept milk being forgotten, and an optional one would be forgotten.
+    if (k === 'home') this.standing.set('yes');
+  }
+
+  protected readonly canAdd = computed(
+    () => !this.addState.submitting() && this.name().trim().length > 0 && this.startedOn().length > 0,
+  );
+
+  protected openPrice(d: DestinationListRow): void {
+    this.pricing.set(d);
+    // Pre-filled from the CURRENT agreement, not blank: a rate change is
+    // usually an edit to a number the operator already knows, and re-typing the
+    // lot size every time is where 40 becomes 4.
+    this.priceAmount.set(d.price ? minorToRupees(d.price.price_minor) : '');
+    this.priceUnit.set(d.price ? String(d.price.price_unit_litres) : '40');
+    this.priceFrom.set(farmToday());
+  }
+
+  /**
+   * What the form understood, or null while it is incomplete.
+   *
+   * Returning null rather than a partial guess is the point: the preview line
+   * is what stands between a mistyped lot size and a rate agreed at forty times
+   * the intended price.
+   */
+  protected readonly pricePreview = computed(() => {
+    const minor = rupeesToMinor(this.priceAmount());
+    const unit = Number(this.priceUnit().trim());
+    if (minor === null || !Number.isFinite(unit) || unit <= 0) return null;
+    if (this.priceFrom().length === 0) return null;
+    return {
+      minor,
+      unit,
+      rate: formatRate(minor, unit),
+      perLitre: perLitreLabel(minor, unit),
+    };
+  });
+
+  protected async submitPrice(e: Event): Promise<void> {
+    e.preventDefault();
+    const d = this.pricing();
+    const p = this.pricePreview();
+    if (!d || !p) return;
+
+    const ok = await this.priceState.run((key) =>
+      this.api.setPrice(
+        d.id,
+        {
+          effective_from: this.priceFrom(),
+          price_minor: p.minor,
+          price_unit_litres: p.unit,
+          recorded_by: this.session.provenance().recorded_by,
+        },
+        key,
+      ),
+    );
+    if (ok) {
+      this.writeLog.announce(`${d.name}: ${p.rate} from ${this.priceFrom()}`);
+      this.pricing.set(null);
+      await this.load();
+    }
+  }
+
+  protected async submitDestination(e: Event): Promise<void> {
+    e.preventDefault();
+    if (!this.canAdd()) return;
+
+    const kind = this.kind();
+    const result = await this.addState.run((key) =>
+      this.api.addDestination(
+        {
+          name: this.name().trim(),
+          kind,
+          standing: this.standing() === 'yes',
+          started_on: this.startedOn(),
+          // Explicit rather than omitted, so the server never has to infer it.
+          billable: kind !== 'home',
+          recorded_by: this.session.provenance().recorded_by,
+        },
+        key,
+      ),
+    );
+    if (result) {
+      this.writeLog.announce(
+        `${result.name} added` +
+          (result.billable ? ' — agree a rate before their first sale' : ' — kept milk, never billed'),
+      );
+      this.name.set('');
+      await this.load();
+    }
+  }
+
+  protected readonly formatMinor = formatMinor;
+}

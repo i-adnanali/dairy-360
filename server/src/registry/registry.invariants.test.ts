@@ -635,3 +635,166 @@ test('every invariant 1-12 has at least one test that makes it fire', () => {
   );
   db.close();
 });
+
+// ---------------------------------------------------------------------------
+// 18-22. Milk sales, home use and the ledger
+// ---------------------------------------------------------------------------
+
+/**
+ * A snapshot carrying the three-buyer farm and one day of sales.
+ *
+ * Built by hand rather than through the write boundary, because that is the
+ * point: every corruption below is something the write boundary already
+ * refuses, and the invariants exist to catch rows that got in some other way --
+ * a hand-written INSERT, or a rule that did not exist when the row was written.
+ */
+function salesSnapshot(): RegistrySnapshot {
+  const dest = (
+    id: string,
+    name: string,
+    kind: string,
+    billable: boolean,
+    standing: boolean,
+  ) => ({
+    id, name, kind, billable, standing, contact: null,
+    started_on: '2026-01-01', ended_on: null, note: null,
+    recorded_by: 'adnan', recorded_at: 't',
+  });
+  return {
+    animals: [], events: [], lactations: [], parentage: [], statuses: [], milkings: [],
+    nextSerial: 1,
+    destinations: [
+      dest('dst_dodhi', 'Bashir', 'dodhi', true, true),
+      dest('dst_home', 'Home', 'home', false, true),
+    ] as never,
+    prices: [
+      {
+        id: 'prc_1', destination_id: 'dst_dodhi', effective_from: '2026-01-01',
+        price_minor: 700_000, price_unit_litres: 40, recorded_by: 'adnan',
+        recorded_at: 't', note: null,
+      },
+    ],
+    dispatches: [
+      {
+        id: 'dsp_1', destination_id: 'dst_dodhi', occurred_on: '2026-02-01',
+        session: 'morning', status: 'taken', litres: 40,
+        price_minor: 700_000, price_unit_litres: 40, reason: null, occurred_time: null,
+        observed_by: null, recorded_by: 'adnan', recorded_at: 't',
+        source_form: 'direct_entry', note: null,
+      },
+      {
+        id: 'dsp_2', destination_id: 'dst_home', occurred_on: '2026-02-01',
+        session: 'morning', status: 'taken', litres: 3,
+        price_minor: null, price_unit_litres: null, reason: null, occurred_time: null,
+        observed_by: null, recorded_by: 'adnan', recorded_at: 't',
+        source_form: 'direct_entry', note: null,
+      },
+    ] as never,
+    payments: [
+      {
+        id: 'pay_1', destination_id: 'dst_dodhi', occurred_on: '2026-02-28',
+        amount_minor: 700_000, method: 'cash', reference: null, observed_by: null,
+        recorded_by: 'adnan', recorded_at: 't', note: null,
+      },
+    ] as never,
+  };
+}
+
+test('a clean sales snapshot produces zero violations', () => {
+  // The null case first: without it, every assertion below could be firing for
+  // the wrong reason.
+  assert.deepEqual(violations(salesSnapshot()), []);
+});
+
+test('EVERY sales invariant is demonstrably reachable', () => {
+  // The same shape as the corruption sweep above, and for the same reason: an
+  // invariant that cannot fire is worse than no invariant, because it reads as
+  // coverage.
+  const fired = new Set<number>();
+  const corruptions: [number, (s: RegistrySnapshot) => void][] = [
+    // 18 -- two rows for one destination in one session.
+    [18, (s) => s.dispatches.push({ ...s.dispatches[0], id: 'dsp_dup' })],
+    // 19 -- 'taken' with no litres.
+    [19, (s) => {
+      s.dispatches[0].litres = null;
+    }],
+    // 19 -- half a price: a rate with no lot size is a 40x error waiting.
+    [19, (s) => {
+      s.dispatches[0].price_unit_litres = null;
+    }],
+    // 19 -- home milk carrying a price, which would reach a balance.
+    [19, (s) => {
+      s.dispatches[1].price_minor = 700_000;
+      s.dispatches[1].price_unit_litres = 40;
+    }],
+    // 20 -- a dispatch after the buyer stopped.
+    [20, (s) => {
+      s.destinations[0].ended_on = '2026-01-15';
+    }],
+    // 20 -- a payment outside the range.
+    [20, (s) => {
+      s.destinations[0].ended_on = '2026-02-01';
+    }],
+    // 21 -- billed with no agreement behind the figure.
+    [21, (s) => {
+      s.prices = [];
+    }],
+    // 21 -- two agreements on one date, so which one wins is silent.
+    [21, (s) => s.prices.push({ ...s.prices[0], id: 'prc_dup' })],
+    // 22 -- home priced.
+    [22, (s) => s.prices.push({ ...s.prices[0], id: 'prc_home', destination_id: 'dst_home' })],
+    // 22 -- home paid.
+    [22, (s) => s.payments.push({ ...s.payments[0], id: 'pay_home', destination_id: 'dst_home' })],
+    // 22 -- a negative cash payment wearing the wrong label.
+    [22, (s) => {
+      s.payments[0].amount_minor = -700_000;
+    }],
+    // 22 -- a signed adjustment with nothing said about it.
+    [22, (s) => {
+      s.payments[0].method = 'adjustment';
+      s.payments[0].amount_minor = -700_000;
+      s.payments[0].note = null;
+    }],
+  ];
+
+  for (const [n, corrupt] of corruptions) {
+    const s = salesSnapshot();
+    corrupt(s);
+    assert.ok(
+      firesInvariant(s, n),
+      `a corruption meant to trip invariant ${n} produced no violation`,
+    );
+    fired.add(n);
+  }
+  assert.deepEqual([...fired].sort((a, b) => a - b), [18, 19, 20, 21, 22]);
+});
+
+test('a dispatch or payment naming an unknown destination is caught', () => {
+  const s = salesSnapshot();
+  s.dispatches[0].destination_id = 'dst_ghost';
+  assert.ok(firesInvariant(s, 20));
+
+  const t = salesSnapshot();
+  t.payments[0].destination_id = 'dst_ghost';
+  assert.ok(firesInvariant(t, 22));
+});
+
+test('a billable dispatch that captured NO price is caught', () => {
+  // Distinct from invariant 21: the agreement exists, but the row never picked
+  // it up, so it is billed at nothing.
+  const s = salesSnapshot();
+  s.dispatches[0].price_minor = null;
+  s.dispatches[0].price_unit_litres = null;
+  assert.ok(firesInvariant(s, 19));
+});
+
+test('an empty registry has nothing to say about sales', () => {
+  // The sales half stands alone from the herd, so a database with buyers and no
+  // animals -- and one with animals and no buyers -- must both be clean.
+  const s = salesSnapshot();
+  s.destinations = [];
+  s.prices = [];
+  s.dispatches = [];
+  s.payments = [];
+  assert.deepEqual(violations(s), []);
+});

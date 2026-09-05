@@ -101,13 +101,17 @@ import type { TimelineEvent } from './types';
 export class EventList {
   readonly events = input.required<TimelineEvent[]>();
 
-  /** The override record on an event, when a guard was stepped past to write it. */
+  /**
+   * The override record on an event, when a guard was stepped past to write it.
+   *
+   * Two columns since migration 4, so this no longer has to defend against a
+   * malformed sub-object -- the database refuses an unknown check and a reason
+   * with no check, which is most of what the old shape-checking was for.
+   */
   protected override(e: TimelineEvent): { check: string; reason: string | null } | null {
-    const o = e.payload['override'];
-    if (o === null || typeof o !== 'object') return null;
-    const rec = o as { check?: unknown; reason?: unknown };
-    if (typeof rec.check !== 'string') return null;
-    return { check: rec.check, reason: typeof rec.reason === 'string' ? rec.reason : null };
+    return e.override_check === null
+      ? null
+      : { check: e.override_check, reason: e.override_reason };
   }
 
   protected label(t: string): string {

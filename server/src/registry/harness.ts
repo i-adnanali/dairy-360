@@ -29,7 +29,8 @@ import express from 'express';
 import cors from 'cors';
 
 import { registryRouter } from './routes';
-import { cleanHerd, freshDb } from './fixtures';
+import { freshDb, tradingHerd } from './fixtures';
+import { farmToday } from './time';
 import { herd } from './reads';
 import type { Db } from './schema';
 
@@ -97,6 +98,9 @@ export function harnessApp(db: Db): express.Express {
       storage: ':memory:',
       warning: 'fixture data, discarded on exit -- this is NOT dairy.db',
       animals: herd(db).length,
+      destinations: (
+        db.prepare(`SELECT COUNT(*) n FROM registry_destinations`).get() as { n: number }
+      ).n,
     });
   });
 
@@ -110,7 +114,16 @@ function main(): void {
     return;
   }
 
-  const db = args.empty ? freshDb() : cleanHerd();
+  // tradingHerd() rather than cleanHerd(): the awkward-case herd PLUS two
+  // weeks of milk yield and sales. The reconciliation screen has production on
+  // one side and dispatch on the other, so a fixture with only the herd would
+  // leave half of every sales screen rendering an empty state.
+  //
+  // ENDING TODAY, not at the frozen AS_OF. The harness reads the real clock, so
+  // a fixture that stopped days ago opened every sales screen onto an empty
+  // session -- correct, and indistinguishable from broken. The default stays
+  // frozen for the tests; only this caller moves with the calendar.
+  const db = args.empty ? freshDb() : tradingHerd(farmToday()).db;
   const app = harnessApp(db);
 
   app.listen(args.port, () => {

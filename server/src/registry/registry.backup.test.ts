@@ -102,7 +102,11 @@ test('the backed-up tables are exactly the non-projection registry tables', () =
     [
       'registry_animal_events',
       'registry_animals',
+      'registry_destination_prices',
+      'registry_destinations',
+      'registry_dispatches',
       'registry_milkings',
+      'registry_payments',
       'registry_serial_counter',
     ],
     'a registry table changed classification -- confirm it is genuinely derivable ' +
