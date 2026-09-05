@@ -5,7 +5,11 @@
   <title>Dairy Farm Agent</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- SVG first, .ico as the fallback. A browser that understands the SVG takes
+       it and stays crisp at any size; everything else falls through to the .ico,
+       which carries 16/32/48/64/128/256 rendered from that same file. -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/x-icon" href="favicon.ico" sizes="any">
 </head>
 <body>
   <app-root></app-root>

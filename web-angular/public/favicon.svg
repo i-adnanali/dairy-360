@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Milk can">
+  <!--
+    A milk can, in the app's own `farm` palette (tailwind.config.js).
+
+    The can rather than a cow or a bottle, because it is the object this
+    application is actually about: milk leaving the bulk in a drum, which is
+    what the dodhi carries away twice a day and what every dispatch row records.
+
+    DRAWN FOR 16px FIRST. A favicon is read at the size of a word, so this is
+    four solid shapes with no outline, no gradient, and no detail that survives
+    being three pixels wide: the lid, the neck, the shoulder, the body. The one
+    band across the body is the only interior line, and it earns its place
+    because without it the body reads as a plain rounded rectangle when small.
+
+    Cream on dark brown rather than the reverse, because browser tab strips are
+    light more often than not and a light-on-dark tile keeps its silhouette
+    against either.
+
+    NOTE THE PUNCTUATION IN THIS COMMENT. The repo writes an em dash as two
+    hyphens, and two hyphens cannot appear inside an XML comment: it is a parse
+    error, the file fails to decode as an image, and the browser falls back
+    silently with no console message. Found by asking the page to decode it
+    rather than by looking at the tab. Keep em dashes real ones in here.
+
+    `width`/`height` are set as well as `viewBox` so the file has an intrinsic
+    size; without them some consumers treat it as 0x0.
+  -->
+  <rect width="32" height="32" rx="6" fill="#6e4e2a"/>
+  <g fill="#faf7f0">
+    <!-- lid -->
+    <rect x="11" y="2.6" width="10" height="3.2" rx="1.6"/>
+    <!-- neck -->
+    <rect x="12.9" y="5.4" width="6.2" height="4.4"/>
+    <!-- shoulder: the flare from neck to body -->
+    <path d="M12.9 9.4h6.2l6.6 4.4H6.3z"/>
+    <!-- body -->
+    <rect x="5.6" y="13.2" width="20.8" height="16.2" rx="2.8"/>
+  </g>
+  <!-- the metal band, and the only interior line the 16px version keeps -->
+  <rect x="5.6" y="19.8" width="20.8" height="1.8" fill="#6e4e2a"/>
+</svg>
