@@ -2,7 +2,12 @@
 
 Status: **built.** Migration 3, the write boundary, the `/milking` roster, invariants 14–17, the
 `/check` completeness panel and the harness fixture all landed together. Server 480 tests, frontend
-210 across 22 files. What is NOT built is listed in §11 and §13; the lactation curve on
+210 across 22 files *at the time this landed* — counts move; a run is the authority.
+
+**Extended since, by [REGISTRY_SALES.md](REGISTRY_SALES.md).** Three claims in here were changed by
+it and each is annotated where it appears: the `source_form` CHECK in §7 (the block was stale from
+the start), the DELETE-scope rule in §8, and the bulk-tank deferral in §11. Milk yield itself is
+unchanged. What is NOT built is listed in §11 and §13; the lactation curve on
 `/animals/:id` (build item 6) is the one piece of §9 still outstanding.
 
 Written against `v0.15.0-5-g1391524` and verified by execution rather than by reading — the finding
@@ -267,7 +272,15 @@ CREATE TABLE registry_milkings (
   observed_by   TEXT,                   -- the milker
   recorded_by   TEXT NOT NULL,
   recorded_at   TEXT NOT NULL,
-  source_form   TEXT NOT NULL,
+  -- CORRECTED. This block said `source_form TEXT NOT NULL` with no CHECK for
+  -- the whole of this document's life; migration 3 as shipped has one, listing
+  -- all five values. The difference is not cosmetic: adding a source_form value
+  -- costs TWO check changes, not one, and the other is on
+  -- registry_animal_events -- a rebuild of the irreplaceable table. Found while
+  -- writing REGISTRY_SALES.md §7, which had reasoned from the cheaper number.
+  source_form   TEXT NOT NULL CHECK (
+                  source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                ),
   note          TEXT,
 
   CONSTRAINT occurred_on_is_a_date
@@ -326,8 +339,16 @@ That is a real divergence from `registry_animal_events`, whose two triggers make
 and it needs to be visible in the schema rather than inferred from the absence of a trigger. It is
 justified by the same distinction as the paragraph above — a measurement is not a claim about
 history — but the guard that keeps it honest is scope: the delete path is per-row and per-session
-from the roster screen, never a bulk statement, and it must never be reachable for any other
-`registry_*` table.
+from the roster screen, never a bulk statement.
+
+> **"It must never be reachable for any other `registry_*` table" — that clause no longer holds, and
+> was struck deliberately rather than quietly.** `registry_dispatches` permits `DELETE` for the same
+> reason and with the same narrowness (a date and a session, never a range), and `registry_payments`
+> permits it because a payment recorded against the wrong buyer has no other repair — correcting it
+> in place would move money between two people's balances without either statement saying so. What
+> survives from the original rule is the part that was load-bearing: **scope**. No registry table
+> exposes a bulk delete, and the event log still exposes none at all. See
+> [REGISTRY_SALES.md §8](REGISTRY_SALES.md#8-corrections-the-one-question-this-document-does-not-settle).
 
 ---
 
@@ -428,6 +449,11 @@ Revisit after one full lactation is in.
 the tank. This is the strongest available check on measurement quality and it is genuinely valuable,
 but it needs a second input the farm does not currently record. Raise it when per-animal entry is
 established, not before.
+
+> **Partly answered since.** [REGISTRY_SALES.md](REGISTRY_SALES.md) records what LEAVES the bulk, and
+> the sum of that is a second, independent measurement of the same milk — taken by a different person
+> for a different reason (money). Not a tank dip, and it does not close this: dispatch measures what
+> went out rather than what was there. But it is the same shape of check, and it is built.
 
 **Feed, weight, body condition.** Named in the reserved list. Each is its own table by the §3 rule.
 Not step 4.

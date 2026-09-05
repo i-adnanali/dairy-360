@@ -1195,10 +1195,12 @@ gate**, and the question stays open rather than being resolved on nothing.
   evidence rather than argument: the keyboard retrofit (§6.7a) was built as if it were the whole
   answer, and the five-animal trial above is the check. The measure is the round trip, not the field
   count.
-- **The override belongs in a column, not the payload.** The reasoning is in `types.ts`: a column is
-  uniform across event types, queryable without `json_extract`, and sits beside the other provenance
-  fields it resembles. It lives in the payload only because a column costs a migration and the build
-  order's standing claim is that everything above the cut line lands without one. **Do not migrate
-  for this alone** — bundle it into whichever migration lands next, most likely item 12
-  (merge/supersede), which needs one anyway. The move is mechanical on a table whose
-  create-copy-drop-rename rebuild is already proven twice.
+- ~~**The override belongs in a column, not the payload.**~~ **Done — migration 4.** It lived in the
+  payload only because a column cost a migration and the build order's standing claim was that
+  everything above the cut line lands without one; the instruction here was to bundle it into
+  whichever migration landed next, and the sales cycle is where that happened. It went as its OWN
+  migration rather than riding along with four plain CREATEs, because it rebuilds a table with
+  foreign keys off. `override_check` and `override_reason` are now columns on
+  `registry_animal_events`, and the vocabulary is enforced by the database for the first time —
+  in the payload it was a write-boundary check only. See
+  [REGISTRY_SALES.md §9](REGISTRY_SALES.md#9-schema).

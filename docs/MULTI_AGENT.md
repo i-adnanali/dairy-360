@@ -1,5 +1,19 @@
 # Multi-Agent System — Decision Doc (Cycle 2)
 
+> **The vendor/sales domain this record describes is the DEMO one, and it has a real
+> counterpart now — [REGISTRY_SALES.md](REGISTRY_SALES.md).** `vendors` and `deliveries` are
+> fixtures `seed()` drops and recreates; the real farm's buyers, effective-dated prices and
+> ledger live in `registry_*` tables. Two things in here read differently as a result, and the
+> text below is left as written:
+>
+> - **`vendors` is a misnomer.** Those rows *buy* from the farm. The registry names its
+>   equivalent for what it holds.
+> - **`deliveries.paid` is a per-row boolean**, which cannot express a part payment against three
+>   weeks of collections. The registry uses a ledger for exactly that reason.
+>
+> Nothing here is wrong about Cycle 2. The demo tools remain advertised and untouched; disposing
+> of them is a writes-cycle decision.
+
 *Status: complete — tagged `v0.5.0`. Supersedes the Cycle 2 note in
 [OBSERVABILITY.md](OBSERVABILITY.md) § Open items ("no decision yet on
 eval/regression tooling — that's Cycle 2"). Regression testing was resequenced

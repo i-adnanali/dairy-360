@@ -1,5 +1,19 @@
 # Registry Agent Tools — Decision Doc (Cycle 9)
 
+> **Extended by the sales cycle — [REGISTRY_SALES.md](REGISTRY_SALES.md).** This is a closed record
+> and its text is left as written; two counts in it are now historical rather than wrong-then:
+>
+> - "`ALL_TOOLS` advertises 21 tools ... **not one of them reads a `registry_*` table**" was true at
+>   `f3262d7` and is what this cycle set out to change. It is now 28, of which seven read the
+>   registry: the three below, plus `list_buyers`, `get_buyer_balance`, `get_dispatches` and
+>   `get_milk_reconciliation` over the sales tables.
+> - The deferral of `get_milking_record` for want of fixture rows is **closed**: `fixtures.ts` now
+>   carries milk and dispatch rows, so the three-status split has a fixture behind it.
+>
+> Decision 1 (reads unrestricted, writes deferred) and Decision 2 (the demo tool surface is not
+> touched) both still stand, and the sales tools were built under them.
+
+
 ## Context
 
 [REGISTRY.md](REGISTRY.md) ends with a deferral: *"No agent tools over the registry. v1 is a service layer."* That deferral is now the largest gap in the product. `ALL_TOOLS` in [tools/index.ts](../server/src/tools/index.ts) advertises 21 tools — 17 declared in that file (6 dairy read, 5 dairy write, 3 vendor read, 3 vendor write) plus `get_yield_vs_deliveries`, two farm reads and one farm write re-exported in — and **not one of them reads a `registry_*` table**. The chat can hold a fluent conversation about fourteen buffaloes that do not exist, and cannot answer a single question about the animals that do.

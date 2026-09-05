@@ -21,6 +21,7 @@ Nothing there describes anything that currently exists.
 | Understand how the system fits together | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) |
 | Understand the agent loop, guardrails, tool contracts | [TECHNICAL.md](TECHNICAL.md) |
 | Work on the real-animal records | [REGISTRY.md](REGISTRY.md) |
+| Work on milk sales, home use, buyer balances | [REGISTRY_SALES.md](REGISTRY_SALES.md) |
 | Work on the frontend | [ANGULAR_PORT.md](ANGULAR_PORT.md) |
 | Change the wire protocol | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) |
 | Know what is still unfinished | [OPEN.md](OPEN.md) |
@@ -39,6 +40,7 @@ Nothing there describes anything that currently exists.
 | [REGISTRY.md](REGISTRY.md) | Real-animal records: schema, migrations, append-only guarantee, calving transaction, projections, CLI, HTTP surface, entry UI, invariants | Deep. The single most load-bearing document in the repo |
 | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | The entry surface — screens, the change list with build status, the defaults rule, the five-animal trial | Deep |
 | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milking` roster | Deep |
+| [REGISTRY_SALES.md](REGISTRY_SALES.md) | Milk sales, home use and the buyer ledger: destinations, effective-dated prices in 40-litre lots, the daily dispatch sheet, the reconciliation, migrations 4–5 | Deep |
 | [FARM_EVENTS.md](FARM_EVENTS.md) | Camera-event ingestion: the real Frigate and Double Take payload shapes, normalization, the `farm_events` model | Deep. Cited from `payloadShape.ts`, `db.ts`, `shared/types.ts` |
 
 `FARM_EVENTS.md` is also a Cycle 4 record. It is listed here because its payload
@@ -64,6 +66,13 @@ Each maps to a git tag. Read them for *why*, not for *what is true now*.
 | 8 · entry | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | `v0.12.0`…`v0.15.0` | The entry surface, built in three passes. Items 7–9 and 6b are still below the cut line |
 | 8 · yield | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | untagged (`46d29c7`) | Per-animal milk yield, migration 3 |
 | 9 | [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) | untagged (`f3262d7`) | Registry read tools for the agent, and the six evals that matter |
+| — · sales | [REGISTRY_SALES.md](REGISTRY_SALES.md) | untagged | Milk sales, home use and the buyer ledger, migrations 4–5 (also reference — see above) |
+
+**[REGISTRY_SALES.md](REGISTRY_SALES.md) has no cycle number on purpose.** The registry's step
+numbering is about the animal record, and these are the first registry tables with no `animal_id` in
+them — a different axis, which the numbering should not absorb. Its §17 is the part worth reading
+twice: seven things building it changed about the plan, two of which were only visible by rendering
+the screen rather than by reading the code.
 
 [cycle-7-followups.md](cycle-7-followups.md) sits deliberately outside the table.
 It holds the six findings (FU-1…FU-6) that came out of Cycle 7 and were *not*

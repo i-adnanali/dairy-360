@@ -68,19 +68,32 @@ append-only event log over the real herd with rebuildable projections, served to
 a transcription UI that is the app's root route. Its schema, entry rules, date-
 precision conventions and known gaps are in
 [docs/REGISTRY.md](docs/REGISTRY.md); the entry surface is
-[docs/REGISTRY_ENTRY_UX.md](docs/REGISTRY_ENTRY_UX.md) and per-animal milk yield
-is [docs/REGISTRY_MILKING.md](docs/REGISTRY_MILKING.md). Those three are the only
-description of any of it — this README does not restate them.
+[docs/REGISTRY_ENTRY_UX.md](docs/REGISTRY_ENTRY_UX.md), per-animal milk yield is
+[docs/REGISTRY_MILKING.md](docs/REGISTRY_MILKING.md), and the commercial half —
+who buys the milk, at what rate, and what they owe — is
+[docs/REGISTRY_SALES.md](docs/REGISTRY_SALES.md). Those four are the only
+description of any of it; this README does not restate them.
 
-The agent reads that registry through three tools (`list_registry_animals`,
-`get_registry_animal`, `get_calving_intervals`) as of Cycle 9. **Reads only** —
-real animal records are still entered through the registry UI, deliberately. The
-point of those tools is not chat-over-a-database: every digest carries how well
-the record knows what it reports, so calving intervals stay split into
-`measured` and `approximate` and are never pooled, and a month-precision date is
-never narrated as an exact day. A live eval asserts the assistant's *prose* on
-exactly that. See [docs/REGISTRY_TOOLS.md](docs/REGISTRY_TOOLS.md), which also
-records what is deferred to the writes cycle and why.
+That last one is worth one sentence here because it is the half a dairy actually
+runs on. Milk leaves the bulk twice a day to a dodhi, to neighbouring households,
+and to the farm's own kitchen — so a **destination** covers all three, home use
+is recorded rather than lost in a gap, prices are **effective-dated and quoted in
+40-litre lots** the way the farm agrees them, and what is owed is a **ledger**
+rather than a paid/unpaid flag, because a part payment against three weeks of
+collections belongs to no single delivery.
+
+The agent reads all of that, and only reads it: three tools over the herd
+(`list_registry_animals`, `get_registry_animal`, `get_calving_intervals`) and
+four over the sales side (`list_buyers`, `get_buyer_balance`, `get_dispatches`,
+`get_milk_reconciliation`). **Reads only** — real records are still entered
+through the registry UI, deliberately. The point is not chat-over-a-database:
+every digest carries how well the record knows what it reports, so calving
+intervals stay split into `measured` and `approximate` and are never pooled, a
+month-precision date is never narrated as an exact day, and the produced-versus-
+sold gap comes back with **no percentage at all** when production is a lower
+bound. A live eval asserts the assistant's *prose* on the first of those. See
+[docs/REGISTRY_TOOLS.md](docs/REGISTRY_TOOLS.md) and
+[docs/REGISTRY_SALES.md](docs/REGISTRY_SALES.md).
 
 Those rows are then **read for meaning**: a deterministic classifier scores each
 event `routine` / `notable` / `urgent` from zone, time of day, face confidence,
@@ -212,8 +225,10 @@ npm run harness:app
 Open <http://localhost:4200>. You get the **animal registry entry UI** over an
 in-memory herd of 31 animals — every life stage, calvings entered out of order,
 a paired date correction, an overridden check, dates at all four precisions —
-and `server/dairy.db` is never opened by any process this starts. No
-`ANTHROPIC_API_KEY`, no `npm run seed`, nothing to clean up afterwards.
+plus a dodhi, two households and the farm's own kitchen with five sessions of
+milk sold and kept behind them. `server/dairy.db` is never opened by any process
+this starts. No `ANTHROPIC_API_KEY`, no `npm run seed`, nothing to clean up
+afterwards.
 
 Two things that path does **not** give you, so you are not left hunting. The
 **agent chat at `/chat` will not answer**: the harness mounts only

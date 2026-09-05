@@ -34,7 +34,7 @@ Two animal tables now exist in one database, and that is deliberate.
 | Ids | `animal_<8hex>` | `BD-0001` |
 | Lifecycle | dropped and recreated by every `seed()` | migration-managed, never dropped |
 | Status vocabulary | `AnimalStatus` in `shared/src/types.ts` | `RegistryAnimalStatus` in `registry/types.ts` |
-| Read by | the agent's tools | nothing yet — v1 is a service layer |
+| Read by | the agent's tools | the agent's tools too, **read-only** ([REGISTRY_TOOLS.md](REGISTRY_TOOLS.md), [REGISTRY_SALES.md](REGISTRY_SALES.md)); every write goes through the entry UI |
 
 **The demo tables are fixtures for a scripted demo, not a record of anything.** That is the fact that makes the fork tolerable, and it is why the registry does not simply extend `animals`.
 
@@ -60,21 +60,30 @@ If `farm_events` ever holds real camera rows alongside synthetic ones, that colu
 
 ## Decision 1 — Registry tables are `registry_*` in one database
 
-Seven tables, all prefixed, all disjoint from the demo tables:
+Eleven tables, all prefixed, all disjoint from the demo tables:
 
 ```
 registry_animals            registry_lactations        registry_serial_counter
 registry_animal_events      registry_parentage         registry_animal_status
 registry_milkings
+registry_destinations       registry_destination_prices
+registry_dispatches         registry_payments
 ```
 
 `registry_milkings` arrived with step 4 (migration 3) — see
 [REGISTRY_MILKING.md](REGISTRY_MILKING.md). It is a **record**, not a projection:
 the rebuild never touches it, because nothing in it is derivable from the event
-log. It is also the only registry table that permits `DELETE`, and that
-divergence is argued where it is declared.
+log. It was the first registry table to permit `DELETE`, and that divergence is
+argued where it is declared.
 
-The prefix goes on all seven, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
+The last four arrived with milk sales (migration 5) — see
+[REGISTRY_SALES.md](REGISTRY_SALES.md). They are also records, they also permit
+`UPDATE` and `DELETE`, and they are **the first registry tables with no
+`animal_id` at all**: every table above them hangs off an animal, and these four
+hang off a counterparty. That is why the sales work carries no step number — it
+is a different axis from the animal record rather than a later step along it.
+
+The prefix goes on all eleven, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
 
 **No registry table has a foreign key to a demo table, and none ever may.** `resetSchema()` drops the demo tables children-first, which is the only reason `foreign_keys = ON` does not abort it; a registry → demo foreign key would start failing that DROP and would couple the two lifecycles.
 
@@ -190,10 +199,10 @@ Two consequences, enforced rather than documented:
 
 ### What this makes a backup
 
-The same split decides what has to be saved. Four tables are **records** — `registry_animal_events`, `registry_animals`, `registry_milkings` and `registry_serial_counter` — and nothing in this repo can reproduce them. The other three are derived, so a backup that omits them loses nothing:
+The same split decides what has to be saved. Eight tables are **records** — `registry_animal_events`, `registry_animals`, `registry_milkings`, `registry_serial_counter`, and the four sales tables `registry_destinations`, `registry_destination_prices`, `registry_dispatches` and `registry_payments` — and nothing in this repo can reproduce them. The other three are derived, so a backup that omits them loses nothing:
 
 ```
-restore the four record tables  ->  registry:rebuild  ->  verify:registry
+restore the record tables  ->  registry:rebuild  ->  verify:registry
 ```
 
 `SOURCE_OF_TRUTH_TABLES` in `backup.ts` is computed as `REGISTRY_TABLES` minus `REGISTRY_PROJECTION_TABLES` rather than listed, so a record table added by a future migration is backed up without anyone remembering to add it — and the failure mode a hardcoded list would have is the silent one, where the backup keeps succeeding while omitting the new table.
@@ -211,11 +220,16 @@ The same split as `classify.ts` / `classifyStore.ts`, for the same reason:
 | `intervals.ts` | **pure** — the calving-interval metric |
 | `invariants.ts` | **pure** — snapshot in, violations out |
 | `time.ts` | **pure** — farm-local "today" |
+| `money.ts` | **pure** — minor units and the one rounding rule ([REGISTRY_SALES.md](REGISTRY_SALES.md)) |
 | `store.ts` | DB shell — takes an explicit handle |
 | `projectStore.ts` | DB shell — the only projection writer |
 | `calving.ts` | DB shell — the transaction |
 | `verify.ts` | DB shell — the rebuild-diff, takes a handle |
 | `backup.ts` | DB shell — snapshot, dump and the pre-migration hook; takes a handle |
+| `milking.ts` | DB shell + pure core — yield, the roster, the completeness report |
+| `destinations.ts` | DB shell + pure core — who milk goes to, and the price in force |
+| `dispatch.ts` | DB shell + pure core — the daily sheet, and the reconciliation |
+| `ledger.ts` | DB shell — payments, balances, the statement |
 | `add.ts`, `calve.ts`, `correct.ts`, `event.ts`, `rebuild.ts`, `verifyRegistry.ts`, `backup.ts` | CLI shells — the only files that reach `../db` |
 
 Every function that touches SQLite takes an explicit `db` handle rather than importing the module singleton. That seam is what lets the same code run against the live `dairy.db` and against `new Database(':memory:')` in a test — and it means `db.ts`'s singleton design is untouched.
@@ -732,6 +746,11 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 | GET | `/duplicate-candidates?name=&post_no=&tag_no=&sex=&exclude_id=` | near-duplicate animals; a soft signal no write consults |
 | GET | `/identifier-values` | previously-used `observed_by` / `acquired_from` / `sire_ref`, for the datalists |
 | GET | `/milking/roster?on=&session=` | who was in milk on that date, with days-in-milk and the comparable session |
+| GET | `/destinations?as_of=` | who milk goes to, with the price in force on that date |
+| GET | `/destinations/:id` | one buyer's statement: months, running balance, price history |
+| GET | `/balances` | balances for the billable destinations; home is absent, not zero |
+| GET | `/dispatch/sheet?on=&session=` | the daily sheet, split into standing and occasional |
+| GET | `/reconcile?from=&to=` | produced against dispatched; `gap_pct` is null when production is incomplete |
 | GET | `/storage` | which database this router writes to |
 | GET | `/verification?as_of=` | invariants, histogram, intervals, milk completeness |
 | POST | `/animals` | `addAcquiredAnimal` |
@@ -739,15 +758,21 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 | POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |
 | POST | `/calvings/:eventId/correction` | `correctCalving` |
 | POST | `/milking/session` | one whole session, all rows or none |
-| POST | `/milking/session/delete` | remove a session, or one animal's row in it — the only `DELETE` any route exposes |
+| POST | `/milking/session/delete` | remove a session, or one animal's row in it |
+| POST | `/destinations` | `addDestination` |
+| POST | `/destinations/:id` | `updateDestination` — amend in place; `kind`, `billable` and `started_on` are not amendable |
+| POST | `/destinations/:id/prices` | `setPrice` — a new agreement from a date; the lot size is required |
+| POST | `/dispatch/session` | one whole session, all rows or none |
+| POST | `/dispatch/session/delete` | remove a session, or one destination's row in it |
+| POST | `/payments` | `recordPayment` — only an `adjustment` may be signed, and it must say why |
+| POST | `/payments/:id/delete` | remove one payment, by id |
 | POST | `/rebuild` | `registry:rebuild` |
 
 `registryRouter` is a **factory taking a `db` handle**, unlike `farmRouter` which is a const importing the singleton. That is what lets the harness serve the same routes over `:memory:`.
 
 ### Every WRITING route requires an `Idempotency-Key`
 
-Six of the `POST`s above — `/animals`, `/events`, `/calvings`,
-`/calvings/:eventId/correction`, `/milking/session` and `/milking/session/delete` — refuse a request
+Thirteen of the `POST`s above — every one except `/rebuild` — refuse a request
 without the header, with a 400 and `missing_idempotency_key`. `/rebuild` does not, because a rebuild
 appends nothing: it recomputes projections from the log, so running it twice lands on the same rows,
 which is invariant 0.
@@ -1147,6 +1172,6 @@ Blocking rules:
 - **Status goes stale as animals age.** A consequence of the `calf` rule depending on the current date. The fix is a rebuild; `verify:registry` says so when invariant 1 fires.
 - **Parentage `certainty` is always `known` in this cycle**, because the only producer is the calving transaction. The column exists so the backfill can assert an uncertain edge without a schema change.
 - **An `acquired` animal gets no parentage edges.** We did not witness its birth, and a fabricated `unknown` edge would add a row asserting nothing.
-- **Registry status words are not dispatcher keywords.** `heifer`, `male` and `departed` are absent from `DAIRY_KEYWORDS` in [dispatch.ts](../server/src/agent/dispatch.ts). Harmless now (registry tools are deferred), but a question phrased with them would not route to the dairy agent — fix it in the tools cycle.
+- **Registry status words are not dispatcher keywords.** `heifer`, `male` and `departed` are absent from `DAIRY_KEYWORDS` in [dispatch.ts](../server/src/agent/dispatch.ts), so a question phrased with them does not route to the dairy agent. No longer harmless-because-deferred, but still harmless in practice: the registry and sales tools are offered on **every** dispatcher branch, so a misrouted turn can still answer. See [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) §5.
 - **The target is re-checked on navigation, not on the write itself.** So one case survives: staying on a single form, having the server on that port replaced underneath, and submitting again without navigating. Everything else — a reload, reaching a form, moving between views — re-asks and sends you back to the gate if the answer changed. Closing it completely means a pre-flight probe inside the four write calls, which is a per-write request and would touch every existing form test; the trigger to build it is any real instance of the surviving case, or a second person entering data.
-- **No agent tools over the registry.** v1 is a service layer. When tools arrive: reads unrestricted, writes confirmation-gated `WRITE_EXECUTOR`, and `record_calving` in particular **must** be gated — it creates an animal.
+- ~~**No agent tools over the registry.**~~ **Resolved, half of it.** Seven read tools exist — three over the herd ([REGISTRY_TOOLS.md](REGISTRY_TOOLS.md)) and four over sales and the ledger ([REGISTRY_SALES.md](REGISTRY_SALES.md)). The other half stands unchanged: **writes are still deferred**, and when they arrive they go through a confirmation-gated `WRITE_EXECUTOR`, with `record_calving` gated in particular — it creates an animal.
