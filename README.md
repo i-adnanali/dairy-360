@@ -65,14 +65,20 @@ no camera hardware involved. See [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
 
 A third surface, `/api/registry`, is the **animal registry** (Cycle 8): an
 append-only event log over the real herd with rebuildable projections, served to
-a transcription UI that is the app's root route. Its schema, entry rules, date-
-precision conventions and known gaps are in
-[docs/REGISTRY.md](docs/REGISTRY.md); the entry surface is
-[docs/REGISTRY_ENTRY_UX.md](docs/REGISTRY_ENTRY_UX.md), per-animal milk yield is
-[docs/REGISTRY_MILKING.md](docs/REGISTRY_MILKING.md), and the commercial half —
-who buys the milk, at what rate, and what they owe — is
-[docs/REGISTRY_SALES.md](docs/REGISTRY_SALES.md). Those four are the only
-description of any of it; this README does not restate them.
+an operations UI that is the app's root. Its schema, entry rules, date-precision
+conventions and known gaps are in [docs/REGISTRY.md](docs/REGISTRY.md); the
+entry surface is [docs/REGISTRY_ENTRY_UX.md](docs/REGISTRY_ENTRY_UX.md),
+per-animal milk yield is
+[docs/REGISTRY_MILKING.md](docs/REGISTRY_MILKING.md), the commercial half — who
+buys the milk, at what rate, and what they owe — is
+[docs/REGISTRY_SALES.md](docs/REGISTRY_SALES.md), and the people who work the
+herd are [docs/REGISTRY_PAYROLL.md](docs/REGISTRY_PAYROLL.md). Those five are
+the only description of any of it; this README does not restate them.
+
+It has grown **three axes**, and the numbering says so: the animal record, the
+counterparties milk goes to, and the people the farm employs. Only the first is
+a sequence of steps; the other two hang off nothing in it, which is why neither
+carries a step number.
 
 That last one is worth one sentence here because it is the half a dairy actually
 runs on. Milk leaves the bulk twice a day to a dodhi, to neighbouring households,
@@ -81,6 +87,15 @@ is recorded rather than lost in a gap, prices are **effective-dated and quoted i
 40-litre lots** the way the farm agrees them, and what is owed is a **ledger**
 rather than a paid/unpaid flag, because a part payment against three weeks of
 collections belongs to no single delivery.
+
+Labour gets the same sentence, because it is the other half a dairy runs on.
+People are separate from **engagements** — one row per stint, so somebody who
+leaves and comes back does not silently inherit their old salary — a package is
+an **effective-dated agreement** of cash plus in-kind lines (milk, flour,
+quarters) rather than a single number, dihari cover is the same table as a
+salaried month because both are a dated range, and what is owed is the **same
+ledger as the buyers' with the sign the other way up**. An advance needs no
+flag: the balance simply goes negative and the next period walks it back.
 
 The agent reads all of that, and only reads it: three tools over the herd
 (`list_registry_animals`, `get_registry_animal`, `get_calving_intervals`) and
@@ -222,13 +237,18 @@ nvm use && npm install     # first time only
 npm run harness:app
 ```
 
-Open <http://localhost:4200>. You get the **animal registry entry UI** over an
-in-memory herd of 31 animals — every life stage, calvings entered out of order,
-a paired date correction, an overridden check, dates at all four precisions —
-plus a dodhi, two households and the farm's own kitchen with five sessions of
-milk sold and kept behind them. `server/dairy.db` is never opened by any process
-this starts. No `ANTHROPIC_API_KEY`, no `npm run seed`, nothing to clean up
-afterwards.
+Open <http://localhost:4200>. You land on the **day board** — the evening
+milking and dispatch outstanding, this month's payroll still to enter — over an
+in-memory herd of 31 animals with every life stage, calvings entered out of
+order, a paired date correction, an overridden check and dates at all four
+precisions. Behind it: a dodhi, two households and the farm's own kitchen with
+five sessions of milk sold and kept, and three staff — two salaried, one dihari
+— with last month paid, one balance open, one settled and one in advance.
+
+Everything is seeded **over HTTP through the same routes the forms use**, so no
+row exists that the production write path would refuse. `server/dairy.db` is
+never opened by any process this starts. No `ANTHROPIC_API_KEY`, no
+`npm run seed`, nothing to clean up afterwards.
 
 Two things that path does **not** give you, so you are not left hunting. The
 **agent chat at `/chat` will not answer**: the harness mounts only
@@ -258,11 +278,16 @@ npm run seed -w server      # creates server/dairy.db
 npm run dev:angular
 ```
 
-Then open <http://localhost:4200> (Angular). The app opens on the **animal
-registry** (`/herd`); the agent chat panel is at `/chat`. The registry is a
-separate surface over real herd records and is documented in
-[docs/REGISTRY.md](docs/REGISTRY.md) — including how to run it against fixture
-data instead of the real database.
+Then open <http://localhost:4200> (Angular). The app opens on a **day board**
+at `/` — what still needs recording today, and nothing else — with the registry
+under `/animals`, milk under `/milk`, labour under `/labour`, and the agent chat
+panel at `/chat`. The registry is a separate surface over real herd records and
+is documented in [docs/REGISTRY.md](docs/REGISTRY.md) — including how to run it
+against fixture data instead of the real database.
+
+**Reads need no session.** Browsing the herd, a statement or `/check` asks for
+nothing; declaring who is recording and from what source is required only where
+something is about to be written, and the write control says so where it stands.
 
 **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) is the verified long form of setup**
 — the Node floor and what ignores it, why `.env` is copied twice, the two run

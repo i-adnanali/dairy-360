@@ -1,6 +1,6 @@
 # Registry milk logging — design decisions
 
-Status: **built.** Migration 3, the write boundary, the `/milking` roster, invariants 14–17, the
+Status: **built.** Migration 3, the write boundary, the `/milk/milking` roster, invariants 14–17, the
 `/check` completeness panel and the harness fixture all landed together. Server 480 tests, frontend
 210 across 22 files *at the time this landed* — counts move; a run is the authority.
 
@@ -354,7 +354,7 @@ from the roster screen, never a bulk statement.
 
 ## 9. Screens
 
-### 9.1 `/milking` — the session roster
+### 9.1 `/milk/milking` — the session roster
 
 One screen is one session. The whole feature is this screen; the rest is reading.
 
@@ -477,7 +477,7 @@ value rather than by that constraint.
 | 7 | Correct the FK claim in `events.ts`, `verify.ts`, `REGISTRY.md` (§2) | XS | **done** |
 | 1 | Migration 3: `registry_milkings` (§7) | S | **done** |
 | 2 | Write boundary + transactional roster save + idempotency (§7, §9.1) | M | **done** |
-| 3 | `/milking` roster screen (§9.1) | M | **done** |
+| 3 | `/milk/milking` roster screen (§9.1) | M | **done** |
 | 4 | Invariants 14–17 (§10) | S | **done** |
 | 5 | `/check` completeness section (§9.3) | S | **done** |
 | 6 | Lactation curve on `/animals/:id` (§9.2) | S | not built |

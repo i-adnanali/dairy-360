@@ -91,16 +91,21 @@ Every component is **standalone**, `OnPush`, and uses signal-based `input()` / `
 improvement over the React prop chain).
 
 > **Scope: this table is the React → Angular port only.** Cycle 8 added a second
-> surface to the same app — the animal registry's entry UI, now 31 non-spec files
-> under [web-angular/src/app/registry/](../web-angular/src/app/registry/) — which
-> has no React ancestor and so has no row here. It also brought the app's **first
+> surface to the same app — the animal registry, now 37 non-spec files under
+> [web-angular/src/app/registry/](../web-angular/src/app/registry/) — which has
+> no React ancestor and so has no row here. It also brought the app's **first
 > router, first `HttpClient` and first use of `@angular/forms`**; before it,
 > `@angular/router` and `@angular/forms` were installed dependencies that
 > nothing imported, and the only server call was `@ag-ui/client`'s SSE
 > transport. That surface is documented in [REGISTRY.md](REGISTRY.md) § "The
-> entry UI", per-animal yield in [REGISTRY_MILKING.md](REGISTRY_MILKING.md), and
-> the sales screens in [REGISTRY_SALES.md](REGISTRY_SALES.md) § 12. None of it is
+> entry UI", per-animal yield in [REGISTRY_MILKING.md](REGISTRY_MILKING.md), the
+> sales screens in [REGISTRY_SALES.md](REGISTRY_SALES.md) § 12, and labour — plus
+> the URL structure, the day board at `/`, and why reads need no recording
+> session — in [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) § 12. None of it is
 > described here.
+>
+> It is no longer only an *entry* UI, which is why the wording above changed: the
+> app's root is a day board and most of its screens are reads.
 
 | React component | Angular component | Notes |
 |---|---|---|

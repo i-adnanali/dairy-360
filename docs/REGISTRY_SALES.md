@@ -1,9 +1,9 @@
 # Milk sales, home use and the buyer ledger — design decisions
 
 Status: **built.** Migrations 4 and 5, `money.ts`, the three domain modules, thirteen HTTP routes,
-invariants 18–22, the `/dispatch`, `/buyers` and `/buyers/:id` screens, the `/check` reconciliation
+invariants 18–22, the `/milk/dispatch`, `/milk/buyers` and `/milk/buyers/:id` screens, the `/check` reconciliation
 panel, the fixtures and four read tools all landed together. Server 622 tests, frontend 233 across
-24 files. What is NOT built is §13 and §15; §17 records what building it changed.
+24 files *at the time this landed* — counts move; a run is the authority. What is NOT built is §13 and §15; §17 records what building it changed.
 
 Written against `v0.15.0-17-ge53acf3` and, unlike its first revision, **verified by execution** —
 the schema is applied to the live database, the screens are rendered, and two of the findings in §17
@@ -740,7 +740,7 @@ completeness panel.
 
 ## 12. Screens
 
-### 12.1 `/dispatch` — the daily sheet
+### 12.1 `/milk/dispatch` — the daily sheet
 
 The whole feature is this screen; the rest is reading. A sibling of
 [milking-roster.ts](../web-angular/src/app/registry/milking-roster.ts), and it should feel like the
@@ -781,7 +781,7 @@ exists arrives as an opening balance instead (§4.4).
 Recorded because the alternative was considered and priced, not overlooked: without this note the
 absence of a backfill path reads as a gap, and somebody eventually builds one nobody asked for.
 
-### 12.2 `/buyers` — destinations and prices
+### 12.2 `/milk/buyers` — destinations and prices
 
 The list, with each destination's current price, and a per-destination price change effective from a
 date. Non-billable destinations appear with no price and no price control.
@@ -801,7 +801,7 @@ the wholesale and retail rates do not move together anyway, so the batch screen 
 to change one row. Build it if the buyer list grows past about six, or if a single rise is ever
 observed moving every rate at once.
 
-### 12.3 `/buyers/:id` — the statement
+### 12.3 `/milk/buyers/:id` — the statement
 
 Dispatches, payments, running balance, price history. This is the screen you hand to a dodhi, which
 is the whole reason §8 is unsettled rather than copied from milking. The payment form lives here
@@ -830,6 +830,11 @@ the same reason the balance is (§4.4): a stored monthly total is a cached numbe
 with the rows it came from. §8 is where that would change, and it should change deliberately.
 
 ### 12.4 Navigation pressure, noted rather than solved
+
+> **Resolved by the labour cycle.** The grouping was made rather than deferred a fourth time — see
+> [REGISTRY_PAYROLL.md §12.3](REGISTRY_PAYROLL.md#123-navigation-and-url-structure--the-change-that-forced-both-decisions),
+> which also restructured the URLs. The paragraph below is what was true at
+> `v0.15.0`; the counts in it are historical.
 
 The shell nav is five items ([registry-shell.ts](../web-angular/src/app/registry/registry-shell.ts));
 this makes it seven. That is over the line where a flat row stops working, and the grouping decision
@@ -879,9 +884,9 @@ the first missing sale to become an argument.
 |---|---|---|---|
 | 1 | Migration 4: `override` to a column (§9), alone | S | **done** |
 | 2 | Migration 5: four tables + `money.ts` (§5, §9) | S | **done** |
-| 3 | Destinations + effective-dated prices: write boundary, `/buyers` (no batch change — §12.2) | M | **done** |
-| 4 | `/dispatch` sheet: transactional save, idempotency, the derived roster | M | **done** |
-| 5 | Payments, balance, `/buyers/:id` statement | M | **done** |
+| 3 | Destinations + effective-dated prices: write boundary, `/milk/buyers` (no batch change — §12.2) | M | **done** |
+| 4 | `/milk/dispatch` sheet: transactional save, idempotency, the derived roster | M | **done** |
+| 5 | Payments, balance, `/milk/buyers/:id` statement | M | **done** |
 | 6 | Invariants 18–22 (§13) | S | **done** |
 | 7 | `/check` completeness + reconciliation (§11) | S | **done** |
 | 8 | Fixtures: dispatches **and milkings** (see below) | S | **done** |
@@ -912,9 +917,13 @@ the reading.
   the sequencing risk most likely to be taken on its own because item 4 is the satisfying half.
 - **The corrections model (§8)** — update-in-place plus a revisions table, or freeze-on-settlement.
   Recommended (a); decide against the first real dispute.
-- **Does home use split?** Household milk and milk given to staff as part of pay are different facts
-  and the second is arguably a cost of labour. §9's schema is deliberately built so that splitting
-  them is an INSERT rather than a migration, but which way the farm thinks about it is unknown.
+- ~~**Does home use split?**~~ **Answered.** It does. The farm allocates a milk portion to staff as
+  part of the salary arrangement, so household milk and staff milk are different facts and the second
+  is a cost of labour. §9's schema was right that adding a destination is an INSERT — but wrong that
+  it costs no migration at all: `kind` has no `staff` value and nothing links a destination to a
+  person, and one shared row cannot say whose milk it was, because the dispatch key is one row per
+  destination per session. See [REGISTRY_PAYROLL.md §4.6a](REGISTRY_PAYROLL.md#46a-milk-as-part-of-the-package--one-destination-per-staff-member)
+  and its migration 7.
 - **Should home use be valued?** Litres is a fact; a rupee figure needs a reference price with no
   transaction behind it. Deferred until somebody asks what the household is costing — and if it is
   built, it is an imputed figure in a report, never a row in the ledger.
@@ -954,7 +963,7 @@ survives contact unamended usually means nobody checked.
 ### 17.1 The two that only rendering could find
 
 **The fixture stopped four days before the harness's today, and every screen was correctly empty.**
-`tradingHerd()` ended at the frozen `AS_OF` while the harness reads the real clock, so `/dispatch`
+`tradingHerd()` ended at the frozen `AS_OF` while the harness reads the real clock, so `/milk/dispatch`
 opened onto a session with no data: no yesterday column, no production, an empty footer. Nothing was
 broken and everything looked broken — the worst kind of fixture, because the instinct is to go
 debugging the screen. `lastOn` is now a parameter defaulting to `AS_OF` (tests need frozen dates)

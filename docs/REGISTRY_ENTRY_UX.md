@@ -8,7 +8,9 @@ Q5/Q6/calf-age addendum — those three can be deleted once this lands.
 
 Baseline was verified at `42c0ad2` (`v0.12.0-2-g42c0ad2`): server 385 tests passing, typecheck
 clean, 44 registry specs across 4 frontend files. At `v0.13.0` that was server 410 and frontend 106
-across 16 files. **Current: server 458, frontend 198 across 21 files**, 10 of them registry specs.
+across 16 files. **At the close of this document: server 458, frontend 198 across 21 files**, 10 of
+them registry specs. Counts move with every cycle and a run is the authority — the milking, sales and
+labour documents each record their own.
 
 Test counts and tag references in this document go stale silently. When one disagrees with a run,
 the run is right.
@@ -50,7 +52,7 @@ Three structural problems sat underneath that.
 event type — add animal, record calving — while the paper is organised per animal (the cycle card).
 Entering one cow's history meant repeatedly leaving and re-entering a context the screen never held.
 
-**Invariants the system could enforce were delegated to the operator.** `/calving` asked "is the
+**Invariants the system could enforce were delegated to the operator.** `/animals/calvings/new` asked "is the
 calf already in the registry?" as a yes/no, warning that a wrong answer creates an unrepairable
 duplicate. That asks a person to recall the contents of a database that is one tab away, with an
 irreversible penalty, at hour two of a transcription session. Likewise "enter calvings oldest
@@ -200,7 +202,7 @@ already built; several assumed present were not.
   notes and dry-offs produced two events. The client disabled the button while submitting, which
   stops a fast double-click on one live form and nothing else. A refresh-and-resubmit or a second
   tab still produces a permanent duplicate — that hole is uncoverable by a server-side store and is
-  answered by §6.2a instead. `/add` is the dangerous one: it mints a fresh serial with no calving
+  answered by §6.2a instead. `/animals/new` is the dangerous one: it mints a fresh serial with no calving
   flow involved.
 - Any persistence of overrides. `allow_near_duplicate` and `allow_after_departure` are transient
   input flags. After the fact, an overridden write is indistinguishable from one that never tripped
@@ -307,7 +309,7 @@ calving (`entry.ts:205`) because a calving creates an animal; `POST /calvings` r
 submit paths, and choosing "calving" expands inline into the calf question. That is the bulk of the
 work in this item.
 
-`/calving` needs no backend change to work with a fixed dam — `dam_id` is a body field, and
+`/animals/calvings/new` needs no backend change to work with a fixed dam — `dam_id` is a body field, and
 `damCandidates` only feeds a dropdown the workbench will not have.
 
 ### 5.3 Day sheet mode — dropped
@@ -344,7 +346,7 @@ is the durable lesson from this item.
 
 An `Idempotency-Key` header, stored per key, returning the original result on replay. Not in the
 original brief and it should have been: it is the cheapest reduction of permanent-duplicate risk,
-and it covers the `/add` path that no amount of calving-flow care would protect.
+and it covers the `/animals/new` path that no amount of calving-flow care would protect.
 
 **Four routes, not three.** `/animals`, `/events`, `/calvings` **and
 `/calvings/:eventId/correction`** — the last appends a superseding calving, a superseding birth and
@@ -387,14 +389,14 @@ What that leaves open:
    client-minted key cannot do, and the alternative that would cover it is the payload-derived key
    rejected above.
 
-Hole 3 is the one that matters, because `/add` is where it mints a permanent duplicate with no
+Hole 3 is the one that matters, because `/animals/new` is where it mints a permanent duplicate with no
 calving flow involved — which is the risk that justified deferring merge (§8). It should not sit
 open across the whole backfill, so it has an answer immediately below.
 
 If this app ever grows a second writer or a real deployment, storage is the first decision to
 revisit.
 
-### 6.2a Near-duplicate detection on `/add` — BUILT
+### 6.2a Near-duplicate detection on `/animals/new` — BUILT
 
 The answer to hole 3. Idempotency cannot see a refresh-and-resubmit or a second tab; a **query
 can**, because the duplicate it would create is sitting in the database by the time the second
@@ -459,7 +461,7 @@ farm does not have.
 #### As built
 
 `GET /duplicate-candidates`, and `duplicate-warning.ts` as its own component so §5.1 inherits it —
-it takes `excludeId` for the row being edited, which `/add` does not need but the roster pass does
+it takes `excludeId` for the row being edited, which `/animals/new` does not need but the roster pass does
 (without it, every keystroke would flag the row as a duplicate of itself). Demonstrated over HTTP:
 
 ```
@@ -614,21 +616,21 @@ the timeline row, because a fact nobody reads is barely better than one never st
   offered on animal five.
 
 - **`observed_by` guidance unified.** It had three treatments across three forms — "leave blank
-  unless someone actually saw it" on `/add`, a bare "(optional)" on the other two — while
+  unless someone actually saw it" on `/animals/new`, a bare "(optional)" on the other two — while
   `recorded_by` was the only field told to be a stable identifier and not a display name. That one
   piece of guidance is what prevents the `abdul`/`Abdul` split, and it was on none of them. All
   three fields now share `identifier-input.ts`, so the wording cannot drift again — the same
   argument as computing `ineligible_reason` on the server.
 
-- **`/calving`'s empty state links out.** It was a dead end while `/herd`'s already had a CTA to
-  `/add`; the asymmetry was the bug — the same nothing-yet state, one screen offering the next step
-  and the other not. Built rather than skipped: §5.2 folds `/calving` into the workbench composer
+- **`/animals/calvings/new`'s empty state links out.** It was a dead end while `/animals`'s already had a CTA to
+  `/animals/new`; the asymmetry was the bug — the same nothing-yet state, one screen offering the next step
+  and the other not. Built rather than skipped: §5.2 folds `/animals/calvings/new` into the workbench composer
   rather than deleting the flow, and "no females exist yet" stays reachable on a fresh database
   however the herd gets entered, so a one-line link is cheaper than reasoning about whether a later
   item removes it.
 
 - **The duplicated explainer.** An `explain` input on the shared control, defaulting **true** so a
-  single-control form keeps the full text without asking. `/add`'s second control sets it false.
+  single-control form keeps the full text without asking. `/animals/new`'s second control sets it false.
   Only the one-sentence *rationale* is gated — the per-precision hints stay on every control,
   because "Stored as the 1st" is specific to the control it sits under and earns its place there.
 
@@ -736,7 +738,7 @@ continuous typing motion. The field count was the wrong measure.
 So the round trip is what this collapses. After a write:
 
 1. **The per-animal fields clear.** `sex` deliberately survives — strong prior, and consecutive
-   animals in a backfill are usually the same sex. On `/calving` **the dam survives**, because a
+   animals in a backfill are usually the same sex. On `/animals/calvings/new` **the dam survives**, because a
    cycle card is one animal's whole history and the next calving entered is almost always hers.
 2. **Focus returns to the first field** of the next record, deferred a frame — focusing before the
    clearing render lands on an element Angular is about to replace, and focus falls to
@@ -745,7 +747,7 @@ So the round trip is what this collapses. After a write:
    the shell. A cleared form is *ambiguous*: it looks exactly like one never filled in. Polite
    rather than assertive because it must not interrupt typing, which is the whole activity.
 
-None of the three happened before: `/add` kept the last animal's values, left focus on the submit
+None of the three happened before: `/animals/new` kept the last animal's values, left focus on the submit
 button, and reported success only in a panel below the fold. Submitting twice in a row would have
 produced a near-duplicate — now also caught by §6.2a, but a form that invites the mistake is not
 fixed by a warning about it.
@@ -953,7 +955,7 @@ idempotency keys live in an in-process `Map` precisely to keep it true (§6.2).
 |---|---|---|
 | 3 | Persist override flags (§6.4) | S |
 | 4 | Smaller items — datalists, `observed_by` wording, empty-state link, explainer (§6.5) | S |
-| B2 | Near-duplicate detection on `/add` (§6.2a) | S |
+| B2 | Near-duplicate detection on `/animals/new` (§6.2a) | S |
 | 5 | Smart date field + "Estimated year" relabel + the half-entered optional date (§6.6) | M |
 
 **Pass 3, done:**
@@ -967,7 +969,7 @@ idempotency keys live in an in-process `Map` precisely to keep it true (§6.2).
 
 | # | Item | Note |
 |---|---|---|
-| 7 | Roster pass (§5.1) | **Gated on evidence.** Five animals through the retrofitted `/add` first — see §11 |
+| 7 | Roster pass (§5.1) | **Gated on evidence.** Five animals through the retrofitted `/animals/new` first — see §11 |
 | 8 | Animal workbench + last-five-written strip (§5.2) | Treat its M as optimistic; see below |
 | 9 | Session band: in-place change + `source_ref` capture (§6.8) | S |
 | 6b | Keyboard remainder (§6.7b) | Whatever the five-animal trial shows is missing |
@@ -995,13 +997,13 @@ its M as optimistic and re-size it once item 7 has shown whether the pattern rec
 ### Sequencing reasons
 
 0 was a live bug in the control everything else touches. 3 and 4 are independent and cheap. B2 sits
-before 5 because it closes the `/add` duplicate hole (§6.2, hole 3) that would otherwise stay open
+before 5 because it closes the `/animals/new` duplicate hole (§6.2, hole 3) that would otherwise stay open
 across the whole backfill, and because §5.1 inherits its query. 5 was last in pass 2 and gated the
 backfill (§6.6).
 
 **6a came before 7, which inverts the original order, and for a reason the original did not
 anticipate:** once §6.6 landed the gate opened, so 7 no longer unblocks anything — the backfill can
-start on `/add` and `/calving` today. What 6a makes bearable is therefore *the entry that is about
+start on `/animals/new` and `/animals/calvings/new` today. What 6a makes bearable is therefore *the entry that is about
 to happen*, not a screen that does not exist yet. And 7's own keyboard needs are intrinsic to it:
 "Enter moves to the next row" is that screen's premise, not a retrofit onto it.
 
@@ -1030,7 +1032,7 @@ Two conventions established in pass 1 that pass 2 onward depends on, both record
 
 ### The five-animal trial — predictions on record
 
-Five animals go through the retrofitted `/add` and `/calving` before §5.1 (roster pass) is decided:
+Five animals go through the retrofitted `/animals/new` and `/animals/calvings/new` before §5.1 (roster pass) is decided:
 the murkiest dates and the longest calving histories, deliberately the hard cases. **None of the six
 predictions below has been fixed**, including the one-line ones, because fixing them costs an
 uncontaminated read on the decision they inform. They are recorded before the trial so the outcome
@@ -1047,7 +1049,7 @@ Ranked by expected likelihood of actually biting:
    **The fix is not obvious, which is why it was not applied blind.**
 3. **Ten tab stops, about half of them empty.** `acquired_from`, `tag_no` and `observed_by` are blank
    for most backfill animals. This is the specific friction that would argue for a list.
-4. **`/calving`'s surviving dam being quietly wrong** when moving from one animal's card to the next.
+4. **`/animals/calvings/new`'s surviving dam being quietly wrong** when moving from one animal's card to the next.
    Recoverable via the candidate list and the near-duplicate guard, but it will read as a trap.
 5. **The write announcement being too quiet** — a thin green line in the shell, with focus back in
    `name` and eyes on paper.
@@ -1056,7 +1058,7 @@ Ranked by expected likelihood of actually biting:
 Two predicted to feel *better* than expected, so the comparison stays honest: the printed digit
 accelerators on sex and outcome, and the single date field on murky dates (`2019`, `Mar 2019`).
 
-**Decision rule.** If 1 and 3 are the only real complaints, both are small fixes to `/add` and a
+**Decision rule.** If 1 and 3 are the only real complaints, both are small fixes to `/animals/new` and a
 roster screen is redundant. If 2 recurs, or if the round trip still feels like a stop-and-restart
 rather than a continuation, build §5.1 — those are properties of the form *shape*, which no tab-order
 work reaches.
@@ -1084,8 +1086,8 @@ the trial is not uniformly compromised, and reading it as if it were would waste
 
 | Fix | Prediction it touches | Clean reading | Confounded reading |
 |---|---|---|---|
-| `:host{display:block}` on the registry components — component hosts are `display: inline` by default and vertical margins do not apply to inline boxes, so every `space-y-*` container was silently contributing nothing between a component and its siblings | **2** (overshooting the arrival date into the birth date). The two `/add` date fields were flush against their neighbours | **If it still bites** — the defect was removed and the problem survived, which is *stronger* evidence than before that the fix is in the form shape | **Only a null result.** Part of the reason may be the spacing rather than the design being sound |
-| `calfSex` default removed on `/calving` (starts unanswered, gates the picker, clears after a write). It was `female`, and the value filters `linkCandidates` — a guessed default greys out the right calf and leaves "create a new animal" as the only reachable path | **"Printed digit accelerators on sex and outcome"**, one of the two things predicted to feel *better* than expected. The accelerator now fires every record instead of rarely | **If they feel bad** — they are being exercised harder than the prediction assumed, so a negative reading is *stronger* evidence against them | **Only a positive result.** "Feels good" is now measured on a form where the chip is mandatory, which is a different test from the one predicted |
+| `:host{display:block}` on the registry components — component hosts are `display: inline` by default and vertical margins do not apply to inline boxes, so every `space-y-*` container was silently contributing nothing between a component and its siblings | **2** (overshooting the arrival date into the birth date). The two `/animals/new` date fields were flush against their neighbours | **If it still bites** — the defect was removed and the problem survived, which is *stronger* evidence than before that the fix is in the form shape | **Only a null result.** Part of the reason may be the spacing rather than the design being sound |
+| `calfSex` default removed on `/animals/calvings/new` (starts unanswered, gates the picker, clears after a write). It was `female`, and the value filters `linkCandidates` — a guessed default greys out the right calf and leaves "create a new animal" as the only reachable path | **"Printed digit accelerators on sex and outcome"**, one of the two things predicted to feel *better* than expected. The accelerator now fires every record instead of rarely | **If they feel bad** — they are being exercised harder than the prediction assumed, so a negative reading is *stronger* evidence against them | **Only a positive result.** "Feels good" is now measured on a form where the chip is mandatory, which is a different test from the one predicted |
 
 So: in both cases a **negative reading is clean and a positive reading needs the caveat.**
 
@@ -1093,7 +1095,7 @@ So: in both cases a **negative reading is clean and a positive reading needs the
 defects with a causal chain to a wrong record, not friction. The calf-sex default manufactures the
 duplicate `CalfPicker` exists to prevent, from a question nobody was asked — the same shape as the
 `precision-date.ts` fabrications in §4, and the same reason those were fixed immediately. The
-spacing defect had collapsed the vertical rhythm of `/add` entirely. Neither is a preference, and
+spacing defect had collapsed the vertical rhythm of `/animals/new` entirely. Neither is a preference, and
 neither is anything the trial was going to measure the value of.
 
 **What the spacing defect actually was, since the refinement document got the mechanism wrong.** It
@@ -1119,11 +1121,11 @@ preconditions. Both were checked by reverting the code and confirming they fail.
 **Two other defaults were considered and kept, and they are kept for different reasons — defaults
 are not settled by this amendment.**
 
-- `outcome: 'live'` on `/calving` — **settled on the merits, not held.** Its asymmetry is
+- `outcome: 'live'` on `/animals/calvings/new` — **settled on the merits, not held.** Its asymmetry is
   load-bearing and argued at the control: live → died is repairable with a departure event, the
   reverse is not, and would leave the animal permanently departed. A default that fails safe is not
   the same object as one that fabricates. No trial data would change this.
-- `sex: 'female'` on `/add` — **held for the trial.** It has no chain to a picker filter, so by the
+- `sex: 'female'` on `/animals/new` — **held for the trial.** It has no chain to a picker filter, so by the
   rule used above it is a preference rather than a defect, and it sits on the form prediction 3 and
   the roster-pass question both measure. It is also the one default with real evidence behind it:
   consecutive acquired animals arrive in same-sex runs, which is why it deliberately *survives* a
@@ -1160,7 +1162,7 @@ retraction**: the target dies and the replacement lives, so an undo needs an eve
 Adding one costs migration 3 (the `type IN (…)` CHECK), an invariant 9 allowance, and a date it has
 no honest value for — and that is the cheap half. The expensive half is that **every write on both
 entry screens creates an animal row**, and `registry_animals` is identity with no delete path:
-retracting an `/add` leaves invariant 3 failing immediately, and retracting a link-mode calving would
+retracting an `/animals/new` leaves invariant 3 failing immediately, and retracting a link-mode calving would
 need to un-supersede an origin promotion, which invariant 9 forbids by name. Undo is therefore not a
 retraction event but animal deletion or an animal-level void state — **item 12, merge/supersede,
 below the cut line**, exactly where §8 already put it. The cut line holds; there is no migration 3.

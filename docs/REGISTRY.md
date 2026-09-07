@@ -60,7 +60,7 @@ If `farm_events` ever holds real camera rows alongside synthetic ones, that colu
 
 ## Decision 1 — Registry tables are `registry_*` in one database
 
-Eleven tables, all prefixed, all disjoint from the demo tables:
+Seventeen tables, all prefixed, all disjoint from the demo tables:
 
 ```
 registry_animals            registry_lactations        registry_serial_counter
@@ -68,6 +68,9 @@ registry_animal_events      registry_parentage         registry_animal_status
 registry_milkings
 registry_destinations       registry_destination_prices
 registry_dispatches         registry_payments
+registry_people             registry_engagements
+registry_pay_terms          registry_pay_benefits
+registry_wage_periods       registry_wage_payments
 ```
 
 `registry_milkings` arrived with step 4 (migration 3) — see
@@ -76,14 +79,23 @@ the rebuild never touches it, because nothing in it is derivable from the event
 log. It was the first registry table to permit `DELETE`, and that divergence is
 argued where it is declared.
 
-The last four arrived with milk sales (migration 5) — see
+The sales four arrived with migration 5 — see
 [REGISTRY_SALES.md](REGISTRY_SALES.md). They are also records, they also permit
-`UPDATE` and `DELETE`, and they are **the first registry tables with no
+`UPDATE` and `DELETE`, and they were **the first registry tables with no
 `animal_id` at all**: every table above them hangs off an animal, and these four
 hang off a counterparty. That is why the sales work carries no step number — it
 is a different axis from the animal record rather than a later step along it.
 
-The prefix goes on all eleven, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
+The labour six arrived with migration 6 — see
+[REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md). Records as well, and a **third
+axis**: they hang off neither an animal nor a counterparty but off a person the
+farm employs. Migration 7 then rebuilt `registry_destinations` to widen its
+`kind` enum and add a nullable `person_id`, which is how milk allocated as part
+of somebody's pay becomes a destination naming them.
+
+Three axes, and none of them is a step along the animal record.
+
+The prefix goes on all seventeen, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
 
 **No registry table has a foreign key to a demo table, and none ever may.** `resetSchema()` drops the demo tables children-first, which is the only reason `foreign_keys = ON` does not abort it; a registry → demo foreign key would start failing that DROP and would couple the two lifecycles.
 
@@ -211,7 +223,13 @@ restore the record tables  ->  registry:rebuild  ->  verify:registry
 
 ### Pure core / DB shell
 
-The same split as `classify.ts` / `classifyStore.ts`, for the same reason:
+The same split as `classify.ts` / `classifyStore.ts`, for the same reason.
+
+**This table classifies by role, and is not an inventory.** `types.ts`,
+`errors.ts`, `schema.ts`, `routes.ts`, `entry.ts`, `reads.ts`, `idempotency.ts`,
+`cli.ts`, `harness.ts` and `fixtures.ts` are transport, vocabulary or test
+support and have no pure/shell answer to give, so they are absent by design
+rather than by omission.
 
 | Module | Role |
 |---|---|
@@ -220,7 +238,7 @@ The same split as `classify.ts` / `classifyStore.ts`, for the same reason:
 | `intervals.ts` | **pure** — the calving-interval metric |
 | `invariants.ts` | **pure** — snapshot in, violations out |
 | `time.ts` | **pure** — farm-local "today" |
-| `money.ts` | **pure** — minor units and the one rounding rule ([REGISTRY_SALES.md](REGISTRY_SALES.md)) |
+| `money.ts` | **pure** — minor units, the one rounding rule, and the two rate formatters ([REGISTRY_SALES.md](REGISTRY_SALES.md), [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md)) |
 | `store.ts` | DB shell — takes an explicit handle |
 | `projectStore.ts` | DB shell — the only projection writer |
 | `calving.ts` | DB shell — the transaction |
@@ -230,6 +248,10 @@ The same split as `classify.ts` / `classifyStore.ts`, for the same reason:
 | `destinations.ts` | DB shell + pure core — who milk goes to, and the price in force |
 | `dispatch.ts` | DB shell + pure core — the daily sheet, and the reconciliation |
 | `ledger.ts` | DB shell — payments, balances, the statement |
+| `people.ts` | DB shell + pure core — people, engagements, and who was employed when ([REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md)) |
+| `payroll.ts` | DB shell + pure core — packages, wage periods, the run read model |
+| `wages.ts` | DB shell — wage payments, balances, the statement |
+| `overview.ts` | DB shell — the day board: what still needs recording |
 | `add.ts`, `calve.ts`, `correct.ts`, `event.ts`, `rebuild.ts`, `verifyRegistry.ts`, `backup.ts` | CLI shells — the only files that reach `../db` |
 
 Every function that touches SQLite takes an explicit `db` handle rather than importing the module singleton. That seam is what lets the same code run against the live `dairy.db` and against `new Database(':memory:')` in a test — and it means `db.ts`'s singleton design is untouched.
@@ -325,7 +347,7 @@ asymmetry, not the importance of the field, is what decides it.
 | year / month / day parts | **none** | state of knowledge — a lie. See below |
 | `source_form` | none, gated | state of knowledge — a lie |
 | `observed_by` | none, blank | a claim about a witness — a lie |
-| link-vs-mint (`/calving`) | none | state of knowledge — a lie |
+| link-vs-mint (`/animals/calvings/new`) | none | state of knowledge — a lie |
 
 **The one place this rule was violated was the control built to enforce it.** `precision-date.ts`
 initialised its year, month and day fields to the current year, January and the 1st. Choosing a
@@ -623,7 +645,7 @@ The CLI came first and was the only way in for most of this cycle. **It is no lo
 | `registry:backup` | nothing in the database — a snapshot + dump into `server/backups/` |
 | `verify:registry` | nothing |
 
-`verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–13 rather than inventing a second notion of "valid".
+`verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–28 rather than inventing a second notion of "valid".
 
 ```bash
 # pass one -- the animals that arrived from elsewhere
@@ -751,8 +773,13 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 | GET | `/balances` | balances for the billable destinations; home is absent, not zero |
 | GET | `/dispatch/sheet?on=&session=` | the daily sheet, split into standing and occasional |
 | GET | `/reconcile?from=&to=` | produced against dispatched; `gap_pct` is null when production is incomplete |
+| GET | `/today?on=` | the day board: which sessions and which payroll month still need recording |
+| GET | `/people?as_of=` | everybody on file, with what is owed; people with no open stint are flagged, not hidden |
+| GET | `/people/:id?as_of=` | one person's statement: stints, package, wage periods, payments, balance |
+| GET | `/engagements/:id/terms` | the package history for one stint, benefits included |
+| GET | `/payroll/run?from=&to=` | the run: who must be answered, and which dihari days are already in |
 | GET | `/storage` | which database this router writes to |
-| GET | `/verification?as_of=` | invariants, histogram, intervals, milk completeness |
+| GET | `/verification?as_of=` | invariants, histogram, intervals, milk completeness, and the labour report |
 | POST | `/animals` | `addAcquiredAnimal` |
 | POST | `/events` | `appendLifeEvent` |
 | POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |
@@ -766,6 +793,16 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 | POST | `/dispatch/session/delete` | remove a session, or one destination's row in it |
 | POST | `/payments` | `recordPayment` — only an `adjustment` may be signed, and it must say why |
 | POST | `/payments/:id/delete` | remove one payment, by id |
+| POST | `/people` | `addPerson` — the identifier is set here and is never amendable |
+| POST | `/people/:id` | `updatePerson` — name and contact only; `identifier` is accepted so it can be refused with an explanation |
+| POST | `/people/:id/engagements` | `addEngagement` — overlapping an existing stint is deliberately not refused |
+| POST | `/engagements/:id` | `updateEngagement` — amend the role, or close the stint |
+| POST | `/engagements/:id/terms` | `setTerm` — a new package from a date, its in-kind lines included |
+| POST | `/terms/:id/correct` | `correctTerm` — for a figure typed wrong and caught immediately |
+| POST | `/payroll/run` | one whole run, all rows or none; every salaried engagement in the period must have a figure |
+| POST | `/payroll/run/delete` | remove wage periods by explicit id |
+| POST | `/wage-payments` | `recordWagePayment` — only an `adjustment` may be signed, and it must say why |
+| POST | `/wage-payments/:id/delete` | remove one wage payment, by id |
 | POST | `/rebuild` | `registry:rebuild` |
 
 `registryRouter` is a **factory taking a `db` handle**, unlike `farmRouter` which is a const importing the singleton. That is what lets the harness serve the same routes over `:memory:`.
@@ -785,7 +822,7 @@ is exactly the shape of thing that gets double-submitted.
 **Double-submit was proven, not suspected.** The same payload posted twice minted `BD-0001` and
 `BD-0002`; identical notes and identical dry-offs each appended two events. The client disabled its
 submit button while a request was in flight, which stops a fast double-click on one live form and
-nothing else. `/add` was the dangerous one: it mints a fresh serial with no calving flow involved,
+nothing else. `/animals/new` was the dangerous one: it mints a fresh serial with no calving flow involved,
 producing exactly the duplicate that merge/supersede does not yet exist to repair.
 
 The same script re-run after the change, both ways:
@@ -870,7 +907,7 @@ Out-of-window animals are not dropped from the response. The client collapses th
 
 #### What this replaced
 
-`/calving` asked *"is the calf already in the registry?"* as a yes/no, with copy warning that answering "new" for an existing animal creates a duplicate that cannot be repaired. All of that was true and it was still the wrong question: it asked the operator to recall the contents of a database one tab away, with an irreversible penalty for a wrong recall, at hour two of a transcription session. The answer was always in the database.
+`/animals/calvings/new` asked *"is the calf already in the registry?"* as a yes/no, with copy warning that answering "new" for an existing animal creates a duplicate that cannot be repaired. All of that was true and it was still the wrong question: it asked the operator to recall the contents of a database one tab away, with an irreversible penalty for a wrong recall, at hour two of a transcription session. The answer was always in the database.
 
 The warning is **gone rather than softened**. The list is the mitigation, and a warning that no longer names a live risk trains operators to skim warnings — the same reason `/check` has no badge that turns green.
 
@@ -958,6 +995,8 @@ The control emits nothing until a precision is chosen, which mirrors `NOT NULL` 
 ### Provenance is set once per session; `observed_by` is not
 
 `source_form` and `recorded_by` are asked once, behind a gate — **no form is reachable until both are set** — and shown permanently in the header. A backfill session is one person entering one kind of source, and retyping both on ~35 forms is where transcription errors come from. Defaulting them would be worse: a mislabelled `source_form` reads exactly like a correct one, and the whole point of the column is that `recall` and `daily_herd_sheet` can be told apart when the first calving-interval number is questioned.
+
+**No FORM, not no screen — and the code was stricter than that sentence for two cycles.** The shell gated the entire router outlet, so nothing rendered at all until provenance was declared: not the herd list, not a buyer statement, not `/check`. Every one of those is a pure read that needs no provenance. Reads are now free, the gate is requested rather than imposed, and every write control is replaced by a prompt that says why it cannot be used. The guarantee moved from one place that held by construction to twelve that are checked by a test. See [REGISTRY_PAYROLL.md §12.5](REGISTRY_PAYROLL.md#125-reads-are-free-the-gate-moved-to-the-forms).
 
 `observed_by` is **per-row and blank by default**. Defaulting it to the session person would silently claim they witnessed things they were told about. Leaving it blank is the cheap path; asserting a witness takes a deliberate act — the same shape as precision-before-date.
 
@@ -1093,6 +1132,27 @@ npm run verify:registry  -w server
 | 15 | No milking after a `departure` |
 | 16 | One milking row per animal per date per session |
 | 17 | A milking is `measured` if and only if it carries a number; a reason only with `not_milked` |
+| 18 | One dispatch row per `(destination, date, session)` |
+| 19 | Dispatch status, litres and captured price agree; a price is both halves |
+| 20 | No dispatch or payment outside a destination's active range |
+| 21 | Prices are unambiguous, and a billable dispatch has one in force |
+| 22 | Nothing bills a non-billable destination; only `adjustment` payments are signed |
+| 23 | Pay terms are unambiguous; every `wage` period has one in force |
+| 24 | No overlapping wage periods within one engagement |
+| 25 | Benefit quantity, unit and period agree; `other` explains itself |
+| 26 | Nothing references an unknown person or engagement |
+| 27 | Only `adjustment` wage payments are signed, and a signed one carries a note |
+| 28 | `staff` destinations and people agree; no person has two milk destinations |
+
+**18–22 are argued in [REGISTRY_SALES.md §13](REGISTRY_SALES.md#13-invariants-1822) and 23–28 in
+[REGISTRY_PAYROLL.md §13](REGISTRY_PAYROLL.md#13-invariants-2328)**, where the reasoning for each
+lives beside the tables it defends. They are listed here because this is the canonical numbering and
+a reader counting invariants should not have to open three documents to find the end of the list.
+
+**Four things the labour block deliberately does NOT check** — overlapping engagements, more than
+one open engagement, a wage period outside its engagement's range, and a wage amount differing from
+the agreement — because all four fire on rows the farm asked to be able to write. They are `/check`
+report lines instead; see [REGISTRY_PAYROLL.md §13](REGISTRY_PAYROLL.md#13-invariants-2328).
 
 14 and 15 are the two that **cannot** be constraints, because they depend on the projection and the projection MOVES: a backdated dry-off or a late-entered calving re-cuts a lactation boundary under rows that were legitimate when written. That is the one place a milk row and the event log can drift apart, and only recomputing can see it.
 

@@ -28,8 +28,12 @@ These cannot be closed from the repo. They need the farm, the herd, or a person.
 - **Per-delivery `price_per_litre` capture needs confirming against real data**
   (a later price change must never rewrite delivery history) —
   [MULTI_AGENT.md § Open items](MULTI_AGENT.md#open-items)
-- **Does home use split into household and staff milk?** Milk given as part of
-  pay is a labour cost, not consumption — [REGISTRY_SALES.md §15](REGISTRY_SALES.md#15-still-open)
+- **Are there opening balances for staff?** The wage ledger is live and opens at zero for
+  everybody; an outstanding advance or a part-paid month needs one `adjustment` payment each —
+  [REGISTRY_PAYROLL.md §15](REGISTRY_PAYROLL.md#15-still-open)
+- **Is leave deductible from a monthly salary?** The schema is deliberately agnostic; the absence
+  table cannot be built without the answer —
+  [REGISTRY_PAYROLL.md §11](REGISTRY_PAYROLL.md#11-leave-named-deferred-and-cheap-to-add-later)
 
 ## Known defects, safe today
 
@@ -85,19 +89,27 @@ Built when something needs them, not before.
   [REGISTRY.md § Known fidelity gaps](REGISTRY.md#known-fidelity-gaps)
 - **The lactation curve on `/animals/:id`** is the one piece of REGISTRY_MILKING
   §9 still unbuilt — [REGISTRY_MILKING.md §13](REGISTRY_MILKING.md#13-still-open)
+- **Absences are not recorded**, so the cost of covering leave with dihari cannot be reported. One
+  table and one nullable column, deliberately deferred —
+  [REGISTRY_PAYROLL.md §11](REGISTRY_PAYROLL.md#11-leave-named-deferred-and-cheap-to-add-later)
+- **No agent tools over payroll**, and not for the usual reason: the chat panel has no notion of who
+  is using it, and salaries are the first data where that matters —
+  [REGISTRY_PAYROLL.md §14](REGISTRY_PAYROLL.md#14-build-order)
+- **In-kind benefits are not valued anywhere.** The run compares milk litres taken against the
+  allowance, but no rupee figure is computed, because the reference price is undecided —
+  [REGISTRY_PAYROLL.md §15](REGISTRY_PAYROLL.md#15-still-open)
 - **Quality-based milk pricing (fat / SNF) is not built.** The farm is flat-rate
   today; the seam it would use is named rather than left to be invented —
   [REGISTRY_SALES.md §4.2](REGISTRY_SALES.md#42-prices-effective-dated-agreement-captured-on-the-dispatch)
 - **No batch price change.** Deliberate at three buyers, with a named trigger to
   build it — [REGISTRY_SALES.md §12.2](REGISTRY_SALES.md#122-buyers--destinations-and-prices)
-- **No revisions trail on a corrected dispatch or payment yet**, so a changed
-  figure leaves no history — [REGISTRY_SALES.md §8](REGISTRY_SALES.md#8-corrections-the-one-question-this-document-does-not-settle)
+- **No revisions trail on a corrected dispatch, payment, wage period or wage payment**, so a
+  changed figure leaves no history. Payroll deliberately did not invent a second answer and waits on
+  the sales one — [REGISTRY_SALES.md §8](REGISTRY_SALES.md#8-corrections-the-one-question-this-document-does-not-settle),
+  [REGISTRY_PAYROLL.md §8](REGISTRY_PAYROLL.md#8-corrections)
 - **The six demo vendor tools and `get_yield_vs_deliveries` are now redundant**
   and still advertised; disposing of them is a writes-cycle decision —
   [REGISTRY_SALES.md §2](REGISTRY_SALES.md#2-the-finding-this-is-already-implemented-and-its-money-model-cannot-represent-the-farm)
-- **The nav is seven items**, past where a flat row works; the grouping decision
-  is deferred until it is being used —
-  [REGISTRY_SALES.md §12.4](REGISTRY_SALES.md#124-navigation-pressure-noted-rather-than-solved)
 - **No `get_lactation_history`, no registry `search_animals`, no digest budget on
   `get_registry_animal`** — each has a named trigger to build it —
   [REGISTRY_TOOLS.md § Open items](REGISTRY_TOOLS.md#open-items)
@@ -150,7 +162,8 @@ Built when something needs them, not before.
 ## Housekeeping
 
 - **`registry.harness.test.ts`'s no-database module list is maintained by hand**,
-  and `milking.ts` was missing from it for a whole cycle —
+  and `milking.ts` was missing from it for a whole cycle. Three more modules were added to it by
+  hand this cycle —
   [REGISTRY_SALES.md §17.5](REGISTRY_SALES.md#175-milkingts-was-never-in-the-harnesss-no-database-list)
 
 - **The local Langfuse Docker stack teardown** is optional and not done —

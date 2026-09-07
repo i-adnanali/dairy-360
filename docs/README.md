@@ -22,7 +22,9 @@ Nothing there describes anything that currently exists.
 | Understand the agent loop, guardrails, tool contracts | [TECHNICAL.md](TECHNICAL.md) |
 | Work on the real-animal records | [REGISTRY.md](REGISTRY.md) |
 | Work on milk sales, home use, buyer balances | [REGISTRY_SALES.md](REGISTRY_SALES.md) |
+| Work on employees, packages and wages | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) |
 | Work on the frontend | [ANGULAR_PORT.md](ANGULAR_PORT.md) |
+| Find out why a URL looks the way it does, or what `/` shows | [REGISTRY_PAYROLL.md §12.3–§12.6](REGISTRY_PAYROLL.md#123-navigation-and-url-structure--the-change-that-forced-both-decisions) |
 | Change the wire protocol | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) |
 | Know what is still unfinished | [OPEN.md](OPEN.md) |
 
@@ -39,8 +41,9 @@ Nothing there describes anything that currently exists.
 | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) | The AG-UI/SSE protocol, custom event channels, the interrupt/resume boundary, the React archival decision | Deep |
 | [REGISTRY.md](REGISTRY.md) | Real-animal records: schema, migrations, append-only guarantee, calving transaction, projections, CLI, HTTP surface, entry UI, invariants | Deep. The single most load-bearing document in the repo |
 | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | The entry surface — screens, the change list with build status, the defaults rule, the five-animal trial | Deep |
-| [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milking` roster | Deep |
+| [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milk/milking` roster | Deep |
 | [REGISTRY_SALES.md](REGISTRY_SALES.md) | Milk sales, home use and the buyer ledger: destinations, effective-dated prices in 40-litre lots, the daily dispatch sheet, the reconciliation, migrations 4–5 | Deep |
+| [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) | Labour: people and engagements, effective-dated packages with in-kind benefits, dihari, the monthly run, the wage ledger, migrations 6–7. Also §12.3–§12.6: the URL structure, the day board at `/`, and why reads need no recording session | Deep |
 | [FARM_EVENTS.md](FARM_EVENTS.md) | Camera-event ingestion: the real Frigate and Double Take payload shapes, normalization, the `farm_events` model | Deep. Cited from `payloadShape.ts`, `db.ts`, `shared/types.ts` |
 
 `FARM_EVENTS.md` is also a Cycle 4 record. It is listed here because its payload
@@ -67,12 +70,15 @@ Each maps to a git tag. Read them for *why*, not for *what is true now*.
 | 8 · yield | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | untagged (`46d29c7`) | Per-animal milk yield, migration 3 |
 | 9 | [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) | untagged (`f3262d7`) | Registry read tools for the agent, and the six evals that matter |
 | — · sales | [REGISTRY_SALES.md](REGISTRY_SALES.md) | untagged | Milk sales, home use and the buyer ledger, migrations 4–5 (also reference — see above) |
+| — · labour | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) | untagged | People, packages, dihari and the wage ledger, migrations 6–7 (also reference — see above) |
 
-**[REGISTRY_SALES.md](REGISTRY_SALES.md) has no cycle number on purpose.** The registry's step
-numbering is about the animal record, and these are the first registry tables with no `animal_id` in
-them — a different axis, which the numbering should not absorb. Its §17 is the part worth reading
-twice: seven things building it changed about the plan, two of which were only visible by rendering
-the screen rather than by reading the code.
+**Neither [REGISTRY_SALES.md](REGISTRY_SALES.md) nor
+[REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) has a cycle number, on purpose.** The registry's step
+numbering is about the animal record. The sales tables were the first with no `animal_id` in them;
+the labour tables hang off neither an animal nor a counterparty but off a person the farm employs.
+Three axes, which the step numbering should not absorb. The last section of each is the part worth
+reading twice — seven things building sales changed about its plan, six for labour, and in both
+cases the most expensive one was a fixture that looked right on screen and was wrong in the data.
 
 [cycle-7-followups.md](cycle-7-followups.md) sits deliberately outside the table.
 It holds the six findings (FU-1…FU-6) that came out of Cycle 7 and were *not*

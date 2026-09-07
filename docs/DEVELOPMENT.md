@@ -163,8 +163,8 @@ notice is about `shared/` emitting CJS.
 ## 5. Test
 
 ```bash
-npm test -w server           # 622 tests, node:test via tsx
-npm test -w web-angular      # 233 tests, Vitest (jsdom) via @angular/build:unit-test
+npm test -w server           # 726 tests, node:test via tsx
+npm test -w web-angular      # 281 tests across 26 files, Vitest (jsdom)
 ```
 
 Both green on a fresh clone, and both need **no database file and no API key** —
@@ -267,10 +267,10 @@ npm install                # first time only
 npm run harness:app
 ```
 
-Then open <http://localhost:4200>. You get the entry UI over an **in-memory**
-herd of 31 animals — plus the buyers, prices and dispatch sessions the sales
-screens need — and `server/dairy.db` is never opened by any process this command
-starts.
+Then open <http://localhost:4200>. You land on the **day board** over an
+**in-memory** herd of 31 animals — plus the buyers, prices and dispatch sessions
+the sales screens need, and the three staff the labour screens need — and
+`server/dairy.db` is never opened by any process this command starts.
 
 It is not a fourth run loop — it is the harness loop below, with the two
 terminals collapsed into one and a readable herd seeded into it:
@@ -317,12 +317,17 @@ What lands, and why each row is there:
 | intervals | 2 `measured` (523, 538 d) and 5 `approximate` (487–550 d), reported separately |
 | milk | 5 sessions over the last 3 days across the 6 animals in milk — **one deliberately incomplete** (4 of 6 recorded) and one `not_milked` with a reason, so `/check`'s completeness panel has something other than a green wall to show |
 | milkers | `abdul` on mornings, `imran` on evenings, so `observed_by` on a milk row reaches the datalist |
-| 4 destinations | one dodhi, two households, and **home** — `/dispatch` is unusable without a home row, because kept milk would otherwise vanish into the reconciliation gap |
+| 4 destinations | one dodhi, two households, and **home** — `/milk/dispatch` is unusable without a home row, because kept milk would otherwise vanish into the reconciliation gap |
 | `standing` both ways | the dodhi and home are answered **every session** and block the save; the two households appear only when they came. Seeding that backwards would make the sheet demand ~1,400 "took nothing" answers a year |
 | prices in 40-litre lots | Rs 7,000 / 40 L wholesale, Rs 9,000 / 40 L retail — so the rate renders as the farm agrees it and a per-litre slip is visible |
 | 5 dispatch sessions | over the same days as the milk, so `/check`'s reconciliation has production on one side and dispatch on the other |
 | one `none` row | the dodhi did not come one evening — and the neighbours took far more that session, which is the households working as a surplus outlet |
 | a **part** payment | Rs 5,000 against a larger balance, so the statement shows a running carried-forward figure. This is the case the demo `deliveries.paid` boolean cannot express at all |
+| 3 staff | two salaried and one dihari. `imran` carries all three benefit kinds, `abdul` carries **none** — a package screen developed against only one of those shapes gets the empty state wrong |
+| `imran`'s milk allowance | a `staff` destination naming him, so the run can compare 2 L/day against what actually left the bulk. **Not `standing` in the seed**, because the dispatch sessions above were already written without it; on a live farm it should be |
+| last month paid, this month not | the current month is outstanding for the whole of it, so a seed that settled it would open `/labour/payroll` on the completed state and hide the one the screen exists for |
+| `imran` paid **less** than his agreement | four days' leave, so `/check` has a real `amount_differs_from_term` line rather than an empty report |
+| three balance states at once | `abdul` settled, `imran` open, `rashid` **in advance** — the negative balance needs no flag anywhere, and is on screen from the first render |
 
 **This is not the same dummy data as `npm run seed`, and the two are
 deliberately separate systems.** Confusing them is the likeliest first mistake:
@@ -331,7 +336,7 @@ deliberately separate systems.** Confusing them is the likeliest first mistake:
 |---|---|---|
 | Writes to | an in-memory database, discarded on exit | **`server/dairy.db`**, on disk |
 | Fills | `registry_*` — the herd | the six demo tables (`animals`, `milkings`, `vendors`, …) |
-| Feeds | the entry UI at `/herd`, `/add`, `/calving`, `/check` | the **agent chat** at `/chat` |
+| Feeds | the entry UI at `/animals`, `/animals/new`, `/animals/calvings/new`, `/check` | the **agent chat** at `/chat` |
 | Needs an API key | no | for the chat to answer, yes |
 | Repeatable | yes — and it never touches a real record | yes, by dropping and recreating those six tables |
 
@@ -379,7 +384,7 @@ server and therefore no proxy — so `ng build` output on a plain static host
 answers `/api/registry/animals` with its own 404 and the app renders "no server
 answered", which reads like a broken backend rather than a missing proxy. It
 serves `web-angular/dist/web-angular/browser` with a `/api` reverse proxy and an
-SPA fallback (`/herd` and `/animals/BD-0003` are client routes with no such
+SPA fallback (`/animals` and `/animals/BD-0003` are client routes with no such
 files, so a hard reload 404s without it). Run `npm run build:angular` first.
 
 Unlike the seed it **refuses nothing** — serving the built app against the real
@@ -580,15 +585,22 @@ come back from nothing:
 | `registry_destination_prices` | **No** — what was agreed, and from when |
 | `registry_dispatches` | **No** — a transaction with a counterparty |
 | `registry_payments` | **No** — money that changed hands |
+| `registry_people` | **No** — identity, and the referent for every `observed_by` |
+| `registry_engagements` | **No** — one row per stint |
+| `registry_pay_terms` | **No** — what was agreed, and from when |
+| `registry_pay_benefits` | **No** — the in-kind lines of an agreement |
+| `registry_wage_periods` | **No** — what was settled for a period |
+| `registry_wage_payments` | **No** — money that changed hands |
 | `registry_animal_status`, `registry_lactations`, `registry_parentage` | Yes — `registry:rebuild` |
 
 That table is not maintained by hand: `SOURCE_OF_TRUTH_TABLES` in
 [backup.ts](../server/src/registry/backup.ts) is `REGISTRY_TABLES` minus
 `REGISTRY_PROJECTION_TABLES`, so a record table added by a future migration is
 backed up without anyone remembering to add it. **Demonstrated rather than
-claimed:** the four sales tables were added by migration 5 and appeared in the
-backup with no change to `backup.ts` at all — only the row list above had to be
-written out for a human to read.
+claimed:** the four sales tables were added by migration 5, the six labour
+tables by migration 6, and all ten appeared in the backup with no change to
+`backup.ts` at all — only the row list above had to be written out for a human
+to read.
 
 ### Taking one
 
@@ -816,7 +828,7 @@ npm run verify:registry -w server
 
 `registry:rebuild` is required in both cases, because the projection tables are
 deliberately not in the dump. `verify:registry` is what makes the restore
-trustworthy rather than hopeful — it runs invariants 0–13, so it reports that the
+trustworthy rather than hopeful — it runs invariants 0–28, so it reports that the
 restored data is *semantically* valid and not merely readable.
 
 **Verify a backup without restoring it**, which is the check worth running before
@@ -876,15 +888,17 @@ then `FARM_SCHEMA` and the migration runner apply.
 after the first server start, before any seed:
 
 ```
-user_version = 3
+user_version = 7
 tables: farm_events, registry_animal_events, registry_animal_status,
         registry_animals, registry_destination_prices, registry_destinations,
-        registry_dispatches, registry_lactations, registry_milkings,
-        registry_parentage, registry_payments, registry_serial_counter
+        registry_dispatches, registry_engagements, registry_lactations,
+        registry_milkings, registry_parentage, registry_pay_benefits,
+        registry_pay_terms, registry_payments, registry_people,
+        registry_serial_counter, registry_wage_payments, registry_wage_periods
 ```
 
-All five registry migrations applied; the eleven `registry_*` tables exist and
-are empty. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
+All seven registry migrations applied; the seventeen `registry_*` tables exist
+and are empty. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
 `feed_inventory`, `health_events`. Those are `resetSchema()`'s tables and only
 `seed()` creates them.
 

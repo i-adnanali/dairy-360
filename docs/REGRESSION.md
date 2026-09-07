@@ -19,7 +19,7 @@ against very little. Once Cycle 2 exists, two genuinely new failure modes
 appear that didn't before: the dispatcher can send a turn to the wrong
 agent, and a coordination bug between two agents' data can silently produce
 a wrong reconciliation number. Neither trips the existing approval gate
-(both are reads/dispatch, not writes), and both now touch data — sales
+(both are reads/milk/dispatch, not writes), and both now touch data — sales
 figures — with real stakes. That combination is what earns this its own
 cycle, motivated by something concrete rather than a general "should have
 tests" instinct.
