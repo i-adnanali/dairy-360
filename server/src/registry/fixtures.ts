@@ -20,6 +20,9 @@ import { addDestination, setPrice } from './destinations';
 import { saveDispatchSession } from './dispatch';
 import { recordPayment } from './ledger';
 import { saveMilkingSession } from './milking';
+import { addEngagement, addPerson } from './people';
+import { saveRun, setTerm } from './payroll';
+import { recordWagePayment } from './wages';
 import type { DatePrecision, DestinationKind, Provenance, RegistrySex } from './types';
 
 /** A fresh, migrated, in-memory registry. Writes nothing to disk. */
@@ -559,7 +562,26 @@ export function addMilkings(db: Db, opts: { lastOn: string; days: number }): num
  * appear only on some, which is the shape §4.1a describes and the reason an
  * absent occasional row must never read as missing data.
  */
-export function addDispatches(db: Db, f: SalesFixture, opts: { lastOn: string; days: number }): number {
+export function addDispatches(
+  db: Db,
+  f: SalesFixture,
+  opts: {
+    lastOn: string;
+    days: number;
+    /**
+     * Extra STANDING destinations that must appear in every session -- a staff
+     * milk allowance, when the labour fixture has created one.
+     *
+     * This parameter exists because saveDispatchSession() REFUSES a session
+     * with a standing destination unanswered, which is the rule working: a
+     * fixture that created a standing staff destination and then wrote sessions
+     * without it would either throw or (if the rule were weaker) leave every
+     * screen showing an untouched row it had no data for. Found by building
+     * the labour fixture on top of this one.
+     */
+    alsoStanding?: { destination_id: string; litres: number }[];
+  },
+): number {
   const [y, m, d] = opts.lastOn.split('-').map(Number);
   let written = 0;
   let n = 0;
@@ -590,6 +612,18 @@ export function addDispatches(db: Db, f: SalesFixture, opts: { lastOn: string; d
       // why there is no `sessions` column to encode.
       if (n % 3 === 0) entries.push({ destination_id: f.ali, status: 'taken', litres: 4 });
       if (n % 5 === 0) entries.push({ destination_id: f.bibi, status: 'taken', litres: 2.5 });
+
+      // A staff allowance is taken every session it is due. The MORNING row
+      // carries the whole daily allowance and the evening row is a real 'none',
+      // because that is how a jug of milk actually leaves -- and it gives the
+      // package report a non-trivial comparison rather than a flat multiple.
+      for (const extra of opts.alsoStanding ?? []) {
+        entries.push(
+          session === 'morning'
+            ? { destination_id: extra.destination_id, status: 'taken', litres: extra.litres }
+            : { destination_id: extra.destination_id, status: 'none', reason: 'taken in the morning' },
+        );
+      }
 
       written += saveDispatchSession(db, {
         occurred_on: day,
@@ -645,4 +679,258 @@ export function tradingHerd(lastOn: string = AS_OF): { db: Db; sales: SalesFixtu
   });
 
   return { db, sales };
+}
+
+// ---------------------------------------------------------------------------
+// Labour fixtures (docs/REGISTRY_PAYROLL.md §14, item 8)
+// ---------------------------------------------------------------------------
+
+/**
+ * SYNTHETIC, AND MORE STRICTLY SO THAN ANYWHERE ELSE IN THIS FILE.
+ *
+ * The rule that nothing synthetic touches dairy.db cuts both ways everywhere,
+ * but here the second direction is the important one: a REAL PERSON'S SALARY
+ * MUST NEVER APPEAR IN A FIXTURE FILE A TEST CAN LOAD. The names and the
+ * figures below are invented. Real people are entered through the screen, into
+ * the live database, by the farm.
+ *
+ * The only thing taken from the real farm is the SHAPE -- salaried staff on a
+ * package of cash plus milk, flour and quarters, with dihari hired a few times
+ * a month for cover and surge.
+ */
+export const FIXTURE_SALARY_MINOR = 2_500_000; // Rs 25,000 / month
+export const FIXTURE_SALARY_2_MINOR = 2_000_000; // Rs 20,000 / month
+export const FIXTURE_DIHARI_MINOR = 120_000; // Rs 1,200 / day
+
+export interface LabourFixture {
+  /** Salaried, with the full package -- milk, flour, quarters. */
+  imran: { person: string; engagement: string };
+  /** Salaried, all cash, so the screens have a package with no in-kind lines. */
+  abdul: { person: string; engagement: string };
+  /** Dihari, hired for cover. */
+  rashid: { person: string; engagement: string };
+  /** Imran's milk destination, so the allowance has dispatch rows to compare. */
+  imranMilk: string;
+}
+
+/**
+ * Two salaried staff, one dihari, and a milk allowance with a destination.
+ *
+ * Takes a db so it can ride on `cleanHerd()` or stand alone -- the labour half
+ * has no foreign key to an animal either, and that is worth a fixture proving
+ * for the same reason the sales half was.
+ *
+ * `imran` deliberately carries all three benefit kinds and `abdul` carries
+ * none: a package screen developed against only one of those shapes gets the
+ * empty state wrong, which is how the sales cycle's §17 findings happened.
+ */
+export function addLabour(db: Db, opts: { startedOn?: string } = {}): LabourFixture {
+  const startedOn = opts.startedOn ?? '2026-01-01';
+
+  const person = (identifier: string, name: string) =>
+    addPerson(db, {
+      identifier,
+      name,
+      recorded_by: 'adnan',
+      recorded_at: nextRecordedAt(),
+    }).id;
+
+  const engage = (personId: string, kind: 'permanent' | 'daily', role: string | null) =>
+    addEngagement(db, {
+      person_id: personId,
+      kind,
+      role,
+      started_on: startedOn,
+      recorded_by: 'adnan',
+      recorded_at: nextRecordedAt(),
+    }).id;
+
+  const imran = person('imran', 'Imran');
+  const abdul = person('abdul', 'Abdul');
+  const rashid = person('rashid', 'Rashid');
+
+  const imranJob = engage(imran, 'permanent', 'milker');
+  const abdulJob = engage(abdul, 'permanent', 'general');
+  const rashidJob = engage(rashid, 'daily', null);
+
+  setTerm(db, {
+    engagement_id: imranJob,
+    effective_from: startedOn,
+    cash_minor: FIXTURE_SALARY_MINOR,
+    cash_period: 'month',
+    benefits: [
+      { kind: 'milk', quantity: 2, unit: 'L', period: 'day' },
+      { kind: 'flour', quantity: 20, unit: 'kg', period: 'month' },
+      { kind: 'accommodation' },
+    ],
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+  setTerm(db, {
+    engagement_id: abdulJob,
+    effective_from: startedOn,
+    cash_minor: FIXTURE_SALARY_2_MINOR,
+    cash_period: 'month',
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+  setTerm(db, {
+    engagement_id: rashidJob,
+    effective_from: startedOn,
+    cash_minor: FIXTURE_DIHARI_MINOR,
+    cash_period: 'day',
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+
+  // One destination per staff member on an allowance -- the dispatch key is one
+  // row per destination per session, so a shared row could not say whose milk
+  // it was. STANDING, because an allowance is taken daily and is exactly as
+  // forgettable as the household's.
+  const imranMilk = addDestination(db, {
+    name: 'Imran (milk allowance)',
+    kind: 'staff',
+    standing: true,
+    person_id: imran,
+    started_on: startedOn,
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  }).id;
+
+  return {
+    imran: { person: imran, engagement: imranJob },
+    abdul: { person: abdul, engagement: abdulJob },
+    rashid: { person: rashid, engagement: rashidJob },
+    imranMilk,
+  };
+}
+
+/**
+ * One month paid, one dihari day, and a part payment.
+ *
+ * The month is the one BEFORE `lastOn`'s, so the current month is deliberately
+ * unpaid: the run screen's whole job is showing an outstanding period, and a
+ * fixture where everything is settled renders the completed state and hides the
+ * one that matters. Learned from the sales fixtures, whose first version ended
+ * at AS_OF and made every screen look broken in the harness.
+ *
+ * `imran` is paid LESS than his agreement, on purpose, so /check has a real
+ * `amount_differs_from_term` line to render rather than an empty report.
+ */
+export function addPayroll(db: Db, f: LabourFixture, opts: { lastOn: string }): number {
+  const month = opts.lastOn.slice(0, 7);
+  const [y, m] = month.split('-').map(Number);
+  const prevY = m === 1 ? y - 1 : y;
+  const prevM = m === 1 ? 12 : m - 1;
+  const from = `${prevY}-${String(prevM).padStart(2, '0')}-01`;
+  const lastDay = new Date(Date.UTC(prevY, prevM, 0)).getUTCDate();
+  const to = `${prevY}-${String(prevM).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+  const result = saveRun(db, {
+    from_on: from,
+    to_on: to,
+    entries: [
+      {
+        engagement_id: f.imran.engagement,
+        amount_minor: FIXTURE_SALARY_MINOR - 300_000,
+        note: 'four days leave',
+      },
+      { engagement_id: f.abdul.engagement, amount_minor: FIXTURE_SALARY_2_MINOR },
+      // Two dihari days, which is the measured cadence: a few times a month.
+      {
+        engagement_id: f.rashid.engagement,
+        from_on: `${prevY}-${String(prevM).padStart(2, '0')}-14`,
+        amount_minor: FIXTURE_DIHARI_MINOR,
+      },
+      {
+        engagement_id: f.rashid.engagement,
+        from_on: `${prevY}-${String(prevM).padStart(2, '0')}-21`,
+        amount_minor: FIXTURE_DIHARI_MINOR,
+      },
+    ],
+    provenance: { source_form: 'direct_entry', recorded_by: 'adnan' },
+  });
+
+  // Abdul settled in full; Imran part-paid, so the ledger fixture has both a
+  // settled balance and an open one rather than a single running total. Rashid
+  // was paid in cash the day he worked, which is what makes his balance zero
+  // with no special case anywhere.
+  recordWagePayment(db, {
+    person_id: f.abdul.person,
+    occurred_on: opts.lastOn,
+    amount_minor: FIXTURE_SALARY_2_MINOR,
+    method: 'cash',
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+  recordWagePayment(db, {
+    person_id: f.imran.person,
+    occurred_on: opts.lastOn,
+    amount_minor: 1_500_000,
+    method: 'cash',
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+  // An ADVANCE, dated before it was earned, so the negative-balance state is on
+  // screen from the first render rather than being something nobody sees until
+  // it happens for real.
+  recordWagePayment(db, {
+    person_id: f.rashid.person,
+    occurred_on: `${prevY}-${String(prevM).padStart(2, '0')}-01`,
+    amount_minor: FIXTURE_DIHARI_MINOR * 3,
+    method: 'cash',
+    reference: 'peshgi',
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+
+  return result.written;
+}
+
+/**
+ * The trading herd, plus the people who work it.
+ *
+ * The fixture the payroll screens are developed against. Same frozen-default
+ * argument as tradingHerd(): the tests need exact dates and the harness needs
+ * today, so the default stays frozen and the harness passes its own.
+ *
+ * ---------------------------------------------------------------------------
+ * NOTE THE ORDER, WHICH IS NOT tradingHerd() + LABOUR
+ * ---------------------------------------------------------------------------
+ * The labour fixture creates a STANDING staff destination, and
+ * saveDispatchSession() refuses a session that leaves a standing destination
+ * unanswered. So labour has to exist BEFORE the dispatches are written, and the
+ * staff row rides along in them via `alsoStanding`.
+ *
+ * Calling tradingHerd() and then adding labour would leave two weeks of
+ * sessions with Imran's allowance missing -- which the rule would not catch,
+ * because those rows were already written, and which would show up only as a
+ * package report that read zero against a 2 L/day allowance. That is the
+ * fixture-looks-broken failure the sales fixtures hit twice, so this function
+ * deliberately does not reuse tradingHerd().
+ */
+export function staffedHerd(lastOn: string = AS_OF): {
+  db: Db;
+  sales: SalesFixture;
+  labour: LabourFixture;
+} {
+  const db = cleanHerd();
+  const sales = addSalesDestinations(db);
+  const labour = addLabour(db);
+  addMilkings(db, { lastOn, days: TRADING_DAYS });
+  addDispatches(db, sales, {
+    lastOn,
+    days: TRADING_DAYS,
+    alsoStanding: [{ destination_id: labour.imranMilk, litres: 2 }],
+  });
+  recordPayment(db, {
+    destination_id: sales.dodhi,
+    occurred_on: lastOn,
+    amount_minor: 2_000_000,
+    method: 'cash',
+    recorded_by: 'adnan',
+    recorded_at: nextRecordedAt(),
+  });
+  addPayroll(db, labour, { lastOn });
+  return { db, sales, labour };
 }

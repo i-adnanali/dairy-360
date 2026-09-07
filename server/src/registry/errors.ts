@@ -69,6 +69,26 @@ export type RegistryErrorCode =
   // date, or a buyer whose range needs correcting first.
   | 'destination_not_active'
   | 'untouched_standing_destination'
+  // --- labour: people, engagements, packages, wages (docs/REGISTRY_PAYROLL.md) ---
+  | 'unknown_person'
+  | 'unknown_engagement'
+  // An identifier already belongs to somebody. Case-insensitive, because the
+  // whole reason registry_people exists is that free text produced `abdul` and
+  // `Abdul` as two people.
+  | 'duplicate_identifier'
+  // Changing an identifier after records exist would silently orphan every
+  // historical `observed_by` that matched it -- the link is BY VALUE, so the
+  // value is not free to move. No `allow_*` companion: this names something
+  // unrepairable rather than unusual.
+  | 'identifier_is_immutable'
+  // No package agreement covering the date. Refused rather than defaulted to
+  // zero, the same reasoning as no_price_in_force: an unpaid month is a
+  // decision somebody has to have made.
+  | 'no_term_in_force'
+  // A wage period overlapping another on the same engagement. The ONE hard rule
+  // in a deliberately loose model -- overlap here is double payment.
+  | 'overlapping_wage_period'
+  | 'untouched_permanent_engagement'
   // --- payload / dates ---
   | 'invalid_payload'
   | 'invalid_precision'

@@ -21,7 +21,11 @@ import { allDestinations, allPrices } from './destinations';
 import type {
   AnimalStatusRow,
   DispatchRow,
+  EngagementRow,
   LactationRow,
+  PayBenefitRow,
+  PayTermRow,
+  PersonRow,
   OverrideRecord,
   PaymentRow,
   ParentageRow,
@@ -34,6 +38,8 @@ import type {
   RegistryOrigin,
   RegistrySex,
   RegistrySnapshot,
+  WagePaymentRow,
+  WagePeriodRow,
 } from './types';
 
 // ---------------------------------------------------------------------------
@@ -146,6 +152,47 @@ export function allPayments(db: Db): PaymentRow[] {
     .all() as PaymentRow[];
 }
 
+/**
+ * The labour tables' bulk reads, here for the same require-cycle reason the
+ * sales ones are: snapshot() needs them, and people.ts/payroll.ts/wages.ts reach
+ * back into this module. Plain SELECTs, which is all they are.
+ */
+export function allPeople(db: Db): PersonRow[] {
+  return db
+    .prepare(`SELECT * FROM registry_people ORDER BY identifier, id`)
+    .all() as PersonRow[];
+}
+
+export function allEngagements(db: Db): EngagementRow[] {
+  return db
+    .prepare(`SELECT * FROM registry_engagements ORDER BY person_id, started_on, id`)
+    .all() as EngagementRow[];
+}
+
+export function allPayTerms(db: Db): PayTermRow[] {
+  return db
+    .prepare(`SELECT * FROM registry_pay_terms ORDER BY engagement_id, effective_from`)
+    .all() as PayTermRow[];
+}
+
+export function allPayBenefits(db: Db): PayBenefitRow[] {
+  return db
+    .prepare(`SELECT * FROM registry_pay_benefits ORDER BY term_id, kind, id`)
+    .all() as PayBenefitRow[];
+}
+
+export function allWagePeriods(db: Db): WagePeriodRow[] {
+  return db
+    .prepare(`SELECT * FROM registry_wage_periods ORDER BY engagement_id, from_on, id`)
+    .all() as WagePeriodRow[];
+}
+
+export function allWagePayments(db: Db): WagePaymentRow[] {
+  return db
+    .prepare(`SELECT * FROM registry_wage_payments ORDER BY person_id, occurred_on, id`)
+    .all() as WagePaymentRow[];
+}
+
 export function readNextSerial(db: Db): number {
   const row = db
     .prepare(`SELECT next_serial FROM registry_serial_counter WHERE id = 1`)
@@ -175,6 +222,16 @@ export function snapshot(db: Db): RegistrySnapshot {
     prices: allPrices(db),
     dispatches: allDispatches(db),
     payments: allPayments(db),
+    // The labour tables (invariants 23-28). Read as plain SELECTs above rather
+    // than through their modules, unlike destinations -- there is no 0/1-to-
+    // boolean normalization to keep in one place here, so a second reader would
+    // buy nothing.
+    people: allPeople(db),
+    engagements: allEngagements(db),
+    terms: allPayTerms(db),
+    benefits: allPayBenefits(db),
+    wagePeriods: allWagePeriods(db),
+    wagePayments: allWagePayments(db),
     nextSerial: readNextSerial(db),
   };
 }

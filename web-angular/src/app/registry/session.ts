@@ -28,6 +28,29 @@ export class Session {
   readonly sourceForm = signal<SourceForm | null>(null);
   readonly recordedBy = signal<string>('');
 
+  /**
+   * Whether the gate is on screen.
+   *
+   * The gate used to be unavoidable: the shell refused to render ANY route
+   * until provenance was set, so browsing the herd, a statement or /check meant
+   * declaring a transcription session you were not about to have. The comment
+   * above says the app "REFUSES to show any FORM" -- form, not screen -- and
+   * the implementation was stricter than the rule it cited.
+   *
+   * Now reads are free and the gate is requested: by clicking "Start
+   * recording", or by reaching for a write control that cannot work without it.
+   */
+  readonly setupOpen = signal(false);
+
+  /** Ask for the gate. Called by SessionRequired and by the session bar. */
+  requestSetup(): void {
+    this.setupOpen.set(true);
+  }
+
+  dismissSetup(): void {
+    this.setupOpen.set(false);
+  }
+
   readonly ready = computed(
     () => this.sourceForm() !== null && this.recordedBy().trim().length > 0,
   );
@@ -35,11 +58,16 @@ export class Session {
   set(form: SourceForm, who: string): void {
     this.sourceForm.set(form);
     this.recordedBy.set(who.trim());
+    this.setupOpen.set(false);
   }
 
   clear(): void {
     this.sourceForm.set(null);
     this.recordedBy.set('');
+    // Re-opened, not merely cleared: "Change" is a deliberate act with an
+    // intent behind it, and clearing without offering the form back would drop
+    // the operator onto a screen whose write controls had all just vanished.
+    this.setupOpen.set(true);
   }
 
   /** The provenance fields every write body needs. Throws if not ready. */

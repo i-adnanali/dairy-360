@@ -7,6 +7,7 @@ import type { ElementRef } from '@angular/core';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { SessionRequired } from './session-required';
 import { WriteLog, focusAfterWrite } from './after-write';
 import { ChipGroup } from './chip-group';
 import { IdentifierInput } from './identifier-input';
@@ -20,7 +21,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
 @Component({
   selector: 'app-event-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, IdentifierInput, PrecisionDateControl],
+  imports: [ChipGroup, IdentifierInput, PrecisionDateControl, SessionRequired],
   template: `
     <form class="space-y-4" (submit)="onSubmit($event)">
       <div class="rounded-xl border border-farm-300 bg-white p-4">
@@ -127,9 +128,13 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
         }
 
         <div class="flex items-center gap-3">
-          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-          >{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
+          @if (session.ready()) {
+            <button type="submit" data-role="submit" [disabled]="!canSubmit()"
+              class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
+            >{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
+          } @else {
+            <app-session-required what="an event" />
+          }
           @if (blockedReason(); as r) {
             <span class="text-sm text-farm-600" data-role="blocked">{{ r }}</span>
           }
@@ -158,7 +163,7 @@ export class EventForm {
   readonly saved = input<((d: AnimalDetail) => void) | null>(null);
 
   private readonly api = inject(RegistryApi);
-  private readonly session = inject(Session);
+  protected readonly session = inject(Session);
   protected readonly identifiers = inject(Identifiers);
   private readonly writeLog = inject(WriteLog);
 

@@ -17,6 +17,8 @@
 // `:memory:` only, via the harness app. Writes nothing to disk.
 
 import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { after, test } from 'node:test';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
@@ -559,4 +561,55 @@ test('GET /storage names the database this router writes to', async () => {
   assert.equal(b.storage, ':memory:');
   assert.equal(b.memory, true);
   await ctx.close();
+});
+
+// ---------------------------------------------------------------------------
+// The documented route table matches the router
+// ---------------------------------------------------------------------------
+
+test('REGISTRY.md § HTTP surface lists exactly the routes the router mounts', () => {
+  // A route table in prose beside a route table in code is a second copy, and
+  // this repo has already paid for one: routes.ts carried a prose enumeration of
+  // its keyed writes that went stale three times before it was deleted
+  // (REGISTRY_PAYROLL.md §16.4).
+  //
+  // The table in REGISTRY.md is worth keeping -- it is the only place a reader
+  // can see the whole surface at once, with a sentence on each route -- so it is
+  // CHECKED instead of trusted. Adding a route now fails this test until the
+  // table names it, which is the cheapest possible moment to write the sentence.
+  //
+  // Source text, not a live server, for invariant 13's reason: it must fail in
+  // CI with no database and no port.
+  const doc = readFileSync(
+    path.join(__dirname, '..', '..', '..', 'docs', 'REGISTRY.md'),
+    'utf8',
+  );
+  const src = readFileSync(path.join(__dirname, 'routes.ts'), 'utf8');
+
+  const documented = new Set(
+    [...doc.matchAll(/^\| (GET|POST) \| `([^`]+)`/gm)].map(
+      (m) => `${m[1]} ${m[2].split('?')[0]}`,
+    ),
+  );
+  const mounted = new Set(
+    [...src.matchAll(/router\.(get|post)\(\s*'([^']+)'/g)].map(
+      (m) => `${m[1].toUpperCase()} ${m[2]}`,
+    ),
+  );
+
+  assert.ok(mounted.size > 0, 'the matcher found no routes at all -- update it');
+
+  const undocumented = [...mounted].filter((r) => !documented.has(r)).sort();
+  const phantom = [...documented].filter((r) => !mounted.has(r)).sort();
+
+  assert.deepEqual(
+    undocumented,
+    [],
+    'these routes are mounted and absent from REGISTRY.md § HTTP surface',
+  );
+  assert.deepEqual(
+    phantom,
+    [],
+    'REGISTRY.md § HTTP surface documents these routes and the router does not mount them',
+  );
 });

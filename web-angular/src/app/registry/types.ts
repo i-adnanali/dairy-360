@@ -222,6 +222,13 @@ export interface Verification {
     caveat: string;
   };
   milking: MilkingReport;
+  /**
+   * A REPORT, not violations. Every line fires on rows the farm asked to be
+   * able to write -- overlapping stints, a settlement after somebody left, a
+   * figure that differs from the agreement -- so /check must render these
+   * differently or people learn to ignore the page.
+   */
+  labour: LabourReportLine[];
 }
 
 /**
@@ -277,7 +284,9 @@ export interface DuplicateCandidate {
 // Milk sales, home use and the buyer ledger (docs/REGISTRY_SALES.md)
 // ---------------------------------------------------------------------------
 
-export type DestinationKind = 'dodhi' | 'household' | 'shop' | 'home' | 'other';
+/** `staff` was added by migration 7: milk allocated as part of a salary
+ *  arrangement, ONE DESTINATION PER PERSON. See docs/REGISTRY_PAYROLL.md §4.6a. */
+export type DestinationKind = 'dodhi' | 'household' | 'shop' | 'home' | 'staff' | 'other';
 export type DispatchStatus = 'taken' | 'none';
 export type PaymentMethod = 'cash' | 'bank' | 'adjustment';
 
@@ -295,6 +304,8 @@ export interface Destination {
   note: string | null;
   recorded_by: string;
   recorded_at: string;
+  /** The staff member this milk belongs to; null for every other kind. */
+  person_id: string | null;
 }
 
 /**
@@ -463,4 +474,239 @@ export interface Reconciliation {
   incomplete: SessionCompleteness[];
   off_schedule: OffSchedule[];
   interpretation: string;
+}
+
+// ---------------------------------------------------------------------------
+// Labour: people, engagements, packages, the run and the wage ledger
+// (docs/REGISTRY_PAYROLL.md)
+// ---------------------------------------------------------------------------
+
+export type EngagementKind = 'permanent' | 'daily';
+export type CashPeriod = 'month' | 'day';
+export type BenefitKind = 'milk' | 'flour' | 'accommodation' | 'other';
+export type BenefitPeriod = 'day' | 'month';
+export type WagePeriodKind = 'wage' | 'bonus';
+
+/**
+ * A person the farm knows -- NOT necessarily an employee.
+ *
+ * `identifier` is the stable string that also appears in `observed_by`. The
+ * link is BY VALUE, and the identifier CANNOT BE RENAMED once records exist:
+ * every milking and dispatch that names them stores it as text, and the event
+ * log cannot be rewritten. The form must not offer it as editable.
+ */
+export interface Person {
+  id: string;
+  identifier: string;
+  name: string | null;
+  contact: string | null;
+  note: string | null;
+  recorded_by: string;
+  recorded_at: string;
+}
+
+/**
+ * One STINT. A person has as many as they have had.
+ *
+ * Overlapping stints and more than one open at a time are LEGITIMATE -- the
+ * farm asked for them, because people leave and come back and somebody can be
+ * milker and night watchman at once. The UI must not treat either as an error.
+ */
+export interface Engagement {
+  id: string;
+  person_id: string;
+  kind: EngagementKind;
+  role: string | null;
+  started_on: string;
+  ended_on: string | null;
+  end_reason: string | null;
+  note: string | null;
+  recorded_by: string;
+  recorded_at: string;
+}
+
+/**
+ * A package agreement, AS AGREED.
+ *
+ * Two values, never one: `cash_minor` is paisa and `cash_period` is what it
+ * covers. Rs 25,000 a month is `(2500000, 'month')`. Never render it as a
+ * per-day conversion -- see money.ts, and REGISTRY_PAYROLL.md §5.
+ */
+export interface PayTerm {
+  id: string;
+  engagement_id: string;
+  effective_from: string;
+  cash_minor: number;
+  cash_period: CashPeriod;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
+/**
+ * One in-kind line of a package.
+ *
+ * `quantity`, `unit` and `period` stand or fall together, and accommodation is
+ * the case with none of the three. THERE IS NO VALUE FIELD, deliberately: the
+ * rupee worth of a package is a computed, explicitly-imputed report figure and
+ * never a stored number anybody can sum into a balance.
+ */
+export interface PayBenefit {
+  id: string;
+  term_id: string;
+  kind: BenefitKind;
+  quantity: number | null;
+  unit: string | null;
+  period: BenefitPeriod | null;
+  note: string | null;
+}
+
+export interface PayTermWithBenefits extends PayTerm {
+  benefits: PayBenefit[];
+}
+
+/** The debit side -- a salaried month, a dihari day, or a one-day bonus. */
+export interface WagePeriod {
+  id: string;
+  engagement_id: string;
+  kind: WagePeriodKind;
+  from_on: string;
+  to_on: string;
+  amount_minor: number;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  source_form: SourceForm;
+  note: string | null;
+}
+
+/** The credit side. Keyed on the PERSON, not the engagement. */
+export interface WagePayment {
+  id: string;
+  person_id: string;
+  occurred_on: string;
+  amount_minor: number;
+  method: PaymentMethod;
+  reference: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
+/** The milk half of the package report: entitlement against what was taken. */
+/**
+ * The expectation is CLIPPED TO TODAY for a per-day allowance, so a month still
+ * running does not read as a shortfall made of days that have not happened.
+ * A monthly allowance is not clipped — 20 kg a month is not 4.6 kg by the 7th.
+ */
+export interface MilkAgainstAllowance {
+  allowance_per_day: number | null;
+  allowance_period: BenefitPeriod | null;
+  taken_litres: number;
+  expected_litres: number | null;
+  through_on: string;
+  /** True while the period is still running, so the screen can say “to date”. */
+  partial: boolean;
+}
+
+export interface PayrollRunRow {
+  engagement: Engagement;
+  person: Person;
+  term: PayTerm | null;
+  benefits: PayBenefit[];
+  /** The default the form offers. Null when there is no agreement to offer. */
+  suggested_minor: number | null;
+  /** Already saved for this exact range, if anything is. */
+  existing: WagePeriod | null;
+  milk: MilkAgainstAllowance | null;
+}
+
+export interface PayrollRun {
+  from_on: string;
+  to_on: string;
+  through_on: string;
+  /** Must be answered before the run saves. */
+  permanent: PayrollRunRow[];
+  /** Dihari days already entered inside the range. */
+  daily: (WagePeriod & { person: Person; engagement: Engagement })[];
+  /** Daily engagements available to add a day against. */
+  daily_candidates: PayrollRunRow[];
+  answered: number;
+  outstanding: number;
+  total_minor: number;
+}
+
+export interface WageStatementMonth {
+  month: string;
+  earned_minor: number;
+  paid_minor: number;
+  closing_minor: number;
+  periods: WagePeriod[];
+  payments: WagePayment[];
+}
+
+export interface WageStatement {
+  person_id: string;
+  identifier: string;
+  name: string | null;
+  engagements: Engagement[];
+  months: WageStatementMonth[];
+  earned_minor: number;
+  paid_minor: number;
+  balance_minor: number;
+  as_of: string;
+  packages: {
+    engagement_id: string;
+    terms: PayTermWithBenefits[];
+    current: { term: PayTerm | null; benefits: PayBenefit[] };
+  }[];
+}
+
+export interface WageBalanceRow {
+  person_id: string;
+  identifier: string;
+  name: string | null;
+  /** False for somebody with no open stint -- the screen dims them. */
+  engaged: boolean;
+  balance_minor: number;
+  last_period_on: string | null;
+  last_payment_on: string | null;
+}
+
+export interface LabourReportLine {
+  kind:
+    | 'unknown_identifier'
+    | 'overlapping_engagements'
+    | 'multiple_open_engagements'
+    | 'wage_period_outside_engagement'
+    | 'amount_differs_from_term';
+  detail: string;
+}
+
+// ---------------------------------------------------------------------------
+// The day board -- what still needs recording
+// ---------------------------------------------------------------------------
+
+export interface SessionStanding {
+  session: MilkingSession;
+  /** How many rows the session expects. Zero means there is nothing to do. */
+  expected: number;
+  recorded: number;
+  complete: boolean;
+}
+
+export interface DayBoard {
+  on: string;
+  milking: SessionStanding[];
+  /** STANDING destinations only — an occasional household is not a gap. */
+  dispatch: SessionStanding[];
+  payroll: { from_on: string; to_on: string; outstanding: number; permanent: number };
+  /**
+   * Last month, when it is still unanswered. Null once it is settled.
+   *
+   * The CURRENT month is outstanding for the whole of it, so prompting about it
+   * would make the payroll line permanently amber and therefore ignorable.
+   */
+  payroll_previous: { from_on: string; to_on: string; outstanding: number; permanent: number } | null;
 }

@@ -20,6 +20,7 @@ import {
   checkSnapshot,
   definitelyBefore,
   diffRowSets,
+  labourReport,
   rowKey,
 } from './invariants';
 import { rebuild } from './projectStore';
@@ -659,9 +660,15 @@ function salesSnapshot(): RegistrySnapshot {
     id, name, kind, billable, standing, contact: null,
     started_on: '2026-01-01', ended_on: null, note: null,
     recorded_by: 'adnan', recorded_at: 't',
+    // NULL, not absent. A real row out of SQLite has person_id === null, and
+    // invariant 28 tests `person_id !== null` -- an omitted field here reads as
+    // "names a person" and makes the whole fixture dirty.
+    person_id: null,
   });
   return {
     animals: [], events: [], lactations: [], parentage: [], statuses: [], milkings: [],
+    people: [], engagements: [], terms: [], benefits: [],
+    wagePeriods: [], wagePayments: [],
     nextSerial: 1,
     destinations: [
       dest('dst_dodhi', 'Bashir', 'dodhi', true, true),
@@ -797,4 +804,268 @@ test('an empty registry has nothing to say about sales', () => {
   s.dispatches = [];
   s.payments = [];
   assert.deepEqual(violations(s), []);
+});
+
+// ---------------------------------------------------------------------------
+// 23-28. People, engagements, packages and the wage ledger
+// ---------------------------------------------------------------------------
+
+/**
+ * A snapshot carrying two salaried staff, one dihari, and one month paid.
+ *
+ * Built BY HAND rather than through the write boundary, for the reason
+ * salesSnapshot() gives: every corruption below is something the write boundary
+ * already refuses, and the invariants exist to catch rows that got in some
+ * other way -- a hand-written INSERT, or a rule that did not exist when the row
+ * was written.
+ */
+function labourSnapshot(): RegistrySnapshot {
+  const s = salesSnapshot();
+  s.people = [
+    { id: 'per_imran', identifier: 'imran', name: 'Imran', contact: null, note: null,
+      recorded_by: 'adnan', recorded_at: 't' },
+    { id: 'per_rashid', identifier: 'rashid', name: 'Rashid', contact: null, note: null,
+      recorded_by: 'adnan', recorded_at: 't' },
+  ] as never;
+  s.engagements = [
+    { id: 'eng_imran', person_id: 'per_imran', kind: 'permanent', role: 'milker',
+      started_on: '2026-01-01', ended_on: null, end_reason: null, note: null,
+      recorded_by: 'adnan', recorded_at: 't' },
+    { id: 'eng_rashid', person_id: 'per_rashid', kind: 'daily', role: null,
+      started_on: '2026-01-01', ended_on: null, end_reason: null, note: null,
+      recorded_by: 'adnan', recorded_at: 't' },
+  ] as never;
+  s.terms = [
+    { id: 'trm_imran', engagement_id: 'eng_imran', effective_from: '2026-01-01',
+      cash_minor: 2_500_000, cash_period: 'month', recorded_by: 'adnan',
+      recorded_at: 't', note: null },
+    { id: 'trm_rashid', engagement_id: 'eng_rashid', effective_from: '2026-01-01',
+      cash_minor: 120_000, cash_period: 'day', recorded_by: 'adnan',
+      recorded_at: 't', note: null },
+  ] as never;
+  s.benefits = [
+    { id: 'ben_milk', term_id: 'trm_imran', kind: 'milk', quantity: 2, unit: 'L',
+      period: 'day', note: null },
+    { id: 'ben_room', term_id: 'trm_imran', kind: 'accommodation', quantity: null,
+      unit: null, period: null, note: null },
+  ] as never;
+  s.wagePeriods = [
+    { id: 'wag_1', engagement_id: 'eng_imran', kind: 'wage', from_on: '2026-09-01',
+      to_on: '2026-09-30', amount_minor: 2_500_000, observed_by: null,
+      recorded_by: 'adnan', recorded_at: 't', source_form: 'direct_entry', note: null },
+    { id: 'wag_2', engagement_id: 'eng_rashid', kind: 'wage', from_on: '2026-09-14',
+      to_on: '2026-09-14', amount_minor: 120_000, observed_by: null,
+      recorded_by: 'adnan', recorded_at: 't', source_form: 'direct_entry', note: null },
+  ] as never;
+  s.wagePayments = [
+    { id: 'wpy_1', person_id: 'per_imran', occurred_on: '2026-10-02',
+      amount_minor: 2_500_000, method: 'cash', reference: null, observed_by: null,
+      recorded_by: 'adnan', recorded_at: 't', note: null },
+  ] as never;
+  return s;
+}
+
+test('the labour fixture is clean', () => {
+  assert.deepEqual(violations(labourSnapshot()), []);
+});
+
+test('an empty labour half has nothing to say', () => {
+  // Labour stands alone from the herd AND from sales, so a database with staff
+  // and no buyers -- and one with buyers and no staff -- must both be clean.
+  const s = labourSnapshot();
+  s.people = [];
+  s.engagements = [];
+  s.terms = [];
+  s.benefits = [];
+  s.wagePeriods = [];
+  s.wagePayments = [];
+  assert.deepEqual(violations(s), []);
+});
+
+test('invariant 23 catches two packages effective the same day', () => {
+  const s = labourSnapshot();
+  s.terms.push({ ...s.terms[0], id: 'trm_dup', cash_minor: 2_600_000 });
+  assert.ok(firesInvariant(s, 23));
+});
+
+test('invariant 23 catches a wage period with no agreement behind it', () => {
+  const s = labourSnapshot();
+  s.terms = s.terms.filter((t) => t.engagement_id !== 'eng_imran');
+  assert.ok(firesInvariant(s, 23));
+});
+
+test('invariant 23 EXEMPTS a bonus, which is a decision rather than a rate', () => {
+  const s = labourSnapshot();
+  s.terms = [];
+  s.wagePeriods = [
+    { ...s.wagePeriods[0], id: 'wag_bonus', kind: 'bonus',
+      from_on: '2026-09-20', to_on: '2026-09-20', amount_minor: 500_000 },
+  ] as never;
+  assert.equal(firesInvariant(s, 23), false);
+});
+
+test('invariant 24 catches overlapping wage periods -- the one hard rule', () => {
+  const s = labourSnapshot();
+  s.wagePeriods.push({
+    ...s.wagePeriods[0], id: 'wag_overlap',
+    from_on: '2026-09-15', to_on: '2026-10-15',
+  });
+  assert.ok(firesInvariant(s, 24));
+});
+
+test('invariant 24 does NOT fire on adjacent periods', () => {
+  const s = labourSnapshot();
+  s.wagePeriods.push({
+    ...s.wagePeriods[0], id: 'wag_oct',
+    from_on: '2026-10-01', to_on: '2026-10-31',
+  });
+  assert.equal(firesInvariant(s, 24), false);
+});
+
+test('invariant 25 catches a half-specified benefit', () => {
+  const half = labourSnapshot();
+  half.benefits[0].unit = null;
+  assert.ok(firesInvariant(half, 25));
+
+  const noPeriod = labourSnapshot();
+  noPeriod.benefits[0].period = null;
+  assert.ok(firesInvariant(noPeriod, 25));
+
+  const unlabelled = labourSnapshot();
+  unlabelled.benefits[1].kind = 'other';
+  assert.ok(firesInvariant(unlabelled, 25));
+});
+
+test('invariant 26 catches every dangling labour reference', () => {
+  for (const corrupt of [
+    (s: RegistrySnapshot) => { s.engagements[0].person_id = 'per_ghost'; },
+    (s: RegistrySnapshot) => { s.terms[0].engagement_id = 'eng_ghost'; },
+    (s: RegistrySnapshot) => { s.benefits[0].term_id = 'trm_ghost'; },
+    (s: RegistrySnapshot) => { s.wagePeriods[0].engagement_id = 'eng_ghost'; },
+    (s: RegistrySnapshot) => { s.wagePayments[0].person_id = 'per_ghost'; },
+  ]) {
+    const s = labourSnapshot();
+    corrupt(s);
+    assert.ok(firesInvariant(s, 26), 'a dangling reference must be reported');
+  }
+});
+
+test('invariant 27 catches a signed cash payment and an unexplained adjustment', () => {
+  const negative = labourSnapshot();
+  negative.wagePayments[0].amount_minor = -100;
+  assert.ok(firesInvariant(negative, 27));
+
+  const bare = labourSnapshot();
+  bare.wagePayments[0].method = 'adjustment';
+  bare.wagePayments[0].note = null;
+  assert.ok(firesInvariant(bare, 27));
+});
+
+test('invariant 28 catches every way a staff destination can disagree', () => {
+  const staff = (over: Record<string, unknown>) => {
+    const s = labourSnapshot();
+    s.destinations.push({
+      id: 'dst_staff', name: 'Imran milk', kind: 'staff', billable: false, standing: true,
+      contact: null, started_on: '2026-01-01', ended_on: null, note: null,
+      recorded_by: 'adnan', recorded_at: 't', person_id: 'per_imran', ...over,
+    } as never);
+    return s;
+  };
+  assert.deepEqual(violations(staff({})), [], 'the well-formed case is clean');
+  assert.ok(firesInvariant(staff({ person_id: null }), 28), 'staff with no person');
+  assert.ok(firesInvariant(staff({ kind: 'household' }), 28), 'a person on a non-staff kind');
+  assert.ok(firesInvariant(staff({ billable: true }), 28), 'billable staff milk');
+  assert.ok(firesInvariant(staff({ person_id: 'per_ghost' }), 28), 'an unknown person');
+});
+
+test('invariant 28 catches two milk destinations for one person', () => {
+  // Then "what did they take" has two answers.
+  const s = labourSnapshot();
+  for (const id of ['dst_staff_a', 'dst_staff_b']) {
+    s.destinations.push({
+      id, name: `Imran milk ${id}`, kind: 'staff', billable: false, standing: true,
+      contact: null, started_on: '2026-01-01', ended_on: null, note: null,
+      recorded_by: 'adnan', recorded_at: 't', person_id: 'per_imran',
+    } as never);
+  }
+  assert.ok(firesInvariant(s, 28));
+});
+
+// ---------------------------------------------------------------------------
+// The report lines -- NOT violations, deliberately
+// ---------------------------------------------------------------------------
+
+test('overlapping stints are a report line and NOT a violation', () => {
+  // The farm asked for overlapping engagements. If either half of this test
+  // flips, the model has stopped being what was asked for.
+  const s = labourSnapshot();
+  s.engagements.push({
+    ...s.engagements[0], id: 'eng_imran_night', kind: 'daily',
+    role: 'night watchman', started_on: '2026-06-01',
+  });
+  assert.deepEqual(violations(s), [], 'not a violation');
+  const report = labourReport(s, '2026-09-07');
+  assert.ok(report.some((l) => l.kind === 'overlapping_engagements'));
+  assert.ok(report.some((l) => l.kind === 'multiple_open_engagements'));
+});
+
+test('a wage period after somebody left is a report line, not a violation', () => {
+  // A final settlement two weeks after leaving looks exactly like this.
+  const s = labourSnapshot();
+  s.engagements[0].ended_on = '2026-08-31';
+  s.engagements[0].end_reason = 'went home';
+  assert.deepEqual(violations(s), []);
+  assert.ok(
+    labourReport(s, '2026-09-07').some((l) => l.kind === 'wage_period_outside_engagement'),
+  );
+});
+
+test('a figure differing from the agreement is reported, never refused', () => {
+  // Expected for any month with leave. The direct analogue of a dispatch billed
+  // at a deliberate discount.
+  const s = labourSnapshot();
+  s.wagePeriods[0].amount_minor = 2_200_000;
+  assert.deepEqual(violations(s), []);
+  const line = labourReport(s, '2026-09-07').find((l) => l.kind === 'amount_differs_from_term');
+  assert.match(line?.detail ?? '', /2200000 for 2026-09-01/);
+  assert.match(line?.detail ?? '', /Expected whenever there was leave/);
+});
+
+test('an identifier on a record that matches no person is a worklist line', () => {
+  // It will name the vet and whoever sold the farm a buffalo. That is the point:
+  // it is a list of people to consider adding, not a defect list.
+  const s = labourSnapshot();
+  s.milkings = [
+    { id: 'mlk_1', animal_id: 'BD-0001', occurred_on: '2026-09-01', session: 'morning',
+      status: 'measured', yield_litres: 5, reason: null, occurred_time: null,
+      observed_by: 'Imran', recorded_by: 'adnan', recorded_at: 't',
+      source_form: 'direct_entry', note: null },
+    { id: 'mlk_2', animal_id: 'BD-0001', occurred_on: '2026-09-02', session: 'morning',
+      status: 'measured', yield_litres: 5, reason: null, occurred_time: null,
+      observed_by: 'dr_khan', recorded_by: 'adnan', recorded_at: 't',
+      source_form: 'direct_entry', note: null },
+  ] as never;
+  const report = labourReport(s, '2026-09-07');
+  const unknown = report.filter((l) => l.kind === 'unknown_identifier');
+  assert.equal(unknown.length, 1, "'Imran' matches 'imran' case-insensitively and is not listed");
+  assert.match(unknown[0].detail, /'dr_khan' appears on 1 record/);
+});
+
+test('the report is silent until there is somebody on file', () => {
+  // Before registry_people has a single row, every identifier in history would
+  // be "unknown" -- which would be a page of noise on the first visit.
+  const s = labourSnapshot();
+  s.people = [];
+  s.engagements = [];
+  s.terms = [];
+  s.benefits = [];
+  s.wagePeriods = [];
+  s.wagePayments = [];
+  s.milkings = [
+    { id: 'mlk_1', animal_id: 'BD-0001', occurred_on: '2026-09-01', session: 'morning',
+      status: 'measured', yield_litres: 5, reason: null, occurred_time: null,
+      observed_by: 'somebody', recorded_by: 'adnan', recorded_at: 't',
+      source_form: 'direct_entry', note: null },
+  ] as never;
+  assert.deepEqual(labourReport(s, '2026-09-07'), []);
 });

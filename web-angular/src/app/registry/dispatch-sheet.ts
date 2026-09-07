@@ -39,9 +39,11 @@ import { Identifiers } from './identifiers';
 import { IdentifierInput } from './identifier-input';
 import { RegistryApi } from './api';
 import { Session } from './session';
+import { SessionRequired } from './session-required';
 import { WriteLog } from './after-write';
 import { amountMinor, formatMinor, formatRate } from './money';
 import { farmToday, likelySession } from './today';
+import { urlParams } from './url-state';
 import type { DispatchSheet, MilkingSession, SheetRow } from './types';
 
 /**
@@ -61,7 +63,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 @Component({
   selector: 'app-dispatch-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, IdentifierInput, RouterLink],
+  imports: [ChipGroup, IdentifierInput, RouterLink, SessionRequired],
   template: `
     <form class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
       <header>
@@ -108,7 +110,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
             data-role="nobody">
             Nobody was taking milk on {{ s.occurred_on }}.
-            <a routerLink="/buyers" class="font-medium text-farm-800 underline">Add a buyer</a>
+            <a routerLink="/milk/buyers" class="font-medium text-farm-800 underline">Add a buyer</a>
             — and add the house too, so milk kept at home is on the record rather than in the gap.
           </p>
         } @else {
@@ -268,9 +270,13 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
       }
 
       <div class="flex items-center gap-3">
-        <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-          class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-        >{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+        @if (session_.ready()) {
+          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
+            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
+          >{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+        } @else {
+          <app-session-required what="this session" />
+        }
         @if (blockedReason(); as b) {
           <span class="text-sm text-farm-600" data-role="blocked">{{ b }}</span>
         }
@@ -280,7 +286,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 })
 export class DispatchSheetScreen {
   private readonly api = inject(RegistryApi);
-  private readonly session_ = inject(Session);
+  protected readonly session_ = inject(Session);
   private readonly writeLog = inject(WriteLog);
   protected readonly identifiers = inject(Identifiers);
 
@@ -297,8 +303,22 @@ export class DispatchSheetScreen {
     written: number; litres: number; amount_minor: number; updated: number;
   }>();
 
-  protected readonly on = signal(farmToday());
-  protected readonly session = signal<MilkingSession>(likelySession());
+  /**
+   * The date and session live in the URL, not in a component signal.
+   *
+   * A bare /milk/... opens today's likely session and STAYS bare; changing
+   * either puts it in the query string, at which point the URL names that
+   * specific sheet and can be sent to somebody. See url-state.ts.
+   */
+  private readonly url = urlParams({ on: farmToday(), session: likelySession() });
+  protected readonly on = computed(() => this.url.value().on);
+  // VALIDATED, not cast: `?session=lunch` is a URL somebody can type, and
+  // passing it through would produce a server refusal on a screen that has no
+  // field to attach it to.
+  protected readonly session = computed<MilkingSession>(() => {
+    const raw = this.url.value().session;
+    return raw === 'morning' || raw === 'evening' ? raw : likelySession();
+  });
   protected readonly handedBy = signal('');
 
   protected readonly sheet = signal<DispatchSheet | null>(null);
@@ -338,11 +358,11 @@ export class DispatchSheetScreen {
   }
 
   protected setOn(v: string): void {
-    if (v.length > 0) this.on.set(v);
+    if (v.length > 0) this.url.set({ on: v });
   }
 
   protected setSession(s: MilkingSession): void {
-    this.session.set(s);
+    this.url.set({ session: s });
   }
 
   protected draft(id: string): Draft {

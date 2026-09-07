@@ -6,9 +6,10 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
   AnimalDetail, BalanceRow, DestinationListRow, DestinationPrice, DispatchSheet,
-  DuplicateCandidate, HerdRow, IdentifierValues, LinkCandidate,
-  MilkingHistoryRow, MilkingRoster, Reconciliation, Statement, StorageInfo,
-  TimelineEvent, Verification, WireError,
+  DayBoard, DuplicateCandidate, Engagement, HerdRow, IdentifierValues, LinkCandidate,
+  MilkingHistoryRow, MilkingRoster, PayrollRun, PayTermWithBenefits, Person,
+  Reconciliation, Statement, StorageInfo, TimelineEvent, Verification,
+  WageBalanceRow, WageStatement, WireError,
 } from './types';
 
 const BASE = '/api/registry';
@@ -158,8 +159,21 @@ export class RegistryApi {
     ).then((r) => r.candidates);
   }
 
-  verification(): Promise<Verification> {
-    return unwrap(firstValueFrom(this.http.get<Verification>(`${BASE}/verification`)));
+  /** What still needs recording. Assembled server-side; see overview.ts. */
+  today(on?: string): Promise<DayBoard> {
+    const q = on ? `?on=${on}` : '';
+    return unwrap(firstValueFrom(this.http.get<DayBoard>(`${BASE}/today${q}`)));
+  }
+
+  /**
+   * `asOf` is optional and normally absent, because /check is a "how does it
+   * look now" screen. It exists so a URL carrying `?as_of=` can pin the run to
+   * a date -- which is what makes a violation reproducible when somebody sends
+   * you one.
+   */
+  verification(asOf?: string): Promise<Verification> {
+    const q = asOf ? `?as_of=${asOf}` : '';
+    return unwrap(firstValueFrom(this.http.get<Verification>(`${BASE}/verification${q}`)));
   }
 
   /**
@@ -370,6 +384,143 @@ export class RegistryApi {
   deletePayment(id: string, idempotencyKey: string): Promise<{ removed: number }> {
     return unwrap(firstValueFrom(this.http.post<never>(
       `${BASE}/payments/${id}/delete`, {}, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  // -------------------------------------------------------------------------
+  // Labour (docs/REGISTRY_PAYROLL.md §10)
+  // -------------------------------------------------------------------------
+
+  people(asOf?: string): Promise<WageBalanceRow[]> {
+    const q = asOf ? `?as_of=${asOf}` : '';
+    return unwrap(
+      firstValueFrom(
+        this.http.get<{ people: WageBalanceRow[] }>(`${BASE}/people${q}`),
+      ).then((r) => r.people),
+    );
+  }
+
+  person(id: string, asOf?: string): Promise<WageStatement> {
+    const q = asOf ? `?as_of=${asOf}` : '';
+    return unwrap(firstValueFrom(this.http.get<WageStatement>(`${BASE}/people/${id}${q}`)));
+  }
+
+  payrollRun(from: string, to: string): Promise<PayrollRun> {
+    const q = new URLSearchParams({ from, to });
+    return unwrap(firstValueFrom(this.http.get<PayrollRun>(`${BASE}/payroll/run?${q}`)));
+  }
+
+  terms(engagementId: string): Promise<PayTermWithBenefits[]> {
+    return unwrap(
+      firstValueFrom(
+        this.http.get<{ terms: PayTermWithBenefits[] }>(
+          `${BASE}/engagements/${engagementId}/terms`,
+        ),
+      ).then((r) => r.terms),
+    );
+  }
+
+  addPerson(body: Record<string, unknown>, idempotencyKey: string): Promise<Person> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/people`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  /**
+   * Amend a person.
+   *
+   * `identifier` is deliberately NOT part of this body type. It cannot be
+   * changed once records exist -- the link to history is by value and the event
+   * log cannot be rewritten -- and the server refuses it. Keeping it out of the
+   * type means a form cannot accidentally send it and discover that at runtime.
+   */
+  updatePerson(
+    id: string,
+    body: { name?: string | null; contact?: string | null; note?: string | null },
+    idempotencyKey: string,
+  ): Promise<Person> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/people/${id}`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  addEngagement(
+    personId: string,
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<Engagement> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/people/${personId}/engagements`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  updateEngagement(
+    id: string,
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<Engagement> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/engagements/${id}`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  /**
+   * Agree a package from a date.
+   *
+   * `cash_period` is a REQUIRED field on a typed body rather than an optional
+   * one, for the reason `setPrice` takes `price_unit_litres` as an argument: a
+   * figure with no period is not a salary, and a default of 'month' would make
+   * every forgotten dihari rate a thirtyfold overpayment that still looks like
+   * a salary.
+   */
+  setTerm(
+    engagementId: string,
+    body: {
+      effective_from: string;
+      cash_minor: number;
+      cash_period: 'month' | 'day';
+      benefits?: {
+        kind: string;
+        quantity?: number | null;
+        unit?: string | null;
+        period?: string | null;
+        note?: string | null;
+      }[];
+      note?: string | null;
+      recorded_by: string;
+    },
+    idempotencyKey: string,
+  ): Promise<PayTermWithBenefits> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/engagements/${engagementId}/terms`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  saveRun(body: Record<string, unknown>, idempotencyKey: string): Promise<{
+    from_on: string; to_on: string; written: number; updated: number; total_minor: number;
+  }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/payroll/run`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  deleteWagePeriods(ids: string[], idempotencyKey: string): Promise<{ removed: number }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/payroll/run/delete`, { ids }, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  recordWagePayment(body: Record<string, unknown>, idempotencyKey: string): Promise<{
+    id: string; amount_minor: number; method: string;
+  }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/wage-payments`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
+  deleteWagePayment(id: string, idempotencyKey: string): Promise<{ removed: number }> {
+    return unwrap(firstValueFrom(this.http.post<never>(
+      `${BASE}/wage-payments/${id}/delete`, {}, RegistryApi.keyed(idempotencyKey),
     )));
   }
 

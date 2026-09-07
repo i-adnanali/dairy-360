@@ -92,3 +92,14 @@ export function minorToRupees(minor: number): string {
   const sign = minor < 0 ? '-' : '';
   return paisa === 0 ? `${sign}${rupees}` : `${sign}${rupees}.${String(paisa).padStart(2, '0')}`;
 }
+
+/**
+ * A package rate as it was agreed -- "Rs 25,000.00 / month".
+ *
+ * The sibling of formatRate, and never converted to a per-day figure. Nobody is
+ * paid "Rs 833.33 a day", and the statement is a document shown to the person
+ * it is about. See docs/REGISTRY_PAYROLL.md §5.
+ */
+export function formatPeriodRate(cashMinor: number, period: 'month' | 'day'): string {
+  return `${formatMinor(cashMinor)} / ${period}`;
+}

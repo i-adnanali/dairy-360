@@ -173,6 +173,11 @@ export interface AddDestinationInput {
   ended_on?: string | null;
   note?: string | null;
   recorded_by: string;
+  /**
+   * REQUIRED for `staff` and forbidden for every other kind -- the schema holds
+   * the two in a biconditional. See REGISTRY_PAYROLL.md §4.6a.
+   */
+  person_id?: string | null;
   id?: string;
   recorded_at?: string;
 }
@@ -202,11 +207,44 @@ export function addDestination(db: Db, input: AddDestinationInput): DestinationR
     );
   }
 
-  const billable = input.kind === 'home' ? false : (input.billable ?? true);
+  const billable =
+    input.kind === 'home' || input.kind === 'staff' ? false : (input.billable ?? true);
   if (input.kind === 'home' && input.billable === true) {
     refuse(
       'invalid_payload',
       'home milk is never billed -- it is milk the farm kept, not milk it sold',
+      'billable',
+    );
+  }
+
+  // A staff destination names a person, and a destination naming a person is
+  // staff milk. The schema holds this as a biconditional CHECK; refusing it here
+  // too is the same three-layer habit as the date conventions, and it is what
+  // turns a raw constraint error into a sentence the operator can act on.
+  const personId = blank(input.person_id);
+  if (input.kind === 'staff' && personId === null) {
+    refuse(
+      'invalid_payload',
+      'staff milk is recorded one destination per person, so this needs the person it ' +
+        'belongs to. A single shared staff row cannot say whose milk it was.',
+      'person_id',
+    );
+  }
+  if (input.kind !== 'staff' && personId !== null) {
+    refuse(
+      'invalid_payload',
+      `only a 'staff' destination names a person, and this one is '${input.kind}'`,
+      'person_id',
+    );
+  }
+  // Milk that is part of somebody's pay must never reach a balance. Making it
+  // billable would give one person two balances -- a buyer balance and a wage
+  // balance -- settled separately, when the farm nets it against pay.
+  if (input.kind === 'staff' && input.billable === true) {
+    refuse(
+      'invalid_payload',
+      'milk allocated as part of pay is never billed. If more was taken than the ' +
+        'allowance, record it as an adjustment on the wage ledger, not as a sale.',
       'billable',
     );
   }
@@ -236,15 +274,16 @@ export function addDestination(db: Db, input: AddDestinationInput): DestinationR
     note: blank(input.note),
     recorded_by: input.recorded_by,
     recorded_at: input.recorded_at ?? new Date().toISOString(),
+    person_id: personId,
   };
 
   db.prepare(
     `INSERT INTO registry_destinations
        (id, name, kind, billable, standing, contact, started_on, ended_on, note,
-        recorded_by, recorded_at)
+        recorded_by, recorded_at, person_id)
      VALUES
        (@id, @name, @kind, @billable, @standing, @contact, @started_on, @ended_on, @note,
-        @recorded_by, @recorded_at)`,
+        @recorded_by, @recorded_at, @person_id)`,
   ).run({ ...row, billable: row.billable ? 1 : 0, standing: row.standing ? 1 : 0 });
 
   return row;

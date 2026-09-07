@@ -34,7 +34,7 @@ import type { HerdRow } from './types';
             Start with the animals that arrived from elsewhere. Farm-born animals are created by
             their dam's calving, so they appear on their own once you record it.
           </p>
-          <a routerLink="/add" data-role="empty-cta"
+          <a routerLink="/animals/new" data-role="empty-cta"
             class="mt-5 inline-block rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white"
           >Add the first animal</a>
         </div>
@@ -43,7 +43,7 @@ import type { HerdRow } from './types';
           <h2 class="text-lg font-semibold text-farm-900">
             {{ rows()!.length }} {{ rows()!.length === 1 ? 'animal' : 'animals' }}
           </h2>
-          <a routerLink="/add" class="text-sm font-medium text-farm-700 underline">Add an animal</a>
+          <a routerLink="/animals/new" class="text-sm font-medium text-farm-700 underline">Add an animal</a>
         </div>
 
         @if (rows()!.length === 1) {

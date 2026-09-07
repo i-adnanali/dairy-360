@@ -10,6 +10,7 @@ import {
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { SessionRequired } from './session-required';
 import { WriteLog } from './after-write';
 import { PrecisionDateControl, dateBlocker } from './precision-date';
 import type { DateEntry } from './precision-date';
@@ -20,7 +21,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
 @Component({
   selector: 'app-correction-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PrecisionDateControl],
+  imports: [PrecisionDateControl, SessionRequired],
   template: `
     <form class="space-y-4" (submit)="onSubmit($event)">
       <div class="rounded-xl border border-farm-300 bg-white p-4">
@@ -95,9 +96,13 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
           </div>
         }
 
-        <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-          class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-        >{{ state.submitting() ? 'Correcting…' : 'Apply correction' }}</button>
+        @if (session.ready()) {
+          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
+            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
+          >{{ state.submitting() ? 'Correcting…' : 'Apply correction' }}</button>
+        } @else {
+          <app-session-required what="a correction" />
+        }
       }
 
       @if (state.result(); as r) {
@@ -138,7 +143,7 @@ export class CorrectionForm {
   readonly done = input<(() => void) | null>(null);
 
   private readonly api = inject(RegistryApi);
-  private readonly session = inject(Session);
+  protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
   private readonly dateControl = viewChild(PrecisionDateControl);
 

@@ -45,6 +45,20 @@ import { Target } from './target';
         <button type="button" data-role="change-session" (click)="change()"
           class="ml-auto text-farm-700 underline">Change</button>
       </div>
+    } @else {
+      <!-- STATED, not blank.
+           This row used to be absent when no session was set, because nothing
+           downstream rendered either -- the gate filled the screen, so there
+           was nothing to explain. Now that reads are free, an operator can be
+           three screens deep with no provenance set, and "nothing you do here
+           is being recorded" is exactly the kind of fact target.ts argues must
+           never be communicated by an absence. -->
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-farm-200
+        bg-farm-50 px-4 py-2 text-xs" data-role="browsing">
+        <span class="text-farm-600">Browsing — nothing is being recorded.</span>
+        <button type="button" data-role="start-session" (click)="session.requestSetup()"
+          class="ml-auto font-medium text-farm-800 underline">Start recording</button>
+      </div>
     }
   `,
 })

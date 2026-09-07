@@ -3,7 +3,7 @@
 //   npm run verify:registry -w server
 //   npm run verify:registry -w server -- --as-of=2026-03-01
 //
-// Runs invariants 0-13 against server/dairy.db and prints the precision
+// Runs invariants 0-28 against server/dairy.db and prints the precision
 // histogram and the calving-interval report. Exits 0 clean, non-zero with a
 // printed diff otherwise.
 //
@@ -78,7 +78,7 @@ Usage:
                    READ-ONLY and never migrated -- this is how a backup taken by
                    \`npm run registry:backup -w server\` gets checked.
 
-Checks invariants 0-13 from docs/REGISTRY.md against server/dairy.db, then
+Checks invariants 0-28 from docs/REGISTRY.md against server/dairy.db, then
 prints the precision histogram and the calving-interval report. Needs no
 running server.
 `.trim();

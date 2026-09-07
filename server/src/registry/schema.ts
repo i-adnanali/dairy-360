@@ -821,6 +821,410 @@ CREATE TABLE registry_payments (
 CREATE INDEX idx_registry_payments_dest ON registry_payments(destination_id, occurred_on);
 `;
 
+// ---------------------------------------------------------------------------
+// Migration 6 -- people, engagements, packages and the wage ledger
+// (docs/REGISTRY_PAYROLL.md §9)
+// ---------------------------------------------------------------------------
+
+/**
+ * SIX TABLES, ALL RECORDS, NONE A PROJECTION.
+ *
+ * They go in REGISTRY_TABLES and stay out of REGISTRY_PROJECTION_TABLES, by the
+ * test that decides it: nothing here is derivable from the event log. The
+ * rebuild must never touch them, and backup.ts picks them up with nothing to
+ * remember, because SOURCE_OF_TRUTH_TABLES is computed rather than listed.
+ *
+ * THE THIRD AXIS. Migration 1 hangs off an animal; migration 5 hangs off a
+ * counterparty; these hang off a person the farm employs. That is why this is
+ * not a "step" either -- see docs/REGISTRY_PAYROLL.md §1.
+ *
+ * A PLAIN SET OF CREATEs. Migration 7 immediately below is the expensive half,
+ * and it is kept separate for the reason migration 4 was kept separate from
+ * migration 5: putting a rebuild and a set of CREATEs behind one review is what
+ * REGISTRY.md refused at migration 3.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY registry_people AND NOT registry_employees
+ * ---------------------------------------------------------------------------
+ * Because observed_by -- the column this table finally gives a referent -- also
+ * holds the vet, the AI technician, and whoever sold the farm a buffalo. Most
+ * rows here are employees; not all of them are, and the ones that are not are
+ * exactly the rows a narrower name would discourage anyone from adding.
+ * Employment is what registry_engagements says, and a person with no engagement
+ * is a legitimate and useful row.
+ *
+ * ---------------------------------------------------------------------------
+ * AND WHY THE LINK TO observed_by IS BY VALUE, NEVER A FOREIGN KEY
+ * ---------------------------------------------------------------------------
+ * Two independent reasons, either sufficient. Those columns hold people who are
+ * not employees, so constraining them would refuse legitimate entries -- the
+ * mandatory-field-becomes-a-reflex argument, arriving from a new direction. And
+ * registry_animal_events is APPEND-ONLY, so historical values cannot be
+ * rewritten to point anywhere: a foreign key could only ever cover rows written
+ * after this migration, which is a constraint true of some rows and not others,
+ * and that is worse than no constraint at all.
+ *
+ * So identifier holds the same string that goes in observed_by, and an
+ * identifier matching no person is a /check REPORT LINE rather than a
+ * violation. See docs/REGISTRY_PAYROLL.md §2.
+ */
+const MIGRATION_6_LABOUR = `
+-- Identity, and nothing else. NO DATES ON THIS TABLE: every date lives on an
+-- engagement, which is what makes multiple stints expressible at all.
+--
+-- COLLATE NOCASE on the unique column, so 'abdul' and 'Abdul' collide HERE even
+-- though history holds both. It folds ASCII A-Z only, which is a real limit
+-- rather than an oversight: every identifier on this farm is Latin-script
+-- transliteration.
+--
+-- CHANGING identifier AFTER RECORDS EXIST must be refused at the write
+-- boundary. The link is by value, so the value is not free to move -- an edit
+-- would silently orphan every historical observed_by that matched it.
+CREATE TABLE registry_people (
+  id          TEXT PRIMARY KEY,
+  identifier  TEXT NOT NULL COLLATE NOCASE UNIQUE,
+  name        TEXT,
+  contact     TEXT,
+  note        TEXT,
+  recorded_by TEXT NOT NULL,
+  recorded_at TEXT NOT NULL,
+
+  CONSTRAINT a_person_has_an_identifier
+    CHECK (length(trim(identifier)) > 0)
+);
+
+-- One row per STINT.
+--
+-- NOTE WHAT IS DELIBERATELY ABSENT: no unique constraint pinning one engagement
+-- per person, and no overlap constraint. The farm asked for this to be
+-- flexible, and flexible has to mean something specific or it means nothing --
+-- people leave and come back, and somebody can be milker and night watchman at
+-- once. Overlap, and more than one open engagement, are /check report lines.
+--
+-- INVARIANT 8 (one-open-lactation) IS DELIBERATELY NOT COPIED. An animal can
+-- only be lactating once; a person can hold two jobs. Said here because a
+-- reader who knows the lactation code will come looking for it.
+--
+-- kind is the standing/occasional split of registry_destinations arriving on a
+-- third table: 'permanent' is on the monthly run and must be answered, 'daily'
+-- is not a row until they worked a day.
+CREATE TABLE registry_engagements (
+  id          TEXT PRIMARY KEY,
+  person_id   TEXT NOT NULL REFERENCES registry_people(id),
+  kind        TEXT NOT NULL CHECK (kind IN ('permanent','daily')),
+  role        TEXT,
+  started_on  TEXT NOT NULL,
+  ended_on    TEXT,
+  -- Free text on purpose: the vocabulary of why somebody left is not one this
+  -- repo should be inventing.
+  end_reason  TEXT,
+  note        TEXT,
+  recorded_by TEXT NOT NULL,
+  recorded_at TEXT NOT NULL,
+
+  CONSTRAINT started_on_is_a_date
+    CHECK (started_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT ended_on_is_a_date
+    CHECK (ended_on IS NULL OR ended_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT the_range_runs_forwards
+    CHECK (ended_on IS NULL OR ended_on >= started_on)
+);
+CREATE INDEX idx_registry_engagements_person
+  ON registry_engagements(person_id, started_on);
+
+-- The AGREEMENT. Effective-dated: a raise is a NEW ROW, never an UPDATE, and
+-- the term in force on a date is the latest row at or before it.
+--
+-- SCOPED TO THE ENGAGEMENT, NOT THE PERSON, and that is the whole reason
+-- engagements are a table rather than a range on the person row. Without it, a
+-- term lookup for a returning worker walks back past the gap and finds their
+-- PRE-DEPARTURE salary -- a bug that is silent, arrives months later, and looks
+-- exactly like a correct answer.
+--
+-- A RATE IS TWO VALUES, as it is for milk. But cash_period is an ENUM where
+-- price_unit_litres is a number, and the divergence is the point: a month is
+-- not a fixed quantity of days, so storing "per 30 days" to keep the shapes
+-- identical would assert something the agreement does not say, and would be
+-- wrong eight months a year.
+--
+-- NO APPEND-ONLY TRIGGERS, safe for the reason the price table is safe: a term
+-- is only the DEFAULT OFFERED AT ENTRY. What was actually paid is on the wage
+-- period, so correcting a term rewrites no history.
+CREATE TABLE registry_pay_terms (
+  id             TEXT PRIMARY KEY,
+  engagement_id  TEXT NOT NULL REFERENCES registry_engagements(id),
+  effective_from TEXT NOT NULL,
+  -- Zero is legal: a package that is entirely in kind is unusual, not nonsense,
+  -- and refusing it would push it into a fiction somewhere else.
+  cash_minor     INTEGER NOT NULL CHECK (cash_minor >= 0),
+  cash_period    TEXT NOT NULL CHECK (cash_period IN ('month','day')),
+  recorded_by    TEXT NOT NULL,
+  recorded_at    TEXT NOT NULL,
+  note           TEXT,
+
+  CONSTRAINT effective_from_is_a_date
+    CHECK (effective_from GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  -- A second term on the same date is not a raise, it is a typo, and which one
+  -- won would be silent.
+  CONSTRAINT one_term_per_engagement_per_day
+    UNIQUE (engagement_id, effective_from)
+);
+CREATE INDEX idx_registry_pay_terms_engagement
+  ON registry_pay_terms(engagement_id, effective_from);
+
+-- The in-kind half of the package. ROWS, NOT COLUMNS -- a column per benefit is
+-- a migration per benefit, the same argument that made calves and spoilage a
+-- destination row rather than a schema change.
+--
+-- THEY HANG OFF THE TERM, NOT THE ENGAGEMENT, because a raise usually moves the
+-- milk allowance too. Effective-dating the package as a unit means "what were
+-- they on in March" is one lookup, and the parts cannot drift out of step with
+-- the whole.
+--
+-- THE VOCABULARY IS THE FARM'S, NOT A GUESS. Asked before this was written:
+-- milk, flour or wheat, accommodation. 'utilities' was in the draft and was
+-- REMOVED rather than carried unused -- a value nobody files anything under is
+-- the farm_events.is_synthetic failure in miniature, a discriminator whose
+-- correctness is never exercised. Subsidised electricity, if it ever happens,
+-- is an 'other' line with a note, which carries more information than a bare
+-- enum value would.
+--
+-- NOTE THE ABSENT valued_minor. A rupee figure for milk or flour needs a
+-- reference price with no transaction behind it, and a column would be summed
+-- by the next person to write a balance query -- not maliciously, but because
+-- it is right there and it looks like money. The value of a package is a REPORT
+-- line, computed from a named reference price and labelled imputed. Leaving the
+-- column out makes the mistake unrepresentable rather than discouraged, which
+-- is the standard this repo has held since deliveries.paid.
+CREATE TABLE registry_pay_benefits (
+  id       TEXT PRIMARY KEY,
+  term_id  TEXT NOT NULL REFERENCES registry_pay_terms(id),
+  kind     TEXT NOT NULL CHECK (
+             kind IN ('milk','flour','accommodation','other')
+           ),
+  quantity REAL,
+  unit     TEXT,
+  period   TEXT CHECK (period IS NULL OR period IN ('day','month')),
+  note     TEXT,
+
+  CONSTRAINT quantity_is_positive
+    CHECK (quantity IS NULL OR quantity > 0),
+  -- A figure without its unit is not a quantity -- money.ts's argument about a
+  -- rate without its lot size, applied to atta.
+  CONSTRAINT a_quantity_has_a_unit
+    CHECK ((quantity IS NULL) = (unit IS NULL)),
+  CONSTRAINT a_quantity_has_a_period
+    CHECK (quantity IS NULL OR period IS NOT NULL),
+  -- An unlabelled benefit is prose about something nobody can price later.
+  CONSTRAINT other_says_what_it_is
+    CHECK (kind <> 'other' OR (note IS NOT NULL AND length(trim(note)) > 0))
+);
+CREATE INDEX idx_registry_pay_benefits_term ON registry_pay_benefits(term_id);
+
+-- The DEBIT side. from_on/to_on rather than a month, which is what lets ONE
+-- TABLE serve a salaried month and a single dihari day:
+--
+--   permanent   2026-09-01 -> 2026-09-30   Rs 25,000
+--   dihari      2026-09-14 -> 2026-09-14   Rs  1,200
+--
+-- THE AGREED FIGURE IS THE TRANSACTION. A month in which somebody took four
+-- days' leave is settled by conversation, not by arithmetic. A system that
+-- computes Rs 25,000 because the calendar says a month elapsed is inventing a
+-- number nobody agreed to, and one that computes a deduction is inventing a
+-- policy as well.
+--
+-- NO CAPTURED RATE, unlike registry_dispatches, and whoever reads that table
+-- first will come looking for one. A dispatch captures its price because its
+-- amount is DERIVED from it (litres x rate), and money must never be recomputed
+-- from a lookup that can move underneath it. A wage period's amount is not
+-- derived from anything -- it IS the stored figure -- so there is nothing to
+-- capture. Whether it matched the term is answered by looking the term up, and
+-- a difference is legitimate rather than a violation.
+CREATE TABLE registry_wage_periods (
+  id            TEXT PRIMARY KEY,
+  engagement_id TEXT NOT NULL REFERENCES registry_engagements(id),
+  -- A bonus is a debit like any other. Giving it a kind keeps the sign positive
+  -- on both sides of the ledger: a bonus filed as a negative payment would be
+  -- arithmetically correct and unreadable on the statement handed to the person
+  -- it is for. A DEDUCTION goes the other way and is an 'adjustment' payment,
+  -- because it reduces what the farm owes, which is what the credit side does.
+  kind          TEXT NOT NULL CHECK (kind IN ('wage','bonus')),
+  from_on       TEXT NOT NULL,
+  to_on         TEXT NOT NULL,
+  amount_minor  INTEGER NOT NULL CHECK (amount_minor >= 0),
+  observed_by   TEXT,
+  recorded_by   TEXT NOT NULL,
+  recorded_at   TEXT NOT NULL,
+  source_form   TEXT NOT NULL CHECK (
+                  source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                ),
+  note          TEXT,
+
+  CONSTRAINT from_on_is_a_date
+    CHECK (from_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT to_on_is_a_date
+    CHECK (to_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT the_range_runs_forwards
+    CHECK (to_on >= from_on),
+  -- A bonus is a moment, not a period.
+  CONSTRAINT a_bonus_is_one_day
+    CHECK (kind <> 'bonus' OR to_on = from_on),
+  -- Stops two September rows. Does NOT stop OVERLAPPING ranges -- a CHECK
+  -- cannot see another row -- so overlap is invariant 24, and it is the ONE
+  -- hard violation in a deliberately loose model: two overlapping wage periods
+  -- is double payment, which is an error and not a shape of employment.
+  CONSTRAINT one_period_per_engagement_per_start
+    UNIQUE (engagement_id, from_on)
+);
+CREATE INDEX idx_registry_wage_periods_engagement
+  ON registry_wage_periods(engagement_id, from_on);
+CREATE INDEX idx_registry_wage_periods_date
+  ON registry_wage_periods(from_on, to_on);
+
+-- The CREDIT side.
+--
+-- KEYED ON THE PERSON, NOT THE ENGAGEMENT, and the asymmetry is deliberate:
+-- earning is per-engagement because the terms are, but one cash handover
+-- settles whatever is outstanding, and an advance paid between two stints
+-- belongs to the person rather than to either job. It is also how the farm
+-- thinks -- "what do I owe Rashid", never "what do I owe Rashid's second
+-- engagement".
+--
+-- NO ADVANCE TABLE, NO ADVANCE FLAG, NO RECOVERY SCHEDULE, and that is not a
+-- simplification -- it is what the ledger already does. An advance is money
+-- handed over before it was earned, so it is an ordinary payment dated when it
+-- happened, and the balance goes negative. Recovery is then not an operation at
+-- all: the next wage period is a debit and the balance walks back towards zero
+-- on its own. A recovery schedule would be a second representation of
+-- arithmetic the ledger already does, and the two could disagree.
+CREATE TABLE registry_wage_payments (
+  id           TEXT PRIMARY KEY,
+  person_id    TEXT NOT NULL REFERENCES registry_people(id),
+  occurred_on  TEXT NOT NULL,
+  amount_minor INTEGER NOT NULL,
+  method       TEXT NOT NULL CHECK (method IN ('cash','bank','adjustment')),
+  reference    TEXT,
+  observed_by  TEXT,
+  recorded_by  TEXT NOT NULL,
+  recorded_at  TEXT NOT NULL,
+  note         TEXT,
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  -- Only an adjustment may be signed. Cash and bank are money that changed
+  -- hands, and a negative one is a different fact wearing the wrong label.
+  CONSTRAINT cash_and_bank_are_positive
+    CHECK (method = 'adjustment' OR amount_minor > 0),
+  -- A signed number with no sentence attached is unauditable a month later.
+  CONSTRAINT an_adjustment_explains_itself
+    CHECK (method <> 'adjustment'
+           OR (amount_minor <> 0 AND note IS NOT NULL AND length(trim(note)) > 0))
+);
+CREATE INDEX idx_registry_wage_payments_person
+  ON registry_wage_payments(person_id, occurred_on);
+`;
+
+// ---------------------------------------------------------------------------
+// Migration 7 -- `staff` destinations, alone
+// (docs/REGISTRY_PAYROLL.md §4.6a)
+// ---------------------------------------------------------------------------
+
+/**
+ * Milk allocated to a staff member as part of a salary arrangement.
+ *
+ * The farm's answer -- "sometime a staff member can also be allocated milk
+ * portion as part of the salary arrangement" -- needs two things migration 5
+ * did not leave room for, and the first of them forces a rebuild.
+ *
+ *   1. `kind` has no 'staff' value. It is dodhi|household|shop|home|other, so
+ *      staff milk could only be filed as 'home' (which is the household) or
+ *      'other' (which says nothing). Adding an enum value is a CHECK change,
+ *      and SQLite has ALTER TABLE ADD COLUMN but no ADD CONSTRAINT.
+ *   2. Nothing links a destination to a person. A nullable `person_id`, with a
+ *      PARTIAL unique index so one person cannot hold two milk destinations.
+ *
+ * WHY ONE DESTINATION PER STAFF MEMBER AND NOT ONE SHARED 'staff' ROW:
+ * registry_dispatches is UNIQUE (destination_id, occurred_on, session), so a
+ * shared destination holds exactly one row per session -- the aggregate -- and
+ * whose milk it was is unrecoverable from it. Three staff on an allowance need
+ * three destinations.
+ *
+ * MILK ABOVE THE ALLOWANCE IS A WAGE-LEDGER ADJUSTMENT, NEVER A PRICED
+ * DISPATCH. Invariant 19 already refuses a priced non-billable dispatch, and
+ * the refusal is right: making the destination billable would give one person
+ * two balances -- a buyer balance and a wage balance, settled separately --
+ * when the farm nets it against pay.
+ *
+ * THREE INBOUND FOREIGN KEYS, where migration 2 dealt with one self-reference:
+ * registry_destination_prices, registry_dispatches and registry_payments all
+ * point here. Dropping the table registers deferred violations that recreating
+ * it does not clear, so this needs `rebuildsTables`. Dropping it also drops
+ * idx_registry_destinations_active, recreated below; there are no triggers on
+ * this table to lose.
+ *
+ * MUST RUN AFTER MIGRATION 6: the new foreign key points at registry_people.
+ */
+const MIGRATION_7_STAFF_DESTINATIONS = `
+CREATE TABLE registry_destinations_new (
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  -- NEW in migration 7: 'staff'.
+  kind        TEXT NOT NULL CHECK (
+                kind IN ('dodhi','household','shop','home','staff','other')
+              ),
+  billable    INTEGER NOT NULL CHECK (billable IN (0,1)),
+  standing    INTEGER NOT NULL CHECK (standing IN (0,1)),
+  contact     TEXT,
+  started_on  TEXT NOT NULL,
+  ended_on    TEXT,
+  note        TEXT,
+  recorded_by TEXT NOT NULL,
+  recorded_at TEXT NOT NULL,
+
+  -- NEW in migration 7. Nullable, because almost no destination is a person.
+  person_id   TEXT REFERENCES registry_people(id),
+
+  CONSTRAINT started_on_is_a_date
+    CHECK (started_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT ended_on_is_a_date
+    CHECK (ended_on IS NULL OR ended_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT the_range_runs_forwards
+    CHECK (ended_on IS NULL OR ended_on >= started_on),
+  CONSTRAINT a_destination_is_named
+    CHECK (length(trim(name)) > 0),
+  CONSTRAINT home_is_never_billable
+    CHECK (kind <> 'home' OR billable = 0),
+  -- NEW. Biconditional, the shape of taken_has_litres: a staff destination
+  -- names a person, and a destination naming a person is staff milk. Neither
+  -- half is useful without the other.
+  CONSTRAINT staff_names_a_person
+    CHECK ((kind = 'staff') = (person_id IS NOT NULL)),
+  -- NEW. Milk that is part of somebody's pay must never reach a balance -- the
+  -- structural half of the argument, not merely the legible half.
+  CONSTRAINT staff_is_never_billable
+    CHECK (kind <> 'staff' OR billable = 0)
+);
+
+INSERT INTO registry_destinations_new
+  SELECT id, name, kind, billable, standing, contact, started_on, ended_on, note,
+         recorded_by, recorded_at, NULL
+    FROM registry_destinations;
+
+DROP TABLE registry_destinations;
+ALTER TABLE registry_destinations_new RENAME TO registry_destinations;
+
+CREATE INDEX idx_registry_destinations_active
+  ON registry_destinations(started_on, ended_on);
+
+-- PARTIAL, so the overwhelming majority of destinations (person_id NULL) are
+-- not forced unique -- the same shape and the same reason as
+-- idx_registry_events_supersedes. One person cannot hold two milk destinations,
+-- because then "what did they take" would have two answers.
+CREATE UNIQUE INDEX idx_registry_destinations_person
+  ON registry_destinations(person_id)
+  WHERE person_id IS NOT NULL;
+`;
+
 export interface Migration {
   /** Applied inside a transaction that also bumps user_version. */
   up: (db: Db) => void;
@@ -857,6 +1261,13 @@ export const MIGRATIONS: readonly Migration[] = [
   // Four plain CREATEs (docs/REGISTRY_SALES.md). Nothing existing is touched,
   // so no `rebuildsTables` and no foreign_keys relaxation.
   { up: (db) => db.exec(MIGRATION_5_SALES) },
+  // Six plain CREATEs (docs/REGISTRY_PAYROLL.md). Same cheap shape as 3 and 5.
+  { up: (db) => db.exec(MIGRATION_6_LABOUR) },
+  // Rebuilds registry_destinations to widen the `kind` enum and add person_id.
+  // Kept apart from 6 for the reason 4 was kept apart from 5: a rebuild and a
+  // set of plain CREATEs must not sit behind one review. THREE INBOUND foreign
+  // keys, where migration 2 had one self-reference, so the same relaxation.
+  { up: (db) => db.exec(MIGRATION_7_STAFF_DESTINATIONS), rebuildsTables: true },
 ];
 
 /** The version a fully-migrated database reports. */
@@ -1078,20 +1489,27 @@ export const REGISTRY_TABLES = [
   'registry_destination_prices',
   'registry_destinations',
   'registry_dispatches',
+  'registry_engagements',
   'registry_lactations',
   'registry_milkings',
   'registry_parentage',
+  'registry_pay_benefits',
+  'registry_pay_terms',
   'registry_payments',
+  'registry_people',
   'registry_serial_counter',
+  'registry_wage_payments',
+  'registry_wage_periods',
 ] as const;
 
 /**
  * The projection tables -- the ones the rebuild is allowed to clear.
  *
  * `registry_milkings` is deliberately ABSENT, and so are the four sales tables
- * added by migration 5. The test for this list is whether every row is derivable
- * from the event log; a milk figure is not, a litre sold is not, and neither is
- * a payment. Clearing any of them would destroy the only copy. They are records,
+ * added by migration 5 and the six labour tables added by migration 6. The test
+ * for this list is whether every row is derivable from the event log; a milk
+ * figure is not, a litre sold is not, a payment is not, and neither is anybody's
+ * salary. Clearing any of them would destroy the only copy. They are records,
  * like the event log and registry_animals.
  */
 export const REGISTRY_PROJECTION_TABLES = [

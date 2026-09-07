@@ -20,8 +20,9 @@
 // It exists because the alternative was switching to a terminal mid-entry to
 // read the histogram, which nobody keeps doing past animal five.
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RegistryApi } from './api';
+import { urlParams } from './url-state';
 import { formatMinor, formatRate } from './money';
 import { farmToday } from './today';
 import type { Reconciliation, Verification } from './types';
@@ -60,6 +61,33 @@ import type { Reconciliation, Verification } from './types';
                 <li class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-900">
                   <span class="font-mono text-xs">[{{ x.invariant }}] {{ x.name }}</span>
                   <span class="ml-2">{{ x.detail }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <!-- THE LABOUR REPORT, AND IT IS NOT A VIOLATIONS LIST.
+             Every line here fires on rows the farm ASKED to be able to write:
+             overlapping stints, a settlement paid after somebody left, a figure
+             that differs from the agreement because there was leave. So it is
+             rendered in amber and headed "worth a look", never in the red the
+             invariants use -- a report styled as a defect list is one people
+             learn to ignore, which costs more than the four lines are worth.
+             See docs/REGISTRY_PAYROLL.md §13. -->
+        <section class="rounded-xl border border-farm-300 bg-white p-4">
+          <h3 class="text-sm font-medium text-farm-800">People — worth a look</h3>
+          @if (data.labour.length === 0) {
+            <p class="mt-2 text-sm text-farm-700" data-role="labour-none">
+              Nothing to flag. These are not violations — they are things that are legitimate and
+              still worth seeing.
+            </p>
+          } @else {
+            <ul class="mt-2 space-y-1" data-role="labour">
+              @for (l of data.labour; track l.detail) {
+                <li class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                  <span class="font-mono text-xs">{{ l.kind }}</span>
+                  <span class="ml-2">{{ l.detail }}</span>
                 </li>
               }
             </ul>
@@ -323,9 +351,21 @@ export class VerificationPanel {
     void this.load();
   }
 
+  /**
+   * `?as_of=` pins the run to a date. Absent -- the normal case -- means today,
+   * and the URL stays bare so a bookmark to /check keeps meaning "now".
+   *
+   * There is deliberately NO date control for this. /check answers "how does it
+   * look", and a date picker would invite treating it as a history browser,
+   * which it is not. The parameter exists so a violation can be reproduced from
+   * a link somebody sent.
+   */
+  private readonly url = urlParams({ as_of: '' });
+  protected readonly asOf = computed(() => this.url.value().as_of || undefined);
+
   protected async load(): Promise<void> {
     try {
-      this.v.set(await this.api.verification());
+      this.v.set(await this.api.verification(this.asOf()));
       this.loadError.set(null);
     } catch (e) {
       this.loadError.set(e instanceof Error ? e.message : String(e));

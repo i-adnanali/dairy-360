@@ -96,6 +96,14 @@ test('no harness-reachable module names the forbidden imports at all', () => {
     'destinations.ts',
     'dispatch.ts',
     'ledger.ts',
+    // The labour modules (docs/REGISTRY_PAYROLL.md). Same rule, same reason.
+    // This list is still maintained by hand and OPEN.md still says so; adding
+    // three at once is exactly when one gets forgotten, so they went in with
+    // the modules rather than after.
+    'people.ts',
+    'payroll.ts',
+    'wages.ts',
+    'overview.ts',
   ]) {
     const src = read(file);
     for (const forbidden of ["'../db'", "'../seed'"]) {

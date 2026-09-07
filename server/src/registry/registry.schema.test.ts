@@ -537,17 +537,17 @@ function dbAtVersion1(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('a fresh database lands on the current target version, now 5', () => {
+test('a fresh database lands on the current target version, now 7', () => {
   // The literal is deliberate and this test is meant to fail when a migration is
   // added: it forces whoever adds one to state the new number here rather than
   // letting TARGET_VERSION verify itself against itself.
   const db = freshDb();
   assert.equal(db.pragma('user_version', { simple: true }), TARGET_VERSION);
-  assert.equal(TARGET_VERSION, 5);
+  assert.equal(TARGET_VERSION, 7);
   db.close();
 });
 
-test('migrations 2 through 5 upgrade a v1 database and PRESERVE its rows', () => {
+test('migrations 2 through 7 upgrade a v1 database and PRESERVE its rows', () => {
   // The rebuild is create-copy-drop-rename. The copy is the part that would
   // silently lose data if it were wrong, so it is tested with data present --
   // even though the real database was empty when this shipped.
@@ -569,12 +569,12 @@ test('migrations 2 through 5 upgrade a v1 database and PRESERVE its rows', () =>
 
   const result = runMigrations(db);
   assert.equal(result.from, 1);
-  assert.equal(result.to, 5);
+  assert.equal(result.to, 7);
   assert.equal(
     result.applied,
-    4,
-    'the estimated-convention rebuild, the milking table, the override columns ' +
-      'AND the four sales tables',
+    6,
+    'the estimated-convention rebuild, the milking table, the override columns, ' +
+      'the four sales tables, the six labour tables AND the staff-destination rebuild',
   );
 
   const rows = db
@@ -672,8 +672,12 @@ test('migration 4 MOVES a payload override into the columns, and out of the payl
 
   const result = runMigrations(db);
   assert.equal(result.from, 3);
-  assert.equal(result.to, 5);
-  assert.equal(result.applied, 2, 'the override rebuild and the sales tables');
+  assert.equal(result.to, 7);
+  assert.equal(
+    result.applied,
+    4,
+    'the override rebuild, the sales tables, the labour tables and the staff rebuild',
+  );
 
   const rows = db
     .prepare(
@@ -895,4 +899,406 @@ test('the other three precisions are unaffected by migration 2', () => {
     );
     db.close();
   }
+});
+
+// ---------------------------------------------------------------------------
+// Migration 6 -- people, engagements, packages and the wage ledger
+// (docs/REGISTRY_PAYROLL.md §9)
+// ---------------------------------------------------------------------------
+
+/** A person, an engagement and a term, so the child tables have parents. */
+function labourFixture(db: ReturnType<typeof freshDb>): void {
+  db.prepare(
+    `INSERT INTO registry_people (id,identifier,recorded_by,recorded_at)
+     VALUES ('per_1','imran','adnan','t')`,
+  ).run();
+  db.prepare(
+    `INSERT INTO registry_engagements (id,person_id,kind,started_on,recorded_by,recorded_at)
+     VALUES ('eng_1','per_1','permanent','2024-01-01','adnan','t')`,
+  ).run();
+  db.prepare(
+    `INSERT INTO registry_pay_terms
+       (id,engagement_id,effective_from,cash_minor,cash_period,recorded_by,recorded_at)
+     VALUES ('trm_1','eng_1','2024-01-01',2500000,'month','adnan','t')`,
+  ).run();
+}
+
+const insPerson = (db: ReturnType<typeof freshDb>, id: string, identifier: string) =>
+  db
+    .prepare(
+      `INSERT INTO registry_people (id,identifier,recorded_by,recorded_at)
+       VALUES (?,?,'adnan','t')`,
+    )
+    .run(id, identifier);
+
+test('a person identifier is unique CASE-INSENSITIVELY', () => {
+  // The whole reason registry_people exists is that free text produced `abdul`,
+  // `Abdul` and `abdul_r`. History still holds all three; this table must not.
+  const db = freshDb();
+  insPerson(db, 'per_1', 'abdul');
+  assert.throws(() => insPerson(db, 'per_2', 'Abdul'), /UNIQUE/);
+  assert.throws(() => insPerson(db, 'per_3', 'ABDUL'), /UNIQUE/);
+  assert.doesNotThrow(() => insPerson(db, 'per_4', 'abdul_r'));
+  db.close();
+});
+
+test('a person identifier cannot be blank or whitespace', () => {
+  const db = freshDb();
+  assert.throws(() => insPerson(db, 'per_1', '   '), /a_person_has_an_identifier/);
+  db.close();
+});
+
+test('a person may hold TWO OVERLAPPING engagements -- the flexibility is deliberate', () => {
+  // People leave and come back, and somebody can be milker and night watchman at
+  // once. Invariant 8's one-open-lactation rule is deliberately NOT copied here;
+  // overlap is a /check report line. If this test ever starts failing, someone
+  // has added a constraint the farm explicitly asked not to have.
+  const db = freshDb();
+  insPerson(db, 'per_1', 'imran');
+  const ins = db.prepare(
+    `INSERT INTO registry_engagements (id,person_id,kind,started_on,ended_on,recorded_by,recorded_at)
+     VALUES (?,'per_1',?,?,?,'adnan','t')`,
+  );
+  assert.doesNotThrow(() => ins.run('eng_1', 'permanent', '2024-01-01', null));
+  assert.doesNotThrow(() => ins.run('eng_2', 'daily', '2024-06-01', null));
+  assert.doesNotThrow(() => ins.run('eng_3', 'permanent', '2022-01-01', '2023-06-30'));
+  assert.equal(
+    (db.prepare(`SELECT COUNT(*) n FROM registry_engagements`).get() as { n: number }).n,
+    3,
+  );
+  db.close();
+});
+
+test('an engagement range must run forwards', () => {
+  const db = freshDb();
+  insPerson(db, 'per_1', 'imran');
+  assert.throws(
+    () =>
+      db
+        .prepare(
+          `INSERT INTO registry_engagements
+             (id,person_id,kind,started_on,ended_on,recorded_by,recorded_at)
+           VALUES ('eng_1','per_1','daily','2024-06-01','2024-05-01','adnan','t')`,
+        )
+        .run(),
+    /the_range_runs_forwards/,
+  );
+  db.close();
+});
+
+test('a second pay term on the same effective_from is refused', () => {
+  // Not a raise -- a typo, and which one won would be silent.
+  const db = freshDb();
+  labourFixture(db);
+  assert.throws(
+    () =>
+      db
+        .prepare(
+          `INSERT INTO registry_pay_terms
+             (id,engagement_id,effective_from,cash_minor,cash_period,recorded_by,recorded_at)
+           VALUES ('trm_2','eng_1','2024-01-01',2600000,'month','adnan','t')`,
+        )
+        .run(),
+    /UNIQUE/,
+  );
+  db.close();
+});
+
+test('a term with zero cash is legal -- a package may be entirely in kind', () => {
+  const db = freshDb();
+  labourFixture(db);
+  assert.doesNotThrow(() =>
+    db
+      .prepare(
+        `INSERT INTO registry_pay_terms
+           (id,engagement_id,effective_from,cash_minor,cash_period,recorded_by,recorded_at)
+         VALUES ('trm_2','eng_1','2025-01-01',0,'month','adnan','t')`,
+      )
+      .run(),
+  );
+  db.close();
+});
+
+test('benefit quantity, unit and period stand or fall together', () => {
+  const db = freshDb();
+  labourFixture(db);
+  const ins = db.prepare(
+    `INSERT INTO registry_pay_benefits (id,term_id,kind,quantity,unit,period,note)
+     VALUES (?,'trm_1',?,?,?,?,?)`,
+  );
+  // Accommodation is the case with none of the three, and it must pass.
+  assert.doesNotThrow(() => ins.run('ben_1', 'accommodation', null, null, null, null));
+  assert.doesNotThrow(() => ins.run('ben_2', 'milk', 2, 'L', 'day', null));
+  assert.doesNotThrow(() => ins.run('ben_3', 'flour', 20, 'kg', 'month', null));
+  assert.throws(
+    () => ins.run('ben_4', 'flour', 20, null, 'month', null),
+    /a_quantity_has_a_unit/,
+    'a figure without its unit is not a quantity',
+  );
+  assert.throws(
+    () => ins.run('ben_5', 'flour', 20, 'kg', null, null),
+    /a_quantity_has_a_period/,
+  );
+  assert.throws(() => ins.run('ben_6', 'milk', 0, 'L', 'day', null), /quantity_is_positive/);
+  db.close();
+});
+
+test("benefit kind 'other' must say what it is", () => {
+  const db = freshDb();
+  labourFixture(db);
+  const ins = db.prepare(
+    `INSERT INTO registry_pay_benefits (id,term_id,kind,note) VALUES (?,'trm_1','other',?)`,
+  );
+  assert.throws(() => ins.run('ben_1', null), /other_says_what_it_is/);
+  assert.throws(() => ins.run('ben_2', '   '), /other_says_what_it_is/);
+  assert.doesNotThrow(() => ins.run('ben_3', 'electricity for the quarters'));
+  db.close();
+});
+
+test("'utilities' is NOT a benefit kind -- it was removed rather than carried unused", () => {
+  // The farm's list is milk, flour and accommodation. A value nobody files
+  // anything under is the farm_events.is_synthetic failure in miniature.
+  const db = freshDb();
+  labourFixture(db);
+  assert.throws(
+    () =>
+      db
+        .prepare(
+          `INSERT INTO registry_pay_benefits (id,term_id,kind) VALUES ('ben_1','trm_1','utilities')`,
+        )
+        .run(),
+    /CHECK constraint failed/,
+  );
+  db.close();
+});
+
+const insWagePeriod = (db: ReturnType<typeof freshDb>) =>
+  db.prepare(
+    `INSERT INTO registry_wage_periods
+       (id,engagement_id,kind,from_on,to_on,amount_minor,recorded_by,recorded_at,source_form)
+     VALUES (?,?,?,?,?,?,'adnan','t','direct_entry')`,
+  );
+
+test('one wage-period table serves a salaried month and a single dihari day', () => {
+  // The claim that registry_wage_periods needs no branch for the two kinds of
+  // engagement, exercised rather than asserted.
+  const db = freshDb();
+  labourFixture(db);
+  db.prepare(
+    `INSERT INTO registry_engagements (id,person_id,kind,started_on,recorded_by,recorded_at)
+     VALUES ('eng_2','per_1','daily','2026-01-01','adnan','t')`,
+  ).run();
+  const ins = insWagePeriod(db);
+  assert.doesNotThrow(() =>
+    ins.run('wag_1', 'eng_1', 'wage', '2026-09-01', '2026-09-30', 2500000),
+  );
+  assert.doesNotThrow(() =>
+    ins.run('wag_2', 'eng_2', 'wage', '2026-09-14', '2026-09-14', 120000),
+  );
+  db.close();
+});
+
+test('a bonus is one day, and a wage period may not run backwards', () => {
+  const db = freshDb();
+  labourFixture(db);
+  const ins = insWagePeriod(db);
+  assert.doesNotThrow(() =>
+    ins.run('wag_1', 'eng_1', 'bonus', '2026-09-20', '2026-09-20', 500000),
+  );
+  assert.throws(
+    () => ins.run('wag_2', 'eng_1', 'bonus', '2026-10-01', '2026-10-31', 500000),
+    /a_bonus_is_one_day/,
+  );
+  assert.throws(
+    () => ins.run('wag_3', 'eng_1', 'wage', '2026-11-30', '2026-11-01', 100),
+    /the_range_runs_forwards/,
+  );
+  db.close();
+});
+
+test('two wage periods with the same start are refused; OVERLAPPING ones are not', () => {
+  // The exact limit of what a CHECK can defend, and the reason invariant 24
+  // exists. If SQLite ever grew a cross-row constraint this test is where the
+  // second half moves out of the invariant and into the schema.
+  const db = freshDb();
+  labourFixture(db);
+  const ins = insWagePeriod(db);
+  ins.run('wag_1', 'eng_1', 'wage', '2026-09-01', '2026-09-30', 2500000);
+  assert.throws(
+    () => ins.run('wag_2', 'eng_1', 'wage', '2026-09-01', '2026-09-15', 100),
+    /UNIQUE/,
+  );
+  assert.doesNotThrow(
+    () => ins.run('wag_3', 'eng_1', 'wage', '2026-09-15', '2026-10-15', 100),
+    'overlap is invariant 24, NOT a constraint -- a CHECK cannot see another row',
+  );
+  db.close();
+});
+
+test('only an adjustment wage payment may be signed, and it must explain itself', () => {
+  const db = freshDb();
+  labourFixture(db);
+  const ins = db.prepare(
+    `INSERT INTO registry_wage_payments
+       (id,person_id,occurred_on,amount_minor,method,recorded_by,recorded_at,note)
+     VALUES (?,'per_1','2026-09-30',?,?,'adnan','t',?)`,
+  );
+  assert.throws(() => ins.run('wpy_1', -100, 'cash', null), /cash_and_bank_are_positive/);
+  assert.throws(() => ins.run('wpy_2', 0, 'bank', null), /cash_and_bank_are_positive/);
+  assert.throws(() => ins.run('wpy_3', -5000, 'adjustment', null), /an_adjustment_explains_itself/);
+  assert.throws(() => ins.run('wpy_4', 0, 'adjustment', 'nothing'), /an_adjustment_explains_itself/);
+  assert.doesNotThrow(() => ins.run('wpy_5', -5000, 'adjustment', 'carried forward from the khata'));
+  assert.doesNotThrow(() => ins.run('wpy_6', 800000, 'cash', null));
+  db.close();
+});
+
+test('an advance is just a payment -- the balance is allowed to go negative', () => {
+  // No advance table, no flag, no recovery schedule. The row dated before
+  // anything was earned is the whole mechanism.
+  const db = freshDb();
+  labourFixture(db);
+  db.prepare(
+    `INSERT INTO registry_wage_payments
+       (id,person_id,occurred_on,amount_minor,method,recorded_by,recorded_at)
+     VALUES ('wpy_1','per_1','2026-08-20',800000,'cash','adnan','t')`,
+  ).run();
+  insWagePeriod(db).run('wag_1', 'eng_1', 'wage', '2026-09-01', '2026-09-30', 2500000);
+  const earned = (
+    db.prepare(`SELECT COALESCE(SUM(amount_minor),0) n FROM registry_wage_periods`).get() as {
+      n: number;
+    }
+  ).n;
+  const paid = (
+    db.prepare(`SELECT COALESCE(SUM(amount_minor),0) n FROM registry_wage_payments`).get() as {
+      n: number;
+    }
+  ).n;
+  assert.equal(earned - paid, 1700000, 'Rs 25,000 earned less an Rs 8,000 advance');
+  db.close();
+});
+
+// ---------------------------------------------------------------------------
+// Migration 7 -- `staff` destinations (docs/REGISTRY_PAYROLL.md §4.6a)
+// ---------------------------------------------------------------------------
+
+const insDestination = (db: ReturnType<typeof freshDb>) =>
+  db.prepare(
+    `INSERT INTO registry_destinations
+       (id,name,kind,billable,standing,started_on,recorded_by,recorded_at,person_id)
+     VALUES (?,?,?,?,?,'2026-09-01','adnan','t',?)`,
+  );
+
+test("migration 7 PRESERVES existing destinations and gives them a null person", () => {
+  // The rebuild is create-copy-drop-rename over a table with THREE inbound
+  // foreign keys, which is the part that would silently lose data if it were
+  // wrong. Run against a database that already holds all four sales tables.
+  const db = freshDb();
+  db.prepare(
+    `INSERT INTO registry_destinations
+       (id,name,kind,billable,standing,started_on,recorded_by,recorded_at)
+     VALUES ('dst_1','Rashid dodhi','dodhi',1,1,'2026-01-01','adnan','t')`,
+  ).run();
+  db.prepare(
+    `INSERT INTO registry_destination_prices
+       (id,destination_id,effective_from,price_minor,price_unit_litres,recorded_by,recorded_at)
+     VALUES ('prc_1','dst_1','2026-01-01',700000,40,'adnan','t')`,
+  ).run();
+  db.prepare(
+    `INSERT INTO registry_dispatches
+       (id,destination_id,occurred_on,session,status,litres,price_minor,price_unit_litres,
+        recorded_by,recorded_at,source_form)
+     VALUES ('dsp_1','dst_1','2026-09-01','morning','taken',42,700000,40,'adnan','t','direct_entry')`,
+  ).run();
+  db.prepare(
+    `INSERT INTO registry_payments
+       (id,destination_id,occurred_on,amount_minor,method,recorded_by,recorded_at)
+     VALUES ('pay_1','dst_1','2026-09-30',735000,'cash','adnan','t')`,
+  ).run();
+
+  // freshDb() is already at TARGET_VERSION, so the rebuild has run. Every row
+  // and every child must have survived it.
+  const row = db
+    .prepare(`SELECT kind, billable, person_id FROM registry_destinations WHERE id = 'dst_1'`)
+    .get() as { kind: string; billable: number; person_id: string | null };
+  assert.deepEqual(row, { kind: 'dodhi', billable: 1, person_id: null });
+  for (const [table, n] of [
+    ['registry_destination_prices', 1],
+    ['registry_dispatches', 1],
+    ['registry_payments', 1],
+  ] as const) {
+    assert.equal(
+      (db.prepare(`SELECT COUNT(*) n FROM ${table}`).get() as { n: number }).n,
+      n,
+      `${table} survived the destinations rebuild`,
+    );
+  }
+  assert.equal((db.pragma('foreign_key_check') as unknown[]).length, 0);
+  db.close();
+});
+
+test('migration 7 recreates the active index and adds the partial person index', () => {
+  // Dropping a table drops its indexes. Without the recreate, the loss would be
+  // silent and would only show up as a slow query months later.
+  const db = freshDb();
+  const names = (
+    db
+      .prepare(`SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='registry_destinations'`)
+      .all() as { name: string }[]
+  ).map((r) => r.name);
+  assert.ok(names.includes('idx_registry_destinations_active'));
+  assert.ok(names.includes('idx_registry_destinations_person'));
+  db.close();
+});
+
+test('a staff destination names a person, and a person named means staff', () => {
+  const db = freshDb();
+  insPerson(db, 'per_1', 'imran');
+  const ins = insDestination(db);
+  assert.doesNotThrow(() => ins.run('dst_1', 'Imran milk', 'staff', 0, 1, 'per_1'));
+  assert.throws(
+    () => ins.run('dst_2', 'Staff milk', 'staff', 0, 1, null),
+    /staff_names_a_person/,
+    'a shared staff row cannot say whose milk it was, so it is refused',
+  );
+  assert.throws(
+    () => ins.run('dst_3', 'Odd', 'household', 1, 0, 'per_1'),
+    /staff_names_a_person/,
+  );
+  db.close();
+});
+
+test('a staff destination can never be billable', () => {
+  // Making it billable would give one person two balances -- a buyer balance and
+  // a wage balance -- settled separately, when the farm nets it against pay.
+  const db = freshDb();
+  insPerson(db, 'per_1', 'imran');
+  assert.throws(
+    () => insDestination(db).run('dst_1', 'Sold to Imran', 'staff', 1, 1, 'per_1'),
+    /staff_is_never_billable/,
+  );
+  db.close();
+});
+
+test('one person cannot hold two milk destinations, but many destinations have none', () => {
+  // The index is PARTIAL. If it were not, the second dodhi would collide with
+  // the first on a NULL and the sales screens would break.
+  const db = freshDb();
+  insPerson(db, 'per_1', 'imran');
+  insPerson(db, 'per_2', 'abdul');
+  const ins = insDestination(db);
+  ins.run('dst_1', 'Imran milk', 'staff', 0, 1, 'per_1');
+  assert.throws(() => ins.run('dst_2', 'Imran again', 'staff', 0, 1, 'per_1'), /UNIQUE/);
+  assert.doesNotThrow(() => ins.run('dst_3', 'Abdul milk', 'staff', 0, 1, 'per_2'));
+  assert.doesNotThrow(() => ins.run('dst_4', 'Dodhi one', 'dodhi', 1, 1, null));
+  assert.doesNotThrow(() => ins.run('dst_5', 'Dodhi two', 'dodhi', 1, 1, null));
+  db.close();
+});
+
+test('a staff destination must name a person who exists', () => {
+  const db = freshDb();
+  assert.throws(
+    () => insDestination(db).run('dst_1', 'Ghost milk', 'staff', 0, 1, 'per_missing'),
+    /FOREIGN KEY/,
+  );
+  db.close();
 });

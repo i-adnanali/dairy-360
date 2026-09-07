@@ -28,10 +28,12 @@ import {
 import { lactationIdFor } from './events';
 import { lactationCovering } from './milking';
 import { activeOn, priceInForce } from './destinations';
+import { rangesOverlap, termInForce } from './payroll';
 import { formatSerial, SERIAL_PREFIX } from './events';
 import type {
   DatePrecision,
   DestinationPriceRow,
+  PayTermRow,
   LactationRow,
   RegistryEvent,
   RegistrySnapshot,
@@ -1012,6 +1014,391 @@ function checkSales(s: RegistrySnapshot): Violation[] {
  * but this catches a divergence with a per-animal message rather than a
  * whole-table diff.
  */
+// ---------------------------------------------------------------------------
+// 23-28. People, engagements, packages and the wage ledger
+// (docs/REGISTRY_PAYROLL.md §13)
+// ---------------------------------------------------------------------------
+
+/**
+ * The rules the labour tables have to satisfy.
+ *
+ * 25, 27 and part of 28 ARE enforced by constraints and are checked again here,
+ * for the reason invariant 11 re-checks the date conventions: a constraint only
+ * defends rows written after it existed, and every destination in the live
+ * database predates migration 7.
+ *
+ * 23, 24 and 26 are the ones no constraint can see. 23 and 26 reach ACROSS
+ * tables; 24 reaches across ROWS, which a CHECK cannot do at all -- that is
+ * exactly why the schema's UNIQUE only stops two periods with the same start,
+ * and why overlap has to be caught here.
+ *
+ * ---------------------------------------------------------------------------
+ * NOTE WHAT IS DELIBERATELY NOT HERE
+ * ---------------------------------------------------------------------------
+ * Overlapping ENGAGEMENTS, more than one open engagement, a wage period outside
+ * its engagement's range, and a wage amount differing from the term in force.
+ * All four fire on rows the farm asked to be able to write, so all four are
+ * REPORT LINES in labourReport() rather than violations. Making any of them a
+ * violation would train people to ignore /check, which costs more than the four
+ * are worth -- the same call checkSales() makes for "a dispatch on a day with
+ * no milking rows".
+ */
+function checkLabour(s: RegistrySnapshot): Violation[] {
+  const out: Violation[] = [];
+  if (
+    s.people.length === 0 &&
+    s.engagements.length === 0 &&
+    s.wagePeriods.length === 0 &&
+    s.wagePayments.length === 0
+  ) {
+    return out;
+  }
+
+  const peopleById = new Map(s.people.map((p) => [p.id, p]));
+  const engagementsById = new Map(s.engagements.map((e) => [e.id, e]));
+
+  const termsBy = new Map<string, PayTermRow[]>();
+  for (const t of s.terms) {
+    const list = termsBy.get(t.engagement_id);
+    if (list) list.push(t);
+    else termsBy.set(t.engagement_id, [t]);
+  }
+
+  // --- 23. Terms are unambiguous and present ------------------------------
+  const seenTerm = new Set<string>();
+  for (const t of s.terms) {
+    const key = `${t.engagement_id}\0${t.effective_from}`;
+    if (seenTerm.has(key)) {
+      out.push(
+        v(
+          23,
+          'duplicate_pay_term',
+          `engagement ${t.engagement_id} has more than one package effective ` +
+            `${t.effective_from}. A second one on the same date is a typo, and which one ` +
+            `applied would be silent.`,
+        ),
+      );
+    }
+    seenTerm.add(key);
+  }
+
+  // --- 26. Nothing references an unknown person or engagement --------------
+  for (const e of s.engagements) {
+    if (!peopleById.has(e.person_id)) {
+      out.push(
+        v(26, 'engagement_unknown_person', `engagement ${e.id} names unknown person '${e.person_id}'`),
+      );
+    }
+  }
+  for (const t of s.terms) {
+    if (!engagementsById.has(t.engagement_id)) {
+      out.push(
+        v(26, 'term_unknown_engagement', `package ${t.id} names unknown engagement '${t.engagement_id}'`),
+      );
+    }
+  }
+  const termIds = new Set(s.terms.map((t) => t.id));
+  for (const b of s.benefits) {
+    if (!termIds.has(b.term_id)) {
+      out.push(v(26, 'benefit_unknown_term', `benefit ${b.id} names unknown package '${b.term_id}'`));
+    }
+  }
+  for (const p of s.wagePayments) {
+    if (!peopleById.has(p.person_id)) {
+      out.push(
+        v(26, 'wage_payment_unknown_person', `wage payment ${p.id} names unknown person '${p.person_id}'`),
+      );
+    }
+  }
+
+  // --- 25. Benefit lines are well formed ----------------------------------
+  for (const b of s.benefits) {
+    if ((b.quantity === null) !== (b.unit === null)) {
+      out.push(
+        v(
+          25,
+          'benefit_half_a_quantity',
+          `benefit ${b.id} carries ${b.quantity === null ? 'a unit with no quantity' : 'a quantity with no unit'}. ` +
+            `A figure without its unit is not an amount.`,
+        ),
+      );
+    }
+    if (b.quantity !== null && b.period === null) {
+      out.push(
+        v(25, 'benefit_no_period', `benefit ${b.id} has a quantity but does not say per what`),
+      );
+    }
+    if (b.quantity !== null && b.quantity <= 0) {
+      out.push(v(25, 'benefit_not_positive', `benefit ${b.id} has quantity ${b.quantity}`));
+    }
+    if (b.kind === 'other' && (b.note === null || b.note.trim().length === 0)) {
+      out.push(
+        v(
+          25,
+          'benefit_other_unlabelled',
+          `benefit ${b.id} is 'other' with no note -- nobody can price it later`,
+        ),
+      );
+    }
+  }
+
+  // --- 24. Wage periods do not overlap within an engagement ---------------
+  //
+  // THE ONE HARD RULE in a deliberately loose model. Engagements may overlap;
+  // wage periods on one may not, because that is paying twice for the same days.
+  const periodsBy = new Map<string, typeof s.wagePeriods>();
+  for (const w of s.wagePeriods) {
+    if (!engagementsById.has(w.engagement_id)) {
+      out.push(
+        v(
+          26,
+          'wage_period_unknown_engagement',
+          `wage period ${w.id} names unknown engagement '${w.engagement_id}'`,
+        ),
+      );
+      continue;
+    }
+    const list = periodsBy.get(w.engagement_id);
+    if (list) list.push(w);
+    else periodsBy.set(w.engagement_id, [w]);
+  }
+  for (const [engagementId, list] of periodsBy) {
+    const sorted = [...list].sort((a, b) => (a.from_on < b.from_on ? -1 : 1));
+    for (let i = 1; i < sorted.length; i++) {
+      if (rangesOverlap(sorted[i - 1], sorted[i])) {
+        out.push(
+          v(
+            24,
+            'overlapping_wage_period',
+            `engagement ${engagementId} has overlapping periods ` +
+              `${sorted[i - 1].from_on}..${sorted[i - 1].to_on} and ` +
+              `${sorted[i].from_on}..${sorted[i].to_on}. That is paying twice for the same days.`,
+          ),
+        );
+      }
+    }
+
+    // --- 23, second half. A wage needs an agreement behind it -------------
+    //
+    // BONUSES ARE EXEMPT, deliberately: a bonus is a decision rather than a
+    // rate, and demanding a term for one would flag the commonest reason a
+    // bonus exists.
+    const terms = termsBy.get(engagementId) ?? [];
+    for (const w of sorted) {
+      if (w.kind !== 'wage') continue;
+      if (termInForce(terms, w.from_on) === null) {
+        out.push(
+          v(
+            23,
+            'wage_period_unpriced',
+            `wage period ${w.id} (${w.from_on}) has no package agreement in force, so it is ` +
+              `a figure nobody can point at.`,
+          ),
+        );
+      }
+    }
+  }
+
+  // --- 27. Only adjustments are signed ------------------------------------
+  for (const p of s.wagePayments) {
+    if (p.method !== 'adjustment' && p.amount_minor <= 0) {
+      out.push(
+        v(
+          27,
+          'wage_payment_not_positive',
+          `wage payment ${p.id} is a ${p.method} of ${p.amount_minor}. Cash and bank are money ` +
+            `that changed hands; to reduce what is owed, record an adjustment and say why.`,
+        ),
+      );
+    }
+    if (
+      p.method === 'adjustment' &&
+      (p.amount_minor === 0 || p.note === null || p.note.trim().length === 0)
+    ) {
+      out.push(
+        v(
+          27,
+          'adjustment_unexplained',
+          `wage payment ${p.id} is an adjustment with no reason attached, which is unauditable ` +
+            `a month later.`,
+        ),
+      );
+    }
+  }
+
+  // --- 28. Staff destinations and people agree -----------------------------
+  const staffSeen = new Map<string, string>();
+  for (const d of s.destinations) {
+    const isStaff = d.kind === 'staff';
+    if (isStaff !== (d.person_id !== null)) {
+      out.push(
+        v(
+          28,
+          'staff_destination_disagrees',
+          `destination ${d.id} is '${d.kind}' with person_id ${JSON.stringify(d.person_id)}. ` +
+            `A staff destination names a person and a destination naming a person is staff milk.`,
+        ),
+      );
+      continue;
+    }
+    if (!isStaff) continue;
+
+    if (d.billable) {
+      out.push(
+        v(
+          28,
+          'staff_destination_billable',
+          `destination ${d.id} allocates milk as part of pay and is billable. That would give ` +
+            `one person two balances, a buyer balance and a wage balance, settled separately.`,
+        ),
+      );
+    }
+    if (d.person_id !== null && !peopleById.has(d.person_id)) {
+      out.push(
+        v(28, 'staff_destination_unknown_person', `destination ${d.id} names unknown person '${d.person_id}'`),
+      );
+    }
+    const prior = d.person_id === null ? undefined : staffSeen.get(d.person_id);
+    if (prior !== undefined) {
+      out.push(
+        v(
+          28,
+          'two_milk_destinations',
+          `${d.person_id} has two milk destinations (${prior} and ${d.id}), so "what did they ` +
+            `take" has two answers.`,
+        ),
+      );
+    }
+    if (d.person_id !== null) staffSeen.set(d.person_id, d.id);
+  }
+
+  return out;
+}
+
+/**
+ * The labour REPORT -- things worth seeing that are not violations.
+ *
+ * Every line here fires on rows the farm asked to be able to write, which is
+ * precisely why none of them is an invariant. Kept separate from Violation[] so
+ * that /check can render them differently: a violation says something is wrong,
+ * a report line says something is worth a look.
+ */
+export interface LabourReportLine {
+  kind:
+    | 'unknown_identifier'
+    | 'overlapping_engagements'
+    | 'multiple_open_engagements'
+    | 'wage_period_outside_engagement'
+    | 'amount_differs_from_term';
+  detail: string;
+}
+
+export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLine[] {
+  const out: LabourReportLine[] = [];
+  const line = (kind: LabourReportLine['kind'], detail: string) => out.push({ kind, detail });
+
+  const known = new Set(s.people.map((p) => p.identifier.toLowerCase()));
+
+  // --- identifiers used on records that match no person -------------------
+  //
+  // Expected to fire, and that is the point: it will name the vet, whoever sold
+  // the farm a buffalo, and every name entered before registry_people existed.
+  // It is a WORKLIST for deciding who is a person, not a defect list.
+  if (s.people.length > 0) {
+    const seen = new Map<string, number>();
+    const note = (value: string | null) => {
+      if (value === null) return;
+      const t = value.trim();
+      if (t.length === 0 || known.has(t.toLowerCase())) return;
+      seen.set(t, (seen.get(t) ?? 0) + 1);
+    };
+    for (const e of s.events) note(e.observed_by);
+    for (const m of s.milkings) note(m.observed_by);
+    for (const d of s.dispatches) note(d.observed_by);
+    for (const p of s.payments) note(p.observed_by);
+    for (const [value, count] of [...seen].sort((a, b) => b[1] - a[1])) {
+      line(
+        'unknown_identifier',
+        `'${value}' appears on ${count} record${count === 1 ? '' : 's'} and is not a person on ` +
+          `file. Either they should be, or the name is a variant of somebody who already is.`,
+      );
+    }
+  }
+
+  const peopleById = new Map(s.people.map((p) => [p.id, p]));
+  const byPerson = new Map<string, typeof s.engagements>();
+  for (const e of s.engagements) {
+    const list = byPerson.get(e.person_id);
+    if (list) list.push(e);
+    else byPerson.set(e.person_id, [e]);
+  }
+
+  for (const [personId, list] of byPerson) {
+    const who = peopleById.get(personId)?.identifier ?? personId;
+    const sorted = [...list].sort((a, b) => (a.started_on < b.started_on ? -1 : 1));
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = sorted[i - 1];
+      const cur = sorted[i];
+      const prevEnd = prev.ended_on;
+      if (prevEnd === null || prevEnd >= cur.started_on) {
+        line(
+          'overlapping_engagements',
+          `${who} has overlapping stints (${prev.started_on}..${prevEnd ?? 'open'} and ` +
+            `${cur.started_on}..${cur.ended_on ?? 'open'}). Legitimate if they hold two roles.`,
+        );
+      }
+    }
+    const open = sorted.filter(
+      (e) => e.started_on <= asOf && (e.ended_on === null || asOf <= e.ended_on),
+    );
+    if (open.length > 1) {
+      line(
+        'multiple_open_engagements',
+        `${who} has ${open.length} stints open on ${asOf}. A wage period has to name which one.`,
+      );
+    }
+  }
+
+  const engagementsById = new Map(s.engagements.map((e) => [e.id, e]));
+  const termsBy = new Map<string, PayTermRow[]>();
+  for (const t of s.terms) {
+    const list = termsBy.get(t.engagement_id);
+    if (list) list.push(t);
+    else termsBy.set(t.engagement_id, [t]);
+  }
+
+  for (const w of s.wagePeriods) {
+    const e = engagementsById.get(w.engagement_id);
+    if (e === undefined) continue;
+    const who = peopleById.get(e.person_id)?.identifier ?? e.person_id;
+
+    if (w.from_on < e.started_on || (e.ended_on !== null && w.to_on > e.ended_on)) {
+      line(
+        'wage_period_outside_engagement',
+        `${who} has a period ${w.from_on}..${w.to_on} outside the stint ` +
+          `(${e.started_on}..${e.ended_on ?? 'open'}). A final settlement after leaving looks ` +
+          `exactly like this and is legitimate.`,
+      );
+    }
+
+    // A deviation is EXPECTED for any month with leave or an adjustment. It is
+    // reported so it is visible, and never refused -- the direct analogue of a
+    // dispatch billed at a deliberate discount.
+    if (w.kind === 'wage') {
+      const term = termInForce(termsBy.get(w.engagement_id) ?? [], w.from_on);
+      if (term !== null && term.cash_minor !== w.amount_minor) {
+        line(
+          'amount_differs_from_term',
+          `${who} was paid ${w.amount_minor} for ${w.from_on}..${w.to_on} against an agreement ` +
+            `of ${term.cash_minor}. Expected whenever there was leave or an adjustment.`,
+        );
+      }
+    }
+  }
+
+  return out;
+}
+
 export function checkSnapshot(s: RegistrySnapshot, asOf: string): Violation[] {
   return [
     ...checkOrigin(s),
@@ -1024,6 +1411,7 @@ export function checkSnapshot(s: RegistrySnapshot, asOf: string): Violation[] {
     ...checkPrecision(s),
     ...checkMilkings(s),
     ...checkSales(s),
+    ...checkLabour(s),
     ...checkProjectionAgreement(s, asOf),
   ];
 }

@@ -32,22 +32,22 @@
 // ---------------------------------------------------------------------------
 // EVERY ROUTE THAT WRITES REQUIRES AN `Idempotency-Key`
 // ---------------------------------------------------------------------------
-// Thirteen of them: POST /animals, /events, /calvings, /calvings/:id/correction,
-// /milking/session, /milking/session/delete, /destinations, /destinations/:id,
-// /destinations/:id/prices, /dispatch/session, /dispatch/session/delete,
-// /payments and /payments/:id/delete. A write without one is refused with a 400
-// rather than accepted unprotected; see idempotency.ts for what that closes,
-// and for the two holes it does not.
+// Every `router.post` below goes through `write()`, which refuses a request
+// with no `Idempotency-Key` as a 400 rather than accepting it unprotected. The
+// one deliberate exception is /rebuild, and the comment on it says why. See
+// idempotency.ts for what the key closes, and for the two holes it does not.
 //
 // The heading used to say "appends an event", which the milking routes broke:
 // they write a measurement table and append nothing. The rule was never about
 // events -- it is about any request that changes state and could arrive twice.
 //
-// NOTE THE COUNT, WHICH HAS NOW BEEN WRONG TWICE. The decisions document said
-// "the three write routes"; this comment then said six, and step 5 added seven
-// more. It is an enumeration in a comment beside the code it enumerates, and it
-// has gone stale every single time the code moved -- so if it disagrees with
-// the router below, the router is right.
+// THERE WAS AN ENUMERATION HERE AND IT HAS BEEN DELETED, on its own advice. It
+// said "the three write routes", then six, then thirteen, and it went stale
+// every single time the code moved -- so it ended by conceding that "if it
+// disagrees with the router below, the router is right". The labour cycle would
+// have made it wrong a fourth time. A list of route paths in a comment beside
+// the list of route paths is not documentation, it is a second copy: the rule
+// is the sentence above, and `write()` is where it is enforced.
 //
 // Why the correction route in particular needs a key: it appends a superseding
 // calving, a superseding birth and sometimes a departure. Replayed without one
@@ -75,6 +75,30 @@ import {
   saveDispatchSession,
 } from './dispatch';
 import { balances, deletePayment, recordPayment, statement } from './ledger';
+import {
+  addEngagement,
+  addPerson,
+  engagementsFor,
+  getPerson,
+  updateEngagement,
+  updatePerson,
+} from './people';
+import {
+  benefitsFor,
+  correctTerm,
+  deleteWagePeriods,
+  packageOn,
+  payrollRun,
+  saveRun,
+  setTerm,
+  termsFor,
+} from './payroll';
+import {
+  deleteWagePayment,
+  recordWagePayment,
+  wageBalances,
+  wageStatement,
+} from './wages';
 import { correctCalving, recordCalving } from './calving';
 import {
   deleteMilkings,
@@ -99,13 +123,22 @@ import {
   identifierValues,
   linkCandidates,
 } from './reads';
+import { dayBoard } from './overview';
 import { rebuild } from './projectStore';
 import { snapshot } from './store';
-import { checkSnapshot } from './invariants';
+import { checkSnapshot, labourReport } from './invariants';
 import { groupByAnimal, intervalReport, precisionHistogram } from './intervals';
 import { farmToday } from './time';
 import type { Db } from './schema';
-import type { DestinationKind, PaymentMethod, Provenance, RegistrySex, SourceForm } from './types';
+import type { BenefitInput, WagePeriodEntryInput } from './payroll';
+import type {
+  DestinationKind,
+  EngagementKind,
+  PaymentMethod,
+  Provenance,
+  RegistrySex,
+  SourceForm,
+} from './types';
 import { SOURCE_FORMS } from './types';
 
 type Body = Record<string, unknown>;
@@ -464,6 +497,22 @@ export function registryRouter(db: Db): express.Router {
     }),
   );
 
+  /**
+   * What still needs recording today -- the landing screen.
+   *
+   * Composed from the read models that already exist, on the server, so "this
+   * session is done" means the same thing here as on the screen that records
+   * it. Six client round trips would each have been a second implementation of
+   * a rule that lives in one place.
+   */
+  router.get(
+    '/today',
+    handle((req, res) => {
+      const on = typeof req.query.on === 'string' ? req.query.on : farmToday();
+      res.json(dayBoard(db, on));
+    }),
+  );
+
   /** Everything verify:registry reports, for checking your own work in the UI. */
   router.get(
     '/verification',
@@ -482,6 +531,10 @@ export function registryRouter(db: Db): express.Router {
         histogram: precisionHistogram(snap.events),
         intervals: intervalReport(groupByAnimal(snap.events)),
         milking: milkingReport(snap.milkings, snap.lactations),
+        // A REPORT, not violations -- every line fires on rows the farm asked to
+        // be able to write, so /check must render them differently or people
+        // learn to ignore the page. See REGISTRY_PAYROLL.md §13.
+        labour: labourReport(snap, asOf),
       });
     }),
   );
@@ -710,6 +763,12 @@ export function registryRouter(db: Db): express.Router {
           started_on: requireStr(b, 'started_on'),
           ended_on: str(b, 'ended_on'),
           note: str(b, 'note'),
+          // REQUIRED for `staff` and refused for every other kind. It was
+          // missing here while addDestination() supported it, so a staff milk
+          // allowance could not be created over HTTP at all -- the fixtures
+          // call the domain function directly, so nothing caught it until the
+          // harness seed, which goes through the routes on purpose.
+          person_id: str(b, 'person_id'),
           recorded_by: requireStr(b, 'recorded_by'),
         }),
       );
@@ -879,6 +938,258 @@ export function registryRouter(db: Db): express.Router {
     '/payments/:id/delete',
     write(replays, (req, res) => {
       res.json({ removed: deletePayment(db, req.params.id) });
+    }),
+  );
+
+  // -------------------------------------------------------------------------
+  // Labour: people, engagements, packages, the run and the wage ledger
+  // (docs/REGISTRY_PAYROLL.md §10)
+  // -------------------------------------------------------------------------
+
+  /** Everybody on file, with their balance. People with no open stint are
+   *  included and flagged rather than hidden -- somebody who has left may still
+   *  be owed a final payment, and hiding them is how it gets forgotten. */
+  router.get(
+    '/people',
+    handle((req, res) => {
+      const asOf = typeof req.query.as_of === 'string' ? req.query.as_of : farmToday();
+      res.json({ as_of: asOf, people: wageBalances(db, asOf) });
+    }),
+  );
+
+  /** One person's statement: stints, package, wage periods, payments, balance. */
+  router.get(
+    '/people/:id',
+    handle((req, res) => {
+      const st = wageStatement(db, req.params.id);
+      if (!st) {
+        res
+          .status(404)
+          .json(
+            new RegistryError('unknown_person', `unknown person '${req.params.id}'`, 'person_id')
+              .toWire(),
+          );
+        return;
+      }
+      const asOf = typeof req.query.as_of === 'string' ? req.query.as_of : farmToday();
+      // The package as it stands on each stint, so the screen can show what
+      // somebody is on without a second round trip per engagement.
+      const packages = st.engagements.map((e) => ({
+        engagement_id: e.id,
+        terms: termsFor(db, e.id).map((t) => ({ ...t, benefits: benefitsFor(db, t.id) })),
+        current: packageOn(db, e.id, asOf),
+      }));
+      res.json({ ...st, as_of: asOf, packages });
+    }),
+  );
+
+  router.post(
+    '/people',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.status(201).json(
+        addPerson(db, {
+          identifier: requireStr(b, 'identifier'),
+          name: str(b, 'name'),
+          contact: str(b, 'contact'),
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * Amend a person. `identifier` is accepted only so it can be REFUSED with an
+   * explanation -- every record naming them stores it as text and the event log
+   * cannot be rewritten, so renaming would orphan all of it.
+   */
+  router.post(
+    '/people/:id',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.json(
+        updatePerson(db, req.params.id, {
+          name: str(b, 'name'),
+          contact: str(b, 'contact'),
+          note: str(b, 'note'),
+          identifier: str(b, 'identifier') ?? undefined,
+        }),
+      );
+    }),
+  );
+
+  /** Open a stint. Overlapping an existing one is deliberately NOT refused. */
+  router.post(
+    '/people/:id/engagements',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.status(201).json(
+        addEngagement(db, {
+          person_id: req.params.id,
+          kind: requireStr(b, 'kind') as EngagementKind,
+          role: str(b, 'role'),
+          started_on: requireStr(b, 'started_on'),
+          ended_on: str(b, 'ended_on'),
+          end_reason: str(b, 'end_reason'),
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /** Amend a stint -- typically to close it. `kind`, `person_id` and
+   *  `started_on` are not amendable; a new stint is the repair. */
+  router.post(
+    '/engagements/:id',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.json(
+        updateEngagement(db, req.params.id, {
+          role: str(b, 'role'),
+          ended_on: str(b, 'ended_on'),
+          end_reason: str(b, 'end_reason'),
+          note: str(b, 'note'),
+        }),
+      );
+    }),
+  );
+
+  router.get(
+    '/engagements/:id/terms',
+    handle((req, res) => {
+      res.json({
+        terms: termsFor(db, req.params.id).map((t) => ({ ...t, benefits: benefitsFor(db, t.id) })),
+      });
+    }),
+  );
+
+  /**
+   * A new package agreement, with its in-kind lines, effective from a date.
+   *
+   * The benefits travel WITH the term because the package is the unit that
+   * changes -- a raise usually moves the milk allowance too, and dating the
+   * parts separately is how they drift out of step.
+   */
+  router.post(
+    '/engagements/:id/terms',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.status(201).json(
+        setTerm(db, {
+          engagement_id: req.params.id,
+          effective_from: requireStr(b, 'effective_from'),
+          cash_minor: requireNum(b, 'cash_minor'),
+          cash_period: requireStr(b, 'cash_period') as 'month' | 'day',
+          benefits: Array.isArray(b.benefits) ? (b.benefits as BenefitInput[]) : [],
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * Correct a package typed wrong and caught immediately.
+   *
+   * Safe for the reason correcting a price is safe: every wage period holds its
+   * own figure, so this moves only the default offered to future entry. A
+   * genuine change of agreement is a NEW term with a later date.
+   */
+  router.post(
+    '/terms/:id/correct',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.json(
+        correctTerm(db, req.params.id, {
+          effective_from: requireStr(b, 'effective_from'),
+          cash_minor: requireNum(b, 'cash_minor'),
+          cash_period: requireStr(b, 'cash_period') as 'month' | 'day',
+          benefits: Array.isArray(b.benefits) ? (b.benefits as BenefitInput[]) : [],
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  /** The derived run for a period: who must be answered, and what dihari days
+   *  are already in. */
+  router.get(
+    '/payroll/run',
+    handle((req, res) => {
+      const to = typeof req.query.to === 'string' ? req.query.to : farmToday();
+      const from = typeof req.query.from === 'string' ? req.query.from : to;
+      // `as_of` is overridable so a test can open a mid-month run at a fixed
+      // date; it defaults to farm-local today, which is what clips a per-day
+      // allowance to the days that have actually happened.
+      const asOf = typeof req.query.as_of === 'string' ? req.query.as_of : farmToday();
+      res.json(payrollRun(db, from, to, asOf));
+    }),
+  );
+
+  /** Save a whole run. All rows or none, and every permanent engagement in the
+   *  period must have a figure. */
+  router.post(
+    '/payroll/run',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.status(201).json(
+        saveRun(db, {
+          from_on: requireStr(b, 'from_on'),
+          to_on: requireStr(b, 'to_on'),
+          entries: Array.isArray(b.entries) ? (b.entries as WagePeriodEntryInput[]) : [],
+          provenance: provenance(b),
+        }),
+      );
+    }),
+  );
+
+  /**
+   * Remove wage periods, by explicit id.
+   *
+   * Narrow on purpose: a run entered against the wrong month has no other
+   * repair, because UNIQUE (engagement_id, from_on) means the wrong dates keep
+   * holding the rows until they are removed.
+   */
+  router.post(
+    '/payroll/run/delete',
+    write(replays, (req, res) => {
+      const b = body(req);
+      const ids = Array.isArray(b.ids) ? (b.ids as unknown[]) : [];
+      if (ids.length === 0 || !ids.every((i) => typeof i === 'string')) {
+        throw new RegistryError('invalid_payload', 'ids must be a non-empty array of strings', 'ids');
+      }
+      res.json({ removed: deleteWagePeriods(db, ids as string[]) });
+    }),
+  );
+
+  /** Money paid to somebody, or a signed adjustment that has to say why. An
+   *  advance is an ordinary payment -- the balance simply goes negative. */
+  router.post(
+    '/wage-payments',
+    write(replays, (req, res) => {
+      const b = body(req);
+      res.status(201).json(
+        recordWagePayment(db, {
+          person_id: requireStr(b, 'person_id'),
+          occurred_on: requireStr(b, 'occurred_on'),
+          amount_minor: requireNum(b, 'amount_minor'),
+          method: requireStr(b, 'method') as PaymentMethod,
+          reference: str(b, 'reference'),
+          observed_by: str(b, 'observed_by'),
+          note: str(b, 'note'),
+          recorded_by: requireStr(b, 'recorded_by'),
+        }),
+      );
+    }),
+  );
+
+  router.post(
+    '/wage-payments/:id/delete',
+    write(replays, (req, res) => {
+      res.json({ removed: deleteWagePayment(db, req.params.id) });
     }),
   );
 

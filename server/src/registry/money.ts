@@ -112,3 +112,21 @@ export function perLitreMinor(priceMinor: number, unitLitres: number): number {
   }
   return priceMinor / unitLitres;
 }
+
+/**
+ * A package rate as it was agreed -- "Rs 25,000.00 / month".
+ *
+ * The sibling of formatRate, and it exists for the same reason: the statement is
+ * a document handed to the person it is about, and it must print what was agreed
+ * rather than a conversion of it. Nobody is paid "Rs 833.33 a day".
+ *
+ * NOTE THAT THERE IS NO ARITHMETIC COUNTERPART. Milk has amountMinor() because a
+ * dispatch's amount is DERIVED (litres x rate); a wage period stores the agreed
+ * figure directly, so payroll adds no multiplication anywhere. If a
+ * `wageForPeriod(term, from, to)` ever appears in this file, something has
+ * started computing a salary from the calendar -- see docs/REGISTRY_PAYROLL.md
+ * §4.6 for why that is the one thing this design refuses to do.
+ */
+export function formatPeriodRate(cashMinor: number, period: 'month' | 'day'): string {
+  return `${formatMinor(cashMinor)} / ${period}`;
+}

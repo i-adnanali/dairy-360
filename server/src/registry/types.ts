@@ -437,7 +437,18 @@ export interface AnimalProjection {
  * comment in schema.ts. Money is a property of the destination (`billable`),
  * not of the act.
  */
-export const DESTINATION_KINDS = ['dodhi', 'household', 'shop', 'home', 'other'] as const;
+export const DESTINATION_KINDS = [
+  'dodhi',
+  'household',
+  'shop',
+  'home',
+  // Added by migration 7: milk allocated to a staff member as part of a salary
+  // arrangement, ONE DESTINATION PER PERSON -- the dispatch key is one row per
+  // destination per session, so a shared row could not say whose milk it was.
+  // See docs/REGISTRY_PAYROLL.md §4.6a.
+  'staff',
+  'other',
+] as const;
 export type DestinationKind = (typeof DESTINATION_KINDS)[number];
 
 /**
@@ -471,6 +482,16 @@ export interface DestinationRow {
   note: string | null;
   recorded_by: string;
   recorded_at: string;
+  /**
+   * The staff member this milk belongs to, or null for every other destination.
+   *
+   * Added by migration 7. Biconditional with `kind === 'staff'` at the schema:
+   * a staff destination names a person and a destination naming a person is
+   * staff milk. One destination PER PERSON, because the dispatch key is one row
+   * per destination per session, so a shared row could not say whose milk it
+   * was. See REGISTRY_PAYROLL.md §4.6a.
+   */
+  person_id: string | null;
 }
 
 /**
@@ -561,6 +582,200 @@ export interface PaymentRow {
  * cost is paid where it is affordable. If verification ever gets slow, this is
  * the member to page or to date-bound, and nothing else here needs touching.
  */
+// ---------------------------------------------------------------------------
+// Labour -- people, engagements, packages and the wage ledger
+// (docs/REGISTRY_PAYROLL.md §4)
+// ---------------------------------------------------------------------------
+
+/**
+ * A person the farm knows. NOT necessarily an employee -- see
+ * REGISTRY_PAYROLL.md §3 for why this is not `registry_employees`.
+ *
+ * `identifier` is the load-bearing column: the stable string that ALSO appears
+ * in `observed_by` and `recorded_by` across four record tables. The link is BY
+ * VALUE, never a foreign key -- those columns hold the vet and whoever sold the
+ * farm a buffalo, and the event log is append-only so historical values could
+ * not be repointed anyway.
+ *
+ * It is unique case-insensitively, so `abdul` and `Abdul` cannot both become
+ * people here even though history holds both.
+ */
+export interface PersonRow {
+  id: string;
+  identifier: string;
+  name: string | null;
+  contact: string | null;
+  note: string | null;
+  recorded_by: string;
+  recorded_at: string;
+}
+
+/**
+ * How somebody is engaged.
+ *
+ * The standing/occasional split of `registry_destinations` arriving on a third
+ * table, and it means the same thing: `permanent` is on the monthly run and
+ * must be answered; `daily` (dihari) is not a row until they worked a day.
+ */
+export const ENGAGEMENT_KINDS = ['permanent', 'daily'] as const;
+
+export type EngagementKind = (typeof ENGAGEMENT_KINDS)[number];
+
+/**
+ * One STINT. A person has as many as they have had.
+ *
+ * DELIBERATELY LOOSE: engagements may overlap, more than one may be open, and
+ * gaps between them are the point. The farm asked for this -- people leave and
+ * come back, and somebody can be milker and night watchman at once. Overlap is
+ * a /check report line, never a violation, and invariant 8's one-open-lactation
+ * rule is deliberately NOT copied.
+ *
+ * `started_on` / `ended_on` are an ACTIVE RANGE, `ended_on` inclusive, so the
+ * payroll run can open last March and show who was employed THEN.
+ */
+export interface EngagementRow {
+  id: string;
+  person_id: string;
+  kind: EngagementKind;
+  role: string | null;
+  started_on: string;
+  ended_on: string | null;
+  end_reason: string | null;
+  note: string | null;
+  recorded_by: string;
+  recorded_at: string;
+}
+
+/**
+ * The period a cash figure covers.
+ *
+ * AN ENUM, where `price_unit_litres` is a number, and the divergence is
+ * deliberate: a month is not a fixed quantity of days, so "per 30 days" would
+ * assert something the agreement does not say. See REGISTRY_PAYROLL.md §4.4.
+ */
+export const CASH_PERIODS = ['month', 'day'] as const;
+
+export type CashPeriod = (typeof CASH_PERIODS)[number];
+
+/**
+ * One effective-dated package agreement, scoped to an ENGAGEMENT.
+ *
+ * Scoped to the engagement rather than the person because otherwise a term
+ * lookup for a returning worker walks back past the gap and finds their
+ * pre-departure salary -- silent, months late, and indistinguishable from a
+ * correct answer.
+ *
+ * A rate is two values, as it is for milk: `cash_minor` and the period it
+ * covers. It is only the DEFAULT OFFERED AT ENTRY; what was actually paid is on
+ * the wage period, which is why correcting a term rewrites no history.
+ */
+export interface PayTermRow {
+  id: string;
+  engagement_id: string;
+  effective_from: string;
+  cash_minor: number;
+  cash_period: CashPeriod;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
+/**
+ * The in-kind lines of a package.
+ *
+ * THE FARM'S OWN LIST: milk, flour or wheat, accommodation. `utilities` was in
+ * the draft and was removed rather than carried unused -- see
+ * REGISTRY_PAYROLL.md §4.5. Anything else is `other` WITH a note.
+ */
+export const BENEFIT_KINDS = ['milk', 'flour', 'accommodation', 'other'] as const;
+
+export type BenefitKind = (typeof BENEFIT_KINDS)[number];
+
+export const BENEFIT_PERIODS = ['day', 'month'] as const;
+
+export type BenefitPeriod = (typeof BENEFIT_PERIODS)[number];
+
+/**
+ * One benefit line. Hangs off the TERM, not the engagement, because a raise
+ * usually moves the milk allowance too -- effective-dating the package as a
+ * unit keeps the parts from drifting out of step with the whole.
+ *
+ * `quantity`, `unit` and `period` stand or fall together, and accommodation is
+ * the case with none of the three.
+ *
+ * THERE IS NO VALUE FIELD, deliberately. A rupee figure for milk or flour needs
+ * a reference price with no transaction behind it; the value of a package is a
+ * report line, computed and labelled imputed, never a stored number that
+ * somebody sums into a balance.
+ */
+export interface PayBenefitRow {
+  id: string;
+  term_id: string;
+  kind: BenefitKind;
+  quantity: number | null;
+  unit: string | null;
+  period: BenefitPeriod | null;
+  note: string | null;
+}
+
+/**
+ * What a wage period IS: a wage for a stretch of time, or a one-day bonus.
+ *
+ * A bonus is a debit like any other, and giving it a kind keeps the sign
+ * positive on both sides of the ledger. A DEDUCTION goes the other way and is
+ * an `adjustment` wage payment, because it reduces what the farm owes.
+ */
+export const WAGE_PERIOD_KINDS = ['wage', 'bonus'] as const;
+
+export type WagePeriodKind = (typeof WAGE_PERIOD_KINDS)[number];
+
+/**
+ * The debit side. One table for a salaried month and a single dihari day,
+ * because it carries a date RANGE rather than a month.
+ *
+ * THE AGREED FIGURE IS THE TRANSACTION. Nothing is derived from the calendar: a
+ * month with four days' leave is settled by conversation, and a system that
+ * computed the figure would be inventing a number nobody agreed to.
+ *
+ * NO CAPTURED RATE, unlike `DispatchRow`, and whoever reads that type first
+ * will look for one. A dispatch derives its amount from the captured rate; this
+ * amount IS the stored figure, so there is nothing to capture.
+ */
+export interface WagePeriodRow {
+  id: string;
+  engagement_id: string;
+  kind: WagePeriodKind;
+  from_on: string;
+  to_on: string;
+  amount_minor: number;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  source_form: SourceForm;
+  note: string | null;
+}
+
+/**
+ * The credit side. Keyed on the PERSON, not the engagement -- one cash handover
+ * settles whatever is outstanding, and an advance paid between two stints
+ * belongs to the person rather than to either job.
+ *
+ * An advance needs no flag and no recovery schedule: it is an ordinary payment
+ * that makes the balance negative, and the next wage period walks it back.
+ */
+export interface WagePaymentRow {
+  id: string;
+  person_id: string;
+  occurred_on: string;
+  amount_minor: number;
+  method: PaymentMethod;
+  reference: string | null;
+  observed_by: string | null;
+  recorded_by: string;
+  recorded_at: string;
+  note: string | null;
+}
+
 export interface RegistrySnapshot {
   animals: RegistryAnimalRow[];
   events: RegistryEvent[];
@@ -577,5 +792,16 @@ export interface RegistrySnapshot {
   prices: DestinationPriceRow[];
   dispatches: DispatchRow[];
   payments: PaymentRow[];
+  /**
+   * The labour tables (invariants 23-28). Same reasoning as the two above:
+   * these grow with time and headcount rather than with the herd, and a farm
+   * with a handful of staff produces a few hundred rows a year.
+   */
+  people: PersonRow[];
+  engagements: EngagementRow[];
+  terms: PayTermRow[];
+  benefits: PayBenefitRow[];
+  wagePeriods: WagePeriodRow[];
+  wagePayments: WagePaymentRow[];
   nextSerial: number;
 }

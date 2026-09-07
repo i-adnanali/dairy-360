@@ -747,6 +747,214 @@ async function seedDispatches() {
   console.log(`dispatch ${plan.length} sessions + 1 part payment`);
 }
 
+/**
+ * The people who work the herd (docs/REGISTRY_PAYROLL.md).
+ *
+ * SYNTHETIC, AND MORE STRICTLY SO THAN ANYTHING ELSE IN THIS FILE. The names and
+ * the figures below are invented. Real people and real salaries go into the live
+ * database through /labour/people, entered by the farm -- never into a seed
+ * file. The isolation rule cuts both ways and this is the direction that
+ * matters here.
+ *
+ * The SHAPE is the only thing taken from the real farm: salaried staff on a
+ * package of cash plus milk, flour and quarters, with dihari hired a few times
+ * a month for cover and surge.
+ *
+ * Three deliberate asymmetries, because a screen developed against one shape
+ * gets the others wrong:
+ *
+ *   - `imran` carries all three benefit kinds; `abdul` carries NONE, so the
+ *     empty-package state is on screen from the first render.
+ *   - `imran` is paid LESS than his agreement, so /check has a real
+ *     `amount_differs_from_term` line rather than an empty report.
+ *   - `rashid` was paid an ADVANCE before he earned anything, so the negative
+ *     balance -- which needs no flag anywhere -- is visible immediately.
+ */
+const STAFF = [
+  {
+    ref: 'imran',
+    identifier: 'imran',
+    name: 'Imran',
+    kind: 'permanent',
+    role: 'milker',
+    cash: 2500000, // Rs 25,000
+    period: 'month',
+    benefits: [
+      { kind: 'milk', quantity: 2, unit: 'L', period: 'day' },
+      { kind: 'flour', quantity: 20, unit: 'kg', period: 'month' },
+      { kind: 'accommodation' },
+    ],
+  },
+  {
+    ref: 'abdul',
+    identifier: 'abdul',
+    name: 'Abdul',
+    kind: 'permanent',
+    role: 'general',
+    cash: 2000000, // Rs 20,000, all cash
+    period: 'month',
+    benefits: [],
+  },
+  {
+    ref: 'rashid',
+    identifier: 'rashid',
+    name: 'Rashid',
+    kind: 'daily',
+    role: null,
+    cash: 120000, // Rs 1,200 a day
+    period: 'day',
+    benefits: [],
+  },
+];
+
+const people = new Map(); // ref -> per_...
+const engagements = new Map(); // ref -> eng_...
+
+/** First and last day of the month before `today()`. Farm-local. */
+function previousMonth() {
+  const [y, m] = today().split('-').map(Number);
+  const py = m === 1 ? y - 1 : y;
+  const pm = m === 1 ? 12 : m - 1;
+  const mm = String(pm).padStart(2, '0');
+  const last = new Date(Date.UTC(py, pm, 0)).getUTCDate();
+  return { from: `${py}-${mm}-01`, to: `${py}-${mm}-${String(last).padStart(2, '0')}` };
+}
+
+async function seedStaff() {
+  for (const p of STAFF) {
+    const person = await post('/people', `person:${p.ref}`, {
+      identifier: p.identifier,
+      name: p.name,
+      recorded_by: RECORDER,
+    });
+    people.set(p.ref, person.id);
+
+    const engagement = await post(`/people/${person.id}/engagements`, `engagement:${p.ref}`, {
+      kind: p.kind,
+      role: p.role,
+      started_on: dayAgo(120),
+      recorded_by: RECORDER,
+    });
+    engagements.set(p.ref, engagement.id);
+
+    await post(`/engagements/${engagement.id}/terms`, `term:${p.ref}`, {
+      effective_from: dayAgo(120),
+      cash_minor: p.cash,
+      cash_period: p.period,
+      benefits: p.benefits,
+      recorded_by: RECORDER,
+    });
+  }
+
+  // ONE DESTINATION PER STAFF MEMBER on an allowance. The dispatch key is one
+  // row per destination per session, so a shared 'staff' row could not say
+  // whose milk it was -- see REGISTRY_PAYROLL.md §4.6a.
+  //
+  // NOT `standing`, and this is the one place the seed deliberately diverges
+  // from what the farm should do. A standing destination must be answered in
+  // every session, and the dispatch rows above were already written without it
+  // -- so seeding it standing would leave every one of those sessions showing
+  // an untouched row with no figure, which is the fixture-looks-broken failure
+  // REGISTRY_PAYROLL.md §16.1 hit from the other direction. Entered through the
+  // screen on a live farm it should be standing.
+  const imran = people.get('imran');
+  await post('/destinations', 'destination:imran-milk', {
+    name: 'Imran (milk allowance)',
+    kind: 'staff',
+    standing: false,
+    person_id: imran,
+    started_on: dayAgo(120),
+    recorded_by: RECORDER,
+  });
+
+  console.log(`\nstaff    ${STAFF.length} people (2 salaried, 1 dihari) + 1 milk allowance`);
+}
+
+/**
+ * LAST month paid, this month left outstanding.
+ *
+ * The current month is outstanding for the whole of it, so a seed that settled
+ * it would open /labour/payroll on the completed state and hide the one the
+ * screen exists for. Last month is what the day board prompts about, so it is
+ * settled -- otherwise `/` would open amber on a fresh clone and stay that way.
+ */
+async function seedPayroll() {
+  const { from, to } = previousMonth();
+  const dihariDay = `${from.slice(0, 8)}14`;
+
+  await post('/payroll/run', `payroll:${from}`, {
+    from_on: from,
+    to_on: to,
+    entries: [
+      {
+        engagement_id: engagements.get('imran'),
+        amount_minor: 2200000,
+        note: 'four days leave',
+      },
+      { engagement_id: engagements.get('abdul'), amount_minor: 2000000 },
+      {
+        engagement_id: engagements.get('rashid'),
+        from_on: dihariDay,
+        amount_minor: 120000,
+      },
+    ],
+    source_form: 'direct_entry',
+    recorded_by: RECORDER,
+  });
+
+  // Abdul settled in full, Imran part-paid, Rashid in advance -- so the list
+  // screen shows a settled balance, an open one and a negative one at once.
+  await post('/wage-payments', 'wage-payment:abdul', {
+    person_id: people.get('abdul'),
+    occurred_on: to,
+    amount_minor: 2000000,
+    method: 'cash',
+    recorded_by: RECORDER,
+  });
+  await post('/wage-payments', 'wage-payment:imran', {
+    person_id: people.get('imran'),
+    occurred_on: to,
+    amount_minor: 1500000,
+    method: 'cash',
+    recorded_by: RECORDER,
+  });
+  await post('/wage-payments', 'wage-payment:rashid', {
+    person_id: people.get('rashid'),
+    occurred_on: from,
+    amount_minor: 360000,
+    method: 'cash',
+    reference: 'peshgi',
+    recorded_by: RECORDER,
+  });
+
+  console.log(`payroll  ${from} to ${to} recorded; this month left outstanding`);
+}
+
+async function reportStaff() {
+  const { people: rows } = await get('/people');
+  console.log('\nwhat is owed to staff');
+  for (const p of rows) {
+    const owed =
+      p.balance_minor === 0
+        ? 'settled'
+        : p.balance_minor < 0
+          ? `Rs ${(-p.balance_minor / 100).toFixed(2)} in advance`
+          : `Rs ${(p.balance_minor / 100).toFixed(2)}`;
+    console.log(`  ${p.identifier.padEnd(10)} ${owed}`);
+  }
+
+  const board = await get('/today');
+  const line = (g) =>
+    board[g].map((s) => `${s.session} ${s.complete ? 'ok' : `${s.recorded}/${s.expected}`}`).join('  ');
+  console.log('\ntoday');
+  console.log(`  milking    ${line('milking')}`);
+  console.log(`  dispatch   ${line('dispatch')}`);
+  console.log(
+    `  payroll    ${board.payroll_previous ? 'last month OUTSTANDING' : 'last month settled'}` +
+      `, ${board.payroll.outstanding} of ${board.payroll.permanent} to enter this month`,
+  );
+}
+
 async function reportSales() {
   const { destinations: rows } = await get('/destinations');
   console.log('\nbuyers');
@@ -894,8 +1102,11 @@ async function main() {
   await seedMilkings();
   await seedDestinations();
   await seedDispatches();
+  await seedStaff();
+  await seedPayroll();
   await report();
   await reportSales();
+  await reportStaff();
 }
 
 main().catch((e) => die(e.stack ?? String(e)));

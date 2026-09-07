@@ -504,7 +504,7 @@ describe('item 4 — the smaller items', () => {
 
     expect(el.querySelector('[data-role="no-dams"]')).not.toBeNull();
     const cta = el.querySelector('[data-role="no-dams-cta"]')!;
-    expect(cta.getAttribute('href')).toBe('/add');
+    expect(cta.getAttribute('href')).toBe('/animals/new');
   });
 });
 

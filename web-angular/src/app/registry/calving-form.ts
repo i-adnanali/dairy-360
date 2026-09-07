@@ -69,7 +69,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
                state, one screen offering the next step and the other not. -->
           <p class="text-sm text-farm-600" data-role="no-dams">
             No females in the registry yet — a calving needs a dam.
-            <a routerLink="/add" data-role="no-dams-cta"
+            <a routerLink="/animals/new" data-role="no-dams-cta"
               class="font-medium text-farm-800 underline">Add an acquired animal</a>,
             and it will be here when you come back.
           </p>

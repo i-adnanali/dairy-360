@@ -25,6 +25,7 @@ import { ChipGroup } from './chip-group';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
+import { SessionRequired } from './session-required';
 import { WriteLog } from './after-write';
 import { formatMinor, formatRate, rupeesToMinor } from './money';
 import { farmToday } from './today';
@@ -33,10 +34,10 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
 @Component({
   selector: 'app-destination-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, RouterLink],
+  imports: [ChipGroup, RouterLink, SessionRequired],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
-      <a routerLink="/buyers" class="text-sm text-farm-600 underline">← all buyers</a>
+      <a routerLink="/milk/buyers" class="text-sm text-farm-600 underline">← all buyers</a>
 
       @if (loadError(); as e) {
         <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
@@ -177,9 +178,13 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
               <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="pay-error">{{ e }}</p>
             }
 
-            <button type="submit" data-role="pay-submit" [disabled]="!canPay()"
-              class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
-            >{{ payState.submitting() ? 'Saving…' : 'Record payment' }}</button>
+            @if (session.ready()) {
+              <button type="submit" data-role="pay-submit" [disabled]="!canPay()"
+                class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+              >{{ payState.submitting() ? 'Saving…' : 'Record payment' }}</button>
+            } @else {
+              <app-session-required what="a payment" />
+            }
           </form>
         }
 
@@ -206,7 +211,7 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
 })
 export class DestinationDetail {
   private readonly api = inject(RegistryApi);
-  private readonly session = inject(Session);
+  protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
 
   /** Bound from the route by withComponentInputBinding(). */

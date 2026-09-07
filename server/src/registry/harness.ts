@@ -29,7 +29,7 @@ import express from 'express';
 import cors from 'cors';
 
 import { registryRouter } from './routes';
-import { freshDb, tradingHerd } from './fixtures';
+import { freshDb, staffedHerd } from './fixtures';
 import { farmToday } from './time';
 import { herd } from './reads';
 import type { Db } from './schema';
@@ -114,7 +114,7 @@ function main(): void {
     return;
   }
 
-  // tradingHerd() rather than cleanHerd(): the awkward-case herd PLUS two
+  // staffedHerd() rather than cleanHerd(): the awkward-case herd PLUS two
   // weeks of milk yield and sales. The reconciliation screen has production on
   // one side and dispatch on the other, so a fixture with only the herd would
   // leave half of every sales screen rendering an empty state.
@@ -123,7 +123,10 @@ function main(): void {
   // a fixture that stopped days ago opened every sales screen onto an empty
   // session -- correct, and indistinguishable from broken. The default stays
   // frozen for the tests; only this caller moves with the calendar.
-  const db = args.empty ? freshDb() : tradingHerd(farmToday()).db;
+  // ...and PLUS the people who work it, for the same reason the sales rows were
+  // added: /payroll, /people and /people/:id opened onto an empty state
+  // otherwise, and an empty screen is indistinguishable from a broken one.
+  const db = args.empty ? freshDb() : staffedHerd(farmToday()).db;
   const app = harnessApp(db);
 
   app.listen(args.port, () => {

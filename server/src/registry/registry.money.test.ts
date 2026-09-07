@@ -11,7 +11,14 @@ import assert from 'node:assert';
 import Database from 'better-sqlite3';
 import { test } from 'node:test';
 
-import { MINOR_PER_UNIT, amountMinor, formatMinor, formatRate, perLitreMinor } from './money';
+import {
+  MINOR_PER_UNIT,
+  amountMinor,
+  formatMinor,
+  formatPeriodRate,
+  formatRate,
+  perLitreMinor,
+} from './money';
 import { applyRegistrySchema } from './schema';
 
 const RS_7000_PER_40L = 700_000; // paisa
@@ -312,4 +319,20 @@ test('the four sales tables permit UPDATE and DELETE, unlike the event log', () 
     0,
   );
   d.close();
+});
+
+// ---------------------------------------------------------------------------
+// formatPeriodRate -- packages (docs/REGISTRY_PAYROLL.md §5)
+// ---------------------------------------------------------------------------
+
+test('formatPeriodRate prints the agreement, not a per-day conversion', () => {
+  // Rs 25,000/month is NOT rendered as Rs 833.33/day. The statement is handed to
+  // the person it is about, and it has to say what they agreed to.
+  assert.equal(formatPeriodRate(2_500_000, 'month'), 'Rs 25,000.00 / month');
+  assert.equal(formatPeriodRate(120_000, 'day'), 'Rs 1,200.00 / day');
+});
+
+test('formatPeriodRate shows paisa and zero, like every other amount', () => {
+  assert.equal(formatPeriodRate(0, 'month'), 'Rs 0.00 / month');
+  assert.equal(formatPeriodRate(2_500_050, 'month'), 'Rs 25,000.50 / month');
 });

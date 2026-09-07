@@ -30,6 +30,7 @@ import { ChipGroup } from './chip-group';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
+import { SessionRequired } from './session-required';
 import { WriteLog } from './after-write';
 import { formatMinor, formatRate, minorToRupees, perLitreLabel, rupeesToMinor } from './money';
 import { farmToday } from './today';
@@ -38,7 +39,7 @@ import type { DestinationKind, DestinationListRow } from './types';
 @Component({
   selector: 'app-destinations-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, RouterLink],
+  imports: [ChipGroup, RouterLink, SessionRequired],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
       <header>
@@ -79,7 +80,7 @@ import type { DestinationKind, DestinationListRow } from './types';
                     [class.opacity-50]="!d.active">
                     <td class="px-3 py-2">
                       @if (d.billable) {
-                        <a [routerLink]="['/buyers', d.id]" class="font-medium text-farm-800 underline"
+                        <a [routerLink]="['/milk/buyers', d.id]" class="font-medium text-farm-800 underline"
                           [attr.data-role]="'open-' + d.id">{{ d.name }}</a>
                       } @else {
                         <span class="text-farm-800">{{ d.name }}</span>
@@ -168,9 +169,13 @@ import type { DestinationKind, DestinationListRow } from './types';
           }
 
           <div class="flex gap-2">
-            <button type="submit" data-role="price-submit" [disabled]="pricePreview() === null || priceState.submitting()"
-              class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
-            >{{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}</button>
+            @if (session.ready()) {
+              <button type="submit" data-role="price-submit" [disabled]="pricePreview() === null || priceState.submitting()"
+                class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+              >{{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}</button>
+            } @else {
+              <app-session-required what="a rate" />
+            }
             <button type="button" data-role="price-cancel" (click)="pricing.set(null)"
               class="rounded-xl border border-farm-300 px-4 py-2 text-sm text-farm-700">Cancel</button>
           </div>
@@ -226,16 +231,20 @@ import type { DestinationKind, DestinationListRow } from './types';
           <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="add-error">{{ e }}</p>
         }
 
-        <button type="submit" data-role="add-submit" [disabled]="!canAdd()"
-          class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
-        >{{ addState.submitting() ? 'Saving…' : 'Add destination' }}</button>
+        @if (session.ready()) {
+          <button type="submit" data-role="add-submit" [disabled]="!canAdd()"
+            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+          >{{ addState.submitting() ? 'Saving…' : 'Add destination' }}</button>
+        } @else {
+          <app-session-required what="a destination" />
+        }
       </form>
     </div>
   `,
 })
 export class DestinationsList {
   private readonly api = inject(RegistryApi);
-  private readonly session = inject(Session);
+  protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
 
   protected readonly rows = signal<DestinationListRow[] | null>(null);

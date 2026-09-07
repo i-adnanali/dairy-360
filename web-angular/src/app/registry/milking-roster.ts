@@ -49,11 +49,13 @@ import { RouterLink } from '@angular/router';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
 import { Session } from './session';
+import { SessionRequired } from './session-required';
 import { WriteLog, focusAfterWrite } from './after-write';
 import { ChipGroup } from './chip-group';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
 import { farmToday, likelySession } from './today';
+import { urlParams } from './url-state';
 import type { MilkingRoster, MilkingSession, MilkingStatus, RosterRow } from './types';
 
 /** What the operator has said about one animal. `null` status = untouched. */
@@ -79,7 +81,7 @@ export const OUT_OF_BAND = 0.5;
 @Component({
   selector: 'app-milking-roster',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, IdentifierInput, RouterLink],
+  imports: [ChipGroup, IdentifierInput, RouterLink, SessionRequired],
   template: `
     <form class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
       <header>
@@ -130,7 +132,7 @@ export const OUT_OF_BAND = 0.5;
           <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
             data-role="nobody">
             No animal was in milk on {{ r.occurred_on }}. A female is in milk from her calving until
-            she is dried off — <a routerLink="/calving" class="font-medium text-farm-800 underline">record a calving</a>
+            she is dried off — <a routerLink="/animals/calvings/new" class="font-medium text-farm-800 underline">record a calving</a>
             and she will be here.
           </p>
         } @else {
@@ -229,9 +231,13 @@ export const OUT_OF_BAND = 0.5;
       }
 
       <div class="flex items-center gap-3">
-        <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-          class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-        >{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+        @if (session_.ready()) {
+          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
+            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
+          >{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+        } @else {
+          <app-session-required what="this session" />
+        }
         @if (blockedReason(); as b) {
           <span class="text-sm text-farm-600" data-role="blocked">{{ b }}</span>
         }
@@ -241,7 +247,7 @@ export const OUT_OF_BAND = 0.5;
 })
 export class MilkingRosterScreen {
   private readonly api = inject(RegistryApi);
-  private readonly session_ = inject(Session);
+  protected readonly session_ = inject(Session);
   private readonly writeLog = inject(WriteLog);
   protected readonly identifiers = inject(Identifiers);
 
@@ -254,16 +260,32 @@ export class MilkingRosterScreen {
   ];
   protected readonly state = new FormState<{ written: number; measured: number; updated: number }>();
 
-  protected readonly on = signal(farmToday());
   /**
-   * Inferred from the clock, then SHOWN AND CHANGEABLE.
+   * The date and session live in the URL, not in a component signal.
+   *
+   * A bare /milk/milking opens today's likely session and STAYS bare; changing
+   * either puts it in the query string, at which point the URL names that
+   * specific roster and can be sent to somebody. See url-state.ts.
+   */
+  private readonly url = urlParams({ on: farmToday(), session: likelySession() });
+  protected readonly on = computed(() => this.url.value().on);
+  /**
+   * Inferred from the clock, then SHOWN AND CHANGEABLE -- and now overridable
+   * by the URL as well.
    *
    * The same parse-then-show-back contract as the date control, for the same
    * reason: an inference the operator cannot see is a default by another name.
    * Before 13:00 local the morning session is the one being entered; after it,
    * the evening.
+   *
+   * VALIDATED, not cast: `?session=lunch` is a URL somebody can type, and
+   * passing it through would produce a server refusal on a screen with no field
+   * to attach it to.
    */
-  protected readonly session = signal<MilkingSession>(likelySession());
+  protected readonly session = computed<MilkingSession>(() => {
+    const raw = this.url.value().session;
+    return raw === 'morning' || raw === 'evening' ? raw : likelySession();
+  });
   protected readonly milkedBy = signal('');
 
   protected readonly roster = signal<MilkingRoster | null>(null);
@@ -306,11 +328,11 @@ export class MilkingRosterScreen {
   }
 
   protected setOn(v: string): void {
-    if (v.length > 0) this.on.set(v);
+    if (v.length > 0) this.url.set({ on: v });
   }
 
   protected setSession(s: MilkingSession): void {
-    this.session.set(s);
+    this.url.set({ session: s });
   }
 
   protected draft(id: string): Draft {
