@@ -149,9 +149,16 @@ export type LinkTone = 'quiet' | 'strong';
 })
 export class TextLink {
   readonly tone = input<LinkTone>('quiet');
-  protected readonly cls = computed(() =>
-    this.tone() === 'quiet'
-      ? 'text-content-muted hover:text-content-heading'
-      : 'font-medium text-content-heading underline',
+  private static readonly FOCUS =
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus ' +
+    'focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page rounded-sm';
+
+  protected readonly cls = computed(
+    () =>
+      (this.tone() === 'quiet'
+        ? 'text-content-muted hover:text-content-heading'
+        : 'font-medium text-content-heading underline') +
+      ' ' +
+      TextLink.FOCUS,
   );
 }

@@ -62,6 +62,15 @@ export class TextInput {
   protected readonly cls = computed(
     () =>
       'rounded-lg border border-line text-sm ' +
+      // A BORDER SHIFT, NOT A RING, and that follows composer.ts rather than
+      // section 7's "ring on every interactive primitive". composer deliberately
+      // traded the native outline for `focus:border-farm-500`, and section 7
+      // itself says to keep that and not reinstate an outline there. Giving
+      // every other input a ring would leave the app with two focus languages
+      // for one element type, and the composer -- the control used most -- would
+      // be the odd one out. Buttons and links take the ring because they have no
+      // border to shift.
+      'focus:outline-none focus:border-focus ' +
       (this.density() === 'compact' ? 'px-2 py-1.5' : 'px-3 py-2'),
   );
 }

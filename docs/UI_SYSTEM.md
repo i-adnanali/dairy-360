@@ -1,6 +1,6 @@
 # UI system — the design system
 
-*Status: **phases 0, 1, 2 and 4 built. Phase 3 is not.** Specified against
+*Status: **phases 0–4 built. 5, 6 and 7 are not.** Specified against
 `816fe67`. The token layer landed with zero visual delta; the fifteen primitives
 landed as attribute **directives** rather than components (class strings 358 →
 293, occurrences 957 → 614, all 115 `data-role` hooks intact); then every call
@@ -11,13 +11,17 @@ layers §3 describes are now two.*
 *The app is no longer beige. Phase 4 is the commit where that happened, and
 phases 1 and 2 existed to make it a single file's edit.*
 
-***Phase 3 was skipped, not completed.*** Dark mode, the `.dark` block,
-`chartTheme()`, the markdown surfaces and the focus rings are all still
-outstanding, and `chart-card.spec.ts:31` still pins `#8a6431` by exact equality
-— a literal that no longer appears anywhere else in the app. §10's order was 3
-then 4; it was run 4 then 3 because the recolour is what the work was for and
-dark mode is a larger, separable job. Read §10 knowing one row is out of
-sequence. §12's **dark** values remain unrendered by anyone.*
+*Phase 3 landed **after** phase 4 rather than before it, which is the one place
+§10's order was not followed: the recolour was what the work was for, and dark
+mode is a larger separable job. Read §10 knowing that row is out of sequence.
+Dark now exists — a `.dark` block of 55 tokens, a three-way toggle
+(system/light/dark, persisted, `color-scheme` set per mode), `chartTheme()`
+reading the properties, the markdown surfaces tokenised and the elements that
+fell through preflight styled, focus treatments on every interactive primitive,
+`aria-live` on the chat, and `prefers-reduced-motion` honoured. **Both modes have
+now been rendered on all fourteen screens** — §12's disclosure that the dark
+values had never been seen no longer holds, though "rendered and read" is not
+"used for a week in a dairy".*
 
 *Three items remain **BLOCKED** on the five-animal trial, and B3 is visibly
 doing its job: the write-log bar keeps its own three tokens at their original

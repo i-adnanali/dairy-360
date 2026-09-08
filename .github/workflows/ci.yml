@@ -22,6 +22,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:shared
+      # BEFORE the typecheck and both builds, on purpose. A backtick inside a
+      # `template:` literal is a compile error, so the spec that guards against
+      # it (templates.spec.ts) never runs -- the build it rides on has already
+      # failed with several errors pointing nowhere near the cause. This names
+      # the file and the line in one line of output. See the script's header.
+      - run: npm run check:templates
       - run: npm run typecheck            # shared + server
       # Shaper, farm ingest/classify, and the animal registry (schema,
       # migrations, calving transaction, projections, invariants, HTTP routes).

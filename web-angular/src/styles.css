@@ -198,6 +198,106 @@
   --certainty-absent: 130 128 122;  /* #82807A */
 }
 
+/*
+ * DARK. Phase 3 of docs/UI_SYSTEM.md, and the first time these values have been
+ * rendered by anybody -- section 12 listed them as reasoned from the light
+ * palette and perceived-contrast matching, not measured.
+ *
+ * `.dark` on <html>, not a media query, because the toggle is three-way:
+ * system / light / dark, and a persisted choice has to be able to disagree with
+ * the OS. app.ts owns the class and the `color-scheme`; see theme.ts.
+ *
+ * SURFACES DO NOT INVERT SYMMETRICALLY, which is why these are not the light
+ * values flipped. Dark surfaces need less separation than light ones to read as
+ * distinct, so page/raised/sunken sit 8 points apart rather than the 8-and-8
+ * the light set uses -- and `--text-on-fill` goes DARK (#20120A), because the
+ * brand fill lightens to #C88356 and white text on it would fail contrast.
+ *
+ * THE WRITE-LOG BAR MOVES HERE, AND B3 PERMITS IT. B3 freezes the bar's
+ * contrast relative to its surroundings, not its hex: a bar that stayed
+ * #f0fdf4 on a #141413 page would be a white slab. Section 3.4's dark values
+ * are "matched for perceived contrast rather than mapped from the light set",
+ * which is the same instruction. It still has its own three tokens, so it can
+ * still be held independently.
+ */
+.dark {
+  /* --- surfaces --- */
+  --surface-page: 20 20 19;       /* #141413 */
+  --surface-raised: 28 27 26;     /* #1C1B1A */
+  --surface-sunken: 35 34 32;     /* #232220 */
+  /* --- text --- */
+  --text-primary: 240 239 234;    /* #F0EFEA */
+  --text-heading: 232 230 224;    /* #E8E6E0 */
+  --text-secondary: 196 194 185;  /* #C4C2B9 */
+  --text-muted: 158 156 147;      /* #9E9C93 */
+  --text-subtle: 124 123 116;     /* #7C7B74 */
+  --text-disabled: 87 86 79;      /* #57564F */
+  --text-on-fill: 32 18 10;       /* #20120A */
+  /* --- lines --- */
+  --border-hairline: 35 34 32;    /* #232220 */
+  --border-subtle: 44 43 40;      /* #2C2B28 */
+  --border-default: 58 57 52;     /* #3A3934 */
+  --border-strong: 74 72 68;      /* #4A4844 */
+  --border-selected: 200 131 86;  /* #C88356 */
+  /* --- brand fill --- */
+  --fill-brand: 200 131 86;       /* #C88356 */
+  --fill-brand-hover: 217 151 108; /* #D9976C */
+  --fill-brand-disabled: 44 43 40; /* #2C2B28 */
+  --fill-badge: 44 43 40;         /* #2C2B28 */
+  --focus-ring: 200 131 86;       /* #C88356 */
+  --divider: 35 34 32;            /* #232220 */
+  /* --- roles --- */
+  --danger-bg: 42 20 20;          /* #2A1414 */
+  --danger-fg: 244 169 160;       /* #F4A9A0 */
+  --danger-soft: 232 135 124;     /* #E8877C */
+  --danger-line: 74 32 32;        /* #4A2020 */
+  --warning-bg: 46 35 15;         /* #2E230F */
+  --warning-fg: 224 181 88;       /* #E0B558 */
+  --warning-strong: 239 201 122;  /* #EFC97A */
+  --warning-line: 71 55 15;       /* #47370F */
+  --success-bg: 18 41 27;         /* #12291B */
+  --success-fg: 124 196 149;      /* #7CC495 */
+  --success-line: 34 69 47;       /* #22452F */
+  /* --- the agent ramp --- */
+  --agent-dairy-bg: 18 38 34;     /* #122622 */
+  --agent-dairy-fg: 121 191 171;  /* #79BFAB */
+  --agent-dairy-line: 34 64 58;   /* #22403A */
+  --agent-vendor-bg: 22 26 46;    /* #161A2E */
+  --agent-vendor-fg: 143 160 220; /* #8FA0DC */
+  --agent-vendor-line: 39 46 77;  /* #272E4D */
+  --agent-both-bg: 33 26 46;      /* #211A2E */
+  --agent-both-fg: 177 151 217;   /* #B197D9 */
+  --agent-both-line: 53 42 77;    /* #352A4D */
+  /* --- the write-log bar --- */
+  --writelog-bg: 18 41 27;        /* #12291B */
+  --writelog-fg: 143 211 166;     /* #8FD3A6 */
+  --writelog-line: 34 69 47;      /* #22452F */
+  /* --- certainty --- */
+  --certainty-known: 240 239 234; /* #F0EFEA */
+  --certainty-approx: 158 156 147; /* #9E9C93 */
+  --certainty-rule: 87 86 79;     /* #57564F */
+  --certainty-absent: 124 123 116; /* #7C7B74 */
+
+  /*
+   * NO DARK COLUMN IN THE DOCUMENT. These seven were added during the token
+   * migration, after section 3 was written, so their dark values are DERIVED
+   * and should be read as the least-verified thing in this file:
+   *   one step lighter than danger-fg, mirroring how the
+   *   light set puts -strong one stop darker than -fg;
+   *   inverted here because dark inverts the direction.
+   *   the harness banner, matched to warning-line.
+   *   the status dots keep their saturation: they are 6px
+   *   marks and need to read at that size.
+   *   tracks text-disabled, as it does in light.
+   */
+  --danger-strong: 248 196 189;   /* #F8C4BD -- derived */
+  --success-strong: 155 217 180;  /* #9BD9B4 -- derived */
+  --success-line-soft: 46 90 61;  /* #2E5A3D -- derived */
+  --warning-fill: 71 55 15;       /* #47370F -- derived */
+  --success-dot: 52 211 153;      /* #34D399 -- derived */
+  --danger-dot: 248 113 113;      /* #F87171 -- derived */
+  --mark-pending: 87 86 79;       /* #57564F -- derived */
+}
 html,
 body,
 app-root {
@@ -251,11 +351,43 @@ app-event-list,
 app-identifier-input,
 app-precision-date,
 app-session-bar,
-app-session-gate {
+app-session-gate,
+/*
+ * ADDED LATE, and it was the exact latent case the comment above describes.
+ * <app-session-required> has 12 call sites and was absent from this list for
+ * its whole life. Five sit inside a flex parent, where CSS blockifies the child
+ * and nothing is wrong; the other seven -- correction-form, person-detail x2,
+ * destination-detail, destinations-list, people-list x2, payroll-run -- do not,
+ * so every `space-y-*` gap above them was contributing nothing. Found by
+ * diffing this list against the components that actually exist rather than by
+ * looking at a screen, which is why section 9 wants it guarded by a test.
+ */
+app-session-required {
   display: block;
 }
 
-/* compact markdown inside assistant bubbles */
+/*
+ * MARKDOWN INSIDE ASSISTANT BUBBLES. Phase 3, sections 8.2 and 7.
+ *
+ * Three `rgba(0, 0, 0, ...)` values used to live here -- the code background,
+ * the table head, and the cell borders -- and all three were invisible over a
+ * dark surface: black at 6% opacity on #1C1B1A is black on near-black. They are
+ * tokens now, so they invert with everything else.
+ *
+ * The rest of this block is the elements section 8.2 found FALLING THROUGH
+ * PREFLIGHT. Tailwind's base layer strips heading sizes, list markers, link
+ * colour and quote indentation, on the assumption that a utility class will put
+ * them back -- and nothing can, because this HTML is produced by `marked` from
+ * the model's reply and never passes through a template. Unstyled, an h2 in a
+ * bubble rendered at body size and weight, and a blockquote was indistinguishable
+ * from a paragraph.
+ *
+ * SCOPED TO WHAT DOMPURIFY ACTUALLY ALLOWS. `ALLOWED_TAGS` in markdown-view.ts
+ * permits h1-h3 and not h4-h6, so there are three heading rules here and not
+ * six: the others are stripped before they reach the DOM and a rule for them
+ * would be dead code that reads like coverage. `del` is allowed and was missing
+ * from section 8.2's own list.
+ */
 .prose-chat p {
   margin: 0 0 0.5rem;
 }
@@ -267,18 +399,126 @@ app-session-gate {
   margin: 0 0 0.5rem;
   padding-left: 1.25rem;
 }
+/*
+ * Markers, because preflight removes them. `outside` rather than `inside` so a
+ * wrapped line aligns under its own text and not under the bullet -- the whole
+ * point of a list in a narrow bubble.
+ */
+.prose-chat ul {
+  list-style: disc outside;
+}
+.prose-chat ol {
+  list-style: decimal outside;
+}
+/* Nested lists: a second level needs a different marker to read as one. */
+.prose-chat ul ul {
+  list-style-type: circle;
+}
+.prose-chat ul ul ul {
+  list-style-type: square;
+}
 .prose-chat li {
   margin: 0.125rem 0;
+}
+.prose-chat li > ul,
+.prose-chat li > ol {
+  margin: 0.125rem 0 0.25rem;
 }
 .prose-chat strong {
   font-weight: 600;
 }
+.prose-chat em {
+  font-style: italic;
+}
+.prose-chat del {
+  text-decoration: line-through;
+  color: rgb(var(--text-muted));
+}
+
+/*
+ * THREE HEADING LEVELS, MATCHING SECTION 4's SCALE.
+ *
+ * Deliberately flatter than a document's: this is a chat bubble, and an h1 at
+ * 2rem inside one reads as a mistake. h1 lands at the app's `text-base`, and
+ * the three levels separate by weight and colour more than by size.
+ */
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3 {
+  margin: 0.75rem 0 0.35rem;
+  line-height: 1.3;
+  color: rgb(var(--text-primary));
+}
+.prose-chat h1:first-child,
+.prose-chat h2:first-child,
+.prose-chat h3:first-child {
+  margin-top: 0;
+}
+.prose-chat h1 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.prose-chat h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.prose-chat h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--text-heading));
+}
+
+/*
+ * A rule on the leading edge, not an indent alone: an indented paragraph in a
+ * bubble that is already indented reads as an accident.
+ */
+.prose-chat blockquote {
+  margin: 0.5rem 0;
+  padding: 0.125rem 0 0.125rem 0.75rem;
+  border-left: 2px solid rgb(var(--border-default));
+  color: rgb(var(--text-secondary));
+}
+.prose-chat hr {
+  margin: 0.75rem 0;
+  border: 0;
+  border-top: 1px solid rgb(var(--divider));
+}
+.prose-chat a {
+  color: rgb(var(--fill-brand));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-chat a:hover {
+  color: rgb(var(--fill-brand-hover));
+}
+
 .prose-chat code {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgb(var(--surface-sunken));
   padding: 0.05rem 0.3rem;
   border-radius: 0.25rem;
   font-size: 0.85em;
 }
+/*
+ * A `pre` holds a `code`, and the inline treatment above would otherwise give
+ * the block a second background inside the first and a stray radius per line.
+ */
+.prose-chat pre {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.375rem;
+  background: rgb(var(--surface-sunken));
+  border: 1px solid rgb(var(--border-hairline));
+  overflow-x: auto;
+  font-size: 0.85em;
+  line-height: 1.45;
+}
+.prose-chat pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
 .prose-chat table {
   width: 100%;
   margin: 0.25rem 0 0.75rem;
@@ -288,11 +528,11 @@ app-session-gate {
   overflow-x: auto;
 }
 .prose-chat thead {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgb(var(--surface-sunken));
 }
 .prose-chat th,
 .prose-chat td {
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid rgb(var(--border-subtle));
   padding: 0.35rem 0.6rem;
   text-align: left;
   vertical-align: top;
@@ -303,4 +543,25 @@ app-session-gate {
 }
 .prose-chat td {
   white-space: normal;
+}
+
+/*
+ * HONOUR prefers-reduced-motion. Section 7 lists it as "not referenced", and it
+ * was: the "Thinking..." pulse animates indefinitely while the model streams,
+ * which is exactly the kind of thing the setting exists to stop.
+ *
+ * Written as a blanket rule rather than per-animation so anything added later
+ * is covered by default. `0.01ms` and not `0` because some browsers skip
+ * transitionend/animationend entirely at zero, and code that waits for those
+ * events then hangs.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

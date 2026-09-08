@@ -121,7 +121,14 @@ export class Button {
 
   protected readonly cls = computed(() => {
     const base =
-      'rounded-lg text-sm font-medium transition-colors ' + PAD[this.size()];
+      'rounded-lg text-sm font-medium transition-colors ' +
+      // `focus-visible`, not `focus`: a ring that appears on every mouse click
+      // is noise, and the whole point is the keyboard. `ring-offset` needs a
+      // ground colour to blend into or it paints white on a dark page, which is
+      // the usual way a ring looks broken in dark mode.
+      'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus ' +
+      'focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page ' +
+      PAD[this.size()];
     if (this.disabled()) {
       // Visibly inert: a flat sunken ground with disabled-weight text. The old
       // `bg-farm-300` was a light tan under WHITE text, which reads as an

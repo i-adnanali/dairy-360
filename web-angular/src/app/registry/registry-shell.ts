@@ -15,12 +15,16 @@ import { WriteLog } from './after-write';
 import { Session } from './session';
 import { SessionBar } from './session-bar';
 import { SessionGate } from './session-gate';
+import { ThemeToggle } from '../ui/theme-toggle';
 import { TextLink } from '../ui/text';
 
 @Component({
   selector: 'app-registry-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, SessionBar, SessionGate, TextLink],
+  imports: [
+    RouterLink, RouterLinkActive, RouterOutlet, SessionBar, SessionGate, TextLink,
+    ThemeToggle,
+  ],
   template: `
     <div class="flex h-full flex-col bg-surface-page text-content-primary">
       <app-session-bar />
@@ -53,13 +57,31 @@ import { TextLink } from '../ui/text';
            appears this becomes a real navigation problem rather than a layout
            one -- and that is the point at which it should stop being a row. -->
       <header class="border-b border-line-subtle bg-surface-raised px-4 py-3">
-        <div class="mx-auto flex max-w-4xl flex-wrap items-baseline gap-x-6 gap-y-2">
-          <h1 class="text-base font-semibold tracking-tight">Animal registry</h1>
+        <div class="mx-auto max-w-4xl">
+          <!--
+            TWO ROWS, EXPLICITLY, AND THAT IS ABOUT HEIGHT.
+
+            The toggle was first added to the same wrapping flex row as the title
+            and the nav, pushed right with ml-auto. The nav is ten links and
+            already wraps to a second line, so the toggle wrapped to a THIRD --
+            +34px of header on twelve of the fourteen screens, permanently, for
+            one control. Measured, not guessed.
+
+            The title is short, so pairing it with the toggle costs nothing. The
+            cost is that the toggle is now the header's FIRST tab stop rather
+            than its last: an operator tabbing for the nav passes it. That is the
+            better half of the trade -- one extra Tab against 34px on every
+            screen -- but it is a trade and not a free win.
+          -->
+          <div class="flex items-baseline justify-between gap-4">
+            <h1 class="text-base font-semibold tracking-tight">Animal registry</h1>
+            <app-theme-toggle />
+          </div>
           <!-- ALWAYS RENDERED. The nav used to be hidden until provenance was
                declared, which meant an operator who only wanted to look at a
                balance could not even see where to look. -->
           @if (true) {
-            <nav class="flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm" data-role="nav">
+            <nav class="mt-2 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm" data-role="nav">
               <!-- Today is first and ungrouped: it is not a subject, it is the
                    answer to "what now", and putting it under Record or Review
                    would make it look like one screen among several. -->

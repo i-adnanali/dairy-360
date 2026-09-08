@@ -1654,3 +1654,173 @@ Skipped, not done: the `.dark` block and the three-way toggle, `chartTheme()`,
 interactive primitive (without reinstating an outline on `composer.ts`), and
 `aria-live` on streaming chat output. §12's **dark** values have still never been
 rendered by anyone.
+
+---
+
+# Phase 3 — dark mode, and the two guards, 2026-09-08
+
+Run **after** phase 4. **294/294** frontend (287 → 294), **726/726** server,
+production build clean. Both modes rendered on all fourteen screens; layout is
+byte-for-byte identical between them.
+
+## Two guards first, both cheap and both overdue
+
+**`app-session-required` is in the `display: block` list.** 12 call sites, absent
+for its whole life, seven of them outside a flex parent — round 1's §3.3, and the
+exact latent case the list's own comment warns about ("fails silently and looks
+like a spacing bug").
+
+**The backtick guard can now fire.** §11.6 recorded that
+`templates.spec.ts`'s check *cannot* catch what it was built for: a stray
+backtick inside a `template:` literal is a **compile** error, so `ng test` dies
+at the build step and the spec never runs. It is now also
+`scripts/check-templates.mjs`, run by `npm run check:templates` **before** the
+typecheck and both builds in CI.
+
+The header of `templates.spec.ts` had rejected two homes — `node:fs` (no node
+types in its tsconfig) and the server suite ("a check on frontend sources in the
+wrong workspace"). Both are right. `scripts/` is the third option it did not
+consider: not a workspace, already home to `harness-seed.mjs` as
+explicitly-not-application-code, and node types simply available. It covers
+`src/app/**` rather than the spec's registry-only `./*.ts`, so `components/` is
+protected for the first time.
+
+**It caught two real cases within a minute of existing** — both in comments I
+was writing for this phase, in `registry-shell.ts` and `theme-toggle.ts`. It
+then caught a third in `dispatch-sheet.ts` later the same session. The spec keeps
+its copy, because it also asserts the check *fires*, which is what stops either
+implementation rotting into a function that reports clean forever.
+
+## Dark
+
+55 tokens in a `.dark` block: every Dark column in §3.1–§3.5, verbatim. Seven
+had **no** Dark column — the ones added during the token migration, after §3 was
+written — so their dark values are **derived** and flagged in the file as the
+least-verified thing in it.
+
+Three things worth recording about the values:
+
+- **Surfaces do not invert symmetrically.** Dark needs less separation between
+  page/raised/sunken than light does to read as distinct, so these are not the
+  light set flipped.
+- **`--text-on-fill` goes dark** (`#20120A`). The brand lightens to `#C88356` in
+  dark, and white on it fails contrast.
+- **The write-log bar moves, and B3 permits it.** B3 freezes the bar's contrast
+  *relative to its surroundings*, not its hex — a bar still at `#f0fdf4` on a
+  `#141413` page would be a white slab. §3.4's dark values are "matched for
+  perceived contrast rather than mapped from the light set", which is the same
+  instruction. It keeps its own three tokens, so it can still be held while
+  everything else moves.
+
+**The toggle is three-way** (system / light / dark), persisted, class on
+`<html>`, `color-scheme` set per mode — which is the half that makes the
+browser's own scrollbars, the eleven date pickers and the five selects follow.
+Without it a dark page opens a white calendar over itself.
+
+`core/theme.ts` persists to `localStorage` while `session.ts` refuses to persist
+anything. **That is not drift** and the file says so: session's rule is about
+*provenance*, and a remembered `recorded_by` mis-attributes a record. A
+remembered theme cannot. `theme.spec.ts` pins the behaviour, including that a
+junk stored value (`banana`, and also `Dark`) is refused rather than passed
+through to `classList.toggle`.
+
+**The toggle's placement cost 34px before it cost nothing.** First added to the
+header's wrapping flex row with `ml-auto`; the nav is ten links and already wraps
+to a second line, so the toggle wrapped to a **third** — +34px on twelve of the
+fourteen screens, permanently, for one control. The header is two explicit rows
+now (title + toggle, then nav), which costs **+2px** — the toggle's box is 2px
+taller than a bare `h1` at baseline. The trade is that the toggle became the
+header's first tab stop rather than its last. One extra Tab against 34px on
+every screen is the better half of that trade, but it is a trade.
+
+## `chartTheme()` — and `chart-card.spec.ts:31` is finally resolved
+
+Ten hex literals became ten token reads. §8.1 was right on every count, and the
+two obstacles it named were both real:
+
+- **The `rgb()` wrapper is not optional.** `getComputedStyle` returns
+  `169 96 60` — the channel triplet `<alpha-value>` forces — which Chart.js
+  cannot parse. It fails as a silently un-themed chart, not as an error.
+- **`options` had to become a `computed()`.** As a plain field it was a stable
+  reference, so `BaseChartDirective` never saw a change and the axes would have
+  kept their first colours forever while the datasets re-rendered.
+
+The re-render works by reading `theme.resolved()` and discarding it — that line
+is the whole mechanism, and without it the token reads would be correct and
+would simply never run again.
+
+**The spec no longer pins a hex.** `chart-card.spec.ts:31` — round 1's §3.1,
+which §8.1 called the reason "any theming breaks it on day one" — now asserts
+that the value comes *from* the custom property and arrives *wrapped*. Three
+tests replaced the one line: the token read, the re-resolve on a theme change
+(asserted on the config object, because jsdom has no 2D context), and the
+`currentColor` fallback for a missing token, which is the state the unit suite
+itself runs in.
+
+## Markdown — and the rules were unobservable, so they were rendered deliberately
+
+The three `rgba(0, 0, 0, …)` values are tokens. All three were invisible over a
+dark surface: black at 6% on `#1C1B1A` is black on near-black.
+
+The elements §8.2 found falling through preflight are styled: `h1`–`h3` (three,
+not six — `ALLOWED_TAGS` in `markdown-view.ts` permits no more, so rules for
+`h4`–`h6` would be dead code that reads like coverage), `blockquote` with a
+leading rule rather than an indent alone, `a`, `hr`, `pre` (with `pre code`
+neutralised so a block does not get the inline treatment inside it), `del` —
+which was missing from §8.2's own list — `em`, and nested list markers at
+disc → circle → square.
+
+**None of this is visible on any of the fourteen screens**, because no fixture
+produces an assistant reply — the same blind spot as `border-farm-200/60`. So it
+was rendered on purpose: a throwaway bubble containing every styled element,
+screenshotted in both modes (`shots/markdown-light.png`, `markdown-dark.png`).
+Everything reads.
+
+## Focus, and the one place §7 is not followed literally
+
+§7 asks for `--focus-ring` on every interactive primitive. **Inputs get a border
+shift instead**, and that is deliberate: `composer.ts` traded the native outline
+for `focus:border-…` as a recorded decision, and §7 itself says to keep that and
+not reinstate an outline there. A ring on every *other* input would leave the app
+with two focus languages for one element type, with the most-used control the odd
+one out. Buttons and links take the ring, because they have no border to shift.
+`ring-offset-surface-page` is set with it — an offset without a ground colour
+paints white on a dark page, which is the usual way a ring looks broken in dark.
+
+## `aria-live` on the chat, which is not what §7 literally asks for
+
+§7 says "add to streaming chat output". Wrapping the stream in a live region is
+the wrong reading: `aria-live` re-announces its region on every mutation, and a
+token-by-token stream mutates dozens of times per reply — a screen reader would
+restart the answer on every token and finish none of them.
+
+So it announces the **transitions** — working / waiting for approval / answer
+ready / failed — and leaves the prose to be read on demand, which is how anybody
+reads an answer. Same shape as the registry's write log, counter included so two
+identical statuses in a row still re-announce. `pending` is checked before
+`loading`, because an agent proposing a write is the one state where the operator
+must act and must not hear "answer ready".
+
+## `prefers-reduced-motion`
+
+§7 listed it as "not referenced", and it was: the "Thinking…" pulse animates
+indefinitely while the model streams. Honoured as a blanket rule so anything
+added later is covered by default, at `0.01ms` rather than `0` — some browsers
+skip `transitionend`/`animationend` entirely at zero, and code waiting on those
+events then hangs.
+
+## What is left
+
+- **Phase 5** — the certainty vocabulary. Tokens exist and nothing consumes them.
+  Acceptance is that the four states are distinguishable **in greyscale**. Note
+  §11.4: this is where the unanswered calf-sex chip goes amber, and that is one
+  of the two predictions expected to feel *better*.
+- **Phase 6** — the chat fold-in, and the `display: block` guard test §9 sketches
+  (whose exclusion list must read `component:` as well as `loadComponent`, or it
+  flags `app-registry-shell`).
+- **Phase 7** — B1, B2, B3 and layout, after the trial.
+- The primitive remainders from §11: `StatusBadge` 3 of 6, `SummaryBar` 2 of 3,
+  `ErrorPanel` 26 of 35, and §4's help-prose demotion, which §10 still assigns
+  to no phase.
+- The seven derived dark values, which nobody has checked against the light set
+  by eye.
