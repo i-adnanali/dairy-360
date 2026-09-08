@@ -185,15 +185,14 @@
    *                       reason other than the re-point.
    *   --certainty-known   tracks --text-primary, which section 3.5 specifies.
    *   --certainty-absent  tracks --text-subtle, likewise.
-   *   --certainty-approx  no longer provisional -- section 3.5's light value and
-   *                       the neutral ramp now agree, which they could not while
-   *                       the palette was beige.
+   *   --certainty-approx  between muted and subtle in light, with >=4.5:1 on
+   *                       all three surfaces; see docs/UI_SYSTEM.md §4.5.
    *
    * "Unanswered" deliberately has no token: section 5 assigns it the warning
    * role, and a second name for one value is how the two drift apart.
    */
   --certainty-known: 26 25 23;  /* #1A1917 */
-  --certainty-approx: 130 128 122;  /* #82807A */
+  --certainty-approx: 108 106 100;  /* #6C6A64 */
   --certainty-rule: 168 166 158;  /* #A8A69E */
   --certainty-absent: 130 128 122;  /* #82807A */
 }

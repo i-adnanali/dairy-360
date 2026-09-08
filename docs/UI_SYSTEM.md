@@ -10,7 +10,7 @@ certainty states proved in **greyscale**.*
 separate adversarial-validation file, and the per-phase implementation records —
 all three were folded in here and deleted, because three documents disagreeing
 about the same counts is how the counts went wrong the first time. Every figure
-below was measured against the tree at `dc0a160`, not carried over.*
+below was measured against the tree at `d9c0057`, not carried over.*
 
 *Three items remain **BLOCKED** on the five-animal trial (§3). One contamination
 of that trial was **knowingly accepted** and is recorded in §3.4 — read it before
@@ -355,9 +355,11 @@ below shows that "two" was itself a large undercount.
 | **This is not the real registry** | `warning-fill` | the storage chip in the header (§12.2), and nowhere else |
 
 They coexist because the second is confined to one element in the **chrome** and
-never appears in the content area. **Nothing else may take amber**, and §8's
-invariant table now checks it. `danger` needs no equivalent reservation: an error
-panel is self-announcing.
+never appears in the content area. **These are the two intended meanings, not
+the five currently in use.** The override, anomaly and liability meanings remain
+recorded debt (§16; PHASE5_PRECHECK.md §2). §8 points to the classified baseline
+check, not an enforcement of the two-meaning reservation. `danger`
+needs no equivalent reservation: an error panel is self-announcing.
 
 ### 4.3 Categorical ramp — agents
 
@@ -404,7 +406,7 @@ and **no fifth property was added** — see §2.1.
 | Token | Light | Dark |
 |---|---|---|
 | `--certainty-known` | `#1A1917` | `#F0EFEA` |
-| `--certainty-approx` | `#82807A` | `#9E9C93` |
+| `--certainty-approx` | `#6C6A64` | `#9E9C93` |
 | `--certainty-rule` | `#A8A69E` | `#57564F` |
 | `--certainty-absent` | `#82807A` | `#7C7B74` |
 
@@ -419,13 +421,19 @@ the record rather than about the certainty of anything in it. The two are told
 apart by the strike-through, which no certainty state has — adequate, and not the
 same as correct. §14.1's `ended` tone is the real fix and it is phase 7.
 
-**And three of these values fail WCAG AA.** `--certainty-approx` and
-`--certainty-absent` hold the same light value (`#82807A`), so in greyscale they
-are separated by the dotted rule and the italic alone; `--certainty-rule` clears
-only 2.1–2.5:1 against a 3:1 threshold, which makes the mark that carries
-"approximate" the weakest thing in the vocabulary. Measured, not estimated:
-PHASE5_PRECHECK.md §1 and §9.6. Fixing them is a token change and phase 5 was
-right not to make it while implementing the states.
+**Light approximate is now `#6C6A64` (108, 106, 100).** It keeps the warm neutral
+ramp between `--text-muted` (`#63615C`) and `--text-subtle` (`#82807A`), while
+clearing 4.5:1 on all three surfaces: **5.04:1 page, 5.41:1 raised, 4.66:1
+sunken**. This value leaves some margin on the limiting sunken surface rather
+than stopping at `#6E6C66`'s 4.53:1. It also makes an approximate value darker
+than an absent answer in light, matching the dark theme's contrast ordering.
+The dark value is unchanged.
+
+`check:contrast` now reports **30 failures, down from 33**. Light
+`--certainty-absent` still fails AA on all three surfaces, and
+`--certainty-rule` still clears only 2.1–2.5:1 against a 3:1 threshold.
+PHASE5_PRECHECK.md §1 records the earlier measurement; those remaining failures
+are still debt, not fixed by separating the two text tones.
 
 "Unanswered" has deliberately **no token**: §6 assigns it the `warning` role, and
 a second name for one value is how the two drift apart.
@@ -549,7 +557,7 @@ would undo that in the one place a person actually looks.
 | **Approximate** — estimated, month/year precision, recalled | `certainty-approx`, `border-b border-dotted` in `certainty-rule`, a qualifier naming the imprecision (§6.1) — **and, as built, `font-mono tabular-nums` too; see below** |
 | **Deliberately absent** — an answer was given: `not_measured`, `nothing taken`, nobody observed | `certainty-absent`, *italic*, always **words** |
 | **No record** — nothing was ever entered | `content-disabled`, roman, an en dash `–` |
-| **Unanswered** — still required | The `warning` role. The only amber in the **content area** (§4.2.1) |
+| **Unanswered** — still required | The `warning` role, with a row-scale highlight to make skipped rows findable; other amber meanings remain in the content area (§4.2.1) |
 
 The earlier rule "always words, never a dash" becomes: **an answer is always
 words; only the absence of an answer is a dash.**
@@ -662,16 +670,19 @@ Structurally, by
 [ui/certainty.spec.ts](../web-angular/src/app/ui/certainty.spec.ts), which
 enumerates all **ten pairs** and fails if any two share every non-colour mark.
 Tone is deliberately excluded from what counts as a separator there, which makes
-the test stricter than the palette — and correctly so, because two of the tones
-are the same number.
+the test independent of the palette, even when two tones have little contrast
+between them.
 
-**The thinnest pair is `approximate` against `absent`**, and it is thin for a
-measurable reason: `--certainty-approx` and `--certainty-absent` hold the
-IDENTICAL light value (`#82807A`), so in light greyscale they are told apart by
-the dotted rule and the italic alone, with no tonal separation at all. That is a
-real distinction and it is one mark thinner than the other nine pairs. Recorded
-rather than papered over, and it is an argument for moving one of the two light
-values — a token change, and not phase 5's to make while implementing the states.
+**`approximate` and `absent` no longer share a light tone.** Approximate now
+uses `#6C6A64` and absent keeps `#82807A` (§4.5), adding tonal separation in
+greyscale to the dotted rule and italic. The previous claim that this was the
+thinnest pair rested on their identical light value; it no longer applies.
+The structural test still checks all ten pairs without counting tone.
+
+Rechecked after this token change on 2026-09-08: `certainty.spec.ts` **6/6**,
+production build successful, and all fourteen harness screens captured in both
+themes, then again with `--grey` (**56 PNGs**). The herd's approximate dates
+were visually checked in all four variants; their dotted rules remain visible.
 
 The screenshot is the weaker half of this proof and the spec is the stronger
 one: a capture proves the vocabulary was distinguishable on the day it was
@@ -1042,10 +1053,10 @@ Small, independent, and each has a reason it was left:
 - **Contrast ratios are now computed**, by
   [scripts/check-contrast.mjs](../scripts/check-contrast.mjs), which reads
   `styles.css` as the source of truth so it cannot drift from what renders.
-  `npm run check:contrast`. **33 graded failures — 18 light, 15 dark** — over 124
-  graded checks, listed in full in PHASE5_PRECHECK.md §1. Not fixed: they are
-  token changes, and phase 5 was right not to make them while implementing the
-  states that sit on them.
+  `npm run check:contrast`. **30 graded failures — 15 light, 15 dark** — over 122
+  graded checks in the current run. PHASE5_PRECHECK.md §1 retains the earlier
+  33-failure baseline; §4.5's light approximate change clears three failures.
+  The remaining failures still need token changes.
 
   The script's own design is the part worth keeping. A first draft checked every
   plausible pair at 4.5 or 3 and printed a hundred failures, most of which were
@@ -1106,12 +1117,12 @@ npm run check:templates       # before anything compiles -- TWO checks now
 npm test -w web-angular       # 328/328, 31 files
 npm test -w server            # 726/726, 4 suites
 npm run build:angular         # production build, 555.12 kB initial
-npm run check:contrast        # 33 known failures, printed not gated -- §9.6
+npm run check:contrast        # 30 known failures, printed not gated -- §9.6
 ```
 
 `check:templates` runs the backtick guard and the `display: block` host guard,
 and prints a line for each. `check:contrast` is aliased with `--report` so it
-prints rather than exiting non-zero: the 33 failures are recorded debt, not
+prints rather than exiting non-zero: the 30 failures are recorded debt, not
 regressions, and a command that always fails is a command nobody runs. Drop the
 flag to use it as a gate once they are fixed.
 
@@ -1674,9 +1685,10 @@ from what the app already does:
 **Moved out of "unverified" by phases 5 and 6**
 
 - ~~The seven derived dark values, and every contrast ratio.~~ Both computed.
-  Six of the seven derived values are contrast-matched, one is not, and 33 pairs
-  fail AA. §9.6, and PHASE5_PRECHECK.md §1 for the full list. **Measured is not
-  fixed**: the 33 are now recorded debt rather than an unknown.
+  Six of the seven derived values are contrast-matched, one is not, and the
+  original 33 failing pairs are listed in PHASE5_PRECHECK.md §1. **Measured is not
+  fixed**: that baseline recorded 33 failures; the light approximate change
+  in §4.5 clears three, leaving 30.
 - ~~Phase 5's greyscale acceptance has never been tested.~~ Tested, both ways:
   a desaturated capture and a spec that enumerates all ten pairs. §6.3.
 - ~~§§12–14 have been rendered as static mockups only.~~ **§13 is built and
@@ -1684,9 +1696,9 @@ from what the app already does:
 
 **Unverified**
 
-- **The 33 contrast failures are unfixed**, and three of them are certainty
-  states — the vocabulary phase 5 just built sits on two tokens that fail AA on
-  every surface and a mark that fails 3:1. Nothing renders wrongly; it renders
+- **30 contrast failures remain**, including light `--certainty-absent` on all
+  three surfaces and the certainty rule below 3:1. Light approximate now clears
+  AA on all three surfaces (§4.5). The remaining failures render
   quieter than the standard asks for, on a screen somebody reads all day.
 - **The categorical agent ramp** has not been checked for distinguishability
   under common colour-vision deficiencies, in either mode — and phase 6b widened
@@ -1714,12 +1726,10 @@ from what the app already does:
   role — but six of the twelve sit on the two frozen forms or on `/animals/new`,
   so B1/B2 reach them and nothing can move until the trial reports. The census
   spec holds the line in the meantime: they may not grow.
-- **Whether `--certainty-approx` and `--certainty-absent` should hold different
-  light values.** They hold the identical `#82807A` today, which makes them the
-  thinnest of §6.3's ten pairs — separated by an italic and a dotted rule with no
-  tonal difference at all. The dark set already separates them, and separates
-  them the right way round. A one-line change to `styles.css`, and it is a
-  decision about the palette rather than about the vocabulary.
+- ~~Whether `--certainty-approx` and `--certainty-absent` should hold different
+  light values.~~ **Resolved:** approximate is `#6C6A64`, absent remains
+  `#82807A`. The three surface ratios and the choice are recorded in §4.5;
+  both themes now give approximate greater text contrast than absent.
 - **Where `Recheck` lives** once §12.4 exists. `REGISTRY_ENTRY_UX.md` §11 holds
   "`Recheck` to the top of `/check`"; §12.4 makes it a section action, which may
   satisfy that item or may answer a different question.
