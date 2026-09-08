@@ -53,6 +53,9 @@ import { SessionRequired } from './session-required';
 import { WriteLog, focusAfterWrite } from './after-write';
 import { ChipGroup } from './chip-group';
 import { Cell } from '../ui/cell';
+import { Certainty } from '../ui/certainty';
+import { NO_RECORD, approximateQuantity } from './precision-display';
+import type { CertaintyState } from '../ui/certainty';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
 import { farmToday, likelySession } from './today';
@@ -96,6 +99,7 @@ export const OUT_OF_BAND = 0.5;
     Button,
     Card,
     Cell,
+    Certainty,
     ChipGroup,
     ErrorPanel,
     FieldLabel,
@@ -178,17 +182,62 @@ export const OUT_OF_BAND = 0.5;
               </thead>
               <tbody>
                 @for (row of r.rows; track row.animal_id; let i = $index) {
-                  <tr appRowDivider [attr.data-row]="row.animal_id">
+                  <!-- §6's fifth state, at the scale §3.2 confines it to. An
+                       untouched row already BLOCKS the save and is named in
+                       "blockedReason()"; what it did not do was look any
+                       different from an answered one, so "Still to answer:
+                       Mithi, Neeli" sent the eye hunting down 31 identical
+                       rows, and the hunt is where one gets skipped.
+
+                       The chips inside the row stay neutral. ChipGroup is
+                       exempt permanently (§3.2, §6.3) and these two buttons are
+                       the same case: they sit in the tab path, the eye is
+                       already on them, and painting them amber would train it
+                       to ignore amber everywhere else. -->
+                  <tr appRowDivider [attr.data-row]="row.animal_id"
+                    [unanswered]="draft(row.animal_id).status === null"
+                    [attr.data-certainty]="draft(row.animal_id).status === null ? 'unanswered' : null">
                     <td appCell density="compact">
                       <span class="font-mono text-content-heading">{{ row.animal_id }}</span>
-                      <span class="ml-2 text-content-secondary">{{ row.name ?? '—' }}</span>
+                      <!-- An unnamed animal is a real no-record: she has a
+                           serial and nobody has given her a name. -->
+                      @if (row.name) {
+                        <span class="ml-2 text-content-secondary">{{ row.name }}</span>
+                      } @else {
+                        <span class="ml-2" appCertainty="no-record"
+                          data-certainty="no-record">{{ noRecord }}</span>
+                      }
                     </td>
+                    <!-- Days in milk is COMPUTED from a lactation start, so it
+                         is as certain as that date and no more. It is left in
+                         the known state because the roster has no access to the
+                         start date's precision -- an honest limit, not a
+                         claim. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="dim">{{ row.days_in_milk }}</td>
+                    <!-- ---------------------------------------------------------
+                         FOUR OF THE FIVE STATES IN ONE COLUMN, and this is the
+                         column the whole vocabulary was written for.
+                         ---------------------------------------------------------
+                         "previousText()" already told a measured figure, a
+                         "not measured", a "not milked" and a missing row apart
+                         -- and then set all four in "tone="secondary"", so the
+                         distinction existed in the code and nowhere on the
+                         screen. /check reports "22 rows carry a number, 5 milked
+                         but unweighed, 1 not milked" precisely so they are never
+                         blended; this is the screen where a person acts on it. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
-                      {{ previousText(row) }}
+                      <span [appCertainty]="previousState(row)"
+                        [attr.data-certainty]="previousState(row)"
+                      >{{ previousText(row) }}</span>
                     </td>
+                    <!-- A MEAN OVER FIVE SESSIONS IS NOT A MEASUREMENT, and it
+                         has been printed as one. §6.1 keeps the tilde for
+                         quantities rather than spending a word on them: "~9.9"
+                         reads as "about" in the width a figure column has. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="mean">
-                      {{ row.recent_mean === null ? '—' : row.recent_mean }}
+                      <span [appCertainty]="row.recent_mean === null ? 'no-record' : 'approximate'"
+                        [attr.data-certainty]="row.recent_mean === null ? 'no-record' : 'approximate'"
+                      >{{ meanText(row) }}</span>
                     </td>
                     <td appCell density="compact">
                       <div class="flex flex-wrap items-center gap-2">
@@ -223,6 +272,10 @@ export const OUT_OF_BAND = 0.5;
                             [attr.data-role]="'band-' + row.animal_id">{{ msg }}</span>
                         }
                         @if (row.existing) {
+                          <!-- NOT a certainty state. "already saved" is a fact
+                               about the write, not about the value, and it keeps
+                               its own treatment so it is not read as one of the
+                               five. -->
                           <span class="text-xs italic text-content-subtle"
                             [attr.data-role]="'saved-' + row.animal_id">already saved</span>
                         }
@@ -311,6 +364,9 @@ export class MilkingRosterScreen {
     return raw === 'morning' || raw === 'evening' ? raw : likelySession();
   });
   protected readonly milkedBy = signal('');
+
+  /** §6's no-record glyph, for the template. An en dash. */
+  protected readonly noRecord = NO_RECORD;
 
   protected readonly roster = signal<MilkingRoster | null>(null);
   protected readonly loadError = signal<string | null>(null);
@@ -432,9 +488,35 @@ export class MilkingRosterScreen {
 
   protected previousText(row: RosterRow): string {
     const p = row.previous;
-    if (!p) return '—';
+    if (!p) return NO_RECORD;
     if (p.status === 'measured') return `${p.yield_litres}`;
     return p.status === 'not_milked' ? 'not milked' : 'not measured';
+  }
+
+  /**
+   * The same four branches as `previousText`, as a certainty state.
+   *
+   * ONE FUNCTION WOULD HAVE BEEN NEATER AND WOULD HAVE BEEN WRONG. Returning
+   * `{ text, state }` puts two `previousState(row)` calls in the template on
+   * every change detection pass through a 31-row table, or forces a `@let`;
+   * two pure switch statements over the same three-value union cost nothing and
+   * the compiler checks both are exhaustive.
+   *
+   * `not_milked` is DELIBERATELY ABSENT and not no-record, which is the
+   * distinction §6 exists for: "no milk was taken" is an answer somebody gave.
+   * A `previous` of `null` is the absence of the answer -- either no row was
+   * saved for that session, or she was not in milk then. The roster cannot tell
+   * those two apart and does not pretend to.
+   */
+  protected previousState(row: RosterRow): CertaintyState {
+    const p = row.previous;
+    if (!p) return 'no-record';
+    return p.status === 'measured' ? 'known' : 'absent';
+  }
+
+  /** The recent mean, marked approximate with §6.1's tilde. */
+  protected meanText(row: RosterRow): string {
+    return row.recent_mean === null ? NO_RECORD : approximateQuantity(row.recent_mean);
   }
 
   /**

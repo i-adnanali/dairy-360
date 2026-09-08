@@ -56,13 +56,31 @@ describe('EventList — the correction window', () => {
     expect(fresh.querySelector('[data-role="when"]')!.className).not.toContain('line-through');
   });
 
-  it('shows precision on every date, never a bare date', () => {
+  it('shows precision on every date, never a bare date, and never a fabricated day', () => {
     const el = render([
       ev({ id: 'a', type: 'acquired', occurred_on: '2019-01-01', date_precision: 'year' }),
       ev({ id: 'b', type: 'note', occurred_on: '2024-03-14', date_precision: 'day' }),
     ]);
-    expect(el.querySelector('[data-event="a"] [data-role="when"]')!.textContent).toContain('(year)');
-    expect(el.querySelector('[data-event="b"] [data-role="when"]')!.textContent).toContain('(day)');
+    const a = el.querySelector('[data-event="a"] [data-role="when"]')!;
+    const b = el.querySelector('[data-event="b"] [data-role="when"]')!;
+
+    // THE QUALIFIER LOST ITS BRACKETS, per UI_SYSTEM.md §6.1: lowercase, no
+    // parentheses, one space after the figure. This assertion used to read
+    // `(year)` / `(day)`.
+    expect(a.textContent).toContain('2019 year');
+
+    // AND THE FIGURE LOST THE DAY IT NEVER KNEW, which is the substance of the
+    // change rather than the punctuation. A year-precision event is stored as
+    // January 1, and this cell printed `2019-01-01 (year)` -- asserting an exact
+    // day in the same breath as denying one. The test's own name says "never a
+    // bare date"; a date with a fabricated day is worse than a bare one,
+    // because it is specific.
+    expect(a.textContent).not.toContain('2019-01-01');
+
+    // An exact day keeps every digit and takes no qualifier: there is no
+    // imprecision to name, and `(day)` was a word spent saying nothing.
+    expect(b.textContent).toContain('2024-03-14');
+    expect(b.textContent).not.toContain('day');
   });
 
   it('says when no witness was recorded rather than leaving it blank', () => {

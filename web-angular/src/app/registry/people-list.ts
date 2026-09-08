@@ -34,6 +34,8 @@ import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
 import { Cell } from '../ui/cell';
+import { Certainty } from '../ui/certainty';
+import { NO_RECORD } from './precision-display';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
@@ -60,6 +62,7 @@ import { Button } from '../ui/button';
     Button,
     Card,
     Cell,
+    Certainty,
     ChipGroup,
     ErrorPanel,
     ErrorText,
@@ -110,19 +113,56 @@ import { Button } from '../ui/button';
                 <tr appRowDivider [class.opacity-60]="!p.engaged"
                   [attr.data-engaged]="p.engaged">
                   <td appCell small class="font-mono">
+                    <!-- WAS "decoration-certainty-rule", AND IT HAD TO MOVE.
+                         §6.2 listed this as "the dotted rule, now named" -- but
+                         it is a SOLID underline on an identifier link, and from
+                         this phase on "--certainty-rule" is the dotted rule that
+                         means "this figure is approximate". Leaving it here
+                         would have said this person's identifier was a guess.
+                         "line-strong" is the value §14.2 specifies for exactly
+                         this treatment: "an identifier is a name, not a link". -->
                     <a [routerLink]="['/labour/people', p.person_id]"
-                      class="text-content-heading underline decoration-certainty-rule">{{ p.identifier }}</a>
+                      class="text-content-heading underline decoration-line-strong">{{ p.identifier }}</a>
                     @if (!p.engaged) {
                       <span class="ml-2 rounded bg-surface-sunken px-1.5 py-0.5 text-[10px] uppercase
                         tracking-wide text-content-muted" data-role="not-engaged">no open stint</span>
                     }
                   </td>
-                  <td appCell>{{ p.name ?? '—' }}</td>
+                  <td appCell>
+                    <span [appCertainty]="p.name ? 'known' : 'no-record'"
+                    >{{ p.name ?? noRecord }}</span>
+                  </td>
+                  <!-- THE ZERO BRANCH IS THE ONE THAT MOVED, and it moved
+                       because it was the inverse of §15's rule rather than an
+                       instance of it. "owed()" returned a bare "—" for a
+                       balance of exactly zero -- a dash standing in for a
+                       number that IS known, from a ledger with entries in it
+                       that net to nothing. §15 rule 1 forbids "a zero standing
+                       in for an unknown"; this was an unknown standing in for a
+                       zero, which is the same lie facing the other way.
+
+                       "settled" is the answer, so it is words, and it is §6's
+                       third state: the amount owed is deliberately nil.
+
+                       The other two branches keep their existing treatment and
+                       the cell keeps its amber. A "text-certainty-known" span
+                       inside would have won the cascade against the <td>'s
+                       "text-warning-fg" and silently deleted the in-advance
+                       highlight -- which is a liability marker, not a certainty
+                       state, and not this phase's to remove. -->
                   <td appCell numeric
                     [class.text-warning-fg]="p.balance_minor < 0" [attr.data-role]="'balance'">
-                    {{ owed(p) }}
+                    @if (p.balance_minor === 0) {
+                      <span appCertainty="absent" data-certainty="absent">settled</span>
+                    } @else {
+                      {{ owed(p) }}
+                    }
                   </td>
-                  <td appCell tone="muted">{{ p.last_payment_on ?? '—' }}</td>
+                  <td appCell tone="muted">
+                    <span [appCertainty]="p.last_payment_on ? 'known' : 'no-record'"
+                      [attr.data-certainty]="p.last_payment_on ? 'known' : 'no-record'"
+                    >{{ p.last_payment_on ?? noRecord }}</span>
+                  </td>
                 </tr>
               }
             </tbody>
@@ -286,8 +326,15 @@ export class PeopleList {
    * special case -- but "-Rs 8,000.00" under a heading that says "owed" reads as
    * a defect rather than a peshgi.
    */
+  /** §6's no-record glyph, for the template. An en dash. */
+  protected readonly noRecord = NO_RECORD;
+
+  /**
+   * The zero case is handled in the template, not here, because it needs a
+   * treatment and not only a word. See the cell's comment.
+   */
   protected owed(p: WageBalanceRow): string {
-    if (p.balance_minor === 0) return '—';
+    if (p.balance_minor === 0) return 'settled';
     if (p.balance_minor < 0) return `${formatMinor(-p.balance_minor)} in advance`;
     return formatMinor(p.balance_minor);
   }

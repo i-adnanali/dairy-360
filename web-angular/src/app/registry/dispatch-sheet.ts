@@ -35,6 +35,9 @@ import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
 import { Cell } from '../ui/cell';
+import { Certainty } from '../ui/certainty';
+import type { CertaintyState } from '../ui/certainty';
+import { NO_RECORD } from './precision-display';
 import { FormState } from './form-state';
 import { Identifiers } from './identifiers';
 import { IdentifierInput } from './identifier-input';
@@ -78,6 +81,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
     Button,
     Card,
     Cell,
+    Certainty,
     ChipGroup,
     ErrorPanel,
     FieldLabel,
@@ -160,7 +164,14 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
               </thead>
               <tbody>
                 @for (row of s.standing; track row.destination_id; let i = $index) {
-                  <tr appRowDivider [attr.data-row]="row.destination_id">
+                  <!-- The standing rows are the ones the header calls "leave
+                       none of these unanswered", so they are exactly §3.2's
+                       case: a destination lost in the sheet, findable at row
+                       scale. The occasional rows below take no such treatment --
+                       "nothing to answer here" is their own header. -->
+                  <tr appRowDivider [attr.data-row]="row.destination_id"
+                    [unanswered]="draft(row.destination_id).status === null"
+                    [attr.data-certainty]="draft(row.destination_id).status === null ? 'unanswered' : null">
                     <td appCell density="compact" nowrap>
                       <span class="text-content-heading">{{ row.name }}</span>
                       @if (!row.billable) {
@@ -169,7 +180,9 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                       }
                     </td>
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
-                      {{ previousText(row) }}
+                      <span [appCertainty]="previousState(row)"
+                        [attr.data-certainty]="previousState(row)"
+                      >{{ previousText(row) }}</span>
                     </td>
                     <!-- Right-aligned but NOT numeric, and that is what keeps this
                          sheet its original height.
@@ -187,7 +200,13 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                          is a real figure column -- rupees, section 4 -- and it is the
                          reason the litres cell is tighter than it was. It fits. -->
                     <td appCell density="compact" nowrap small tone="muted"
-                      class="text-right" data-role="rate">{{ rateText(row) }}</td>
+                      class="text-right" data-role="rate">
+                      @if (rateState(row); as st) {
+                        <span [appCertainty]="st" [attr.data-certainty]="st">{{ rateText(row) }}</span>
+                      } @else {
+                        {{ rateText(row) }}
+                      }
+                    </td>
                     <td appCell density="compact">
                       <div class="flex flex-wrap items-center gap-2">
                         <input
@@ -219,7 +238,9 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                     </td>
                     <td appCell density="compact" numeric tone="secondary"
                       [attr.data-role]="'amount-' + row.destination_id">
-                      {{ amountText(row) }}
+                      <span [appCertainty]="amountState(row)"
+                        [attr.data-certainty]="amountState(row)"
+                      >{{ amountText(row) }}</span>
                     </td>
                   </tr>
                 }
@@ -240,7 +261,12 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                     <tr appRowDivider [attr.data-row]="row.destination_id">
                       <td appCell density="compact" tone="heading">
                         {{ row.name }}
-                        <span class="ml-2 text-xs text-content-subtle" data-role="rate">{{ rateText(row) }}</span>
+                        @if (rateState(row); as st) {
+                          <span class="ml-2 text-xs" [appCertainty]="st"
+                            [attr.data-certainty]="st" data-role="rate">{{ rateText(row) }}</span>
+                        } @else {
+                          <span class="ml-2 text-xs text-content-subtle" data-role="rate">{{ rateText(row) }}</span>
+                        }
                       </td>
                       <td appCell density="compact">
                         @if (draft(row.destination_id).status === null) {
@@ -257,7 +283,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                               (input)="typeLitres(row.destination_id, $any($event.target).value)"
                               class="w-24 rounded-lg border border-line px-2 py-1 text-sm"
                             />
-                            <span class="text-sm text-content-secondary"
+                            <span class="text-sm" [appCertainty]="amountState(row)"
+                              [attr.data-certainty]="amountState(row)"
                               [attr.data-role]="'amount-' + row.destination_id">{{ amountText(row) }}</span>
                             <button type="button" [attr.data-role]="'remove-' + row.destination_id"
                               (click)="removeOccasional(row.destination_id)"
@@ -455,8 +482,23 @@ export class DispatchSheetScreen {
 
   protected previousText(row: SheetRow): string {
     const p = row.previous;
-    if (!p) return '—';
+    if (!p) return NO_RECORD;
     return p.status === 'taken' ? `${p.litres}` : 'nothing';
+  }
+
+  /**
+   * The same three branches as a certainty state.
+   *
+   * `'none'` is DELIBERATELY ABSENT, which is the whole distinction: a
+   * destination that was offered milk and took none gave an answer, and one
+   * that was never on the sheet that session did not. Both used to render as
+   * `tone="secondary"` -- and one of them as a dash and the other as the word
+   * `nothing`, so the copy already knew the difference the type did not show.
+   */
+  protected previousState(row: SheetRow): CertaintyState {
+    const p = row.previous;
+    if (!p) return 'no-record';
+    return p.status === 'taken' ? 'known' : 'absent';
   }
 
   /**
@@ -472,6 +514,26 @@ export class DispatchSheetScreen {
     return formatRate(row.price.price_minor, row.price.price_unit_litres);
   }
 
+  /**
+   * The rate cell's certainty -- and `known` IS DELIBERATELY NOT ONE OF THE
+   * ANSWERS.
+   *
+   * §6's `known` treatment carries `font-mono tabular-nums`, and the comment on
+   * the rate cell in the template is the record of what that costs here: given
+   * the monospace face this composite label grew the sheet 48px, because table
+   * layout took the width back off the litres cell. §11 lists it as the single
+   * most expensive surprise of phase 4.
+   *
+   * The rate is a LABEL, identical in every row, not a value whose certainty a
+   * reader is weighing -- so it takes a state only when it is saying that
+   * something is missing, and otherwise stays exactly as it renders today.
+   */
+  protected rateState(row: SheetRow): CertaintyState | null {
+    if (!row.billable) return 'absent';
+    if (row.price === null) return 'no-record';
+    return null;
+  }
+
   private rowAmountMinor(row: SheetRow): number {
     const d = this.draft(row.destination_id);
     if (d.status !== 'taken' || !row.billable || row.price === null) return 0;
@@ -480,12 +542,43 @@ export class DispatchSheetScreen {
     return amountMinor(litres, row.price.price_minor, row.price.price_unit_litres);
   }
 
+  /**
+   * ---------------------------------------------------------------------------
+   * TWO OF THE THREE DASHES HERE WERE HIDING A REASON, AND ONE WAS NOT.
+   * ---------------------------------------------------------------------------
+   * All three branches returned `—`, and §15 rule 1 is that "an absence is
+   * named, not blanked ... The one dash permitted is §6's no-record state, which
+   * is the absence of an answer rather than an answer."
+   *
+   *   nothing taken yet    the row is unanswered and already says so, in amber,
+   *                        at row scale. The dash is right: there is nothing to
+   *                        name that is not already on screen. NO-RECORD.
+   *   not billable         a REASON, and one the rate column beside it already
+   *                        prints in words. So the amount says it too rather
+   *                        than going blank. DELIBERATELY ABSENT.
+   *   no agreed price      nobody ever recorded a price. NO-RECORD, but in
+   *                        words, because "no price" tells a reader what to go
+   *                        and fix and a dash does not.
+   *
+   * The rule that falls out, and it is the one §6 wants: THE DASH IS FOR WHEN
+   * THERE IS NOTHING TO SAY THAT IS NOT ALREADY SAID. Where the absence has a
+   * reason worth naming, name it -- and the treatment follows the fact, not the
+   * glyph.
+   */
   protected amountText(row: SheetRow): string {
     const d = this.draft(row.destination_id);
-    if (d.status !== 'taken') return '—';
-    if (!row.billable) return '—';
+    if (d.status !== 'taken') return NO_RECORD;
+    if (!row.billable) return 'not billed';
     if (row.price === null) return 'no price';
     return formatMinor(this.rowAmountMinor(row));
+  }
+
+  protected amountState(row: SheetRow): CertaintyState {
+    const d = this.draft(row.destination_id);
+    if (d.status !== 'taken') return 'no-record';
+    if (!row.billable) return 'absent';
+    if (row.price === null) return 'no-record';
+    return 'known';
   }
 
   protected noneClass(id: string): string {

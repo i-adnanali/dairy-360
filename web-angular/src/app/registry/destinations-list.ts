@@ -28,6 +28,8 @@ import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
 import { Cell } from '../ui/cell';
+import { Certainty } from '../ui/certainty';
+import { NO_RECORD } from './precision-display';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
@@ -54,6 +56,7 @@ import { Button } from '../ui/button';
     Button,
     Card,
     Cell,
+    Certainty,
     ChipGroup,
     ErrorPanel,
     FieldLabel,
@@ -122,13 +125,23 @@ import { Button } from '../ui/button';
                       {{ d.standing ? 'yes — must be answered' : 'only when they come' }}
                     </td>
                     <td appCell tone="secondary" [attr.data-role]="'rate-' + d.id">
+                      <!-- Three of §6's states in one cell, and the third one
+                           KEEPS ITS AMBER rather than being quietened into the
+                           no-record grey. A billable destination with no agreed
+                           rate is milk leaving the farm for a price nobody has
+                           written down: that is "still required", not "nothing
+                           was ever entered", and there is a "change rate" button
+                           on the same row to act on it. It was already amber, so
+                           the census gains nothing here -- it is simply
+                           classified now instead of being a bare utility. -->
                       @if (!d.billable) {
-                        <span class="text-content-subtle">not billed</span>
+                        <span appCertainty="absent" data-certainty="absent">not billed</span>
                       } @else if (d.price) {
                         {{ rate(d) }}
                         <span class="ml-1 text-xs text-content-subtle">({{ perLitre(d) }})</span>
                       } @else {
-                        <span class="text-warning-fg">no price agreed</span>
+                        <span appCertainty="unanswered" data-certainty="unanswered"
+                        >no price agreed</span>
                       }
                     </td>
                     <td appCell numeric>
@@ -309,12 +322,17 @@ export class DestinationsList {
     }
   }
 
+  /**
+   * Both no-record branches are UNREACHABLE: the only call sites sit inside
+   * `@else if (d.price)`. Left as type-level fallbacks and moved onto §6's en
+   * dash so that if either ever does render, it renders the right glyph.
+   */
   protected rate(d: DestinationListRow): string {
-    return d.price ? formatRate(d.price.price_minor, d.price.price_unit_litres) : '—';
+    return d.price ? formatRate(d.price.price_minor, d.price.price_unit_litres) : NO_RECORD;
   }
 
   protected perLitre(d: DestinationListRow): string {
-    return d.price ? perLitreLabel(d.price.price_minor, d.price.price_unit_litres) : '—';
+    return d.price ? perLitreLabel(d.price.price_minor, d.price.price_unit_litres) : NO_RECORD;
   }
 
   protected setKind(k: DestinationKind): void {

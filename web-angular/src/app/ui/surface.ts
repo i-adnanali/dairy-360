@@ -97,12 +97,50 @@ export class ErrorText {
 // RowDivider -- 10
 // ---------------------------------------------------------------------------
 
-/** The hairline between rows of a list. */
+/**
+ * The hairline between rows of a list.
+ *
+ * ---------------------------------------------------------------------------
+ * `unanswered` IS THE ONLY AMBER THE CERTAINTY VOCABULARY ADDS, AND IT IS HERE
+ * ---------------------------------------------------------------------------
+ * §6's fifth state is "still required" in the `warning` role, and §3.2 confines
+ * it to "rows and list items, never to a control the eye is already on":
+ *
+ *   > Amber's job in the unanswered state is to make something FINDABLE -- a
+ *   > row skipped in a 31-animal roster, a destination unanswered on the
+ *   > dispatch sheet. A two-option chip group sitting directly in the tab path
+ *   > is not lost; you are looking at it.
+ *
+ * So the filled ground lives on the <tr> and not on any span inside it. A row
+ * is the scale at which amber does the job it is for -- an eye sweeping a
+ * 31-row table finds a tinted band, and would not find a 12px tag.
+ *
+ * A LEFT EDGE, NOT ONLY A TINT. The tint alone is a hue difference, and §6.3
+ * requires every state to survive greyscale: `box-shadow: inset` draws a 3px
+ * bar on the leading edge that reads as a mark at any saturation. `box-shadow`
+ * rather than `border-l`, because a border on one <tr> shifts every cell in
+ * that row 3px right and the column stops being a column.
+ *
+ * PHASE5_PRECHECK.md's census is why this is the ONLY amber added: amber
+ * already carries five meanings at 26 sites, so §6's claim that this would be
+ * "the only amber in the content area" was false before it was written. One
+ * more inline tag would have been the sixth meaning; a row band is a different
+ * visual event from all 26.
+ */
 @Directive({
   selector: '[appRowDivider]',
-  host: { class: 'border-t border-line-hairline' },
+  host: { '[class]': 'cls()' },
 })
-export class RowDivider {}
+export class RowDivider {
+  readonly unanswered = input(false, { transform: booleanAttribute });
+  protected readonly cls = computed(
+    () =>
+      'border-t border-line-hairline' +
+      (this.unanswered()
+        ? ' bg-warning-bg shadow-[inset_3px_0_0_0_rgb(var(--warning-line))]'
+        : ''),
+  );
+}
 
 // ---------------------------------------------------------------------------
 // StatusBadge -- 6 sites, five strings, and only three of them agree

@@ -45,6 +45,8 @@ import { farmToday } from './today';
 import { urlParams } from './url-state';
 import type { PayrollRun, PayrollRunRow } from './types';
 import { Card } from '../ui/surface';
+import { Certainty } from '../ui/certainty';
+import { NO_RECORD } from './precision-display';
 import { ErrorPanel } from '../ui/surface';
 import { HelpText } from '../ui/text';
 import { TextInput } from '../ui/input';
@@ -72,6 +74,7 @@ interface DihariDraft {
   imports: [
     Button,
     Card,
+    Certainty,
     ErrorPanel,
     HelpText,
     IdentifierInput,
@@ -166,7 +169,14 @@ interface DihariDraft {
                   @if (row.milk; as m) {
                     <p class="mt-2 text-xs text-content-muted" data-role="milk">
                       milk allowance
-                      {{ m.expected_litres ?? '—' }} L due{{ m.partial ? ' to date' : '' }},
+                      <!-- No allowance on the agreement is a no-record, not a
+                           zero: a person with no milk in their package has no
+                           expected figure to compare against, which is why
+                           "differs()" returns false for null rather than
+                           treating it as 0 L due. -->
+                      <span [appCertainty]="m.expected_litres === null ? 'no-record' : 'known'"
+                        [attr.data-certainty]="m.expected_litres === null ? 'no-record' : 'known'"
+                      >{{ m.expected_litres ?? noRecord }}</span> L due{{ m.partial ? ' to date' : '' }},
                       <span [class.text-warning-fg]="differs(m.expected_litres, m.taken_litres)">
                         {{ m.taken_litres }} L taken
                       </span>
@@ -356,8 +366,17 @@ export class PayrollRunScreen {
     if (v.length > 0) this.url.set({ to: v });
   }
 
+  /** §6's no-record glyph, for the template. An en dash. */
+  protected readonly noRecord = NO_RECORD;
+
+  /**
+   * The no-record branch is UNREACHABLE and is left as a type-level fallback:
+   * the only call site sits inside `@if (row.term)`, and a person with no
+   * agreement gets the red "no package agreed" line instead. Kept rather than
+   * thrown, because `row.term` is nullable and the compiler is right to ask.
+   */
   protected rate(row: PayrollRunRow): string {
-    return row.term ? formatPeriodRate(row.term.cash_minor, row.term.cash_period) : '—';
+    return row.term ? formatPeriodRate(row.term.cash_minor, row.term.cash_period) : NO_RECORD;
   }
 
   /** The in-kind lines, as prose. Never totalled -- see §4.5. */

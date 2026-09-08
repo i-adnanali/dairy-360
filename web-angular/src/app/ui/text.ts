@@ -38,31 +38,63 @@ import { Directive, booleanAttribute, computed, input } from '@angular/core';
 // HelpText -- 45 sites, the most-used primitive in the app
 // ---------------------------------------------------------------------------
 
-/** `sm` is the prose under a control; `xs` the quieter aside under that. */
+/** `xs` is the default measure; `sm` the louder one two sites still want. */
 export type TextSize = 'sm' | 'xs';
-/** `muted` is farm-600, `subtle` farm-500. Both already semantic tokens. */
+/** `muted` is --text-muted, `subtle` --text-subtle. Both semantic tokens. */
 export type TextTone = 'muted' | 'subtle';
 
 /**
  * Explanatory prose beside a control.
  *
- * NOT demoted here. Section 4 wants help prose at `text-xs` in `--text-muted`
- * with a 65ch measure, on the grounds that it is currently "nearly as loud as
- * the labels it explains". That is a real visual change, it is not assigned to
- * any phase in section 10, and phase 2's acceptance is that nothing moves
- * except the button's disabled state and cell padding. So both current sizes
- * are preserved as variants and the demotion is left to whoever schedules it.
+ * ---------------------------------------------------------------------------
+ * DEMOTED. Phase 5, UI_SYSTEM.md §5 and §9.1.
+ * ---------------------------------------------------------------------------
+ * The original spec wanted `text-xs` in `--text-muted` with a bounded measure,
+ * on the grounds that help text is "nearly as loud as the labels it explains".
+ * It was held back through phases 1-4 because phase 2's acceptance was that
+ * nothing moved except the button and cell padding, and because the original
+ * phase list assigned it to no phase at all.
+ *
+ * It rides with the certainty vocabulary because THE VOCABULARY DOES NOT WORK
+ * WITHOUT IT. §6's five states separate by weight and tone across a narrow
+ * range -- `certainty-approx` and `content-disabled` are two steps apart -- and
+ * 34 paragraphs of `text-sm` prose sitting at the same weight as the values
+ * they explain flattens that range to nothing. §9.1: "the certainty vocabulary
+ * needs the prose one step quieter to read at all."
+ *
+ * WHAT CHANGED IS THE DEFAULT, not the variants. `size` still takes `sm`; it is
+ * simply no longer what a bare `appHelp` gets. That demotes the 34 sites that
+ * were relying on the default and leaves the 38 already passing `size="xs"`
+ * exactly as they were.
+ *
+ * ---------------------------------------------------------------------------
+ * 68ch, AND IT IS A MAX RATHER THAN A WIDTH
+ * ---------------------------------------------------------------------------
+ * §5: "A prose measure is independent of its container. A note under a
+ * full-width table wraps at 68ch, not at the table's width." `max-w-[68ch]`
+ * only ever constrains, so a paragraph already inside a 320px column is
+ * untouched and one under a 1400px table stops being a single unreadable line.
+ *
+ * `ch` and not `rem` deliberately: the measure is about characters per line,
+ * and `ch` is the unit that stays correct if the type scale ever moves. The
+ * figure is 68 and not the original draft's 65 because §5 and §12.5 both
+ * settled on 68, and one number in two places is how they drift.
+ *
+ * A max-width does nothing on an inline element, and four sites put `appHelp`
+ * on a `<span>` inside a flex row. Those are single clauses, not prose, and
+ * they are the reason this is not `block`: forcing display here would break
+ * four layouts to bound a measure that is already bounded by the row.
  */
 @Directive({
   selector: '[appHelp]',
   host: { '[class]': 'cls()' },
 })
 export class HelpText {
-  readonly size = input<TextSize>('sm');
+  readonly size = input<TextSize>('xs');
   readonly tone = input<TextTone>('muted');
   protected readonly cls = computed(
     () =>
-      `text-${this.size()} ` +
+      `text-${this.size()} max-w-[68ch] ` +
       (this.tone() === 'muted' ? 'text-content-muted' : 'text-content-subtle'),
   );
 }

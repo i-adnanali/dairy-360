@@ -26,6 +26,8 @@ import { urlParams } from './url-state';
 import { formatMinor, formatRate } from './money';
 import { farmToday } from './today';
 import type { Reconciliation, Verification } from './types';
+import { Certainty } from '../ui/certainty';
+import { NO_RECORD } from './precision-display';
 import { Cell } from '../ui/cell';
 import { Card } from '../ui/surface';
 import { ErrorPanel } from '../ui/surface';
@@ -42,6 +44,7 @@ import { SubHeading } from '../ui/heading';
   imports: [
     Card,
     Cell,
+    Certainty,
     ErrorPanel,
     HelpText,
     PageHeading,
@@ -132,7 +135,18 @@ import { SubHeading } from '../ui/heading';
                 @for (c of data.histogram; track c.source_form + c.date_precision) {
                   <tr appRowDivider>
                     <td appCell tone="heading">{{ c.source_form }}</td>
-                    <td appCell tone="heading">{{ c.date_precision }}</td>
+                    <!-- THE ONE COLUMN IN THE APP WHOSE VALUES ARE THE
+                         VOCABULARY'S OWN WORDS. "day" is a known date and
+                         "month"/"year"/"estimated" are approximate ones, so the
+                         word is set in the state it names. This is where the
+                         vocabulary is learnable: a reader who has seen "month"
+                         dotted here reads a dotted "2017-03" on /animals
+                         without being told. -->
+                    <td appCell>
+                      <span [appCertainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
+                        [attr.data-certainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
+                      >{{ c.date_precision }}</span>
+                    </td>
                     <td appCell numeric emphasis tone="primary">{{ c.count }}</td>
                   </tr>
                 }
@@ -158,8 +172,20 @@ import { SubHeading } from '../ui/heading';
                     <td appCell tone="heading" class="font-mono">{{ i.animal_id }}</td>
                     <td appCell tone="secondary">{{ i.from_on }}</td>
                     <td appCell tone="secondary">{{ i.to_on }}</td>
-                    <td appCell numeric emphasis tone="primary">{{ i.days }}</td>
-                    <td appCell tone="secondary">{{ i.quality }}</td>
+                    <!-- THE INTERVAL TAKES ITS OWN QUALITY, which is the
+                         typographic form of what intervalReport() refuses to do
+                         in arithmetic: an interval computed from two approximate
+                         calvings is not the same number as one computed from two
+                         exact days, and until now they were set identically. -->
+                    <td appCell numeric emphasis>
+                      <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
+                        [attr.data-certainty]="i.quality === 'measured' ? 'known' : 'approximate'"
+                      >{{ i.days }}</span>
+                    </td>
+                    <td appCell>
+                      <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
+                      >{{ i.quality }}</span>
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -170,9 +196,20 @@ import { SubHeading } from '../ui/heading';
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div appSectionLabel>{{ s.quality }}</div>
                   @if (s.count === 0) {
-                    <div class="text-content-subtle italic">none</div>
+                    <!-- NO RECORD, NOT AN ABSENT ANSWER. Nobody said "there are
+                         no approximate intervals"; there simply are none yet, so
+                         this is §6's fifth state and it loses the italic it used
+                         to carry. It keeps the WORD rather than taking the en
+                         dash: §6's dash belongs in a value slot where a figure
+                         is expected, and a dash under a heading reads as a
+                         rendering fault. §15 rule 1 -- an absence is named. -->
+                    <div appCertainty="no-record" data-certainty="no-record">none</div>
                   } @else {
-                    <div class="text-content-primary">n = {{ s.count }} · mean {{ s.mean_days }}d</div>
+                    <div>
+                      <span [appCertainty]="s.quality === 'measured' ? 'known' : 'approximate'"
+                        [attr.data-certainty]="s.quality === 'measured' ? 'known' : 'approximate'"
+                      >n = {{ s.count }} · mean {{ s.mean_days }}d</span>
+                    </div>
                     <div appHelp size="xs">min {{ s.min_days }}d · max {{ s.max_days }}d</div>
                   }
                 </div>
@@ -200,7 +237,12 @@ import { SubHeading } from '../ui/heading';
                 <div class="text-content-primary">
                   {{ data.milking.complete_sessions }} complete of {{ data.milking.sessions }}
                 </div>
-                <div appHelp size="xs">{{ data.milking.first_on }} → {{ data.milking.last_on }}</div>
+                <div appHelp size="xs">
+                  <span [appCertainty]="data.milking.first_on ? 'known' : 'no-record'"
+                  >{{ data.milking.first_on ?? noRecord }}</span> →
+                  <span [appCertainty]="data.milking.last_on ? 'known' : 'no-record'"
+                  >{{ data.milking.last_on ?? noRecord }}</span>
+                </div>
               </div>
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                 <div appSectionLabel>measured</div>
@@ -229,9 +271,18 @@ import { SubHeading } from '../ui/heading';
                   <tr appRowDivider>
                     <td appCell tone="secondary">{{ s.occurred_on }}</td>
                     <td appCell tone="secondary">{{ s.session }}</td>
-                    <td appCell numeric emphasis
-                      [class]="s.recorded >= s.expected ? 'text-content-primary' : 'text-warning-fg'"
-                    >{{ s.recorded }}</td>
+                    <!-- A session with fewer rows than animals in milk has
+                         animals nobody answered for, which is §6's fifth state.
+                         The colour is unchanged -- this was already amber, and
+                         it is one of the nine sites PHASE5_PRECHECK.md's census
+                         classifies as amber's PERMITTED first meaning. What
+                         changes is that it now says so in the vocabulary
+                         instead of in a ternary. -->
+                    <td appCell numeric emphasis>
+                      <span [appCertainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
+                        [attr.data-certainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
+                      >{{ s.recorded }}</span>
+                    </td>
                     <td appCell numeric tone="secondary">{{ s.expected }}</td>
                     <td appCell numeric tone="secondary">{{ s.measured }}</td>
                   </tr>
@@ -284,7 +335,11 @@ import { SubHeading } from '../ui/heading';
                     @if (r.gap_pct !== null) {
                       {{ r.gap_pct }}% of measured
                     } @else {
-                      no percentage
+                      <!-- DELIBERATELY ABSENT, not no-record. The server
+                           withholds this percentage on purpose and says why in
+                           the panel below, so an answer WAS given -- §6's third
+                           state, italic and in words, never a dash. -->
+                      <span appCertainty="absent" data-certainty="absent">no percentage</span>
                     }
                   </div>
                 </div>
@@ -361,6 +416,9 @@ import { SubHeading } from '../ui/heading';
   `,
 })
 export class VerificationPanel {
+  /** §6's no-record glyph, for the template. An en dash. */
+  protected readonly noRecord = NO_RECORD;
+
   private readonly api = inject(RegistryApi);
 
   protected readonly v = signal<Verification | null>(null);

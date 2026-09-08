@@ -17,12 +17,14 @@
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import type { TimelineEvent } from './types';
-import { HelpText } from '../ui/text';
+import { Certainty, Qualifier } from '../ui/certainty';
+import { precisionParts } from './precision-display';
+import type { PrecisionParts } from './precision-display';
 
 @Component({
   selector: 'app-event-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [HelpText],
+  imports: [Certainty, Qualifier],
   template: `
     @if (events().length === 0) {
       <p class="rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-content-muted"
@@ -50,8 +52,28 @@ import { HelpText } from '../ui/text';
                 [class]="e.effective ? 'text-content-heading' : 'text-content-disabled line-through'"
                 data-role="when"
               >
-                {{ e.occurred_on }}{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
-                <span appHelp size="xs">({{ e.date_precision }})</span>
+                <!-- The event log is the third place a date carried a
+                     fabricated day beside its own qualifier. Same fix as the
+                     herd list and /animals/:id.
+
+                     A SUPERSEDED EVENT KEEPS ITS OWN TREATMENT and does not
+                     take the vocabulary: "content-disabled line-through" is a
+                     statement about the RECORD (this was replaced), not about
+                     the certainty of the date inside it. The two now share a
+                     token -- "content-disabled" is §6's no-record colour -- and
+                     are told apart by the strike-through, which no certainty
+                     state has. §14.1's "ended" tone is the real fix and it is
+                     phase 7. -->
+                @if (when(e); as w) {
+                  @if (e.effective) {
+                    <span [appCertainty]="w.state" [attr.data-certainty]="w.state"
+                    >{{ w.figure }}</span>{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
+                    @if (w.qualifier) { <span appQualifier>{{ w.qualifier }}</span> }
+                  } @else {
+                    {{ w.figure }}{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
+                    @if (w.qualifier) { <span class="text-xs">{{ w.qualifier }}</span> }
+                  }
+                }
               </span>
 
               @if (!e.effective) {
@@ -101,6 +123,11 @@ import { HelpText } from '../ui/text';
   `,
 })
 export class EventList {
+  /** The event's date at the precision it was known to. See precision-display.ts. */
+  protected when(e: TimelineEvent): PrecisionParts {
+    return precisionParts(e.occurred_on, e.date_precision);
+  }
+
   readonly events = input.required<TimelineEvent[]>();
 
   /**

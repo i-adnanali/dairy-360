@@ -23,6 +23,9 @@ import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
 import { Cell } from '../ui/cell';
+import { Certainty } from '../ui/certainty';
+import type { CertaintyState } from '../ui/certainty';
+import { NO_RECORD } from './precision-display';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
@@ -49,6 +52,7 @@ import { Button } from '../ui/button';
     Button,
     Card,
     Cell,
+    Certainty,
     ChipGroup,
     ErrorPanel,
     FieldLabel,
@@ -112,13 +116,30 @@ import { Button } from '../ui/button';
                   <tr appRowDivider [attr.data-dispatch]="d.id">
                     <td appCell tone="secondary">{{ d.occurred_on }} {{ d.session }}</td>
                     <td appCell tone="secondary">
-                      {{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}
+                      <!-- "nothing taken" is §6's third state: an answer was
+                           given, so it is words and it is italic. -->
+                      <span [appCertainty]="d.status === 'taken' ? 'known' : 'absent'"
+                        [attr.data-certainty]="d.status === 'taken' ? 'known' : 'absent'"
+                      >{{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}</span>
                       @if (d.reason) { <span class="text-content-subtle">— {{ d.reason }}</span> }
                     </td>
+                    <!-- AN EMPTY CELL, WHICH §15 RULE 1 FORBIDS OUTRIGHT:
+                         "rateText" returned '' for a dispatch with no price, so
+                         the rate column simply went blank and a reader could not
+                         tell a missing agreement from a rendering fault. It
+                         takes the en dash now, which is what §6 reserves for
+                         exactly this. -->
                     <td appCell small tone="muted" [attr.data-role]="'rate-' + d.id">
-                      {{ rateText(d) }}
+                      @if (rateState(d); as st) {
+                        <span [appCertainty]="st" [attr.data-certainty]="st">{{ rateText(d) }}</span>
+                      } @else {
+                        {{ rateText(d) }}
+                      }
                     </td>
-                    <td appCell numeric tone="heading">{{ amountText(d) }}</td>
+                    <td appCell numeric tone="heading">
+                      <span [appCertainty]="amountState(d)" [attr.data-certainty]="amountState(d)"
+                      >{{ amountText(d) }}</span>
+                    </td>
                   </tr>
                 }
                 @for (p of m.payments; track p.id) {
@@ -281,13 +302,32 @@ export class DestinationDetail {
 
   /** As agreed, never per-litre -- see the module comment. */
   protected rateText(d: Dispatch): string {
-    if (d.price_minor === null || d.price_unit_litres === null) return '';
+    if (d.price_minor === null || d.price_unit_litres === null) return NO_RECORD;
     return formatRate(d.price_minor, d.price_unit_litres);
   }
 
+  /**
+   * `known` is not among the answers, for the same reason it is not on the
+   * dispatch sheet's rate column: §6's known treatment carries the monospace
+   * face, and this is a composite rate LABEL rather than a figure column. §11
+   * records the 48px that cost the last time it was set in mono.
+   */
+  protected rateState(d: Dispatch): CertaintyState | null {
+    return d.price_minor === null || d.price_unit_litres === null ? 'no-record' : null;
+  }
+
   protected amountText(d: Dispatch): string {
-    if (d.status !== 'taken' || d.price_minor === null || d.price_unit_litres === null) return '—';
+    if (d.status !== 'taken' || d.price_minor === null || d.price_unit_litres === null) {
+      return NO_RECORD;
+    }
     return formatMinor(Math.round((d.litres! * d.price_minor) / d.price_unit_litres));
+  }
+
+  protected amountState(d: Dispatch): CertaintyState {
+    if (d.status !== 'taken' || d.price_minor === null || d.price_unit_litres === null) {
+      return 'no-record';
+    }
+    return 'known';
   }
 
   protected balanceText(s: Statement): string {

@@ -222,7 +222,20 @@ describe('DispatchSheetScreen', () => {
     input.value = '3';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(el.querySelector('[data-role="amount-dst_home"]')!.textContent).toContain('—');
+
+    // WAS AN EM DASH, AND THE DASH WAS THE WRONG ANSWER. §15 rule 1: "an
+    // absence is named, not blanked ... The one dash permitted is §6's
+    // no-record state, which is the absence of an answer rather than an
+    // answer." Home milk having no amount is not a missing record -- it is a
+    // destination that is not billed, which the rate column beside it has
+    // always said in words. So the amount says it too.
+    //
+    // The test's own name is "never prices it", and `not billed` keeps that
+    // promise more legibly than a dash did.
+    const amount = el.querySelector('[data-role="amount-dst_home"]')!;
+    expect(amount.textContent).toContain('not billed');
+    // §6's third state: an answer was given, so it is italic and it is words.
+    expect(amount.querySelector('[data-certainty="absent"]')).not.toBeNull();
   });
 
   it('sends only rows with an answer -- an absent neighbour is not an omission', async () => {

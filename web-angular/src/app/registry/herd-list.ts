@@ -11,6 +11,9 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 import { RegistryApi } from './api';
 import { Cell } from '../ui/cell';
+import { Certainty, Qualifier } from '../ui/certainty';
+import { NO_RECORD, precisionParts } from './precision-display';
+import type { PrecisionParts } from './precision-display';
 import { lifeStageLabel } from './life-stage';
 import type { HerdRow } from './types';
 import { ErrorPanel } from '../ui/surface';
@@ -22,7 +25,10 @@ import { StatusBadge } from '../ui/surface';
 @Component({
   selector: 'app-herd-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Cell, ErrorPanel, HelpText, PageHeading, RouterLink, StatusBadge],
+  imports: [
+    Button, Cell, Certainty, ErrorPanel, HelpText, PageHeading, Qualifier, RouterLink,
+    StatusBadge,
+  ],
   template: `
     <div class="mx-auto max-w-4xl">
       @if (loadError(); as e) {
@@ -81,7 +87,10 @@ import { StatusBadge } from '../ui/surface';
                   <td appCell>
                     <a [routerLink]="['/animals', r.id]" class="font-mono font-medium text-content-heading underline">{{ r.id }}</a>
                   </td>
-                  <td appCell tone="heading">{{ r.name ?? '—' }}</td>
+                  <td appCell tone="heading">
+                    <span [appCertainty]="r.name ? 'known' : 'no-record'"
+                    >{{ r.name ?? noRecord }}</span>
+                  </td>
                   <td appCell tone="secondary">{{ r.sex }}</td>
                   <!-- The local term, with what the enum actually holds on hover:
                        the screen shows the farm's word and never hides the
@@ -92,15 +101,39 @@ import { StatusBadge } from '../ui/surface';
                       {{ r.status ? stage(r) : 'no projection' }}
                     </span>
                   </td>
-                  <td appCell numeric tone="heading">{{ r.parity ?? '—' }}</td>
-                  <!-- Precision is shown on every date. Never a bare date:
-                       hiding the qualifier manufactures confidence. -->
+                  <td appCell numeric tone="heading">
+                    <span [appCertainty]="r.parity === null ? 'no-record' : 'known'"
+                    >{{ r.parity ?? noRecord }}</span>
+                  </td>
+                  <!-- ---------------------------------------------------------
+                       PRECISION IS SHOWN ON EVERY DATE, AND THE FIGURE IS NOW
+                       TRUNCATED TO IT.
+                       ---------------------------------------------------------
+                       This cell used to read "2019-03-01 (month)". The comment
+                       here said "never a bare date: hiding the qualifier
+                       manufactures confidence", which was right about the
+                       qualifier and blind to the "-01" beside it -- a day the
+                       operator was careful not to claim, printed as though it
+                       were known. "precisionParts" drops it, so the figure and
+                       the qualifier now say the same thing. See
+                       precision-display.ts.
+
+                       "unknown" stays a WORD and not a dash, because the herd
+                       list is where a missing birth date is a fact about the
+                       animal rather than an empty slot -- but it moves from
+                       italic (§6's "an answer was given") to the no-record
+                       treatment, which is what it actually is. -->
                   <td appCell tone="secondary" data-role="born">
-                    @if (r.birth_on) {
-                      {{ r.birth_on }}
-                      <span appHelp size="xs" tone="subtle">({{ r.birth_precision }})</span>
-                    } @else {
-                      <span class="italic text-content-subtle">unknown</span>
+                    @if (born(r); as b) {
+                      @if (b.state === 'no-record') {
+                        <span appCertainty="no-record" data-certainty="no-record">unknown</span>
+                      } @else {
+                        <span [appCertainty]="b.state" [attr.data-certainty]="b.state"
+                        >{{ b.figure }}</span>
+                        @if (b.qualifier) {
+                          <span appQualifier>{{ b.qualifier }}</span>
+                        }
+                      }
                     }
                   </td>
                   <td appCell small tone="muted">{{ r.origin }}</td>
@@ -115,9 +148,17 @@ import { StatusBadge } from '../ui/surface';
   `,
 })
 export class HerdList {
+  /** §6's no-record glyph, for the template. An en dash. */
+  protected readonly noRecord = NO_RECORD;
+
   /** The farm's word for this animal's stage. Stored enum unchanged. */
   protected stage(r: HerdRow): string {
     return lifeStageLabel(r.status, r.sex);
+  }
+
+  /** The birth date at the precision it was known to. See precision-display.ts. */
+  protected born(r: HerdRow): PrecisionParts {
+    return precisionParts(r.birth_on, r.birth_precision);
   }
 
   private readonly api = inject(RegistryApi);

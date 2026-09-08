@@ -8,6 +8,9 @@ import { EventList } from './event-list';
 import { EventForm } from './event-form';
 import { CorrectionForm } from './correction-form';
 import type { AnimalDetail as Detail } from './types';
+import { Certainty, Qualifier } from '../ui/certainty';
+import { NO_RECORD, precisionParts } from './precision-display';
+import type { PrecisionParts } from './precision-display';
 import { Card } from '../ui/surface';
 import { ErrorPanel } from '../ui/surface';
 import { HelpText } from '../ui/text';
@@ -18,7 +21,10 @@ type Tab = 'events' | 'add-event' | 'correct';
 @Component({
   selector: 'app-animal-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Card, CorrectionForm, ErrorPanel, EventForm, EventList, HelpText, StatusBadge],
+  imports: [
+    Card, Certainty, CorrectionForm, ErrorPanel, EventForm, EventList, HelpText, Qualifier,
+    StatusBadge,
+  ],
   template: `
     @if (loadError(); as e) {
       <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
@@ -40,11 +46,31 @@ type Tab = 'events' | 'add-event' | 'correct';
             <div class="flex gap-2"><dt class="text-content-muted">Origin</dt><dd class="text-content-primary">{{ d.animal.origin }}</dd></div>
             <div class="flex gap-2">
               <dt class="text-content-muted">Born</dt>
-              <dd class="text-content-primary" data-role="birth">
-                {{ d.status?.birth_on ? d.status?.birth_on + ' (' + d.status?.birth_precision + ')' : 'unknown' }}
+              <!-- Was "2019-03-01 (month)" built by string concatenation in the
+                   template. Same correction as the herd list: the figure is
+                   truncated to the precision it was known to, and the qualifier
+                   loses its brackets. This is the screen where an animal's whole
+                   record is read, so a fabricated day here is the one that gets
+                   believed. -->
+              <dd data-role="birth">
+                @if (born(d); as b) {
+                  @if (b.state === 'no-record') {
+                    <span appCertainty="no-record" data-certainty="no-record">unknown</span>
+                  } @else {
+                    <span [appCertainty]="b.state" [attr.data-certainty]="b.state"
+                    >{{ b.figure }}</span>
+                    @if (b.qualifier) { <span appQualifier>{{ b.qualifier }}</span> }
+                  }
+                }
               </dd>
             </div>
-            <div class="flex gap-2"><dt class="text-content-muted">Parity</dt><dd class="text-content-primary">{{ d.status?.parity ?? '—' }}</dd></div>
+            <div class="flex gap-2">
+              <dt class="text-content-muted">Parity</dt>
+              <dd data-role="parity">
+                <span [appCertainty]="(d.status?.parity ?? null) === null ? 'no-record' : 'known'"
+                >{{ d.status?.parity ?? noRecord }}</span>
+              </dd>
+            </div>
             @if (d.animal.post_no) {
               <div class="flex gap-2"><dt class="text-content-muted">Post</dt><dd class="text-content-primary">{{ d.animal.post_no }}</dd></div>
             }
@@ -85,6 +111,14 @@ type Tab = 'events' | 'add-event' | 'correct';
   `,
 })
 export class AnimalDetailView {
+  /** §6's no-record glyph, for the template. An en dash. */
+  protected readonly noRecord = NO_RECORD;
+
+  /** The birth date at the precision it was known to. See precision-display.ts. */
+  protected born(d: Detail): PrecisionParts {
+    return precisionParts(d.status?.birth_on ?? null, d.status?.birth_precision ?? null);
+  }
+
   /** The farm's word for this animal's stage. Stored enum unchanged. */
   protected stage(d: Detail): string {
     return d.status === null ? 'no projection' : lifeStageLabel(d.status.status, d.animal.sex);
