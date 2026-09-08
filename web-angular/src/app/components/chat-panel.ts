@@ -15,7 +15,6 @@ import { Composer } from './composer';
 import { ConfirmationCard } from './confirmation-card';
 import { EmptyState } from './empty-state';
 import { MessageList } from './message-list';
-import { ThemeToggle } from '../ui/theme-toggle';
 import { HelpText } from '../ui/text';
 import { Button } from '../ui/button';
 
@@ -24,20 +23,21 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-chat-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    Button, Composer, ConfirmationCard, EmptyState, HelpText, MessageList, ThemeToggle,
-  ],
+  imports: [Button, Composer, ConfirmationCard, EmptyState, HelpText, MessageList],
   template: `
     <div class="mx-auto flex h-full max-w-3xl flex-col">
       <header class="border-b border-line-subtle bg-surface-page/80 px-6 py-4 backdrop-blur">
-        <!-- The chat is a TOP-LEVEL route (app.routes.ts), so it renders outside
-             the registry shell and gets no header from it. It therefore needs its
-             own copy of the toggle, and will stop needing it when section 9 folds
-             this panel into the shell. -->
-        <div class="flex items-baseline justify-between gap-4">
-          <h1 class="text-lg font-semibold tracking-tight">Baghicha Dairy Co. — Farm Agent</h1>
-          <app-theme-toggle />
-        </div>
+        <!-- THE DUPLICATE THEME TOGGLE IS GONE. Phase 6a: this route is a child
+             of RegistryShell now, so it inherits the shell's header and its one
+             toggle. Two toggles reading the same signal were not merely
+             redundant -- they were two controls for one setting on one screen,
+             which is the kind of thing that makes a person wonder whether they
+             do different things.
+
+             The <h2> is a heading level down as well. The shell's <h1> is
+             "Animal registry"; two <h1>s on one document is an outline with two
+             roots, and a screen reader reads it as two pages. -->
+        <h2 class="text-lg font-semibold tracking-tight">Baghicha Dairy Co. — Farm Agent</h2>
         <p appHelp>
           Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances —
           and take actions with confirmation.

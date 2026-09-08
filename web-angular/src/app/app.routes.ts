@@ -131,11 +131,28 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./registry/verification-panel').then((m) => m.VerificationPanel),
       },
+
+      // -----------------------------------------------------------------------
+      // THE ASSISTANT, MOVED IN FROM THE TOP LEVEL. Phase 6a, UI_SYSTEM.md §9.2.
+      // -----------------------------------------------------------------------
+      // This was a SIBLING of the shell rather than a child of it, which is why
+      // the panel rendered with no banner, no session bar and no nav -- and why
+      // it needed its own copy of the theme toggle to be usable in dark mode at
+      // all. It was not a design decision; it was where a ported React route
+      // landed.
+      //
+      // Moving it in is a one-line change and NOT sufficient on its own. The
+      // panel's root is `mx-auto flex h-full max-w-3xl flex-col` with a
+      // `flex-1 overflow-y-auto` region and a pinned composer, and a component
+      // host is `display: inline` by default -- so as a plain child of <main>
+      // its `h-full` resolves against `auto` and the whole chain collapses.
+      // styles.css carries the `display: block; height: 100%` that holds it up,
+      // and templates.spec.ts now guards the list it belongs to.
+      {
+        path: 'chat',
+        loadComponent: () => import('./components/chat-panel').then((m) => m.ChatPanel),
+      },
     ],
-  },
-  {
-    path: 'chat',
-    loadComponent: () => import('./components/chat-panel').then((m) => m.ChatPanel),
   },
   { path: '**', redirectTo: '' },
 ];

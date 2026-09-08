@@ -141,3 +141,39 @@ describe('write controls', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// THE `display: block` GUARD IS NOT HERE, AND §9.2 EXPECTED IT TO BE
+// ---------------------------------------------------------------------------
+//
+// UI_SYSTEM.md §9.2 says to add it to this file, and gives the mechanism:
+//
+//   "Reading `styles.css` as raw text works -- `'../../styles.css?raw'`, and
+//    `?raw` bypasses the Tailwind pipeline to give the hand-maintained source."
+//
+// IT DOES NOT WORK IN THIS TOOLCHAIN. `import.meta.glob('../../*.css', { query:
+// '?raw', ... })` resolves the key -- `../../styles.css` -- and hands back a
+// module whose `default` is a string of LENGTH ZERO. Measured, not assumed:
+// `@angular/build:unit-test` intercepts `.css` ahead of Vite's `?raw` handling
+// and returns nothing for it. Every `.ts` raw glob in this file works, and the
+// `.ts` half of the guard (scanning app.routes.ts for both route forms) works
+// too; the stylesheet is the half that cannot be read from inside the suite.
+//
+// A guard that reads its input as '' does not fail -- it reports EVERY
+// component as unlisted, which on the first run it duly did, all eleven of
+// them. That is the §8.3 failure mode one layer along: "a stray backtick is a
+// compile error, so ng test dies at the build step and the spec never runs; it
+// only ever covered the rarer subset that still parses."
+//
+// So it lives in scripts/check-templates.mjs beside the backtick check, for the
+// reason §8.3 gives for that one: it must fail in CI with no toolchain to
+// configure, and the failure has to name the file so it is fixed in seconds.
+// `npm run check:templates` runs ahead of the typecheck and both builds.
+//
+// What that script checks, so it is findable from here:
+//   * every `app-…` selector under src/app/** that the router does not mount
+//     has a `display: block` rule in styles.css
+//   * the routed set is read from BOTH `loadComponent` and `component:`,
+//     because RegistryShell is a static import and is exactly the component
+//     carrying the flex and height chain
+//   * it fires -- a synthetic unlisted selector is reported

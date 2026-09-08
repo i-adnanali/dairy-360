@@ -362,8 +362,95 @@ app-session-gate,
  * diffing this list against the components that actually exist rather than by
  * looking at a screen, which is why section 9 wants it guarded by a test.
  */
-app-session-required {
+app-session-required,
+/*
+ * ---------------------------------------------------------------------------
+ * NINE MORE, FOUND BY THE GUARD THAT §9.2 ASKED FOR. Phase 6a.
+ * ---------------------------------------------------------------------------
+ * The comment above says a missing one "fails silently and looks like a spacing
+ * bug", and predicted the list would be diffed against reality one day.
+ * scripts/check-templates.mjs now does it on every run, and the first run found
+ * nine -- all of them in components/ and ui/, which is to say none of them in
+ * the directory anybody had thought to look at. §8.3 records the same blind
+ * spot for the backtick guard: "covering src/app/** rather than the spec's
+ * registry-only glob -- so components/ is protected for the first time."
+ *
+ * THREE OF THE NINE ARE LIVE BUGS, each an inline host inside a `space-y-*`:
+ *
+ *   app-message         message-list.ts:11 is `<div class="space-y-5">`, so
+ *                       EVERY GAP BETWEEN EVERY CHAT MESSAGE was contributing
+ *                       nothing. The worst of the three by reach, and invisible
+ *                       to the fourteen-screen baseline because no fixture
+ *                       produces a reply (§8.2).
+ *   app-chart-card      message.ts:50 is `<div class="w-full space-y-3">`.
+ *   app-confirmation-card
+ *                       chat-panel.ts:79 is `<div class="mt-4 space-y-3">`, so
+ *                       two pending writes sat flush against each other. Also
+ *                       invisible by screenshot -- §8.2 lists this surface as
+ *                       one that "renders only while an agent write is pending".
+ *
+ * THE OTHER SIX ARE LATENT, and are listed for the reason the comment above
+ * already gives: "flex and grid children are already blockified by CSS, so
+ * listing them here changes nothing and costs nothing". app-composer,
+ * app-tool-call-chip and app-theme-toggle are flex items today and the
+ * declaration is a no-op for them; app-empty-state, app-message-list and
+ * app-markdown-view are sole children of block parents, where inline costs a
+ * stray line box rather than a missing margin. All six become bugs the moment
+ * somebody puts a sibling beside them, which is exactly what happened to
+ * app-session-required.
+ */
+app-chart-card,
+app-composer,
+app-confirmation-card,
+app-empty-state,
+app-markdown-view,
+app-message,
+app-message-list,
+app-theme-toggle,
+app-tool-call-chip {
   display: block;
+}
+
+/*
+ * THE ASSISTANT PANEL, AND IT NEEDS THE HEIGHT AS WELL AS THE DISPLAY.
+ *
+ * Phase 6a, UI_SYSTEM.md section 9.2. <app-chat-panel> was a top-level route --
+ * a sibling of the shell, not a child of it -- so it rendered with no banner,
+ * no session bar and no nav, and carried its own copy of the theme toggle to
+ * compensate. app.routes.ts moves it into RegistryShell's children.
+ *
+ * THE ROUTED COMPONENTS ARE DELIBERATELY ABSENT FROM THE LIST ABOVE, and this
+ * is the exception that proves the comment's reasoning rather than breaking it.
+ * The others gain nothing from `display: block` because the router inserts them
+ * alone after <router-outlet> and they are never siblings of anything. This one
+ * is not about margins at all:
+ *
+ *   the panel's root is `mx-auto flex h-full max-w-3xl flex-col`, holding a
+ *   `flex-1 overflow-y-auto` message list and a pinned composer.
+ *
+ * `h-full` is `height: 100%`, which resolves against the PARENT's height -- and
+ * an inline host has no height to resolve against. So `display: block` alone
+ * makes the host a block of `height: auto`, and `100%` of `auto` is still
+ * `auto`: the flex column collapses to its content, the message list stops
+ * scrolling internally, the composer drifts up the page, and
+ * afterRenderEffect's scrollTo silently does nothing because
+ * `scrollHeight === clientHeight`. Both declarations, or neither works.
+ *
+ * WHAT <main> DOES *NOT* NEED is `min-h-0`, and that is worth stating because it
+ * is the usual remedy. <main> is a flex item of the shell's `flex h-full
+ * flex-col`, so its automatic minimum size would normally hold it open at its
+ * content height -- except that it carries `overflow-y-auto`, and a scroll
+ * container's automatic minimum size is zero. It is already correct.
+ *
+ * What is left is not a collapse but an INSET: <main>'s `py-6` costs the panel
+ * 3rem, so its pinned composer floats 1.5rem off the bottom of the viewport
+ * rather than sitting on it. That is a design call about the shell's padding
+ * (section 12.5's per-screen widths), not a bug in this rule, and it is left
+ * alone here.
+ */
+app-chat-panel {
+  display: block;
+  height: 100%;
 }
 
 /*
