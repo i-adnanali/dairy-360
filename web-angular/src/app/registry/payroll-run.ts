@@ -44,6 +44,13 @@ import { formatMinor, formatPeriodRate, minorToRupees, rupeesToMinor } from './m
 import { farmToday } from './today';
 import { urlParams } from './url-state';
 import type { PayrollRun, PayrollRunRow } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { SectionHeading } from '../ui/heading';
+import { Button } from '../ui/button';
 
 /** The first of the month `on` falls in, and the last. Farm-local, no clock. */
 export function monthBounds(on: string): { from: string; to: string } {
@@ -62,21 +69,29 @@ interface DihariDraft {
 @Component({
   selector: 'app-payroll-run',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IdentifierInput, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    ErrorPanel,
+    HelpText,
+    IdentifierInput,
+    PageHeading,
+    SectionHeading,
+    SessionRequired,
+    TextInput,
+  ],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
       <header class="space-y-3">
-        <h2 class="text-lg font-semibold text-farm-900">Payroll</h2>
+        <h2 appPageHeading>Payroll</h2>
         <div class="flex flex-wrap items-end gap-4">
           <label class="space-y-1">
             <span class="block text-xs font-medium uppercase tracking-wide text-farm-600">From</span>
-            <input type="date" [value]="from()" (change)="setFrom($any($event.target).value)"
-              class="rounded-lg border border-farm-300 px-3 py-2 text-sm" data-role="from" />
+            <input type="date" [value]="from()" (change)="setFrom($any($event.target).value)" appInput density="comfortable" data-role="from" />
           </label>
           <label class="space-y-1">
             <span class="block text-xs font-medium uppercase tracking-wide text-farm-600">To</span>
-            <input type="date" [value]="to()" (change)="setTo($any($event.target).value)"
-              class="rounded-lg border border-farm-300 px-3 py-2 text-sm" data-role="to" />
+            <input type="date" [value]="to()" (change)="setTo($any($event.target).value)" appInput density="comfortable" data-role="to" />
           </label>
           <label class="space-y-1">
             <span class="block text-xs font-medium uppercase tracking-wide text-farm-600">
@@ -89,18 +104,18 @@ interface DihariDraft {
       </header>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       }
 
       @if (run(); as r) {
         <!-- Salaried. Above the divider: every row must be answered. -->
         <section class="space-y-3" data-role="permanent">
-          <h3 class="text-sm font-semibold text-farm-900">
+          <h3 appSectionHeading>
             Salaried <span class="font-normal text-farm-600">— every row needs a figure</span>
           </h3>
 
           @if (r.permanent.length === 0) {
-            <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
+            <p appCard empty
               data-role="no-permanent">
               Nobody was on a salaried stint in this period.
             </p>
@@ -118,7 +133,7 @@ interface DihariDraft {
                     </div>
                     <!-- The AGREEMENT, read-only and visibly separate from the
                          figure being entered. -->
-                    <span class="text-xs text-farm-600" data-role="agreement">
+                    <span appHelp size="xs" data-role="agreement">
                       @if (row.term) {
                         agreed {{ rate(row) }}
                       } @else {
@@ -129,16 +144,14 @@ interface DihariDraft {
 
                   <div class="mt-2 flex flex-wrap items-center gap-3">
                     <label class="flex items-center gap-2">
-                      <span class="text-xs text-farm-600">Rs</span>
+                      <span appHelp size="xs">Rs</span>
                       <input type="text" inputmode="decimal"
                         [value]="amountOf(row)" (input)="setAmount(row, $any($event.target).value)"
-                        [disabled]="!row.term"
-                        class="w-32 rounded-lg border border-farm-300 px-3 py-2 text-right text-sm
-                          tabular-nums disabled:bg-farm-50"
+                        [disabled]="!row.term" appInput density="comfortable" class="w-32 text-right tabular-nums disabled:bg-farm-50"
                         [attr.data-role]="'amount-' + row.person.identifier" />
                     </label>
                     @if (row.existing) {
-                      <span class="text-xs text-farm-500" data-role="already-saved">
+                      <span appHelp size="xs" tone="subtle" data-role="already-saved">
                         already recorded as {{ formatMinor(row.existing.amount_minor) }}
                       </span>
                     }
@@ -164,7 +177,7 @@ interface DihariDraft {
                   }
                   @if (packageLines(row); as lines) {
                     @if (lines.length > 0) {
-                      <p class="mt-1 text-xs text-farm-500" data-role="package">{{ lines.join(' · ') }}</p>
+                      <p appHelp size="xs" tone="subtle" class="mt-1" data-role="package">{{ lines.join(' · ') }}</p>
                     }
                   }
                 </li>
@@ -178,7 +191,7 @@ interface DihariDraft {
         <!-- Dihari. Below the divider: nothing here is required, because most
              months most of them were never hired. -->
         <section class="space-y-3" data-role="daily">
-          <h3 class="text-sm font-semibold text-farm-900">
+          <h3 appSectionHeading>
             Dihari <span class="font-normal text-farm-600">— only the days somebody worked</span>
           </h3>
 
@@ -194,7 +207,7 @@ interface DihariDraft {
           }
 
           @if (r.daily_candidates.length === 0) {
-            <p class="text-xs text-farm-500" data-role="no-dihari">
+            <p appHelp size="xs" tone="subtle" data-role="no-dihari">
               No dihari stints in this period. Open one on the People screen.
             </p>
           } @else {
@@ -204,8 +217,7 @@ interface DihariDraft {
                 <label class="space-y-1">
                   <span class="block text-xs text-farm-600">Who</span>
                   <select [value]="draft.engagement_id"
-                    (change)="setDraft($index, { engagement_id: $any($event.target).value })"
-                    class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm">
+                    (change)="setDraft($index, { engagement_id: $any($event.target).value })" appInput>
                     <option value="">Choose…</option>
                     @for (c of r.daily_candidates; track c.engagement.id) {
                       <option [value]="c.engagement.id">{{ c.person.identifier }}</option>
@@ -215,14 +227,12 @@ interface DihariDraft {
                 <label class="space-y-1">
                   <span class="block text-xs text-farm-600">Day</span>
                   <input type="date" [value]="draft.on"
-                    (change)="setDraft($index, { on: $any($event.target).value })"
-                    class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                    (change)="setDraft($index, { on: $any($event.target).value })" appInput />
                 </label>
                 <label class="space-y-1">
                   <span class="block text-xs text-farm-600">Rs</span>
                   <input type="text" inputmode="decimal" [value]="draft.amount"
-                    (input)="setDraft($index, { amount: $any($event.target).value })"
-                    class="w-28 rounded-lg border border-farm-300 px-2 py-1.5 text-right text-sm tabular-nums" />
+                    (input)="setDraft($index, { amount: $any($event.target).value })" appInput class="w-28 text-right tabular-nums" />
                 </label>
                 <button type="button" (click)="removeDraft($index)"
                   class="rounded-lg px-2 py-1.5 text-xs text-farm-600 underline">remove</button>
@@ -246,30 +256,29 @@ interface DihariDraft {
           </div>
 
           @if (state.formError(['entries', 'from_on', 'to_on']); as msg) {
-            <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="save-error">{{ msg }}</p>
+            <p appErrorPanel data-role="save-error">{{ msg }}</p>
           }
           @if (state.fieldError('entries'); as msg) {
-            <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="entries-error">{{ msg }}</p>
+            <p appErrorPanel data-role="entries-error">{{ msg }}</p>
           }
 
           @if (session.ready()) {
-            <button type="button" (click)="save()" [disabled]="!canSave()"
-              class="rounded-lg bg-farm-800 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
-              data-role="save">
+            <button type="button" (click)="save()" [appButtonDisabled]="!canSave()" appButton
+              data-role="save" reason="payroll-save-reason">
               {{ state.submitting() ? 'Saving…' : 'Save run' }}
             </button>
           } @else {
             <app-session-required what="this run" />
           }
           @if (!allAnswered()) {
-            <p class="text-xs text-farm-600" data-role="blocked">
+            <p appHelp size="xs" data-role="blocked" id="payroll-save-reason">
               Every salaried person in this period needs a figure. If somebody was paid nothing,
               enter nothing and say why in a note — an omission is not an answer.
             </p>
           }
         </footer>
       } @else {
-        <p class="text-sm text-farm-500">Loading…</p>
+        <p appHelp tone="subtle">Loading…</p>
       }
     </div>
   `,

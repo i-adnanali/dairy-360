@@ -12,18 +12,20 @@ import { Composer } from './composer';
 import { ConfirmationCard } from './confirmation-card';
 import { EmptyState } from './empty-state';
 import { MessageList } from './message-list';
+import { HelpText } from '../ui/text';
+import { Button } from '../ui/button';
 
 // Port of web-react/src/components/ChatPanel.tsx.
 // Injects ChatStore directly instead of prop-drilling from the root.
 @Component({
   selector: 'app-chat-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Composer, ConfirmationCard, EmptyState, MessageList],
+  imports: [Button, Composer, ConfirmationCard, EmptyState, HelpText, MessageList],
   template: `
     <div class="mx-auto flex h-full max-w-3xl flex-col">
       <header class="border-b border-farm-200 bg-farm-50/80 px-6 py-4 backdrop-blur">
         <h1 class="text-lg font-semibold tracking-tight">Baghicha Dairy Co. — Farm Agent</h1>
-        <p class="text-sm text-farm-600">
+        <p appHelp>
           Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances —
           and take actions with confirmation.
         </p>
@@ -50,8 +52,7 @@ import { MessageList } from './message-list';
                 <app-confirmation-card [card]="card" (resolve)="store.resolve($event)" />
               }
               @if (pending.length > 1) {
-                <button
-                  class="rounded-md bg-farm-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-farm-700"
+                <button appButton size="sm"
                   (click)="approveAll(pending)"
                 >
                   Approve all ({{ pending.length }})

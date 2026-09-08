@@ -170,16 +170,48 @@ describe('SessionGate target', () => {
     const e = el(fixture);
     expect(e.querySelector('[data-role="target-real"]')!.textContent).toContain('dairy.db');
     // Provenance is complete, so this is the target and nothing else.
-    expect(start(e).disabled).toBe(true);
+    expect(start(e).getAttribute('aria-disabled')).toBe('true');
 
     const ack = e.querySelector('[data-role="acknowledge-target"]') as HTMLInputElement;
     ack.checked = true;
     ack.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(start(e).disabled).toBe(false);
+    expect(start(e).getAttribute('aria-disabled')).toBeNull();
 
     start(e).click();
     expect(TestBed.inject(Session).ready()).toBe(true);
+  });
+
+  /**
+   * The guarantee above used to be enforced by the BROWSER.
+   *
+   * `start` carried the native `disabled` attribute, so an unacknowledged click
+   * could not reach the handler at all. It now carries `aria-disabled` instead
+   * -- the Button primitive dropped the native attribute so that the reason
+   * text can be focused and announced -- and the refusal moved into code: the
+   * directive cancels the click, which cancels the form submission, and
+   * `start()` re-checks `canStart()` behind that.
+   *
+   * So the property is pinned directly rather than inferred from an attribute:
+   * click it while blocked and no session opens. Checked by reverting BOTH
+   * defences and confirming this fails -- removing either one alone still
+   * passes, which is why the assertion is on the session and not on the
+   * attribute.
+   */
+  it('cannot be clicked past: a blocked start opens no session even when activated', async () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(SessionGate);
+    fixture.detectChanges();
+    await settle(fixture, http, { storage: REAL, memory: false });
+    await fillProvenance(fixture);
+
+    const e = el(fixture);
+    expect(start(e).getAttribute('aria-disabled')).toBe('true');
+    // Not `.disabled` -- the element is focusable and clickable on purpose.
+    expect(start(e).disabled).toBe(false);
+
+    start(e).click();
+    expect(TestBed.inject(Session).ready()).toBe(false);
   });
 
   it('does not ask on the harness — a confirmation clicked through daily protects nothing', async () => {
@@ -192,7 +224,7 @@ describe('SessionGate target', () => {
     const e = el(fixture);
     expect(e.querySelector('[data-role="target-harness"]')!.textContent).toContain('discarded');
     expect(e.querySelector('[data-role="acknowledge-target"]')).toBeNull();
-    expect(start(e).disabled).toBe(false);
+    expect(start(e).getAttribute('aria-disabled')).toBeNull();
   });
 
   it('asks when the target could not be determined, rather than resolving it permissively', async () => {
@@ -204,7 +236,7 @@ describe('SessionGate target', () => {
 
     const e = el(fixture);
     expect(e.querySelector('[data-role="target-unknown"]')!.textContent).toContain('cannot be ruled out');
-    expect(start(e).disabled).toBe(true);
+    expect(start(e).getAttribute('aria-disabled')).toBe('true');
     expect(e.querySelector('[data-role="acknowledge-target"]')).not.toBeNull();
   });
 
@@ -217,7 +249,7 @@ describe('SessionGate target', () => {
 
     const e = el(fixture);
     expect(e.querySelector('[data-role="target-unknown"]')!.textContent).toContain('No server answered');
-    expect(start(e).disabled).toBe(false);
+    expect(start(e).getAttribute('aria-disabled')).toBeNull();
   });
 });
 

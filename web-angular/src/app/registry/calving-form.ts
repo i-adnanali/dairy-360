@@ -42,40 +42,62 @@ import { PrecisionDateControl, dateBlocker } from './precision-date';
 import type { DateEntry, PrecisionDate } from './precision-date';
 import type { CalfChoice } from './calf-picker';
 import type { CalvingOutcome, LinkCandidate, RegistrySex } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { ErrorText } from '../ui/surface';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { SectionLabel } from '../ui/text';
+import { TextLink } from '../ui/text';
+import { Button } from '../ui/button';
 
 const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', 'outcome'] as const;
 
 @Component({
   selector: 'app-calving-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CalfPicker, ChipGroup, IdentifierInput, PrecisionDateControl, RouterLink],
+  imports: [
+    Button,
+    CalfPicker,
+    Card,
+    ChipGroup,
+    ErrorPanel,
+    ErrorText,
+    HelpText,
+    IdentifierInput,
+    PageHeading,
+    PrecisionDateControl,
+    RouterLink,
+    SectionLabel,
+    TextInput,
+    TextLink,
+  ],
   template: `
     <!-- A real <form>: Enter submits from any text field. -->
     <form class="mx-auto max-w-2xl space-y-4" (submit)="onSubmit($event)">
       <header>
-        <h2 class="text-lg font-semibold text-farm-900">Record a calving</h2>
-        <p class="mt-1 text-sm text-farm-600">
+        <h2 appPageHeading>Record a calving</h2>
+        <p appHelp class="mt-1">
           Enter calvings oldest first. Each one creates its calf, so in order means a farm-born
           animal exists before anything refers to it.
         </p>
       </header>
 
       <!-- dam -->
-      <div class="rounded-xl border border-farm-300 bg-white p-4">
-        <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Dam</div>
+      <div appCard>
+        <div appSectionLabel legend>Dam</div>
         @if (dams().length === 0) {
           <!-- Was a dead end with no way out, while /herd's empty state already
                linked to /add. The asymmetry was the bug: the same nothing-yet
                state, one screen offering the next step and the other not. -->
-          <p class="text-sm text-farm-600" data-role="no-dams">
+          <p appHelp data-role="no-dams">
             No females in the registry yet — a calving needs a dam.
-            <a routerLink="/animals/new" data-role="no-dams-cta"
-              class="font-medium text-farm-800 underline">Add an acquired animal</a>,
+            <a routerLink="/animals/new" data-role="no-dams-cta" appTextLink tone="strong">Add an acquired animal</a>,
             and it will be here when you come back.
           </p>
         } @else {
-          <select #firstField data-role="dam" [value]="damId()" (change)="setDam($any($event.target).value)"
-            class="w-full max-w-sm rounded-lg border border-farm-300 px-2 py-1.5 text-sm">
+          <select #firstField data-role="dam" [value]="damId()" (change)="setDam($any($event.target).value)" appInput class="w-full max-w-sm">
             <option value="">Choose a dam…</option>
             @for (d of dams(); track d.id) {
               <option [value]="d.id" [disabled]="!d.eligible">
@@ -85,7 +107,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
           </select>
         }
         @if (state.fieldError('dam_id'); as e) {
-          <p class="mt-2 text-sm text-red-800" data-role="error-dam">{{ e }}</p>
+          <p appErrorText class="mt-2" data-role="error-dam">{{ e }}</p>
         }
       </div>
 
@@ -98,7 +120,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       <!-- calf sex + outcome, needed before the picker can judge eligibility -->
       <div class="rounded-xl border border-farm-300 bg-white p-4 space-y-4">
         <div>
-          <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Calf sex</div>
+          <div appSectionLabel legend>Calf sex</div>
           <app-chip-group
             name="calf-sex" label="Calf sex" [options]="sexChips" [value]="calfSex()"
             (changed)="setCalfSex($any($event))"
@@ -106,7 +128,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
         </div>
 
         <div>
-          <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Outcome</div>
+          <div appSectionLabel legend>Outcome</div>
           <app-chip-group
             name="outcome" label="Outcome" [options]="outcomes" [value]="outcome()"
             (changed)="setOutcome($any($event))"
@@ -145,7 +167,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       />
 
       @if (state.formError(fields); as e) {
-        <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">
+        <div appErrorPanel data-role="error-form">
           {{ e }}
         </div>
       }
@@ -170,11 +192,9 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       }
 
       <div class="flex items-center gap-3">
-        <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-          class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-        >{{ state.submitting() ? 'Saving…' : 'Record calving' }}</button>
+        <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="calving-submit-reason">{{ state.submitting() ? 'Saving…' : 'Record calving' }}</button>
         @if (blockedReason(); as r) {
-          <span class="text-sm text-farm-600" data-role="blocked">{{ r }}</span>
+          <span appHelp data-role="blocked" id="calving-submit-reason">{{ r }}</span>
         }
       </div>
 

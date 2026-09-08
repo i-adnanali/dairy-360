@@ -36,20 +36,23 @@ import { RegistryApi } from './api';
 import { farmToday } from './today';
 import { urlParams } from './url-state';
 import type { DayBoard, SessionStanding } from './types';
+import { ErrorPanel } from '../ui/surface';
+import { HelpText } from '../ui/text';
+import { PageHeading } from '../ui/heading';
 
 @Component({
   selector: 'app-today-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [ErrorPanel, HelpText, PageHeading, RouterLink],
   template: `
     <div class="mx-auto max-w-2xl space-y-6">
       <header>
-        <h2 class="text-lg font-semibold text-farm-900">Today</h2>
-        <p class="mt-1 text-sm text-farm-600" data-role="date">{{ prettyDate() }}</p>
+        <h2 appPageHeading>Today</h2>
+        <p appHelp class="mt-1" data-role="date">{{ prettyDate() }}</p>
       </header>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       }
 
       @if (board(); as b) {
@@ -122,7 +125,7 @@ import type { DayBoard, SessionStanding } from './types';
           </a>
         </section>
       } @else {
-        @if (!loadError()) { <p class="text-sm text-farm-500">Loading…</p> }
+        @if (!loadError()) { <p appHelp tone="subtle">Loading…</p> }
       }
     </div>
   `,

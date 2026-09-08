@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { Button } from '../ui/button';
 
 // Port of web-react/src/components/Composer.tsx
 @Component({
   selector: 'app-composer',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Button],
   template: `
     <div class="border-t border-farm-200 bg-farm-50 px-6 py-4">
       <div class="flex items-end gap-2">
@@ -18,8 +20,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
         ></textarea>
         <button
           (click)="submit()"
-          [disabled]="disabled() || !value().trim()"
-          class="rounded-xl bg-farm-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-farm-700 disabled:cursor-not-allowed disabled:bg-farm-300"
+          [appButtonDisabled]="disabled() || !value().trim()" appButton
         >
           Send
         </button>

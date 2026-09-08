@@ -107,7 +107,7 @@ describe('MilkingRoster', () => {
     // "3 animals left" makes the operator hunt, and the hunt is where one gets
     // skipped.
     const { el, fixture } = await mount();
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('Noori');
 
     type(fixture, el, 'BD-0001', '6.5');
@@ -122,7 +122,7 @@ describe('MilkingRoster', () => {
     type(fixture, el, 'BD-0001', '6.5');
     press(fixture, el, 'BD-0002', 'm');
 
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
     (el.querySelector('[data-role="submit"]') as HTMLButtonElement).click();
 
     const req = http.expectOne(`${BASE}/milking/session`);
@@ -164,10 +164,10 @@ describe('MilkingRoster', () => {
     const { el, fixture } = await mount();
     type(fixture, el, 'BD-0001', '6');
     type(fixture, el, 'BD-0002', '5');
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
 
     type(fixture, el, 'BD-0001', '');
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('Noori');
   });
 
@@ -189,7 +189,7 @@ describe('MilkingRoster', () => {
     type(fixture, el, 'BD-0001', '60'); // mean is 6 -- a misplaced decimal
     expect(el.querySelector('[data-role="band-BD-0001"]')).not.toBeNull();
     press(fixture, el, 'BD-0002', 'm');
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
 
     type(fixture, el, 'BD-0001', '6.5');
     expect(el.querySelector('[data-role="band-BD-0001"]')).toBeNull();
@@ -247,6 +247,6 @@ describe('MilkingRoster', () => {
     const { el } = await mount({ ...ROSTER, rows: [] });
     expect(el.querySelector('[data-role="nobody"]')).not.toBeNull();
     expect(el.querySelector('[data-role="nobody"]')!.textContent).toContain('dried off');
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
   });
 });

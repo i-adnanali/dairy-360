@@ -1302,3 +1302,231 @@ predicted in the phase-0 record. Two things to carry forward:
   present it as the original. Round 1 now carries a note saying its subject is
   gone and its `docs/UI_SYSTEM.md` links resolve to the successor.
 - The **Archive** table is unchanged, for the same reason.
+
+---
+
+# Phase 2 — primitives, 2026-09-08
+
+**All fifteen landed. Class strings 358 → 293, occurrences 957 → 614, all 115
+hooks intact, 284/284 and 726/726 green.**
+
+## The decision that unblocked this
+
+§11.3 above is unchanged and still true: §6.3's disabled state adds a tab stop to
+both frozen forms, and prediction 3 of the five-animal trial is pre-registered on
+that count. It was raised before starting and the call was to **build the design
+system now and read the trial against the built system**, using the harness
+fixture to understand the shape of the forms in the meantime, with any
+improvement found in live use folded back into this document and its
+implementation afterwards.
+
+So the tab-stop change is **deliberate and recorded, not worked around**. It is
+written into [button.ts](web-angular/src/app/ui/button.ts)'s header so the trial
+report is read knowing the baseline moved — the same treatment
+`REGISTRY_ENTRY_UX.md` §11 already gives its two pre-trial contaminations. What
+the trial now measures on `/animals/new` is nine tab stops in the empty state,
+not eight, and a submit that is reachable while inert.
+
+**The form shapes here are harness shapes.** Every screenshot and every density
+judgement in this phase rests on `scripts/harness-seed.mjs` fixture data at farm
+date 2026-09-08 — 31 animals, 5 buyers, 3 people. It exercises every table and
+both forms, but it is not the backfill: no murky-date animal, no long calving
+history, no 31-row roster typed by hand. Row counts, column widths and the
+compact/comfortable assignment in §4 are therefore **proposed against fixtures,
+not derived from use**, which is the same caveat §12 already carries.
+
+## Fifteen directives, not fifteen components — the one structural deviation
+
+§6 describes components. All fifteen are **attribute directives**, in six files
+under [ui/](web-angular/src/app/ui/). The reason is §11.5's measurement: 86 of
+the 115 hooks sit on the exact element a primitive would absorb, and the suite
+does not stop at matching a selector — 68 casts to concrete element types, 37
+`.disabled` reads, 31 `.value =` assignments, 44 `dispatchEvent` calls, and
+`identifier-input.spec.ts:26` asserting `input.tagName === 'INPUT'`, a test whose
+whole point is that the control is an input with a datalist rather than a select.
+A wrapping component fails that one by construction, and a `<td>` is the only
+child a `<tr>` accepts.
+
+A directive keeps the element, its attributes, its bindings and its handlers
+where they were and contributes only classes. Angular merges a host `[class]`
+binding with the template's static `class` — measured before relying on it — so
+call sites keep positional classes (margins, widths) and give up only what the
+primitive owns. **Zero hooks needed rewriting, including the 21 interpolated
+ones** (`[attr.data-role]="'litres-' + row.destination_id"`).
+
+| # | Primitive | File | Sites collapsed |
+|---|---|---|---:|
+| 1 | `Cell` | `ui/cell.ts` | 98 |
+| 2 | `HelpText` | `ui/text.ts` | 71 |
+| 3 | `TextInput` | `ui/input.ts` | 45 |
+| 4 | `FieldLabel` | `ui/text.ts` | 28 |
+| 5 | `ErrorPanel` + `ErrorText` | `ui/surface.ts` | 26 + 11 |
+| 6 | `Card` | `ui/surface.ts` | 26 |
+| 7 | `Button` | `ui/button.ts` | 19 |
+| 8 | `SubHeading` | `ui/heading.ts` | 17 |
+| 9 | `SectionLabel` | `ui/text.ts` | 18 |
+| 10 | `PageHeading` | `ui/heading.ts` | 14 |
+| 11 | `TextLink` | `ui/text.ts` | 14 |
+| 12 | `SectionHeading` | `ui/heading.ts` | 12 |
+| 13 | `RowDivider` | `ui/surface.ts` | 10 |
+| 14 | `StatusBadge` | `ui/surface.ts` | 3 of 6 |
+| 15 | `SummaryBar` | `ui/surface.ts` | 2 of 3 |
+
+`NotePanel` was not created. Its eight sites are stat tiles inside
+`verification-panel` and remain a local `@for`.
+
+## The metric
+
+| | before | after |
+|---|---:|---:|
+| Distinct whole-attribute class strings | **358** | **293** |
+| Total occurrences | **957** | **614** |
+| …of which occur exactly once | 230 | 209 |
+| Distinct table-cell class strings | **31** | **3** |
+| Four competing cell padding scales | 44 / 34 / 12 / 7 | two densities |
+
+**−65 distinct (−18%) and −343 occurrences (−36%).** The occurrence figure is
+the honest one: 343 hand-written class attributes stopped existing. The distinct
+count moves less because **209 of the surviving 293 occur exactly once** and are
+layout, not appearance — `flex flex-wrap items-end gap-3`, `mx-auto max-w-4xl
+space-y-6`, `mt-2 space-y-1`. No primitive collapses those, which is round 1's
+own point about this metric having a floor.
+
+What is left repeated is mostly **bare colour utilities**: `text-farm-600` ×22,
+`text-farm-900` ×17, `text-farm-500` ×15, `font-medium text-farm-900` ×15. These
+are colour-only spans, not primitives, so §6 does not reach them and they were
+left alone. **This matters for phase 4**: §3's promise is that re-pointing layer 2
+makes "the whole app follow from one file", and it cannot while ~100 call sites
+still name `farm` stops directly. Migrating them is mechanical and zero-delta,
+and it should be scheduled before phase 4 rather than discovered during it.
+
+## The one regression, and how it was caught
+
+**Not by a test.** After the twelve non-button primitives landed, all fourteen
+screenshots differed — 263 pixels on `/`, confined to 14 rows, `77 55 34` where
+`138 100 49` belonged. The ten nav links carry
+`routerLinkActive="font-medium text-farm-900"` over a base of `text-farm-600`, so
+two colour utilities land on the active link and **the winner is decided by their
+order in the compiled stylesheet, not by the template**. That worked because
+Tailwind emits a ramp in ascending stop order. Renaming the base to
+`text-content-muted` put it in a different group that lands last, and the active
+nav item silently lost its highlight.
+
+Fixed by making the precedence explicit — `routerLinkActive="font-medium
+!text-content-primary"` — rather than by reordering config keys, which would have
+restored the same invisible dependency. Same rendered colour as before. **The
+fragility predated this phase**; renaming only exposed it.
+
+This is the argument for the pixel diff over the hash: a byte comparison says
+"different", and a 263-pixel/14-row answer says where to look. Every subsequent
+step was checked the same way.
+
+## Button — the sanctioned appearance change
+
+One radius (`rounded-lg`, the middle of three), one fill (`bg-brand` = farm-600,
+so payroll, the people list and the person record stop being farm-800), one
+hover, one disabled state. `aria-disabled` replaces the native attribute, with
+`aria-describedby` pointing at the existing reason text at the six sites that
+have one — those notes gained an `id`; their wording is untouched.
+
+**The two lookalikes were not swept in.** `message.ts:16`, the user's chat
+bubble, keeps its own classes and does not import `Button`. `confirmation-card`'s
+brand-filled pill is a badge and took `StatusBadge`, which is what it is.
+`composer.ts` keeps `outline-none focus:border-farm-500` — the deliberate border
+shift, not reinstated as an outline.
+
+**Where the refusal now lives, measured rather than assumed.** Dropping the
+native attribute means the browser stops suppressing the click, so activation is
+refused in two places and which one works depends on the button:
+
+- `type="submit"` (15 of 19) — the directive's `preventDefault` cancels the
+  click, which cancels the form submission. **This is the primary defence**, and
+  it was measured: with the handler guard removed the suite still passes, and
+  only when `preventDefault` goes too does the new `target.spec` test fail.
+- `type="button"` with a template `(click)` (payroll's save) — host and template
+  listeners on one element have no guaranteed order, so the **handler guard** is
+  the only defence.
+
+All 19 handlers were checked one by one.
+[destinations-list.ts:361](web-angular/src/app/registry/destinations-list.ts#L361)
+`submitPrice()` was the single one that re-checked only half of its button's
+condition — it tested `pricePreview()` but not `submitting()` — and now re-checks
+both. The idempotency key survives an in-flight attempt so the double submit was
+a replay rather than a duplicate rate, but it was still a second request nobody
+asked for.
+
+`animal-form`'s guard turned out to be enforced by the **type system**: removing
+`if (a.status !== 'complete' …)` fails compilation, because it is what narrows
+`DateEntry` to the branch carrying `.value`. Stronger than a test, and worth
+knowing before anyone "simplifies" it.
+
+## Specs
+
+**30 assertions converted**, exactly the population §11.6c predicted:
+`forms.spec.ts` 14, `milking.spec.ts` 6, `target.spec.ts` 5, `sales.spec.ts` 3,
+`payroll.spec.ts` 2. Each `expect(x.disabled).toBe(true)` became
+`expect(x.getAttribute('aria-disabled')).toBe('true')`, and `false` became
+`.toBeNull()`. None was deleted.
+
+**Seven were deliberately left native** and are not Button sites: two textareas
+(`chat-panel`, `composer`), three inputs (`payroll` ×2, `milking`'s cell), a
+checkbox (`precision-date`), and `calf-picker`'s candidate rows.
+
+**Three tests added**, because the guarantee that used to be the browser's is now
+the code's:
+
+- `target.spec.ts` — a blocked `start` that is clicked anyway opens no session.
+  Verified to fail by reverting **both** defences; either alone still passes,
+  which is why the assertion is on the session and not on the attribute.
+- `forms.spec.ts` — a blocked submit that is clicked anyway sends nothing.
+- `forms.spec.ts` — the blocked submit points at its reason by `id`, and that
+  element is the existing `data-role="blocked"` note.
+
+Frontend went 281 → **284**. `templates.spec.ts:128` still passes: no
+`provenance()` call moved, and nothing in `ui/` contains one, so the
+registry-only glob is unaffected. The five `className` assertions were untouched
+and still pass; `chart-card.spec.ts:31` is still phase 3's problem.
+
+## Screens whose appearance changed
+
+Diffed against the phase-1 baseline with a per-pixel comparison.
+
+| Screen | Change | Sanctioned by |
+|---|---|---|
+| `01-today`, `02-herd`, `03-animal-detail` | **byte-identical** | — |
+| `04-milking`, `05-dispatch` | 138 px, 24 rows — submit radius only | §6.3 one radius |
+| `06-buyers` | 4,863 px, 36 rows — two submits | §6.3 |
+| `07-buyer-detail` | height 966 → 990 — 7 cells `px-4 py-1.5` → `px-3 py-2` | §6.2 |
+| `08-payroll` | 3,088 px, 36 rows, maxΔ=47 — save farm-800 → farm-600 | §6.3 one fill |
+| `09-people` | 7,460 px, 72 rows — two buttons | §6.3 |
+| `10-person-detail` | 5,008 px, 36 rows — two buttons | §6.3 |
+| `11-check` | height 2,246 → 2,438 — 30 cells `py-1` → `px-3 py-2` | §6.2 |
+| `12-chat` | 2,576 px, 40 rows — composer send + approve-all radius | §6.3 |
+| `13-animals-new`, `14-calvings-new` | 3,747 / 4,646 px, 36 rows — the disabled submit | §6.3, and the trial cost above |
+
+Every difference is confined to 24–72 rows around a button, or to the two tables
+whose padding scales §6.2 deletes. Nothing else moved.
+
+## Costs and remainders
+
+- **The initial bundle grew 527.98 → 534.49 kB** (+6.5 kB raw, 145.84 kB
+  transferred). Fifteen directives are code where hand-written strings were
+  markup. The 500 kB budget was already exceeded before this phase (by 27.98 kB,
+  now 34.49) — the warning is pre-existing, the increment is not.
+- **`StatusBadge` collapsed 3 of 6 and `SummaryBar` 2 of 3.** §12 asked whether
+  the six badges can share one primitive: three can. `event-list`'s superseded
+  marker (different radius, different stop, no `rounded-full`), the amber "not
+  billed" tag and the small `bg-farm-100` aside cannot without a visible change,
+  and two of the six carry their own TypeScript colour logic. `SummaryBar`'s
+  third site is a `<footer>` with different padding and no flex.
+- **`ErrorPanel` covers 26 of 35 sites.** `verification-panel`'s `text-red-900`
+  has no token in §3 to map onto, and `chat-panel`'s bordered `rounded-md`
+  variant is a third radius. Both are real inconsistencies whose fix is visible,
+  so they need a decision in §3 rather than a quiet normalisation here.
+- **§4's help-prose demotion was not applied.** It is a real visual change
+  (`text-sm` → `text-xs`, a 65ch measure) that §10 assigns to no phase. Both
+  current sizes are preserved as variants.
+- **`numeric` does not add `font-mono tabular-nums` yet.** Monospace figures are
+  phase 4; adding them here would have put a third change into this phase.
+- The four `<thead>` elements sharing `SectionLabel`'s class string were skipped
+  deliberately — a directive named for a label does not belong on a table head.

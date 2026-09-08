@@ -22,6 +22,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
+import { Cell } from '../ui/cell';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
@@ -30,22 +31,47 @@ import { WriteLog } from './after-write';
 import { formatMinor, formatRate, rupeesToMinor } from './money';
 import { farmToday } from './today';
 import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { RowDivider } from '../ui/surface';
+import { SectionHeading } from '../ui/heading';
+import { SectionLabel } from '../ui/text';
+import { Button } from '../ui/button';
 
 @Component({
   selector: 'app-destination-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, RouterLink, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    Cell,
+    ChipGroup,
+    ErrorPanel,
+    FieldLabel,
+    HelpText,
+    PageHeading,
+    RouterLink,
+    RowDivider,
+    SectionHeading,
+    SectionLabel,
+    SessionRequired,
+    TextInput,
+  ],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
       <a routerLink="/milk/buyers" class="text-sm text-farm-600 underline">← all buyers</a>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (statement(); as s) {
         <header class="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 class="text-lg font-semibold text-farm-900" data-role="name">{{ s.name }}</h2>
+          <h2 appPageHeading data-role="name">{{ s.name }}</h2>
           <div class="text-right">
-            <div class="text-xs uppercase tracking-wide text-farm-600">
+            <div appSectionLabel>
               {{ s.balance_minor < 0 ? 'In credit' : 'Owes' }}
             </div>
             <div class="text-xl font-semibold"
@@ -54,13 +80,13 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
           </div>
         </header>
 
-        <p class="text-sm text-farm-600" data-role="totals">
+        <p appHelp data-role="totals">
           {{ s.litres }} L over {{ s.months.length }} month(s) · billed {{ money(s.billed_minor) }}
           · paid {{ money(s.paid_minor) }}
         </p>
 
         @if (s.months.length === 0) {
-          <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
+          <p appCard empty
             data-role="empty">Nothing recorded for {{ s.name }} yet.</p>
         }
 
@@ -83,28 +109,28 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
             <table class="w-full text-left text-sm">
               <tbody>
                 @for (d of m.dispatches; track d.id) {
-                  <tr class="border-t border-farm-100" [attr.data-dispatch]="d.id">
-                    <td class="px-4 py-1.5 text-farm-700">{{ d.occurred_on }} {{ d.session }}</td>
-                    <td class="px-4 py-1.5 text-farm-700">
+                  <tr appRowDivider [attr.data-dispatch]="d.id">
+                    <td appCell tone="secondary">{{ d.occurred_on }} {{ d.session }}</td>
+                    <td appCell tone="secondary">
                       {{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}
                       @if (d.reason) { <span class="text-farm-500">— {{ d.reason }}</span> }
                     </td>
-                    <td class="px-4 py-1.5 text-xs text-farm-600" [attr.data-role]="'rate-' + d.id">
+                    <td appCell small tone="muted" [attr.data-role]="'rate-' + d.id">
                       {{ rateText(d) }}
                     </td>
-                    <td class="px-4 py-1.5 text-right text-farm-800">{{ amountText(d) }}</td>
+                    <td appCell numeric tone="heading">{{ amountText(d) }}</td>
                   </tr>
                 }
                 @for (p of m.payments; track p.id) {
                   <tr class="border-t border-farm-100 bg-green-50/40" [attr.data-payment]="p.id">
-                    <td class="px-4 py-1.5 text-farm-700">{{ p.occurred_on }}</td>
-                    <td class="px-4 py-1.5 text-farm-700">
+                    <td appCell tone="secondary">{{ p.occurred_on }}</td>
+                    <td appCell tone="secondary">
                       {{ p.method }}
                       @if (p.reference) { <span class="text-farm-500">· {{ p.reference }}</span> }
                       @if (p.note) { <span class="text-farm-500">— {{ p.note }}</span> }
                     </td>
-                    <td></td>
-                    <td class="px-4 py-1.5 text-right font-medium text-green-800">
+                    <td appCell></td>
+                    <td appCell numeric emphasis tone="success">
                       −{{ money(p.amount_minor) }}
                     </td>
                   </tr>
@@ -116,38 +142,35 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
 
         <!-- record a payment ------------------------------------------- -->
         @if (s.billable) {
-          <form class="space-y-3 rounded-xl border border-farm-300 bg-white p-4"
+          <form appCard class="space-y-3"
             data-role="payment-form" (submit)="submitPayment($event)">
-            <h3 class="text-sm font-semibold text-farm-900">Record a payment</h3>
+            <h3 appSectionHeading>Record a payment</h3>
 
             <div class="flex flex-wrap items-end gap-3">
               <label class="block">
-                <span class="mb-1 block text-xs font-medium text-farm-700">Amount (Rs)</span>
+                <span appFieldLabel>Amount (Rs)</span>
                 <input data-role="pay-amount" inputmode="decimal" [value]="amount()"
-                  (input)="amount.set($any($event.target).value)"
-                  class="w-32 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                  (input)="amount.set($any($event.target).value)" appInput class="w-32" />
               </label>
               <label class="block">
-                <span class="mb-1 block text-xs font-medium text-farm-700">On</span>
+                <span appFieldLabel>On</span>
                 <input type="date" data-role="pay-on" [value]="occurredOn()"
-                  (change)="occurredOn.set($any($event.target).value)"
-                  class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                  (change)="occurredOn.set($any($event.target).value)" appInput />
               </label>
               <div>
-                <div class="mb-1 text-xs font-medium text-farm-700">How</div>
+                <div appFieldLabel inline>How</div>
                 <app-chip-group name="method" label="Method" [options]="methodChips"
                   [value]="method()" (changed)="method.set($any($event))" />
               </div>
             </div>
 
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">
+              <span appFieldLabel>
                 Reference {{ method() === 'adjustment' ? '' : '(optional)' }}
               </span>
               <input data-role="pay-reference" [value]="reference()"
                 (input)="reference.set($any($event.target).value)"
-                placeholder="cheque no., transfer ref, khata page"
-                class="w-72 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                placeholder="cheque no., transfer ref, khata page" appInput class="w-72" />
             </label>
 
             @if (method() === 'adjustment') {
@@ -156,11 +179,10 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
                    allowed. A signed number with no sentence attached cannot be
                    audited a month later. -->
               <label class="block">
-                <span class="mb-1 block text-xs font-medium text-farm-700">Why (required)</span>
+                <span appFieldLabel>Why (required)</span>
                 <input data-role="pay-note" [value]="note()"
                   (input)="note.set($any($event.target).value)"
-                  placeholder="written off, agreed at settlement…"
-                  class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                  placeholder="written off, agreed at settlement…" appInput class="w-full" />
               </label>
               <div class="flex items-center gap-2 text-xs text-farm-700">
                 <label class="flex items-center gap-1">
@@ -175,12 +197,11 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
             }
 
             @if (payState.formError(payFields); as e) {
-              <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="pay-error">{{ e }}</p>
+              <p appErrorPanel data-role="pay-error">{{ e }}</p>
             }
 
             @if (session.ready()) {
-              <button type="submit" data-role="pay-submit" [disabled]="!canPay()"
-                class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+              <button type="submit" data-role="pay-submit" [appButtonDisabled]="!canPay()" appButton
               >{{ payState.submitting() ? 'Saving…' : 'Record payment' }}</button>
             } @else {
               <app-session-required what="a payment" />
@@ -190,7 +211,7 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
 
         <!-- price history ---------------------------------------------- -->
         @if (s.prices.length > 0) {
-          <section class="rounded-xl border border-farm-300 bg-white p-4" data-role="price-history">
+          <section appCard data-role="price-history">
             <h3 class="mb-2 text-sm font-semibold text-farm-900">Agreed rates</h3>
             <ul class="space-y-1 text-sm text-farm-700">
               @for (p of s.prices; track p.id) {
@@ -204,7 +225,7 @@ import type { Dispatch, PaymentMethod, Statement, StatementMonth } from './types
           </section>
         }
       } @else {
-        <p class="text-sm text-farm-600" data-role="loading">Loading…</p>
+        <p appHelp data-role="loading">Loading…</p>
       }
     </div>
   `,

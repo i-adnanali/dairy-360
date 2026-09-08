@@ -15,17 +15,38 @@ import { Identifiers } from './identifiers';
 import { PrecisionDateControl, dateBlocker } from './precision-date';
 import type { DateEntry } from './precision-date';
 import type { AnimalDetail, EnterableEventType } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { ErrorText } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { SectionLabel } from '../ui/text';
+import { Button } from '../ui/button';
 
 const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_time', 'reason', 'text'] as const;
 
 @Component({
   selector: 'app-event-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, IdentifierInput, PrecisionDateControl, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    ChipGroup,
+    ErrorPanel,
+    ErrorText,
+    FieldLabel,
+    HelpText,
+    IdentifierInput,
+    PrecisionDateControl,
+    SectionLabel,
+    SessionRequired,
+    TextInput,
+  ],
   template: `
     <form class="space-y-4" (submit)="onSubmit($event)">
-      <div class="rounded-xl border border-farm-300 bg-white p-4">
-        <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">What happened?</div>
+      <div appCard>
+        <div appSectionLabel legend>What happened?</div>
         <app-chip-group
           name="event-type" label="What happened?" [options]="types" [value]="type()"
           (changed)="type.set($any($event))"
@@ -44,9 +65,8 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
 
         @if (t === 'dry_off') {
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">Reason (optional)</span>
-            <select data-role="reason" [value]="reason()" (change)="reason.set($any($event.target).value)"
-              class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm">
+            <span appFieldLabel>Reason (optional)</span>
+            <select data-role="reason" [value]="reason()" (change)="reason.set($any($event.target).value)" appInput>
               <option value="">—</option>
               @for (r of dryOffReasons; track r) { <option [value]="r">{{ r }}</option> }
             </select>
@@ -56,36 +76,33 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
         @if (t === 'departure') {
           <div class="rounded-xl border border-farm-300 bg-white p-4 space-y-3">
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Reason (required)</span>
-              <select data-role="reason" [value]="reason()" (change)="reason.set($any($event.target).value)"
-                class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm">
+              <span appFieldLabel>Reason (required)</span>
+              <select data-role="reason" [value]="reason()" (change)="reason.set($any($event.target).value)" appInput>
                 <option value="">Choose…</option>
                 @for (r of departureReasons; track r) { <option [value]="r">{{ r }}</option> }
               </select>
             </label>
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">To / cause (optional)</span>
+              <span appFieldLabel>To / cause (optional)</span>
               <input data-role="to" [value]="to()" (input)="to.set($any($event.target).value)"
-                placeholder="who bought her, or what she died of"
-                class="w-full max-w-md rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                placeholder="who bought her, or what she died of" appInput class="w-full max-w-md" />
             </label>
-            <p class="text-xs text-farm-600">
+            <p appHelp size="xs">
               Departure is terminal. Nothing but a note can be recorded after it.
             </p>
           </div>
           @if (state.fieldError('reason'); as e) {
-            <p class="text-sm text-red-800" data-role="error-reason">{{ e }}</p>
+            <p appErrorText data-role="error-reason">{{ e }}</p>
           }
         }
 
         @if (t === 'note') {
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">Note (required)</span>
-            <textarea data-role="text" rows="3" [value]="text()" (input)="text.set($any($event.target).value)"
-              class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm"></textarea>
+            <span appFieldLabel>Note (required)</span>
+            <textarea data-role="text" rows="3" [value]="text()" (input)="text.set($any($event.target).value)" appInput class="w-full"></textarea>
           </label>
           @if (state.fieldError('text'); as e) {
-            <p class="text-sm text-red-800" data-role="error-text">{{ e }}</p>
+            <p appErrorText data-role="error-text">{{ e }}</p>
           }
         }
 
@@ -96,7 +113,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
         />
 
         @if (state.formError(fields); as e) {
-          <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">{{ e }}</p>
+          <p appErrorPanel data-role="error-form">{{ e }}</p>
         }
 
         <!-- The override sits OUTSIDE the form-level error block, keyed on the
@@ -129,14 +146,12 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
 
         <div class="flex items-center gap-3">
           @if (session.ready()) {
-            <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-              class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-            >{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
+            <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="event-submit-reason">{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
           } @else {
             <app-session-required what="an event" />
           }
           @if (blockedReason(); as r) {
-            <span class="text-sm text-farm-600" data-role="blocked">{{ r }}</span>
+            <span appHelp data-role="blocked" id="event-submit-reason">{{ r }}</span>
           }
         </div>
       }

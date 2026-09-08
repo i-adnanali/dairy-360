@@ -15,11 +15,12 @@ import { WriteLog } from './after-write';
 import { Session } from './session';
 import { SessionBar } from './session-bar';
 import { SessionGate } from './session-gate';
+import { TextLink } from '../ui/text';
 
 @Component({
   selector: 'app-registry-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, SessionBar, SessionGate],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, SessionBar, SessionGate, TextLink],
   template: `
     <div class="flex h-full flex-col bg-farm-50 text-farm-900">
       <app-session-bar />
@@ -63,32 +64,22 @@ import { SessionGate } from './session-gate';
                    answer to "what now", and putting it under Record or Review
                    would make it look like one screen among several. -->
               <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }"
-                routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800" data-role="nav-today">Today</a>
+                routerLinkActive="font-medium !text-content-primary" appTextLink data-role="nav-today">Today</a>
 
               <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-farm-400"
                 data-role="nav-group-record">Record</span>
-              <a routerLink="/animals/new" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Add animal</a>
-              <a routerLink="/animals/calvings/new" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Record calving</a>
-              <a routerLink="/milk/milking" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Milking</a>
-              <a routerLink="/milk/dispatch" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Dispatch</a>
-              <a routerLink="/labour/payroll" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Payroll</a>
+              <a routerLink="/animals/new" routerLinkActive="font-medium !text-content-primary" appTextLink>Add animal</a>
+              <a routerLink="/animals/calvings/new" routerLinkActive="font-medium !text-content-primary" appTextLink>Record calving</a>
+              <a routerLink="/milk/milking" routerLinkActive="font-medium !text-content-primary" appTextLink>Milking</a>
+              <a routerLink="/milk/dispatch" routerLinkActive="font-medium !text-content-primary" appTextLink>Dispatch</a>
+              <a routerLink="/labour/payroll" routerLinkActive="font-medium !text-content-primary" appTextLink>Payroll</a>
 
               <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-farm-400"
                 data-role="nav-group-review">Review</span>
-              <a routerLink="/animals" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Herd</a>
-              <a routerLink="/milk/buyers" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Buyers</a>
-              <a routerLink="/labour/people" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">People</a>
-              <a routerLink="/check" routerLinkActive="font-medium text-farm-900"
-                class="text-farm-600 hover:text-farm-800">Check</a>
+              <a routerLink="/animals" routerLinkActive="font-medium !text-content-primary" appTextLink>Herd</a>
+              <a routerLink="/milk/buyers" routerLinkActive="font-medium !text-content-primary" appTextLink>Buyers</a>
+              <a routerLink="/labour/people" routerLinkActive="font-medium !text-content-primary" appTextLink>People</a>
+              <a routerLink="/check" routerLinkActive="font-medium !text-content-primary" appTextLink>Check</a>
             </nav>
           }
         </div>

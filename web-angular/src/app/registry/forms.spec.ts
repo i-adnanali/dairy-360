@@ -181,7 +181,7 @@ describe('item 6a — the keyboard retrofit', () => {
     // The reset is honest about what it cleared: an empty required date blocks,
     // so the cleared form cannot be submitted as a duplicate by a stray Enter.
     const { el } = await writeOne();
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain(
       'Enter the arrival date',
     );
@@ -276,7 +276,7 @@ describe('CalvingForm', () => {
 
     // No list, and the submit blocker names the field that is holding it up.
     http.expectNone((r) => r.url.startsWith(`${BASE}/link-candidates`));
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('female or male');
 
     chooseCalfSex(fixture, el, 'female');
@@ -295,12 +295,12 @@ describe('CalvingForm', () => {
     http.expectOne((r) => r.url.startsWith(`${BASE}/link-candidates`)).flush({ candidates: CANDIDATES });
     await settle(fixture);
 
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('none of these');
 
     (el.querySelector('[data-candidate="BD-0006"]') as HTMLButtonElement).click();
     fixture.detectChanges();
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
   });
 
   it('sends the picked animal as calf_id, and no calf_name', async () => {
@@ -399,7 +399,7 @@ describe('CalvingForm', () => {
     // And the picker is unreachable again rather than showing a stale list.
     expect(el.querySelector('[data-role="picker-blocked"]')).not.toBeNull();
     expect(el.querySelectorAll('[data-candidate]').length).toBe(0);
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     // The date cleared too, and it is named FIRST -- blockedReason reports the
     // earliest unanswered field, not every one of them.
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('Enter the calving date');
@@ -426,12 +426,12 @@ describe('CalvingForm', () => {
 
     (el.querySelector('[data-candidate="BD-0006"]') as HTMLButtonElement).click();
     fixture.detectChanges();
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
 
     enterDate(fixture, el, '9 Jun 2024');
     await settle(fixture);
 
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     http.match((r) => r.url.startsWith(`${BASE}/link-candidates`)).forEach((r) => r.flush({ candidates: CANDIDATES }));
   });
 
@@ -688,17 +688,17 @@ describe('SessionGate', () => {
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const start = el.querySelector('[data-role="start"]') as HTMLButtonElement;
-    expect(start.disabled).toBe(true);
+    expect(start.getAttribute('aria-disabled')).toBe('true');
 
     click(el, '[data-chip="recall"]');
     fixture.detectChanges();
-    expect((el.querySelector('[data-role="start"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="start"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
 
     const who = el.querySelector('[data-role="recorded-by"]') as HTMLInputElement;
     who.value = 'adnan';
     who.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect((el.querySelector('[data-role="start"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="start"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
 
     click(el, '[data-role="start"]');
     expect(TestBed.inject(Session).ready()).toBe(true);
@@ -720,7 +720,7 @@ describe('AnimalForm', () => {
     const fixture = TestBed.createComponent(AnimalForm);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain(
       'Enter the arrival date',
     );
@@ -736,11 +736,62 @@ describe('AnimalForm', () => {
     const el = fixture.nativeElement as HTMLElement;
 
     enterDate(fixture, el, '2019');           // arrival: fine
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
 
     enterDate(fixture, el, '06/07/2023', 1);  // birth: ambiguous, so incomplete
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('birth date');
+  });
+
+  /**
+   * The counterpart to the assertion above, and it is not the same assertion.
+   *
+   * `aria-disabled="true"` says the button LOOKS and ANNOUNCES as blocked. It
+   * does not stop the click: the Button primitive dropped the native `disabled`
+   * attribute so the blocked reason can be focused and read, which means the
+   * browser no longer refuses the activation. What actually prevents the write
+   * is `submit()`'s own re-check -- the "belt and braces" guard that was
+   * previously the second line of defence and is now the only one.
+   *
+   * Pinned separately because the two properties can now fail independently:
+   * the attribute could be right while the guard was gone, and the form would
+   * look safe while writing a fabricated date.
+   */
+  it('a BLOCKED submit that is clicked anyway sends nothing', () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    enterDate(fixture, el, '2019');           // arrival: fine
+    enterDate(fixture, el, '06/07/2023', 1);  // birth: ambiguous, so incomplete
+    const submit = el.querySelector('[data-role="submit"]') as HTMLButtonElement;
+    expect(submit.getAttribute('aria-disabled')).toBe('true');
+    // Focusable and clickable on purpose -- that is the point of the change.
+    expect(submit.disabled).toBe(false);
+
+    submit.click();
+    http.expectNone(`${BASE}/animals`);
+  });
+
+  /**
+   * The reason text is now REACHABLE, which is the whole reason the native
+   * attribute went. A disabled button cannot be focused, so an operator on a
+   * keyboard or a screen reader never met the sentence explaining why.
+   */
+  it('points the blocked submit at the reason, by id', () => {
+    setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    const submit = el.querySelector('[data-role="submit"]') as HTMLButtonElement;
+    const describedBy = submit.getAttribute('aria-describedby');
+    expect(describedBy).toBe('animal-submit-reason');
+    const reason = el.querySelector('#' + describedBy);
+    expect(reason).not.toBeNull();
+    expect(reason!.textContent).toContain('Enter the arrival date');
+    expect(reason!.getAttribute('data-role')).toBe('blocked');
   });
 
   it('an EMPTY optional birth date does not block, and sends null honestly', () => {
@@ -751,7 +802,7 @@ describe('AnimalForm', () => {
     const el = fixture.nativeElement as HTMLElement;
 
     enterDate(fixture, el, '2019');
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
     click(el, '[data-role="submit"]');
 
     const req = http.expectOne(`${BASE}/animals`);

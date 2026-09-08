@@ -15,21 +15,40 @@ import { WriteLog } from './after-write';
 import { PrecisionDateControl, dateBlocker } from './precision-date';
 import type { DateEntry } from './precision-date';
 import type { TimelineEvent } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { ErrorText } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { SectionLabel } from '../ui/text';
+import { Button } from '../ui/button';
 
 const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
 
 @Component({
   selector: 'app-correction-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PrecisionDateControl, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    ErrorPanel,
+    ErrorText,
+    FieldLabel,
+    HelpText,
+    PrecisionDateControl,
+    SectionLabel,
+    SessionRequired,
+    TextInput,
+  ],
   template: `
     <form class="space-y-4" (submit)="onSubmit($event)">
-      <div class="rounded-xl border border-farm-300 bg-white p-4">
-        <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
+      <div appCard>
+        <div appSectionLabel legend>
           Which calving is the date wrong on?
         </div>
         @if (correctable().length === 0) {
-          <p class="text-sm text-farm-600" data-role="no-calvings">
+          <p appHelp data-role="no-calvings">
             No effective calvings on this animal to correct.
           </p>
         } @else {
@@ -40,14 +59,14 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
                 [class]="target() === c.id ? 'border-farm-600 bg-farm-100' : 'border-farm-300 bg-white hover:border-farm-400'"
               >
                 <span class="font-medium">{{ c.occurred_on }}</span>
-                <span class="text-xs text-farm-600">({{ c.date_precision }})</span>
+                <span appHelp size="xs">({{ c.date_precision }})</span>
                 <span class="ml-auto font-mono text-xs text-farm-500">{{ c.id }}</span>
               </button>
             }
           </div>
         }
         @if (state.fieldError('calving_event_id'); as e) {
-          <p class="mt-2 text-sm text-red-800" data-role="error-target">{{ e }}</p>
+          <p appErrorText class="mt-2" data-role="error-target">{{ e }}</p>
         }
       </div>
 
@@ -65,14 +84,13 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
         </div>
 
         <label class="block">
-          <span class="mb-1 block text-xs font-medium text-farm-700">Why the change? (optional note)</span>
+          <span appFieldLabel>Why the change? (optional note)</span>
           <input data-role="notes" [value]="notes()" (input)="notes.set($any($event.target).value)"
-            placeholder="e.g. remembered again on a second telling"
-            class="w-full max-w-md rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+            placeholder="e.g. remembered again on a second telling" appInput class="w-full max-w-md" />
         </label>
 
         @if (state.formError(fields); as e) {
-          <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">
+          <div appErrorPanel data-role="error-form">
             {{ e }}
           </div>
         }
@@ -97,8 +115,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
         }
 
         @if (session.ready()) {
-          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
+          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton
           >{{ state.submitting() ? 'Correcting…' : 'Apply correction' }}</button>
         } @else {
           <app-session-required what="a correction" />

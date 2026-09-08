@@ -1,14 +1,18 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import type { Approval, PendingWrite } from '@dairy/shared';
+import { Cell } from '../ui/cell';
+import { Button } from '../ui/button';
+import { StatusBadge } from '../ui/surface';
 
 // Port of web-react/src/components/ConfirmationCard.tsx
 @Component({
   selector: 'app-confirmation-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Button, Cell, StatusBadge],
   template: `
     <div class="rounded-xl border-2 border-farm-300 bg-farm-100 p-4 shadow-sm">
       <div class="mb-1 flex items-center gap-2">
-        <span class="rounded-full bg-farm-600 px-2 py-0.5 text-xs font-medium text-white">
+        <span appBadge tone="brand">
           Confirm action
         </span>
         <span class="font-mono text-xs text-farm-600">{{ card().toolName }}</span>
@@ -29,17 +33,17 @@ import type { Approval, PendingWrite } from '@dairy/shared';
         <table class="mb-3 w-full text-sm">
           <thead>
             <tr class="border-b border-farm-200 text-left text-farm-500">
-              <th class="py-1 font-medium">Animal</th>
-              <th class="py-1 text-right font-medium">Value</th>
+              <th appCell emphasis>Animal</th>
+              <th appCell numeric emphasis>Value</th>
             </tr>
           </thead>
           <tbody>
             @for (r of card().rows; track $index) {
               <tr class="border-b border-farm-200/60 last:border-0">
-                <td class="py-1">
+                <td appCell>
                   {{ r.tag }}{{ r.name ? ' · ' + r.name : '' }}
                 </td>
-                <td class="py-1 text-right tabular-nums">{{ r.value }}</td>
+                <td appCell numeric class="tabular-nums">{{ r.value }}</td>
               </tr>
             }
           </tbody>
@@ -47,8 +51,7 @@ import type { Approval, PendingWrite } from '@dairy/shared';
       }
 
       <div class="flex gap-2">
-        <button
-          class="rounded-md bg-farm-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-farm-700"
+        <button appButton size="sm"
           (click)="approve()"
         >
           Approve

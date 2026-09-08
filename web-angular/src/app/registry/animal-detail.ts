@@ -8,25 +8,29 @@ import { EventList } from './event-list';
 import { EventForm } from './event-form';
 import { CorrectionForm } from './correction-form';
 import type { AnimalDetail as Detail } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { HelpText } from '../ui/text';
+import { StatusBadge } from '../ui/surface';
 
 type Tab = 'events' | 'add-event' | 'correct';
 
 @Component({
   selector: 'app-animal-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [EventList, EventForm, CorrectionForm],
+  imports: [Card, CorrectionForm, ErrorPanel, EventForm, EventList, HelpText, StatusBadge],
   template: `
     @if (loadError(); as e) {
-      <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+      <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
     } @else if (detail(); as d) {
       <div class="mx-auto max-w-3xl space-y-5">
-        <header class="rounded-xl border border-farm-300 bg-white p-4">
+        <header appCard>
           <div class="flex flex-wrap items-baseline gap-x-3">
             <h2 class="font-mono text-xl font-semibold text-farm-900" data-role="serial">{{ d.animal.id }}</h2>
             @if (d.animal.name) { <span class="text-lg text-farm-800">{{ d.animal.name }}</span> }
             <!-- The farm's word, with the stored enum on hover. 'majj' says in
                  one word what "cow" is vague about: she has calved. -->
-            <span class="rounded-full bg-farm-200 px-2 py-0.5 text-xs font-medium text-farm-800"
+            <span appBadge
               data-role="status"
               [title]="d.status ? 'stored as ' + d.status.status : ''"
             >{{ stage(d) }}</span>
@@ -76,7 +80,7 @@ type Tab = 'events' | 'add-event' | 'correct';
         }
       </div>
     } @else {
-      <p class="text-sm text-farm-600" data-role="loading">Loading…</p>
+      <p appHelp data-role="loading">Loading…</p>
     }
   `,
 })

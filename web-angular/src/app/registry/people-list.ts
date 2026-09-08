@@ -33,6 +33,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
+import { Cell } from '../ui/cell';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
@@ -41,16 +42,41 @@ import { WriteLog } from './after-write';
 import { formatMinor } from './money';
 import { farmToday } from './today';
 import type { EngagementKind, Person, WageBalanceRow } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { ErrorText } from '../ui/surface';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { RowDivider } from '../ui/surface';
+import { SectionHeading } from '../ui/heading';
+import { SubHeading } from '../ui/heading';
+import { Button } from '../ui/button';
 
 @Component({
   selector: 'app-people-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, RouterLink, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    Cell,
+    ChipGroup,
+    ErrorPanel,
+    ErrorText,
+    HelpText,
+    PageHeading,
+    RouterLink,
+    RowDivider,
+    SectionHeading,
+    SessionRequired,
+    SubHeading,
+    TextInput,
+  ],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
       <header>
-        <h2 class="text-lg font-semibold text-farm-900">People</h2>
-        <p class="mt-1 text-sm text-farm-600">
+        <h2 appPageHeading>People</h2>
+        <p appHelp class="mt-1">
           Everyone the farm employs, and what is owed to them. Also anyone whose name appears on a
           record — the vet, whoever sold you an animal — so “everything Imran milked” has somebody
           to point at.
@@ -58,12 +84,12 @@ import type { EngagementKind, Person, WageBalanceRow } from './types';
       </header>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       }
 
       @if (rows(); as list) {
         @if (list.length === 0) {
-          <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
+          <p appCard empty
             data-role="empty">
             Nobody on file yet. Add the people who work here — then open a stint for each, and
             record what they are on.
@@ -73,17 +99,17 @@ import type { EngagementKind, Person, WageBalanceRow } from './types';
             data-role="people-table">
             <thead class="bg-farm-100 text-left text-xs uppercase tracking-wide text-farm-600">
               <tr>
-                <th class="px-3 py-2">Identifier</th>
-                <th class="px-3 py-2">Name</th>
-                <th class="px-3 py-2 text-right">Owed</th>
-                <th class="px-3 py-2">Last paid</th>
+                <th appCell>Identifier</th>
+                <th appCell>Name</th>
+                <th appCell numeric>Owed</th>
+                <th appCell>Last paid</th>
               </tr>
             </thead>
             <tbody>
               @for (p of list; track p.person_id) {
-                <tr class="border-t border-farm-100" [class.opacity-60]="!p.engaged"
+                <tr appRowDivider [class.opacity-60]="!p.engaged"
                   [attr.data-engaged]="p.engaged">
-                  <td class="px-3 py-2 font-mono text-xs">
+                  <td appCell small class="font-mono">
                     <a [routerLink]="['/labour/people', p.person_id]"
                       class="text-farm-800 underline decoration-farm-300">{{ p.identifier }}</a>
                     @if (!p.engaged) {
@@ -91,31 +117,30 @@ import type { EngagementKind, Person, WageBalanceRow } from './types';
                         tracking-wide text-farm-600" data-role="not-engaged">no open stint</span>
                     }
                   </td>
-                  <td class="px-3 py-2">{{ p.name ?? '—' }}</td>
-                  <td class="px-3 py-2 text-right tabular-nums"
+                  <td appCell>{{ p.name ?? '—' }}</td>
+                  <td appCell numeric class="tabular-nums"
                     [class.text-amber-800]="p.balance_minor < 0" [attr.data-role]="'balance'">
                     {{ owed(p) }}
                   </td>
-                  <td class="px-3 py-2 text-farm-600">{{ p.last_payment_on ?? '—' }}</td>
+                  <td appCell tone="muted">{{ p.last_payment_on ?? '—' }}</td>
                 </tr>
               }
             </tbody>
           </table>
         }
       } @else {
-        <p class="text-sm text-farm-500">Loading…</p>
+        <p appHelp tone="subtle">Loading…</p>
       }
 
       <!-- Add a person. The identifier is asked for HERE and nowhere else. -->
       <form class="space-y-4 rounded-xl border border-farm-300 bg-white p-4"
         (submit)="submitPerson($event)" data-role="add-person">
-        <h3 class="text-sm font-semibold text-farm-900">Add a person</h3>
+        <h3 appSectionHeading>Add a person</h3>
 
         <label class="block space-y-1">
-          <span class="text-sm font-medium text-farm-800">Identifier</span>
+          <span appSubHeading>Identifier</span>
           <input name="identifier" [value]="identifier()"
-            (input)="identifier.set($any($event.target).value)"
-            class="w-full rounded-lg border border-farm-300 px-3 py-2 font-mono text-sm"
+            (input)="identifier.set($any($event.target).value)" appInput density="comfortable" class="w-full font-mono"
             placeholder="imran" autocomplete="off" />
           <span class="block text-xs text-farm-500">
             A short, stable name — the same one you type into “observed by”. It cannot be changed
@@ -123,29 +148,26 @@ import type { EngagementKind, Person, WageBalanceRow } from './types';
             cannot be rewritten.
           </span>
           @if (personState.fieldError('identifier'); as msg) {
-            <span class="block text-xs text-red-700" data-role="error-identifier">{{ msg }}</span>
+            <span appErrorText size="xs" tone="soft" class="block" data-role="error-identifier">{{ msg }}</span>
           }
         </label>
 
         <label class="block space-y-1">
-          <span class="text-sm font-medium text-farm-800">Display name <span class="text-farm-500">(optional)</span></span>
-          <input name="name" [value]="name()" (input)="name.set($any($event.target).value)"
-            class="w-full rounded-lg border border-farm-300 px-3 py-2 text-sm" placeholder="Imran" />
+          <span appSubHeading>Display name <span class="text-farm-500">(optional)</span></span>
+          <input name="name" [value]="name()" (input)="name.set($any($event.target).value)" appInput density="comfortable" class="w-full" placeholder="Imran" />
         </label>
 
         <label class="block space-y-1">
-          <span class="text-sm font-medium text-farm-800">Contact <span class="text-farm-500">(optional)</span></span>
-          <input name="contact" [value]="contact()" (input)="contact.set($any($event.target).value)"
-            class="w-full rounded-lg border border-farm-300 px-3 py-2 text-sm" />
+          <span appSubHeading>Contact <span class="text-farm-500">(optional)</span></span>
+          <input name="contact" [value]="contact()" (input)="contact.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
         </label>
 
         @if (personState.formError(['identifier']); as msg) {
-          <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="person-form-error">{{ msg }}</p>
+          <p appErrorPanel data-role="person-form-error">{{ msg }}</p>
         }
 
         @if (session.ready()) {
-          <button type="submit" [disabled]="!canAddPerson()"
-            class="rounded-lg bg-farm-800 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">
+          <button type="submit" [appButtonDisabled]="!canAddPerson()" appButton>
             {{ personState.submitting() ? 'Saving…' : 'Add person' }}
           </button>
         } @else {
@@ -160,18 +182,17 @@ import type { EngagementKind, Person, WageBalanceRow } from './types';
         @if (list.length > 0) {
           <form class="space-y-4 rounded-xl border border-farm-300 bg-white p-4"
             (submit)="submitEngagement($event)" data-role="add-engagement">
-            <h3 class="text-sm font-semibold text-farm-900">Open a stint</h3>
-            <p class="text-xs text-farm-500">
+            <h3 appSectionHeading>Open a stint</h3>
+            <p appHelp size="xs" tone="subtle">
               Somebody who left and came back gets a second stint, not an edited first one — which
               is what stops their old salary quietly applying to the new one. Two stints at once is
               fine too, for somebody holding two roles.
             </p>
 
             <label class="block space-y-1">
-              <span class="text-sm font-medium text-farm-800">Person</span>
+              <span appSubHeading>Person</span>
               <select name="person_id" [value]="engagePerson()"
-                (change)="engagePerson.set($any($event.target).value)"
-                class="w-full rounded-lg border border-farm-300 px-3 py-2 text-sm">
+                (change)="engagePerson.set($any($event.target).value)" appInput density="comfortable" class="w-full">
                 <option value="">Choose…</option>
                 @for (p of list; track p.person_id) {
                   <option [value]="p.person_id">{{ p.identifier }}</option>
@@ -180,7 +201,7 @@ import type { EngagementKind, Person, WageBalanceRow } from './types';
             </label>
 
             <div class="space-y-1">
-              <span class="text-sm font-medium text-farm-800">Kind</span>
+              <span appSubHeading>Kind</span>
               <app-chip-group name="kind" [options]="kindChips" [value]="engageKind()"
                 (changed)="engageKind.set($any($event))" />
               <span class="block text-xs text-farm-500">
@@ -190,29 +211,26 @@ import type { EngagementKind, Person, WageBalanceRow } from './types';
             </div>
 
             <label class="block space-y-1">
-              <span class="text-sm font-medium text-farm-800">Role <span class="text-farm-500">(optional)</span></span>
-              <input name="role" [value]="engageRole()" (input)="engageRole.set($any($event.target).value)"
-                class="w-full rounded-lg border border-farm-300 px-3 py-2 text-sm" placeholder="milker" />
+              <span appSubHeading>Role <span class="text-farm-500">(optional)</span></span>
+              <input name="role" [value]="engageRole()" (input)="engageRole.set($any($event.target).value)" appInput density="comfortable" class="w-full" placeholder="milker" />
             </label>
 
             <label class="block space-y-1">
-              <span class="text-sm font-medium text-farm-800">Started on</span>
+              <span appSubHeading>Started on</span>
               <input name="started_on" type="date" [value]="engageFrom()"
-                (input)="engageFrom.set($any($event.target).value)"
-                class="rounded-lg border border-farm-300 px-3 py-2 text-sm" />
+                (input)="engageFrom.set($any($event.target).value)" appInput density="comfortable" />
               @if (engageState.fieldError('started_on'); as msg) {
-                <span class="block text-xs text-red-700" data-role="error-started-on">{{ msg }}</span>
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-started-on">{{ msg }}</span>
               }
             </label>
 
             @if (engageState.formError(['started_on', 'kind', 'person_id']); as msg) {
-              <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800"
+              <p appErrorPanel
                 data-role="engage-form-error">{{ msg }}</p>
             }
 
             @if (session.ready()) {
-              <button type="submit" [disabled]="!canEngage()"
-                class="rounded-lg bg-farm-800 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">
+              <button type="submit" [appButtonDisabled]="!canEngage()" appButton>
                 {{ engageState.submitting() ? 'Saving…' : 'Open stint' }}
               </button>
             } @else {

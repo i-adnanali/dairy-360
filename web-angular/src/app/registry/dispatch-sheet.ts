@@ -34,6 +34,7 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
+import { Cell } from '../ui/cell';
 import { FormState } from './form-state';
 import { Identifiers } from './identifiers';
 import { IdentifierInput } from './identifier-input';
@@ -45,6 +46,16 @@ import { amountMinor, formatMinor, formatRate } from './money';
 import { farmToday, likelySession } from './today';
 import { urlParams } from './url-state';
 import type { DispatchSheet, MilkingSession, SheetRow } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { RowDivider } from '../ui/surface';
+import { TextLink } from '../ui/text';
+import { Button } from '../ui/button';
+import { SummaryBar } from '../ui/surface';
 
 /**
  * A row's pending answer.
@@ -63,27 +74,42 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 @Component({
   selector: 'app-dispatch-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, IdentifierInput, RouterLink, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    Cell,
+    ChipGroup,
+    ErrorPanel,
+    FieldLabel,
+    HelpText,
+    IdentifierInput,
+    PageHeading,
+    RouterLink,
+    RowDivider,
+    SessionRequired,
+    SummaryBar,
+    TextInput,
+    TextLink,
+  ],
   template: `
     <form class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
       <header>
-        <h2 class="text-lg font-semibold text-farm-900">Where the milk went</h2>
-        <p class="mt-1 text-sm text-farm-600">
+        <h2 appPageHeading>Where the milk went</h2>
+        <p appHelp class="mt-1">
           One session, and everything that left the bulk in it — sold and kept. The dodhi and the
           house are on every sheet; a neighbour appears only when they took something.
         </p>
       </header>
 
       <!-- when -->
-      <div class="rounded-xl border border-farm-300 bg-white p-4">
+      <div appCard>
         <div class="flex flex-wrap items-end gap-4">
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">Date</span>
-            <input type="date" data-role="on" [value]="on()" (change)="setOn($any($event.target).value)"
-              class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+            <span appFieldLabel>Date</span>
+            <input type="date" data-role="on" [value]="on()" (change)="setOn($any($event.target).value)" appInput />
           </label>
           <div>
-            <div class="mb-1 text-xs font-medium text-farm-700">Session</div>
+            <div appFieldLabel inline>Session</div>
             <app-chip-group
               name="session" label="Session" [options]="sessionChips" [value]="session()"
               (changed)="setSession($any($event))"
@@ -104,13 +130,13 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
       </div>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (sheet(); as s) {
         @if (s.standing.length === 0 && s.occasional.length === 0) {
-          <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
+          <p appCard empty
             data-role="nobody">
             Nobody was taking milk on {{ s.occurred_on }}.
-            <a routerLink="/milk/buyers" class="font-medium text-farm-800 underline">Add a buyer</a>
+            <a routerLink="/milk/buyers" appTextLink tone="strong">Add a buyer</a>
             — and add the house too, so milk kept at home is on the record rather than in the gap.
           </p>
         } @else {
@@ -123,31 +149,31 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             <table class="w-full text-left text-sm">
               <thead class="border-b border-farm-200 text-xs uppercase tracking-wide text-farm-600">
                 <tr>
-                  <th class="px-3 py-2">Goes to</th>
-                  <th class="whitespace-nowrap px-3 py-2 text-right">
+                  <th appCell>Goes to</th>
+                  <th appCell numeric nowrap>
                     Yesterday {{ s.previous_session.session }}
                   </th>
-                  <th class="whitespace-nowrap px-3 py-2 text-right">Rate</th>
-                  <th class="px-3 py-2">Litres</th>
-                  <th class="px-3 py-2 text-right">Amount</th>
+                  <th appCell numeric nowrap>Rate</th>
+                  <th appCell>Litres</th>
+                  <th appCell numeric>Amount</th>
                 </tr>
               </thead>
               <tbody>
                 @for (row of s.standing; track row.destination_id; let i = $index) {
-                  <tr class="border-t border-farm-100" [attr.data-row]="row.destination_id">
-                    <td class="whitespace-nowrap px-3 py-1.5">
+                  <tr appRowDivider [attr.data-row]="row.destination_id">
+                    <td appCell density="compact" nowrap>
                       <span class="text-farm-800">{{ row.name }}</span>
                       @if (!row.billable) {
                         <span class="ml-2 whitespace-nowrap rounded bg-farm-100 px-1.5 py-0.5 text-xs text-farm-600"
                           data-role="not-billed">kept, not sold</span>
                       }
                     </td>
-                    <td class="px-3 py-1.5 text-right text-farm-700" data-role="previous">
+                    <td appCell density="compact" numeric tone="secondary" data-role="previous">
                       {{ previousText(row) }}
                     </td>
-                    <td class="whitespace-nowrap px-3 py-1.5 text-right text-xs text-farm-600"
+                    <td appCell density="compact" numeric nowrap small tone="muted"
                       data-role="rate">{{ rateText(row) }}</td>
-                    <td class="px-3 py-1.5">
+                    <td appCell density="compact">
                       <div class="flex flex-wrap items-center gap-2">
                         <input
                           #cell
@@ -176,7 +202,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         }
                       </div>
                     </td>
-                    <td class="px-3 py-1.5 text-right text-farm-700"
+                    <td appCell density="compact" numeric tone="secondary"
                       [attr.data-role]="'amount-' + row.destination_id">
                       {{ amountText(row) }}
                     </td>
@@ -196,12 +222,12 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
               <table class="w-full text-left text-sm">
                 <tbody>
                   @for (row of s.occasional; track row.destination_id) {
-                    <tr class="border-t border-farm-100" [attr.data-row]="row.destination_id">
-                      <td class="px-3 py-1.5 text-farm-800">
+                    <tr appRowDivider [attr.data-row]="row.destination_id">
+                      <td appCell density="compact" tone="heading">
                         {{ row.name }}
                         <span class="ml-2 text-xs text-farm-500" data-role="rate">{{ rateText(row) }}</span>
                       </td>
-                      <td class="px-3 py-1.5">
+                      <td appCell density="compact">
                         @if (draft(row.destination_id).status === null) {
                           <button type="button" [attr.data-role]="'add-' + row.destination_id"
                             (click)="addOccasional(row.destination_id)"
@@ -233,7 +259,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           }
 
           <!-- THE FOOTER, and the reason it carries production -->
-          <div class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-farm-300 bg-white px-4 py-3 text-sm">
+          <div appSummaryBar class="flex flex-wrap items-center justify-between gap-4 bg-surface-raised">
             <span data-role="resolved">
               <span class="text-farm-600">Answered </span>
               <span class="font-medium text-farm-900">{{ answered() }} of {{ s.standing.length }}</span>
@@ -262,23 +288,21 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           }
         }
       } @else {
-        <p class="text-sm text-farm-600" data-role="loading">Loading…</p>
+        <p appHelp data-role="loading">Loading…</p>
       }
 
       @if (state.formError(fields); as e) {
-        <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">{{ e }}</p>
+        <p appErrorPanel data-role="error-form">{{ e }}</p>
       }
 
       <div class="flex items-center gap-3">
         @if (session_.ready()) {
-          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-          >{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="dispatch-submit-reason">{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
         } @else {
           <app-session-required what="this session" />
         }
         @if (blockedReason(); as b) {
-          <span class="text-sm text-farm-600" data-role="blocked">{{ b }}</span>
+          <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
         }
       </div>
     </form>

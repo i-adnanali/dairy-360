@@ -185,7 +185,7 @@ describe('DispatchSheetScreen', () => {
     const blocked = el.querySelector('[data-role="blocked"]')!;
     expect(blocked.textContent).toContain('Bashir');
     expect(blocked.textContent).toContain('Home');
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
   });
 
   it('does NOT block on an untouched occasional destination', async () => {
@@ -197,7 +197,7 @@ describe('DispatchSheetScreen', () => {
     }
     fixture.detectChanges();
     expect(el.querySelector('[data-role="blocked"]')).toBeNull();
-    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).disabled).toBe(false);
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBeNull();
   });
 
   it('shows the rate AS AGREED, and the amount it produces', async () => {
@@ -368,7 +368,7 @@ describe('DestinationsList', () => {
     expect(el.querySelector('[data-role="price-preview"]')!.textContent).toContain(
       'Enter an amount',
     );
-    expect((el.querySelector('[data-role="price-submit"]') as HTMLButtonElement).disabled).toBe(true);
+    expect((el.querySelector('[data-role="price-submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
   });
 
   it('sends the lot size as its own number, not folded into the rate', async () => {

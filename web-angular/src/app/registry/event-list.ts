@@ -17,10 +17,12 @@
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import type { TimelineEvent } from './types';
+import { HelpText } from '../ui/text';
 
 @Component({
   selector: 'app-event-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [HelpText],
   template: `
     @if (events().length === 0) {
       <p class="rounded-xl border border-dashed border-farm-300 px-4 py-6 text-center text-sm text-farm-600"
@@ -49,7 +51,7 @@ import type { TimelineEvent } from './types';
                 data-role="when"
               >
                 {{ e.occurred_on }}{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
-                <span class="text-xs text-farm-600">({{ e.date_precision }})</span>
+                <span appHelp size="xs">({{ e.date_precision }})</span>
               </span>
 
               @if (!e.effective) {

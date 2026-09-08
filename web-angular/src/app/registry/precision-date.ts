@@ -41,6 +41,11 @@ import {
 } from '@angular/core';
 import { canEstimate, parseDateEntry } from './date-parse';
 import type { DateEntry, PrecisionDate } from './date-parse';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
 
 export type { DateEntry, PrecisionDate } from './date-parse';
 
@@ -69,19 +74,19 @@ export function dateBlocker(
 @Component({
   selector: 'app-precision-date',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Card, ErrorPanel, FieldLabel, HelpText, TextInput],
   template: `
-    <fieldset class="rounded-xl border border-farm-300 bg-white p-4">
+    <fieldset appCard>
       <legend class="px-2 text-sm font-medium text-farm-800">{{ label() }}</legend>
 
       <div class="flex flex-wrap items-end gap-3">
         <label class="block">
-          <span class="mb-1 block text-xs font-medium text-farm-700">Date</span>
+          <span appFieldLabel>Date</span>
           <input
             data-role="date-text"
             [value]="text()"
             (input)="text.set($any($event.target).value)"
-            placeholder="2019, Mar 2019, or 6 Jul 2023"
-            class="w-56 rounded-lg border border-farm-300 px-2 py-1.5 text-sm"
+            placeholder="2019, Mar 2019, or 6 Jul 2023" appInput class="w-56"
           />
         </label>
 
@@ -89,13 +94,12 @@ export function dateBlocker(
              no such thing as knowing the hour but not the day. -->
         @if (precision() === 'day') {
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">
+            <span appFieldLabel>
               Time <span class="font-normal text-farm-500">(optional)</span>
             </span>
             <input
               type="time" data-role="time"
-              [value]="time()" (input)="time.set($any($event.target).value)"
-              class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm"
+              [value]="time()" (input)="time.set($any($event.target).value)" appInput
             />
           </label>
         }
@@ -127,7 +131,7 @@ export function dateBlocker(
             <span class="text-farm-600">Reading this as</span>
             <span class="ml-1 font-medium text-farm-900">{{ readingText() }}</span>
           </p>
-          <p class="mt-1 text-xs text-farm-500" data-role="reading-escape">
+          <p appHelp size="xs" tone="subtle" class="mt-1" data-role="reading-escape">
             Not what you meant? Type it more precisely — <span class="font-mono">Mar 2019</span> for
             a month, <span class="font-mono">6 Jul 2023</span> for a day. Nothing here can claim a
             day you did not type.
@@ -138,7 +142,7 @@ export function dateBlocker(
             data-role="incomplete">{{ incompleteMessage() }}</p>
         }
         @default {
-          <p class="mt-3 text-xs text-farm-600" data-role="hint">
+          <p appHelp size="xs" class="mt-3" data-role="hint">
             {{ explain()
               ? 'The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.'
               : 'The precision is read from what you type and shown back.' }}
@@ -147,7 +151,7 @@ export function dateBlocker(
       }
 
       @if (error(); as e) {
-        <p class="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error">
+        <p appErrorPanel class="mt-3" data-role="error">
           {{ e }}
         </p>
       }

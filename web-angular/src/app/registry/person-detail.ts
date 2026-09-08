@@ -40,22 +40,45 @@ import { WriteLog } from './after-write';
 import { formatMinor, formatPeriodRate, rupeesToMinor } from './money';
 import { farmToday } from './today';
 import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { ErrorText } from '../ui/surface';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { SectionHeading } from '../ui/heading';
+import { SubHeading } from '../ui/heading';
+import { Button } from '../ui/button';
 
 @Component({
   selector: 'app-person-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, IdentifierInput, RouterLink, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    ChipGroup,
+    ErrorPanel,
+    ErrorText,
+    HelpText,
+    IdentifierInput,
+    PageHeading,
+    RouterLink,
+    SectionHeading,
+    SessionRequired,
+    SubHeading,
+    TextInput,
+  ],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
       <a routerLink="/labour/people" class="text-sm text-farm-600 underline">← People</a>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       }
 
       @if (statement(); as s) {
         <header class="space-y-1">
-          <h2 class="text-lg font-semibold text-farm-900">
+          <h2 appPageHeading>
             {{ s.name ?? s.identifier }}
             <span class="ml-2 font-mono text-sm font-normal text-farm-500">{{ s.identifier }}</span>
           </h2>
@@ -67,9 +90,9 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
         <!-- Stints. Overlapping and multiple-open are LEGITIMATE and are
              rendered plainly -- the screen must not mark them as a problem. -->
         <section class="space-y-2" data-role="engagements">
-          <h3 class="text-sm font-semibold text-farm-900">Stints</h3>
+          <h3 appSectionHeading>Stints</h3>
           @if (s.engagements.length === 0) {
-            <p class="text-sm text-farm-600" data-role="no-stints">
+            <p appHelp data-role="no-stints">
               On file, but never employed. That is a legitimate row — the vet and whoever sold you
               an animal belong here too.
             </p>
@@ -83,7 +106,7 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
                       <span class="font-medium">{{ e.kind === 'daily' ? 'Dihari' : 'Salaried' }}</span>
                       @if (e.role) { <span class="text-farm-600">· {{ e.role }}</span> }
                     </span>
-                    <span class="text-xs text-farm-600">
+                    <span appHelp size="xs">
                       {{ e.started_on }} → {{ e.ended_on ?? 'open' }}
                       @if (e.end_reason) { <span class="text-farm-500">({{ e.end_reason }})</span> }
                     </span>
@@ -107,34 +130,32 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
         </section>
 
         @if (closing(); as e) {
-          <form class="space-y-3 rounded-xl border border-farm-300 bg-white p-4"
+          <form appCard class="space-y-3"
             (submit)="submitClose($event)" data-role="close-form">
-            <h3 class="text-sm font-semibold text-farm-900">Close the stint</h3>
-            <p class="text-xs text-farm-500">
+            <h3 appSectionHeading>Close the stint</h3>
+            <p appHelp size="xs" tone="subtle">
               A final settlement dated after this is fine and is not an error — /check reports it
               so it is visible, and nothing refuses it.
             </p>
             <label class="block space-y-1">
-              <span class="text-sm font-medium text-farm-800">Last day</span>
+              <span appSubHeading>Last day</span>
               <input type="date" name="ended_on" [value]="endedOn()"
-                (input)="endedOn.set($any($event.target).value)"
-                class="rounded-lg border border-farm-300 px-3 py-2 text-sm" />
+                (input)="endedOn.set($any($event.target).value)" appInput density="comfortable" />
               @if (closeState.fieldError('ended_on'); as msg) {
-                <span class="block text-xs text-red-700" data-role="error-ended-on">{{ msg }}</span>
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-ended-on">{{ msg }}</span>
               }
             </label>
             <label class="block space-y-1">
-              <span class="text-sm font-medium text-farm-800">Why <span class="text-farm-500">(optional)</span></span>
+              <span appSubHeading>Why <span class="text-farm-500">(optional)</span></span>
               <input name="end_reason" [value]="endReason()"
-                (input)="endReason.set($any($event.target).value)"
-                class="w-full rounded-lg border border-farm-300 px-3 py-2 text-sm" />
+                (input)="endReason.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
             </label>
             @if (closeState.formError(['ended_on', 'end_reason']); as msg) {
-              <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="close-error">{{ msg }}</p>
+              <p appErrorPanel data-role="close-error">{{ msg }}</p>
             }
             <div class="flex gap-2">
               @if (session.ready()) {
-                <button type="submit" class="rounded-lg bg-farm-800 px-4 py-2 text-sm font-medium text-white">
+                <button type="submit" appButton>
                   {{ closeState.submitting() ? 'Saving…' : 'Close stint' }}
                 </button>
               } @else {
@@ -149,9 +170,9 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
         <!-- The statement proper, grouped by month. The monthly line is the
              artifact; the rows underneath are the evidence. -->
         <section class="space-y-3" data-role="months">
-          <h3 class="text-sm font-semibold text-farm-900">Statement</h3>
+          <h3 appSectionHeading>Statement</h3>
           @if (s.months.length === 0) {
-            <p class="text-sm text-farm-600" data-role="no-months">Nothing recorded yet.</p>
+            <p appHelp data-role="no-months">Nothing recorded yet.</p>
           } @else {
             @for (m of s.months; track m.month) {
               <div class="overflow-hidden rounded-xl border border-farm-200 bg-white"
@@ -170,7 +191,7 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
                       <span>
                         {{ w.kind === 'bonus' ? 'Bonus' : 'Wage' }}
                         {{ w.from_on }}@if (w.to_on !== w.from_on) { <span> → {{ w.to_on }}</span> }
-                        @if (w.note) { <span class="text-xs text-farm-500">· {{ w.note }}</span> }
+                        @if (w.note) { <span appHelp size="xs" tone="subtle">· {{ w.note }}</span> }
                       </span>
                       <span class="tabular-nums">{{ formatMinor(w.amount_minor) }}</span>
                     </li>
@@ -178,9 +199,9 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
                   @for (p of m.payments; track p.id) {
                     <li class="flex items-baseline justify-between px-3 py-1.5 text-farm-700">
                       <span>
-                        Paid {{ p.occurred_on }} <span class="text-xs text-farm-500">{{ p.method }}</span>
-                        @if (p.reference) { <span class="text-xs text-farm-500">· {{ p.reference }}</span> }
-                        @if (p.note) { <span class="text-xs text-farm-500">· {{ p.note }}</span> }
+                        Paid {{ p.occurred_on }} <span appHelp size="xs" tone="subtle">{{ p.method }}</span>
+                        @if (p.reference) { <span appHelp size="xs" tone="subtle">· {{ p.reference }}</span> }
+                        @if (p.note) { <span appHelp size="xs" tone="subtle">· {{ p.note }}</span> }
                       </span>
                       <span class="tabular-nums">− {{ formatMinor(p.amount_minor) }}</span>
                     </li>
@@ -194,10 +215,10 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
         <!-- Record a payment. -->
         <form class="space-y-4 rounded-xl border border-farm-300 bg-white p-4"
           (submit)="submitPayment($event)" data-role="payment-form">
-          <h3 class="text-sm font-semibold text-farm-900">Record a payment</h3>
+          <h3 appSectionHeading>Record a payment</h3>
 
           <div class="space-y-1">
-            <span class="text-sm font-medium text-farm-800">Method</span>
+            <span appSubHeading>Method</span>
             <app-chip-group name="method" [options]="methodChips" [value]="method()"
               (changed)="setMethod($any($event))" />
             @if (method() === 'adjustment') {
@@ -213,53 +234,48 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
             <label class="space-y-1">
               <span class="block text-sm font-medium text-farm-800">Amount (Rs)</span>
               <input name="amount_minor" type="text" inputmode="decimal" [value]="amount()"
-                (input)="amount.set($any($event.target).value)"
-                class="w-36 rounded-lg border border-farm-300 px-3 py-2 text-right text-sm tabular-nums" />
+                (input)="amount.set($any($event.target).value)" appInput density="comfortable" class="w-36 text-right tabular-nums" />
               @if (payState.fieldError('amount_minor'); as msg) {
-                <span class="block text-xs text-red-700" data-role="error-amount">{{ msg }}</span>
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{ msg }}</span>
               }
             </label>
             <label class="space-y-1">
               <span class="block text-sm font-medium text-farm-800">On</span>
               <input name="occurred_on" type="date" [value]="paidOn()"
-                (input)="paidOn.set($any($event.target).value)"
-                class="rounded-lg border border-farm-300 px-3 py-2 text-sm" />
+                (input)="paidOn.set($any($event.target).value)" appInput density="comfortable" />
             </label>
             <label class="space-y-1">
               <span class="block text-sm font-medium text-farm-800">
                 Reference <span class="text-farm-500">(optional)</span>
               </span>
               <input name="reference" [value]="reference()"
-                (input)="reference.set($any($event.target).value)"
-                class="rounded-lg border border-farm-300 px-3 py-2 text-sm" placeholder="peshgi" />
+                (input)="reference.set($any($event.target).value)" appInput density="comfortable" placeholder="peshgi" />
             </label>
           </div>
 
           <label class="block space-y-1">
-            <span class="text-sm font-medium text-farm-800">
+            <span appSubHeading>
               Note @if (method() === 'adjustment') { <span class="text-red-700">(required)</span> }
               @else { <span class="text-farm-500">(optional)</span> }
             </span>
-            <input name="note" [value]="note()" (input)="note.set($any($event.target).value)"
-              class="w-full rounded-lg border border-farm-300 px-3 py-2 text-sm" />
+            <input name="note" [value]="note()" (input)="note.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
             @if (payState.fieldError('note'); as msg) {
-              <span class="block text-xs text-red-700" data-role="error-note">{{ msg }}</span>
+              <span appErrorText size="xs" tone="soft" class="block" data-role="error-note">{{ msg }}</span>
             }
           </label>
 
           <label class="block space-y-1">
-            <span class="text-sm font-medium text-farm-800">Handed over by</span>
+            <span appSubHeading>Handed over by</span>
             <app-identifier-input field="observed_by" label="Handed over by" name="observed_by"
               [value]="observedBy()" (changed)="observedBy.set($event)" />
           </label>
 
           @if (payState.formError(['amount_minor', 'note', 'occurred_on', 'method']); as msg) {
-            <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="payment-error">{{ msg }}</p>
+            <p appErrorPanel data-role="payment-error">{{ msg }}</p>
           }
 
           @if (session.ready()) {
-            <button type="submit" [disabled]="!canPay()"
-              class="rounded-lg bg-farm-800 px-4 py-2 text-sm font-medium text-white disabled:opacity-40">
+            <button type="submit" [appButtonDisabled]="!canPay()" appButton>
               {{ payState.submitting() ? 'Saving…' : 'Record payment' }}
             </button>
           } @else {
@@ -267,7 +283,7 @@ import type { Engagement, PaymentMethod, PayBenefit, WageStatement } from './typ
           }
         </form>
       } @else {
-        @if (!loadError()) { <p class="text-sm text-farm-500">Loading…</p> }
+        @if (!loadError()) { <p appHelp tone="subtle">Loading…</p> }
       }
     </div>
   `,

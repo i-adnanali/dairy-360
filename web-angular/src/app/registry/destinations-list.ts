@@ -27,6 +27,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
+import { Cell } from '../ui/cell';
 import { FormState } from './form-state';
 import { RegistryApi } from './api';
 import { Session } from './session';
@@ -35,28 +36,53 @@ import { WriteLog } from './after-write';
 import { formatMinor, formatRate, minorToRupees, perLitreLabel, rupeesToMinor } from './money';
 import { farmToday } from './today';
 import type { DestinationKind, DestinationListRow } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { RowDivider } from '../ui/surface';
+import { SectionHeading } from '../ui/heading';
+import { TextLink } from '../ui/text';
+import { Button } from '../ui/button';
 
 @Component({
   selector: 'app-destinations-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, RouterLink, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    Cell,
+    ChipGroup,
+    ErrorPanel,
+    FieldLabel,
+    HelpText,
+    PageHeading,
+    RouterLink,
+    RowDivider,
+    SectionHeading,
+    SessionRequired,
+    TextInput,
+    TextLink,
+  ],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
       <header>
-        <h2 class="text-lg font-semibold text-farm-900">Buyers</h2>
-        <p class="mt-1 text-sm text-farm-600">
+        <h2 appPageHeading>Buyers</h2>
+        <p appHelp class="mt-1">
           Everyone milk goes to, and what they pay for it. The house is here too — milk kept at
           home is a disposition, not a sale, so it has no price and never appears in a balance.
         </p>
       </header>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       }
 
       @if (rows(); as list) {
         @if (list.length === 0) {
-          <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
+          <p appCard empty
             data-role="empty">
             No destinations yet. Add the dodhi, the neighbours who buy, and
             <strong>the house</strong> — without a home row, milk kept for the family disappears
@@ -67,20 +93,20 @@ import type { DestinationKind, DestinationListRow } from './types';
             <table class="w-full text-left text-sm">
               <thead class="border-b border-farm-200 text-xs uppercase tracking-wide text-farm-600">
                 <tr>
-                  <th class="px-3 py-2">Name</th>
-                  <th class="px-3 py-2">Kind</th>
-                  <th class="px-3 py-2">On every sheet</th>
-                  <th class="px-3 py-2">Rate today</th>
-                  <th class="px-3 py-2"></th>
+                  <th appCell>Name</th>
+                  <th appCell>Kind</th>
+                  <th appCell>On every sheet</th>
+                  <th appCell>Rate today</th>
+                  <th appCell></th>
                 </tr>
               </thead>
               <tbody>
                 @for (d of list; track d.id) {
-                  <tr class="border-t border-farm-100" [attr.data-row]="d.id"
+                  <tr appRowDivider [attr.data-row]="d.id"
                     [class.opacity-50]="!d.active">
-                    <td class="px-3 py-2">
+                    <td appCell>
                       @if (d.billable) {
-                        <a [routerLink]="['/milk/buyers', d.id]" class="font-medium text-farm-800 underline"
+                        <a [routerLink]="['/milk/buyers', d.id]" appTextLink tone="strong"
                           [attr.data-role]="'open-' + d.id">{{ d.name }}</a>
                       } @else {
                         <span class="text-farm-800">{{ d.name }}</span>
@@ -91,11 +117,11 @@ import type { DestinationKind, DestinationListRow } from './types';
                         </span>
                       }
                     </td>
-                    <td class="px-3 py-2 text-farm-700">{{ d.kind }}</td>
-                    <td class="px-3 py-2 text-farm-700" [attr.data-role]="'standing-' + d.id">
+                    <td appCell tone="secondary">{{ d.kind }}</td>
+                    <td appCell tone="secondary" [attr.data-role]="'standing-' + d.id">
                       {{ d.standing ? 'yes — must be answered' : 'only when they come' }}
                     </td>
-                    <td class="px-3 py-2 text-farm-700" [attr.data-role]="'rate-' + d.id">
+                    <td appCell tone="secondary" [attr.data-role]="'rate-' + d.id">
                       @if (!d.billable) {
                         <span class="text-farm-500">not billed</span>
                       } @else if (d.price) {
@@ -105,7 +131,7 @@ import type { DestinationKind, DestinationListRow } from './types';
                         <span class="text-amber-800">no price agreed</span>
                       }
                     </td>
-                    <td class="px-3 py-2 text-right">
+                    <td appCell numeric>
                       @if (d.billable) {
                         <button type="button" [attr.data-role]="'price-' + d.id"
                           (click)="openPrice(d)"
@@ -120,58 +146,54 @@ import type { DestinationKind, DestinationListRow } from './types';
           </div>
         }
       } @else if (!loadError()) {
-        <p class="text-sm text-farm-600" data-role="loading">Loading…</p>
+        <p appHelp data-role="loading">Loading…</p>
       }
 
       <!-- change a rate ------------------------------------------------- -->
       @if (pricing(); as d) {
-        <form class="space-y-3 rounded-xl border border-farm-300 bg-white p-4"
+        <form appCard class="space-y-3"
           data-role="price-form" (submit)="submitPrice($event)">
-          <h3 class="text-sm font-semibold text-farm-900">Rate for {{ d.name }}</h3>
+          <h3 appSectionHeading>Rate for {{ d.name }}</h3>
 
           <div class="flex flex-wrap items-end gap-3">
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Amount (Rs)</span>
+              <span appFieldLabel>Amount (Rs)</span>
               <input data-role="price-amount" inputmode="decimal" [value]="priceAmount()"
-                (input)="priceAmount.set($any($event.target).value)"
-                class="w-32 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                (input)="priceAmount.set($any($event.target).value)" appInput class="w-32" />
             </label>
             <span class="pb-2 text-sm text-farm-600">per</span>
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Litres</span>
+              <span appFieldLabel>Litres</span>
               <input data-role="price-unit" inputmode="decimal" [value]="priceUnit()"
-                (input)="priceUnit.set($any($event.target).value)"
-                class="w-24 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                (input)="priceUnit.set($any($event.target).value)" appInput class="w-24" />
             </label>
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">From</span>
+              <span appFieldLabel>From</span>
               <input type="date" data-role="price-from" [value]="priceFrom()"
-                (change)="priceFrom.set($any($event.target).value)"
-                class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                (change)="priceFrom.set($any($event.target).value)" appInput />
             </label>
           </div>
 
           <!-- SHOWN BACK, never typed. Where a factor-of-forty slip surfaces. -->
-          <p class="text-xs text-farm-600" data-role="price-preview">
+          <p appHelp size="xs" data-role="price-preview">
             @if (pricePreview(); as p) {
               Will be recorded as <strong>{{ p.rate }}</strong> — that is {{ p.perLitre }}.
             } @else {
               Enter an amount and the litres it covers.
             }
           </p>
-          <p class="text-xs text-farm-500" data-role="price-note">
+          <p appHelp size="xs" tone="subtle" data-role="price-note">
             A rate change is a new agreement from that date. Milk already dispatched keeps the
             rate it was billed at — changing this never re-prices what is already recorded.
           </p>
 
           @if (priceState.formError(priceFields); as e) {
-            <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="price-error">{{ e }}</p>
+            <p appErrorPanel data-role="price-error">{{ e }}</p>
           }
 
           <div class="flex gap-2">
             @if (session.ready()) {
-              <button type="submit" data-role="price-submit" [disabled]="pricePreview() === null || priceState.submitting()"
-                class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+              <button type="submit" data-role="price-submit" [appButtonDisabled]="pricePreview() === null || priceState.submitting()" appButton
               >{{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}</button>
             } @else {
               <app-session-required what="a rate" />
@@ -183,37 +205,35 @@ import type { DestinationKind, DestinationListRow } from './types';
       }
 
       <!-- add a destination ---------------------------------------------- -->
-      <form class="space-y-3 rounded-xl border border-farm-300 bg-white p-4"
+      <form appCard class="space-y-3"
         data-role="add-form" (submit)="submitDestination($event)">
-        <h3 class="text-sm font-semibold text-farm-900">Add a destination</h3>
+        <h3 appSectionHeading>Add a destination</h3>
 
         <div class="flex flex-wrap items-end gap-3">
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">Name</span>
-            <input data-role="name" [value]="name()" (input)="name.set($any($event.target).value)"
-              class="w-56 rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+            <span appFieldLabel>Name</span>
+            <input data-role="name" [value]="name()" (input)="name.set($any($event.target).value)" appInput class="w-56" />
           </label>
           <div>
-            <div class="mb-1 text-xs font-medium text-farm-700">Kind</div>
+            <div appFieldLabel inline>Kind</div>
             <app-chip-group name="kind" label="Kind" [options]="kindChips" [value]="kind()"
               (changed)="setKind($any($event))" />
           </div>
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">Buying since</span>
+            <span appFieldLabel>Buying since</span>
             <input type="date" data-role="started-on" [value]="startedOn()"
-              (change)="startedOn.set($any($event.target).value)"
-              class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+              (change)="startedOn.set($any($event.target).value)" appInput />
           </label>
         </div>
 
         <div>
-          <div class="mb-1 text-xs font-medium text-farm-700">On every sheet?</div>
+          <div appFieldLabel inline>On every sheet?</div>
           <app-chip-group name="standing" label="On every sheet" [options]="standingChips"
             [value]="standing()" (changed)="standing.set($any($event))" />
           <!-- NOT defaulted: it decides whether the sheet demands an answer,
                which is a question about how the farm works rather than a fact
                about the buyer. -->
-          <p class="mt-1 text-xs text-farm-600" data-role="standing-help">
+          <p appHelp size="xs" class="mt-1" data-role="standing-help">
             <strong>Every session</strong> for someone who is always accounted for — the dodhi, the
             house. <strong>Only when they come</strong> for a neighbour who takes surplus: they
             will never be marked absent, so nothing trains anyone to click past the sheet.
@@ -228,12 +248,11 @@ import type { DestinationKind, DestinationListRow } from './types';
         }
 
         @if (addState.formError(addFields); as e) {
-          <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="add-error">{{ e }}</p>
+          <p appErrorPanel data-role="add-error">{{ e }}</p>
         }
 
         @if (session.ready()) {
-          <button type="submit" data-role="add-submit" [disabled]="!canAdd()"
-            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:bg-farm-300"
+          <button type="submit" data-role="add-submit" [appButtonDisabled]="!canAdd()" appButton
           >{{ addState.submitting() ? 'Saving…' : 'Add destination' }}</button>
         } @else {
           <app-session-required what="a destination" />
@@ -343,7 +362,15 @@ export class DestinationsList {
     e.preventDefault();
     const d = this.pricing();
     const p = this.pricePreview();
-    if (!d || !p) return;
+    // `submitting()` is re-checked HERE and not only on the button, because the
+    // button no longer carries the native `disabled` attribute -- it carries
+    // `aria-disabled`, so the browser has stopped suppressing the second click
+    // for us. Every other write handler in the registry already re-checked its
+    // own precondition; this was the one that only checked half of the button's.
+    // The idempotency key survives an in-flight attempt, so a double submit was
+    // a replay rather than a duplicate rate -- but it was still a second
+    // request nobody asked for.
+    if (!d || !p || this.priceState.submitting()) return;
 
     const ok = await this.priceState.run((key) =>
       this.api.setPrice(

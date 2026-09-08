@@ -16,43 +16,65 @@ import { Identifiers } from './identifiers';
 import { PrecisionDateControl, dateBlocker } from './precision-date';
 import type { DateEntry } from './precision-date';
 import type { AnimalDetail, RegistrySex } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { ErrorText } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { SectionLabel } from '../ui/text';
+import { Button } from '../ui/button';
 
 const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_precision'] as const;
 
 @Component({
   selector: 'app-animal-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, DuplicateWarning, IdentifierInput, PrecisionDateControl],
+  imports: [
+    Button,
+    Card,
+    ChipGroup,
+    DuplicateWarning,
+    ErrorPanel,
+    ErrorText,
+    FieldLabel,
+    HelpText,
+    IdentifierInput,
+    PageHeading,
+    PrecisionDateControl,
+    SectionLabel,
+    TextInput,
+  ],
   template: `
     <!-- A real <form>, which is what makes Enter submit from any text field.
          Before this there was no form element anywhere in the registry and
          every button was type="button", so Enter did nothing on any screen. -->
     <form class="mx-auto max-w-2xl" (submit)="onSubmit($event)">
       <header class="mb-4">
-        <h2 class="text-lg font-semibold text-farm-900">Add an acquired animal</h2>
-        <p class="mt-1 text-sm text-farm-600">
+        <h2 appPageHeading>Add an acquired animal</h2>
+        <p appHelp class="mt-1">
           Only animals that arrived from elsewhere. A farm-born animal is created by its dam's
           calving — record the calving instead, and it appears as a consequence.
         </p>
       </header>
 
       <div class="space-y-4">
-        <div class="rounded-xl border border-farm-300 bg-white p-4">
-          <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">Sex</div>
+        <div appCard>
+          <div appSectionLabel legend>Sex</div>
           <app-chip-group
             name="sex" label="Sex" [options]="sexChips" [value]="sex()"
             (changed)="sex.set($any($event))"
           />
           @if (state.fieldError('sex'); as e) {
-            <p class="mt-2 text-sm text-red-800" data-role="error-sex">{{ e }}</p>
+            <p appErrorText class="mt-2" data-role="error-sex">{{ e }}</p>
           }
 
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Name (optional)</span>
+              <span appFieldLabel>Name (optional)</span>
               <input #firstField data-role="name" [value]="name()"
-                (input)="name.set($any($event.target).value)"
-                class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                (input)="name.set($any($event.target).value)" appInput class="w-full" />
             </label>
             <app-identifier-input
               field="acquired_from" label="Acquired from"
@@ -60,14 +82,12 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
               (changed)="from.set($event)"
             />
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Post no. (optional)</span>
-              <input data-role="post_no" [value]="postNo()" (input)="postNo.set($any($event.target).value)"
-                class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+              <span appFieldLabel>Post no. (optional)</span>
+              <input data-role="post_no" [value]="postNo()" (input)="postNo.set($any($event.target).value)" appInput class="w-full" />
             </label>
             <label class="block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Ear tag (optional)</span>
-              <input data-role="tag_no" [value]="tagNo()" (input)="tagNo.set($any($event.target).value)"
-                class="w-full rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+              <span appFieldLabel>Ear tag (optional)</span>
+              <input data-role="tag_no" [value]="tagNo()" (input)="tagNo.set($any($event.target).value)" appInput class="w-full" />
             </label>
           </div>
           <p class="mt-2 text-xs text-farm-500">
@@ -111,16 +131,14 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
         />
 
         @if (state.formError(fields); as e) {
-          <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">{{ e }}</p>
+          <p appErrorPanel data-role="error-form">{{ e }}</p>
         }
 
         <div class="flex items-center gap-3">
           <button
-            type="submit" data-role="submit" [disabled]="!canSubmit()"
-            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-          >{{ state.submitting() ? 'Saving…' : 'Add animal' }}</button>
+            type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="animal-submit-reason">{{ state.submitting() ? 'Saving…' : 'Add animal' }}</button>
           @if (blockedReason(); as r) {
-            <span class="text-sm text-farm-600" data-role="blocked">{{ r }}</span>
+            <span appHelp data-role="blocked" id="animal-submit-reason">{{ r }}</span>
           }
         </div>
 

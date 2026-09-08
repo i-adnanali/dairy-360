@@ -26,25 +26,45 @@ import { urlParams } from './url-state';
 import { formatMinor, formatRate } from './money';
 import { farmToday } from './today';
 import type { Reconciliation, Verification } from './types';
+import { Cell } from '../ui/cell';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { HelpText } from '../ui/text';
+import { PageHeading } from '../ui/heading';
+import { RowDivider } from '../ui/surface';
+import { SectionHeading } from '../ui/heading';
+import { SectionLabel } from '../ui/text';
+import { SubHeading } from '../ui/heading';
 
 @Component({
   selector: 'app-verification-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    Card,
+    Cell,
+    ErrorPanel,
+    HelpText,
+    PageHeading,
+    RowDivider,
+    SectionHeading,
+    SectionLabel,
+    SubHeading,
+  ],
   template: `
     <div class="mx-auto max-w-3xl space-y-5">
       <header>
-        <h2 class="text-lg font-semibold text-farm-900">Check the records</h2>
-        <p class="mt-1 text-sm text-farm-600">
+        <h2 appPageHeading>Check the records</h2>
+        <p appHelp class="mt-1">
           Read these; they are not assertions. Nothing in the rest of the app changes based on
           what is here.
         </p>
       </header>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (v(); as data) {
-        <section class="rounded-xl border border-farm-300 bg-white p-4">
-          <h3 class="text-sm font-medium text-farm-800">Invariants</h3>
+        <section appCard>
+          <h3 appSubHeading>Invariants</h3>
           @if (data.violations.length === 0) {
             <p class="mt-2 text-sm text-farm-700" data-role="violations-none">
               No violations across {{ data.counts.animals }} animal(s),
@@ -75,8 +95,8 @@ import type { Reconciliation, Verification } from './types';
              invariants use -- a report styled as a defect list is one people
              learn to ignore, which costs more than the four lines are worth.
              See docs/REGISTRY_PAYROLL.md §13. -->
-        <section class="rounded-xl border border-farm-300 bg-white p-4">
-          <h3 class="text-sm font-medium text-farm-800">People — worth a look</h3>
+        <section appCard>
+          <h3 appSubHeading>People — worth a look</h3>
           @if (data.labour.length === 0) {
             <p class="mt-2 text-sm text-farm-700" data-role="labour-none">
               Nothing to flag. These are not violations — they are things that are legitimate and
@@ -94,9 +114,9 @@ import type { Reconciliation, Verification } from './types';
           }
         </section>
 
-        <section class="rounded-xl border border-farm-300 bg-white p-4">
-          <h3 class="text-sm font-medium text-farm-800">How the dates were known</h3>
-          <p class="mt-1 text-xs text-farm-600">
+        <section appCard>
+          <h3 appSubHeading>How the dates were known</h3>
+          <p appHelp size="xs" class="mt-1">
             Source against precision. Nothing can detect a date that is more precise than the
             memory behind it — this is the number that shows it. A backfill coming out mostly
             exact-day recall is the signal worth acting on.
@@ -106,14 +126,14 @@ import type { Reconciliation, Verification } from './types';
           } @else {
             <table class="mt-2 w-full text-left text-sm" data-role="histogram">
               <thead class="text-xs uppercase tracking-wide text-farm-600">
-                <tr><th class="py-1">Source</th><th class="py-1">Precision</th><th class="py-1 text-right">Events</th></tr>
+                <tr><th appCell>Source</th><th appCell>Precision</th><th appCell numeric>Events</th></tr>
               </thead>
               <tbody>
                 @for (c of data.histogram; track c.source_form + c.date_precision) {
-                  <tr class="border-t border-farm-100">
-                    <td class="py-1 text-farm-800">{{ c.source_form }}</td>
-                    <td class="py-1 text-farm-800">{{ c.date_precision }}</td>
-                    <td class="py-1 text-right font-medium text-farm-900">{{ c.count }}</td>
+                  <tr appRowDivider>
+                    <td appCell tone="heading">{{ c.source_form }}</td>
+                    <td appCell tone="heading">{{ c.date_precision }}</td>
+                    <td appCell numeric emphasis tone="primary">{{ c.count }}</td>
                   </tr>
                 }
               </tbody>
@@ -121,8 +141,8 @@ import type { Reconciliation, Verification } from './types';
           }
         </section>
 
-        <section class="rounded-xl border border-farm-300 bg-white p-4">
-          <h3 class="text-sm font-medium text-farm-800">Calving intervals</h3>
+        <section appCard>
+          <h3 appSubHeading>Calving intervals</h3>
           @if (data.intervals.intervals.length === 0) {
             <p class="mt-2 text-sm italic text-farm-500" data-role="intervals-empty">
               No animal has two or more calvings yet.
@@ -130,16 +150,16 @@ import type { Reconciliation, Verification } from './types';
           } @else {
             <table class="mt-2 w-full text-left text-sm" data-role="intervals">
               <thead class="text-xs uppercase tracking-wide text-farm-600">
-                <tr><th class="py-1">Animal</th><th class="py-1">From</th><th class="py-1">To</th><th class="py-1 text-right">Days</th><th class="py-1">Quality</th></tr>
+                <tr><th appCell>Animal</th><th appCell>From</th><th appCell>To</th><th appCell numeric>Days</th><th appCell>Quality</th></tr>
               </thead>
               <tbody>
                 @for (i of data.intervals.intervals; track i.animal_id + i.ordinal) {
-                  <tr class="border-t border-farm-100">
-                    <td class="py-1 font-mono text-farm-800">{{ i.animal_id }}</td>
-                    <td class="py-1 text-farm-700">{{ i.from_on }}</td>
-                    <td class="py-1 text-farm-700">{{ i.to_on }}</td>
-                    <td class="py-1 text-right font-medium text-farm-900">{{ i.days }}</td>
-                    <td class="py-1 text-farm-700">{{ i.quality }}</td>
+                  <tr appRowDivider>
+                    <td appCell tone="heading" class="font-mono">{{ i.animal_id }}</td>
+                    <td appCell tone="secondary">{{ i.from_on }}</td>
+                    <td appCell tone="secondary">{{ i.to_on }}</td>
+                    <td appCell numeric emphasis tone="primary">{{ i.days }}</td>
+                    <td appCell tone="secondary">{{ i.quality }}</td>
                   </tr>
                 }
               </tbody>
@@ -148,23 +168,23 @@ import type { Reconciliation, Verification } from './types';
             <div class="mt-3 grid gap-2 sm:grid-cols-2" data-role="summaries">
               @for (s of [data.intervals.measured, data.intervals.approximate]; track s.quality) {
                 <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                  <div class="text-xs uppercase tracking-wide text-farm-600">{{ s.quality }}</div>
+                  <div appSectionLabel>{{ s.quality }}</div>
                   @if (s.count === 0) {
                     <div class="text-farm-500 italic">none</div>
                   } @else {
                     <div class="text-farm-900">n = {{ s.count }} · mean {{ s.mean_days }}d</div>
-                    <div class="text-xs text-farm-600">min {{ s.min_days }}d · max {{ s.max_days }}d</div>
+                    <div appHelp size="xs">min {{ s.min_days }}d · max {{ s.max_days }}d</div>
                   }
                 </div>
               }
             </div>
           }
-          <p class="mt-3 text-xs text-farm-600" data-role="caveat">{{ data.intervals.caveat }}</p>
+          <p appHelp size="xs" class="mt-3" data-role="caveat">{{ data.intervals.caveat }}</p>
         </section>
 
-        <section class="rounded-xl border border-farm-300 bg-white p-4">
-          <h3 class="text-sm font-medium text-farm-800">How complete the milk record is</h3>
-          <p class="mt-1 text-xs text-farm-600">
+        <section appCard>
+          <h3 appSubHeading>How complete the milk record is</h3>
+          <p appHelp size="xs" class="mt-1">
             A session is complete when every animal in milk has a row — not when every row carries a
             number. The two are separate on purpose: a session of all “not measured” is a complete
             record and empty data, and one blended percentage would hide exactly that.
@@ -176,21 +196,21 @@ import type { Reconciliation, Verification } from './types';
           } @else {
             <div class="mt-2 grid gap-2 sm:grid-cols-3" data-role="milking-summary">
               <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                <div class="text-xs uppercase tracking-wide text-farm-600">sessions</div>
+                <div appSectionLabel>sessions</div>
                 <div class="text-farm-900">
                   {{ data.milking.complete_sessions }} complete of {{ data.milking.sessions }}
                 </div>
-                <div class="text-xs text-farm-600">{{ data.milking.first_on }} → {{ data.milking.last_on }}</div>
+                <div appHelp size="xs">{{ data.milking.first_on }} → {{ data.milking.last_on }}</div>
               </div>
               <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                <div class="text-xs uppercase tracking-wide text-farm-600">measured</div>
+                <div appSectionLabel>measured</div>
                 <div class="text-farm-900">{{ data.milking.measured }} row(s)</div>
-                <div class="text-xs text-farm-600">carry a number</div>
+                <div appHelp size="xs">carry a number</div>
               </div>
               <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                <div class="text-xs uppercase tracking-wide text-farm-600">not measured</div>
+                <div appSectionLabel>not measured</div>
                 <div class="text-farm-900">{{ data.milking.milked_not_measured }} row(s)</div>
-                <div class="text-xs text-farm-600">
+                <div appHelp size="xs">
                   milked, unweighed · {{ data.milking.not_milked }} not milked
                 </div>
               </div>
@@ -199,27 +219,27 @@ import type { Reconciliation, Verification } from './types';
             <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
               <thead class="text-xs uppercase tracking-wide text-farm-600">
                 <tr>
-                  <th class="py-1">Date</th><th class="py-1">Session</th>
-                  <th class="py-1 text-right">Recorded</th><th class="py-1 text-right">In milk</th>
-                  <th class="py-1 text-right">Measured</th>
+                  <th appCell>Date</th><th appCell>Session</th>
+                  <th appCell numeric>Recorded</th><th appCell numeric>In milk</th>
+                  <th appCell numeric>Measured</th>
                 </tr>
               </thead>
               <tbody>
                 @for (s of data.milking.recent; track s.occurred_on + s.session) {
-                  <tr class="border-t border-farm-100">
-                    <td class="py-1 text-farm-700">{{ s.occurred_on }}</td>
-                    <td class="py-1 text-farm-700">{{ s.session }}</td>
-                    <td class="py-1 text-right font-medium"
+                  <tr appRowDivider>
+                    <td appCell tone="secondary">{{ s.occurred_on }}</td>
+                    <td appCell tone="secondary">{{ s.session }}</td>
+                    <td appCell numeric emphasis
                       [class]="s.recorded >= s.expected ? 'text-farm-900' : 'text-amber-800'"
                     >{{ s.recorded }}</td>
-                    <td class="py-1 text-right text-farm-700">{{ s.expected }}</td>
-                    <td class="py-1 text-right text-farm-700">{{ s.measured }}</td>
+                    <td appCell numeric tone="secondary">{{ s.expected }}</td>
+                    <td appCell numeric tone="secondary">{{ s.measured }}</td>
                   </tr>
                 }
               </tbody>
             </table>
           }
-          <p class="mt-3 text-xs text-farm-600" data-role="milking-caveat">{{ data.milking.caveat }}</p>
+          <p appHelp size="xs" class="mt-3" data-role="milking-caveat">{{ data.milking.caveat }}</p>
         </section>
 
         <!-- ---------------------------------------------------------------
@@ -232,9 +252,9 @@ import type { Reconciliation, Verification } from './types';
              with it. See docs/REGISTRY_SALES.md §11.
              --------------------------------------------------------------- -->
         @if (reconciliation(); as r) {
-          <section class="rounded-xl border border-farm-300 bg-white p-4">
-            <h3 class="text-sm font-semibold text-farm-900">Where the milk went</h3>
-            <p class="mt-1 text-xs text-farm-600">{{ r.from }} → {{ r.to }}</p>
+          <section appCard>
+            <h3 appSectionHeading>Where the milk went</h3>
+            <p appHelp size="xs" class="mt-1">{{ r.from }} → {{ r.to }}</p>
 
             @if (r.dispatched_total === 0 && r.produced_measured === 0) {
               <p class="mt-2 text-sm italic text-farm-500" data-role="reconcile-empty">
@@ -243,24 +263,24 @@ import type { Reconciliation, Verification } from './types';
             } @else {
               <div class="mt-2 grid gap-2 sm:grid-cols-4" data-role="reconcile-summary">
                 <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                  <div class="text-xs uppercase tracking-wide text-farm-600">Measured</div>
+                  <div appSectionLabel>Measured</div>
                   <div class="text-farm-900" data-role="produced">{{ r.produced_measured }} L</div>
-                  <div class="text-xs text-farm-600">from {{ r.measured_rows }} row(s)</div>
+                  <div appHelp size="xs">from {{ r.measured_rows }} row(s)</div>
                 </div>
                 <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                  <div class="text-xs uppercase tracking-wide text-farm-600">Sold</div>
+                  <div appSectionLabel>Sold</div>
                   <div class="text-farm-900" data-role="sold">{{ r.dispatched_sold }} L</div>
-                  <div class="text-xs text-farm-600">{{ money(r.billed_minor) }}</div>
+                  <div appHelp size="xs">{{ money(r.billed_minor) }}</div>
                 </div>
                 <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                  <div class="text-xs uppercase tracking-wide text-farm-600">Kept at home</div>
+                  <div appSectionLabel>Kept at home</div>
                   <div class="text-farm-900" data-role="home">{{ r.dispatched_home }} L</div>
-                  <div class="text-xs text-farm-600">its own term, not the gap</div>
+                  <div appHelp size="xs">its own term, not the gap</div>
                 </div>
                 <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
-                  <div class="text-xs uppercase tracking-wide text-farm-600">Gap</div>
+                  <div appSectionLabel>Gap</div>
                   <div class="text-farm-900" data-role="gap">{{ r.gap_litres }} L</div>
-                  <div class="text-xs text-farm-600" data-role="gap-pct">
+                  <div appHelp size="xs" data-role="gap-pct">
                     @if (r.gap_pct !== null) {
                       {{ r.gap_pct }}% of measured
                     } @else {
@@ -287,13 +307,13 @@ import type { Reconciliation, Verification } from './types';
               @if (r.incomplete.length > 0) {
                 <table class="mt-2 w-full text-left text-sm" data-role="reconcile-incomplete">
                   <thead class="text-xs uppercase tracking-wide text-farm-600">
-                    <tr><th class="py-1">Session</th><th class="py-1 text-right">Answered</th></tr>
+                    <tr><th appCell>Session</th><th appCell numeric>Answered</th></tr>
                   </thead>
                   <tbody>
                     @for (s of r.incomplete; track s.occurred_on + s.session) {
-                      <tr class="border-t border-farm-100">
-                        <td class="py-1 text-farm-700">{{ s.occurred_on }} {{ s.session }}</td>
-                        <td class="py-1 text-right text-farm-700">
+                      <tr appRowDivider>
+                        <td appCell tone="secondary">{{ s.occurred_on }} {{ s.session }}</td>
+                        <td appCell numeric tone="secondary">
                           {{ s.recorded_standing }} of {{ s.expected_standing }}
                         </td>
                       </tr>
@@ -318,14 +338,14 @@ import type { Reconciliation, Verification } from './types';
                       </li>
                     }
                   </ul>
-                  <p class="mt-1 text-xs text-farm-600">
+                  <p appHelp size="xs" class="mt-1">
                     Not necessarily wrong — a one-off discount looks exactly like a stale default.
                   </p>
                 </div>
               }
             }
 
-            <p class="mt-3 text-xs text-farm-600" data-role="reconcile-interpretation">
+            <p appHelp size="xs" class="mt-3" data-role="reconcile-interpretation">
               {{ r.interpretation }}
             </p>
           </section>
@@ -335,7 +355,7 @@ import type { Reconciliation, Verification } from './types';
           class="rounded-xl border border-farm-300 bg-white px-4 py-2 text-sm font-medium text-farm-800"
         >Recheck</button>
       } @else {
-        <p class="text-sm text-farm-600" data-role="loading">Loading…</p>
+        <p appHelp data-role="loading">Loading…</p>
       }
     </div>
   `,

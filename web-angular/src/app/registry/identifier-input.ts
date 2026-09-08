@@ -27,6 +27,8 @@
 // server.
 
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { FieldLabel } from '../ui/text';
+import { TextInput } from '../ui/input';
 
 /** The wording each field carries, in one place so three forms cannot diverge. */
 export const IDENTIFIER_GUIDANCE = {
@@ -42,17 +44,17 @@ export type IdentifierField = keyof typeof IDENTIFIER_GUIDANCE;
 @Component({
   selector: 'app-identifier-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FieldLabel, TextInput],
   template: `
     <label class="block">
-      <span class="mb-1 block text-xs font-medium text-farm-700">
+      <span appFieldLabel>
         {{ label() }} <span class="font-normal text-farm-500">(optional)</span>
       </span>
       <input
         [attr.data-role]="field()"
         [attr.list]="listId()"
         [value]="value()"
-        (input)="changed.emit($any($event.target).value)"
-        class="w-full max-w-md rounded-lg border border-farm-300 px-2 py-1.5 text-sm"
+        (input)="changed.emit($any($event.target).value)" appInput class="w-full max-w-md"
       />
       <!-- Suggestions only. An empty datalist is harmless: the input behaves
            exactly as a plain text field, which is the state of a fresh

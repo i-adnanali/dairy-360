@@ -2,19 +2,20 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import type { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import type { Dataset } from '@dairy/shared';
+import { HelpText } from '../ui/text';
 
 // Port of web-react/src/components/ChartCard.tsx (Recharts -> Chart.js via ng2-charts).
 @Component({
   selector: 'app-chart-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BaseChartDirective],
+  imports: [BaseChartDirective, HelpText],
   template: `
     <div class="rounded-xl border border-farm-200 bg-white p-4 shadow-sm">
       <div class="mb-2 flex items-baseline justify-between">
         <h3 class="text-sm font-semibold text-farm-800">
           {{ dataset().scopeLabel }} — {{ dataset().interval }}ly yield
         </h3>
-        <span class="text-xs text-farm-500">{{ dataset().points.length }} points</span>
+        <span appHelp size="xs" tone="subtle">{{ dataset().points.length }} points</span>
       </div>
       <div class="h-56 w-full">
         <canvas baseChart type="line" [data]="data()" [options]="options"></canvas>

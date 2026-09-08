@@ -52,11 +52,22 @@ import { Session } from './session';
 import { SessionRequired } from './session-required';
 import { WriteLog, focusAfterWrite } from './after-write';
 import { ChipGroup } from './chip-group';
+import { Cell } from '../ui/cell';
 import { IdentifierInput } from './identifier-input';
 import { Identifiers } from './identifiers';
 import { farmToday, likelySession } from './today';
 import { urlParams } from './url-state';
 import type { MilkingRoster, MilkingSession, MilkingStatus, RosterRow } from './types';
+import { Card } from '../ui/surface';
+import { ErrorPanel } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { RowDivider } from '../ui/surface';
+import { TextLink } from '../ui/text';
+import { Button } from '../ui/button';
+import { SummaryBar } from '../ui/surface';
 
 /** What the operator has said about one animal. `null` status = untouched. */
 interface Draft {
@@ -81,12 +92,28 @@ export const OUT_OF_BAND = 0.5;
 @Component({
   selector: 'app-milking-roster',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup, IdentifierInput, RouterLink, SessionRequired],
+  imports: [
+    Button,
+    Card,
+    Cell,
+    ChipGroup,
+    ErrorPanel,
+    FieldLabel,
+    HelpText,
+    IdentifierInput,
+    PageHeading,
+    RouterLink,
+    RowDivider,
+    SessionRequired,
+    SummaryBar,
+    TextInput,
+    TextLink,
+  ],
   template: `
     <form class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
       <header>
-        <h2 class="text-lg font-semibold text-farm-900">Record a milking</h2>
-        <p class="mt-1 text-sm text-farm-600">
+        <h2 appPageHeading>Record a milking</h2>
+        <p appHelp class="mt-1">
           Everyone in milk on this date, in one pass. An animal left untouched blocks the save —
           if she was milked and nobody weighed it, say so; that is a real answer and a guessed
           number is not.
@@ -94,15 +121,14 @@ export const OUT_OF_BAND = 0.5;
       </header>
 
       <!-- when -->
-      <div class="rounded-xl border border-farm-300 bg-white p-4">
+      <div appCard>
         <div class="flex flex-wrap items-end gap-4">
           <label class="block">
-            <span class="mb-1 block text-xs font-medium text-farm-700">Date</span>
-            <input type="date" data-role="on" [value]="on()" (change)="setOn($any($event.target).value)"
-              class="rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+            <span appFieldLabel>Date</span>
+            <input type="date" data-role="on" [value]="on()" (change)="setOn($any($event.target).value)" appInput />
           </label>
           <div>
-            <div class="mb-1 text-xs font-medium text-farm-700">Session</div>
+            <div appFieldLabel inline>Session</div>
             <app-chip-group
               name="session" label="Session" [options]="sessionChips" [value]="session()"
               (changed)="setSession($any($event))"
@@ -126,13 +152,13 @@ export const OUT_OF_BAND = 0.5;
       </div>
 
       @if (loadError(); as e) {
-        <p class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" data-role="load-error">{{ e }}</p>
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (roster(); as r) {
         @if (r.rows.length === 0) {
-          <p class="rounded-xl border border-farm-300 bg-white p-4 text-sm text-farm-600"
+          <p appCard empty
             data-role="nobody">
             No animal was in milk on {{ r.occurred_on }}. A female is in milk from her calving until
-            she is dried off — <a routerLink="/animals/calvings/new" class="font-medium text-farm-800 underline">record a calving</a>
+            she is dried off — <a routerLink="/animals/calvings/new" appTextLink tone="strong">record a calving</a>
             and she will be here.
           </p>
         } @else {
@@ -140,31 +166,31 @@ export const OUT_OF_BAND = 0.5;
             <table class="w-full text-left text-sm">
               <thead class="border-b border-farm-200 text-xs uppercase tracking-wide text-farm-600">
                 <tr>
-                  <th class="px-3 py-2">Animal</th>
-                  <th class="px-3 py-2 text-right">Days in milk</th>
+                  <th appCell>Animal</th>
+                  <th appCell numeric>Days in milk</th>
                   <!-- The SAME session yesterday, never this morning: morning
                        and evening are separated by an unknown interval and are
                        not comparable. Same rule for the mean. -->
-                  <th class="px-3 py-2 text-right">Yesterday {{ r.previous_session.session }}</th>
-                  <th class="px-3 py-2 text-right">Recent {{ r.session }} mean</th>
-                  <th class="px-3 py-2">Litres — or <span class="font-mono">m</span> / <span class="font-mono">n</span></th>
+                  <th appCell numeric>Yesterday {{ r.previous_session.session }}</th>
+                  <th appCell numeric>Recent {{ r.session }} mean</th>
+                  <th appCell>Litres — or <span class="font-mono">m</span> / <span class="font-mono">n</span></th>
                 </tr>
               </thead>
               <tbody>
                 @for (row of r.rows; track row.animal_id; let i = $index) {
-                  <tr class="border-t border-farm-100" [attr.data-row]="row.animal_id">
-                    <td class="px-3 py-1.5">
+                  <tr appRowDivider [attr.data-row]="row.animal_id">
+                    <td appCell density="compact">
                       <span class="font-mono text-farm-800">{{ row.animal_id }}</span>
                       <span class="ml-2 text-farm-700">{{ row.name ?? '—' }}</span>
                     </td>
-                    <td class="px-3 py-1.5 text-right text-farm-700" data-role="dim">{{ row.days_in_milk }}</td>
-                    <td class="px-3 py-1.5 text-right text-farm-700" data-role="previous">
+                    <td appCell density="compact" numeric tone="secondary" data-role="dim">{{ row.days_in_milk }}</td>
+                    <td appCell density="compact" numeric tone="secondary" data-role="previous">
                       {{ previousText(row) }}
                     </td>
-                    <td class="px-3 py-1.5 text-right text-farm-700" data-role="mean">
+                    <td appCell density="compact" numeric tone="secondary" data-role="mean">
                       {{ row.recent_mean === null ? '—' : row.recent_mean }}
                     </td>
-                    <td class="px-3 py-1.5">
+                    <td appCell density="compact">
                       <div class="flex flex-wrap items-center gap-2">
                         <input
                           #cell
@@ -210,7 +236,7 @@ export const OUT_OF_BAND = 0.5;
 
           <!-- The total catches a ten-fold typo that no per-row rule will,
                because the operator knows roughly what the herd gives. -->
-          <div class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-farm-300 bg-farm-50 px-4 py-3 text-sm">
+          <div appSummaryBar class="flex flex-wrap items-center gap-x-6 gap-y-2 bg-surface-page">
             <span data-role="resolved">
               <span class="font-medium text-farm-900">{{ resolved() }}</span>
               <span class="text-farm-600"> of {{ r.rows.length }} answered</span>
@@ -223,23 +249,21 @@ export const OUT_OF_BAND = 0.5;
           </div>
         }
       } @else {
-        <p class="text-sm text-farm-600" data-role="loading">Loading…</p>
+        <p appHelp data-role="loading">Loading…</p>
       }
 
       @if (state.formError(fields); as e) {
-        <p class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" data-role="error-form">{{ e }}</p>
+        <p appErrorPanel data-role="error-form">{{ e }}</p>
       }
 
       <div class="flex items-center gap-3">
         @if (session_.ready()) {
-          <button type="submit" data-role="submit" [disabled]="!canSubmit()"
-            class="rounded-xl bg-farm-600 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
-          >{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="milking-submit-reason">{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
         } @else {
           <app-session-required what="this session" />
         }
         @if (blockedReason(); as b) {
-          <span class="text-sm text-farm-600" data-role="blocked">{{ b }}</span>
+          <span appHelp data-role="blocked" id="milking-submit-reason">{{ b }}</span>
         }
       </div>
     </form>

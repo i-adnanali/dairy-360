@@ -192,7 +192,7 @@ describe('PayrollRunScreen', () => {
     expect(el.querySelector('[data-role="daily"]')!.textContent).toContain('only the days');
     // Nothing in the dihari block is required, so the run is saveable with the
     // salaried rows pre-filled and no dihari at all.
-    expect(el.querySelector<HTMLButtonElement>('[data-role="save"]')!.disabled).toBe(false);
+    expect(el.querySelector<HTMLButtonElement>('[data-role="save"]')!.getAttribute('aria-disabled')).toBeNull();
   });
 
   it('BLOCKS the save when a salaried figure is cleared', async () => {
@@ -201,7 +201,7 @@ describe('PayrollRunScreen', () => {
     input.value = '';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(el.querySelector<HTMLButtonElement>('[data-role="save"]')!.disabled).toBe(true);
+    expect(el.querySelector<HTMLButtonElement>('[data-role="save"]')!.getAttribute('aria-disabled')).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain(
       'an omission is not an answer',
     );

@@ -31,6 +31,12 @@
 
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import type { LinkCandidate } from './types';
+import { Card } from '../ui/surface';
+import { ErrorText } from '../ui/surface';
+import { FieldLabel } from '../ui/text';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { SectionLabel } from '../ui/text';
 
 /** `null` means "create a new animal"; a string is an existing animal's id. */
 export type CalfChoice = string | null;
@@ -38,14 +44,15 @@ export type CalfChoice = string | null;
 @Component({
   selector: 'app-calf-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Card, ErrorText, FieldLabel, HelpText, SectionLabel, TextInput],
   template: `
-    <div class="rounded-xl border border-farm-300 bg-white p-4">
-      <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
+    <div appCard>
+      <div appSectionLabel legend>
         Which calf is this?
       </div>
 
       @if (!ready()) {
-        <p class="text-sm text-farm-600" data-role="picker-blocked">
+        <p appHelp data-role="picker-blocked">
           Choose the dam, the calving date and the calf's sex first — which animals can be linked
           depends on all three: an animal's birth cannot postdate its own history, and one recorded
           as the other sex is not this calf.
@@ -87,7 +94,7 @@ export type CalfChoice = string | null;
             animal missing from this list would read as data loss.
           </p>
         } @else {
-          <p class="text-sm text-farm-600" data-role="candidates-empty">
+          <p appHelp data-role="candidates-empty">
             No animal in the registry has a birth date near this calving.
           </p>
         }
@@ -142,17 +149,16 @@ export type CalfChoice = string | null;
 
           @if (chosen() === null && answered()) {
             <label class="mt-3 block">
-              <span class="mb-1 block text-xs font-medium text-farm-700">Calf name (optional)</span>
+              <span appFieldLabel>Calf name (optional)</span>
               <input data-role="calf_name" [value]="calfName()"
-                (input)="setName($any($event.target).value)"
-                class="w-full max-w-xs rounded-lg border border-farm-300 px-2 py-1.5 text-sm" />
+                (input)="setName($any($event.target).value)" appInput class="w-full max-w-xs" />
             </label>
           }
         </div>
       }
 
       @if (error(); as e) {
-        <p class="mt-2 text-sm text-red-800" data-role="error-calf">{{ e }}</p>
+        <p appErrorText class="mt-2" data-role="error-calf">{{ e }}</p>
       }
     </div>
   `,

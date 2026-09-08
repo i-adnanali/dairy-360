@@ -1,14 +1,25 @@
 # UI system — the design system
 
-*Status: **phases 0 and 1 built; phase 2 is blocked.** Specified against
-`816fe67`; the token layer landed with zero visual delta, verified by fourteen
-byte-identical screenshots and all 54 colour utilities resolving unchanged.
-**Phase 2 does not proceed as written** — §6.3's disabled state changes the
-tab-stop count on both frozen forms, which prediction 3 of the five-animal trial
-is pre-registered to measure, and §2's B1 freezes fields rather than buttons.
-Phases 3–7 are unstarted. Three items are marked **BLOCKED** on the trial.*
+*Status: **phases 0, 1 and 2 built.** Specified against `816fe67`. The token
+layer landed with zero visual delta (fourteen byte-identical screenshots, all 54
+colour utilities resolving unchanged); the fifteen primitives landed as attribute
+**directives** rather than components, taking class strings from 358 to 293 and
+occurrences from 957 to 614 with all 115 `data-role` hooks intact. Phases 3–7 are
+unstarted and phase 3 wants eyes on the result first — §12's target light and
+dark values have still never been rendered. Three items remain **BLOCKED** on the
+five-animal trial.*
 
-*Counts in §1, §4 and §6 were re-read from the code and **five are still wrong**:
+*One cost was accepted knowingly rather than avoided. §6.3's disabled state drops
+the native attribute so `aria-describedby` can reach the reason text, which puts
+the blocked submit back in the tab order: `/animals/new` now has nine tab stops
+in the empty state rather than eight. `REGISTRY_ENTRY_UX.md` §11 prediction 3 is
+pre-registered on that count and §2's B1 freezes fields, not buttons, so nothing
+in the trial gate caught it. The decision was to build the system now and read
+the trial against the built system. Treat it as a third entry alongside the two
+contaminations §11 already documents.*
+
+*Counts in §1, §4 and §6 were re-read from the code and **five are still wrong**
+(they were implemented against the code, not against these figures):
 §6.2's padding buckets measure 44/34/12/7 over 31 distinct cell strings (and do
 not sum to 98 as printed), §6.3 has eight variants rather than seven, §6.4's
 TextInput figure counts two of seventeen strings against a real 45, and

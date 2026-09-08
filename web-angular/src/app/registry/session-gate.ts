@@ -22,23 +22,28 @@ import { ChipGroup } from './chip-group';
 import { Session } from './session';
 import { Target } from './target';
 import type { SourceForm } from './types';
+import { HelpText } from '../ui/text';
+import { TextInput } from '../ui/input';
+import { PageHeading } from '../ui/heading';
+import { SectionLabel } from '../ui/text';
+import { Button } from '../ui/button';
 
 @Component({
   selector: 'app-session-gate',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChipGroup],
+  imports: [Button, ChipGroup, HelpText, PageHeading, SectionLabel, TextInput],
   template: `
     <form class="mx-auto max-w-lg rounded-2xl border border-farm-300 bg-white p-6"
       data-role="gate" (submit)="onSubmit($event)">
-      <h2 class="text-lg font-semibold text-farm-900">Before entering anything</h2>
-      <p class="mt-1 text-sm text-farm-600">
+      <h2 appPageHeading>Before entering anything</h2>
+      <p appHelp class="mt-1">
         Both of these go on every record you write in this session. They are asked once rather
         than on each form, and they are not defaulted — a mislabelled source reads exactly like a
         correct one.
       </p>
 
       <div class="mt-5">
-        <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
+        <div appSectionLabel legend>
           Where is this coming from?
         </div>
         <app-chip-group
@@ -52,8 +57,7 @@ import type { SourceForm } from './types';
           Who is typing?
         </span>
         <input data-role="recorded-by" [value]="who()" (input)="who.set($any($event.target).value)"
-          placeholder="a stable identifier, not a display name"
-          class="w-full rounded-lg border border-farm-300 px-3 py-2 text-sm" />
+          placeholder="a stable identifier, not a display name" appInput density="comfortable" class="w-full" />
         <span class="mt-1 block text-xs text-farm-600">
           Recorded on every event as <span class="font-mono">recorded_by</span>. Whoever remembered
           it, if this is recall.
@@ -69,7 +73,7 @@ import type { SourceForm } from './types';
            where we could not find out. -->
       @if (target.probed()) {
         <div class="mt-5 border-t border-farm-200 pt-4" data-role="target">
-          <div class="mb-1 text-xs font-medium uppercase tracking-wide text-farm-600">
+          <div appSectionLabel legend>
             Where is this going?
           </div>
 
@@ -112,8 +116,7 @@ import type { SourceForm } from './types';
         </div>
       }
 
-      <button type="submit" data-role="start" [disabled]="!canStart()"
-        class="mt-5 w-full rounded-xl bg-farm-600 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-farm-300"
+      <button type="submit" data-role="start" [appButtonDisabled]="!canStart()" appButton class="mt-5 w-full"
       >Start entering</button>
     </form>
   `,
