@@ -43,7 +43,12 @@ import { join } from 'node:path';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const BASE = process.env.APP_URL ?? 'http://localhost:4200';
-const WIDTH = 1440;
+/*
+ * 1440 is §10.5's baseline width and every stored comparison is against it, so
+ * --width is for verifying a breakpoint rather than for shooting a baseline.
+ * §13.1's 1100px is the app's only one.
+ */
+const WIDTH = Number(process.env.SHOT_WIDTH ?? 1440);
 const START_HEIGHT = 900;
 const MAX_HEIGHT = 6000;
 
@@ -65,6 +70,14 @@ const ONLY = opt('only', '').split(',').filter(Boolean);
  */
 const AD_HOC = opt('path', '');
 const AD_HOC_KEY = opt('key', 'ad-hoc');
+/*
+ * Open the assistant panel before capturing (§13.1).
+ *
+ * It is default closed and its state lives in sessionStorage, so a capture that
+ * did not ask for it would photograph the closed state on every screen -- which
+ * is the right default and useless as a picture of the panel.
+ */
+const OPEN_ASSISTANT = flag('assistant');
 
 /*
  * The fourteen. Twelve free plus the two frozen forms, and `chat` is the
@@ -348,6 +361,14 @@ async function navigateInApp(cdp, path) {
  * The loop is the whole point (see the header). It ends on equality rather than
  * on a fixed number of tries so a screen that genuinely needs 3000px gets it,
  * and it caps out so a runaway layout does not ask for a 40MB PNG.
+ *
+ * IT MEASURES <main>, WHICH IS SLIGHTLY WRONG WITH --assistant BELOW 1100px.
+ * The panel then covers the whole content area, so the height is chosen by the
+ * table hidden beneath it and the capture carries empty space under the panel.
+ * The picture is still true -- it is not measuring the wrong ELEMENT, it is
+ * measuring the element that owns the scroll -- and fixing it would mean the
+ * driver knowing which overlay is up, which is more coupling than a screenshot
+ * tool should have.
  */
 async function capture(cdp, file) {
   let height = START_HEIGHT;
@@ -448,6 +469,30 @@ async function main() {
         if (screen.gate) {
           await openSession(cdp);
           await settle(cdp);
+        }
+        if (OPEN_ASSISTANT) {
+          // ENSURE open, do not TOGGLE. The panel's state lives in
+          // sessionStorage and survives a page load, so a blind click opened it
+          // on the first screen and closed it again on the second -- which is
+          // the persistence working exactly as §13.1 specifies, and a bug in
+          // the driver rather than in the app.
+          await evaluate(cdp, `
+            (() => {
+              if (document.querySelector('[data-role="assistant-panel"]')) return true;
+              const t = document.querySelector('[data-role="assistant-toggle"]');
+              if (!t) return 'no toggle';
+              t.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+              return true;
+            })()
+          `);
+          // The panel @defers its chat panel, so the chunk has to arrive before
+          // there is anything to photograph.
+          for (let i = 0; i < 60; i++) {
+            const up = await evaluate(cdp, `!!document.querySelector('app-composer textarea, app-composer input')`);
+            if (up) break;
+            await sleep(100);
+          }
+          await sleep(200);
         }
         if (GREY) await applyGrey(cdp);
 

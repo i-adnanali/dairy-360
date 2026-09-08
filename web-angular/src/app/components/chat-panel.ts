@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import type { Approval, PendingWrite } from '@dairy/shared';
+import { Assistant } from '../core/assistant';
 import { ChatStore } from '../core/chat-store';
 import { Composer } from './composer';
 import { ConfirmationCard } from './confirmation-card';
@@ -98,12 +99,39 @@ import { Button } from '../ui/button';
         }
       </div>
 
+      <!-- ---------------------------------------------------------------
+           THE CONTEXT LINE. §13.2, and it is what makes the panel FOLDED IN
+           rather than merely relocated.
+           ---------------------------------------------------------------
+           §13.2: "On an animal route, 'how does her interval compare?'
+           resolves the pronoun without the person naming the animal."
+
+           So the line is not decoration -- it is the app telling you what the
+           pronoun in your next question will bind to. Above the composer and
+           not in the header, because that is where the eye is when the
+           question is being typed.
+
+           Absent rather than empty on a route with nothing useful to say, and
+           /chat itself is one of those: the route IS the assistant, so
+           "Reading the assistant" is a sentence about nothing. See
+           registry-shell.ts, which owns the wording.
+           --------------------------------------------------------------- -->
+      @if (assistant.contextLine(); as line) {
+        <div
+          class="border-t border-line-subtle px-6 pt-2 text-xs text-content-muted"
+          data-role="chat-context"
+        >
+          {{ line }}
+        </div>
+      }
+
       <app-composer [disabled]="store.busy()" (send)="store.send($event)" />
     </div>
   `,
 })
 export class ChatPanel {
   protected readonly store = inject(ChatStore);
+  protected readonly assistant = inject(Assistant);
 
   /** Bumped per transition, so an identical status re-announces. */
   private readonly turn = signal(0);

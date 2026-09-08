@@ -195,23 +195,26 @@ const A_LIABILITY = [
   'src/app/registry/event-list.ts',     // "not billed"
 ];
 
-/**
- * NOT A MEANING -- A HALF-FINISHED MIGRATION, and the census is how it surfaced.
+/*
+ * ---------------------------------------------------------------------------
+ * ONE ENTRY HAS BEEN DELETED FROM THIS FILE, AND THE TEST BELOW IS WHY
+ * ---------------------------------------------------------------------------
+ * The census originally carried a sixth list, `HALF_MIGRATED`, holding
+ * `src/app/components/message.ts` -- whose `agentClass()` returned
+ * `bg-warning-bg text-agent-vendor-fg border-agent-vendor-line` for the vendor
+ * arm. §4.3 states that "vendor has left amber, which was the point: a vendor
+ * answer used to wear the same colour as an unanswered milking row". The
+ * foreground and the border had moved to the agent ramp in `ed6235a`; the
+ * BACKGROUND had not, so the vendor chip still rendered on the warning role in
+ * the chat's content area -- the one element in the app mixing a categorical
+ * ramp with a role, and the one place §4.2.1 says amber may not be.
  *
- * message.ts:73 is `bg-warning-bg text-agent-vendor-fg border-agent-vendor-line`.
- * §4.3 states that "vendor has left amber, which was the point: a vendor answer
- * used to wear the same colour as an unanswered milking row". The foreground
- * and the border moved to the agent ramp in `ed6235a`; the BACKGROUND did not.
- * So the vendor agent chip still renders on the warning role, in the chat's
- * content area, and it is the only element in the app mixing a categorical ramp
- * with a role.
- *
- * Listed separately rather than folded into a meaning, because it is a bug with
- * an owner: phase 6b (§13.3), which is the phase that touches this component.
+ * Phase 6b re-pointed it, and "still has amber in every file the census names"
+ * FAILED on the next run, naming the file and the list it was in. That is the
+ * rot-check doing the job it exists for: the record cannot go on claiming a cost
+ * the app no longer pays, which is how §4.2.1 came to describe a rule it did not
+ * have. The line is gone rather than commented out, and the history is here.
  */
-const HALF_MIGRATED = [
-  'src/app/components/message.ts',
-];
 
 const CLASSIFIED = new Map<string, string[]>([
   ['needs an answer from you (PERMITTED)', NEEDS_AN_ANSWER],
@@ -219,7 +222,6 @@ const CLASSIFIED = new Map<string, string[]>([
   ['overriding a refusal', OVERRIDING_A_REFUSAL],
   ['unlike its neighbours', UNLIKE_ITS_NEIGHBOURS],
   ['a liability or missing agreement', A_LIABILITY],
-  ['half-migrated: phase 6b owns it', HALF_MIGRATED],
 ]);
 
 describe('amber — §4.2.1 and §10.7', () => {
@@ -248,12 +250,22 @@ describe('amber — §4.2.1 and §10.7', () => {
     expect(stale).toEqual([]);
   });
 
-  it('is carried by exactly two permitted meanings and four unpermitted ones', () => {
-    // The number that matters, asserted so it cannot drift upward quietly. It
-    // is four and not zero, and phase 5 did not make it worse -- see the file
-    // header and PHASE5_PRECHECK.md §2.
+  it('is carried by exactly two permitted meanings and three unpermitted ones', () => {
+    // THE NUMBER THAT MATTERS, and it may go down but not up.
+    //
+    // §4.2.1 permits two meanings. PHASE5_PRECHECK.md's census found five, so
+    // three are unpermitted: an override, an anomaly hint, and a liability or
+    // missing agreement. Each is a real distinction that deserves its own name
+    // rather than a sweep onto amber, and §16 carries them as undecided.
+    //
+    // It was four until phase 6b. The fourth was never a MEANING -- it was
+    // message.ts's half-migrated vendor chip, which is a bug with an owner
+    // rather than a design decision, and counting it alongside the three
+    // flattered the other three by comparison. It is fixed and the entry is
+    // gone; see the note above A_LIABILITY.
     const unpermitted = [...CLASSIFIED.keys()].filter((k) => !k.includes('PERMITTED'));
-    expect(unpermitted.length).toBe(4);
+    expect(unpermitted.length).toBe(3);
+    expect([...CLASSIFIED.keys()].filter((k) => k.includes('PERMITTED')).length).toBe(2);
   });
 
   it('keeps warning-fill to the one element in the chrome that may carry it', () => {

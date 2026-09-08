@@ -399,6 +399,16 @@ app-session-required,
  * somebody puts a sibling beside them, which is exactly what happened to
  * app-session-required.
  */
+/*
+ * app-assistant-panel holds nothing but ABSOLUTELY POSITIONED children -- the
+ * dim and the aside -- so as a flex item of the shell's content column it
+ * contributes a zero-height block and no layout. It is listed anyway, and the
+ * guard in scripts/check-templates.mjs is what made that non-optional: the
+ * policy is that every non-routed host is declared, and a host exempted
+ * because "it happens not to matter today" is exactly the reasoning that left
+ * app-session-required off the list for its whole life.
+ */
+app-assistant-panel,
 app-chart-card,
 app-composer,
 app-confirmation-card,

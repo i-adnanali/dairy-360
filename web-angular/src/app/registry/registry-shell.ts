@@ -12,6 +12,8 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { WriteLog } from './after-write';
+import { Assistant } from '../core/assistant';
+import { AssistantPanel } from '../components/assistant-panel';
 import { Session } from './session';
 import { SessionBar } from './session-bar';
 import { SessionGate } from './session-gate';
@@ -22,8 +24,8 @@ import { TextLink } from '../ui/text';
   selector: 'app-registry-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    RouterLink, RouterLinkActive, RouterOutlet, SessionBar, SessionGate, TextLink,
-    ThemeToggle,
+    AssistantPanel, RouterLink, RouterLinkActive, RouterOutlet, SessionBar, SessionGate,
+    TextLink, ThemeToggle,
   ],
   template: `
     <div class="flex h-full flex-col bg-surface-page text-content-primary">
@@ -75,7 +77,42 @@ import { TextLink } from '../ui/text';
           -->
           <div class="flex items-baseline justify-between gap-4">
             <h1 class="text-base font-semibold tracking-tight">Animal registry</h1>
-            <app-theme-toggle />
+            <!-- ---------------------------------------------------------
+                 THE ASSISTANT TOGGLE, PARKED. §13.1 says it belongs in the
+                 header, and the header §13.1 means is §12.1's -- three zones
+                 over two explicit rows, with the storage chip, the session
+                 chip, the theme toggle and this one placed deliberately.
+                 THAT IS PHASE 7 and it is gated on the five-animal trial,
+                 because it changes the chrome around the frozen forms and the
+                 tab order into them.
+
+                 So it goes where the current header can carry it: row 1 holds
+                 a short title and the theme toggle and nothing else, so one
+                 more small control fits without touching row 2. §11 records
+                 the theme toggle costing 34px when it was first put in the
+                 SAME wrapping row as the ten-link nav; this is the row that
+                 cannot wrap.
+
+                 WHEN §12.1 IS BUILT, this moves to the right zone beside the
+                 session chip and this comment goes with it. Note the tab-order
+                 consequence §11 already flagged for the theme toggle: there
+                 are now TWO controls ahead of the nav rather than one.
+                 --------------------------------------------------------- -->
+            <div class="flex items-baseline gap-3">
+              <button
+                type="button"
+                (click)="assistant.toggle()"
+                [attr.aria-expanded]="assistant.open()"
+                aria-controls="assistant-panel"
+                class="rounded-sm text-xs text-content-muted hover:text-content-primary
+                  focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
+                  focus-visible:ring-offset-2 focus-visible:ring-offset-surface-raised"
+                data-role="assistant-toggle"
+              >
+                Assistant
+              </button>
+              <app-theme-toggle />
+            </div>
           </div>
           <!-- ALWAYS RENDERED. The nav used to be hidden until provenance was
                declared, which meant an operator who only wanted to look at a
@@ -150,19 +187,40 @@ import { TextLink } from '../ui/text';
         </div>
       }
 
-      <main class="flex-1 overflow-y-auto px-4 py-6">
-        @if (writeOnlyRoute() && !session.ready()) {
-          <app-session-gate />
-        } @else {
-          <router-outlet />
-        }
-      </main>
+      <!-- ---------------------------------------------------------------
+           THE CONTENT REGION IS NOW A POSITIONING CONTEXT. Phase 6b, §13.1.
+           ---------------------------------------------------------------
+           The assistant panel OVERLAYS the content rather than pushing it, so
+           it needs an ancestor to be absolute against -- and that ancestor has
+           to be the content region and not the viewport, or the panel would
+           cover the header, the nav and the storage banner. Those are the three
+           things §12.2 and §12.3 argue must be permanently visible.
+
+           "relative flex-1" takes over the flex-item role <main> used to have,
+           and "min-h-0" is here rather than on <main> for the same reason §9.2
+           works out: <main> does not need it because its own "overflow-y-auto"
+           zeroes its automatic minimum size, but THIS div does not scroll, so
+           without it the region holds itself open at content height and the
+           panel's "inset-y-0" resolves against a box taller than the viewport.
+           --------------------------------------------------------------- -->
+      <div class="relative flex min-h-0 flex-1 flex-col">
+        <main class="flex-1 overflow-y-auto px-4 py-6">
+          @if (writeOnlyRoute() && !session.ready()) {
+            <app-session-gate />
+          } @else {
+            <router-outlet />
+          }
+        </main>
+
+        <app-assistant-panel />
+      </div>
     </div>
   `,
 })
 export class RegistryShell {
   protected readonly session = inject(Session);
   protected readonly writeLog = inject(WriteLog);
+  protected readonly assistant = inject(Assistant);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -181,7 +239,58 @@ export class RegistryShell {
         filter((e) => e instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => this.writeOnlyRoute.set(this.declaresWrites()));
+      .subscribe(() => {
+        this.writeOnlyRoute.set(this.declaresWrites());
+        this.assistant.context.set(this.contextFor());
+      });
+    this.assistant.context.set(this.contextFor());
+  }
+
+  /**
+   * §13.2's context line, in words -- and the WORDING lives here on purpose.
+   *
+   * The panel is a component that knows nothing about routes; the shell is the
+   * only thing that has the activated route in hand. Putting the phrasing here
+   * also puts it next to the nav that names the same screens, which is what
+   * stops "the evening roster" and "Milking" drifting into two names for one
+   * place.
+   *
+   * ABSENT RATHER THAN GENERIC when a route has nothing useful to say. §13.2's
+   * whole claim is that the line resolves a pronoun -- "how does HER interval
+   * compare" on an animal route -- and a line reading "Reading the app" resolves
+   * nothing while training the eye to skip the one place that does. /chat is the
+   * clearest case: the route IS the assistant.
+   *
+   * The URL is read rather than the route's `data`, because a serial in the path
+   * is the thing worth naming and `data` would have to repeat it. `BD-0003`
+   * comes straight out of the URL; the roster's session comes out of the query
+   * string, which url-state.ts puts there precisely so a specific roster can be
+   * named and sent to somebody.
+   */
+  private contextFor(): string | null {
+    const url = this.router.url.split('?')[0];
+    const q = this.router.url.includes('?')
+      ? new URLSearchParams(this.router.url.split('?')[1])
+      : new URLSearchParams();
+
+    const animal = /^\/animals\/([^/]+)$/.exec(url);
+    if (animal && animal[1] !== 'new') return animal[1];
+
+    if (url === '/milk/milking') {
+      const session = q.get('session');
+      return session === 'morning' || session === 'evening'
+        ? `the ${session} roster`
+        : 'the milking roster';
+    }
+    if (url === '/milk/dispatch') return 'the dispatch sheet';
+    if (url === '/animals') return 'the herd';
+    if (url === '/milk/buyers') return 'the buyers';
+    if (url === '/labour/people') return 'the people list';
+    if (url === '/labour/payroll') return 'the payroll run';
+    if (url === '/check') return 'the checks';
+    // Everything else -- /, /chat, both frozen forms, the two detail routes
+    // whose ids are per-run UUIDs nobody would recognise -- says nothing.
+    return null;
   }
 
   /**
