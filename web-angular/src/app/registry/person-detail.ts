@@ -179,7 +179,7 @@ import { Button } from '../ui/button';
                 [attr.data-month]="m.month">
                 <div class="flex flex-wrap items-baseline justify-between gap-2 bg-surface-sunken px-3 py-2 text-sm">
                   <span class="font-medium text-content-primary">{{ m.month }}</span>
-                  <span class="tabular-nums text-content-secondary">
+                  <span class="font-mono tabular-nums text-content-secondary">
                     earned {{ formatMinor(m.earned_minor) }} ·
                     paid {{ formatMinor(m.paid_minor) }} ·
                     <span class="font-medium">closing {{ formatMinor(m.closing_minor) }}</span>
@@ -193,7 +193,7 @@ import { Button } from '../ui/button';
                         {{ w.from_on }}@if (w.to_on !== w.from_on) { <span> → {{ w.to_on }}</span> }
                         @if (w.note) { <span appHelp size="xs" tone="subtle">· {{ w.note }}</span> }
                       </span>
-                      <span class="tabular-nums">{{ formatMinor(w.amount_minor) }}</span>
+                      <span class="font-mono tabular-nums">{{ formatMinor(w.amount_minor) }}</span>
                     </li>
                   }
                   @for (p of m.payments; track p.id) {
@@ -203,7 +203,7 @@ import { Button } from '../ui/button';
                         @if (p.reference) { <span appHelp size="xs" tone="subtle">· {{ p.reference }}</span> }
                         @if (p.note) { <span appHelp size="xs" tone="subtle">· {{ p.note }}</span> }
                       </span>
-                      <span class="tabular-nums">− {{ formatMinor(p.amount_minor) }}</span>
+                      <span class="font-mono tabular-nums">− {{ formatMinor(p.amount_minor) }}</span>
                     </li>
                   }
                 </ul>
@@ -234,7 +234,7 @@ import { Button } from '../ui/button';
             <label class="space-y-1">
               <span class="block text-sm font-medium text-content-heading">Amount (Rs)</span>
               <input name="amount_minor" type="text" inputmode="decimal" [value]="amount()"
-                (input)="amount.set($any($event.target).value)" appInput density="comfortable" class="w-36 text-right tabular-nums" />
+                (input)="amount.set($any($event.target).value)" appInput density="comfortable" class="w-36 text-right font-mono tabular-nums" />
               @if (payState.fieldError('amount_minor'); as msg) {
                 <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{ msg }}</span>
               }

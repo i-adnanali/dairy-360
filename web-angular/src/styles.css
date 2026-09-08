@@ -3,20 +3,30 @@
 @tailwind utilities;
 
 /*
- * THE TOKEN LAYER. Phase 1 of docs/UI_SYSTEM.md, and deliberately invisible.
+ * THE TOKEN LAYER, RE-POINTED. Phase 4 of docs/UI_SYSTEM.md.
  *
- * Three layers, and components are meant to read only the third:
- *   1. primitives  -- the `farm` ramp in tailwind.config.js, still literal hex
- *   2. indirection -- these custom properties, which currently hold exactly the
- *                     phase-1 values, i.e. today's colours to the byte
- *   3. semantics   -- the colour names in tailwind.config.js that read these
+ * Two layers now, not three. The `farm` ramp is gone from tailwind.config.js --
+ * nothing referenced it any more -- so these custom properties ARE layer 1, and
+ * the semantic names in the config are layer 2. The indirection did its job and
+ * then collapsed, which is what it was for.
  *
- * EVERY VALUE HERE IS THE CURRENT ONE. Nothing about the rendered app changes
- * when this file lands; the point is only that the names now exist, so phase 2
- * can migrate call sites one at a time and phase 4 can re-point the ramp from
- * one place. The values were verified channel by channel against the COMPILED
- * stylesheet, not against the config -- `rgb(230 215 184 / 0.6)` for
- * border-farm-200/60 is what Tailwind actually emitted before this change.
+ * THIS IS THE COMMIT WHERE THE APP STOPS BEING BEIGE. Phases 1 and 2 were built
+ * to be invisible: phase 1's acceptance was fourteen byte-identical screenshots,
+ * and phase 2's was that nothing moved except the button and cell padding. All
+ * of that existed so this file could be edited once. The greys below are
+ * section 3.1's "Target light" column; the brand is a clay/terracotta accent
+ * that reads as a decision rather than as the colour of old paper.
+ *
+ * WHAT IS DELIBERATELY NOT RE-POINTED:
+ *   - the roles (danger/warning/success). Section 3.2's Light column is already
+ *     today's Tailwind palette, so there is nothing to move.
+ *   - the write-log bar. B3 freezes its contrast until the five-animal trial
+ *     reports, so it keeps its own three tokens at their original values while
+ *     everything around it changes. This is the whole reason it has its own
+ *     tokens rather than the success role's.
+ *
+ * The `<alpha-value>` contract still holds and is still the regression test:
+ * three opacity modifiers exist and all three resolve through these triplets.
  *
  * CHANNEL TRIPLETS, NOT HEX, and this is forced rather than chosen.
  * tailwind.config.js wraps each of these as `rgb(var(--token) / <alpha-value>)`
@@ -34,24 +44,24 @@
  */
 :root {
   /* --- surfaces ------------------------------------------------------- */
-  --surface-page: 250 247 240;          /* farm-50   #faf7f0 */
-  --surface-raised: 255 255 255;        /* white     #ffffff */
-  --surface-sunken: 243 236 220;        /* farm-100  #f3ecdc */
+  --surface-page: 247 247 245;  /* #F7F7F5 */
+  --surface-raised: 255 255 255;  /* #FFFFFF */
+  --surface-sunken: 239 238 235;  /* #EFEEEB */
 
   /* --- text ----------------------------------------------------------- */
-  --text-primary: 77 55 34;             /* farm-900  #4d3722 */
-  --text-heading: 91 64 38;             /* farm-800  #5b4026 */
-  --text-secondary: 110 78 42;          /* farm-700  #6e4e2a */
-  --text-muted: 138 100 49;             /* farm-600  #8a6431 */
-  --text-subtle: 168 125 62;            /* farm-500  #a87d3e */
-  --text-disabled: 194 155 92;          /* farm-400  #c29b5c */
-  --text-on-fill: 255 255 255;          /* white     #ffffff */
+  --text-primary: 26 25 23;  /* #1A1917 */
+  --text-heading: 46 45 42;  /* #2E2D2A */
+  --text-secondary: 74 72 68;  /* #4A4844 */
+  --text-muted: 99 97 92;  /* #63615C */
+  --text-subtle: 130 128 122;  /* #82807A */
+  --text-disabled: 168 166 158;  /* #A8A69E */
+  --text-on-fill: 255 255 255;  /* #FFFFFF */
 
   /* --- lines ---------------------------------------------------------- */
-  --border-hairline: 243 236 220;       /* farm-100  #f3ecdc */
-  --border-subtle: 230 215 184;         /* farm-200  #e6d7b8 */
-  --border-default: 212 186 133;        /* farm-300  #d4ba85 */
-  --border-strong: 194 155 92;          /* farm-400  #c29b5c */
+  --border-hairline: 239 238 235;  /* #EFEEEB */
+  --border-subtle: 227 226 222;  /* #E3E2DE */
+  --border-default: 203 201 195;  /* #CBC9C3 */
+  --border-strong: 168 166 158;  /* #A8A69E */
   /*
    * A STATE, NOT A BRAND FILL. border-farm-600 is the selected chip, the
    * selected card and the active tab, at 8 sites across chip-group,
@@ -59,16 +69,16 @@
    * animal-detail. It shares a value with --fill-brand today and must not
    * share a name, or phase 4 cannot move one without the other.
    */
-  --border-selected: 138 100 49;        /* farm-600  #8a6431 */
+  --border-selected: 169 96 60;  /* #A9603C */
 
   /* --- brand fill ----------------------------------------------------- */
-  --fill-brand: 138 100 49;             /* farm-600  #8a6431 */
-  --fill-brand-hover: 110 78 42;        /* farm-700  #6e4e2a */
-  --fill-brand-disabled: 212 186 133;   /* farm-300  #d4ba85 */
-  --fill-badge: 230 215 184;            /* farm-200  #e6d7b8 */
+  --fill-brand: 169 96 60;  /* #A9603C */
+  --fill-brand-hover: 142 78 48;  /* #8E4E30 */
+  --fill-brand-disabled: 227 226 222;  /* #E3E2DE */
+  --fill-badge: 239 238 235;  /* #EFEEEB */
 
-  --focus-ring: 168 125 62;             /* farm-500  #a87d3e */
-  --divider: 243 236 220;               /* farm-100  #f3ecdc */
+  --focus-ring: 169 96 60;  /* #A9603C */
+  --divider: 239 238 235;  /* #EFEEEB */
 
   /* --- roles ---------------------------------------------------------- */
   /*
@@ -104,17 +114,17 @@
    * role -- a vendor answer wears the same amber as an unanswered milking row
    * -- and moving it off amber is phase 4's job, not this one.
    */
-  --agent-dairy-bg: 236 253 245;        /* emerald-50  #ecfdf5 */
-  --agent-dairy-fg: 4 120 87;           /* emerald-700 #047857 */
-  --agent-dairy-line: 167 243 208;      /* emerald-200 #a7f3d0 */
+  --agent-dairy-bg: 236 245 241;  /* #ECF5F1 */
+  --agent-dairy-fg: 47 111 94;  /* #2F6F5E */
+  --agent-dairy-line: 191 220 211;  /* #BFDCD3 */
 
-  --agent-vendor-bg: 255 251 235;       /* amber-50  #fffbeb -- collides */
-  --agent-vendor-fg: 180 83 9;          /* amber-700 #b45309 */
-  --agent-vendor-line: 253 230 138;     /* amber-200 #fde68a */
+  --agent-vendor-bg: 238 240 250;  /* #EEF0FA */
+  --agent-vendor-fg: 76 95 168;  /* #4C5FA8 */
+  --agent-vendor-line: 199 206 234;  /* #C7CEEA */
 
-  --agent-both-bg: 245 243 255;         /* violet-50  #f5f3ff */
-  --agent-both-fg: 109 40 217;          /* violet-700 #6d28d9 */
-  --agent-both-line: 221 214 254;       /* violet-200 #ddd6fe */
+  --agent-both-bg: 243 238 250;  /* #F3EEFA */
+  --agent-both-fg: 122 90 168;  /* #7A5AA8 */
+  --agent-both-line: 216 203 234;  /* #D8CBEA */
 
   /* --- the write-log bar ---------------------------------------------- */
   /*
@@ -160,7 +170,7 @@
   --success-line-soft: 187 247 208;     /* green-200 #bbf7d0 */
   --success-dot: 16 185 129;            /* emerald-500 #10b981, tool-call OK */
   --danger-dot: 239 68 68;              /* red-500   #ef4444, tool-call error */
-  --mark-pending: 194 155 92;           /* farm-400  #c29b5c, the "Thinking..." pulse */
+  --mark-pending: 168 166 158;  /* #A8A69E */
 
   /* --- certainty ------------------------------------------------------ */
   /*
@@ -169,24 +179,23 @@
    * consumes them until phase 5, so the layer is still zero-delta either way,
    * but the provenance differs and should not be forgotten:
    *
-   *   --certainty-rule    IS today's value. decoration-farm-300 already exists
-   *                       at one site (people-list) as the dotted rule under an
-   *                       approximate figure, unnamed until now.
-   *   --certainty-known   points at --text-primary, which section 3.5 specifies.
-   *   --certainty-absent  points at --text-subtle, likewise.
-   *   --certainty-approx  PROVISIONAL. Section 3.5 gives only a target neutral
-   *                       (#82807A) with no light-phase equivalent, so this
-   *                       holds --text-subtle's value as the nearest current
-   *                       analogue. Revisit in phase 5 rather than reading it
-   *                       as measured.
+   *   --certainty-rule    now section 3.5's own value. Its one consumer is the
+   *                       dotted rule under an approximate figure in people-list,
+   *                       which is the one site in the app that moves for a
+   *                       reason other than the re-point.
+   *   --certainty-known   tracks --text-primary, which section 3.5 specifies.
+   *   --certainty-absent  tracks --text-subtle, likewise.
+   *   --certainty-approx  no longer provisional -- section 3.5's light value and
+   *                       the neutral ramp now agree, which they could not while
+   *                       the palette was beige.
    *
    * "Unanswered" deliberately has no token: section 5 assigns it the warning
    * role, and a second name for one value is how the two drift apart.
    */
-  --certainty-known: 77 55 34;          /* = --text-primary */
-  --certainty-approx: 168 125 62;       /* PROVISIONAL, = --text-subtle */
-  --certainty-rule: 212 186 133;        /* farm-300 #d4ba85, today's dotted rule */
-  --certainty-absent: 168 125 62;       /* = --text-subtle */
+  --certainty-known: 26 25 23;  /* #1A1917 */
+  --certainty-approx: 130 128 122;  /* #82807A */
+  --certainty-rule: 168 166 158;  /* #A8A69E */
+  --certainty-absent: 130 128 122;  /* #82807A */
 }
 
 html,

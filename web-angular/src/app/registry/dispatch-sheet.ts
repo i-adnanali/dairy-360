@@ -171,8 +171,23 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
                       {{ previousText(row) }}
                     </td>
-                    <td appCell density="compact" numeric nowrap small tone="muted"
-                      data-role="rate">{{ rateText(row) }}</td>
+                    <!-- Right-aligned but NOT numeric, and that is what keeps this
+                         sheet its original height.
+
+                         "Rs 7,000.00 / 40 L" is a composite rate label, identical in
+                         every row -- not a column of digits anybody scans down. Given
+                         the numeric prop it was monospaced, and mono is wider: table
+                         layout took the width back off the litres cell, whose wrapping
+                         flex row then dropped the "already saved" note onto a second
+                         line and grew the sheet 48px. Alignment without the face costs
+                         nothing and gives nothing up, because there is nothing here to
+                         align against.
+
+                         The AMOUNT column next door keeps numeric and keeps mono. It
+                         is a real figure column -- rupees, section 4 -- and it is the
+                         reason the litres cell is tighter than it was. It fits. -->
+                    <td appCell density="compact" nowrap small tone="muted"
+                      class="text-right" data-role="rate">{{ rateText(row) }}</td>
                     <td appCell density="compact">
                       <div class="flex flex-wrap items-center gap-2">
                         <input

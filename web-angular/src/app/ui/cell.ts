@@ -63,14 +63,25 @@ export class Cell {
   readonly tone = input<CellTone>('default');
 
   /**
-   * A column of figures: right-aligned.
+   * A column of figures: right-aligned, monospaced, tabular.
    *
-   * `font-mono tabular-nums` belongs here too and is deliberately NOT applied
-   * yet -- monospace figures are phase 4 ("Neutral re-point + monospace
-   * figures"), and adding them now would put a third change into a phase whose
-   * acceptance is "screenshots differ only in the button's disabled state and
-   * cell padding". Two cells already do it by hand and keep doing it by hand
-   * until then.
+   * `font-mono tabular-nums` arrived in phase 4, held back from phase 2 only
+   * because that phase's acceptance was that nothing moved except the button
+   * and cell padding.
+   *
+   * `tabular-nums` is the half that does the work and the half nobody notices:
+   * it forces every digit to one advance width, so the units column of row 31
+   * sits under the units column of row 1. Proportional digits in a right-aligned
+   * column still line up at the right EDGE while the digits inside wander, which
+   * is exactly the case where an eye scanning for an anomaly finds nothing.
+   * Section 4: "tabular alignment is what lets you scan 31 rows for an anomaly."
+   *
+   * `whitespace-nowrap` comes with it, and it is not tidiness. Monospace is
+   * WIDER than the proportional face it replaced, so the dispatch sheet's
+   * amount column broke "Rs 3,325.00" across two lines the moment the figures
+   * went mono -- 48px of extra page height and a number you cannot read at a
+   * glance. A figure that wraps is worse than one that overflows, because the
+   * eye reads the fragment as a smaller number.
    */
   readonly numeric = input(false, { transform: booleanAttribute });
   readonly emphasis = input(false, { transform: booleanAttribute });
@@ -82,7 +93,15 @@ export class Cell {
     const pad = this.isHeader || this.density() === 'comfortable' ? 'px-3 py-2' : 'px-3 py-1.5';
     return [
       pad,
-      this.numeric() ? 'text-right' : '',
+      // A numeric <th> gets the ALIGNMENT but not the face: a header is a word
+      // ("Days", "Recorded", "Rate today"), and setting a word in a figure font
+      // is how a table starts looking like a terminal. Only the cells that hold
+      // digits are monospaced.
+      this.numeric()
+        ? this.isHeader
+          ? 'text-right'
+          : 'text-right font-mono tabular-nums whitespace-nowrap'
+        : '',
       this.emphasis() ? 'font-medium' : '',
       this.nowrap() ? 'whitespace-nowrap' : '',
       this.small() ? 'text-xs' : '',

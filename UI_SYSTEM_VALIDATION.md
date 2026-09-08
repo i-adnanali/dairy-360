@@ -1530,3 +1530,127 @@ whose padding scales §6.2 deletes. Nothing else moved.
   phase 4; adding them here would have put a third change into this phase.
 - The four `<thead>` elements sharing `SectionLabel`'s class string were skipped
   deliberately — a directive named for a label does not belong on a table head.
+
+---
+
+# Phase 4 — the neutral re-point, 2026-09-08
+
+**The app is no longer beige.** Phases 1 and 2 existed so this could be one
+file's edit, and it was: 35 values in `:root`, plus deleting the ramp.
+
+Run **out of §10's order** — 4 before 3 — because the recolour is what the work
+was for and dark mode is a larger separable job. Phase 3 is untouched.
+
+## What moved
+
+| | |
+|---|---|
+| §3.1 core tokens | 21 → Target light. Greys `#F7F7F5`…`#1A1917`, brand a clay `#A9603C` |
+| §3.3 agent ramp | 9 values. **`vendor` leaves amber for blue** — the collision §3.3 called "the point" |
+| §3.5 certainty | 4 values, now genuinely §3.5's own rather than phase-1 provisionals |
+| `--mark-pending` | farm-400 → `#A8A69E` |
+| §3.2 roles | **unchanged.** Its Light column was already today's Tailwind palette |
+| §3.4 write-log | **unchanged, per B3** — see below |
+| `farm` ramp | **deleted** |
+
+**B3 is visibly working.** The write-log bar keeps `--writelog-bg/-fg/-line` at
+their original greens while every surface around it turned neutral. That is only
+possible because §3.4 gave it its own three tokens instead of the `success`
+role — and because the token migration split `--success-strong` and
+`--success-line-soft` off as separate names holding identical values. One token
+per value would have meant re-pointing the bar along with everything else, which
+is exactly what prediction 5 is pre-registered against.
+
+**Deleting the ramp is how the migration is proved, not assumed.** Any missed
+call site would have failed the build loudly rather than quietly rendering the
+old beige. `src/` now holds zero `farm` references; the only palette literal
+anywhere is `border-transparent`, a Tailwind built-in. Zero occurrences of
+`farm` in the compiled stylesheet.
+
+## Monospace figures
+
+`Cell`'s `numeric` prop now adds `font-mono tabular-nums whitespace-nowrap`,
+held back from phase 2 only because that phase's acceptance was that nothing
+moved except the button and cell padding. Eight money figures outside tables
+(person-detail, payroll-run) and four amount inputs took `font-mono` too.
+
+Two refinements the specification does not mention, both found by rendering:
+
+- **A numeric `<th>` gets the alignment but not the face.** A header is a word —
+  "Days", "Recorded", "Rate today" — and setting words in a figure font makes a
+  table look like a terminal.
+- **`whitespace-nowrap` comes with `numeric`.** A figure that wraps is worse than
+  one that overflows, because the eye reads the fragment as a smaller number.
+
+## The one layout consequence, and the wrong fix for it
+
+Mono is **wider**, and on the dispatch sheet that cost 48px: the rate column
+`Rs 7,000.00 / 40 L` grew, table layout took the width off the litres cell, and
+its `flex-wrap` row dropped the "already saved" note onto a second line.
+
+The fix was **not** to drop mono. The rate is a composite label, identical in
+every row — nothing anybody scans down a column — so it takes right-alignment
+without the face. The AMOUNT column next door keeps both, because rupees are
+exactly what §4 wants monospaced. **0 of 14 screens reflow** against the
+pre-phase-4 capture.
+
+Worth recording how nearly this went wrong: an intermediate measurement said the
+48px had *not* been recovered, and the comment written into `dispatch-sheet.ts`
+said so and blamed the amount column. That measurement was taken against a
+**broken build** — see below — so the dev server was serving stale CSS. The
+comment was wrong in the tree for two commits' worth of work and is now
+corrected. A screenshot is only evidence if the thing that produced it compiled.
+
+## chart-card: ten hex literals the migration could not reach
+
+Chart.js takes colour **strings**, not classes, so this file never went through
+the token migration and phase 4's re-point could not touch it. Left alone it
+would have held the only old-palette values left in `src/` — brown lines and
+beige gridlines on a neutral card, visible the moment the agent returns a
+dataset (it renders only inside `message.ts`, so no fixture screen shows it).
+
+The literals were re-pointed **by hand** and `chart-card.spec.ts:31` updated to
+match. **That is the defect, not the fix.** §8.1's `chartTheme()` factory, which
+reads the custom properties, is phase 3 and is also what dark mode requires; a
+hand-copied hex cannot follow a toggle and will drift from `:root` the first time
+somebody edits one and not the other. The spec still pins a hex by exact
+equality, which is precisely why §8.1 says theming this file "breaks it on day
+one".
+
+## I hit the bug templates.spec.ts was built for, and the guard could not fire
+
+Writing that dispatch-sheet comment, I put backticks around `numeric` and
+`flex-wrap` **inside a `template:` literal** — the exact mistake
+`REGISTRY_PAYROLL.md` §16.3 records as having cost four occurrences over three
+cycles, and which `templates.spec.ts` was built to catch. It produced eleven
+TypeScript errors pointing at lines nowhere near the cause, as advertised.
+
+**The guard never ran.** A stray backtick inside a template literal is a
+*compile* error, so `ng test` fails at the build step and the spec that would
+have named the file and line never executes. The guard can only fire for the
+subset of stray backticks that still produce parseable TypeScript. That is a real
+gap in a check whose whole stated purpose is that "the failure has to name the
+file and the line so it is fixed in seconds rather than bisected" — it is
+worth either moving to the server suite (which the header explicitly considered
+and rejected for workspace reasons) or running it as a lint step ahead of the
+build.
+
+## Verification
+
+- **284/284** frontend, **726/726** server, production build clean (534.23 kB,
+  +0.26 kB against phase 2).
+- **0 of 14 screens reflowed** — the recolour changed no layout.
+- The three opacity modifiers still resolve through the tokens:
+  `rgb(var(--surface-page) / 0.8)`, `rgb(var(--success-bg) / 0.4)`,
+  `rgb(var(--border-subtle) / 0.6)`. The `<alpha-value>` contract held through a
+  re-point, which is the thing channel triplets were chosen for.
+- `--writelog-fg` still `20 83 45`; `--fill-brand` now `169 96 60`.
+
+## What phase 3 still owes
+
+Skipped, not done: the `.dark` block and the three-way toggle, `chartTheme()`,
+`.prose-chat`'s three `rgba(0,0,0,…)` values and its unstyled `h1`–`h3` /
+`blockquote` / `a` / `hr` / `pre` / `del` / nested lists, focus rings on every
+interactive primitive (without reinstating an outline on `composer.ts`), and
+`aria-live` on streaming chat output. §12's **dark** values have still never been
+rendered by anyone.

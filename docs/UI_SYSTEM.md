@@ -1,13 +1,27 @@
 # UI system — the design system
 
-*Status: **phases 0, 1 and 2 built.** Specified against `816fe67`. The token
-layer landed with zero visual delta (fourteen byte-identical screenshots, all 54
-colour utilities resolving unchanged); the fifteen primitives landed as attribute
-**directives** rather than components, taking class strings from 358 to 293 and
-occurrences from 957 to 614 with all 115 `data-role` hooks intact. Phases 3–7 are
-unstarted and phase 3 wants eyes on the result first — §12's target light and
-dark values have still never been rendered. Three items remain **BLOCKED** on the
-five-animal trial.*
+*Status: **phases 0, 1, 2 and 4 built. Phase 3 is not.** Specified against
+`816fe67`. The token layer landed with zero visual delta; the fifteen primitives
+landed as attribute **directives** rather than components (class strings 358 →
+293, occurrences 957 → 614, all 115 `data-role` hooks intact); then every call
+site moved onto the semantic names, and §3.1's Target light column went in. The
+`farm` ramp is **deleted** — `src/` holds zero references to it — so the three
+layers §3 describes are now two.*
+
+*The app is no longer beige. Phase 4 is the commit where that happened, and
+phases 1 and 2 existed to make it a single file's edit.*
+
+***Phase 3 was skipped, not completed.*** Dark mode, the `.dark` block,
+`chartTheme()`, the markdown surfaces and the focus rings are all still
+outstanding, and `chart-card.spec.ts:31` still pins `#8a6431` by exact equality
+— a literal that no longer appears anywhere else in the app. §10's order was 3
+then 4; it was run 4 then 3 because the recolour is what the work was for and
+dark mode is a larger, separable job. Read §10 knowing one row is out of
+sequence. §12's **dark** values remain unrendered by anyone.*
+
+*Three items remain **BLOCKED** on the five-animal trial, and B3 is visibly
+doing its job: the write-log bar keeps its own three tokens at their original
+green while every surface around it turned neutral.*
 
 *One cost was accepted knowingly rather than avoided. §6.3's disabled state drops
 the native attribute so `aria-describedby` can reach the reason text, which puts

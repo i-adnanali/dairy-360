@@ -30,7 +30,11 @@ describe('ChartCard', () => {
     expect(data.datasets).toHaveLength(2);
     expect(data.datasets[0].label).toBe('Total litres');
     expect(data.datasets[0].data).toEqual([100, 110]);
-    expect(data.datasets[0].borderColor).toBe('#8a6431');
+    // Phase 4 re-pointed this by hand, so the literal moved with it. Still an
+    // exact-equality check on a hex, which is what section 8.1 wants replaced by
+    // an assertion on the resolved token once chartTheme() exists -- this line is
+    // the reason theming this file "breaks it on day one".
+    expect(data.datasets[0].borderColor).toBe('#A9603C');
     expect(data.datasets[1].label).toBe('Avg / animal');
     expect(data.datasets[1].data).toEqual([5, 5.5]);
     expect(data.datasets[1].borderDash).toEqual([4, 3]);

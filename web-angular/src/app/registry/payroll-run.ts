@@ -147,7 +147,7 @@ interface DihariDraft {
                       <span appHelp size="xs">Rs</span>
                       <input type="text" inputmode="decimal"
                         [value]="amountOf(row)" (input)="setAmount(row, $any($event.target).value)"
-                        [disabled]="!row.term" appInput density="comfortable" class="w-32 text-right tabular-nums disabled:bg-surface-page"
+                        [disabled]="!row.term" appInput density="comfortable" class="w-32 text-right font-mono tabular-nums disabled:bg-surface-page"
                         [attr.data-role]="'amount-' + row.person.identifier" />
                     </label>
                     @if (row.existing) {
@@ -200,7 +200,7 @@ interface DihariDraft {
               @for (d of r.daily; track d.id) {
                 <li class="flex items-baseline justify-between rounded-lg bg-surface-raised px-3 py-2">
                   <span><span class="font-mono text-xs">{{ d.person.identifier }}</span> — {{ d.from_on }}</span>
-                  <span class="tabular-nums">{{ formatMinor(d.amount_minor) }}</span>
+                  <span class="font-mono tabular-nums">{{ formatMinor(d.amount_minor) }}</span>
                 </li>
               }
             </ul>
@@ -232,7 +232,7 @@ interface DihariDraft {
                 <label class="space-y-1">
                   <span class="block text-xs text-content-muted">Rs</span>
                   <input type="text" inputmode="decimal" [value]="draft.amount"
-                    (input)="setDraft($index, { amount: $any($event.target).value })" appInput class="w-28 text-right tabular-nums" />
+                    (input)="setDraft($index, { amount: $any($event.target).value })" appInput class="w-28 text-right font-mono tabular-nums" />
                 </label>
                 <button type="button" (click)="removeDraft($index)"
                   class="rounded-lg px-2 py-1.5 text-xs text-content-muted underline">remove</button>
@@ -250,7 +250,7 @@ interface DihariDraft {
             <span class="font-medium text-content-primary" data-role="answered">
               {{ answeredCount() }} of {{ r.permanent.length }} salaried answered
             </span>
-            <span class="tabular-nums text-content-primary" data-role="total">
+            <span class="font-mono tabular-nums text-content-primary" data-role="total">
               {{ formatMinor(draftTotalMinor()) }}
             </span>
           </div>

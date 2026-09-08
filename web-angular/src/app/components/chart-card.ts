@@ -5,6 +5,29 @@ import type { Dataset } from '@dairy/shared';
 import { HelpText } from '../ui/text';
 
 // Port of web-react/src/components/ChartCard.tsx (Recharts -> Chart.js via ng2-charts).
+//
+// ---------------------------------------------------------------------------
+// TEN HEX LITERALS, RE-POINTED BY HAND. A STOPGAP, NOT PHASE 3.
+// ---------------------------------------------------------------------------
+// Chart.js takes colours as strings, not classes, so this file never went
+// through the token migration and phase 4's re-point could not reach it. Left
+// alone it would have held the ONLY old-palette values left in src/ -- brown
+// lines and beige gridlines on a neutral card -- visible the moment the agent
+// returns a dataset.
+//
+// So the literals now match the new palette: the primary series takes the brand
+// accent, the secondary the disabled grey, and the axes take border-subtle,
+// border-default and text-muted. Values copied from styles.css by hand.
+//
+// THAT IS THE DEFECT, NOT THE FIX. Section 8.1 asks for a chartTheme() factory
+// that READS the custom properties, which is phase 3 and also what dark mode
+// needs -- a hand-copied hex cannot follow a theme toggle, and it will drift
+// from :root the first time anybody edits one and not the other. Two details
+// that pass are already recorded: `data` is a computed() so it re-renders for
+// free, and `options` needs converting to one (verified against the installed
+// ng2-charts 10.0.0 -- BaseChartDirective's ngOnChanges assigns and calls
+// update()). getComputedStyle returns "169 96 60", which Chart.js cannot parse,
+// so every read needs an rgb() wrapper.
 @Component({
   selector: 'app-chart-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,8 +57,8 @@ export class ChartCard {
         {
           label: 'Total litres',
           data: points.map((p) => p.totalLitres),
-          borderColor: '#8a6431',
-          backgroundColor: '#8a6431',
+          borderColor: '#A9603C',
+          backgroundColor: '#A9603C',
           borderWidth: 2,
           pointRadius: 0,
           cubicInterpolationMode: 'monotone',
@@ -43,8 +66,8 @@ export class ChartCard {
         {
           label: 'Avg / animal',
           data: points.map((p) => p.avgPerAnimal),
-          borderColor: '#c29b5c',
-          backgroundColor: '#c29b5c',
+          borderColor: '#A8A69E',
+          backgroundColor: '#A8A69E',
           borderWidth: 1.5,
           borderDash: [4, 3],
           pointRadius: 0,
@@ -64,14 +87,14 @@ export class ChartCard {
     },
     scales: {
       x: {
-        grid: { color: '#e6d7b8' },
-        border: { color: '#8a6431' },
-        ticks: { font: { size: 11 }, color: '#8a6431' },
+        grid: { color: '#E3E2DE' },
+        border: { color: '#CBC9C3' },
+        ticks: { font: { size: 11 }, color: '#63615C' },
       },
       y: {
-        grid: { color: '#e6d7b8' },
-        border: { color: '#8a6431' },
-        ticks: { font: { size: 11 }, color: '#8a6431' },
+        grid: { color: '#E3E2DE' },
+        border: { color: '#CBC9C3' },
+        ticks: { font: { size: 11 }, color: '#63615C' },
       },
     },
   };

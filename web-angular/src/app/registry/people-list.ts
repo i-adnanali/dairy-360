@@ -118,7 +118,7 @@ import { Button } from '../ui/button';
                     }
                   </td>
                   <td appCell>{{ p.name ?? '—' }}</td>
-                  <td appCell numeric class="tabular-nums"
+                  <td appCell numeric
                     [class.text-warning-fg]="p.balance_minor < 0" [attr.data-role]="'balance'">
                     {{ owed(p) }}
                   </td>

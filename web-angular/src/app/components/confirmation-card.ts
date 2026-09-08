@@ -43,7 +43,7 @@ import { StatusBadge } from '../ui/surface';
                 <td appCell>
                   {{ r.tag }}{{ r.name ? ' · ' + r.name : '' }}
                 </td>
-                <td appCell numeric class="tabular-nums">{{ r.value }}</td>
+                <td appCell numeric>{{ r.value }}</td>
               </tr>
             }
           </tbody>

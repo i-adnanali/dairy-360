@@ -1,8 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 
 /*
- * Layer 3 of the token vocabulary. See src/styles.css for layers 1 and 2, and
- * docs/UI_SYSTEM.md section 3 for why there are three.
+ * The semantic layer. See src/styles.css for the tokens it reads, and
+ * docs/UI_SYSTEM.md section 3. There were three layers while the `farm` ramp
+ * still existed; there are two now, which is what phase 4 was for.
  *
  * `rgb(var(--token) / <alpha-value>)` rather than `var(--token)` throughout:
  * the placeholder is what keeps opacity modifiers working, and it is the reason
@@ -47,27 +48,19 @@ module.exports = {
 
       colors: {
         /*
-         * KEPT, ON PURPOSE. Phase 2 migrates call sites to the semantic names
-         * a primitive at a time, so both vocabularies have to resolve during
-         * the migration -- 966 colour-utility occurrences cannot move in one
-         * commit. Still literal hex, so every existing utility compiles to
-         * exactly the bytes it did before. Deleted in phase 4, once nothing
-         * reads it.
+         * The `farm` ramp is GONE, and its absence is the deliverable.
+         *
+         * It was kept through phases 1 and 2 because both vocabularies had to
+         * resolve while ~500 utility occurrences moved a primitive at a time.
+         * Nothing reads it now -- src/ contains zero `farm` references, the
+         * only palette literal left anywhere being `border-transparent`, which
+         * is a Tailwind built-in and not a colour -- so deleting it is how the
+         * migration is PROVED complete rather than assumed. Any site that had
+         * been missed would fail the build here, loudly, instead of quietly
+         * rendering the old beige.
          */
-        farm: {
-          50: '#faf7f0',
-          100: '#f3ecdc',
-          200: '#e6d7b8',
-          300: '#d4ba85',
-          400: '#c29b5c',
-          500: '#a87d3e',
-          600: '#8a6431',
-          700: '#6e4e2a',
-          800: '#5b4026',
-          900: '#4d3722',
-        },
 
-        // --- the semantic layer: the only thing templates should read ------
+        // --- the semantic layer: the only thing templates read -------------
         surface: {
           page: token('surface-page'),
           raised: token('surface-raised'),
