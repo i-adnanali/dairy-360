@@ -2,6 +2,160 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * THE TOKEN LAYER. Phase 1 of docs/UI_SYSTEM.md, and deliberately invisible.
+ *
+ * Three layers, and components are meant to read only the third:
+ *   1. primitives  -- the `farm` ramp in tailwind.config.js, still literal hex
+ *   2. indirection -- these custom properties, which currently hold exactly the
+ *                     phase-1 values, i.e. today's colours to the byte
+ *   3. semantics   -- the colour names in tailwind.config.js that read these
+ *
+ * EVERY VALUE HERE IS THE CURRENT ONE. Nothing about the rendered app changes
+ * when this file lands; the point is only that the names now exist, so phase 2
+ * can migrate call sites one at a time and phase 4 can re-point the ramp from
+ * one place. The values were verified channel by channel against the COMPILED
+ * stylesheet, not against the config -- `rgb(230 215 184 / 0.6)` for
+ * border-farm-200/60 is what Tailwind actually emitted before this change.
+ *
+ * CHANNEL TRIPLETS, NOT HEX, and this is forced rather than chosen.
+ * tailwind.config.js wraps each of these as `rgb(var(--token) / <alpha-value>)`
+ * so that opacity modifiers keep working. Three exist and they are the
+ * regression test for this phase: border-farm-200/60 (confirmation-card),
+ * bg-green-50/40 (destination-detail), bg-farm-50/80 (chat-panel). A hex value
+ * here would make all three emit `rgb(#e6d7b8 / 0.6)`, which is not a colour.
+ *
+ * The same decision has a consequence outside CSS: a getComputedStyle read of
+ * one of these returns `230 215 184`, which Chart.js cannot parse. chart-card's
+ * theme reads must wrap every one in `rgb(...)`. See UI_SYSTEM.md section 3.6.
+ *
+ * NO `.dark` BLOCK YET. That is phase 3, and the dark values in the document
+ * have never been rendered.
+ */
+:root {
+  /* --- surfaces ------------------------------------------------------- */
+  --surface-page: 250 247 240;          /* farm-50   #faf7f0 */
+  --surface-raised: 255 255 255;        /* white     #ffffff */
+  --surface-sunken: 243 236 220;        /* farm-100  #f3ecdc */
+
+  /* --- text ----------------------------------------------------------- */
+  --text-primary: 77 55 34;             /* farm-900  #4d3722 */
+  --text-heading: 91 64 38;             /* farm-800  #5b4026 */
+  --text-secondary: 110 78 42;          /* farm-700  #6e4e2a */
+  --text-muted: 138 100 49;             /* farm-600  #8a6431 */
+  --text-subtle: 168 125 62;            /* farm-500  #a87d3e */
+  --text-disabled: 194 155 92;          /* farm-400  #c29b5c */
+  --text-on-fill: 255 255 255;          /* white     #ffffff */
+
+  /* --- lines ---------------------------------------------------------- */
+  --border-hairline: 243 236 220;       /* farm-100  #f3ecdc */
+  --border-subtle: 230 215 184;         /* farm-200  #e6d7b8 */
+  --border-default: 212 186 133;        /* farm-300  #d4ba85 */
+  --border-strong: 194 155 92;          /* farm-400  #c29b5c */
+  /*
+   * A STATE, NOT A BRAND FILL. border-farm-600 is the selected chip, the
+   * selected card and the active tab, at 8 sites across chip-group,
+   * calf-picker, correction-form, dispatch-sheet, milking-roster and
+   * animal-detail. It shares a value with --fill-brand today and must not
+   * share a name, or phase 4 cannot move one without the other.
+   */
+  --border-selected: 138 100 49;        /* farm-600  #8a6431 */
+
+  /* --- brand fill ----------------------------------------------------- */
+  --fill-brand: 138 100 49;             /* farm-600  #8a6431 */
+  --fill-brand-hover: 110 78 42;        /* farm-700  #6e4e2a */
+  --fill-brand-disabled: 212 186 133;   /* farm-300  #d4ba85 */
+  --fill-badge: 230 215 184;            /* farm-200  #e6d7b8 */
+
+  --focus-ring: 168 125 62;             /* farm-500  #a87d3e */
+  --divider: 243 236 220;               /* farm-100  #f3ecdc */
+
+  /* --- roles ---------------------------------------------------------- */
+  /*
+   * `danger-soft` and `warning-strong` are not decoration. text-red-700 is
+   * pinned by tool-call-chip.spec.ts and cannot be expressed by a danger role
+   * fixed at red-800; text-amber-900 has 13 sites one stop darker than the
+   * role. Keeping danger on red and warning on amber is a design choice
+   * defended on convention -- both spec assertions that look like they pin it
+   * are negative substring checks that pass vacuously once the literals go.
+   */
+  --danger-bg: 254 242 242;             /* red-50    #fef2f2 */
+  --danger-fg: 153 27 27;               /* red-800   #991b1b */
+  --danger-soft: 185 28 28;             /* red-700   #b91c1c */
+  --danger-line: 252 165 165;           /* red-300   #fca5a5 */
+
+  --warning-bg: 255 251 235;            /* amber-50  #fffbeb */
+  --warning-fg: 146 64 14;              /* amber-800 #92400e */
+  --warning-strong: 120 53 15;          /* amber-900 #78350f */
+  --warning-line: 252 211 77;           /* amber-300 #fcd34d */
+
+  --success-bg: 240 253 244;            /* green-50  #f0fdf4 */
+  --success-fg: 22 101 52;              /* green-800 #166534 */
+  --success-line: 134 239 172;          /* green-300 #86efac */
+
+  /* --- the agent ramp, categorical ------------------------------------ */
+  /*
+   * FOUR MUTUALLY DISTINGUISHABLE VALUES, and not the roles. agentClass()
+   * means WHICH AGENT ANSWERED, not error/outstanding/settled, so folding
+   * emerald into success would make the dairy chip mean "settled" and amber
+   * into warning would make the vendor chip mean "outstanding". Both false.
+   *
+   * These are TODAY's values. `vendor` currently collides with the warning
+   * role -- a vendor answer wears the same amber as an unanswered milking row
+   * -- and moving it off amber is phase 4's job, not this one.
+   */
+  --agent-dairy-bg: 236 253 245;        /* emerald-50  #ecfdf5 */
+  --agent-dairy-fg: 4 120 87;           /* emerald-700 #047857 */
+  --agent-dairy-line: 167 243 208;      /* emerald-200 #a7f3d0 */
+
+  --agent-vendor-bg: 255 251 235;       /* amber-50  #fffbeb -- collides */
+  --agent-vendor-fg: 180 83 9;          /* amber-700 #b45309 */
+  --agent-vendor-line: 253 230 138;     /* amber-200 #fde68a */
+
+  --agent-both-bg: 245 243 255;         /* violet-50  #f5f3ff */
+  --agent-both-fg: 109 40 217;          /* violet-700 #6d28d9 */
+  --agent-both-line: 221 214 254;       /* violet-200 #ddd6fe */
+
+  /* --- the write-log bar ---------------------------------------------- */
+  /*
+   * ITS OWN TOKENS AT ITS OWN VALUES, which is the whole point. The bar is
+   * text-green-900 on green-50 with a green-200 rule; the success role's
+   * foreground is green-800. Mapping the bar onto the role would make it
+   * LIGHTER -- quieter -- and its loudness is exactly what prediction 5 of the
+   * five-animal trial is pre-registered to measure. Held at equal contrast per
+   * B3 of UI_SYSTEM.md section 2: tokenised, not restyled.
+   */
+  --writelog-bg: 240 253 244;           /* green-50  #f0fdf4 */
+  --writelog-fg: 20 83 45;              /* green-900 #14532d */
+  --writelog-line: 187 247 208;         /* green-200 #bbf7d0 */
+
+  /* --- certainty ------------------------------------------------------ */
+  /*
+   * SECTION 3.5 HAS NO PHASE-1 COLUMN, so unlike everything above these are
+   * not simply "today's value" -- there mostly is no today's value. Nothing
+   * consumes them until phase 5, so the layer is still zero-delta either way,
+   * but the provenance differs and should not be forgotten:
+   *
+   *   --certainty-rule    IS today's value. decoration-farm-300 already exists
+   *                       at one site (people-list) as the dotted rule under an
+   *                       approximate figure, unnamed until now.
+   *   --certainty-known   points at --text-primary, which section 3.5 specifies.
+   *   --certainty-absent  points at --text-subtle, likewise.
+   *   --certainty-approx  PROVISIONAL. Section 3.5 gives only a target neutral
+   *                       (#82807A) with no light-phase equivalent, so this
+   *                       holds --text-subtle's value as the nearest current
+   *                       analogue. Revisit in phase 5 rather than reading it
+   *                       as measured.
+   *
+   * "Unanswered" deliberately has no token: section 5 assigns it the warning
+   * role, and a second name for one value is how the two drift apart.
+   */
+  --certainty-known: 77 55 34;          /* = --text-primary */
+  --certainty-approx: 168 125 62;       /* PROVISIONAL, = --text-subtle */
+  --certainty-rule: 212 186 133;        /* farm-300 #d4ba85, today's dotted rule */
+  --certainty-absent: 168 125 62;       /* = --text-subtle */
+}
+
 html,
 body,
 app-root {

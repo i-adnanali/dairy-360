@@ -1,6 +1,18 @@
 # UI_SYSTEM.md — validation
 
-*Adversarial read of [docs/UI_SYSTEM.md](docs/UI_SYSTEM.md) against the working tree at
+> **Round 1's subject is not the document at `docs/UI_SYSTEM.md` any more, and is
+> not on disk at all.** Round 1 below reviews the earlier *plan* — the one with
+> "67 distinct colour utilities", fourteen primitives, `NotePanel` and a
+> twelve-screen phase 0. That plan was never committed to any ref, so it survives
+> only as the quotations in this file; there is nothing to archive and no
+> `archive/UI_SYSTEM_PLAN.md` was invented for it. `docs/UI_SYSTEM.md` now holds
+> its successor, the design system, which is what `Round 2` further down reviews.
+> Every `docs/UI_SYSTEM.md` link in round 1 therefore points at the wrong
+> document; the section numbers in round 1's citations are the plan's, not the
+> design system's. Round 1's body is left exactly as written.
+
+*Adversarial read of the earlier plan (then at `docs/UI_SYSTEM.md`, see the note
+above) against the working tree at
 `816fe67` (source is clean at that commit; only the plan document itself is
 modified). No code was changed. Where this file and the plan disagree, this file
 was checked against the code and the plan was not.*
@@ -1164,3 +1176,129 @@ ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Couri
 and the screenshots will say so — but the declaration changes, and on a platform
 without `ui-monospace` the fallback order genuinely differs. Recorded because
 "nothing looks different" is true of this machine, not of the rule.
+
+---
+
+# Phase 1 — token layer, 2026-09-08
+
+**Zero delta achieved, and measured three ways rather than eyeballed.**
+
+## What landed
+
+- `web-angular/src/styles.css` — a `:root` block of **48 custom properties** as
+  channel triplets, ahead of the `html, body, app-root` rules.
+- `web-angular/tailwind.config.js` — the semantic colour names, `darkMode:
+  'class'`, `fontFamily.mono`. The `farm` ramp is **kept**, still literal hex.
+  `plugins: []` unchanged; `@tailwindcss/forms` was not added.
+- No `.dark` block. That is phase 3.
+- Nothing in `src/app/` was touched — not one call site migrated. That is phase 2.
+
+## Evidence of zero delta
+
+**1. Fourteen screenshots, byte-identical.** Same harness process, same fixture,
+same farm date, same viewport, same browser. All fourteen `md5`s match phase 0
+exactly, including both frozen forms:
+
+```
+identical: 14   differing: 0
+```
+
+**2. The compiled stylesheet diff is exactly two things.** Fetched from
+`http://localhost:4200/styles.css` before and after (24,411 → 25,862 bytes). The
+whole diff is the `:root` addition plus the `font-mono` stack. **Not one colour
+declaration changed** — every `farm`, red, amber, green, emerald and violet
+utility compiles to the bytes it did before, because the `farm` ramp is still
+literal hex and no call site moved.
+
+**3. All 54 colour utilities resolve identically**, read back through
+`getComputedStyle` in the live page (`computed-colours.json` in both shot
+directories):
+
+```
+all 54 resolved colours IDENTICAL
+```
+
+The three opacity modifiers, the named regression test, are unmoved —
+`rgba(250, 247, 240, 0.8)`, `rgba(240, 253, 244, 0.4)`, `rgba(230, 215, 184, 0.6)`.
+`:root` went from **0 of 21** core properties to **21 of 21**.
+
+**4. Suites unchanged:** 281/281 frontend, 726/726 server.
+
+## The semantic names were checked against their twins, not assumed
+
+Tailwind's JIT emits nothing for an unused class, so adding the semantic palette
+produces **no new CSS at all** in phase 1 — which is why the stylesheet diff is
+so small, and also why "the tokens work" is not something phase 1 can
+demonstrate by rendering the app. Verified instead with a one-off `tailwindcss`
+build over a scratch content file that uses each semantic utility beside its
+existing counterpart, then comparing resolved channels and alpha:
+
+```
+semantic == existing:  51 of 51
+```
+
+Including all three opacity forms (`bg-surface-page/80` ≡ `bg-farm-50/80`, and
+so on), which is the `<alpha-value>` contract actually working rather than
+assumed. Two pairs needed a second look and both are identical:
+`divide-divider` compiles to a compound selector (`.divide-divider >
+:not([hidden]) ~ :not([hidden])`) carrying `rgb(var(--divider) / …)` = `243 236
+220` = farm-100; and `decoration-certainty-rule` emits `rgb(var(--certainty-rule)
+/ 1)` = `212 186 133` against `decoration-farm-300`'s literal `#d4ba85`, which is
+the same colour written the other way.
+
+## Two deviations from §3, both deliberate
+
+**a. `--certainty-approx` is provisional, and labelled so in the file.** §3.5 has
+no phase-1 column (§11.2 above), so unlike every other token this one has no
+current value to be set to — its only tabulated value, `#82807A`, is a target
+neutral. It holds `--text-subtle`'s channels as the nearest current analogue.
+`--certainty-rule` by contrast *is* today's value: `212 186 133`, the
+`decoration-farm-300` already in `people-list`. Nothing consumes either until
+phase 5, so the layer is zero-delta regardless, but the provenance differs and
+the comment says which is which.
+
+**b. The seven unmapped utilities were left unmapped.** §11.2 lists them —
+`bg-farm-800`, `bg-amber-200`, `bg-emerald-500`, `bg-red-500`, `bg-farm-400`,
+`border-transparent`, `text-red-900`. §3 gives them no names and phase 1
+implements §3, so no tokens were invented for them. They render unchanged
+through the retained `farm` ramp and the literal palette. **Phase 2 cannot
+migrate the sites that use them until §3 grows the names**, which is a real
+prerequisite rather than a detail: `tool-call-chip`'s two status dots and
+`session-bar`'s harness banner have nowhere to go.
+
+## The one thing that did change, by instruction
+
+`fontFamily.mono`. The diff:
+
+```
+-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
++    ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace
+```
+
+Rendered identically here — all fourteen screenshots are byte-identical, so
+`ui-monospace` is resolving first on this machine and the change is invisible, as
+predicted in the phase-0 record. Two things to carry forward:
+
+- **It appears twice in the compiled output, not once.** The `.font-mono` utility
+  at line ~922, and Tailwind's **preflight base rule for `code, kbd, samp, pre`**
+  at line ~175. So this also restyles markdown code spans and blocks in the chat
+  panel, which `.prose-chat code` and `.prose-chat pre` sit on — a surface none of
+  the 34 `font-mono` call sites covers, and one §8.2 is separately going to touch.
+- On a platform without `ui-monospace` the fallback order genuinely differs
+  (`Monaco` and `Courier New` are gone). Invisible on macOS is not invisible.
+
+## Document housekeeping
+
+- `docs/UI_SYSTEM_DESIGN.md` **deleted** — it was a byte-identical duplicate of
+  `docs/UI_SYSTEM.md` (§10 above). Nothing cited it.
+- `docs/UI_SYSTEM.md` **kept in place** with a status line replacing the old
+  "specified, not implemented" and the now-satisfied "Intended home" paragraph:
+  phases 0–1 built, phase 2 blocked and why, plus a pointer here for the five
+  counts its body still gets wrong.
+- `docs/README.md` — added to the **Reference** table, after `REGISTRY_ENTRY_UX.md`.
+- **No `docs/archive/UI_SYSTEM_PLAN.md` was created.** There is nothing to
+  archive: the plan was never committed to any ref, so the only way to produce
+  the file would be to reconstruct a document from its critic's quotations and
+  present it as the original. Round 1 now carries a note saying its subject is
+  gone and its `docs/UI_SYSTEM.md` links resolve to the successor.
+- The **Archive** table is unchanged, for the same reason.
