@@ -108,14 +108,14 @@ export class ChipGroup {
   protected chipClass(v: string): string {
     const base =
       'inline-flex items-baseline rounded-lg border px-3 py-1.5 text-sm capitalize ' +
-      'focus:outline-none focus-visible:ring-2 focus-visible:ring-farm-500 focus-visible:ring-offset-1';
+      'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1';
     const wide = this.vertical() ? ' w-full text-left normal-case' : '';
     return (
       base +
       wide +
       (this.value() === v
-        ? ' border-farm-600 bg-farm-600 text-white'
-        : ' border-farm-300 bg-white text-farm-800 hover:border-farm-400')
+        ? ' border-line-selected bg-brand text-content-onFill'
+        : ' border-line bg-surface-raised text-content-heading hover:border-line-strong')
     );
   }
 

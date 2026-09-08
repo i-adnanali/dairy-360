@@ -57,7 +57,7 @@ import { PageHeading } from '../ui/heading';
 
       @if (board(); as b) {
         @if (allClear()) {
-          <p class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
+          <p class="rounded-xl border border-success-lineSoft bg-success-bg px-4 py-3 text-sm text-success-strong"
             data-role="all-clear">
             Nothing outstanding. Both milkings and both dispatches are recorded, and the payroll is
             settled.
@@ -65,14 +65,14 @@ import { PageHeading } from '../ui/heading';
         }
 
         <section class="space-y-2" data-role="milking">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-farm-500">Milking</h3>
+          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Milking</h3>
           @for (s of b.milking; track s.session) {
             <a [routerLink]="['/milk/milking']" [queryParams]="{ on: b.on, session: s.session }"
-              class="flex items-baseline justify-between rounded-xl border bg-white px-4 py-3 text-sm"
-              [class]="s.complete ? 'border-farm-200' : 'border-amber-300'"
+              class="flex items-baseline justify-between rounded-xl border bg-surface-raised px-4 py-3 text-sm"
+              [class]="s.complete ? 'border-line-subtle' : 'border-warning-line'"
               [attr.data-session]="s.session" [attr.data-complete]="s.complete">
-              <span class="capitalize text-farm-900">{{ s.session }}</span>
-              <span [class]="s.complete ? 'text-farm-600' : 'font-medium text-amber-800'">
+              <span class="capitalize text-content-primary">{{ s.session }}</span>
+              <span [class]="s.complete ? 'text-content-muted' : 'font-medium text-warning-fg'">
                 {{ standing(s) }}
               </span>
             </a>
@@ -80,14 +80,14 @@ import { PageHeading } from '../ui/heading';
         </section>
 
         <section class="space-y-2" data-role="dispatch">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-farm-500">Dispatch</h3>
+          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Dispatch</h3>
           @for (s of b.dispatch; track s.session) {
             <a [routerLink]="['/milk/dispatch']" [queryParams]="{ on: b.on, session: s.session }"
-              class="flex items-baseline justify-between rounded-xl border bg-white px-4 py-3 text-sm"
-              [class]="s.complete ? 'border-farm-200' : 'border-amber-300'"
+              class="flex items-baseline justify-between rounded-xl border bg-surface-raised px-4 py-3 text-sm"
+              [class]="s.complete ? 'border-line-subtle' : 'border-warning-line'"
               [attr.data-session]="s.session" [attr.data-complete]="s.complete">
-              <span class="capitalize text-farm-900">{{ s.session }}</span>
-              <span [class]="s.complete ? 'text-farm-600' : 'font-medium text-amber-800'">
+              <span class="capitalize text-content-primary">{{ s.session }}</span>
+              <span [class]="s.complete ? 'text-content-muted' : 'font-medium text-warning-fg'">
                 {{ standing(s) }}
               </span>
             </a>
@@ -95,14 +95,14 @@ import { PageHeading } from '../ui/heading';
         </section>
 
         <section class="space-y-2" data-role="payroll">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-farm-500">Payroll</h3>
+          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Payroll</h3>
           @if (b.payroll_previous; as prev) {
             <a [routerLink]="['/labour/payroll']"
               [queryParams]="{ from: prev.from_on, to: prev.to_on }"
-              class="flex items-baseline justify-between rounded-xl border border-amber-300 bg-white
+              class="flex items-baseline justify-between rounded-xl border border-warning-line bg-surface-raised
                 px-4 py-3 text-sm" data-role="payroll-previous">
-              <span class="text-farm-900">{{ monthName(prev.from_on) }}</span>
-              <span class="font-medium text-amber-800">
+              <span class="text-content-primary">{{ monthName(prev.from_on) }}</span>
+              <span class="font-medium text-warning-fg">
                 {{ prev.outstanding }} of {{ prev.permanent }} unanswered
               </span>
             </a>
@@ -110,10 +110,10 @@ import { PageHeading } from '../ui/heading';
           <!-- The current month, stated and never flagged. -->
           <a [routerLink]="['/labour/payroll']"
             [queryParams]="{ from: b.payroll.from_on, to: b.payroll.to_on }"
-            class="flex items-baseline justify-between rounded-xl border border-farm-200 bg-white
+            class="flex items-baseline justify-between rounded-xl border border-line-subtle bg-surface-raised
               px-4 py-3 text-sm" data-role="payroll-current">
-            <span class="text-farm-900">{{ monthName(b.payroll.from_on) }}</span>
-            <span class="text-farm-600">
+            <span class="text-content-primary">{{ monthName(b.payroll.from_on) }}</span>
+            <span class="text-content-muted">
               @if (b.payroll.permanent === 0) {
                 nobody salaried
               } @else if (b.payroll.outstanding === 0) {

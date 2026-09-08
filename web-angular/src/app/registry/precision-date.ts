@@ -77,7 +77,7 @@ export function dateBlocker(
   imports: [Card, ErrorPanel, FieldLabel, HelpText, TextInput],
   template: `
     <fieldset appCard>
-      <legend class="px-2 text-sm font-medium text-farm-800">{{ label() }}</legend>
+      <legend class="px-2 text-sm font-medium text-content-heading">{{ label() }}</legend>
 
       <div class="flex flex-wrap items-end gap-3">
         <label class="block">
@@ -95,7 +95,7 @@ export function dateBlocker(
         @if (precision() === 'day') {
           <label class="block">
             <span appFieldLabel>
-              Time <span class="font-normal text-farm-500">(optional)</span>
+              Time <span class="font-normal text-content-subtle">(optional)</span>
             </span>
             <input
               type="time" data-role="time"
@@ -111,7 +111,7 @@ export function dateBlocker(
            fabricated day wearing a humility label, and the write boundary
            rejects it by name. -->
       <label class="mt-3 flex items-start gap-2 text-sm"
-        [class]="canEstimate() ? 'cursor-pointer text-farm-800' : 'text-farm-400'">
+        [class]="canEstimate() ? 'cursor-pointer text-content-heading' : 'text-content-disabled'">
         <input type="checkbox" data-role="estimated" class="mt-0.5"
           [checked]="estimated()" [disabled]="!canEstimate()"
           (change)="estimated.set($any($event.target).checked)" />
@@ -128,8 +128,8 @@ export function dateBlocker(
       @switch (entry().status) {
         @case ('complete') {
           <p class="mt-3 text-sm" data-role="reading">
-            <span class="text-farm-600">Reading this as</span>
-            <span class="ml-1 font-medium text-farm-900">{{ readingText() }}</span>
+            <span class="text-content-muted">Reading this as</span>
+            <span class="ml-1 font-medium text-content-primary">{{ readingText() }}</span>
           </p>
           <p appHelp size="xs" tone="subtle" class="mt-1" data-role="reading-escape">
             Not what you meant? Type it more precisely — <span class="font-mono">Mar 2019</span> for
@@ -138,7 +138,7 @@ export function dateBlocker(
           </p>
         }
         @case ('incomplete') {
-          <p class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900"
+          <p class="mt-3 rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong"
             data-role="incomplete">{{ incompleteMessage() }}</p>
         }
         @default {

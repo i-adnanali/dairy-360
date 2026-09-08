@@ -22,7 +22,7 @@ import { TextLink } from '../ui/text';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, RouterOutlet, SessionBar, SessionGate, TextLink],
   template: `
-    <div class="flex h-full flex-col bg-farm-50 text-farm-900">
+    <div class="flex h-full flex-col bg-surface-page text-content-primary">
       <app-session-bar />
 
       <!-- TEN links in TWO GROUPS, plus Today ungrouped -- and this is the
@@ -52,7 +52,7 @@ import { TextLink } from '../ui/text';
            One row on a wide screen, two on a narrow one. If a third group ever
            appears this becomes a real navigation problem rather than a layout
            one -- and that is the point at which it should stop being a row. -->
-      <header class="border-b border-farm-200 bg-white px-4 py-3">
+      <header class="border-b border-line-subtle bg-surface-raised px-4 py-3">
         <div class="mx-auto flex max-w-4xl flex-wrap items-baseline gap-x-6 gap-y-2">
           <h1 class="text-base font-semibold tracking-tight">Animal registry</h1>
           <!-- ALWAYS RENDERED. The nav used to be hidden until provenance was
@@ -66,7 +66,7 @@ import { TextLink } from '../ui/text';
               <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }"
                 routerLinkActive="font-medium !text-content-primary" appTextLink data-role="nav-today">Today</a>
 
-              <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-farm-400"
+              <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-content-disabled"
                 data-role="nav-group-record">Record</span>
               <a routerLink="/animals/new" routerLinkActive="font-medium !text-content-primary" appTextLink>Add animal</a>
               <a routerLink="/animals/calvings/new" routerLinkActive="font-medium !text-content-primary" appTextLink>Record calving</a>
@@ -74,7 +74,7 @@ import { TextLink } from '../ui/text';
               <a routerLink="/milk/dispatch" routerLinkActive="font-medium !text-content-primary" appTextLink>Dispatch</a>
               <a routerLink="/labour/payroll" routerLinkActive="font-medium !text-content-primary" appTextLink>Payroll</a>
 
-              <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-farm-400"
+              <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-content-disabled"
                 data-role="nav-group-review">Review</span>
               <a routerLink="/animals" routerLinkActive="font-medium !text-content-primary" appTextLink>Herd</a>
               <a routerLink="/milk/buyers" routerLinkActive="font-medium !text-content-primary" appTextLink>Buyers</a>
@@ -98,7 +98,7 @@ import { TextLink } from '../ui/text';
         {{ writeLog.last() }}
       </div>
       @if (writeLog.last(); as msg) {
-        <div class="border-b border-green-200 bg-green-50 px-4 py-1.5 text-center text-xs font-medium text-green-900"
+        <div class="border-b border-writelog-line bg-writelog-bg px-4 py-1.5 text-center text-xs font-medium text-writelog-fg"
           data-role="write-log">{{ msg }}</div>
       }
 
@@ -123,7 +123,7 @@ import { TextLink } from '../ui/text';
            the routed component and take any half-typed figure with it, which is
            precisely the moment somebody reaches for this. -->
       @if (session.setupOpen() && !session.ready() && !writeOnlyRoute()) {
-        <div class="border-b border-farm-200 bg-white" data-role="session-setup">
+        <div class="border-b border-line-subtle bg-surface-raised" data-role="session-setup">
           <app-session-gate />
         </div>
       }

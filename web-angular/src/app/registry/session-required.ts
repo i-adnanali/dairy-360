@@ -36,8 +36,8 @@ import { Session } from './session';
   selector: 'app-session-required',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-amber-300
-      bg-amber-50 px-3 py-2 text-sm text-amber-900" data-role="session-required">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-warning-line
+      bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="session-required">
       <span>
         Recording is off, so {{ what() }} cannot be saved yet.
       </span>

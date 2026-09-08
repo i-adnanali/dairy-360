@@ -25,7 +25,7 @@ import { HelpText } from '../ui/text';
   imports: [HelpText],
   template: `
     @if (events().length === 0) {
-      <p class="rounded-xl border border-dashed border-farm-300 px-4 py-6 text-center text-sm text-farm-600"
+      <p class="rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-content-muted"
         data-role="empty">
         No events yet. An animal's record starts with its origin event.
       </p>
@@ -36,18 +36,18 @@ import { HelpText } from '../ui/text';
             [attr.data-event]="e.id"
             [attr.data-effective]="e.effective"
             class="rounded-xl border px-4 py-3"
-            [class]="e.effective ? 'border-farm-300 bg-white' : 'border-farm-200 bg-farm-50'"
+            [class]="e.effective ? 'border-line bg-surface-raised' : 'border-line-subtle bg-surface-page'"
           >
             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span
                 class="text-sm font-semibold"
-                [class]="e.effective ? 'text-farm-900' : 'text-farm-400 line-through'"
+                [class]="e.effective ? 'text-content-primary' : 'text-content-disabled line-through'"
                 data-role="type"
               >{{ label(e.type) }}</span>
 
               <span
                 class="text-sm"
-                [class]="e.effective ? 'text-farm-800' : 'text-farm-400 line-through'"
+                [class]="e.effective ? 'text-content-heading' : 'text-content-disabled line-through'"
                 data-role="when"
               >
                 {{ e.occurred_on }}{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
@@ -55,40 +55,40 @@ import { HelpText } from '../ui/text';
               </span>
 
               @if (!e.effective) {
-                <span class="rounded bg-farm-200 px-1.5 py-0.5 text-xs font-medium text-farm-700"
+                <span class="rounded bg-brand-badge px-1.5 py-0.5 text-xs font-medium text-content-secondary"
                   data-role="superseded-badge">superseded</span>
               }
 
-              <span class="ml-auto font-mono text-xs text-farm-500" data-role="id">{{ e.id }}</span>
+              <span class="ml-auto font-mono text-xs text-content-subtle" data-role="id">{{ e.id }}</span>
             </div>
 
             @if (!e.effective && e.superseded_by_id) {
-              <p class="mt-1 text-xs text-farm-700" data-role="replaced-by">
+              <p class="mt-1 text-xs text-content-secondary" data-role="replaced-by">
                 replaced by <span class="font-mono">{{ e.superseded_by_id }}</span>
               </p>
             }
             @if (e.supersedes_id) {
-              <p class="mt-1 text-xs text-farm-700" data-role="replaces">
+              <p class="mt-1 text-xs text-content-secondary" data-role="replaces">
                 replaces <span class="font-mono">{{ e.supersedes_id }}</span>
               </p>
             }
 
             @if (summary(e); as s) {
-              <p class="mt-1 text-sm" [class]="e.effective ? 'text-farm-700' : 'text-farm-400'"
+              <p class="mt-1 text-sm" [class]="e.effective ? 'text-content-secondary' : 'text-content-disabled'"
                 data-role="summary">{{ s }}</p>
             }
 
             <!-- An overridden check is part of how the record explains itself:
                  without this the log holds the fact and nobody ever sees it. -->
             @if (override(e); as o) {
-              <p class="mt-1.5 rounded-lg bg-amber-50 px-2 py-1 text-xs text-amber-900"
+              <p class="mt-1.5 rounded-lg bg-warning-bg px-2 py-1 text-xs text-warning-strong"
                 data-role="override">
                 Written over the <span class="font-mono">{{ o.check }}</span> check{{ o.reason ? ' — ' + o.reason : '' }}
                 @if (!o.reason) { <span class="italic">— no reason recorded</span> }
               </p>
             }
 
-            <p class="mt-1.5 text-xs text-farm-500" data-role="provenance">
+            <p class="mt-1.5 text-xs text-content-subtle" data-role="provenance">
               {{ e.source_form }}{{ e.source_ref ? ' · ' + e.source_ref : '' }}
               · recorded by {{ e.recorded_by }}
               @if (e.observed_by) { · observed by {{ e.observed_by }} }

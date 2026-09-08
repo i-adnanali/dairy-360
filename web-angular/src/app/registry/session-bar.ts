@@ -24,26 +24,26 @@ import { Target } from './target';
     @if (target.kind() === 'harness') {
       <!-- Which database am I pointed at should never be a guess: the forms
            write real records. -->
-      <div class="bg-amber-200 px-4 py-1.5 text-center text-xs font-medium text-amber-900"
+      <div class="bg-warning-fill px-4 py-1.5 text-center text-xs font-medium text-warning-strong"
         data-role="harness-banner">
         Harness — {{ target.storage() }} fixture data, discarded when the process exits. This is not the real registry.
       </div>
     }
 
     @if (session.ready()) {
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-farm-200 bg-farm-50 px-4 py-2 text-xs"
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line-subtle bg-surface-page px-4 py-2 text-xs"
         data-role="session-summary">
-        <span class="text-farm-600">Recording as</span>
-        <span class="font-medium text-farm-900">{{ session.recordedBy() }}</span>
-        <span class="text-farm-600">from</span>
-        <span class="font-medium text-farm-900">{{ session.sourceForm() }}</span>
+        <span class="text-content-muted">Recording as</span>
+        <span class="font-medium text-content-primary">{{ session.recordedBy() }}</span>
+        <span class="text-content-muted">from</span>
+        <span class="font-medium text-content-primary">{{ session.sourceForm() }}</span>
         @if (target.kind() === 'real') {
-          <span class="text-farm-600">into</span>
-          <span class="font-medium text-farm-900" data-role="target-summary"
+          <span class="text-content-muted">into</span>
+          <span class="font-medium text-content-primary" data-role="target-summary"
             [title]="target.storage()">{{ target.basename() }}</span>
         }
         <button type="button" data-role="change-session" (click)="change()"
-          class="ml-auto text-farm-700 underline">Change</button>
+          class="ml-auto text-content-secondary underline">Change</button>
       </div>
     } @else {
       <!-- STATED, not blank.
@@ -53,11 +53,11 @@ import { Target } from './target';
            three screens deep with no provenance set, and "nothing you do here
            is being recorded" is exactly the kind of fact target.ts argues must
            never be communicated by an absence. -->
-      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-farm-200
-        bg-farm-50 px-4 py-2 text-xs" data-role="browsing">
-        <span class="text-farm-600">Browsing — nothing is being recorded.</span>
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line-subtle
+        bg-surface-page px-4 py-2 text-xs" data-role="browsing">
+        <span class="text-content-muted">Browsing — nothing is being recorded.</span>
         <button type="button" data-role="start-session" (click)="session.requestSetup()"
-          class="ml-auto font-medium text-farm-800 underline">Start recording</button>
+          class="ml-auto font-medium text-content-heading underline">Start recording</button>
       </div>
     }
   `,

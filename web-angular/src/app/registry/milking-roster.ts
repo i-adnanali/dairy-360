@@ -145,7 +145,7 @@ export const OUT_OF_BAND = 0.5;
         <!-- Today is a legitimate default HERE, and only here: today is a fact,
              not a guess. Said out loud so it does not read as the no-default
              rule being forgotten. -->
-        <p class="mt-2 text-xs text-farm-600" data-role="today-note">
+        <p class="mt-2 text-xs text-content-muted" data-role="today-note">
           Defaults to today and this session — the one place a date is defaulted, because today is
           a fact rather than a guess. Change it to enter a session you missed.
         </p>
@@ -162,9 +162,9 @@ export const OUT_OF_BAND = 0.5;
             and she will be here.
           </p>
         } @else {
-          <div class="overflow-hidden rounded-xl border border-farm-300 bg-white">
+          <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
             <table class="w-full text-left text-sm">
-              <thead class="border-b border-farm-200 text-xs uppercase tracking-wide text-farm-600">
+              <thead class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted">
                 <tr>
                   <th appCell>Animal</th>
                   <th appCell numeric>Days in milk</th>
@@ -180,8 +180,8 @@ export const OUT_OF_BAND = 0.5;
                 @for (row of r.rows; track row.animal_id; let i = $index) {
                   <tr appRowDivider [attr.data-row]="row.animal_id">
                     <td appCell density="compact">
-                      <span class="font-mono text-farm-800">{{ row.animal_id }}</span>
-                      <span class="ml-2 text-farm-700">{{ row.name ?? '—' }}</span>
+                      <span class="font-mono text-content-heading">{{ row.animal_id }}</span>
+                      <span class="ml-2 text-content-secondary">{{ row.name ?? '—' }}</span>
                     </td>
                     <td appCell density="compact" numeric tone="secondary" data-role="dim">{{ row.days_in_milk }}</td>
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
@@ -200,7 +200,7 @@ export const OUT_OF_BAND = 0.5;
                           [disabled]="draft(row.animal_id).status !== null && draft(row.animal_id).status !== 'measured'"
                           (input)="typeLitres(row.animal_id, $any($event.target).value)"
                           (keydown)="onKey($event, i)"
-                          class="w-24 rounded-lg border border-farm-300 px-2 py-1 text-sm disabled:bg-farm-50"
+                          class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
                         <button type="button" [attr.data-role]="'m-' + row.animal_id"
                           (click)="mark(row.animal_id, 'milked_not_measured')"
@@ -216,14 +216,14 @@ export const OUT_OF_BAND = 0.5;
                             [value]="draft(row.animal_id).reason"
                             (input)="setReason(row.animal_id, $any($event.target).value)"
                             placeholder="why (optional)"
-                            class="w-44 rounded-lg border border-farm-300 px-2 py-1 text-sm" />
+                            class="w-44 rounded-lg border border-line px-2 py-1 text-sm" />
                         }
                         @if (outOfBand(row); as msg) {
-                          <span class="rounded-lg bg-amber-50 px-2 py-0.5 text-xs text-amber-900"
+                          <span class="rounded-lg bg-warning-bg px-2 py-0.5 text-xs text-warning-strong"
                             [attr.data-role]="'band-' + row.animal_id">{{ msg }}</span>
                         }
                         @if (row.existing) {
-                          <span class="text-xs italic text-farm-500"
+                          <span class="text-xs italic text-content-subtle"
                             [attr.data-role]="'saved-' + row.animal_id">already saved</span>
                         }
                       </div>
@@ -238,13 +238,13 @@ export const OUT_OF_BAND = 0.5;
                because the operator knows roughly what the herd gives. -->
           <div appSummaryBar class="flex flex-wrap items-center gap-x-6 gap-y-2 bg-surface-page">
             <span data-role="resolved">
-              <span class="font-medium text-farm-900">{{ resolved() }}</span>
-              <span class="text-farm-600"> of {{ r.rows.length }} answered</span>
+              <span class="font-medium text-content-primary">{{ resolved() }}</span>
+              <span class="text-content-muted"> of {{ r.rows.length }} answered</span>
             </span>
             <span data-role="total">
-              <span class="text-farm-600">Herd total </span>
-              <span class="font-medium text-farm-900">{{ total() }} L</span>
-              <span class="text-farm-600"> from {{ measuredCount() }} measured</span>
+              <span class="text-content-muted">Herd total </span>
+              <span class="font-medium text-content-primary">{{ total() }} L</span>
+              <span class="text-content-muted"> from {{ measuredCount() }} measured</span>
             </span>
           </div>
         }
@@ -457,8 +457,8 @@ export class MilkingRosterScreen {
   protected chipClass(id: string, status: MilkingStatus): string {
     const base = 'rounded-lg border px-2 py-1 text-xs ';
     return this.draft(id).status === status
-      ? base + 'border-farm-600 bg-farm-600 text-white'
-      : base + 'border-farm-300 bg-white text-farm-700 hover:border-farm-400';
+      ? base + 'border-line-selected bg-brand text-content-onFill'
+      : base + 'border-line bg-surface-raised text-content-secondary hover:border-line-strong';
   }
 
   protected readonly resolved = computed(() => {

@@ -58,7 +58,7 @@ export type CalfChoice = string | null;
           as the other sex is not this calf.
         </p>
       } @else {
-        <p class="mb-2 text-xs text-farm-600">
+        <p class="mb-2 text-xs text-content-muted">
           Animals already in the registry that could be this calf, nearest birth date first. One
           will be here if you entered it in the roster pass, or in pass one because its dam was
           already in the herd.
@@ -73,10 +73,10 @@ export type CalfChoice = string | null;
                 class="flex w-full items-baseline gap-2 rounded-lg border px-3 py-2 text-left text-sm"
                 [class]="
                   chosen() === c.id
-                    ? 'border-farm-600 bg-farm-100'
+                    ? 'border-line-selected bg-surface-sunken'
                     : c.eligible
-                      ? 'border-farm-300 bg-white hover:border-farm-400'
-                      : 'border-farm-200 bg-farm-50 text-farm-400 cursor-not-allowed'
+                      ? 'border-line bg-surface-raised hover:border-line-strong'
+                      : 'border-line-subtle bg-surface-page text-content-disabled cursor-not-allowed'
                 "
               >
                 <span class="font-mono">{{ c.id }}</span>
@@ -89,7 +89,7 @@ export type CalfChoice = string | null;
               </button>
             }
           </div>
-          <p class="mt-2 text-xs text-farm-500">
+          <p class="mt-2 text-xs text-content-subtle">
             Animals that cannot be linked are shown greyed with the reason, rather than hidden — an
             animal missing from this list would read as data loss.
           </p>
@@ -113,10 +113,10 @@ export type CalfChoice = string | null;
                   class="flex w-full items-baseline gap-2 rounded-lg border px-3 py-2 text-left text-sm"
                   [class]="
                     chosen() === c.id
-                      ? 'border-farm-600 bg-farm-100'
+                      ? 'border-line-selected bg-surface-sunken'
                       : c.eligible
-                        ? 'border-farm-300 bg-white hover:border-farm-400'
-                        : 'border-farm-200 bg-farm-50 text-farm-400 cursor-not-allowed'
+                        ? 'border-line bg-surface-raised hover:border-line-strong'
+                        : 'border-line-subtle bg-surface-page text-content-disabled cursor-not-allowed'
                   "
                 >
                   <span class="font-mono">{{ c.id }}</span>
@@ -131,7 +131,7 @@ export type CalfChoice = string | null;
             </div>
           } @else {
             <button type="button" data-role="show-far" (click)="showFar.set(true)"
-              class="mt-2 text-xs text-farm-700 underline">
+              class="mt-2 text-xs text-content-secondary underline">
               {{ far().length }} more, with birth dates further from this date
             </button>
           }
@@ -139,12 +139,12 @@ export type CalfChoice = string | null;
 
         <!-- LAST, and visually separated. Creating an animal is the deliberate
              act; linking to one that exists is the safe default path. -->
-        <div class="mt-3 border-t border-farm-200 pt-3">
+        <div class="mt-3 border-t border-line-subtle pt-3">
           <button type="button" data-role="mode-new" (click)="pick(null)"
             class="w-full rounded-lg border px-3 py-2 text-left text-sm"
-            [class]="chosen() === null && answered() ? 'border-farm-600 bg-farm-100' : 'border-farm-300 bg-white hover:border-farm-400'"
+            [class]="chosen() === null && answered() ? 'border-line-selected bg-surface-sunken' : 'border-line bg-surface-raised hover:border-line-strong'"
           >
-            <span class="font-medium text-farm-900">None of these — create a new animal</span>
+            <span class="font-medium text-content-primary">None of these — create a new animal</span>
           </button>
 
           @if (chosen() === null && answered()) {

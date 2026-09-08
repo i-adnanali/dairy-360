@@ -13,8 +13,8 @@ const STARTERS = [
   template: `
     <div class="flex h-full flex-col items-center justify-center text-center">
       <div class="mb-2 text-4xl">🐃</div>
-      <h2 class="text-xl font-semibold text-farm-800">Welcome to your farm assistant</h2>
-      <p class="mb-6 mt-1 max-w-md text-sm text-farm-600">
+      <h2 class="text-xl font-semibold text-content-heading">Welcome to your farm assistant</h2>
+      <p class="mb-6 mt-1 max-w-md text-sm text-content-muted">
         I can read your records to answer questions, and propose record changes that you approve before
         anything is written.
       </p>
@@ -22,7 +22,7 @@ const STARTERS = [
         @for (s of starters; track s) {
           <button
             (click)="pick.emit(s)"
-            class="rounded-xl border border-farm-200 bg-white px-4 py-3 text-left text-sm text-farm-800 shadow-sm transition hover:border-farm-400 hover:bg-farm-100"
+            class="rounded-xl border border-line-subtle bg-surface-raised px-4 py-3 text-left text-sm text-content-heading shadow-sm transition hover:border-line-strong hover:bg-surface-sunken"
           >
             {{ s }}
           </button>

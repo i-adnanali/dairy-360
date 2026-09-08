@@ -8,7 +8,7 @@ import { RouterOutlet } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet],
   template: `
-    <div class="h-full bg-farm-50 text-farm-900">
+    <div class="h-full bg-surface-page text-content-primary">
       <router-outlet />
     </div>
   `,

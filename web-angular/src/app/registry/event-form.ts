@@ -51,7 +51,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
           name="event-type" label="What happened?" [options]="types" [value]="type()"
           (changed)="type.set($any($event))"
         />
-        <p class="mt-1.5 text-xs text-farm-600">
+        <p class="mt-1.5 text-xs text-content-muted">
           A calving is not entered here — it creates an animal. Use the calving form.
         </p>
       </div>
@@ -74,7 +74,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
         }
 
         @if (t === 'departure') {
-          <div class="rounded-xl border border-farm-300 bg-white p-4 space-y-3">
+          <div class="rounded-xl border border-line bg-surface-raised p-4 space-y-3">
             <label class="block">
               <span appFieldLabel>Reason (required)</span>
               <select data-role="reason" [value]="reason()" (change)="reason.set($any($event.target).value)" appInput>
@@ -121,7 +121,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
              the date control and never reaches that block. Keeping the button
              there left it unreachable. -->
         @if (state.hasCode('animal_departed')) {
-          <div class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900" data-role="override">
+          <div class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="override">
             <p>
               If the event genuinely follows the departure, record it anyway — verification will
               flag it, which is the honest outcome.
@@ -136,7 +136,7 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
               <input data-role="override_reason" [value]="overrideReason()"
                 (input)="overrideReason.set($any($event.target).value)"
                 placeholder="sold in May but stayed on the farm until August"
-                class="w-full rounded-lg border border-amber-300 bg-white px-2 py-1.5 text-sm" />
+                class="w-full rounded-lg border border-warning-line bg-surface-raised px-2 py-1.5 text-sm" />
             </label>
             <button type="button" data-role="allow-after-departure"
               (click)="allowAfterDeparture.set(true); submit()"

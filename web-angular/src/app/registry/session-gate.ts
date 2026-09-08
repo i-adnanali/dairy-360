@@ -33,7 +33,7 @@ import { Button } from '../ui/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Button, ChipGroup, HelpText, PageHeading, SectionLabel, TextInput],
   template: `
-    <form class="mx-auto max-w-lg rounded-2xl border border-farm-300 bg-white p-6"
+    <form class="mx-auto max-w-lg rounded-2xl border border-line bg-surface-raised p-6"
       data-role="gate" (submit)="onSubmit($event)">
       <h2 appPageHeading>Before entering anything</h2>
       <p appHelp class="mt-1">
@@ -53,18 +53,18 @@ import { Button } from '../ui/button';
       </div>
 
       <label class="mt-5 block">
-        <span class="mb-1 block text-xs font-medium uppercase tracking-wide text-farm-600">
+        <span class="mb-1 block text-xs font-medium uppercase tracking-wide text-content-muted">
           Who is typing?
         </span>
         <input data-role="recorded-by" [value]="who()" (input)="who.set($any($event.target).value)"
           placeholder="a stable identifier, not a display name" appInput density="comfortable" class="w-full" />
-        <span class="mt-1 block text-xs text-farm-600">
+        <span class="mt-1 block text-xs text-content-muted">
           Recorded on every event as <span class="font-mono">recorded_by</span>. Whoever remembered
           it, if this is recall.
         </span>
       </label>
 
-      <p class="mt-4 rounded-lg bg-farm-100 px-3 py-2 text-xs text-farm-700">
+      <p class="mt-4 rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-secondary">
         Whether someone actually <em>saw</em> a thing is asked per record, and left blank by
         default. Nobody observed a purchase record.
       </p>
@@ -72,28 +72,28 @@ import { Button } from '../ui/button';
       <!-- Which database, stated positively in every case -- including the one
            where we could not find out. -->
       @if (target.probed()) {
-        <div class="mt-5 border-t border-farm-200 pt-4" data-role="target">
+        <div class="mt-5 border-t border-line-subtle pt-4" data-role="target">
           <div appSectionLabel legend>
             Where is this going?
           </div>
 
           @switch (target.kind()) {
             @case ('harness') {
-              <p class="text-sm text-farm-700" data-role="target-harness">
-                <span class="font-medium text-farm-900">Harness</span> —
+              <p class="text-sm text-content-secondary" data-role="target-harness">
+                <span class="font-medium text-content-primary">Harness</span> —
                 <span class="font-mono text-xs">{{ target.storage() }}</span>. Fixture data,
                 discarded when that process exits. Nothing you enter here is kept.
               </p>
             }
             @case ('real') {
-              <p class="text-sm text-farm-700" data-role="target-real">
-                <span class="font-medium text-farm-900">The real registry</span> —
+              <p class="text-sm text-content-secondary" data-role="target-real">
+                <span class="font-medium text-content-primary">The real registry</span> —
                 <span class="font-mono text-xs">{{ target.storage() }}</span>. Every record you
                 enter is permanent: corrections are new events, and nothing is deleted.
               </p>
             }
             @case ('unknown') {
-              <p class="text-sm text-farm-700" data-role="target-unknown">
+              <p class="text-sm text-content-secondary" data-role="target-unknown">
                 {{ target.reachable()
                   ? 'A server answered but would not say which database it holds — an older build, or something else serving /api. Treated as real, because it cannot be ruled out.'
                   : 'No server answered. Nothing can be written until one does.' }}
@@ -105,10 +105,10 @@ import { Button } from '../ui/button';
                because "we could not tell" must not resolve in the permissive
                direction. Not asked on the harness: see target.ts. -->
           @if (needsAck()) {
-            <label class="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-farm-300 bg-white px-3 py-2 text-sm">
+            <label class="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-line bg-surface-raised px-3 py-2 text-sm">
               <input type="checkbox" data-role="acknowledge-target" class="mt-0.5"
                 [checked]="acked()" (change)="acked.set($any($event.target).checked)" />
-              <span class="text-farm-800">
+              <span class="text-content-heading">
                 I mean to write to this database. This is not the harness.
               </span>
             </label>

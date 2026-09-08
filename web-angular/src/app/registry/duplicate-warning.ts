@@ -46,14 +46,14 @@ export const DEBOUNCE_MS = 250;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (matches().length > 0) {
-      <div class="rounded-xl border border-amber-300 bg-amber-50 p-3" data-role="duplicate-warning">
-        <p class="text-sm font-medium text-amber-900">
+      <div class="rounded-xl border border-warning-line bg-warning-bg p-3" data-role="duplicate-warning">
+        <p class="text-sm font-medium text-warning-strong">
           Is this a new one? {{ matches().length === 1 ? 'An animal' : 'Animals' }} already in the
           registry {{ matches().length === 1 ? 'looks' : 'look' }} like this.
         </p>
         <ul class="mt-2 space-y-1">
           @for (m of matches(); track m.id) {
-            <li class="flex flex-wrap items-baseline gap-x-2 text-sm text-amber-900">
+            <li class="flex flex-wrap items-baseline gap-x-2 text-sm text-warning-strong">
               <span class="font-mono">{{ m.id }}</span>
               <span>{{ m.name ?? '—' }}</span>
               <span class="text-xs">{{ m.match_reason }}</span>
@@ -67,7 +67,7 @@ export const DEBOUNCE_MS = 250;
              clear: the warning goes when what was typed stops matching, and
              submit was never blocked, so an "I know" button would only train
              the reflex of clicking one. -->
-        <p class="mt-2 text-xs text-amber-800">
+        <p class="mt-2 text-xs text-warning-fg">
           If it is genuinely a different animal, carry on — nothing is blocked.
         </p>
       </div>

@@ -29,11 +29,11 @@ export class ToolCallChip {
 
   protected readonly chipClass = computed(() =>
     this.isError()
-      ? 'border-red-300 bg-red-50 text-red-700'
-      : 'border-farm-200 bg-farm-100 text-farm-700 hover:bg-farm-200',
+      ? 'border-danger-line bg-danger-bg text-danger-soft'
+      : 'border-line-subtle bg-surface-sunken text-content-secondary hover:bg-brand-badge',
   );
 
   protected readonly dotClass = computed(() =>
-    this.isError() ? 'bg-red-500' : 'bg-emerald-500',
+    this.isError() ? 'bg-danger-dot' : 'bg-success-dot',
   );
 }

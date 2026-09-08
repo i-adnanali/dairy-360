@@ -13,7 +13,7 @@ import { ToolCallChip } from './tool-call-chip';
     @if (item().role === 'user') {
       <div class="flex justify-end">
         <div
-          class="max-w-[80%] rounded-2xl rounded-br-sm bg-farm-600 px-4 py-2.5 text-sm text-white shadow-sm"
+          class="max-w-[80%] rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 text-sm text-content-onFill shadow-sm"
         >
           {{ item().text }}
         </div>
@@ -32,7 +32,7 @@ import { ToolCallChip } from './tool-call-chip';
 
         @if (a.text) {
           <div
-            class="prose-chat max-w-[85%] rounded-2xl rounded-bl-sm border border-farm-200 bg-white px-4 py-3 text-sm text-farm-900 shadow-sm"
+            class="prose-chat max-w-[85%] rounded-2xl rounded-bl-sm border border-line-subtle bg-surface-raised px-4 py-3 text-sm text-content-primary shadow-sm"
           >
             <app-markdown-view [text]="a.text" />
           </div>
@@ -68,13 +68,13 @@ export class Message {
   protected readonly agentClass = computed(() => {
     switch (this.assistant()?.agent) {
       case 'dairy':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-agent-dairy-bg text-agent-dairy-fg border-agent-dairy-line';
       case 'vendor':
-        return 'bg-amber-50 text-amber-700 border-amber-200';
+        return 'bg-warning-bg text-agent-vendor-fg border-agent-vendor-line';
       case 'both':
-        return 'bg-violet-50 text-violet-700 border-violet-200';
+        return 'bg-agent-both-bg text-agent-both-fg border-agent-both-line';
       default:
-        return 'bg-farm-100 text-farm-600 border-farm-200';
+        return 'bg-surface-sunken text-content-muted border-line-subtle';
     }
   });
 }

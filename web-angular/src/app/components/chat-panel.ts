@@ -23,7 +23,7 @@ import { Button } from '../ui/button';
   imports: [Button, Composer, ConfirmationCard, EmptyState, HelpText, MessageList],
   template: `
     <div class="mx-auto flex h-full max-w-3xl flex-col">
-      <header class="border-b border-farm-200 bg-farm-50/80 px-6 py-4 backdrop-blur">
+      <header class="border-b border-line-subtle bg-surface-page/80 px-6 py-4 backdrop-blur">
         <h1 class="text-lg font-semibold tracking-tight">Baghicha Dairy Co. — Farm Agent</h1>
         <p appHelp>
           Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances —
@@ -39,8 +39,8 @@ import { Button } from '../ui/button';
         }
 
         @if (store.loading()) {
-          <div class="mt-4 flex items-center gap-2 text-sm text-farm-500">
-            <span class="h-2 w-2 animate-pulse rounded-full bg-farm-400"></span>
+          <div class="mt-4 flex items-center gap-2 text-sm text-content-subtle">
+            <span class="h-2 w-2 animate-pulse rounded-full bg-mark-pending"></span>
             Thinking…
           </div>
         }
@@ -63,7 +63,7 @@ import { Button } from '../ui/button';
         }
 
         @if (store.error(); as error) {
-          <div class="mt-4 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div class="mt-4 rounded-md border border-danger-line bg-danger-bg px-4 py-3 text-sm text-danger-soft">
             {{ error }}
           </div>
         }

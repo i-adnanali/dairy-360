@@ -98,13 +98,18 @@ module.exports = {
         },
         focus: token('focus-ring'),
         divider: token('divider'),
+        // A pending indicator, not text and not a line: the chat's pulse dot.
+        mark: { pending: token('mark-pending') },
 
         danger: {
           bg: token('danger-bg'),
           fg: token('danger-fg'),
           // red-700, which the danger role at red-800 cannot express.
           soft: token('danger-soft'),
+          // red-900, one stop darker again. verification-panel's hardest refusal.
+          strong: token('danger-strong'),
           line: token('danger-line'),
+          dot: token('danger-dot'),
         },
         warning: {
           bg: token('warning-bg'),
@@ -112,11 +117,18 @@ module.exports = {
           // amber-900, 13 sites one stop darker than the role.
           strong: token('warning-strong'),
           line: token('warning-line'),
+          // amber-200. The harness banner, which target.spec.ts pins.
+          fill: token('warning-fill'),
         },
         success: {
           bg: token('success-bg'),
           fg: token('success-fg'),
+          // green-900. Shares a VALUE with writelog.fg and not a name -- see styles.css.
+          strong: token('success-strong'),
           line: token('success-line'),
+          // green-200: the today board's settled panel. See styles.css.
+          lineSoft: token('success-line-soft'),
+          dot: token('success-dot'),
         },
 
         // Categorical, and not the roles. See styles.css for why.

@@ -89,9 +89,9 @@ import { Button } from '../ui/button';
             into the reconciliation gap instead of being recorded.
           </p>
         } @else {
-          <div class="overflow-hidden rounded-xl border border-farm-300 bg-white">
+          <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
             <table class="w-full text-left text-sm">
-              <thead class="border-b border-farm-200 text-xs uppercase tracking-wide text-farm-600">
+              <thead class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted">
                 <tr>
                   <th appCell>Name</th>
                   <th appCell>Kind</th>
@@ -109,10 +109,10 @@ import { Button } from '../ui/button';
                         <a [routerLink]="['/milk/buyers', d.id]" appTextLink tone="strong"
                           [attr.data-role]="'open-' + d.id">{{ d.name }}</a>
                       } @else {
-                        <span class="text-farm-800">{{ d.name }}</span>
+                        <span class="text-content-heading">{{ d.name }}</span>
                       }
                       @if (!d.active) {
-                        <span class="ml-2 text-xs text-farm-500" data-role="closed">
+                        <span class="ml-2 text-xs text-content-subtle" data-role="closed">
                           stopped {{ d.ended_on }}
                         </span>
                       }
@@ -123,19 +123,19 @@ import { Button } from '../ui/button';
                     </td>
                     <td appCell tone="secondary" [attr.data-role]="'rate-' + d.id">
                       @if (!d.billable) {
-                        <span class="text-farm-500">not billed</span>
+                        <span class="text-content-subtle">not billed</span>
                       } @else if (d.price) {
                         {{ rate(d) }}
-                        <span class="ml-1 text-xs text-farm-500">({{ perLitre(d) }})</span>
+                        <span class="ml-1 text-xs text-content-subtle">({{ perLitre(d) }})</span>
                       } @else {
-                        <span class="text-amber-800">no price agreed</span>
+                        <span class="text-warning-fg">no price agreed</span>
                       }
                     </td>
                     <td appCell numeric>
                       @if (d.billable) {
                         <button type="button" [attr.data-role]="'price-' + d.id"
                           (click)="openPrice(d)"
-                          class="rounded-lg border border-farm-300 px-2 py-1 text-xs text-farm-700 hover:border-farm-400"
+                          class="rounded-lg border border-line px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
                         >change rate</button>
                       }
                     </td>
@@ -161,7 +161,7 @@ import { Button } from '../ui/button';
               <input data-role="price-amount" inputmode="decimal" [value]="priceAmount()"
                 (input)="priceAmount.set($any($event.target).value)" appInput class="w-32" />
             </label>
-            <span class="pb-2 text-sm text-farm-600">per</span>
+            <span class="pb-2 text-sm text-content-muted">per</span>
             <label class="block">
               <span appFieldLabel>Litres</span>
               <input data-role="price-unit" inputmode="decimal" [value]="priceUnit()"
@@ -199,7 +199,7 @@ import { Button } from '../ui/button';
               <app-session-required what="a rate" />
             }
             <button type="button" data-role="price-cancel" (click)="pricing.set(null)"
-              class="rounded-xl border border-farm-300 px-4 py-2 text-sm text-farm-700">Cancel</button>
+              class="rounded-xl border border-line px-4 py-2 text-sm text-content-secondary">Cancel</button>
           </div>
         </form>
       }
@@ -241,7 +241,7 @@ import { Button } from '../ui/button';
         </div>
 
         @if (kind() === 'home') {
-          <p class="rounded-lg bg-farm-50 px-3 py-2 text-xs text-farm-700" data-role="home-note">
+          <p class="rounded-lg bg-surface-page px-3 py-2 text-xs text-content-secondary" data-role="home-note">
             Milk kept at home is never billed and can never carry a price or a payment. Recording
             it is what keeps it out of the unexplained gap.
           </p>

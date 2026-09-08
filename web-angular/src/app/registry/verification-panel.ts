@@ -66,7 +66,7 @@ import { SubHeading } from '../ui/heading';
         <section appCard>
           <h3 appSubHeading>Invariants</h3>
           @if (data.violations.length === 0) {
-            <p class="mt-2 text-sm text-farm-700" data-role="violations-none">
+            <p class="mt-2 text-sm text-content-secondary" data-role="violations-none">
               No violations across {{ data.counts.animals }} animal(s),
               {{ data.counts.events }} event(s), {{ data.counts.lactations }} lactation(s),
               as of {{ data.as_of }}.
@@ -78,7 +78,7 @@ import { SubHeading } from '../ui/heading';
           } @else {
             <ul class="mt-2 space-y-1" data-role="violations">
               @for (x of data.violations; track x.detail) {
-                <li class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-900">
+                <li class="rounded-lg bg-danger-bg px-3 py-2 text-sm text-danger-strong">
                   <span class="font-mono text-xs">[{{ x.invariant }}] {{ x.name }}</span>
                   <span class="ml-2">{{ x.detail }}</span>
                 </li>
@@ -98,14 +98,14 @@ import { SubHeading } from '../ui/heading';
         <section appCard>
           <h3 appSubHeading>People — worth a look</h3>
           @if (data.labour.length === 0) {
-            <p class="mt-2 text-sm text-farm-700" data-role="labour-none">
+            <p class="mt-2 text-sm text-content-secondary" data-role="labour-none">
               Nothing to flag. These are not violations — they are things that are legitimate and
               still worth seeing.
             </p>
           } @else {
             <ul class="mt-2 space-y-1" data-role="labour">
               @for (l of data.labour; track l.detail) {
-                <li class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                <li class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong">
                   <span class="font-mono text-xs">{{ l.kind }}</span>
                   <span class="ml-2">{{ l.detail }}</span>
                 </li>
@@ -122,10 +122,10 @@ import { SubHeading } from '../ui/heading';
             exact-day recall is the signal worth acting on.
           </p>
           @if (data.histogram.length === 0) {
-            <p class="mt-2 text-sm italic text-farm-500" data-role="histogram-empty">No events yet.</p>
+            <p class="mt-2 text-sm italic text-content-subtle" data-role="histogram-empty">No events yet.</p>
           } @else {
             <table class="mt-2 w-full text-left text-sm" data-role="histogram">
-              <thead class="text-xs uppercase tracking-wide text-farm-600">
+              <thead class="text-xs uppercase tracking-wide text-content-muted">
                 <tr><th appCell>Source</th><th appCell>Precision</th><th appCell numeric>Events</th></tr>
               </thead>
               <tbody>
@@ -144,12 +144,12 @@ import { SubHeading } from '../ui/heading';
         <section appCard>
           <h3 appSubHeading>Calving intervals</h3>
           @if (data.intervals.intervals.length === 0) {
-            <p class="mt-2 text-sm italic text-farm-500" data-role="intervals-empty">
+            <p class="mt-2 text-sm italic text-content-subtle" data-role="intervals-empty">
               No animal has two or more calvings yet.
             </p>
           } @else {
             <table class="mt-2 w-full text-left text-sm" data-role="intervals">
-              <thead class="text-xs uppercase tracking-wide text-farm-600">
+              <thead class="text-xs uppercase tracking-wide text-content-muted">
                 <tr><th appCell>Animal</th><th appCell>From</th><th appCell>To</th><th appCell numeric>Days</th><th appCell>Quality</th></tr>
               </thead>
               <tbody>
@@ -167,12 +167,12 @@ import { SubHeading } from '../ui/heading';
             <!-- The two sets are reported separately and never blended. -->
             <div class="mt-3 grid gap-2 sm:grid-cols-2" data-role="summaries">
               @for (s of [data.intervals.measured, data.intervals.approximate]; track s.quality) {
-                <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div appSectionLabel>{{ s.quality }}</div>
                   @if (s.count === 0) {
-                    <div class="text-farm-500 italic">none</div>
+                    <div class="text-content-subtle italic">none</div>
                   } @else {
-                    <div class="text-farm-900">n = {{ s.count }} · mean {{ s.mean_days }}d</div>
+                    <div class="text-content-primary">n = {{ s.count }} · mean {{ s.mean_days }}d</div>
                     <div appHelp size="xs">min {{ s.min_days }}d · max {{ s.max_days }}d</div>
                   }
                 </div>
@@ -190,26 +190,26 @@ import { SubHeading } from '../ui/heading';
             record and empty data, and one blended percentage would hide exactly that.
           </p>
           @if (data.milking.rows === 0) {
-            <p class="mt-2 text-sm italic text-farm-500" data-role="milking-empty">
+            <p class="mt-2 text-sm italic text-content-subtle" data-role="milking-empty">
               No milking recorded yet.
             </p>
           } @else {
             <div class="mt-2 grid gap-2 sm:grid-cols-3" data-role="milking-summary">
-              <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+              <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                 <div appSectionLabel>sessions</div>
-                <div class="text-farm-900">
+                <div class="text-content-primary">
                   {{ data.milking.complete_sessions }} complete of {{ data.milking.sessions }}
                 </div>
                 <div appHelp size="xs">{{ data.milking.first_on }} → {{ data.milking.last_on }}</div>
               </div>
-              <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+              <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                 <div appSectionLabel>measured</div>
-                <div class="text-farm-900">{{ data.milking.measured }} row(s)</div>
+                <div class="text-content-primary">{{ data.milking.measured }} row(s)</div>
                 <div appHelp size="xs">carry a number</div>
               </div>
-              <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+              <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                 <div appSectionLabel>not measured</div>
-                <div class="text-farm-900">{{ data.milking.milked_not_measured }} row(s)</div>
+                <div class="text-content-primary">{{ data.milking.milked_not_measured }} row(s)</div>
                 <div appHelp size="xs">
                   milked, unweighed · {{ data.milking.not_milked }} not milked
                 </div>
@@ -217,7 +217,7 @@ import { SubHeading } from '../ui/heading';
             </div>
 
             <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
-              <thead class="text-xs uppercase tracking-wide text-farm-600">
+              <thead class="text-xs uppercase tracking-wide text-content-muted">
                 <tr>
                   <th appCell>Date</th><th appCell>Session</th>
                   <th appCell numeric>Recorded</th><th appCell numeric>In milk</th>
@@ -230,7 +230,7 @@ import { SubHeading } from '../ui/heading';
                     <td appCell tone="secondary">{{ s.occurred_on }}</td>
                     <td appCell tone="secondary">{{ s.session }}</td>
                     <td appCell numeric emphasis
-                      [class]="s.recorded >= s.expected ? 'text-farm-900' : 'text-amber-800'"
+                      [class]="s.recorded >= s.expected ? 'text-content-primary' : 'text-warning-fg'"
                     >{{ s.recorded }}</td>
                     <td appCell numeric tone="secondary">{{ s.expected }}</td>
                     <td appCell numeric tone="secondary">{{ s.measured }}</td>
@@ -257,29 +257,29 @@ import { SubHeading } from '../ui/heading';
             <p appHelp size="xs" class="mt-1">{{ r.from }} → {{ r.to }}</p>
 
             @if (r.dispatched_total === 0 && r.produced_measured === 0) {
-              <p class="mt-2 text-sm italic text-farm-500" data-role="reconcile-empty">
+              <p class="mt-2 text-sm italic text-content-subtle" data-role="reconcile-empty">
                 Nothing recorded in this period.
               </p>
             } @else {
               <div class="mt-2 grid gap-2 sm:grid-cols-4" data-role="reconcile-summary">
-                <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div appSectionLabel>Measured</div>
-                  <div class="text-farm-900" data-role="produced">{{ r.produced_measured }} L</div>
+                  <div class="text-content-primary" data-role="produced">{{ r.produced_measured }} L</div>
                   <div appHelp size="xs">from {{ r.measured_rows }} row(s)</div>
                 </div>
-                <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div appSectionLabel>Sold</div>
-                  <div class="text-farm-900" data-role="sold">{{ r.dispatched_sold }} L</div>
+                  <div class="text-content-primary" data-role="sold">{{ r.dispatched_sold }} L</div>
                   <div appHelp size="xs">{{ money(r.billed_minor) }}</div>
                 </div>
-                <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div appSectionLabel>Kept at home</div>
-                  <div class="text-farm-900" data-role="home">{{ r.dispatched_home }} L</div>
+                  <div class="text-content-primary" data-role="home">{{ r.dispatched_home }} L</div>
                   <div appHelp size="xs">its own term, not the gap</div>
                 </div>
-                <div class="rounded-lg bg-farm-50 px-3 py-2 text-sm">
+                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div appSectionLabel>Gap</div>
-                  <div class="text-farm-900" data-role="gap">{{ r.gap_litres }} L</div>
+                  <div class="text-content-primary" data-role="gap">{{ r.gap_litres }} L</div>
                   <div appHelp size="xs" data-role="gap-pct">
                     @if (r.gap_pct !== null) {
                       {{ r.gap_pct }}% of measured
@@ -293,20 +293,20 @@ import { SubHeading } from '../ui/heading';
               <!-- The withheld percentage says WHY rather than showing a dash:
                    a missing number with no explanation reads as a bug. -->
               @if (r.gap_pct_withheld_because; as why) {
-                <p class="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900"
+                <p class="mt-2 rounded-lg bg-warning-bg px-3 py-2 text-xs text-warning-strong"
                   data-role="gap-withheld">
                   No percentage, on purpose — {{ why }}
                 </p>
               }
 
-              <p class="mt-2 text-sm text-farm-700" data-role="reconcile-sessions">
+              <p class="mt-2 text-sm text-content-secondary" data-role="reconcile-sessions">
                 {{ r.complete_sessions }} of {{ r.sessions }} dispatch session(s) had every
                 standing destination answered.
               </p>
 
               @if (r.incomplete.length > 0) {
                 <table class="mt-2 w-full text-left text-sm" data-role="reconcile-incomplete">
-                  <thead class="text-xs uppercase tracking-wide text-farm-600">
+                  <thead class="text-xs uppercase tracking-wide text-content-muted">
                     <tr><th appCell>Session</th><th appCell numeric>Answered</th></tr>
                   </thead>
                   <tbody>
@@ -326,10 +326,10 @@ import { SubHeading } from '../ui/heading';
                    a stale default look identical from here. -->
               @if (r.off_schedule.length > 0) {
                 <div class="mt-3" data-role="off-schedule">
-                  <h4 class="text-xs font-semibold uppercase tracking-wide text-farm-700">
+                  <h4 class="text-xs font-semibold uppercase tracking-wide text-content-secondary">
                     Billed at something other than the agreed rate
                   </h4>
-                  <ul class="mt-1 space-y-1 text-sm text-farm-700">
+                  <ul class="mt-1 space-y-1 text-sm text-content-secondary">
                     @for (o of r.off_schedule; track o.dispatch_id) {
                       <li>
                         {{ o.occurred_on }} {{ o.session }} · {{ o.name }} —
@@ -352,7 +352,7 @@ import { SubHeading } from '../ui/heading';
         }
 
         <button type="button" data-role="refresh" (click)="load()"
-          class="rounded-xl border border-farm-300 bg-white px-4 py-2 text-sm font-medium text-farm-800"
+          class="rounded-xl border border-line bg-surface-raised px-4 py-2 text-sm font-medium text-content-heading"
         >Recheck</button>
       } @else {
         <p appHelp data-role="loading">Loading…</p>

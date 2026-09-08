@@ -48,7 +48,7 @@ export type IdentifierField = keyof typeof IDENTIFIER_GUIDANCE;
   template: `
     <label class="block">
       <span appFieldLabel>
-        {{ label() }} <span class="font-normal text-farm-500">(optional)</span>
+        {{ label() }} <span class="font-normal text-content-subtle">(optional)</span>
       </span>
       <input
         [attr.data-role]="field()"
@@ -64,7 +64,7 @@ export type IdentifierField = keyof typeof IDENTIFIER_GUIDANCE;
           <option [value]="v"></option>
         }
       </datalist>
-      <span class="mt-1 block text-xs text-farm-600" [attr.data-role]="field() + '-hint'">
+      <span class="mt-1 block text-xs text-content-muted" [attr.data-role]="field() + '-hint'">
         {{ guidance() }}
       </span>
     </label>

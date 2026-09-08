@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Button],
   template: `
-    <div class="border-t border-farm-200 bg-farm-50 px-6 py-4">
+    <div class="border-t border-line-subtle bg-surface-page px-6 py-4">
       <div class="flex items-end gap-2">
         <textarea
           [value]="value()"
@@ -16,7 +16,7 @@ import { Button } from '../ui/button';
           [disabled]="disabled()"
           rows="1"
           [placeholder]="placeholder()"
-          class="max-h-40 min-h-[44px] flex-1 resize-none rounded-xl border border-farm-300 bg-white px-3 py-2.5 text-sm text-farm-900 outline-none focus:border-farm-500 disabled:bg-farm-100 disabled:text-farm-400"
+          class="max-h-40 min-h-[44px] flex-1 resize-none rounded-xl border border-line bg-surface-raised px-3 py-2.5 text-sm text-content-primary outline-none focus:border-focus disabled:bg-surface-sunken disabled:text-content-disabled"
         ></textarea>
         <button
           (click)="submit()"

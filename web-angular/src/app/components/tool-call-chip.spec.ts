@@ -30,6 +30,11 @@ describe('ToolCallChip', () => {
     fixture.componentRef.setInput('call', { ...call, status: 'error' });
     fixture.detectChanges();
     const button = (fixture.nativeElement as HTMLElement).querySelector('button')!;
-    expect(button.className).toContain('text-red-700');
+    // `text-red-700` until the token migration. The literal is gone, not the
+    // meaning: `danger.soft` exists precisely BECAUSE this assertion pins red-700
+    // and the danger role is fixed at red-800, so the role could not express it.
+    // Asserting the token rather than the hex keeps the check and lets phase 4
+    // re-point the value.
+    expect(button.className).toContain('text-danger-soft');
   });
 });

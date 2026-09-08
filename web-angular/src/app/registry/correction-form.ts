@@ -56,11 +56,11 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
             @for (c of correctable(); track c.id) {
               <button type="button" [attr.data-calving]="c.id" (click)="target.set(c.id)"
                 class="flex w-full items-baseline gap-3 rounded-lg border px-3 py-2 text-left text-sm"
-                [class]="target() === c.id ? 'border-farm-600 bg-farm-100' : 'border-farm-300 bg-white hover:border-farm-400'"
+                [class]="target() === c.id ? 'border-line-selected bg-surface-sunken' : 'border-line bg-surface-raised hover:border-line-strong'"
               >
                 <span class="font-medium">{{ c.occurred_on }}</span>
                 <span appHelp size="xs">({{ c.date_precision }})</span>
-                <span class="ml-auto font-mono text-xs text-farm-500">{{ c.id }}</span>
+                <span class="ml-auto font-mono text-xs text-content-subtle">{{ c.id }}</span>
               </button>
             }
           </div>
@@ -77,7 +77,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
           (changed)="when.set($event)"
         />
 
-        <div class="rounded-lg bg-farm-100 px-3 py-2 text-xs text-farm-700">
+        <div class="rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-secondary">
           Both halves are written together: a superseding calving on the dam and a superseding
           birth on the calf. If the calf did not live, its departure moves too — the three are
           the same physical fact. The old events stay in the log, marked superseded.
@@ -99,7 +99,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
              names occurred_on, so its message goes to the date control, and a
              button nested in that block would be unreachable. -->
         @if (state.hasCode('near_duplicate_calving')) {
-          <div class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900" data-role="override">
+          <div class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="override">
             <p>The corrected date lands near another calving on this dam — check it first.</p>
             <label class="mt-2 block">
               <span class="mb-1 block text-xs font-medium">
@@ -107,7 +107,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
               </span>
               <input data-role="override_reason" [value]="overrideReason()"
                 (input)="overrideReason.set($any($event.target).value)"
-                class="w-full rounded-lg border border-amber-300 bg-white px-2 py-1.5 text-sm" />
+                class="w-full rounded-lg border border-warning-line bg-surface-raised px-2 py-1.5 text-sm" />
             </label>
             <button type="button" data-role="allow-duplicate" (click)="allowDuplicate.set(true); submit()"
               class="mt-2 font-medium underline">Correct it anyway</button>
@@ -123,16 +123,16 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
       }
 
       @if (state.result(); as r) {
-        <div class="rounded-xl border border-green-300 bg-green-50 p-4 text-sm" data-role="result">
-          <p class="font-medium text-green-900">Correction applied</p>
-          <ul class="mt-1 space-y-0.5 text-green-800">
+        <div class="rounded-xl border border-success-line bg-success-bg p-4 text-sm" data-role="result">
+          <p class="font-medium text-success-strong">Correction applied</p>
+          <ul class="mt-1 space-y-0.5 text-success-fg">
             <li>superseded calving <span class="font-mono text-xs">{{ r.superseded.calving_event_id }}</span></li>
             <li>superseded birth <span class="font-mono text-xs">{{ r.superseded.birth_event_id }}</span></li>
             @if (r.superseded.departure_event_id) {
               <li>superseded departure <span class="font-mono text-xs">{{ r.superseded.departure_event_id }}</span></li>
             }
           </ul>
-          <p class="mt-2 text-green-800">
+          <p class="mt-2 text-success-fg">
             The event list below shows both the old and the new — check it reads the way you meant.
           </p>
         </div>

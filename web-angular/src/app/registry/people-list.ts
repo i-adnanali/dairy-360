@@ -95,9 +95,9 @@ import { Button } from '../ui/button';
             record what they are on.
           </p>
         } @else {
-          <table class="w-full overflow-hidden rounded-xl border border-farm-200 bg-white text-sm"
+          <table class="w-full overflow-hidden rounded-xl border border-line-subtle bg-surface-raised text-sm"
             data-role="people-table">
-            <thead class="bg-farm-100 text-left text-xs uppercase tracking-wide text-farm-600">
+            <thead class="bg-surface-sunken text-left text-xs uppercase tracking-wide text-content-muted">
               <tr>
                 <th appCell>Identifier</th>
                 <th appCell>Name</th>
@@ -111,15 +111,15 @@ import { Button } from '../ui/button';
                   [attr.data-engaged]="p.engaged">
                   <td appCell small class="font-mono">
                     <a [routerLink]="['/labour/people', p.person_id]"
-                      class="text-farm-800 underline decoration-farm-300">{{ p.identifier }}</a>
+                      class="text-content-heading underline decoration-certainty-rule">{{ p.identifier }}</a>
                     @if (!p.engaged) {
-                      <span class="ml-2 rounded bg-farm-100 px-1.5 py-0.5 text-[10px] uppercase
-                        tracking-wide text-farm-600" data-role="not-engaged">no open stint</span>
+                      <span class="ml-2 rounded bg-surface-sunken px-1.5 py-0.5 text-[10px] uppercase
+                        tracking-wide text-content-muted" data-role="not-engaged">no open stint</span>
                     }
                   </td>
                   <td appCell>{{ p.name ?? '—' }}</td>
                   <td appCell numeric class="tabular-nums"
-                    [class.text-amber-800]="p.balance_minor < 0" [attr.data-role]="'balance'">
+                    [class.text-warning-fg]="p.balance_minor < 0" [attr.data-role]="'balance'">
                     {{ owed(p) }}
                   </td>
                   <td appCell tone="muted">{{ p.last_payment_on ?? '—' }}</td>
@@ -133,7 +133,7 @@ import { Button } from '../ui/button';
       }
 
       <!-- Add a person. The identifier is asked for HERE and nowhere else. -->
-      <form class="space-y-4 rounded-xl border border-farm-300 bg-white p-4"
+      <form class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
         (submit)="submitPerson($event)" data-role="add-person">
         <h3 appSectionHeading>Add a person</h3>
 
@@ -142,7 +142,7 @@ import { Button } from '../ui/button';
           <input name="identifier" [value]="identifier()"
             (input)="identifier.set($any($event.target).value)" appInput density="comfortable" class="w-full font-mono"
             placeholder="imran" autocomplete="off" />
-          <span class="block text-xs text-farm-500">
+          <span class="block text-xs text-content-subtle">
             A short, stable name — the same one you type into “observed by”. It cannot be changed
             later: every milking and dispatch that names them stores it as text, and the event log
             cannot be rewritten.
@@ -153,12 +153,12 @@ import { Button } from '../ui/button';
         </label>
 
         <label class="block space-y-1">
-          <span appSubHeading>Display name <span class="text-farm-500">(optional)</span></span>
+          <span appSubHeading>Display name <span class="text-content-subtle">(optional)</span></span>
           <input name="name" [value]="name()" (input)="name.set($any($event.target).value)" appInput density="comfortable" class="w-full" placeholder="Imran" />
         </label>
 
         <label class="block space-y-1">
-          <span appSubHeading>Contact <span class="text-farm-500">(optional)</span></span>
+          <span appSubHeading>Contact <span class="text-content-subtle">(optional)</span></span>
           <input name="contact" [value]="contact()" (input)="contact.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
         </label>
 
@@ -180,7 +180,7 @@ import { Button } from '../ui/button';
            returning gets a second stint rather than an edited first one. -->
       @if (rows(); as list) {
         @if (list.length > 0) {
-          <form class="space-y-4 rounded-xl border border-farm-300 bg-white p-4"
+          <form class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
             (submit)="submitEngagement($event)" data-role="add-engagement">
             <h3 appSectionHeading>Open a stint</h3>
             <p appHelp size="xs" tone="subtle">
@@ -204,14 +204,14 @@ import { Button } from '../ui/button';
               <span appSubHeading>Kind</span>
               <app-chip-group name="kind" [options]="kindChips" [value]="engageKind()"
                 (changed)="engageKind.set($any($event))" />
-              <span class="block text-xs text-farm-500">
+              <span class="block text-xs text-content-subtle">
                 Salaried people are on every monthly run and must be answered. Dihari are not a row
                 until they worked a day.
               </span>
             </div>
 
             <label class="block space-y-1">
-              <span appSubHeading>Role <span class="text-farm-500">(optional)</span></span>
+              <span appSubHeading>Role <span class="text-content-subtle">(optional)</span></span>
               <input name="role" [value]="engageRole()" (input)="engageRole.set($any($event.target).value)" appInput density="comfortable" class="w-full" placeholder="milker" />
             </label>
 

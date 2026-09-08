@@ -118,7 +118,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       />
 
       <!-- calf sex + outcome, needed before the picker can judge eligibility -->
-      <div class="rounded-xl border border-farm-300 bg-white p-4 space-y-4">
+      <div class="rounded-xl border border-line bg-surface-raised p-4 space-y-4">
         <div>
           <div appSectionLabel legend>Calf sex</div>
           <app-chip-group
@@ -133,12 +133,12 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             name="outcome" label="Outcome" [options]="outcomes" [value]="outcome()"
             (changed)="setOutcome($any($event))"
           />
-          <p class="mt-1.5 text-xs text-farm-600">
+          <p class="mt-1.5 text-xs text-content-muted">
             A calf that did not live is still recorded as an animal, still opens the lactation, and
             still counts toward parity and the calving interval.
           </p>
           @if (outcome() !== 'live') {
-            <p class="mt-1.5 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900" data-role="outcome-warning">
+            <p class="mt-1.5 rounded-lg bg-warning-bg px-3 py-2 text-xs text-warning-strong" data-role="outcome-warning">
               If you are unsure whether this calf survived, record it as <strong>live</strong>.
               Live → died is repairable with a departure event; the reverse is not, and would
               leave the animal permanently departed.
@@ -175,7 +175,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       <!-- Keyed on the code, not nested in the form-level error: this refusal
            names occurred_on, so its message goes to the date control. -->
       @if (state.hasCode('near_duplicate_calving')) {
-        <div class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900" data-role="override">
+        <div class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="override">
           <p>Far more likely a double entry than a real second calving — check the date first.</p>
           <label class="mt-2 block">
             <span class="mb-1 block text-xs font-medium">
@@ -184,7 +184,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             <input data-role="override_reason" [value]="overrideReason()"
               (input)="overrideReason.set($any($event.target).value)"
               placeholder="twin born the following month, confirmed against the cycle card"
-              class="w-full rounded-lg border border-amber-300 bg-white px-2 py-1.5 text-sm" />
+              class="w-full rounded-lg border border-warning-line bg-surface-raised px-2 py-1.5 text-sm" />
           </label>
           <button type="button" data-role="allow-duplicate" (click)="allowDuplicate.set(true); submit()"
             class="mt-2 font-medium underline">Record it anyway</button>
@@ -199,21 +199,21 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       </div>
 
       @if (state.result(); as r) {
-        <div class="rounded-xl border border-green-300 bg-green-50 p-4" data-role="result">
-          <p class="text-sm font-medium text-green-900">
+        <div class="rounded-xl border border-success-line bg-success-bg p-4" data-role="result">
+          <p class="text-sm font-medium text-success-strong">
             Calf {{ r.calf_id }}{{ r.linked ? ' — linked, not created' : ' — created' }}
           </p>
           @if (r.superseded_origin_event_id) {
-            <p class="mt-1 text-sm text-green-800">
+            <p class="mt-1 text-sm text-success-fg">
               Its “acquired” origin was superseded; its birth date is now the calving date,
               replacing what pass one estimated.
             </p>
           }
-          <p class="mt-1 text-sm text-green-800">
+          <p class="mt-1 text-sm text-success-fg">
             Dam is now <span class="font-mono">{{ r.dam.status?.status }}</span>,
             parity {{ r.dam.status?.parity }}
           </p>
-          <div class="mt-2 flex gap-3 text-sm font-medium text-green-900 underline">
+          <div class="mt-2 flex gap-3 text-sm font-medium text-success-strong underline">
             <button type="button" (click)="open(r.dam.animal.id)">Open dam</button>
             <button type="button" (click)="open(r.calf_id)">Open calf</button>
           </div>

@@ -123,7 +123,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             />
           </div>
         </div>
-        <p class="mt-2 text-xs text-farm-600" data-role="today-note">
+        <p class="mt-2 text-xs text-content-muted" data-role="today-note">
           Defaults to today and this session — the one place a date is defaulted, because today is
           a fact rather than a guess. Change it to enter a session you missed.
         </p>
@@ -141,13 +141,13 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           </p>
         } @else {
           <!-- MUST be answered -->
-          <div class="overflow-hidden rounded-xl border border-farm-300 bg-white">
-            <div class="border-b border-farm-200 bg-farm-50 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-farm-700"
+          <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
+            <div class="border-b border-line-subtle bg-surface-page px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-secondary"
               data-role="standing-head">
               Every session — leave none of these unanswered
             </div>
             <table class="w-full text-left text-sm">
-              <thead class="border-b border-farm-200 text-xs uppercase tracking-wide text-farm-600">
+              <thead class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted">
                 <tr>
                   <th appCell>Goes to</th>
                   <th appCell numeric nowrap>
@@ -162,9 +162,9 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                 @for (row of s.standing; track row.destination_id; let i = $index) {
                   <tr appRowDivider [attr.data-row]="row.destination_id">
                     <td appCell density="compact" nowrap>
-                      <span class="text-farm-800">{{ row.name }}</span>
+                      <span class="text-content-heading">{{ row.name }}</span>
                       @if (!row.billable) {
-                        <span class="ml-2 whitespace-nowrap rounded bg-farm-100 px-1.5 py-0.5 text-xs text-farm-600"
+                        <span class="ml-2 whitespace-nowrap rounded bg-surface-sunken px-1.5 py-0.5 text-xs text-content-muted"
                           data-role="not-billed">kept, not sold</span>
                       }
                     </td>
@@ -183,7 +183,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                           [disabled]="draft(row.destination_id).status === 'none'"
                           (input)="typeLitres(row.destination_id, $any($event.target).value)"
                           (keydown)="onKey($event, i)"
-                          class="w-24 rounded-lg border border-farm-300 px-2 py-1 text-sm disabled:bg-farm-50"
+                          class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
                         <button type="button" [attr.data-role]="'none-' + row.destination_id"
                           (click)="markNone(row.destination_id)"
@@ -194,10 +194,10 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                             [value]="draft(row.destination_id).reason"
                             (input)="setReason(row.destination_id, $any($event.target).value)"
                             placeholder="why (optional)"
-                            class="w-44 rounded-lg border border-farm-300 px-2 py-1 text-sm" />
+                            class="w-44 rounded-lg border border-line px-2 py-1 text-sm" />
                         }
                         @if (row.existing) {
-                          <span class="text-xs italic text-farm-500"
+                          <span class="text-xs italic text-content-subtle"
                             [attr.data-role]="'saved-' + row.destination_id">already saved</span>
                         }
                       </div>
@@ -214,8 +214,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 
           <!-- OFFERED, never required -->
           @if (s.occasional.length > 0) {
-            <div class="overflow-hidden rounded-xl border border-dashed border-farm-300 bg-white">
-              <div class="border-b border-farm-200 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-farm-600"
+            <div class="overflow-hidden rounded-xl border border-dashed border-line bg-surface-raised">
+              <div class="border-b border-line-subtle px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-muted"
                 data-role="occasional-head">
                 Only if they came — nothing to answer here
               </div>
@@ -225,13 +225,13 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                     <tr appRowDivider [attr.data-row]="row.destination_id">
                       <td appCell density="compact" tone="heading">
                         {{ row.name }}
-                        <span class="ml-2 text-xs text-farm-500" data-role="rate">{{ rateText(row) }}</span>
+                        <span class="ml-2 text-xs text-content-subtle" data-role="rate">{{ rateText(row) }}</span>
                       </td>
                       <td appCell density="compact">
                         @if (draft(row.destination_id).status === null) {
                           <button type="button" [attr.data-role]="'add-' + row.destination_id"
                             (click)="addOccasional(row.destination_id)"
-                            class="rounded-lg border border-farm-300 bg-white px-2 py-1 text-xs text-farm-700 hover:border-farm-400"
+                            class="rounded-lg border border-line bg-surface-raised px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
                           >they took some</button>
                         } @else {
                           <div class="flex items-center gap-2">
@@ -240,13 +240,13 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                               inputmode="decimal"
                               [value]="draft(row.destination_id).litres"
                               (input)="typeLitres(row.destination_id, $any($event.target).value)"
-                              class="w-24 rounded-lg border border-farm-300 px-2 py-1 text-sm"
+                              class="w-24 rounded-lg border border-line px-2 py-1 text-sm"
                             />
-                            <span class="text-sm text-farm-700"
+                            <span class="text-sm text-content-secondary"
                               [attr.data-role]="'amount-' + row.destination_id">{{ amountText(row) }}</span>
                             <button type="button" [attr.data-role]="'remove-' + row.destination_id"
                               (click)="removeOccasional(row.destination_id)"
-                              class="text-xs text-farm-500 underline hover:text-farm-700"
+                              class="text-xs text-content-subtle underline hover:text-content-secondary"
                             >didn't come</button>
                           </div>
                         }
@@ -261,28 +261,28 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           <!-- THE FOOTER, and the reason it carries production -->
           <div appSummaryBar class="flex flex-wrap items-center justify-between gap-4 bg-surface-raised">
             <span data-role="resolved">
-              <span class="text-farm-600">Answered </span>
-              <span class="font-medium text-farm-900">{{ answered() }} of {{ s.standing.length }}</span>
-              <span class="text-farm-600"> required</span>
+              <span class="text-content-muted">Answered </span>
+              <span class="font-medium text-content-primary">{{ answered() }} of {{ s.standing.length }}</span>
+              <span class="text-content-muted"> required</span>
             </span>
             <span data-role="out">
-              <span class="text-farm-600">Out </span>
-              <span class="font-medium text-farm-900">{{ totalLitres() }} L</span>
-              <span class="text-farm-600"> · billed </span>
-              <span class="font-medium text-farm-900">{{ totalAmount() }}</span>
+              <span class="text-content-muted">Out </span>
+              <span class="font-medium text-content-primary">{{ totalLitres() }} L</span>
+              <span class="text-content-muted"> · billed </span>
+              <span class="font-medium text-content-primary">{{ totalAmount() }}</span>
             </span>
             <span data-role="produced">
-              <span class="text-farm-600">Measured this session </span>
-              <span class="font-medium text-farm-900">{{ s.produced.measured_litres }} L</span>
+              <span class="text-content-muted">Measured this session </span>
+              <span class="font-medium text-content-primary">{{ s.produced.measured_litres }} L</span>
               @if (s.produced.not_measured > 0) {
-                <span class="text-farm-600"> · {{ s.produced.not_measured }} milked but not weighed</span>
+                <span class="text-content-muted"> · {{ s.produced.not_measured }} milked but not weighed</span>
               }
             </span>
           </div>
 
           <!-- Not an alert. See the comment on producedNote(). -->
           @if (producedNote(); as note) {
-            <p class="rounded-xl bg-farm-50 px-4 py-2 text-xs text-farm-700" data-role="produced-note">
+            <p class="rounded-xl bg-surface-page px-4 py-2 text-xs text-content-secondary" data-role="produced-note">
               {{ note }}
             </p>
           }
@@ -476,8 +476,8 @@ export class DispatchSheetScreen {
   protected noneClass(id: string): string {
     const base = 'rounded-lg border px-2 py-1 text-xs ';
     return this.draft(id).status === 'none'
-      ? base + 'border-farm-600 bg-farm-600 text-white'
-      : base + 'border-farm-300 bg-white text-farm-700 hover:border-farm-400';
+      ? base + 'border-line-selected bg-brand text-content-onFill'
+      : base + 'border-line bg-surface-raised text-content-secondary hover:border-line-strong';
   }
 
   private allRows(): SheetRow[] {

@@ -63,7 +63,7 @@ import { Button } from '../ui/button';
   ],
   template: `
     <div class="mx-auto max-w-4xl space-y-6">
-      <a routerLink="/milk/buyers" class="text-sm text-farm-600 underline">← all buyers</a>
+      <a routerLink="/milk/buyers" class="text-sm text-content-muted underline">← all buyers</a>
 
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
@@ -75,7 +75,7 @@ import { Button } from '../ui/button';
               {{ s.balance_minor < 0 ? 'In credit' : 'Owes' }}
             </div>
             <div class="text-xl font-semibold"
-              [class]="s.balance_minor > 0 ? 'text-farm-900' : 'text-green-800'"
+              [class]="s.balance_minor > 0 ? 'text-content-primary' : 'text-success-fg'"
               data-role="balance">{{ balanceText(s) }}</div>
           </div>
         </header>
@@ -91,15 +91,15 @@ import { Button } from '../ui/button';
         }
 
         @for (m of s.months; track m.month) {
-          <section class="overflow-hidden rounded-xl border border-farm-300 bg-white"
+          <section class="overflow-hidden rounded-xl border border-line bg-surface-raised"
             [attr.data-month]="m.month">
             <!-- THE ARTIFACT: one line per month. -->
-            <div class="flex flex-wrap items-baseline justify-between gap-3 border-b border-farm-200 bg-farm-50 px-4 py-2 text-sm">
-              <span class="font-semibold text-farm-900">{{ monthLabel(m.month) }}</span>
-              <span class="text-farm-700" [attr.data-role]="'summary-' + m.month">
+            <div class="flex flex-wrap items-baseline justify-between gap-3 border-b border-line-subtle bg-surface-page px-4 py-2 text-sm">
+              <span class="font-semibold text-content-primary">{{ monthLabel(m.month) }}</span>
+              <span class="text-content-secondary" [attr.data-role]="'summary-' + m.month">
                 {{ m.litres }} L · billed {{ money(m.billed_minor) }} · paid {{ money(m.paid_minor) }}
                 ·
-                <span class="font-medium text-farm-900">
+                <span class="font-medium text-content-primary">
                   {{ m.closing_minor === 0 ? 'settled' : money(m.closing_minor) + ' carried forward' }}
                 </span>
               </span>
@@ -113,7 +113,7 @@ import { Button } from '../ui/button';
                     <td appCell tone="secondary">{{ d.occurred_on }} {{ d.session }}</td>
                     <td appCell tone="secondary">
                       {{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}
-                      @if (d.reason) { <span class="text-farm-500">— {{ d.reason }}</span> }
+                      @if (d.reason) { <span class="text-content-subtle">— {{ d.reason }}</span> }
                     </td>
                     <td appCell small tone="muted" [attr.data-role]="'rate-' + d.id">
                       {{ rateText(d) }}
@@ -122,12 +122,12 @@ import { Button } from '../ui/button';
                   </tr>
                 }
                 @for (p of m.payments; track p.id) {
-                  <tr class="border-t border-farm-100 bg-green-50/40" [attr.data-payment]="p.id">
+                  <tr class="border-t border-line-hairline bg-success-bg/40" [attr.data-payment]="p.id">
                     <td appCell tone="secondary">{{ p.occurred_on }}</td>
                     <td appCell tone="secondary">
                       {{ p.method }}
-                      @if (p.reference) { <span class="text-farm-500">· {{ p.reference }}</span> }
-                      @if (p.note) { <span class="text-farm-500">— {{ p.note }}</span> }
+                      @if (p.reference) { <span class="text-content-subtle">· {{ p.reference }}</span> }
+                      @if (p.note) { <span class="text-content-subtle">— {{ p.note }}</span> }
                     </td>
                     <td appCell></td>
                     <td appCell numeric emphasis tone="success">
@@ -184,13 +184,13 @@ import { Button } from '../ui/button';
                   (input)="note.set($any($event.target).value)"
                   placeholder="written off, agreed at settlement…" appInput class="w-full" />
               </label>
-              <div class="flex items-center gap-2 text-xs text-farm-700">
+              <div class="flex items-center gap-2 text-xs text-content-secondary">
                 <label class="flex items-center gap-1">
                   <input type="checkbox" data-role="pay-negative" [checked]="negative()"
                     (change)="negative.set($any($event.target).checked)" />
                   reduces what they owe
                 </label>
-                <span class="text-farm-500">
+                <span class="text-content-subtle">
                   — only an adjustment may be signed; cash and bank are money that arrived.
                 </span>
               </div>
@@ -212,13 +212,13 @@ import { Button } from '../ui/button';
         <!-- price history ---------------------------------------------- -->
         @if (s.prices.length > 0) {
           <section appCard data-role="price-history">
-            <h3 class="mb-2 text-sm font-semibold text-farm-900">Agreed rates</h3>
-            <ul class="space-y-1 text-sm text-farm-700">
+            <h3 class="mb-2 text-sm font-semibold text-content-primary">Agreed rates</h3>
+            <ul class="space-y-1 text-sm text-content-secondary">
               @for (p of s.prices; track p.id) {
                 <li>
                   from {{ p.effective_from }} —
                   <span class="font-medium">{{ rate(p.price_minor, p.price_unit_litres) }}</span>
-                  @if (p.note) { <span class="text-farm-500">· {{ p.note }}</span> }
+                  @if (p.note) { <span class="text-content-subtle">· {{ p.note }}</span> }
                 </li>
               }
             </ul>

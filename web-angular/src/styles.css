@@ -129,6 +129,39 @@
   --writelog-fg: 20 83 45;              /* green-900 #14532d */
   --writelog-line: 187 247 208;         /* green-200 #bbf7d0 */
 
+  /* --- the seven section 3 never named -------------------------------- */
+  /*
+   * Round 2 of the validation found seven colour utilities falling through
+   * sections 3.1-3.5 with nowhere to go. Phase 2 left them literal because
+   * phase 2 implements section 3 as written. Phase 4 cannot: re-pointing the
+   * ramp while a site still says `text-red-900` leaves that site on the OLD
+   * palette, which is how a recolour ends up half-done. So they get names.
+   *
+   * `--danger-strong` and `--success-strong` are one stop darker than their
+   * roles, at 1 and 6 sites -- verification-panel's hardest refusal, and the
+   * "Added BD-0007" panel the three write forms show after a successful save.
+   *
+   * --success-strong AND --writelog-fg HOLD THE SAME VALUE ON PURPOSE, which
+   * is the one place this file wants two names for one number. B3 freezes the
+   * write-log bar's contrast until the trial reports, and the success panels
+   * are not frozen. One token would mean phase 4 could not move either without
+   * moving both -- exactly the coupling B3 exists to prevent.
+   */
+  --danger-strong: 127 29 29;           /* red-900   #7f1d1d */
+  --success-strong: 20 83 45;           /* green-900 #14532d -- see above */
+  --warning-fill: 253 230 138;          /* amber-200 #fde68a, the harness banner */
+  /*
+   * A SOFTER success line than the role's green-300, because two exist.
+   * The three form success panels use green-300; the today board's "nothing
+   * outstanding" panel uses green-200, the same value the write-log bar's rule
+   * holds. Same reasoning as --success-strong above: identical numbers, separate
+   * names, because B3 freezes one of them and not the other.
+   */
+  --success-line-soft: 187 247 208;     /* green-200 #bbf7d0 */
+  --success-dot: 16 185 129;            /* emerald-500 #10b981, tool-call OK */
+  --danger-dot: 239 68 68;              /* red-500   #ef4444, tool-call error */
+  --mark-pending: 194 155 92;           /* farm-400  #c29b5c, the "Thinking..." pulse */
+
   /* --- certainty ------------------------------------------------------ */
   /*
    * SECTION 3.5 HAS NO PHASE-1 COLUMN, so unlike everything above these are

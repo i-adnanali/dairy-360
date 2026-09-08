@@ -90,7 +90,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
               <input data-role="tag_no" [value]="tagNo()" (input)="tagNo.set($any($event.target).value)" appInput class="w-full" />
             </label>
           </div>
-          <p class="mt-2 text-xs text-farm-500">
+          <p class="mt-2 text-xs text-content-subtle">
             Post number and ear tag are attributes, not identity — both change over an animal's life.
           </p>
         </div>
@@ -118,7 +118,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           [error]="state.fieldError('birth_on') ?? state.fieldError('birth_precision')"
           (changed)="birth.set($event)"
         />
-        <p class="-mt-2 px-1 text-xs text-farm-600">
+        <p class="-mt-2 px-1 text-xs text-content-muted">
           Leave the birth date blank if you do not know it. Without one the animal shows as
           heifer or male even if it is visibly a calf — the age rule has no date to test. An
           estimated year is the fix: type the year and tick the guess box.
@@ -143,11 +143,11 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
         </div>
 
         @if (state.result(); as r) {
-          <div class="rounded-xl border border-green-300 bg-green-50 p-4" data-role="result">
-            <p class="text-sm font-medium text-green-900">
+          <div class="rounded-xl border border-success-line bg-success-bg p-4" data-role="result">
+            <p class="text-sm font-medium text-success-strong">
               Added {{ r.animal_id }}{{ r.animal.animal.name ? ' — ' + r.animal.animal.name : '' }}
             </p>
-            <p class="mt-1 text-sm text-green-800">
+            <p class="mt-1 text-sm text-success-fg">
               Status <span class="font-mono">{{ r.animal.status?.status }}</span>,
               birth
               <span class="font-mono">{{
@@ -157,7 +157,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
               }}</span>
             </p>
             <button type="button" (click)="open(r.animal_id)"
-              class="mt-2 text-sm font-medium text-green-900 underline">Open its record</button>
+              class="mt-2 text-sm font-medium text-success-strong underline">Open its record</button>
           </div>
         }
       </div>

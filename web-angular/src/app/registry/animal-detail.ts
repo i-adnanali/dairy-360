@@ -26,8 +26,8 @@ type Tab = 'events' | 'add-event' | 'correct';
       <div class="mx-auto max-w-3xl space-y-5">
         <header appCard>
           <div class="flex flex-wrap items-baseline gap-x-3">
-            <h2 class="font-mono text-xl font-semibold text-farm-900" data-role="serial">{{ d.animal.id }}</h2>
-            @if (d.animal.name) { <span class="text-lg text-farm-800">{{ d.animal.name }}</span> }
+            <h2 class="font-mono text-xl font-semibold text-content-primary" data-role="serial">{{ d.animal.id }}</h2>
+            @if (d.animal.name) { <span class="text-lg text-content-heading">{{ d.animal.name }}</span> }
             <!-- The farm's word, with the stored enum on hover. 'majj' says in
                  one word what "cow" is vague about: she has calved. -->
             <span appBadge
@@ -36,29 +36,29 @@ type Tab = 'events' | 'add-event' | 'correct';
             >{{ stage(d) }}</span>
           </div>
           <dl class="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-            <div class="flex gap-2"><dt class="text-farm-600">Sex</dt><dd class="text-farm-900">{{ d.animal.sex }}</dd></div>
-            <div class="flex gap-2"><dt class="text-farm-600">Origin</dt><dd class="text-farm-900">{{ d.animal.origin }}</dd></div>
+            <div class="flex gap-2"><dt class="text-content-muted">Sex</dt><dd class="text-content-primary">{{ d.animal.sex }}</dd></div>
+            <div class="flex gap-2"><dt class="text-content-muted">Origin</dt><dd class="text-content-primary">{{ d.animal.origin }}</dd></div>
             <div class="flex gap-2">
-              <dt class="text-farm-600">Born</dt>
-              <dd class="text-farm-900" data-role="birth">
+              <dt class="text-content-muted">Born</dt>
+              <dd class="text-content-primary" data-role="birth">
                 {{ d.status?.birth_on ? d.status?.birth_on + ' (' + d.status?.birth_precision + ')' : 'unknown' }}
               </dd>
             </div>
-            <div class="flex gap-2"><dt class="text-farm-600">Parity</dt><dd class="text-farm-900">{{ d.status?.parity ?? '—' }}</dd></div>
+            <div class="flex gap-2"><dt class="text-content-muted">Parity</dt><dd class="text-content-primary">{{ d.status?.parity ?? '—' }}</dd></div>
             @if (d.animal.post_no) {
-              <div class="flex gap-2"><dt class="text-farm-600">Post</dt><dd class="text-farm-900">{{ d.animal.post_no }}</dd></div>
+              <div class="flex gap-2"><dt class="text-content-muted">Post</dt><dd class="text-content-primary">{{ d.animal.post_no }}</dd></div>
             }
             @if (d.animal.tag_no) {
-              <div class="flex gap-2"><dt class="text-farm-600">Tag</dt><dd class="text-farm-900">{{ d.animal.tag_no }}</dd></div>
+              <div class="flex gap-2"><dt class="text-content-muted">Tag</dt><dd class="text-content-primary">{{ d.animal.tag_no }}</dd></div>
             }
           </dl>
         </header>
 
-        <nav class="flex gap-2 border-b border-farm-200">
+        <nav class="flex gap-2 border-b border-line-subtle">
           @for (t of tabs; track t.id) {
             <button type="button" [attr.data-tab]="t.id" (click)="tab.set(t.id)"
               class="-mb-px border-b-2 px-3 py-2 text-sm"
-              [class]="tab() === t.id ? 'border-farm-600 font-medium text-farm-900' : 'border-transparent text-farm-600'"
+              [class]="tab() === t.id ? 'border-line-selected font-medium text-content-primary' : 'border-transparent text-content-muted'"
             >{{ t.label }}</button>
           }
         </nav>
@@ -71,7 +71,7 @@ type Tab = 'events' | 'add-event' | 'correct';
           @case ('correct') {
             <app-correction-form [events]="d.events" [done]="onCorrected" />
             <div class="mt-5">
-              <h3 class="mb-2 text-sm font-medium text-farm-800">
+              <h3 class="mb-2 text-sm font-medium text-content-heading">
                 The record as it stands — check the correction reads the way you meant
               </h3>
               <app-event-list [events]="d.events" />
