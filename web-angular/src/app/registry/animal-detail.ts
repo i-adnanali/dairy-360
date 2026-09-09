@@ -22,7 +22,14 @@ type Tab = 'events' | 'add-event' | 'correct';
   selector: 'app-animal-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    Card, Certainty, CorrectionForm, ErrorPanel, EventForm, EventList, HelpText, Qualifier,
+    Card,
+    Certainty,
+    CorrectionForm,
+    ErrorPanel,
+    EventForm,
+    EventList,
+    HelpText,
+    Qualifier,
     StatusBadge,
   ],
   template: `
@@ -32,18 +39,31 @@ type Tab = 'events' | 'add-event' | 'correct';
       <div class="mx-auto max-w-3xl space-y-5">
         <header appCard>
           <div class="flex flex-wrap items-baseline gap-x-3">
-            <h2 class="font-mono text-xl font-semibold text-content-primary" data-role="serial">{{ d.animal.id }}</h2>
-            @if (d.animal.name) { <span class="text-lg text-content-heading">{{ d.animal.name }}</span> }
+            <h2 class="font-mono text-xl font-semibold text-content-primary" data-role="serial">
+              {{ d.animal.id }}
+            </h2>
+            @if (d.animal.name) {
+              <span class="text-lg text-content-heading">{{ d.animal.name }}</span>
+            }
             <!-- The farm's word, with the stored enum on hover. 'majj' says in
                  one word what "cow" is vague about: she has calved. -->
-            <span appBadge
+            <span
+              appBadge
+              [tone]="d.status?.status === 'departed' ? 'ended' : 'neutral'"
               data-role="status"
               [title]="d.status ? 'stored as ' + d.status.status : ''"
-            >{{ stage(d) }}</span>
+              >{{ stage(d) }}</span
+            >
           </div>
           <dl class="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-            <div class="flex gap-2"><dt class="text-content-muted">Sex</dt><dd class="text-content-primary">{{ d.animal.sex }}</dd></div>
-            <div class="flex gap-2"><dt class="text-content-muted">Origin</dt><dd class="text-content-primary">{{ d.animal.origin }}</dd></div>
+            <div class="flex gap-2">
+              <dt class="text-content-muted">Sex</dt>
+              <dd class="text-content-primary">{{ d.animal.sex }}</dd>
+            </div>
+            <div class="flex gap-2">
+              <dt class="text-content-muted">Origin</dt>
+              <dd class="text-content-primary">{{ d.animal.origin }}</dd>
+            </div>
             <div class="flex gap-2">
               <dt class="text-content-muted">Born</dt>
               <!-- Was "2019-03-01 (month)" built by string concatenation in the
@@ -57,9 +77,12 @@ type Tab = 'events' | 'add-event' | 'correct';
                   @if (b.state === 'no-record') {
                     <span appCertainty="no-record" data-certainty="no-record">unknown</span>
                   } @else {
-                    <span [appCertainty]="b.state" [attr.data-certainty]="b.state"
-                    >{{ b.figure }}</span>
-                    @if (b.qualifier) { <span appQualifier>{{ b.qualifier }}</span> }
+                    <span [appCertainty]="b.state" [attr.data-certainty]="b.state">{{
+                      b.figure
+                    }}</span>
+                    @if (b.qualifier) {
+                      <span appQualifier>{{ b.qualifier }}</span>
+                    }
                   }
                 }
               </dd>
@@ -67,30 +90,49 @@ type Tab = 'events' | 'add-event' | 'correct';
             <div class="flex gap-2">
               <dt class="text-content-muted">Parity</dt>
               <dd data-role="parity">
-                <span [appCertainty]="(d.status?.parity ?? null) === null ? 'no-record' : 'known'"
-                >{{ d.status?.parity ?? noRecord }}</span>
+                <span
+                  [appCertainty]="(d.status?.parity ?? null) === null ? 'no-record' : 'known'"
+                  >{{ d.status?.parity ?? noRecord }}</span
+                >
               </dd>
             </div>
             @if (d.animal.post_no) {
-              <div class="flex gap-2"><dt class="text-content-muted">Post</dt><dd class="text-content-primary">{{ d.animal.post_no }}</dd></div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted">Post</dt>
+                <dd class="text-content-primary">{{ d.animal.post_no }}</dd>
+              </div>
             }
             @if (d.animal.tag_no) {
-              <div class="flex gap-2"><dt class="text-content-muted">Tag</dt><dd class="text-content-primary">{{ d.animal.tag_no }}</dd></div>
+              <div class="flex gap-2">
+                <dt class="text-content-muted">Tag</dt>
+                <dd class="text-content-primary">{{ d.animal.tag_no }}</dd>
+              </div>
             }
           </dl>
         </header>
 
         <nav class="flex gap-2 border-b border-line-subtle">
           @for (t of tabs; track t.id) {
-            <button type="button" [attr.data-tab]="t.id" (click)="tab.set(t.id)"
+            <button
+              type="button"
+              [attr.data-tab]="t.id"
+              (click)="tab.set(t.id)"
               class="-mb-px border-b-2 px-3 py-2 text-sm"
-              [class]="tab() === t.id ? 'border-line-selected font-medium text-content-primary' : 'border-transparent text-content-muted'"
-            >{{ t.label }}</button>
+              [class]="
+                tab() === t.id
+                  ? 'border-line-selected font-medium text-content-primary'
+                  : 'border-transparent text-content-muted'
+              "
+            >
+              {{ t.label }}
+            </button>
           }
         </nav>
 
         @switch (tab()) {
-          @case ('events') { <app-event-list [events]="d.events" /> }
+          @case ('events') {
+            <app-event-list [events]="d.events" />
+          }
           @case ('add-event') {
             <app-event-form [animalId]="d.animal.id" [saved]="onSaved" />
           }

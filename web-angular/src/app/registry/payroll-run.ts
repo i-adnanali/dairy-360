@@ -1,3 +1,4 @@
+import { SummaryBar } from '../ui/surface';
 // `/payroll` -- the monthly run (docs/REGISTRY_PAYROLL.md §12.1).
 //
 // A sibling of dispatch-sheet.ts, with one difference: the period is a month
@@ -32,7 +33,14 @@
 // same measurement that cut the batch price change from the sales cycle. Build
 // it if the cadence turns out to be weekly.
 
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 
 import { FormState } from './form-state';
 import { IdentifierInput } from './identifier-input';
@@ -72,6 +80,7 @@ interface DihariDraft {
   selector: 'app-payroll-run',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    SummaryBar,
     Button,
     Card,
     Certainty,
@@ -89,19 +98,42 @@ interface DihariDraft {
         <h2 appPageHeading>Payroll</h2>
         <div class="flex flex-wrap items-end gap-4">
           <label class="space-y-1">
-            <span class="block text-xs font-medium uppercase tracking-wide text-content-muted">From</span>
-            <input type="date" [value]="from()" (change)="setFrom($any($event.target).value)" appInput density="comfortable" data-role="from" />
+            <span class="block text-xs font-medium uppercase tracking-wide text-content-muted"
+              >From</span
+            >
+            <input
+              type="date"
+              [value]="from()"
+              (change)="setFrom($any($event.target).value)"
+              appInput
+              density="comfortable"
+              data-role="from"
+            />
           </label>
           <label class="space-y-1">
-            <span class="block text-xs font-medium uppercase tracking-wide text-content-muted">To</span>
-            <input type="date" [value]="to()" (change)="setTo($any($event.target).value)" appInput density="comfortable" data-role="to" />
+            <span class="block text-xs font-medium uppercase tracking-wide text-content-muted"
+              >To</span
+            >
+            <input
+              type="date"
+              [value]="to()"
+              (change)="setTo($any($event.target).value)"
+              appInput
+              density="comfortable"
+              data-role="to"
+            />
           </label>
           <label class="space-y-1">
             <span class="block text-xs font-medium uppercase tracking-wide text-content-muted">
               Paid out by
             </span>
-            <app-identifier-input field="observed_by" label="Paid out by" name="observed_by"
-              [value]="observedBy()" (changed)="observedBy.set($event)" />
+            <app-identifier-input
+              field="observed_by"
+              label="Paid out by"
+              name="observed_by"
+              [value]="observedBy()"
+              (changed)="observedBy.set($event)"
+            />
           </label>
         </div>
       </header>
@@ -118,20 +150,25 @@ interface DihariDraft {
           </h3>
 
           @if (r.permanent.length === 0) {
-            <p appCard empty
-              data-role="no-permanent">
+            <p appCard empty data-role="no-permanent">
               Nobody was on a salaried stint in this period.
             </p>
           } @else {
             <ul class="space-y-2">
               @for (row of r.permanent; track row.engagement.id) {
-                <li class="rounded-xl border border-line-subtle bg-surface-raised p-3"
-                  [attr.data-engagement]="row.engagement.id">
+                <li
+                  class="rounded-xl border border-line-subtle bg-surface-raised p-3"
+                  [attr.data-engagement]="row.engagement.id"
+                >
                   <div class="flex flex-wrap items-baseline justify-between gap-2">
                     <div>
-                      <span class="font-mono text-sm text-content-primary">{{ row.person.identifier }}</span>
+                      <span class="font-mono text-sm text-content-primary">{{
+                        row.person.identifier
+                      }}</span>
                       @if (row.engagement.role) {
-                        <span class="ml-2 text-xs text-content-subtle">{{ row.engagement.role }}</span>
+                        <span class="ml-2 text-xs text-content-subtle">{{
+                          row.engagement.role
+                        }}</span>
                       }
                     </div>
                     <!-- The AGREEMENT, read-only and visibly separate from the
@@ -148,10 +185,17 @@ interface DihariDraft {
                   <div class="mt-2 flex flex-wrap items-center gap-3">
                     <label class="flex items-center gap-2">
                       <span appHelp size="xs">Rs</span>
-                      <input type="text" inputmode="decimal"
-                        [value]="amountOf(row)" (input)="setAmount(row, $any($event.target).value)"
-                        [disabled]="!row.term" appInput density="comfortable" class="w-32 text-right font-mono tabular-nums disabled:bg-surface-page"
-                        [attr.data-role]="'amount-' + row.person.identifier" />
+                      <input
+                        type="text"
+                        inputmode="decimal"
+                        [value]="amountOf(row)"
+                        (input)="setAmount(row, $any($event.target).value)"
+                        [disabled]="!row.term"
+                        appInput
+                        density="comfortable"
+                        class="w-32 text-right font-mono tabular-nums disabled:bg-surface-page"
+                        [attr.data-role]="'amount-' + row.person.identifier"
+                      />
                     </label>
                     @if (row.existing) {
                       <span appHelp size="xs" tone="subtle" data-role="already-saved">
@@ -174,10 +218,15 @@ interface DihariDraft {
                            expected figure to compare against, which is why
                            "differs()" returns false for null rather than
                            treating it as 0 L due. -->
-                      <span [appCertainty]="m.expected_litres === null ? 'no-record' : 'known'"
+                      <span
+                        [appCertainty]="m.expected_litres === null ? 'no-record' : 'known'"
                         [attr.data-certainty]="m.expected_litres === null ? 'no-record' : 'known'"
-                      >{{ m.expected_litres ?? noRecord }}</span> L due{{ m.partial ? ' to date' : '' }},
-                      <span [class.text-warning-fg]="differs(m.expected_litres, m.taken_litres)">
+                        >{{ m.expected_litres ?? noRecord }}</span
+                      >
+                      L due{{ m.partial ? ' to date' : '' }},
+                      <span
+                        [class.text-content-secondary]="differs(m.expected_litres, m.taken_litres)"
+                      >
                         {{ m.taken_litres }} L taken
                       </span>
                       @if (m.partial) {
@@ -187,7 +236,9 @@ interface DihariDraft {
                   }
                   @if (packageLines(row); as lines) {
                     @if (lines.length > 0) {
-                      <p appHelp size="xs" tone="subtle" class="mt-1" data-role="package">{{ lines.join(' · ') }}</p>
+                      <p appHelp size="xs" tone="subtle" class="mt-1" data-role="package">
+                        {{ lines.join(' · ') }}
+                      </p>
                     }
                   }
                 </li>
@@ -202,14 +253,20 @@ interface DihariDraft {
              months most of them were never hired. -->
         <section class="space-y-3" data-role="daily">
           <h3 appSectionHeading>
-            Dihari <span class="font-normal text-content-muted">— only the days somebody worked</span>
+            Dihari
+            <span class="font-normal text-content-muted">— only the days somebody worked</span>
           </h3>
 
           @if (r.daily.length > 0) {
             <ul class="space-y-1 text-sm" data-role="daily-rows">
               @for (d of r.daily; track d.id) {
-                <li class="flex items-baseline justify-between rounded-lg bg-surface-raised px-3 py-2">
-                  <span><span class="font-mono text-xs">{{ d.person.identifier }}</span> — {{ d.from_on }}</span>
+                <li
+                  class="flex items-baseline justify-between rounded-lg bg-surface-raised px-3 py-2"
+                >
+                  <span
+                    ><span class="font-mono text-xs">{{ d.person.identifier }}</span> —
+                    {{ d.from_on }}</span
+                  >
                   <span class="font-mono tabular-nums">{{ formatMinor(d.amount_minor) }}</span>
                 </li>
               }
@@ -222,12 +279,17 @@ interface DihariDraft {
             </p>
           } @else {
             @for (draft of drafts(); track $index) {
-              <div class="flex flex-wrap items-end gap-2 rounded-lg border border-line-subtle bg-surface-raised p-2"
-                data-role="dihari-draft">
+              <div
+                class="flex flex-wrap items-end gap-2 rounded-lg border border-line-subtle bg-surface-raised p-2"
+                data-role="dihari-draft"
+              >
                 <label class="space-y-1">
                   <span class="block text-xs text-content-muted">Who</span>
-                  <select [value]="draft.engagement_id"
-                    (change)="setDraft($index, { engagement_id: $any($event.target).value })" appInput>
+                  <select
+                    [value]="draft.engagement_id"
+                    (change)="setDraft($index, { engagement_id: $any($event.target).value })"
+                    appInput
+                  >
                     <option value="">Choose…</option>
                     @for (c of r.daily_candidates; track c.engagement.id) {
                       <option [value]="c.engagement.id">{{ c.person.identifier }}</option>
@@ -236,21 +298,41 @@ interface DihariDraft {
                 </label>
                 <label class="space-y-1">
                   <span class="block text-xs text-content-muted">Day</span>
-                  <input type="date" [value]="draft.on"
-                    (change)="setDraft($index, { on: $any($event.target).value })" appInput />
+                  <input
+                    type="date"
+                    [value]="draft.on"
+                    (change)="setDraft($index, { on: $any($event.target).value })"
+                    appInput
+                  />
                 </label>
                 <label class="space-y-1">
                   <span class="block text-xs text-content-muted">Rs</span>
-                  <input type="text" inputmode="decimal" [value]="draft.amount"
-                    (input)="setDraft($index, { amount: $any($event.target).value })" appInput class="w-28 text-right font-mono tabular-nums" />
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    [value]="draft.amount"
+                    (input)="setDraft($index, { amount: $any($event.target).value })"
+                    appInput
+                    class="w-28 text-right font-mono tabular-nums"
+                  />
                 </label>
-                <button type="button" (click)="removeDraft($index)"
-                  class="rounded-lg px-2 py-1.5 text-xs text-content-muted underline">remove</button>
+                <button
+                  type="button"
+                  (click)="removeDraft($index)"
+                  class="rounded-lg px-2 py-1.5 text-xs text-content-muted underline"
+                >
+                  remove
+                </button>
               </div>
             }
-            <button type="button" (click)="addDraft()"
+            <button
+              type="button"
+              (click)="addDraft()"
               class="rounded-lg border border-line px-3 py-1.5 text-sm text-content-heading"
-              data-role="add-day">Add a day</button>
+              data-role="add-day"
+            >
+              Add a day
+            </button>
           }
         </section>
 
@@ -273,8 +355,14 @@ interface DihariDraft {
           }
 
           @if (session.ready()) {
-            <button type="button" (click)="save()" [appButtonDisabled]="!canSave()" appButton
-              data-role="save" reason="payroll-save-reason">
+            <button
+              type="button"
+              (click)="save()"
+              [appButtonDisabled]="!canSave()"
+              appButton
+              data-role="save"
+              reason="payroll-save-reason"
+            >
               {{ state.submitting() ? 'Saving…' : 'Save run' }}
             </button>
           } @else {
@@ -477,7 +565,8 @@ export class PayrollRunScreen {
         {
           from_on: this.from(),
           to_on: this.to(),
-          entries: observed.length > 0 ? entries.map((e) => ({ ...e, observed_by: observed })) : entries,
+          entries:
+            observed.length > 0 ? entries.map((e) => ({ ...e, observed_by: observed })) : entries,
           ...this.session.provenance(),
         },
         key,

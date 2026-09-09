@@ -16,12 +16,9 @@ import { Button } from '../ui/button';
           [disabled]="disabled()"
           rows="1"
           [placeholder]="placeholder()"
-          class="max-h-40 min-h-[44px] flex-1 resize-none rounded-xl border border-line bg-surface-raised px-3 py-2.5 text-sm text-content-primary outline-none focus:border-focus disabled:bg-surface-sunken disabled:text-content-disabled"
+          class="max-h-40 min-h-[44px] flex-1 resize-none rounded-xl border border-line bg-surface-raised px-3 py-2.5 text-sm text-content-primary outline-none focus:border-focus focus:shadow-[0_0_0_1px_rgb(var(--focus-ring))] disabled:bg-surface-sunken disabled:text-content-disabled"
         ></textarea>
-        <button
-          (click)="submit()"
-          [appButtonDisabled]="disabled() || !value().trim()" appButton
-        >
+        <button (click)="submit()" [appButtonDisabled]="disabled() || !value().trim()" appButton>
           Send
         </button>
       </div>

@@ -103,7 +103,7 @@ Confirmed with the project owner: use the existing street-facing camera rather t
   to a stored column and belongs in its own slice, exactly as FU-1 was split out.
   This slice's job is to *detect* it in the definition of done.
 
-## What's already validated / reusable (real-world + repo, from FU-1)
+## What was validated / reusable at kickoff (real-world + repo, from FU-1)
 
 - Camera, Frigate 0.17.2, go2rtc restream, and the MQTT capture harness are all proven working against this exact hardware.
 - `/onvif1` (1280×720 H.264) is the working stream path; the codec-mislabel issue is already solved by the committed go2rtc config.
@@ -115,7 +115,7 @@ Confirmed with the project owner: use the existing street-facing camera rather t
   `dairy-agent_frigate_media`) — harmless, but they are not the stack.
   `frigate/config.yml` exists locally and is gitignored.
 
-## Not yet validated — open items
+## Kickoff questions and their recorded resolutions
 
 - ~~**Is Double Take even deployed anywhere yet?**~~ → **ANSWERED: no, nowhere.** See finding 1.
 - ~~Whether Double Take produces enough real match/unknown events in a short window~~ → **ANSWERED, and worse than feared.** See finding 9 and BL-3.

@@ -1,3 +1,4 @@
+import { StatusBadge } from '../ui/surface';
 // `/dispatch` -- where the milk went (docs/REGISTRY_SALES.md §12.1).
 //
 // A sibling of milking-roster.ts, and it should feel like the same motion,
@@ -78,6 +79,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
   selector: 'app-dispatch-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    StatusBadge,
     Button,
     Card,
     Cell,
@@ -110,26 +112,37 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
         <div class="flex flex-wrap items-end gap-4">
           <label class="block">
             <span appFieldLabel>Date</span>
-            <input type="date" data-role="on" [value]="on()" (change)="setOn($any($event.target).value)" appInput />
+            <input
+              type="date"
+              data-role="on"
+              [value]="on()"
+              (change)="setOn($any($event.target).value)"
+              appInput
+            />
           </label>
           <div>
             <div appFieldLabel inline>Session</div>
             <app-chip-group
-              name="session" label="Session" [options]="sessionChips" [value]="session()"
+              name="session"
+              label="Session"
+              [options]="sessionChips"
+              [value]="session()"
               (changed)="setSession($any($event))"
             />
           </div>
           <div class="ml-auto">
             <app-identifier-input
-              field="observed_by" label="Handed over by"
-              [value]="handedBy()" [suggestions]="identifiers.values().observed_by"
+              field="observed_by"
+              label="Handed over by"
+              [value]="handedBy()"
+              [suggestions]="identifiers.values().observed_by"
               (changed)="handedBy.set($event)"
             />
           </div>
         </div>
         <p class="mt-2 text-xs text-content-muted" data-role="today-note">
-          Defaults to today and this session — the one place a date is defaulted, because today is
-          a fact rather than a guess. Change it to enter a session you missed.
+          Defaults to today and this session — the one place a date is defaulted, because today is a
+          fact rather than a guess. Change it to enter a session you missed.
         </p>
       </div>
 
@@ -137,8 +150,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (sheet(); as s) {
         @if (s.standing.length === 0 && s.occasional.length === 0) {
-          <p appCard empty
-            data-role="nobody">
+          <p appCard empty data-role="nobody">
             Nobody was taking milk on {{ s.occurred_on }}.
             <a routerLink="/milk/buyers" appTextLink tone="strong">Add a buyer</a>
             — and add the house too, so milk kept at home is on the record rather than in the gap.
@@ -146,17 +158,19 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
         } @else {
           <!-- MUST be answered -->
           <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
-            <div class="border-b border-line-subtle bg-surface-page px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-secondary"
-              data-role="standing-head">
+            <div
+              class="border-b border-line-subtle bg-surface-page px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-secondary"
+              data-role="standing-head"
+            >
               Every session — leave none of these unanswered
             </div>
             <table class="w-full text-left text-sm">
-              <thead class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted">
+              <thead
+                class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
+              >
                 <tr>
                   <th appCell>Goes to</th>
-                  <th appCell numeric nowrap>
-                    Yesterday {{ s.previous_session.session }}
-                  </th>
+                  <th appCell numeric nowrap>Yesterday {{ s.previous_session.session }}</th>
                   <th appCell numeric nowrap>Rate</th>
                   <th appCell>Litres</th>
                   <th appCell numeric>Amount</th>
@@ -169,20 +183,28 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                        case: a destination lost in the sheet, findable at row
                        scale. The occasional rows below take no such treatment --
                        "nothing to answer here" is their own header. -->
-                  <tr appRowDivider [attr.data-row]="row.destination_id"
+                  <tr
+                    appRowDivider
+                    [attr.data-row]="row.destination_id"
                     [unanswered]="draft(row.destination_id).status === null"
-                    [attr.data-certainty]="draft(row.destination_id).status === null ? 'unanswered' : null">
+                    [attr.data-certainty]="
+                      draft(row.destination_id).status === null ? 'unanswered' : null
+                    "
+                  >
                     <td appCell density="compact" nowrap>
                       <span class="text-content-heading">{{ row.name }}</span>
                       @if (!row.billable) {
-                        <span class="ml-2 whitespace-nowrap rounded bg-surface-sunken px-1.5 py-0.5 text-xs text-content-muted"
-                          data-role="not-billed">kept, not sold</span>
+                        <span appBadge class="ml-2 whitespace-nowrap" data-role="not-billed"
+                          >kept, not sold</span
+                        >
                       }
                     </td>
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
-                      <span [appCertainty]="previousState(row)"
+                      <span
+                        [appCertainty]="previousState(row)"
                         [attr.data-certainty]="previousState(row)"
-                      >{{ previousText(row) }}</span>
+                        >{{ previousText(row) }}</span
+                      >
                     </td>
                     <!-- Right-aligned but NOT numeric, and that is what keeps this
                          sheet its original height.
@@ -199,10 +221,19 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                          The AMOUNT column next door keeps numeric and keeps mono. It
                          is a real figure column -- rupees, section 4 -- and it is the
                          reason the litres cell is tighter than it was. It fits. -->
-                    <td appCell density="compact" nowrap small tone="muted"
-                      class="text-right" data-role="rate">
+                    <td
+                      appCell
+                      density="compact"
+                      nowrap
+                      small
+                      tone="muted"
+                      class="text-right"
+                      data-role="rate"
+                    >
                       @if (rateState(row); as st) {
-                        <span [appCertainty]="st" [attr.data-certainty]="st">{{ rateText(row) }}</span>
+                        <span [appCertainty]="st" [attr.data-certainty]="st">{{
+                          rateText(row)
+                        }}</span>
                       } @else {
                         {{ rateText(row) }}
                       }
@@ -219,28 +250,44 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                           (keydown)="onKey($event, i)"
                           class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
-                        <button type="button" [attr.data-role]="'none-' + row.destination_id"
+                        <button
+                          type="button"
+                          [attr.data-role]="'none-' + row.destination_id"
                           (click)="markNone(row.destination_id)"
                           [class]="noneClass(row.destination_id)"
-                        >nothing taken</button>
+                        >
+                          nothing taken
+                        </button>
                         @if (draft(row.destination_id).status === 'none') {
-                          <input [attr.data-role]="'reason-' + row.destination_id"
+                          <input
+                            [attr.data-role]="'reason-' + row.destination_id"
                             [value]="draft(row.destination_id).reason"
                             (input)="setReason(row.destination_id, $any($event.target).value)"
                             placeholder="why (optional)"
-                            class="w-44 rounded-lg border border-line px-2 py-1 text-sm" />
+                            class="w-44 rounded-lg border border-line px-2 py-1 text-sm"
+                          />
                         }
                         @if (row.existing) {
-                          <span class="text-xs italic text-content-subtle"
-                            [attr.data-role]="'saved-' + row.destination_id">already saved</span>
+                          <span
+                            class="text-xs italic text-content-subtle"
+                            [attr.data-role]="'saved-' + row.destination_id"
+                            >already saved</span
+                          >
                         }
                       </div>
                     </td>
-                    <td appCell density="compact" numeric tone="secondary"
-                      [attr.data-role]="'amount-' + row.destination_id">
-                      <span [appCertainty]="amountState(row)"
+                    <td
+                      appCell
+                      density="compact"
+                      numeric
+                      tone="secondary"
+                      [attr.data-role]="'amount-' + row.destination_id"
+                    >
+                      <span
+                        [appCertainty]="amountState(row)"
                         [attr.data-certainty]="amountState(row)"
-                      >{{ amountText(row) }}</span>
+                        >{{ amountText(row) }}</span
+                      >
                     </td>
                   </tr>
                 }
@@ -250,9 +297,13 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 
           <!-- OFFERED, never required -->
           @if (s.occasional.length > 0) {
-            <div class="overflow-hidden rounded-xl border border-dashed border-line bg-surface-raised">
-              <div class="border-b border-line-subtle px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-muted"
-                data-role="occasional-head">
+            <div
+              class="overflow-hidden rounded-xl border border-dashed border-line bg-surface-raised"
+            >
+              <div
+                class="border-b border-line-subtle px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-muted"
+                data-role="occasional-head"
+              >
                 Only if they came — nothing to answer here
               </div>
               <table class="w-full text-left text-sm">
@@ -262,18 +313,29 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                       <td appCell density="compact" tone="heading">
                         {{ row.name }}
                         @if (rateState(row); as st) {
-                          <span class="ml-2 text-xs" [appCertainty]="st"
-                            [attr.data-certainty]="st" data-role="rate">{{ rateText(row) }}</span>
+                          <span
+                            class="ml-2 text-xs"
+                            [appCertainty]="st"
+                            [attr.data-certainty]="st"
+                            data-role="rate"
+                            >{{ rateText(row) }}</span
+                          >
                         } @else {
-                          <span class="ml-2 text-xs text-content-subtle" data-role="rate">{{ rateText(row) }}</span>
+                          <span class="ml-2 text-xs text-content-subtle" data-role="rate">{{
+                            rateText(row)
+                          }}</span>
                         }
                       </td>
                       <td appCell density="compact">
                         @if (draft(row.destination_id).status === null) {
-                          <button type="button" [attr.data-role]="'add-' + row.destination_id"
+                          <button
+                            type="button"
+                            [attr.data-role]="'add-' + row.destination_id"
                             (click)="addOccasional(row.destination_id)"
                             class="rounded-lg border border-line bg-surface-raised px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
-                          >they took some</button>
+                          >
+                            they took some
+                          </button>
                         } @else {
                           <div class="flex items-center gap-2">
                             <input
@@ -283,13 +345,21 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                               (input)="typeLitres(row.destination_id, $any($event.target).value)"
                               class="w-24 rounded-lg border border-line px-2 py-1 text-sm"
                             />
-                            <span class="text-sm" [appCertainty]="amountState(row)"
+                            <span
+                              class="text-sm"
+                              [appCertainty]="amountState(row)"
                               [attr.data-certainty]="amountState(row)"
-                              [attr.data-role]="'amount-' + row.destination_id">{{ amountText(row) }}</span>
-                            <button type="button" [attr.data-role]="'remove-' + row.destination_id"
+                              [attr.data-role]="'amount-' + row.destination_id"
+                              >{{ amountText(row) }}</span
+                            >
+                            <button
+                              type="button"
+                              [attr.data-role]="'remove-' + row.destination_id"
                               (click)="removeOccasional(row.destination_id)"
                               class="text-xs text-content-subtle underline hover:text-content-secondary"
-                            >didn't come</button>
+                            >
+                              didn't come
+                            </button>
                           </div>
                         }
                       </td>
@@ -301,10 +371,15 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           }
 
           <!-- THE FOOTER, and the reason it carries production -->
-          <div appSummaryBar class="flex flex-wrap items-center justify-between gap-4 bg-surface-raised">
+          <div
+            appSummaryBar
+            class="flex flex-wrap items-center justify-between gap-4 bg-surface-raised"
+          >
             <span data-role="resolved">
               <span class="text-content-muted">Answered </span>
-              <span class="font-medium text-content-primary">{{ answered() }} of {{ s.standing.length }}</span>
+              <span class="font-medium text-content-primary"
+                >{{ answered() }} of {{ s.standing.length }}</span
+              >
               <span class="text-content-muted"> required</span>
             </span>
             <span data-role="out">
@@ -315,16 +390,23 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             </span>
             <span data-role="produced">
               <span class="text-content-muted">Measured this session </span>
-              <span class="font-medium text-content-primary">{{ s.produced.measured_litres }} L</span>
+              <span class="font-medium text-content-primary"
+                >{{ s.produced.measured_litres }} L</span
+              >
               @if (s.produced.not_measured > 0) {
-                <span class="text-content-muted"> · {{ s.produced.not_measured }} milked but not weighed</span>
+                <span class="text-content-muted">
+                  · {{ s.produced.not_measured }} milked but not weighed</span
+                >
               }
             </span>
           </div>
 
           <!-- Not an alert. See the comment on producedNote(). -->
           @if (producedNote(); as note) {
-            <p class="rounded-xl bg-surface-page px-4 py-2 text-xs text-content-secondary" data-role="produced-note">
+            <p
+              class="rounded-xl bg-surface-page px-4 py-2 text-xs text-content-secondary"
+              data-role="produced-note"
+            >
               {{ note }}
             </p>
           }
@@ -339,7 +421,15 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 
       <div class="flex items-center gap-3">
         @if (session_.ready()) {
-          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="dispatch-submit-reason">{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+          <button
+            type="submit"
+            data-role="submit"
+            [appButtonDisabled]="!canSubmit()"
+            appButton
+            reason="dispatch-submit-reason"
+          >
+            {{ state.submitting() ? 'Saving…' : 'Save session' }}
+          </button>
         } @else {
           <app-session-required what="this session" />
         }
@@ -359,14 +449,21 @@ export class DispatchSheetScreen {
   private readonly cells = viewChildren<ElementRef<HTMLInputElement>>('cell');
 
   protected readonly fields = [
-    'occurred_on', 'session', 'entries', 'destination_id', 'litres',
+    'occurred_on',
+    'session',
+    'entries',
+    'destination_id',
+    'litres',
   ] as const;
   protected readonly sessionChips = [
     { value: 'morning', label: 'Morning' },
     { value: 'evening', label: 'Evening' },
   ];
   protected readonly state = new FormState<{
-    written: number; litres: number; amount_minor: number; updated: number;
+    written: number;
+    litres: number;
+    amount_minor: number;
+    updated: number;
   }>();
 
   /**
@@ -661,7 +758,10 @@ export class DispatchSheetScreen {
     if (left.length === 0) return null;
     // NAMED, not counted. "2 left" makes the operator hunt, and the hunt is
     // where one gets skipped.
-    const names = left.slice(0, 3).map((x) => x.name).join(', ');
+    const names = left
+      .slice(0, 3)
+      .map((x) => x.name)
+      .join(', ');
     return left.length <= 3
       ? `Still to answer: ${names}.`
       : `Still to answer: ${names} and ${left.length - 3} more.`;

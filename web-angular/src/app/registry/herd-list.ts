@@ -1,3 +1,5 @@
+import { ShellActions } from './navigation';
+import { IdentifierLink, RowLink } from '../ui/navigation';
 // The herd table. Exists to CHECK YOUR OWN WORK, not to be a dashboard.
 //
 // Deliberately a plain list before it is anything else -- the forms are what
@@ -26,7 +28,16 @@ import { StatusBadge } from '../ui/surface';
   selector: 'app-herd-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    Button, Cell, Certainty, ErrorPanel, HelpText, PageHeading, Qualifier, RouterLink,
+    IdentifierLink,
+    RowLink,
+    Button,
+    Cell,
+    Certainty,
+    ErrorPanel,
+    HelpText,
+    PageHeading,
+    Qualifier,
+    RouterLink,
     StatusBadge,
   ],
   template: `
@@ -38,8 +49,10 @@ import { StatusBadge } from '../ui/surface';
       } @else if (rows()!.length === 0) {
         <!-- THE EMPTY STATE. What the first hour looks like before any row
              exists: one thing to do, and no furniture pretending there is data. -->
-        <div class="rounded-2xl border border-dashed border-line bg-surface-raised px-6 py-12 text-center"
-          data-role="empty">
+        <div
+          class="rounded-2xl border border-dashed border-line bg-surface-raised px-6 py-12 text-center"
+          data-role="empty"
+        >
           <div class="mb-3 text-4xl">🐃</div>
           <h2 appPageHeading>No animals yet</h2>
           <p class="mx-auto mt-2 max-w-md text-sm text-content-muted">
@@ -47,14 +60,21 @@ import { StatusBadge } from '../ui/surface';
             their dam's calving, so they appear on their own once you record it.
           </p>
           <a routerLink="/animals/new" data-role="empty-cta" appButton class="mt-5 inline-block"
-          >Add the first animal</a>
+            >Add the first animal</a
+          >
         </div>
       } @else {
         <div class="mb-3 flex items-baseline justify-between">
           <h2 appPageHeading>
             {{ rows()!.length }} {{ rows()!.length === 1 ? 'animal' : 'animals' }}
           </h2>
-          <a routerLink="/animals/new" class="text-sm font-medium text-content-secondary underline">Add an animal</a>
+          @if (!shell.inShell()) {
+            <a
+              routerLink="/animals/new"
+              class="text-sm font-medium text-content-secondary underline"
+              >Add an animal</a
+            >
+          }
         </div>
 
         @if (rows()!.length === 1) {
@@ -62,14 +82,19 @@ import { StatusBadge } from '../ui/surface';
                placeholder: the header, the columns and the drill-through all
                have to look right at n=1, because that is the state you stare
                at longest. -->
-          <p class="mb-3 rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-secondary" data-role="one-row-note">
+          <p
+            class="mb-3 rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-secondary"
+            data-role="one-row-note"
+          >
             One animal so far. Open it to check the record reads the way you meant, then carry on.
           </p>
         }
 
         <div class="overflow-x-auto rounded-xl border border-line bg-surface-raised">
           <table class="w-full text-left text-sm" data-role="table">
-            <thead class="border-b border-line-subtle bg-surface-page text-xs uppercase tracking-wide text-content-muted">
+            <thead
+              class="border-b border-line-subtle bg-surface-page text-xs uppercase tracking-wide text-content-muted"
+            >
               <tr>
                 <th appCell>Serial</th>
                 <th appCell>Name</th>
@@ -83,27 +108,32 @@ import { StatusBadge } from '../ui/surface';
             </thead>
             <tbody>
               @for (r of rows(); track r.id) {
-                <tr class="border-b border-line-hairline last:border-0 hover:bg-surface-page" [attr.data-row]="r.id">
+                <tr
+                  [appRowLink]="'/animals/' + r.id"
+                  class="border-b border-line-hairline last:border-0"
+                  [attr.data-row]="r.id"
+                >
                   <td appCell>
-                    <a [routerLink]="['/animals', r.id]" class="font-mono font-medium text-content-heading underline">{{ r.id }}</a>
+                    <a [routerLink]="['/animals', r.id]" appIdentifier>{{ r.id }}</a>
                   </td>
                   <td appCell tone="heading">
-                    <span [appCertainty]="r.name ? 'known' : 'no-record'"
-                    >{{ r.name ?? noRecord }}</span>
+                    <span [appCertainty]="r.name ? 'known' : 'no-record'">{{
+                      r.name ?? noRecord
+                    }}</span>
                   </td>
                   <td appCell tone="secondary">{{ r.sex }}</td>
                   <!-- The local term, with what the enum actually holds on hover:
                        the screen shows the farm's word and never hides the
                        stored value from anyone debugging it. -->
-                  <td appCell data-role="status"
-                    [title]="r.status ? 'stored as ' + r.status : ''">
-                    <span appBadge>
+                  <td appCell data-role="status" [title]="r.status ? 'stored as ' + r.status : ''">
+                    <span appBadge [tone]="r.status === 'departed' ? 'ended' : 'neutral'">
                       {{ r.status ? stage(r) : 'no projection' }}
                     </span>
                   </td>
                   <td appCell numeric tone="heading">
-                    <span [appCertainty]="r.parity === null ? 'no-record' : 'known'"
-                    >{{ r.parity ?? noRecord }}</span>
+                    <span [appCertainty]="r.parity === null ? 'no-record' : 'known'">{{
+                      r.parity ?? noRecord
+                    }}</span>
                   </td>
                   <!-- ---------------------------------------------------------
                        PRECISION IS SHOWN ON EVERY DATE, AND THE FIGURE IS NOW
@@ -128,8 +158,9 @@ import { StatusBadge } from '../ui/surface';
                       @if (b.state === 'no-record') {
                         <span appCertainty="no-record" data-certainty="no-record">unknown</span>
                       } @else {
-                        <span [appCertainty]="b.state" [attr.data-certainty]="b.state"
-                        >{{ b.figure }}</span>
+                        <span [appCertainty]="b.state" [attr.data-certainty]="b.state">{{
+                          b.figure
+                        }}</span>
                         @if (b.qualifier) {
                           <span appQualifier>{{ b.qualifier }}</span>
                         }
@@ -148,6 +179,7 @@ import { StatusBadge } from '../ui/surface';
   `,
 })
 export class HerdList {
+  protected readonly shell = inject(ShellActions);
   /** §6's no-record glyph, for the template. An en dash. */
   protected readonly noRecord = NO_RECORD;
 

@@ -17,6 +17,11 @@ Double Take has never been stood up. Prerequisite:
 [FARM_EVENTS.md](FARM_EVENTS.md) (Cycle 4) complete and tagged `v0.7.0`.
 Deferred work is tracked in [cycle-7-followups.md](cycle-7-followups.md).*
 
+> **Later result:** Double Take was subsequently brought up and validated in
+> [Cycle 7 FU-3](Cycle7-fu3-double-take-validation.md), completed on 2026-08-28.
+> The “never been stood up” statement above describes the end of step 1 only.
+> Live stack/container observations below are historical, not current health checks.
+
 > **Note on this document's shape.** It began as a pre-implementation handover
 > written before any of the work was done, and it now also carries the results.
 > The early sections are therefore stated as assumptions-to-be-checked, and the

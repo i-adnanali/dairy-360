@@ -1,3 +1,4 @@
+import { StatusBadge } from '../ui/surface';
 // `/people/:id` -- the statement (docs/REGISTRY_PAYROLL.md §12.2).
 //
 // Stints as a timeline, the package as it stands, wage periods, payments and a
@@ -27,7 +28,15 @@
 // for. The form says so rather than leaving an operator to discover it from a
 // refusal.
 
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from './chip-group';
@@ -54,6 +63,7 @@ import { Button } from '../ui/button';
   selector: 'app-person-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    StatusBadge,
     Button,
     Card,
     ChipGroup,
@@ -80,9 +90,15 @@ import { Button } from '../ui/button';
         <header class="space-y-1">
           <h2 appPageHeading>
             {{ s.name ?? s.identifier }}
-            <span class="ml-2 font-mono text-sm font-normal text-content-subtle">{{ s.identifier }}</span>
+            <span class="ml-2 font-mono text-sm font-normal text-content-subtle">{{
+              s.identifier
+            }}</span>
           </h2>
-          <p class="text-sm" [class.text-warning-fg]="s.balance_minor < 0" data-role="balance">
+          <p
+            class="text-sm"
+            [class.text-content-secondary]="s.balance_minor < 0"
+            data-role="balance"
+          >
             {{ balanceLabel(s) }}
           </p>
         </header>
@@ -99,27 +115,45 @@ import { Button } from '../ui/button';
           } @else {
             <ul class="space-y-2">
               @for (e of s.engagements; track e.id) {
-                <li class="rounded-xl border border-line-subtle bg-surface-raised p-3 text-sm"
-                  [attr.data-engagement]="e.id">
+                <li
+                  class="rounded-xl border border-line-subtle bg-surface-raised p-3 text-sm"
+                  [attr.data-engagement]="e.id"
+                >
                   <div class="flex flex-wrap items-baseline justify-between gap-2">
                     <span>
-                      <span class="font-medium">{{ e.kind === 'daily' ? 'Dihari' : 'Salaried' }}</span>
-                      @if (e.role) { <span class="text-content-muted">· {{ e.role }}</span> }
+                      <span class="font-medium">{{
+                        e.kind === 'daily' ? 'Dihari' : 'Salaried'
+                      }}</span>
+                      @if (e.role) {
+                        <span class="text-content-muted">· {{ e.role }}</span>
+                      }
                     </span>
                     <span appHelp size="xs">
                       {{ e.started_on }} → {{ e.ended_on ?? 'open' }}
-                      @if (e.end_reason) { <span class="text-content-subtle">({{ e.end_reason }})</span> }
+                      @if (e.ended_on) {
+                        <span appBadge tone="ended">closed engagement</span>
+                      }
+                      @if (e.end_reason) {
+                        <span class="text-content-subtle">({{ e.end_reason }})</span>
+                      }
                     </span>
                   </div>
 
                   <!-- The package, as its lines. Never as a total. -->
-                  <p class="mt-1 text-xs text-content-secondary" [attr.data-role]="'package-' + e.id">
+                  <p
+                    class="mt-1 text-xs text-content-secondary"
+                    [attr.data-role]="'package-' + e.id"
+                  >
                     {{ packageLabel(e) }}
                   </p>
 
                   @if (e.ended_on === null) {
-                    <button type="button" (click)="openClose(e)"
-                      class="mt-2 text-xs text-content-muted underline" data-role="close-stint">
+                    <button
+                      type="button"
+                      (click)="openClose(e)"
+                      class="mt-2 text-xs text-content-muted underline"
+                      data-role="close-stint"
+                    >
                       Close this stint
                     </button>
                   }
@@ -130,25 +164,38 @@ import { Button } from '../ui/button';
         </section>
 
         @if (closing(); as e) {
-          <form appCard class="space-y-3"
-            (submit)="submitClose($event)" data-role="close-form">
+          <form appCard class="space-y-3" (submit)="submitClose($event)" data-role="close-form">
             <h3 appSectionHeading>Close the stint</h3>
             <p appHelp size="xs" tone="subtle">
-              A final settlement dated after this is fine and is not an error — /check reports it
-              so it is visible, and nothing refuses it.
+              A final settlement dated after this is fine and is not an error — /check reports it so
+              it is visible, and nothing refuses it.
             </p>
             <label class="block space-y-1">
               <span appSubHeading>Last day</span>
-              <input type="date" name="ended_on" [value]="endedOn()"
-                (input)="endedOn.set($any($event.target).value)" appInput density="comfortable" />
+              <input
+                type="date"
+                name="ended_on"
+                [value]="endedOn()"
+                (input)="endedOn.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+              />
               @if (closeState.fieldError('ended_on'); as msg) {
-                <span appErrorText size="xs" tone="soft" class="block" data-role="error-ended-on">{{ msg }}</span>
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-ended-on">{{
+                  msg
+                }}</span>
               }
             </label>
             <label class="block space-y-1">
               <span appSubHeading>Why <span class="text-content-subtle">(optional)</span></span>
-              <input name="end_reason" [value]="endReason()"
-                (input)="endReason.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
+              <input
+                name="end_reason"
+                [value]="endReason()"
+                (input)="endReason.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                class="w-full"
+              />
             </label>
             @if (closeState.formError(['ended_on', 'end_reason']); as msg) {
               <p appErrorPanel data-role="close-error">{{ msg }}</p>
@@ -161,8 +208,13 @@ import { Button } from '../ui/button';
               } @else {
                 <app-session-required what="the closing date" />
               }
-              <button type="button" (click)="closing.set(null)"
-                class="rounded-lg px-4 py-2 text-sm text-content-secondary">Cancel</button>
+              <button
+                type="button"
+                (click)="closing.set(null)"
+                class="rounded-lg px-4 py-2 text-sm text-content-secondary"
+              >
+                Cancel
+              </button>
             </div>
           </form>
         }
@@ -175,13 +227,17 @@ import { Button } from '../ui/button';
             <p appHelp data-role="no-months">Nothing recorded yet.</p>
           } @else {
             @for (m of s.months; track m.month) {
-              <div class="overflow-hidden rounded-xl border border-line-subtle bg-surface-raised"
-                [attr.data-month]="m.month">
-                <div class="flex flex-wrap items-baseline justify-between gap-2 bg-surface-sunken px-3 py-2 text-sm">
+              <div
+                class="overflow-hidden rounded-xl border border-line-subtle bg-surface-raised"
+                [attr.data-month]="m.month"
+              >
+                <div
+                  class="flex flex-wrap items-baseline justify-between gap-2 bg-surface-sunken px-3 py-2 text-sm"
+                >
                   <span class="font-medium text-content-primary">{{ m.month }}</span>
                   <span class="font-mono tabular-nums text-content-secondary">
-                    earned {{ formatMinor(m.earned_minor) }} ·
-                    paid {{ formatMinor(m.paid_minor) }} ·
+                    earned {{ formatMinor(m.earned_minor) }} · paid
+                    {{ formatMinor(m.paid_minor) }} ·
                     <span class="font-medium">closing {{ formatMinor(m.closing_minor) }}</span>
                   </span>
                 </div>
@@ -190,20 +246,34 @@ import { Button } from '../ui/button';
                     <li class="flex items-baseline justify-between px-3 py-1.5">
                       <span>
                         {{ w.kind === 'bonus' ? 'Bonus' : 'Wage' }}
-                        {{ w.from_on }}@if (w.to_on !== w.from_on) { <span> → {{ w.to_on }}</span> }
-                        @if (w.note) { <span appHelp size="xs" tone="subtle">· {{ w.note }}</span> }
+                        {{ w.from_on }}
+                        @if (w.to_on !== w.from_on) {
+                          <span> → {{ w.to_on }}</span>
+                        }
+                        @if (w.note) {
+                          <span appHelp size="xs" tone="subtle">· {{ w.note }}</span>
+                        }
                       </span>
                       <span class="font-mono tabular-nums">{{ formatMinor(w.amount_minor) }}</span>
                     </li>
                   }
                   @for (p of m.payments; track p.id) {
-                    <li class="flex items-baseline justify-between px-3 py-1.5 text-content-secondary">
+                    <li
+                      class="flex items-baseline justify-between px-3 py-1.5 text-content-secondary"
+                    >
                       <span>
-                        Paid {{ p.occurred_on }} <span appHelp size="xs" tone="subtle">{{ p.method }}</span>
-                        @if (p.reference) { <span appHelp size="xs" tone="subtle">· {{ p.reference }}</span> }
-                        @if (p.note) { <span appHelp size="xs" tone="subtle">· {{ p.note }}</span> }
+                        Paid {{ p.occurred_on }}
+                        <span appHelp size="xs" tone="subtle">{{ p.method }}</span>
+                        @if (p.reference) {
+                          <span appHelp size="xs" tone="subtle">· {{ p.reference }}</span>
+                        }
+                        @if (p.note) {
+                          <span appHelp size="xs" tone="subtle">· {{ p.note }}</span>
+                        }
                       </span>
-                      <span class="font-mono tabular-nums">− {{ formatMinor(p.amount_minor) }}</span>
+                      <span class="font-mono tabular-nums"
+                        >− {{ formatMinor(p.amount_minor) }}</span
+                      >
                     </li>
                   }
                 </ul>
@@ -213,19 +283,26 @@ import { Button } from '../ui/button';
         </section>
 
         <!-- Record a payment. -->
-        <form class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
-          (submit)="submitPayment($event)" data-role="payment-form">
+        <form
+          class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
+          (submit)="submitPayment($event)"
+          data-role="payment-form"
+        >
           <h3 appSectionHeading>Record a payment</h3>
 
           <div class="space-y-1">
             <span appSubHeading>Method</span>
-            <app-chip-group name="method" [options]="methodChips" [value]="method()"
-              (changed)="setMethod($any($event))" />
+            <app-chip-group
+              name="method"
+              [options]="methodChips"
+              [value]="method()"
+              (changed)="setMethod($any($event))"
+            />
             @if (method() === 'adjustment') {
               <span class="block text-xs text-content-subtle" data-role="adjustment-hint">
-                The only signed kind, and it must say why. This is also how a deduction is
-                recorded — damage, or milk taken above the allowance — because those reduce what
-                the farm owes. A positive figure reduces the balance.
+                The only signed kind, and it must say why. This is also how a deduction is recorded
+                — damage, or milk taken above the allowance — because those reduce what the farm
+                owes. A positive figure reduces the balance.
               </span>
             }
           </div>
@@ -233,41 +310,81 @@ import { Button } from '../ui/button';
           <div class="flex flex-wrap gap-4">
             <label class="space-y-1">
               <span class="block text-sm font-medium text-content-heading">Amount (Rs)</span>
-              <input name="amount_minor" type="text" inputmode="decimal" [value]="amount()"
-                (input)="amount.set($any($event.target).value)" appInput density="comfortable" class="w-36 text-right font-mono tabular-nums" />
+              <input
+                name="amount_minor"
+                type="text"
+                inputmode="decimal"
+                [value]="amount()"
+                (input)="amount.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                class="w-36 text-right font-mono tabular-nums"
+              />
               @if (payState.fieldError('amount_minor'); as msg) {
-                <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{ msg }}</span>
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{
+                  msg
+                }}</span>
               }
             </label>
             <label class="space-y-1">
               <span class="block text-sm font-medium text-content-heading">On</span>
-              <input name="occurred_on" type="date" [value]="paidOn()"
-                (input)="paidOn.set($any($event.target).value)" appInput density="comfortable" />
+              <input
+                name="occurred_on"
+                type="date"
+                [value]="paidOn()"
+                (input)="paidOn.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+              />
             </label>
             <label class="space-y-1">
               <span class="block text-sm font-medium text-content-heading">
                 Reference <span class="text-content-subtle">(optional)</span>
               </span>
-              <input name="reference" [value]="reference()"
-                (input)="reference.set($any($event.target).value)" appInput density="comfortable" placeholder="peshgi" />
+              <input
+                name="reference"
+                [value]="reference()"
+                (input)="reference.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                placeholder="peshgi"
+              />
             </label>
           </div>
 
           <label class="block space-y-1">
             <span appSubHeading>
-              Note @if (method() === 'adjustment') { <span class="text-danger-soft">(required)</span> }
-              @else { <span class="text-content-subtle">(optional)</span> }
+              Note
+              @if (method() === 'adjustment') {
+                <span class="text-danger-soft">(required)</span>
+              } @else {
+                <span class="text-content-subtle">(optional)</span>
+              }
             </span>
-            <input name="note" [value]="note()" (input)="note.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
+            <input
+              name="note"
+              [value]="note()"
+              (input)="note.set($any($event.target).value)"
+              appInput
+              density="comfortable"
+              class="w-full"
+            />
             @if (payState.fieldError('note'); as msg) {
-              <span appErrorText size="xs" tone="soft" class="block" data-role="error-note">{{ msg }}</span>
+              <span appErrorText size="xs" tone="soft" class="block" data-role="error-note">{{
+                msg
+              }}</span>
             }
           </label>
 
           <label class="block space-y-1">
             <span appSubHeading>Handed over by</span>
-            <app-identifier-input field="observed_by" label="Handed over by" name="observed_by"
-              [value]="observedBy()" (changed)="observedBy.set($event)" />
+            <app-identifier-input
+              field="observed_by"
+              label="Handed over by"
+              name="observed_by"
+              [value]="observedBy()"
+              (changed)="observedBy.set($event)"
+            />
           </label>
 
           @if (payState.formError(['amount_minor', 'note', 'occurred_on', 'method']); as msg) {
@@ -283,7 +400,9 @@ import { Button } from '../ui/button';
           }
         </form>
       } @else {
-        @if (!loadError()) { <p appHelp tone="subtle">Loading…</p> }
+        @if (!loadError()) {
+          <p appHelp tone="subtle">Loading…</p>
+        }
       }
     </div>
   `,

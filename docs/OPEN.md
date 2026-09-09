@@ -15,10 +15,11 @@ Items were scattered across seven documents before this existed, which is why
 These cannot be closed from the repo. They need the farm, the herd, or a person.
 
 - **The five-animal trial has not run.** REGISTRY_ENTRY_UX items 7 and 8 are
-  gated on it, and predictions 1–5 are on record waiting to be scored —
+  gated on it, and the remaining predictions are on record waiting to be scored —
   [REGISTRY_ENTRY_UX.md §11](REGISTRY_ENTRY_UX.md#11-still-open)
-- **The registry is empty.** Every `verify:registry` run against the live
-  database passes vacuously until a real animal is entered —
+- **Real backfill is not recorded as completed.** The last documented live
+  registry check was empty; a current `verify:registry` run is needed before
+  making any claim about its contents —
   [REGISTRY.md § Known fidelity gaps](REGISTRY.md#known-fidelity-gaps)
 - **`RESTRICTED_ZONES = { 'feed_store' }` is provisional.** Whether `barn` or
   `yard` should also be restricted overnight is the farm's answer, not ours —
@@ -35,9 +36,14 @@ These cannot be closed from the repo. They need the farm, the herd, or a person.
   table cannot be built without the answer —
   [REGISTRY_PAYROLL.md §11](REGISTRY_PAYROLL.md#11-leave-named-deferred-and-cheap-to-add-later)
 
-## Known defects, safe today
+## Known defects and limitations
 
-Each fails safely and is written down rather than fixed.
+These remain open; the linked sections describe their consequences.
+
+- **Agent approvals have no cross-request replay protection.** Replaying the
+  same pre-write history and approval can execute a demo write again. Registry
+  HTTP idempotency keys do not cover agent executors —
+  [TECHNICAL.md §1.3](TECHNICAL.md#13-the-write-gate-pause-and-resume).
 
 - **The model offers registry writes it cannot perform.** `log_milking` hits the
   demo table and `guardIds` rejects a `BD-` serial, so the offer is a confusing
@@ -62,6 +68,10 @@ Each fails safely and is written down rather than fixed.
   [OBSERVABILITY.md § Open items](OBSERVABILITY.md#open-items)
 
 ## Missing capability, deliberately deferred
+
+- **Session `source_ref` capture is missing.** In-place session editing is built;
+  the paper/card reference still has no entry control —
+  [REGISTRY_ENTRY_UX.md §6.8](REGISTRY_ENTRY_UX.md#68-session-band)
 
 Built when something needs them, not before.
 
@@ -102,7 +112,7 @@ Built when something needs them, not before.
   today; the seam it would use is named rather than left to be invented —
   [REGISTRY_SALES.md §4.2](REGISTRY_SALES.md#42-prices-effective-dated-agreement-captured-on-the-dispatch)
 - **No batch price change.** Deliberate at three buyers, with a named trigger to
-  build it — [REGISTRY_SALES.md §12.2](REGISTRY_SALES.md#122-buyers--destinations-and-prices)
+  build it — [REGISTRY_SALES.md §12.2](REGISTRY_SALES.md#122-milkbuyers--destinations-and-prices)
 - **No revisions trail on a corrected dispatch, payment, wage period or wage payment**, so a
   changed figure leaves no history. Payroll deliberately did not invent a second answer and waits on
   the sales one — [REGISTRY_SALES.md §8](REGISTRY_SALES.md#8-corrections-the-one-question-this-document-does-not-settle),
@@ -119,6 +129,11 @@ Built when something needs them, not before.
   [FARM_MONITOR.md § Open items](FARM_MONITOR.md#open-items)
 
 ## Test and eval gaps
+
+- **UI contrast and colour-vision checks remain open.** The current contrast
+  report has 30 failures; the resting input border remains explicitly held.
+  The categorical agent ramp still needs colour-vision testing —
+  [UI_SYSTEM.md §16](UI_SYSTEM.md#16-unverified-and-undecided)
 
 - **Regression flakiness is unmeasured.** Two clean local passes is a small
   sample; the fallback is recorded transcripts —
@@ -150,7 +165,8 @@ Built when something needs them, not before.
   enough? — [MULTI_AGENT.md § Open items](MULTI_AGENT.md#open-items)
 - **Revisit "two agents" vs. merged tools** if the dispatcher's `both` default
   fires on nearly every turn — [MULTI_AGENT.md § Open items](MULTI_AGENT.md#open-items)
-- **Widen the regression suite to the planned 15–20 scenarios?** —
+- **Widen the original 12-scenario regression set?** Six registry precision evals
+  have since been added; broader coverage remains a separate question —
   [REGRESSION.md § Open items](REGRESSION.md#open-items)
 - **Revisit Langfuse's ClickHouse-acquisition implications** —
   [OBSERVABILITY.md § Open items](OBSERVABILITY.md#open-items)
@@ -162,11 +178,12 @@ Built when something needs them, not before.
 ## Housekeeping
 
 - **`registry.harness.test.ts`'s no-database module list is maintained by hand**,
-  and `milking.ts` was missing from it for a whole cycle. Three more modules were added to it by
-  hand this cycle —
+  and `milking.ts` was missing from it for a whole cycle. The sales cycle found the omission while adding more modules by
+  hand —
   [REGISTRY_SALES.md §17.5](REGISTRY_SALES.md#175-milkingts-was-never-in-the-harnesss-no-database-list)
 
-- **The local Langfuse Docker stack teardown** is optional and not done —
+- **The local Langfuse Docker stack teardown** is optional; the recorded
+  validation left it running, and current status needs a container check —
   [OBSERVABILITY.md § Open items](OBSERVABILITY.md#open-items)
 - **Off-machine backups do not exist.** Versioned local history runs; the
   off-machine half does not — [DEVELOPMENT.md §8](DEVELOPMENT.md)

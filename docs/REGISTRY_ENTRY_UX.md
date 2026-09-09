@@ -1,10 +1,9 @@
 # Registry entry UX — design decisions
 
 Status: **passes 1, 2 and 3 are built** — items 0, 1 and 2 (`v0.13.0`); items 3, 4, B2 and 5
-(`v0.14.0`); items 6a and 10 (`v0.15.0`). Items 7, 8, 9 and 6b are next and deliberately undecided:
-**7 and 8 are gated on the five-animal trial**, which has not run — see §11. Everything below the
-cut line is decided but unbuilt. Supersedes the kickoff brief, the validation reply, and the
-Q5/Q6/calf-age addendum — those three can be deleted once this lands.
+(`v0.14.0`); items 6a and 10 (`v0.15.0`). Items 7, 8 and 6b remain open; item 9 is partly built:
+**7 and 8 are gated on the five-animal trial**, which has not run — see §11. The cut line records the original build plan; later changes are identified below.
+This document supersedes the kickoff brief, validation reply and Q5/Q6/calf-age addendum.
 
 Baseline was verified at `42c0ad2` (`v0.12.0-2-g42c0ad2`): server 385 tests passing, typecheck
 clean, 44 registry specs across 4 frontend files. At `v0.13.0` that was server 410 and frontend 106
@@ -758,10 +757,11 @@ Whatever the five-animal trial shows is still missing. Deliberately left open ra
 
 ### 6.8 Session band
 
-Two of the three original bullets survive.
+One original item remains open; session editing landed in UI phase 7.
 
-- **In-place source and `recorded_by` change.** The Change button currently clears the session and
-  returns to the gate; make it editable in place.
+- **In-place source and `recorded_by` change — built.** The session chip opens an
+  editable gate while preserving the current session and mounted form. Cancel
+  keeps the old session; submitting applies the new source and recorder.
 - **`source_ref` capture.** The column, the `Provenance` field, the route parser and the event-list
   display all exist. Only the capture UI is missing. Without it, provenance records that something
   came from *a* cycle card rather than *this* one, and in eighteen months it cannot be re-checked
@@ -971,7 +971,7 @@ idempotency keys live in an in-process `Map` precisely to keep it true (§6.2).
 |---|---|---|
 | 7 | Roster pass (§5.1) | **Gated on evidence.** Five animals through the retrofitted `/animals/new` first — see §11 |
 | 8 | Animal workbench + last-five-written strip (§5.2) | Treat its M as optimistic; see below |
-| 9 | Session band: in-place change + `source_ref` capture (§6.8) | S |
+| 9 | Session: `source_ref` capture remains; in-place editing built (§6.8) | S |
 | 6b | Keyboard remainder (§6.7b) | Whatever the five-animal trial shows is missing |
 
 — cut line —
@@ -1032,11 +1032,19 @@ Two conventions established in pass 1 that pass 2 onward depends on, both record
 
 ### The five-animal trial — predictions on record
 
+**Phase 7 amendment — 2026-09-09.** The user explicitly authorized the UI work
+before this trial. UI_SYSTEM.md §3.4 records the fourth contamination: new shell,
+content measures, focus shadow, palette and neutral notice treatments. Field
+order and date-control parity are preserved; Cmd/Ctrl+Enter now works. The
+predictions below remain the original record, not a claim that the current UI
+is unchanged. Optional markers already existed; the trial itself is still open.
+
+
 Five animals go through the retrofitted `/animals/new` and `/animals/calvings/new` before §5.1 (roster pass) is decided:
-the murkiest dates and the longest calving histories, deliberately the hard cases. **None of the six
-predictions below has been fixed**, including the one-line ones, because fixing them costs an
-uncontaminated read on the decision they inform. They are recorded before the trial so the outcome
-can be told apart from taste.
+the murkiest dates and the longest calving histories, deliberately the hard cases. **The following six friction predictions and two positive predictions are the
+original pre-trial record.** Phase 7 has since implemented Cmd/Ctrl+Enter and
+changed the shared presentation, as the amendment above records. The remaining
+trial decisions are still open.
 
 Ranked by expected likelihood of actually biting:
 
@@ -1053,7 +1061,8 @@ Ranked by expected likelihood of actually biting:
    Recoverable via the candidate list and the near-duplicate guard, but it will read as a trap.
 5. **The write announcement being too quiet** — a thin green line in the shell, with focus back in
    `name` and eyes on paper.
-6. **`Cmd+Enter` doing nothing.** §5.1 specifies it; the retrofit does not have it.
+6. **`Cmd+Enter` doing nothing — resolved by phase 7.** This was absent in the
+   original retrofit; it now submits the focused form through its native handler.
 
 Two predicted to feel *better* than expected, so the comparison stays honest: the printed digit
 accelerators on sex and outcome, and the single date field on murky dates (`2019`, `Mar 2019`).
@@ -1147,11 +1156,12 @@ are not settled by this amendment.**
   its own consequences (§5.2). Keep the instruction *and* flag the violation; a sentence at the top
   of a form asks the operator to hold a rule, a flag at the moment of violation tells them they have
   broken it.
-- **Token layer and `(optional)` markers — held, treated as adjacent to prediction 3.** Prediction 3
-  ("ten tab stops, about half of them empty") is the same observation approached from the keyboard.
-  These are preferences on forms the trial measures, so there is no cost to waiting. `Recheck` to the
-  top of `/check` is held on the same grounds — uncontaminating, since `/check` is not in the trial,
-  but not worth a commit now.
+- **Token layer and `(optional)` markers — held in this September 4 amendment.**
+  **Later status:** the token layer is built, optional markers already existed,
+  and Recheck now lives in the Check section bar. The following explains the
+  original deferral, not current pending work. The token proposal was treated as
+  adjacent to prediction 3 ("ten tab stops, about half of them empty"). Moving
+  Recheck was also deferred then, although `/check` was outside the trial.
 
 **The retraction finding, which changes a deferral in §8 and one in that document.** Assumption
 "there is no event type that retracts or corrects a prior event" is false: `supersedes_id`,

@@ -48,7 +48,15 @@ import { Theme } from '../core/theme';
     <div class="rounded-xl border border-line-subtle bg-surface-raised p-4 shadow-sm">
       <div class="mb-2 flex items-baseline justify-between">
         <h3 class="text-sm font-semibold text-content-heading">
-          {{ dataset().scopeLabel }} — {{ dataset().interval }}ly yield
+          {{ dataset().scopeLabel }} —
+          {{
+            dataset().interval === 'day'
+              ? 'daily'
+              : dataset().interval === 'week'
+                ? 'weekly'
+                : 'monthly'
+          }}
+          yield
         </h3>
         <span appHelp size="xs" tone="subtle">{{ dataset().points.length }} points</span>
       </div>

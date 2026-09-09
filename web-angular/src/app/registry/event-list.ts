@@ -1,3 +1,4 @@
+import { StatusBadge } from '../ui/surface';
 // One animal's event list.
 //
 // ---------------------------------------------------------------------------
@@ -24,11 +25,13 @@ import type { PrecisionParts } from './precision-display';
 @Component({
   selector: 'app-event-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Certainty, Qualifier],
+  imports: [StatusBadge, Certainty, Qualifier],
   template: `
     @if (events().length === 0) {
-      <p class="rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-content-muted"
-        data-role="empty">
+      <p
+        class="rounded-xl border border-dashed border-line px-4 py-6 text-center text-sm text-content-muted"
+        data-role="empty"
+      >
         No events yet. An animal's record starts with its origin event.
       </p>
     } @else {
@@ -38,18 +41,21 @@ import type { PrecisionParts } from './precision-display';
             [attr.data-event]="e.id"
             [attr.data-effective]="e.effective"
             class="rounded-xl border px-4 py-3"
-            [class]="e.effective ? 'border-line bg-surface-raised' : 'border-line-subtle bg-surface-page'"
+            [class]="
+              e.effective ? 'border-line bg-surface-raised' : 'border-line-subtle bg-surface-page'
+            "
           >
             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span
                 class="text-sm font-semibold"
-                [class]="e.effective ? 'text-content-primary' : 'text-content-disabled line-through'"
+                [class]="e.effective ? 'text-content-primary' : 'text-content-subtle line-through'"
                 data-role="type"
-              >{{ label(e.type) }}</span>
+                >{{ label(e.type) }}</span
+              >
 
               <span
                 class="text-sm"
-                [class]="e.effective ? 'text-content-heading' : 'text-content-disabled line-through'"
+                [class]="e.effective ? 'text-content-heading' : 'text-content-subtle line-through'"
                 data-role="when"
               >
                 <!-- The event log is the third place a date carried a
@@ -66,22 +72,29 @@ import type { PrecisionParts } from './precision-display';
                      phase 7. -->
                 @if (when(e); as w) {
                   @if (e.effective) {
-                    <span [appCertainty]="w.state" [attr.data-certainty]="w.state"
-                    >{{ w.figure }}</span>{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
-                    @if (w.qualifier) { <span appQualifier>{{ w.qualifier }}</span> }
+                    <span [appCertainty]="w.state" [attr.data-certainty]="w.state">{{
+                      w.figure
+                    }}</span
+                    >{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
+                    @if (w.qualifier) {
+                      <span appQualifier>{{ w.qualifier }}</span>
+                    }
                   } @else {
                     {{ w.figure }}{{ e.occurred_time ? ' ' + e.occurred_time : '' }}
-                    @if (w.qualifier) { <span class="text-xs">{{ w.qualifier }}</span> }
+                    @if (w.qualifier) {
+                      <span class="text-xs">{{ w.qualifier }}</span>
+                    }
                   }
                 }
               </span>
 
               @if (!e.effective) {
-                <span class="rounded bg-brand-badge px-1.5 py-0.5 text-xs font-medium text-content-secondary"
-                  data-role="superseded-badge">superseded</span>
+                <span appBadge tone="ended" data-role="superseded-badge">superseded</span>
               }
 
-              <span class="ml-auto font-mono text-xs text-content-subtle" data-role="id">{{ e.id }}</span>
+              <span class="ml-auto font-mono text-xs text-content-subtle" data-role="id">{{
+                e.id
+              }}</span>
             </div>
 
             @if (!e.effective && e.superseded_by_id) {
@@ -96,25 +109,39 @@ import type { PrecisionParts } from './precision-display';
             }
 
             @if (summary(e); as s) {
-              <p class="mt-1 text-sm" [class]="e.effective ? 'text-content-secondary' : 'text-content-disabled'"
-                data-role="summary">{{ s }}</p>
+              <p
+                class="mt-1 text-sm"
+                [class]="e.effective ? 'text-content-secondary' : 'text-content-disabled'"
+                data-role="summary"
+              >
+                {{ s }}
+              </p>
             }
 
             <!-- An overridden check is part of how the record explains itself:
                  without this the log holds the fact and nobody ever sees it. -->
             @if (override(e); as o) {
-              <p class="mt-1.5 rounded-lg bg-warning-bg px-2 py-1 text-xs text-warning-strong"
-                data-role="override">
-                Written over the <span class="font-mono">{{ o.check }}</span> check{{ o.reason ? ' — ' + o.reason : '' }}
-                @if (!o.reason) { <span class="italic">— no reason recorded</span> }
+              <p
+                class="override-notice mt-1.5 rounded-lg bg-surface-sunken px-2 py-1 text-xs text-content-primary"
+                data-role="override"
+              >
+                Written over the <span class="font-mono">{{ o.check }}</span> check{{
+                  o.reason ? ' — ' + o.reason : ''
+                }}
+                @if (!o.reason) {
+                  <span class="italic">— no reason recorded</span>
+                }
               </p>
             }
 
             <p class="mt-1.5 text-xs text-content-subtle" data-role="provenance">
-              {{ e.source_form }}{{ e.source_ref ? ' · ' + e.source_ref : '' }}
-              · recorded by {{ e.recorded_by }}
-              @if (e.observed_by) { · observed by {{ e.observed_by }} }
-              @else { · <span class="italic">no witness recorded</span> }
+              {{ e.source_form }}{{ e.source_ref ? ' · ' + e.source_ref : '' }} · recorded by
+              {{ e.recorded_by }}
+              @if (e.observed_by) {
+                · observed by {{ e.observed_by }}
+              } @else {
+                · <span class="italic">no witness recorded</span>
+              }
             </p>
           </li>
         }
@@ -138,20 +165,25 @@ export class EventList {
    * with no check, which is most of what the old shape-checking was for.
    */
   protected override(e: TimelineEvent): { check: string; reason: string | null } | null {
-    return e.override_check === null
-      ? null
-      : { check: e.override_check, reason: e.override_reason };
+    return e.override_check == null ? null : { check: e.override_check, reason: e.override_reason };
   }
 
   protected label(t: string): string {
     switch (t) {
-      case 'birth': return 'Born';
-      case 'acquired': return 'Acquired';
-      case 'calving': return 'Calved';
-      case 'dry_off': return 'Dried off';
-      case 'departure': return 'Left the farm';
-      case 'note': return 'Note';
-      default: return t;
+      case 'birth':
+        return 'Born';
+      case 'acquired':
+        return 'Acquired';
+      case 'calving':
+        return 'Calved';
+      case 'dry_off':
+        return 'Dried off';
+      case 'departure':
+        return 'Left the farm';
+      case 'note':
+        return 'Note';
+      default:
+        return t;
     }
   }
 

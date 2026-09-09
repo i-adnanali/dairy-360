@@ -42,7 +42,13 @@
 // learned.
 
 import {
-  ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChildren,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChildren,
 } from '@angular/core';
 import type { ElementRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -118,9 +124,9 @@ export const OUT_OF_BAND = 0.5;
       <header>
         <h2 appPageHeading>Record a milking</h2>
         <p appHelp class="mt-1">
-          Everyone in milk on this date, in one pass. An animal left untouched blocks the save —
-          if she was milked and nobody weighed it, say so; that is a real answer and a guessed
-          number is not.
+          Everyone in milk on this date, in one pass. An animal left untouched blocks the save — if
+          she was milked and nobody weighed it, say so; that is a real answer and a guessed number
+          is not.
         </p>
       </header>
 
@@ -129,19 +135,30 @@ export const OUT_OF_BAND = 0.5;
         <div class="flex flex-wrap items-end gap-4">
           <label class="block">
             <span appFieldLabel>Date</span>
-            <input type="date" data-role="on" [value]="on()" (change)="setOn($any($event.target).value)" appInput />
+            <input
+              type="date"
+              data-role="on"
+              [value]="on()"
+              (change)="setOn($any($event.target).value)"
+              appInput
+            />
           </label>
           <div>
             <div appFieldLabel inline>Session</div>
             <app-chip-group
-              name="session" label="Session" [options]="sessionChips" [value]="session()"
+              name="session"
+              label="Session"
+              [options]="sessionChips"
+              [value]="session()"
               (changed)="setSession($any($event))"
             />
           </div>
           <div class="ml-auto">
             <app-identifier-input
-              field="observed_by" label="Milked by"
-              [value]="milkedBy()" [suggestions]="identifiers.values().observed_by"
+              field="observed_by"
+              label="Milked by"
+              [value]="milkedBy()"
+              [suggestions]="identifiers.values().observed_by"
               (changed)="milkedBy.set($event)"
             />
           </div>
@@ -150,8 +167,8 @@ export const OUT_OF_BAND = 0.5;
              not a guess. Said out loud so it does not read as the no-default
              rule being forgotten. -->
         <p class="mt-2 text-xs text-content-muted" data-role="today-note">
-          Defaults to today and this session — the one place a date is defaulted, because today is
-          a fact rather than a guess. Change it to enter a session you missed.
+          Defaults to today and this session — the one place a date is defaulted, because today is a
+          fact rather than a guess. Change it to enter a session you missed.
         </p>
       </div>
 
@@ -159,16 +176,18 @@ export const OUT_OF_BAND = 0.5;
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (roster(); as r) {
         @if (r.rows.length === 0) {
-          <p appCard empty
-            data-role="nobody">
+          <p appCard empty data-role="nobody">
             No animal was in milk on {{ r.occurred_on }}. A female is in milk from her calving until
-            she is dried off — <a routerLink="/animals/calvings/new" appTextLink tone="strong">record a calving</a>
+            she is dried off —
+            <a routerLink="/animals/calvings/new" appTextLink tone="strong">record a calving</a>
             and she will be here.
           </p>
         } @else {
           <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
             <table class="w-full text-left text-sm">
-              <thead class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted">
+              <thead
+                class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
+              >
                 <tr>
                   <th appCell>Animal</th>
                   <th appCell numeric>Days in milk</th>
@@ -177,7 +196,9 @@ export const OUT_OF_BAND = 0.5;
                        not comparable. Same rule for the mean. -->
                   <th appCell numeric>Yesterday {{ r.previous_session.session }}</th>
                   <th appCell numeric>Recent {{ r.session }} mean</th>
-                  <th appCell>Litres — or <span class="font-mono">m</span> / <span class="font-mono">n</span></th>
+                  <th appCell>
+                    Litres — or <span class="font-mono">m</span> / <span class="font-mono">n</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -194,9 +215,14 @@ export const OUT_OF_BAND = 0.5;
                        the same case: they sit in the tab path, the eye is
                        already on them, and painting them amber would train it
                        to ignore amber everywhere else. -->
-                  <tr appRowDivider [attr.data-row]="row.animal_id"
+                  <tr
+                    appRowDivider
+                    [attr.data-row]="row.animal_id"
                     [unanswered]="draft(row.animal_id).status === null"
-                    [attr.data-certainty]="draft(row.animal_id).status === null ? 'unanswered' : null">
+                    [attr.data-certainty]="
+                      draft(row.animal_id).status === null ? 'unanswered' : null
+                    "
+                  >
                     <td appCell density="compact">
                       <span class="font-mono text-content-heading">{{ row.animal_id }}</span>
                       <!-- An unnamed animal is a real no-record: she has a
@@ -204,8 +230,9 @@ export const OUT_OF_BAND = 0.5;
                       @if (row.name) {
                         <span class="ml-2 text-content-secondary">{{ row.name }}</span>
                       } @else {
-                        <span class="ml-2" appCertainty="no-record"
-                          data-certainty="no-record">{{ noRecord }}</span>
+                        <span class="ml-2" appCertainty="no-record" data-certainty="no-record">{{
+                          noRecord
+                        }}</span>
                       }
                     </td>
                     <!-- Days in milk is COMPUTED from a lactation start, so it
@@ -213,7 +240,9 @@ export const OUT_OF_BAND = 0.5;
                          the known state because the roster has no access to the
                          start date's precision -- an honest limit, not a
                          claim. -->
-                    <td appCell density="compact" numeric tone="secondary" data-role="dim">{{ row.days_in_milk }}</td>
+                    <td appCell density="compact" numeric tone="secondary" data-role="dim">
+                      {{ row.days_in_milk }}
+                    </td>
                     <!-- ---------------------------------------------------------
                          FOUR OF THE FIVE STATES IN ONE COLUMN, and this is the
                          column the whole vocabulary was written for.
@@ -226,18 +255,24 @@ export const OUT_OF_BAND = 0.5;
                          but unweighed, 1 not milked" precisely so they are never
                          blended; this is the screen where a person acts on it. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
-                      <span [appCertainty]="previousState(row)"
+                      <span
+                        [appCertainty]="previousState(row)"
                         [attr.data-certainty]="previousState(row)"
-                      >{{ previousText(row) }}</span>
+                        >{{ previousText(row) }}</span
+                      >
                     </td>
                     <!-- A MEAN OVER FIVE SESSIONS IS NOT A MEASUREMENT, and it
                          has been printed as one. §6.1 keeps the tilde for
                          quantities rather than spending a word on them: "~9.9"
                          reads as "about" in the width a figure column has. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="mean">
-                      <span [appCertainty]="row.recent_mean === null ? 'no-record' : 'approximate'"
-                        [attr.data-certainty]="row.recent_mean === null ? 'no-record' : 'approximate'"
-                      >{{ meanText(row) }}</span>
+                      <span
+                        [appCertainty]="row.recent_mean === null ? 'no-record' : 'approximate'"
+                        [attr.data-certainty]="
+                          row.recent_mean === null ? 'no-record' : 'approximate'
+                        "
+                        >{{ meanText(row) }}</span
+                      >
                     </td>
                     <td appCell density="compact">
                       <div class="flex flex-wrap items-center gap-2">
@@ -246,38 +281,57 @@ export const OUT_OF_BAND = 0.5;
                           [attr.data-role]="'litres-' + row.animal_id"
                           inputmode="decimal"
                           [value]="draft(row.animal_id).litres"
-                          [disabled]="draft(row.animal_id).status !== null && draft(row.animal_id).status !== 'measured'"
+                          [disabled]="
+                            draft(row.animal_id).status !== null &&
+                            draft(row.animal_id).status !== 'measured'
+                          "
                           (input)="typeLitres(row.animal_id, $any($event.target).value)"
                           (keydown)="onKey($event, i)"
                           class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
-                        <button type="button" [attr.data-role]="'m-' + row.animal_id"
+                        <button
+                          type="button"
+                          [attr.data-role]="'m-' + row.animal_id"
                           (click)="mark(row.animal_id, 'milked_not_measured')"
                           [class]="chipClass(row.animal_id, 'milked_not_measured')"
-                        >not measured</button>
-                        <button type="button" [attr.data-role]="'n-' + row.animal_id"
+                        >
+                          not measured
+                        </button>
+                        <button
+                          type="button"
+                          [attr.data-role]="'n-' + row.animal_id"
                           (click)="mark(row.animal_id, 'not_milked')"
                           [class]="chipClass(row.animal_id, 'not_milked')"
-                        >not milked</button>
+                        >
+                          not milked
+                        </button>
 
                         @if (draft(row.animal_id).status === 'not_milked') {
-                          <input [attr.data-role]="'reason-' + row.animal_id"
+                          <input
+                            [attr.data-role]="'reason-' + row.animal_id"
                             [value]="draft(row.animal_id).reason"
                             (input)="setReason(row.animal_id, $any($event.target).value)"
                             placeholder="why (optional)"
-                            class="w-44 rounded-lg border border-line px-2 py-1 text-sm" />
+                            class="w-44 rounded-lg border border-line px-2 py-1 text-sm"
+                          />
                         }
                         @if (outOfBand(row); as msg) {
-                          <span class="rounded-lg bg-warning-bg px-2 py-0.5 text-xs text-warning-strong"
-                            [attr.data-role]="'band-' + row.animal_id">{{ msg }}</span>
+                          <span
+                            class="anomaly-notice rounded-lg bg-surface-sunken px-2 py-0.5 text-xs text-content-primary"
+                            [attr.data-role]="'band-' + row.animal_id"
+                            >{{ msg }}</span
+                          >
                         }
                         @if (row.existing) {
                           <!-- NOT a certainty state. "already saved" is a fact
                                about the write, not about the value, and it keeps
                                its own treatment so it is not read as one of the
                                five. -->
-                          <span class="text-xs italic text-content-subtle"
-                            [attr.data-role]="'saved-' + row.animal_id">already saved</span>
+                          <span
+                            class="text-xs italic text-content-subtle"
+                            [attr.data-role]="'saved-' + row.animal_id"
+                            >already saved</span
+                          >
                         }
                       </div>
                     </td>
@@ -311,7 +365,15 @@ export const OUT_OF_BAND = 0.5;
 
       <div class="flex items-center gap-3">
         @if (session_.ready()) {
-          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="milking-submit-reason">{{ state.submitting() ? 'Saving…' : 'Save session' }}</button>
+          <button
+            type="submit"
+            data-role="submit"
+            [appButtonDisabled]="!canSubmit()"
+            appButton
+            reason="milking-submit-reason"
+          >
+            {{ state.submitting() ? 'Saving…' : 'Save session' }}
+          </button>
         } @else {
           <app-session-required what="this session" />
         }
@@ -330,12 +392,22 @@ export class MilkingRosterScreen {
 
   private readonly cells = viewChildren<ElementRef<HTMLInputElement>>('cell');
 
-  protected readonly fields = ['occurred_on', 'session', 'entries', 'animal_id', 'yield_litres'] as const;
+  protected readonly fields = [
+    'occurred_on',
+    'session',
+    'entries',
+    'animal_id',
+    'yield_litres',
+  ] as const;
   protected readonly sessionChips = [
     { value: 'morning', label: 'Morning' },
     { value: 'evening', label: 'Evening' },
   ];
-  protected readonly state = new FormState<{ written: number; measured: number; updated: number }>();
+  protected readonly state = new FormState<{
+    written: number;
+    measured: number;
+    updated: number;
+  }>();
 
   /**
    * The date and session live in the URL, not in a component signal.
@@ -439,10 +511,7 @@ export class MilkingRosterScreen {
     const current = this.draft(id).status;
     // Clicking the active one again returns the row to untouched, so a
     // mis-click is undone the same way it was made.
-    this.patch(
-      id,
-      current === status ? { ...EMPTY } : { status, litres: '', reason: '' },
-    );
+    this.patch(id, current === status ? { ...EMPTY } : { status, litres: '', reason: '' });
   }
 
   protected setReason(id: string, v: string): void {
@@ -588,7 +657,10 @@ export class MilkingRosterScreen {
     if (r.rows.length === 0) return 'Nobody was in milk on this date.';
     const left = this.untouched();
     if (left.length === 0) return null;
-    const names = left.slice(0, 3).map((x) => x.name ?? x.animal_id).join(', ');
+    const names = left
+      .slice(0, 3)
+      .map((x) => x.name ?? x.animal_id)
+      .join(', ');
     return left.length <= 3
       ? `Still to answer: ${names}.`
       : `Still to answer: ${names} and ${left.length - 3} more.`;

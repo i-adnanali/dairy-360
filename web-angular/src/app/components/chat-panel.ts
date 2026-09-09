@@ -1,3 +1,4 @@
+import { ErrorPanel } from '../ui/surface';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -24,7 +25,7 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-chat-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Composer, ConfirmationCard, EmptyState, HelpText, MessageList],
+  imports: [ErrorPanel, Button, Composer, ConfirmationCard, EmptyState, HelpText, MessageList],
   template: `
     <div class="mx-auto flex h-full max-w-3xl flex-col">
       <header class="border-b border-line-subtle bg-surface-page/80 px-6 py-4 backdrop-blur">
@@ -82,9 +83,7 @@ import { Button } from '../ui/button';
                 <app-confirmation-card [card]="card" (resolve)="store.resolve($event)" />
               }
               @if (pending.length > 1) {
-                <button appButton size="sm"
-                  (click)="approveAll(pending)"
-                >
+                <button appButton size="sm" (click)="approveAll(pending)">
                   Approve all ({{ pending.length }})
                 </button>
               }
@@ -93,7 +92,7 @@ import { Button } from '../ui/button';
         }
 
         @if (store.error(); as error) {
-          <div class="mt-4 rounded-md border border-danger-line bg-danger-bg px-4 py-3 text-sm text-danger-soft">
+          <div appErrorPanel size="lg" class="mt-4">
             {{ error }}
           </div>
         }

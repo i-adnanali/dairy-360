@@ -2,7 +2,8 @@
 
 A low-level reference for the parts that make this an **agent** rather than a chat wrapper: the **loop**, the **guardrails**, and the **shape of the tool contracts**. For the high-level architecture, data flows, and system diagrams, see [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md); this document deliberately does not repeat them.
 
-All line references are to the current source; the authoritative definitions live in the linked files.
+The linked source files are authoritative. Line numbers in older design records
+refer to their stated baselines and may have moved.
 
 ---
 
@@ -51,7 +52,7 @@ The body is a bounded `for (let iteration = 0; iteration < MAX_ITERATIONS; itera
 ### 1.3 The write gate: pause and resume
 
 - **Unresolved writes** (a write `tool_use` with no matching `approvals` entry) cause the loop to build `PendingWrite` cards, emit them over a `agent.pending` CUSTOM event, and **end the run** with a plain `RUN_FINISHED` (deliberately *not* an AG-UI `outcome: interrupt` — see Section 2.6 and [AGUI_MIGRATION.md](./AGUI_MIGRATION.md)). Nothing is executed. The client renders the cards.
-- **Resolved writes** (every write has a decision) are applied: for each `approved` write, `guardIds` runs again and then `WRITE_EXECUTORS[name].execute(input)`; each rejected write records a `{ declined: true }` tool result instead. Read + write results are appended and `remainingApprovals` is cleared (consumed once), so a resend cannot re-apply them.
+- **Resolved writes** (every write has a decision) are applied: for each `approved` write, `guardIds` runs again and then `WRITE_EXECUTORS[name].execute(input)`; each rejected write records a `{ declined: true }` tool result instead. Read + write results are appended and `remainingApprovals` is cleared for the rest of that run. This does not deduplicate a new HTTP request carrying the same pre-write history and approvals; agent writes have no cross-request replay protection.
 
 ### 1.4 Message assembly helpers
 
@@ -308,7 +309,6 @@ Card label helpers: `tagLabel(animalId)` renders `TAG (name)` when a name exists
 | `search_animals` top-K | `8` | [server/src/tools/reads.ts](../server/src/tools/reads.ts) |
 | Reconcile tolerance | `5` % of production | [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts) |
 | `get_farm_events` top-K | `50` rows | [server/src/tools/farmReads.ts](../server/src/tools/farmReads.ts) |
-| Farm timezone | `Asia/Karachi` (also pinned as `TZ` on the farm scripts) | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
 | Farm work hours | `04:00`–`20:00` farm-local (start inclusive, end exclusive) | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
 | Restricted zones | `feed_store` (provisional) | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
 | Confident face match | `>= 0.85`, `face_match` rows only | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |

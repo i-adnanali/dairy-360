@@ -87,9 +87,7 @@ export class ErrorText {
   readonly size = input<'sm' | 'xs'>('sm');
   readonly tone = input<'default' | 'soft'>('default');
   protected readonly cls = computed(
-    () =>
-      `text-${this.size()} ` +
-      (this.tone() === 'soft' ? 'text-danger-soft' : 'text-danger-fg'),
+    () => `text-${this.size()} ` + (this.tone() === 'soft' ? 'text-danger-soft' : 'text-danger-fg'),
   );
 }
 
@@ -136,31 +134,15 @@ export class RowDivider {
   protected readonly cls = computed(
     () =>
       'border-t border-line-hairline' +
-      (this.unanswered()
-        ? ' bg-warning-bg shadow-[inset_3px_0_0_0_rgb(var(--warning-line))]'
-        : ''),
+      (this.unanswered() ? ' bg-warning-bg shadow-[inset_3px_0_0_0_rgb(var(--warning-line))]' : ''),
   );
 }
 
 // ---------------------------------------------------------------------------
-// StatusBadge -- 6 sites, five strings, and only three of them agree
-// ---------------------------------------------------------------------------
+// StatusBadge: state labels share geometry, while ended records retain a
+// dashed outline and warning/brand have explicit roles. UI_SYSTEM.md §14.1.
+export type BadgeTone = 'neutral' | 'default' | 'ended' | 'warning' | 'brand';
 
-/** `fill` is the badge ground: the neutral chip, or the brand one. */
-export type BadgeTone = 'neutral' | 'brand';
-
-/**
- * A short status word beside a name.
- *
- * Section 12 asks whether the six sites can share one primitive. Three can:
- * the two `rounded-full bg-farm-200` badges on the herd list and the animal
- * record, and confirmation-card's brand-filled one. Three cannot and are left
- * alone -- event-list's superseded marker (a different radius, a different
- * stop and no `rounded-full`), the amber "not billed" tag, and the small
- * `bg-farm-100` aside. Two of the six additionally carry TypeScript colour
- * logic of their own (`tool-call-chip.chipClass()`, `message.agentClass()`),
- * which is a categorical ramp rather than a status and does not belong here.
- */
 @Directive({
   selector: '[appBadge]',
   host: { '[class]': 'cls()' },
@@ -170,9 +152,13 @@ export class StatusBadge {
   protected readonly cls = computed(
     () =>
       'rounded-full px-2 py-0.5 text-xs font-medium ' +
-      (this.tone() === 'neutral'
-        ? 'bg-brand-badge text-content-heading'
-        : 'bg-brand text-content-onFill'),
+      (this.tone() === 'ended'
+        ? 'border border-dashed border-line bg-transparent text-content-subtle'
+        : this.tone() === 'warning'
+          ? 'bg-warning-bg text-warning-strong'
+          : this.tone() === 'neutral' || this.tone() === 'default'
+            ? 'bg-brand-badge text-content-heading'
+            : 'bg-brand text-content-onFill'),
   );
 }
 

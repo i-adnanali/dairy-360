@@ -37,7 +37,13 @@
 // one case they would each get wrong alone.
 
 import {
-  ChangeDetectionStrategy, Component, computed, effect, input, output, signal,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  output,
+  signal,
 } from '@angular/core';
 import { canEstimate, parseDateEntry } from './date-parse';
 import type { DateEntry, PrecisionDate } from './date-parse';
@@ -86,7 +92,9 @@ export function dateBlocker(
             data-role="date-text"
             [value]="text()"
             (input)="text.set($any($event.target).value)"
-            placeholder="2019, Mar 2019, or 6 Jul 2023" appInput class="w-56"
+            placeholder="2019, Mar 2019, or 6 Jul 2023"
+            appInput
+            class="w-56"
           />
         </label>
 
@@ -98,8 +106,11 @@ export function dateBlocker(
               Time <span class="font-normal text-content-subtle">(optional)</span>
             </span>
             <input
-              type="time" data-role="time"
-              [value]="time()" (input)="time.set($any($event.target).value)" appInput
+              type="time"
+              data-role="time"
+              [value]="time()"
+              (input)="time.set($any($event.target).value)"
+              appInput
             />
           </label>
         }
@@ -110,11 +121,18 @@ export function dateBlocker(
            only qualify a bare year -- a specific day at estimated precision is a
            fabricated day wearing a humility label, and the write boundary
            rejects it by name. -->
-      <label class="mt-3 flex items-start gap-2 text-sm"
-        [class]="canEstimate() ? 'cursor-pointer text-content-heading' : 'text-content-disabled'">
-        <input type="checkbox" data-role="estimated" class="mt-0.5"
-          [checked]="estimated()" [disabled]="!canEstimate()"
-          (change)="estimated.set($any($event.target).checked)" />
+      <label
+        class="mt-3 flex items-start gap-2 text-sm"
+        [class]="canEstimate() ? 'cursor-pointer text-content-heading' : 'text-content-disabled'"
+      >
+        <input
+          type="checkbox"
+          data-role="estimated"
+          class="mt-0.5"
+          [checked]="estimated()"
+          [disabled]="!canEstimate()"
+          (change)="estimated.set($any($event.target).checked)"
+        />
         <span>
           Even the year is a guess
           @if (!canEstimate()) {
@@ -138,14 +156,20 @@ export function dateBlocker(
           </p>
         }
         @case ('incomplete') {
-          <p class="mt-3 rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong"
-            data-role="incomplete">{{ incompleteMessage() }}</p>
+          <p
+            class="mt-3 rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
+            data-role="incomplete"
+          >
+            {{ incompleteMessage() }}
+          </p>
         }
         @default {
           <p appHelp size="xs" class="mt-3" data-role="hint">
-            {{ explain()
-              ? 'The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.'
-              : 'The precision is read from what you type and shown back.' }}
+            {{
+              explain()
+                ? 'The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.'
+                : 'The precision is read from what you type and shown back.'
+            }}
           </p>
         }
       }

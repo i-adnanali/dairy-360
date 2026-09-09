@@ -1,3 +1,4 @@
+import { ShellActions } from './navigation';
 // The verification read: invariants, precision histogram, calving intervals.
 //
 // ---------------------------------------------------------------------------
@@ -20,7 +21,14 @@
 // It exists because the alternative was switching to a terminal mid-entry to
 // read the histogram, which nobody keeps doing past animal five.
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { RegistryApi } from './api';
 import { urlParams } from './url-state';
 import { formatMinor, formatRate } from './money';
@@ -58,11 +66,21 @@ import { SubHeading } from '../ui/heading';
       <header>
         <h2 appPageHeading>Check the records</h2>
         <p appHelp class="mt-1">
-          Read these; they are not assertions. Nothing in the rest of the app changes based on
-          what is here.
+          Read these; they are not assertions. Nothing in the rest of the app changes based on what
+          is here.
         </p>
       </header>
 
+      @if (!actions.inShell()) {
+        <button
+          type="button"
+          data-role="refresh"
+          (click)="load()"
+          class="rounded-xl border border-line bg-surface-raised px-4 py-2 text-sm font-medium text-content-heading"
+        >
+          Recheck
+        </button>
+      }
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (v(); as data) {
@@ -71,17 +89,18 @@ import { SubHeading } from '../ui/heading';
           @if (data.violations.length === 0) {
             <p class="mt-2 text-sm text-content-secondary" data-role="violations-none">
               No violations across {{ data.counts.animals }} animal(s),
-              {{ data.counts.events }} event(s), {{ data.counts.lactations }} lactation(s),
-              as of {{ data.as_of }}.
+              {{ data.counts.events }} event(s), {{ data.counts.lactations }} lactation(s), as of
+              {{ data.as_of }}.
               @if (data.counts.animals === 0) {
-                <span class="italic"> An empty registry passes every check vacuously — this says
-                nothing yet.</span>
+                <span class="italic">
+                  An empty registry passes every check vacuously — this says nothing yet.</span
+                >
               }
             </p>
           } @else {
             <ul class="mt-2 space-y-1" data-role="violations">
               @for (x of data.violations; track x.detail) {
-                <li class="rounded-lg bg-danger-bg px-3 py-2 text-sm text-danger-strong">
+                <li appErrorPanel>
                   <span class="font-mono text-xs">[{{ x.invariant }}] {{ x.name }}</span>
                   <span class="ml-2">{{ x.detail }}</span>
                 </li>
@@ -120,16 +139,22 @@ import { SubHeading } from '../ui/heading';
         <section appCard>
           <h3 appSubHeading>How the dates were known</h3>
           <p appHelp size="xs" class="mt-1">
-            Source against precision. Nothing can detect a date that is more precise than the
-            memory behind it — this is the number that shows it. A backfill coming out mostly
-            exact-day recall is the signal worth acting on.
+            Source against precision. Nothing can detect a date that is more precise than the memory
+            behind it — this is the number that shows it. A backfill coming out mostly exact-day
+            recall is the signal worth acting on.
           </p>
           @if (data.histogram.length === 0) {
-            <p class="mt-2 text-sm italic text-content-subtle" data-role="histogram-empty">No events yet.</p>
+            <p class="mt-2 text-sm italic text-content-subtle" data-role="histogram-empty">
+              No events yet.
+            </p>
           } @else {
             <table class="mt-2 w-full text-left text-sm" data-role="histogram">
               <thead class="text-xs uppercase tracking-wide text-content-muted">
-                <tr><th appCell>Source</th><th appCell>Precision</th><th appCell numeric>Events</th></tr>
+                <tr>
+                  <th appCell>Source</th>
+                  <th appCell>Precision</th>
+                  <th appCell numeric>Events</th>
+                </tr>
               </thead>
               <tbody>
                 @for (c of data.histogram; track c.source_form + c.date_precision) {
@@ -143,9 +168,11 @@ import { SubHeading } from '../ui/heading';
                          dotted here reads a dotted "2017-03" on /animals
                          without being told. -->
                     <td appCell>
-                      <span [appCertainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
+                      <span
+                        [appCertainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
                         [attr.data-certainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
-                      >{{ c.date_precision }}</span>
+                        >{{ c.date_precision }}</span
+                      >
                     </td>
                     <td appCell numeric emphasis tone="primary">{{ c.count }}</td>
                   </tr>
@@ -164,7 +191,13 @@ import { SubHeading } from '../ui/heading';
           } @else {
             <table class="mt-2 w-full text-left text-sm" data-role="intervals">
               <thead class="text-xs uppercase tracking-wide text-content-muted">
-                <tr><th appCell>Animal</th><th appCell>From</th><th appCell>To</th><th appCell numeric>Days</th><th appCell>Quality</th></tr>
+                <tr>
+                  <th appCell>Animal</th>
+                  <th appCell>From</th>
+                  <th appCell>To</th>
+                  <th appCell numeric>Days</th>
+                  <th appCell>Quality</th>
+                </tr>
               </thead>
               <tbody>
                 @for (i of data.intervals.intervals; track i.animal_id + i.ordinal) {
@@ -178,13 +211,16 @@ import { SubHeading } from '../ui/heading';
                          calvings is not the same number as one computed from two
                          exact days, and until now they were set identically. -->
                     <td appCell numeric emphasis>
-                      <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
+                      <span
+                        [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
                         [attr.data-certainty]="i.quality === 'measured' ? 'known' : 'approximate'"
-                      >{{ i.days }}</span>
+                        >{{ i.days }}</span
+                      >
                     </td>
                     <td appCell>
-                      <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
-                      >{{ i.quality }}</span>
+                      <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'">{{
+                        i.quality
+                      }}</span>
                     </td>
                   </tr>
                 }
@@ -206,9 +242,11 @@ import { SubHeading } from '../ui/heading';
                     <div appCertainty="no-record" data-certainty="no-record">none</div>
                   } @else {
                     <div>
-                      <span [appCertainty]="s.quality === 'measured' ? 'known' : 'approximate'"
+                      <span
+                        [appCertainty]="s.quality === 'measured' ? 'known' : 'approximate'"
                         [attr.data-certainty]="s.quality === 'measured' ? 'known' : 'approximate'"
-                      >n = {{ s.count }} · mean {{ s.mean_days }}d</span>
+                        >n = {{ s.count }} · mean {{ s.mean_days }}d</span
+                      >
                     </div>
                     <div appHelp size="xs">min {{ s.min_days }}d · max {{ s.max_days }}d</div>
                   }
@@ -238,10 +276,13 @@ import { SubHeading } from '../ui/heading';
                   {{ data.milking.complete_sessions }} complete of {{ data.milking.sessions }}
                 </div>
                 <div appHelp size="xs">
-                  <span [appCertainty]="data.milking.first_on ? 'known' : 'no-record'"
-                  >{{ data.milking.first_on ?? noRecord }}</span> →
-                  <span [appCertainty]="data.milking.last_on ? 'known' : 'no-record'"
-                  >{{ data.milking.last_on ?? noRecord }}</span>
+                  <span [appCertainty]="data.milking.first_on ? 'known' : 'no-record'">{{
+                    data.milking.first_on ?? noRecord
+                  }}</span>
+                  →
+                  <span [appCertainty]="data.milking.last_on ? 'known' : 'no-record'">{{
+                    data.milking.last_on ?? noRecord
+                  }}</span>
                 </div>
               </div>
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
@@ -251,7 +292,9 @@ import { SubHeading } from '../ui/heading';
               </div>
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                 <div appSectionLabel>not measured</div>
-                <div class="text-content-primary">{{ data.milking.milked_not_measured }} row(s)</div>
+                <div class="text-content-primary">
+                  {{ data.milking.milked_not_measured }} row(s)
+                </div>
                 <div appHelp size="xs">
                   milked, unweighed · {{ data.milking.not_milked }} not milked
                 </div>
@@ -261,8 +304,10 @@ import { SubHeading } from '../ui/heading';
             <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
               <thead class="text-xs uppercase tracking-wide text-content-muted">
                 <tr>
-                  <th appCell>Date</th><th appCell>Session</th>
-                  <th appCell numeric>Recorded</th><th appCell numeric>In milk</th>
+                  <th appCell>Date</th>
+                  <th appCell>Session</th>
+                  <th appCell numeric>Recorded</th>
+                  <th appCell numeric>In milk</th>
                   <th appCell numeric>Measured</th>
                 </tr>
               </thead>
@@ -279,9 +324,11 @@ import { SubHeading } from '../ui/heading';
                          changes is that it now says so in the vocabulary
                          instead of in a ternary. -->
                     <td appCell numeric emphasis>
-                      <span [appCertainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
+                      <span
+                        [appCertainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
                         [attr.data-certainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
-                      >{{ s.recorded }}</span>
+                        >{{ s.recorded }}</span
+                      >
                     </td>
                     <td appCell numeric tone="secondary">{{ s.expected }}</td>
                     <td appCell numeric tone="secondary">{{ s.measured }}</td>
@@ -315,7 +362,9 @@ import { SubHeading } from '../ui/heading';
               <div class="mt-2 grid gap-2 sm:grid-cols-4" data-role="reconcile-summary">
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div appSectionLabel>Measured</div>
-                  <div class="text-content-primary" data-role="produced">{{ r.produced_measured }} L</div>
+                  <div class="text-content-primary" data-role="produced">
+                    {{ r.produced_measured }} L
+                  </div>
                   <div appHelp size="xs">from {{ r.measured_rows }} row(s)</div>
                 </div>
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
@@ -348,21 +397,26 @@ import { SubHeading } from '../ui/heading';
               <!-- The withheld percentage says WHY rather than showing a dash:
                    a missing number with no explanation reads as a bug. -->
               @if (r.gap_pct_withheld_because; as why) {
-                <p class="mt-2 rounded-lg bg-warning-bg px-3 py-2 text-xs text-warning-strong"
-                  data-role="gap-withheld">
+                <p
+                  class="mt-2 rounded-lg bg-warning-bg px-3 py-2 text-xs text-warning-strong"
+                  data-role="gap-withheld"
+                >
                   No percentage, on purpose — {{ why }}
                 </p>
               }
 
               <p class="mt-2 text-sm text-content-secondary" data-role="reconcile-sessions">
-                {{ r.complete_sessions }} of {{ r.sessions }} dispatch session(s) had every
-                standing destination answered.
+                {{ r.complete_sessions }} of {{ r.sessions }} dispatch session(s) had every standing
+                destination answered.
               </p>
 
               @if (r.incomplete.length > 0) {
                 <table class="mt-2 w-full text-left text-sm" data-role="reconcile-incomplete">
                   <thead class="text-xs uppercase tracking-wide text-content-muted">
-                    <tr><th appCell>Session</th><th appCell numeric>Answered</th></tr>
+                    <tr>
+                      <th appCell>Session</th>
+                      <th appCell numeric>Answered</th>
+                    </tr>
                   </thead>
                   <tbody>
                     @for (s of r.incomplete; track s.occurred_on + s.session) {
@@ -387,9 +441,9 @@ import { SubHeading } from '../ui/heading';
                   <ul class="mt-1 space-y-1 text-sm text-content-secondary">
                     @for (o of r.off_schedule; track o.dispatch_id) {
                       <li>
-                        {{ o.occurred_on }} {{ o.session }} · {{ o.name }} —
-                        billed {{ rate(o.captured_minor, o.captured_unit_litres) }},
-                        agreed {{ rate(o.agreed_minor, o.agreed_unit_litres) }}
+                        {{ o.occurred_on }} {{ o.session }} · {{ o.name }} — billed
+                        {{ rate(o.captured_minor, o.captured_unit_litres) }}, agreed
+                        {{ rate(o.agreed_minor, o.agreed_unit_litres) }}
                       </li>
                     }
                   </ul>
@@ -405,10 +459,6 @@ import { SubHeading } from '../ui/heading';
             </p>
           </section>
         }
-
-        <button type="button" data-role="refresh" (click)="load()"
-          class="rounded-xl border border-line bg-surface-raised px-4 py-2 text-sm font-medium text-content-heading"
-        >Recheck</button>
       } @else {
         <p appHelp data-role="loading">Loading…</p>
       }
@@ -425,8 +475,12 @@ export class VerificationPanel {
   protected readonly reconciliation = signal<Reconciliation | null>(null);
   protected readonly loadError = signal<string | null>(null);
 
+  protected readonly actions = inject(ShellActions);
   constructor() {
-    void this.load();
+    effect(() => {
+      this.actions.recheck();
+      void this.load();
+    });
   }
 
   /**

@@ -2,6 +2,12 @@
 
 A working AI **multi-agent system** for managing a dairy farm. Two agents share one process — a **dairy agent** (animals, milk yields, feed, health events) and a **vendor/sales agent** (vendors, deliveries, balances) — with one deliberate point of contact: reconciling milk *produced* against milk *delivered*. A thin per-turn dispatcher routes each message to the dairy agent, the vendor agent, or both. The agents answer questions about the farm **and take real actions** - but every state-changing action is gated behind an explicit human confirmation. This document explains how the system is put together, with a deliberate focus on the **agentic workflow**; the multi-agent design is in [MULTI_AGENT.md](./MULTI_AGENT.md).
 
+The application also has a direct registry workspace for animals, milk and labour.
+Its five-section shell, command palette and contextual assistant are described in
+[UI_SYSTEM.md](UI_SYSTEM.md); registry writes use explicit forms and provenance,
+while the agent’s registry tools remain read-only. The diagrams below focus on
+the agent path, not the full registry HTTP surface.
+
 For setup and run instructions, see the [README.md](../README.md). This document is about *how it works*. The transport-layer design decisions (why AG-UI, how the interrupt/resume boundary works) live in [AGUI_MIGRATION.md](./AGUI_MIGRATION.md); the observability design is in [OBSERVABILITY.md](./OBSERVABILITY.md).
 
 ---
@@ -21,11 +27,11 @@ Four principles are made **observably true** in the running app:
 
 ## 2. Tech stack & repository layout
 
-- **Server:** Node >= 20, TypeScript, Express, official Anthropic SDK (`@anthropic-ai/sdk`). Streams the turn as **AG-UI** events over SSE (`@ag-ui/encoder` + `@ag-ui/core`) via `anthropic.messages.stream()`.
+- **Server:** Node 22.22.3 (repository pin), TypeScript, Express, official Anthropic SDK (`@anthropic-ai/sdk`). Streams the turn as **AG-UI** events over SSE (`@ag-ui/encoder` + `@ag-ui/core`) via `anthropic.messages.stream()`.
 - **Database:** SQLite via `better-sqlite3` (synchronous, zero-config).
 - **Frontend:** Angular 22 (standalone, zoneless) + TypeScript, signals, Tailwind CSS, `ng2-charts` (Chart.js), `marked` + `DOMPurify` for markdown. Consumes the AG-UI stream with `@ag-ui/client`'s `HttpAgent`.
 - **Observability:** self-hosted Langfuse via its OTel-based JS SDK (`@langfuse/tracing`, `@langfuse/otel`, `@opentelemetry/sdk-node`); opt-in, silently disabled if keys are unset.
-- **Model:** default `claude-sonnet-4-6` (override via `ANTHROPIC_MODEL`), with a fallback to the latest Sonnet if the configured model string is rejected.
+- **Model:** default `claude-sonnet-4-6` (override via `ANTHROPIC_MODEL`), with a single retry using the configured `FALLBACK_MODEL` (`claude-sonnet-4-5`) when a 400/404 occurs before output is emitted.
 
 npm-workspaces monorepo:
 
@@ -210,9 +216,9 @@ sequenceDiagram
     end
 ```
 
-Why this is safe:
+What the approval gate enforces, and its limit:
 
-- **Stateless + explicit decisions.** The server only mutates on an explicit `approved: true` in that request. Re-sending the same approval does not double-write, because there is no server-side pending state to replay - the mutation is driven purely by the approval decision in the request body. `ChatStore.resolve()` ([web-angular/src/app/core/chat-store.ts](../web-angular/src/app/core/chat-store.ts)) opens a fresh run that resends the unchanged `messages` plus `approvals` via `forwardedProps`.
+- **Stateless + explicit decisions.** The server only mutates on an explicit `approved: true` in that request. Approvals are consumed within that run, but there is no server-side replay store: resending the same pre-write history and approval in a new request can execute the write again. This is not an exactly-once guarantee. `ChatStore.resolve()` ([web-angular/src/app/core/chat-store.ts](../web-angular/src/app/core/chat-store.ts)) opens a fresh run that resends the unchanged `messages` plus `approvals` via `forwardedProps`.
 - **Partial approval.** When multiple writes are proposed, each gets its own decision; approved ones execute and the rest get a `declined` tool result, so the model can acknowledge exactly what happened.
 - **Guarded again at execution.** Even approved writes pass through `guardIds` before running.
 
@@ -265,7 +271,7 @@ SQLite schema from [server/src/db.ts](../server/src/db.ts). `animals` is the hub
 
 Cycle 4 (farm event ingestion, see [FARM_EVENTS.md](FARM_EVENTS.md)) adds one further table, `farm_events`, with **no** foreign key to anything — camera events are correlated to each other by `source_event_id` (the Frigate event id both webhooks carry), never to the dairy domain. It also sits outside the seed lifecycle: it lives in its own `FARM_SCHEMA` created with `IF NOT EXISTS` and is absent from `resetSchema()`'s DROP list, so `npm run seed` and the Cycle 3 regression suite cannot truncate ingested events.
 
-Cycle 5 (farm monitor, see [FARM_MONITOR.md](FARM_MONITOR.md)) adds no table — it extends `farm_events` with four nullable classification columns (`classified_at`, `flagged`, `flag_severity`, `flag_reason`), a 1:1 relationship where a side table would only have bought a join. `classified_at` carries real meaning of its own: without it, a routine event (`flagged = 0`) would be indistinguishable from one nobody has examined yet. Note the consequence of `IF NOT EXISTS` — adding columns to `FARM_SCHEMA` does **not** alter a `dairy.db` that already has the table, so the local table has to be dropped once and recreated. That was the accepted cost of there being no migration framework *at the time*, taken deliberately for four nullable columns. Cycle 8 has since built one (below), and the drop-and-recreate step remains what a pre-Cycle-5 `dairy.db` needs.
+Cycle 5 (farm monitor, see [FARM_MONITOR.md](FARM_MONITOR.md)) adds no table — it extends `farm_events` with four classification columns (`classified_at`, `flagged`, `flag_severity`, `flag_reason`), a 1:1 relationship where a side table would only have bought a join. `classified_at` carries real meaning of its own: without it, a routine event (`flagged = 0`) would be indistinguishable from one nobody has examined yet. Note the consequence of `IF NOT EXISTS` — adding columns to `FARM_SCHEMA` does **not** alter a `dairy.db` that already has the table, so the local table has to be dropped once and recreated. That was the accepted cost of there being no migration framework *at the time*, taken deliberately for four nullable columns. Cycle 8 has since built one (below), and the drop-and-recreate step remains what a pre-Cycle-5 `dairy.db` needs.
 
 Cycle 8 (animal registry, see [REGISTRY.md](REGISTRY.md)) adds `registry_*` tables in the same database file — six at Cycle 8, `registry_milkings` at step 4, four more with milk sales ([REGISTRY_SALES.md](REGISTRY_SALES.md), migration 5) and six with labour ([REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md), migration 6), for seventeen; migration 7 then rebuilt `registry_destinations` to widen its `kind` enum and add a nullable `person_id` — and with them **the repo's first migration runner** — `PRAGMA user_version`, applied at `db.ts` load and callable against any handle, global rather than registry-specific. Three boundary facts matter at this level; everything else about the registry, including its schema, belongs to REGISTRY.md and is deliberately not repeated here:
 

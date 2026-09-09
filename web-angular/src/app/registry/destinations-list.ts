@@ -1,3 +1,5 @@
+import { RowLink } from '../ui/navigation';
+import { StatusBadge } from '../ui/surface';
 // `/buyers` -- destinations, and what they pay (docs/REGISTRY_SALES.md §12.2).
 //
 // ---------------------------------------------------------------------------
@@ -53,6 +55,8 @@ import { Button } from '../ui/button';
   selector: 'app-destinations-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    RowLink,
+    StatusBadge,
     Button,
     Card,
     Cell,
@@ -74,8 +78,8 @@ import { Button } from '../ui/button';
       <header>
         <h2 appPageHeading>Buyers</h2>
         <p appHelp class="mt-1">
-          Everyone milk goes to, and what they pay for it. The house is here too — milk kept at
-          home is a disposition, not a sale, so it has no price and never appears in a balance.
+          Everyone milk goes to, and what they pay for it. The house is here too — milk kept at home
+          is a disposition, not a sale, so it has no price and never appears in a balance.
         </p>
       </header>
 
@@ -85,8 +89,7 @@ import { Button } from '../ui/button';
 
       @if (rows(); as list) {
         @if (list.length === 0) {
-          <p appCard empty
-            data-role="empty">
+          <p appCard empty data-role="empty">
             No destinations yet. Add the dodhi, the neighbours who buy, and
             <strong>the house</strong> — without a home row, milk kept for the family disappears
             into the reconciliation gap instead of being recorded.
@@ -94,7 +97,9 @@ import { Button } from '../ui/button';
         } @else {
           <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
             <table class="w-full text-left text-sm">
-              <thead class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted">
+              <thead
+                class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
+              >
                 <tr>
                   <th appCell>Name</th>
                   <th appCell>Kind</th>
@@ -105,17 +110,26 @@ import { Button } from '../ui/button';
               </thead>
               <tbody>
                 @for (d of list; track d.id) {
-                  <tr appRowDivider [attr.data-row]="d.id"
-                    [class.opacity-50]="!d.active">
+                  <tr
+                    appRowDivider
+                    [appRowLink]="d.billable ? '/milk/buyers/' + d.id : null"
+                    [attr.data-row]="d.id"
+                    [class.opacity-50]="!d.active"
+                  >
                     <td appCell>
                       @if (d.billable) {
-                        <a [routerLink]="['/milk/buyers', d.id]" appTextLink tone="strong"
-                          [attr.data-role]="'open-' + d.id">{{ d.name }}</a>
+                        <a
+                          [routerLink]="['/milk/buyers', d.id]"
+                          appTextLink
+                          tone="strong"
+                          [attr.data-role]="'open-' + d.id"
+                          >{{ d.name }}</a
+                        >
                       } @else {
                         <span class="text-content-heading">{{ d.name }}</span>
                       }
                       @if (!d.active) {
-                        <span class="ml-2 text-xs text-content-subtle" data-role="closed">
+                        <span appBadge tone="ended" class="ml-2" data-role="closed">
                           stopped {{ d.ended_on }}
                         </span>
                       }
@@ -141,15 +155,20 @@ import { Button } from '../ui/button';
                         <span class="ml-1 text-xs text-content-subtle">({{ perLitre(d) }})</span>
                       } @else {
                         <span appCertainty="unanswered" data-certainty="unanswered"
-                        >no price agreed</span>
+                          >no price agreed</span
+                        >
                       }
                     </td>
                     <td appCell numeric>
                       @if (d.billable) {
-                        <button type="button" [attr.data-role]="'price-' + d.id"
+                        <button
+                          type="button"
+                          [attr.data-role]="'price-' + d.id"
                           (click)="openPrice(d)"
                           class="rounded-lg border border-line px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
-                        >change rate</button>
+                        >
+                          change rate
+                        </button>
                       }
                     </td>
                   </tr>
@@ -164,26 +183,42 @@ import { Button } from '../ui/button';
 
       <!-- change a rate ------------------------------------------------- -->
       @if (pricing(); as d) {
-        <form appCard class="space-y-3"
-          data-role="price-form" (submit)="submitPrice($event)">
+        <form appCard class="space-y-3" data-role="price-form" (submit)="submitPrice($event)">
           <h3 appSectionHeading>Rate for {{ d.name }}</h3>
 
           <div class="flex flex-wrap items-end gap-3">
             <label class="block">
               <span appFieldLabel>Amount (Rs)</span>
-              <input data-role="price-amount" inputmode="decimal" [value]="priceAmount()"
-                (input)="priceAmount.set($any($event.target).value)" appInput class="w-32" />
+              <input
+                data-role="price-amount"
+                inputmode="decimal"
+                [value]="priceAmount()"
+                (input)="priceAmount.set($any($event.target).value)"
+                appInput
+                class="w-32"
+              />
             </label>
             <span class="pb-2 text-sm text-content-muted">per</span>
             <label class="block">
               <span appFieldLabel>Litres</span>
-              <input data-role="price-unit" inputmode="decimal" [value]="priceUnit()"
-                (input)="priceUnit.set($any($event.target).value)" appInput class="w-24" />
+              <input
+                data-role="price-unit"
+                inputmode="decimal"
+                [value]="priceUnit()"
+                (input)="priceUnit.set($any($event.target).value)"
+                appInput
+                class="w-24"
+              />
             </label>
             <label class="block">
               <span appFieldLabel>From</span>
-              <input type="date" data-role="price-from" [value]="priceFrom()"
-                (change)="priceFrom.set($any($event.target).value)" appInput />
+              <input
+                type="date"
+                data-role="price-from"
+                [value]="priceFrom()"
+                (change)="priceFrom.set($any($event.target).value)"
+                appInput
+              />
             </label>
           </div>
 
@@ -196,8 +231,8 @@ import { Button } from '../ui/button';
             }
           </p>
           <p appHelp size="xs" tone="subtle" data-role="price-note">
-            A rate change is a new agreement from that date. Milk already dispatched keeps the
-            rate it was billed at — changing this never re-prices what is already recorded.
+            A rate change is a new agreement from that date. Milk already dispatched keeps the rate
+            it was billed at — changing this never re-prices what is already recorded.
           </p>
 
           @if (priceState.formError(priceFields); as e) {
@@ -206,57 +241,92 @@ import { Button } from '../ui/button';
 
           <div class="flex gap-2">
             @if (session.ready()) {
-              <button type="submit" data-role="price-submit" [appButtonDisabled]="pricePreview() === null || priceState.submitting()" appButton
-              >{{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}</button>
+              <button
+                type="submit"
+                data-role="price-submit"
+                [appButtonDisabled]="pricePreview() === null || priceState.submitting()"
+                appButton
+              >
+                {{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}
+              </button>
             } @else {
               <app-session-required what="a rate" />
             }
-            <button type="button" data-role="price-cancel" (click)="pricing.set(null)"
-              class="rounded-xl border border-line px-4 py-2 text-sm text-content-secondary">Cancel</button>
+            <button
+              type="button"
+              data-role="price-cancel"
+              (click)="pricing.set(null)"
+              class="rounded-xl border border-line px-4 py-2 text-sm text-content-secondary"
+            >
+              Cancel
+            </button>
           </div>
         </form>
       }
 
       <!-- add a destination ---------------------------------------------- -->
-      <form appCard class="space-y-3"
-        data-role="add-form" (submit)="submitDestination($event)">
+      <form appCard class="space-y-3" data-role="add-form" (submit)="submitDestination($event)">
         <h3 appSectionHeading>Add a destination</h3>
 
         <div class="flex flex-wrap items-end gap-3">
           <label class="block">
             <span appFieldLabel>Name</span>
-            <input data-role="name" [value]="name()" (input)="name.set($any($event.target).value)" appInput class="w-56" />
+            <input
+              data-role="name"
+              [value]="name()"
+              (input)="name.set($any($event.target).value)"
+              appInput
+              class="w-56"
+            />
           </label>
           <div>
             <div appFieldLabel inline>Kind</div>
-            <app-chip-group name="kind" label="Kind" [options]="kindChips" [value]="kind()"
-              (changed)="setKind($any($event))" />
+            <app-chip-group
+              name="kind"
+              label="Kind"
+              [options]="kindChips"
+              [value]="kind()"
+              (changed)="setKind($any($event))"
+            />
           </div>
           <label class="block">
             <span appFieldLabel>Buying since</span>
-            <input type="date" data-role="started-on" [value]="startedOn()"
-              (change)="startedOn.set($any($event.target).value)" appInput />
+            <input
+              type="date"
+              data-role="started-on"
+              [value]="startedOn()"
+              (change)="startedOn.set($any($event.target).value)"
+              appInput
+            />
           </label>
         </div>
 
         <div>
           <div appFieldLabel inline>On every sheet?</div>
-          <app-chip-group name="standing" label="On every sheet" [options]="standingChips"
-            [value]="standing()" (changed)="standing.set($any($event))" />
+          <app-chip-group
+            name="standing"
+            label="On every sheet"
+            [options]="standingChips"
+            [value]="standing()"
+            (changed)="standing.set($any($event))"
+          />
           <!-- NOT defaulted: it decides whether the sheet demands an answer,
                which is a question about how the farm works rather than a fact
                about the buyer. -->
           <p appHelp size="xs" class="mt-1" data-role="standing-help">
             <strong>Every session</strong> for someone who is always accounted for — the dodhi, the
-            house. <strong>Only when they come</strong> for a neighbour who takes surplus: they
-            will never be marked absent, so nothing trains anyone to click past the sheet.
+            house. <strong>Only when they come</strong> for a neighbour who takes surplus: they will
+            never be marked absent, so nothing trains anyone to click past the sheet.
           </p>
         </div>
 
         @if (kind() === 'home') {
-          <p class="rounded-lg bg-surface-page px-3 py-2 text-xs text-content-secondary" data-role="home-note">
-            Milk kept at home is never billed and can never carry a price or a payment. Recording
-            it is what keeps it out of the unexplained gap.
+          <p
+            class="rounded-lg bg-surface-page px-3 py-2 text-xs text-content-secondary"
+            data-role="home-note"
+          >
+            Milk kept at home is never billed and can never carry a price or a payment. Recording it
+            is what keeps it out of the unexplained gap.
           </p>
         }
 
@@ -265,8 +335,9 @@ import { Button } from '../ui/button';
         }
 
         @if (session.ready()) {
-          <button type="submit" data-role="add-submit" [appButtonDisabled]="!canAdd()" appButton
-          >{{ addState.submitting() ? 'Saving…' : 'Add destination' }}</button>
+          <button type="submit" data-role="add-submit" [appButtonDisabled]="!canAdd()" appButton>
+            {{ addState.submitting() ? 'Saving…' : 'Add destination' }}
+          </button>
         } @else {
           <app-session-required what="a destination" />
         }
@@ -343,7 +414,8 @@ export class DestinationsList {
   }
 
   protected readonly canAdd = computed(
-    () => !this.addState.submitting() && this.name().trim().length > 0 && this.startedOn().length > 0,
+    () =>
+      !this.addState.submitting() && this.name().trim().length > 0 && this.startedOn().length > 0,
   );
 
   protected openPrice(d: DestinationListRow): void {
@@ -431,7 +503,9 @@ export class DestinationsList {
     if (result) {
       this.writeLog.announce(
         `${result.name} added` +
-          (result.billable ? ' — agree a rate before their first sale' : ' — kept milk, never billed'),
+          (result.billable
+            ? ' — agree a rate before their first sale'
+            : ' — kept milk, never billed'),
       );
       this.name.set('');
       await this.load();

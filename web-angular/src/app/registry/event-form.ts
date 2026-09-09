@@ -1,7 +1,14 @@
 // Append a life event: dry_off, departure, or note.
 
 import {
-  ChangeDetectionStrategy, Component, computed, inject, input, signal, viewChild, viewChildren,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  signal,
+  viewChild,
+  viewChildren,
 } from '@angular/core';
 import type { ElementRef } from '@angular/core';
 import { RegistryApi } from './api';
@@ -24,7 +31,15 @@ import { TextInput } from '../ui/input';
 import { SectionLabel } from '../ui/text';
 import { Button } from '../ui/button';
 
-const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_time', 'reason', 'text'] as const;
+const FIELDS = [
+  'animal_id',
+  'type',
+  'occurred_on',
+  'date_precision',
+  'occurred_time',
+  'reason',
+  'text',
+] as const;
 
 @Component({
   selector: 'app-event-form',
@@ -48,7 +63,10 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
       <div appCard>
         <div appSectionLabel legend>What happened?</div>
         <app-chip-group
-          name="event-type" label="What happened?" [options]="types" [value]="type()"
+          name="event-type"
+          label="What happened?"
+          [options]="types"
+          [value]="type()"
           (changed)="type.set($any($event))"
         />
         <p class="mt-1.5 text-xs text-content-muted">
@@ -59,16 +77,27 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
       @if (type(); as t) {
         <app-precision-date
           [label]="'When?'"
-          [error]="state.fieldError('occurred_on') ?? state.fieldError('date_precision') ?? state.fieldError('occurred_time')"
+          [error]="
+            state.fieldError('occurred_on') ??
+            state.fieldError('date_precision') ??
+            state.fieldError('occurred_time')
+          "
           (changed)="when.set($event)"
         />
 
         @if (t === 'dry_off') {
           <label class="block">
             <span appFieldLabel>Reason (optional)</span>
-            <select data-role="reason" [value]="reason()" (change)="reason.set($any($event.target).value)" appInput>
+            <select
+              data-role="reason"
+              [value]="reason()"
+              (change)="reason.set($any($event.target).value)"
+              appInput
+            >
               <option value="">—</option>
-              @for (r of dryOffReasons; track r) { <option [value]="r">{{ r }}</option> }
+              @for (r of dryOffReasons; track r) {
+                <option [value]="r">{{ r }}</option>
+              }
             </select>
           </label>
         }
@@ -77,15 +106,28 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
           <div class="rounded-xl border border-line bg-surface-raised p-4 space-y-3">
             <label class="block">
               <span appFieldLabel>Reason (required)</span>
-              <select data-role="reason" [value]="reason()" (change)="reason.set($any($event.target).value)" appInput>
+              <select
+                data-role="reason"
+                [value]="reason()"
+                (change)="reason.set($any($event.target).value)"
+                appInput
+              >
                 <option value="">Choose…</option>
-                @for (r of departureReasons; track r) { <option [value]="r">{{ r }}</option> }
+                @for (r of departureReasons; track r) {
+                  <option [value]="r">{{ r }}</option>
+                }
               </select>
             </label>
             <label class="block">
               <span appFieldLabel>To / cause (optional)</span>
-              <input data-role="to" [value]="to()" (input)="to.set($any($event.target).value)"
-                placeholder="who bought her, or what she died of" appInput class="w-full max-w-md" />
+              <input
+                data-role="to"
+                [value]="to()"
+                (input)="to.set($any($event.target).value)"
+                placeholder="who bought her, or what she died of"
+                appInput
+                class="w-full max-w-md"
+              />
             </label>
             <p appHelp size="xs">
               Departure is terminal. Nothing but a note can be recorded after it.
@@ -99,7 +141,14 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
         @if (t === 'note') {
           <label class="block">
             <span appFieldLabel>Note (required)</span>
-            <textarea data-role="text" rows="3" [value]="text()" (input)="text.set($any($event.target).value)" appInput class="w-full"></textarea>
+            <textarea
+              data-role="text"
+              rows="3"
+              [value]="text()"
+              (input)="text.set($any($event.target).value)"
+              appInput
+              class="w-full"
+            ></textarea>
           </label>
           @if (state.fieldError('text'); as e) {
             <p appErrorText data-role="error-text">{{ e }}</p>
@@ -107,8 +156,10 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
         }
 
         <app-identifier-input
-          field="observed_by" label="Observed by"
-          [value]="observedBy()" [suggestions]="identifiers.values().observed_by"
+          field="observed_by"
+          label="Observed by"
+          [value]="observedBy()"
+          [suggestions]="identifiers.values().observed_by"
           (changed)="observedBy.set($event)"
         />
 
@@ -121,7 +172,10 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
              the date control and never reaches that block. Keeping the button
              there left it unreachable. -->
         @if (state.hasCode('animal_departed')) {
-          <div class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="override">
+          <div
+            class="override-notice rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
+            data-role="override"
+          >
             <p>
               If the event genuinely follows the departure, record it anyway — verification will
               flag it, which is the honest outcome.
@@ -133,20 +187,36 @@ const FIELDS = ['animal_id', 'type', 'occurred_on', 'date_precision', 'occurred_
               <span class="mb-1 block text-xs font-medium">
                 Why, if you want it on the record <span class="font-normal">(optional)</span>
               </span>
-              <input data-role="override_reason" [value]="overrideReason()"
+              <input
+                data-role="override_reason"
+                [value]="overrideReason()"
                 (input)="overrideReason.set($any($event.target).value)"
                 placeholder="sold in May but stayed on the farm until August"
-                class="w-full rounded-lg border border-warning-line bg-surface-raised px-2 py-1.5 text-sm" />
+                class="w-full rounded-lg border border-line-strong bg-surface-raised px-2 py-1.5 text-sm"
+              />
             </label>
-            <button type="button" data-role="allow-after-departure"
+            <button
+              type="button"
+              data-role="allow-after-departure"
               (click)="allowAfterDeparture.set(true); submit()"
-              class="mt-2 font-medium underline">Record it anyway</button>
+              class="mt-2 font-medium underline"
+            >
+              Record it anyway
+            </button>
           </div>
         }
 
         <div class="flex items-center gap-3">
           @if (session.ready()) {
-            <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="event-submit-reason">{{ state.submitting() ? 'Saving…' : 'Record ' + t }}</button>
+            <button
+              type="submit"
+              data-role="submit"
+              [appButtonDisabled]="!canSubmit()"
+              appButton
+              reason="event-submit-reason"
+            >
+              {{ state.submitting() ? 'Saving…' : 'Record ' + t }}
+            </button>
           } @else {
             <app-session-required what="an event" />
           }
@@ -222,20 +292,23 @@ export class EventForm {
     if (entry.status !== 'complete' || !t) return;
     const w = entry.value;
     const r = await this.state.run((key) =>
-      this.api.addEvent({
-        animal_id: this.animalId(),
-        type: t,
-        occurred_on: w.occurred_on,
-        occurred_time: w.occurred_time,
-        date_precision: w.date_precision,
-        reason: blank(this.reason()),
-        to: blank(this.to()),
-        text: blank(this.text()),
-        observed_by: blank(this.observedBy()),
-        allow_after_departure: this.allowAfterDeparture(),
-        override_reason: blank(this.overrideReason()),
-        ...this.session.provenance(),
-      }, key),
+      this.api.addEvent(
+        {
+          animal_id: this.animalId(),
+          type: t,
+          occurred_on: w.occurred_on,
+          occurred_time: w.occurred_time,
+          date_precision: w.date_precision,
+          reason: blank(this.reason()),
+          to: blank(this.to()),
+          text: blank(this.text()),
+          observed_by: blank(this.observedBy()),
+          allow_after_departure: this.allowAfterDeparture(),
+          override_reason: blank(this.overrideReason()),
+          ...this.session.provenance(),
+        },
+        key,
+      ),
     );
     this.allowAfterDeparture.set(false);
     if (r) {

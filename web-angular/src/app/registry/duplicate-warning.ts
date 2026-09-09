@@ -32,7 +32,13 @@
 // the way calf-picker.ts was built for the workbench.
 
 import {
-  ChangeDetectionStrategy, Component, computed, effect, inject, input, signal,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { RegistryApi } from './api';
@@ -46,20 +52,29 @@ export const DEBOUNCE_MS = 250;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (matches().length > 0) {
-      <div class="rounded-xl border border-warning-line bg-warning-bg p-3" data-role="duplicate-warning">
-        <p class="text-sm font-medium text-warning-strong">
+      <div
+        class="anomaly-notice rounded-xl border border-line-strong bg-surface-sunken p-3"
+        data-role="duplicate-warning"
+      >
+        <p class="text-sm font-medium text-content-primary">
           Is this a new one? {{ matches().length === 1 ? 'An animal' : 'Animals' }} already in the
           registry {{ matches().length === 1 ? 'looks' : 'look' }} like this.
         </p>
         <ul class="mt-2 space-y-1">
           @for (m of matches(); track m.id) {
-            <li class="flex flex-wrap items-baseline gap-x-2 text-sm text-warning-strong">
+            <li class="flex flex-wrap items-baseline gap-x-2 text-sm text-content-primary">
               <span class="font-mono">{{ m.id }}</span>
               <span>{{ m.name ?? '—' }}</span>
               <span class="text-xs">{{ m.match_reason }}</span>
               <span class="text-xs italic" data-role="added">{{ age(m) }}</span>
-              <button type="button" [attr.data-open]="m.id" (click)="open(m.id)"
-                class="ml-auto text-xs font-medium underline">Open its record</button>
+              <button
+                type="button"
+                [attr.data-open]="m.id"
+                (click)="open(m.id)"
+                class="ml-auto text-xs font-medium underline"
+              >
+                Open its record
+              </button>
             </li>
           }
         </ul>
@@ -67,7 +82,7 @@ export const DEBOUNCE_MS = 250;
              clear: the warning goes when what was typed stops matching, and
              submit was never blocked, so an "I know" button would only train
              the reflex of clicking one. -->
-        <p class="mt-2 text-xs text-warning-fg">
+        <p class="mt-2 text-xs text-content-secondary">
           If it is genuinely a different animal, carry on — nothing is blocked.
         </p>
       </div>

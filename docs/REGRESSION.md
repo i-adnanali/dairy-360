@@ -4,6 +4,12 @@
 12 scenarios, verified over multiple clean live passes). Prerequisite:
 `docs/MULTI_AGENT.md` (Cycle 2) complete and tagged `v0.5.0`.*
 
+> **Extended by the registry tools cycle:** `test:regression` now runs four
+> subprocesses. [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) adds six registry precision
+> evals to the original 12 scenarios. The counts and three-script configuration
+> below describe the `v0.6.0` baseline; current commands are in
+> [DEVELOPMENT.md §5](DEVELOPMENT.md#5-test).
+
 ## Context
 
 `docs/OBSERVABILITY.md` § Open items originally called this "Cycle 2" —

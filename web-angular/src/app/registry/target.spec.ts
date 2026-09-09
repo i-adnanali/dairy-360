@@ -235,7 +235,9 @@ describe('SessionGate target', () => {
     await fillProvenance(fixture);
 
     const e = el(fixture);
-    expect(e.querySelector('[data-role="target-unknown"]')!.textContent).toContain('cannot be ruled out');
+    expect(e.querySelector('[data-role="target-unknown"]')!.textContent).toContain(
+      'cannot be ruled out',
+    );
     expect(start(e).getAttribute('aria-disabled')).toBe('true');
     expect(e.querySelector('[data-role="acknowledge-target"]')).not.toBeNull();
   });
@@ -248,7 +250,9 @@ describe('SessionGate target', () => {
     await fillProvenance(fixture);
 
     const e = el(fixture);
-    expect(e.querySelector('[data-role="target-unknown"]')!.textContent).toContain('No server answered');
+    expect(e.querySelector('[data-role="target-unknown"]')!.textContent).toContain(
+      'No server answered',
+    );
     expect(start(e).getAttribute('aria-disabled')).toBeNull();
   });
 });
@@ -263,7 +267,9 @@ describe('SessionBar target', () => {
 
     const e = el(fixture);
     expect(e.querySelector('[data-role="harness-banner"]')).toBeNull();
-    expect(e.querySelector('[data-role="target-summary"]')!.textContent!.trim()).toBe('dairy.db');
+    expect(e.querySelector('[data-role="target-summary"]')!.getAttribute('aria-label')).toBe(
+      'registry: /Users/x/dairy-360/server/dairy.db',
+    );
   });
 
   it('keeps the harness banner, and keeps it out of the real case', async () => {
@@ -274,7 +280,9 @@ describe('SessionBar target', () => {
     await settle(fixture, http, { storage: ':memory:', memory: true });
 
     const e = el(fixture);
-    expect(e.querySelector('[data-role="harness-banner"]')!.textContent).toContain('not the real registry');
+    expect(e.querySelector('[data-role="harness-banner"]')!.textContent).toContain(
+      'harness · in memory',
+    );
     expect(e.querySelector('[data-role="target-summary"]')).toBeNull();
   });
 });

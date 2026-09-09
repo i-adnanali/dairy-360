@@ -34,7 +34,7 @@ Two animal tables now exist in one database, and that is deliberate.
 | Ids | `animal_<8hex>` | `BD-0001` |
 | Lifecycle | dropped and recreated by every `seed()` | migration-managed, never dropped |
 | Status vocabulary | `AnimalStatus` in `shared/src/types.ts` | `RegistryAnimalStatus` in `registry/types.ts` |
-| Read by | the agent's tools | the agent's tools too, **read-only** ([REGISTRY_TOOLS.md](REGISTRY_TOOLS.md), [REGISTRY_SALES.md](REGISTRY_SALES.md)); every write goes through the entry UI |
+| Read by | the agent's tools | the agent's tools too, **read-only** ([REGISTRY_TOOLS.md](REGISTRY_TOOLS.md), [REGISTRY_SALES.md](REGISTRY_SALES.md)); writes use the registry UI, HTTP routes or CLI, not agent tools |
 
 **The demo tables are fixtures for a scripted demo, not a record of anything.** That is the fact that makes the fork tolerable, and it is why the registry does not simply extend `animals`.
 
@@ -1019,9 +1019,13 @@ The gate asks a third thing alongside `source_form` and `recorded_by`: **where t
 
 **The gate, not the first write.** The gate is the one screen guaranteed to be crossed before any write, so this needs no per-form or per-write plumbing and covers forms added later for free. The acknowledgement lives on the gate *component*, not on the service, so it cannot outlive the screen that asked for it.
 
-**The bar states the real target plainly, in the same weight as the rest of the session.** No permanent red band: friction belongs at the deliberate act, and standing alarm chrome is furniture within the hour. The amber harness banner stays as it was.
+**The storage chip states the target explicitly.** UI phase 7 replaced the
+harness banner with a header chip: amber for harness or unknown, neutral for a
+real registry, with the full path available on hover and focus. The separate
+session chip opens editable provenance without destroying an unfinished form.
+The real-database acknowledgement remains at the gate. See [UI_SYSTEM.md §12](UI_SYSTEM.md#12-the-shell--built-in-phase-7).
 
-**The target is re-asked on every navigation, and drift sends you back to the gate.** The gate runs once per page load, so a server replaced on that port while the app stayed loaded — kill the harness, start the real server, exactly the sequence at the end of a click-through pass — would otherwise leave the amber "Harness" banner showing over writes landing in `dairy.db`. A stale signal that is wrong in the dangerous direction is worse than no signal. When the storage string changes under a live session, the session is cleared and provenance and target are re-stated together.
+**The target is re-asked on every navigation, and drift sends you back to the gate.** The gate runs once per page load, so a server replaced on that port while the app stayed loaded — kill the harness, start the real server, exactly the sequence at the end of a click-through pass — would otherwise leave the harness indicator showing over writes landing in `dairy.db`. A stale signal that is wrong in the dangerous direction is worse than no signal. When the storage string changes under a live session, the session is cleared and provenance and target are re-stated together.
 
 Becoming *unreachable* is not drift and clears nothing: the anchor is kept through the outage precisely so the change is still caught when the server comes back as something else. Not a poll — a timer would be liveness machinery this surface has no use for.
 

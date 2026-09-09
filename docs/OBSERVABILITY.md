@@ -47,6 +47,10 @@ Reasoning, in order of weight:
   - `finish_reason: completed | awaiting_approval | iteration_cap` — without this flag, these cases can be hard to distinguish from the trace view alone.
   - `agent: dairy | vendor | both` — which agent the dispatcher selected for the turn (added in Cycle 2; see [MULTI_AGENT.md](./MULTI_AGENT.md)).
 
+> Live stack and teardown observations below describe the recorded validation
+> session; they are not a current container-status check. The operating commands
+> are maintained in the root [README](../README.md).
+
 ## Addendum — React frontend and `/api/chat` archived
 
 `web-react/`, the `POST /api/chat` route and `server/src/agent/loop.ts` were

@@ -1,59 +1,38 @@
-# WebAngular
+# Dairy 360 Angular frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.5.
+Current frontend: Angular 22, standalone components, signals and zoneless change
+detection. It includes the animal, milk and labour registry, plus the assistant.
 
-## Development server
+Run the commands below from the **repository root**, using the Node version in
+[`.nvmrc`](../.nvmrc). Install dependencies once with `npm install`.
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Run locally
 
 ```bash
-ng generate component component-name
+npm run harness:app   # in-memory fixture registry + Angular, no API key needed
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Open `http://localhost:4200/`. To use the persistent server and agent instead,
+follow [DEVELOPMENT.md](../docs/DEVELOPMENT.md); `npm run dev:angular` starts that
+pair. The fixture harness does not provide agent responses.
+
+## Build and verify
 
 ```bash
-ng generate --help
+npm run build:angular
+npm test -w web-angular
+npm run check:templates
+npm run check:contrast
 ```
 
-## Building
+Build output is `web-angular/dist/web-angular/browser`. Contrast currently runs
+in report mode and includes documented failures; exit success is not an AA pass.
+No `ng e2e` target is configured. Browser capture tooling and its limits are
+covered in [UI_SYSTEM.md](../docs/UI_SYSTEM.md).
 
-To build the project run:
+## Read next
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [UI system](../docs/UI_SYSTEM.md): shell, primitives, certainty, themes and verification.
+- [Screen gallery](../docs/images/phase7/README.md): all routes in light and dark mode.
+- [Angular port](../docs/ANGULAR_PORT.md): chat state and component architecture.
+- [Entry UX](../docs/REGISTRY_ENTRY_UX.md): form behavior and the outstanding farm trial.

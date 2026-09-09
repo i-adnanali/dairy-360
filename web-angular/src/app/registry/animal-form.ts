@@ -1,7 +1,13 @@
 // Add an acquired animal. Pass one of the backfill.
 
 import {
-  ChangeDetectionStrategy, Component, computed, inject, signal, viewChild, viewChildren,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  viewChild,
+  viewChildren,
 } from '@angular/core';
 import type { ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
@@ -63,7 +69,10 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
         <div appCard>
           <div appSectionLabel legend>Sex</div>
           <app-chip-group
-            name="sex" label="Sex" [options]="sexChips" [value]="sex()"
+            name="sex"
+            label="Sex"
+            [options]="sexChips"
+            [value]="sex()"
             (changed)="sex.set($any($event))"
           />
           @if (state.fieldError('sex'); as e) {
@@ -73,25 +82,46 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
             <label class="block">
               <span appFieldLabel>Name (optional)</span>
-              <input #firstField data-role="name" [value]="name()"
-                (input)="name.set($any($event.target).value)" appInput class="w-full" />
+              <input
+                #firstField
+                data-role="name"
+                [value]="name()"
+                (input)="name.set($any($event.target).value)"
+                appInput
+                class="w-full"
+              />
             </label>
             <app-identifier-input
-              field="acquired_from" label="Acquired from"
-              [value]="from()" [suggestions]="identifiers.values().acquired_from"
+              field="acquired_from"
+              label="Acquired from"
+              [value]="from()"
+              [suggestions]="identifiers.values().acquired_from"
               (changed)="from.set($event)"
             />
             <label class="block">
               <span appFieldLabel>Post no. (optional)</span>
-              <input data-role="post_no" [value]="postNo()" (input)="postNo.set($any($event.target).value)" appInput class="w-full" />
+              <input
+                data-role="post_no"
+                [value]="postNo()"
+                (input)="postNo.set($any($event.target).value)"
+                appInput
+                class="w-full"
+              />
             </label>
             <label class="block">
               <span appFieldLabel>Ear tag (optional)</span>
-              <input data-role="tag_no" [value]="tagNo()" (input)="tagNo.set($any($event.target).value)" appInput class="w-full" />
+              <input
+                data-role="tag_no"
+                [value]="tagNo()"
+                (input)="tagNo.set($any($event.target).value)"
+                appInput
+                class="w-full"
+              />
             </label>
           </div>
           <p class="mt-2 text-xs text-content-subtle">
-            Post number and ear tag are attributes, not identity — both change over an animal's life.
+            Post number and ear tag are attributes, not identity — both change over an animal's
+            life.
           </p>
         </div>
 
@@ -99,7 +129,10 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
              submit button: the useful moment is while the name is still being
              typed, not after the decision to save has been made. -->
         <app-duplicate-warning
-          [name]="name()" [postNo]="postNo()" [tagNo]="tagNo()" [sex]="sex()"
+          [name]="name()"
+          [postNo]="postNo()"
+          [tagNo]="tagNo()"
+          [sex]="sex()"
           [refreshToken]="writes()"
         />
 
@@ -119,14 +152,16 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
           (changed)="birth.set($event)"
         />
         <p class="-mt-2 px-1 text-xs text-content-muted">
-          Leave the birth date blank if you do not know it. Without one the animal shows as
-          heifer or male even if it is visibly a calf — the age rule has no date to test. An
-          estimated year is the fix: type the year and tick the guess box.
+          Leave the birth date blank if you do not know it. Without one the animal shows as heifer
+          or male even if it is visibly a calf — the age rule has no date to test. An estimated year
+          is the fix: type the year and tick the guess box.
         </p>
 
         <app-identifier-input
-          field="observed_by" label="Observed by"
-          [value]="observedBy()" [suggestions]="identifiers.values().observed_by"
+          field="observed_by"
+          label="Observed by"
+          [value]="observedBy()"
+          [suggestions]="identifiers.values().observed_by"
           (changed)="observedBy.set($event)"
         />
 
@@ -136,7 +171,14 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
 
         <div class="flex items-center gap-3">
           <button
-            type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="animal-submit-reason">{{ state.submitting() ? 'Saving…' : 'Add animal' }}</button>
+            type="submit"
+            data-role="submit"
+            [appButtonDisabled]="!canSubmit()"
+            appButton
+            reason="animal-submit-reason"
+          >
+            {{ state.submitting() ? 'Saving…' : 'Add animal' }}
+          </button>
           @if (blockedReason(); as r) {
             <span appHelp data-role="blocked" id="animal-submit-reason">{{ r }}</span>
           }
@@ -148,19 +190,27 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
               Added {{ r.animal_id }}{{ r.animal.animal.name ? ' — ' + r.animal.animal.name : '' }}
             </p>
             <p class="mt-1 text-sm text-success-fg">
-              Status <span class="font-mono">{{ r.animal.status?.status }}</span>,
-              birth
+              Status <span class="font-mono">{{ r.animal.status?.status }}</span
+              >, birth
               <span class="font-mono">{{
                 r.animal.status?.birth_on
                   ? r.animal.status?.birth_on + ' (' + r.animal.status?.birth_precision + ')'
                   : 'unknown'
               }}</span>
             </p>
-            <button type="button" (click)="open(r.animal_id)"
-              class="mt-2 text-sm font-medium text-success-strong underline">Open its record</button>
+            <button
+              type="button"
+              (click)="open(r.animal_id)"
+              class="mt-2 text-sm font-medium text-success-strong underline"
+            >
+              Open its record
+            </button>
           </div>
         }
       </div>
+      <p class="mt-2 text-xs text-content-muted">
+        Cmd/Ctrl+Enter saves from a field when the record is ready.
+      </p>
     </form>
   `,
 })
@@ -246,19 +296,22 @@ export class AnimalForm {
     // must never reach the wire as a null.
     if (a.status !== 'complete' || b.status === 'incomplete') return;
     const r = await this.state.run((key) =>
-      this.api.addAnimal({
-        sex: this.sex(),
-        name: blank(this.name()),
-        acquired_on: a.value.occurred_on,
-        date_precision: a.value.date_precision,
-        birth_on: b.status === 'complete' ? b.value.occurred_on : null,
-        birth_precision: b.status === 'complete' ? b.value.date_precision : null,
-        from: blank(this.from()),
-        post_no: blank(this.postNo()),
-        tag_no: blank(this.tagNo()),
-        observed_by: blank(this.observedBy()),
-        ...this.session.provenance(),
-      }, key),
+      this.api.addAnimal(
+        {
+          sex: this.sex(),
+          name: blank(this.name()),
+          acquired_on: a.value.occurred_on,
+          date_precision: a.value.date_precision,
+          birth_on: b.status === 'complete' ? b.value.occurred_on : null,
+          birth_precision: b.status === 'complete' ? b.value.date_precision : null,
+          from: blank(this.from()),
+          post_no: blank(this.postNo()),
+          tag_no: blank(this.tagNo()),
+          observed_by: blank(this.observedBy()),
+          ...this.session.provenance(),
+        },
+        key,
+      ),
     );
     // Refreshed AFTER the write, so a name typed on this animal is offered on
     // the next one. That is the whole point of the datalist.

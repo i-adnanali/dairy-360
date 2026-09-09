@@ -70,7 +70,7 @@ export class TextInput {
       // for one element type, and the composer -- the control used most -- would
       // be the odd one out. Buttons and links take the ring because they have no
       // border to shift.
-      'focus:outline-none focus:border-focus ' +
+      'focus:outline-none focus:border-focus focus:shadow-[0_0_0_1px_rgb(var(--focus-ring))] ' +
       (this.density() === 'compact' ? 'px-2 py-1.5' : 'px-3 py-2'),
   );
 }

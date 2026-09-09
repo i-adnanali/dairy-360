@@ -1,6 +1,16 @@
 // The registry area: session gate, nav, and the routed view.
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import {
@@ -11,6 +21,10 @@ import {
   RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
+import { CommandPalette } from './command-palette';
+import { SECTIONS, sectionFor, ShellActions } from './navigation';
+import { Button } from '../ui/button';
+import { Shortcuts } from '../core/shortcuts';
 import { WriteLog } from './after-write';
 import { Assistant } from '../core/assistant';
 import { AssistantPanel } from '../components/assistant-panel';
@@ -24,125 +38,112 @@ import { TextLink } from '../ui/text';
   selector: 'app-registry-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AssistantPanel, RouterLink, RouterLinkActive, RouterOutlet, SessionBar, SessionGate,
-    TextLink, ThemeToggle,
+    AssistantPanel,
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    SessionBar,
+    SessionGate,
+    TextLink,
+    ThemeToggle,
+    Button,
+    CommandPalette,
   ],
   template: `
     <div class="flex h-full flex-col bg-surface-page text-content-primary">
-      <app-session-bar />
-
-      <!-- TEN links in TWO GROUPS, plus Today ungrouped -- and this is the
-           decision REGISTRY_SALES.md §12.4 deferred twice.
-
-           It said the grouping "should be made when the seventh item exists and
-           is being used, not predicted from six". The seventh exists, and
-           payroll brings three more, so the flat row is past the point where it
-           reads as a row at all.
-
-           The split is RECORD versus REVIEW -- what you come here to write down
-           against what you come here to look up. It is not alphabetical, not by
-           subject (animals/milk/money/people), and not by frequency, because
-           only one of those tells you where to look when you arrive holding a
-           number you need to enter.
-
-           THE URLs GROUP BY SUBJECT INSTEAD, and that divergence is deliberate:
-           a nav entry answers "what am I doing", a URL names a thing. Encoding
-           the activity in the path -- /record/milking -- would put one subject
-           in two places and mean nothing to whoever received the link. See
-           app.routes.ts.
-
-           Herd sits in review rather than record even though /add and
-           /calving write animals: the list itself is a lookup, and the two
-           writing screens are already named for what they write.
-
-           One row on a wide screen, two on a narrow one. If a third group ever
-           appears this becomes a real navigation problem rather than a layout
-           one -- and that is the point at which it should stop being a row. -->
-      <header class="border-b border-line-subtle bg-surface-raised px-4 py-3">
-        <div class="mx-auto max-w-4xl">
-          <!--
-            TWO ROWS, EXPLICITLY, AND THAT IS ABOUT HEIGHT.
-
-            The toggle was first added to the same wrapping flex row as the title
-            and the nav, pushed right with ml-auto. The nav is ten links and
-            already wraps to a second line, so the toggle wrapped to a THIRD --
-            +34px of header on twelve of the fourteen screens, permanently, for
-            one control. Measured, not guessed.
-
-            The title is short, so pairing it with the toggle costs nothing. The
-            cost is that the toggle is now the header's FIRST tab stop rather
-            than its last: an operator tabbing for the nav passes it. That is the
-            better half of the trade -- one extra Tab against 34px on every
-            screen -- but it is a trade and not a free win.
-          -->
-          <div class="flex items-baseline justify-between gap-4">
-            <h1 class="text-base font-semibold tracking-tight">Animal registry</h1>
-            <!-- ---------------------------------------------------------
-                 THE ASSISTANT TOGGLE, PARKED. §13.1 says it belongs in the
-                 header, and the header §13.1 means is §12.1's -- three zones
-                 over two explicit rows, with the storage chip, the session
-                 chip, the theme toggle and this one placed deliberately.
-                 THAT IS PHASE 7 and it is gated on the five-animal trial,
-                 because it changes the chrome around the frozen forms and the
-                 tab order into them.
-
-                 So it goes where the current header can carry it: row 1 holds
-                 a short title and the theme toggle and nothing else, so one
-                 more small control fits without touching row 2. §11 records
-                 the theme toggle costing 34px when it was first put in the
-                 SAME wrapping row as the ten-link nav; this is the row that
-                 cannot wrap.
-
-                 WHEN §12.1 IS BUILT, this moves to the right zone beside the
-                 session chip and this comment goes with it. Note the tab-order
-                 consequence §11 already flagged for the theme toggle: there
-                 are now TWO controls ahead of the nav rather than one.
-                 --------------------------------------------------------- -->
-            <div class="flex items-baseline gap-3">
+      <header class="border-b border-line-subtle bg-surface-raised px-4">
+        <div class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 py-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <h1 class="text-base font-semibold tracking-tight">Dairy 360</h1>
+            <app-session-bar mode="storage" />
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <app-session-bar mode="session" />
+            <button type="button" appTextLink (click)="palette.show()" data-role="search-toggle">
+              Search <kbd>{{ palette.chordLabel }}</kbd>
+            </button>
+            <app-theme-toggle />
+            <button
+              type="button"
+              appTextLink
+              (click)="assistant.toggle()"
+              [attr.aria-expanded]="assistant.open()"
+              aria-controls="assistant-panel"
+              data-role="assistant-toggle"
+            >
+              Assistant
+            </button>
+          </div>
+        </div>
+        <nav
+          class="phase7-nav mx-auto flex max-w-[1400px] gap-5 overflow-x-auto text-sm"
+          data-role="nav"
+          aria-label="Sections"
+        >
+          @for (section of sections; track section.label) {
+            <a
+              [routerLink]="section.path"
+              [class.ml-auto]="section.label === 'Check'"
+              [class.active]="activeSection().label === section.label"
+              [attr.aria-current]="activeSection().label === section.label ? 'page' : null"
+              [attr.data-role]="section.label === 'Today' ? 'nav-today' : null"
+              >{{ section.label }}</a
+            >
+          }
+        </nav>
+      </header>
+      <div class="border-b border-line-subtle bg-surface-sunken px-4" data-role="section-bar">
+        <div
+          class="mx-auto flex min-h-12 max-w-[1400px] flex-wrap items-center justify-between gap-3 py-2"
+        >
+          <nav class="flex flex-wrap gap-4 text-sm" aria-label="Section views">
+            @for (view of activeSection().views; track view.path) {
+              <a
+                [routerLink]="view.path"
+                routerLinkActive="font-medium !text-content-primary"
+                [routerLinkActiveOptions]="{ exact: true }"
+                appTextLink
+                >{{ view.label }}</a
+              >
+            }
+          </nav>
+          <div class="flex flex-wrap gap-3">
+            @if (activeSection().label === 'Check') {
               <button
                 type="button"
-                (click)="assistant.toggle()"
-                [attr.aria-expanded]="assistant.open()"
-                aria-controls="assistant-panel"
-                class="rounded-sm text-xs text-content-muted hover:text-content-primary
-                  focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
-                  focus-visible:ring-offset-2 focus-visible:ring-offset-surface-raised"
-                data-role="assistant-toggle"
+                appButton
+                variant="secondary"
+                (click)="actions.refresh()"
+                data-role="section-recheck"
               >
-                Assistant
+                Recheck
               </button>
-              <app-theme-toggle />
-            </div>
+            } @else if (!session.ready() || activeSection().label === 'Today') {
+              <button
+                type="button"
+                appButton
+                variant="secondary"
+                (click)="session.requestSetup()"
+                data-role="section-start-session"
+              >
+                {{ session.ready() ? 'Change recording session' : 'Start a recording session' }}
+              </button>
+            } @else {
+              @for (action of activeSection().actions; track action.path) {
+                <a
+                  [routerLink]="action.path"
+                  [fragment]="action.fragment"
+                  (click)="focusAction(action.fragment)"
+                  appButton
+                  [variant]="action.primary ? 'primary' : 'secondary'"
+                  >{{ action.label }}</a
+                >
+              }
+            }
           </div>
-          <!-- ALWAYS RENDERED. The nav used to be hidden until provenance was
-               declared, which meant an operator who only wanted to look at a
-               balance could not even see where to look. -->
-          @if (true) {
-            <nav class="mt-2 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-sm" data-role="nav">
-              <!-- Today is first and ungrouped: it is not a subject, it is the
-                   answer to "what now", and putting it under Record or Review
-                   would make it look like one screen among several. -->
-              <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }"
-                routerLinkActive="font-medium !text-content-primary" appTextLink data-role="nav-today">Today</a>
-
-              <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-content-disabled"
-                data-role="nav-group-record">Record</span>
-              <a routerLink="/animals/new" routerLinkActive="font-medium !text-content-primary" appTextLink>Add animal</a>
-              <a routerLink="/animals/calvings/new" routerLinkActive="font-medium !text-content-primary" appTextLink>Record calving</a>
-              <a routerLink="/milk/milking" routerLinkActive="font-medium !text-content-primary" appTextLink>Milking</a>
-              <a routerLink="/milk/dispatch" routerLinkActive="font-medium !text-content-primary" appTextLink>Dispatch</a>
-              <a routerLink="/labour/payroll" routerLinkActive="font-medium !text-content-primary" appTextLink>Payroll</a>
-
-              <span class="ml-2 text-[10px] font-medium uppercase tracking-wide text-content-disabled"
-                data-role="nav-group-review">Review</span>
-              <a routerLink="/animals" routerLinkActive="font-medium !text-content-primary" appTextLink>Herd</a>
-              <a routerLink="/milk/buyers" routerLinkActive="font-medium !text-content-primary" appTextLink>Buyers</a>
-              <a routerLink="/labour/people" routerLinkActive="font-medium !text-content-primary" appTextLink>People</a>
-              <a routerLink="/check" routerLinkActive="font-medium !text-content-primary" appTextLink>Check</a>
-            </nav>
-          }
         </div>
-      </header>
+      </div>
+      <app-command-palette #palette />
 
       <!-- WHAT JUST HAPPENED, without looking for it.
            A cleared form is ambiguous: it looks exactly like a form that was
@@ -157,8 +158,12 @@ import { TextLink } from '../ui/text';
         {{ writeLog.last() }}
       </div>
       @if (writeLog.last(); as msg) {
-        <div class="border-b border-writelog-line bg-writelog-bg px-4 py-1.5 text-center text-xs font-medium text-writelog-fg"
-          data-role="write-log">{{ msg }}</div>
+        <div
+          class="border-b border-writelog-line bg-writelog-bg px-4 py-1.5 text-center text-xs font-medium text-writelog-fg"
+          data-role="write-log"
+        >
+          {{ msg }}
+        </div>
       }
 
       <!-- READS ARE FREE; ONLY A SCREEN THAT IS NOTHING BUT A FORM IS GATED.
@@ -181,8 +186,14 @@ import { TextLink } from '../ui/text';
            the screen STAYS MOUNTED. Swapping the outlet for it would destroy
            the routed component and take any half-typed figure with it, which is
            precisely the moment somebody reaches for this. -->
-      @if (session.setupOpen() && !session.ready() && !writeOnlyRoute()) {
-        <div class="border-b border-line-subtle bg-surface-raised" data-role="session-setup">
+      @if (session.setupOpen() && (session.ready() || !writeOnlyRoute())) {
+        <div
+          class="max-h-[70vh] overflow-y-auto border-b border-line-subtle bg-surface-raised"
+          data-role="session-setup"
+        >
+          <button type="button" class="m-3 text-sm underline" (click)="session.dismissSetup()">
+            Cancel session setup
+          </button>
           <app-session-gate />
         </div>
       }
@@ -204,7 +215,10 @@ import { TextLink } from '../ui/text';
            panel's "inset-y-0" resolves against a box taller than the viewport.
            --------------------------------------------------------------- -->
       <div class="relative flex min-h-0 flex-1 flex-col">
-        <main class="flex-1 overflow-y-auto px-4 py-6">
+        <main
+          class="phase7-content flex-1 overflow-y-auto px-4 py-6"
+          [class.phase7-form]="writeOnlyRoute()"
+        >
           @if (writeOnlyRoute() && !session.ready()) {
             <app-session-gate />
           } @else {
@@ -222,7 +236,13 @@ export class RegistryShell {
   protected readonly writeLog = inject(WriteLog);
   protected readonly assistant = inject(Assistant);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
   private readonly route = inject(ActivatedRoute);
+
+  protected readonly sections = SECTIONS;
+  protected readonly actions = inject(ShellActions);
+  private readonly url = signal(this.router.url);
+  protected readonly activeSection = computed(() => sectionFor(this.url()));
 
   /**
    * True when the active route is nothing but a form.
@@ -234,12 +254,42 @@ export class RegistryShell {
   protected readonly writeOnlyRoute = signal(this.declaresWrites());
 
   constructor() {
+    this.actions.inShell.set(true);
+    effect(() => {
+      if (this.session.ready() && this.writeOnlyRoute()) {
+        afterNextRender(
+          () => {
+            document.querySelector('main')?.scrollTo({ top: 0 });
+          },
+          { injector: this.injector },
+        );
+      }
+    });
+    inject(DestroyRef).onDestroy(() => this.actions.inShell.set(false));
+    const undo = inject(Shortcuts).register('mod+enter', 'RegistryShell', (e) => {
+      if (document.querySelector('[data-role="command-dialog"]')) return;
+      const focused = e.target as HTMLElement | null;
+      const form = focused?.closest('form');
+      if (form && form.closest('main, [data-role="session-setup"]')) form.requestSubmit();
+    });
+    inject(DestroyRef).onDestroy(undo);
     this.router.events
       .pipe(
         filter((e) => e instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
       .subscribe(() => {
+        this.url.set(this.router.url);
+        afterNextRender(
+          () => {
+            if (this.router.url.endsWith('#add-person')) {
+              this.focusAction('add-person');
+            } else {
+              document.querySelector('main')?.scrollTo({ top: 0 });
+            }
+          },
+          { injector: this.injector },
+        );
         this.writeOnlyRoute.set(this.declaresWrites());
         this.assistant.context.set(this.contextFor());
       });
@@ -267,6 +317,13 @@ export class RegistryShell {
    * string, which url-state.ts puts there precisely so a specific roster can be
    * named and sent to somebody.
    */
+  protected focusAction(fragment?: string): void {
+    if (!fragment) return;
+    const form = document.getElementById(fragment);
+    form?.scrollIntoView({ block: 'start' });
+    (form?.querySelector('input') as HTMLElement | null)?.focus();
+  }
+
   private contextFor(): string | null {
     const url = this.router.url.split('?')[0];
     const q = this.router.url.includes('?')
@@ -274,7 +331,7 @@ export class RegistryShell {
       : new URLSearchParams();
 
     const animal = /^\/animals\/([^/]+)$/.exec(url);
-    if (animal && animal[1] !== 'new') return animal[1];
+    if (animal && !['new', 'calvings'].includes(animal[1])) return animal[1];
 
     if (url === '/milk/milking') {
       const session = q.get('session');

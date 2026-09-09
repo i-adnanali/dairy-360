@@ -3,8 +3,8 @@
 *Every command below was run on 2026-09-03 against commit `a6c4842` on macOS
 (darwin 25.3.0), node 22.22.3, npm 10.9.8. The fresh-clone section was verified
 in an actual throwaway clone, not reasoned about. Four things could not be run
-here and are marked **UNVERIFIED** where they appear — there is no other kind of
-claim in this document.*
+here and were marked **UNVERIFIED** where they appeared. Later verification
+updates are listed below; the original environment measurements are historical.*
 
 Checked against `package.json` (root, `server/`, `web-angular/`, `shared/`),
 `.nvmrc`, `web-angular/proxy.conf.json` and `web-angular/angular.json`. Where
@@ -31,6 +31,11 @@ twice. The defect fixes moved § 5 to 458/198 and § 4's overrun to 16.72 kB; mi
 logging then moved them again — § 5 is now **480** server and **210** frontend
 across **22** files, and § 4's overrun **17.46 kB**. Same caveat both times:
 nothing else was re-measured.
+
+**Phase 7 verification — 2026-09-09:** 726 server tests, 339 frontend tests
+across 32 files, typecheck, template checks and the Angular production build pass.
+The initial bundle is 584.58 kB. These update §§4–5; earlier timings, install
+audit counts and environment observations remain dated measurements.
 
 ---
 
@@ -79,7 +84,7 @@ npm install
 
 Took **8.7 s** in a fresh clone: `better-sqlite3` resolved a prebuilt binary for
 this platform rather than compiling. On a platform with no prebuild it compiles
-the native binding, which is slower. `npm install` reports 19 known
+the native binding, which is slower. That install reported 19 known
 vulnerabilities in the dependency tree (3 low, 6 moderate, 10 high) — this is a
 local single-operator demo, and none is addressed here.
 
@@ -151,12 +156,12 @@ All three ran clean. How to tell each worked:
 treat them as failures:
 
 ```
-▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 17.46 kB ...
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 84.58 kB ...
 ▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
 ```
 
-The budget was already exceeded by 7.57 kB before the last cycle; the CommonJS
-notice is about `shared/` emitting CJS.
+The Phase 7 initial bundle is 584.58 kB against the 500 kB warning budget.
+The CommonJS notice is about `shared/` emitting CJS.
 
 ---
 
@@ -164,17 +169,18 @@ notice is about `shared/` emitting CJS.
 
 ```bash
 npm test -w server           # 726 tests, node:test via tsx
-npm test -w web-angular      # 281 tests across 26 files, Vitest (jsdom)
+npm test -w web-angular      # 339 tests across 32 files, Vitest (jsdom)
 ```
 
-Both green on a fresh clone, and both need **no database file and no API key** —
-the registry suites run against `new Database(':memory:')` and the suite as a
-whole writes nothing to disk.
+Both passed during Phase 7 verification in the working checkout. They need **no database file and no API key** —
+registry fixtures use `new Database(':memory:')`. Backup tests also write
+snapshots in temporary directories and clean them up; the suite does not use
+the live database.
 
 | Suite | Expected | Notes |
 |---|---|---|
-| `npm test -w server` | `# tests 480 / # pass 480 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
-| `npm test -w web-angular` | `Test Files 22 passed / Tests 210 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
+| `npm test -w server` | `# tests 726 / # pass 726 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
+| `npm test -w web-angular` | `Test Files 32 passed / Tests 339 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
 
 **`npm test -w web-angular` needs the node version `.nvmrc` pins** — the Angular CLI refuses below
 its floor and runs nothing, so `nvm use` first. See § 1; the failure mode is a green server suite
@@ -223,10 +229,11 @@ file placed somewhere unlisted fails loudly instead of never running. See
 ### The regression suite is env-gated, and a skip is not a pass
 
 ```bash
-npm run test:regression -w server        # all three, live model, costs tokens
+npm run test:regression -w server        # all four suites, live model, costs tokens
 npm run test:regression:core -w server
 npm run test:regression:cap -w server
 npm run test:regression:fallback -w server
+npm run test:regression:registry -w server
 ```
 
 Gated on `RUN_REGRESSION=1` (set by the scripts themselves) **and** an
@@ -241,8 +248,10 @@ ok 1 - regression suite (live model) # SKIP ANTHROPIC_API_KEY not set — live r
 ```
 
 **Exit code 0.** Read that carefully: `ok`, nothing failed, and *nothing ran*.
-Ten scenarios did not execute. Never record a skipped regression run as a pass —
-check `# tests` is 12, not just that the command succeeded.
+The skipped suite executed no scenarios. Never record that as a pass. The
+original core/cap/fallback set contains 12 scenarios in total; the registry
+suite adds six precision evals. Check each subprocess summary, not only the
+aggregate exit code.
 
 **Not run here**, deliberately: the live suite makes real API calls against the
 configured model, and its `beforeEach(seed)` re-seeds `dairy.db`. **UNVERIFIED:**
@@ -479,15 +488,15 @@ Do not confuse either with editing rows: the append-only guarantee is
 
 In the app, the gate at the entry UI states the target before a session opens and
 **will not open a session against a real database until you acknowledge it**; the
-harness is deliberately exempt. The amber harness banner's *absence* is not by
-itself the signal — an absence cannot distinguish the real server from an
-unreachable one, which is why `/storage` exists. See [REGISTRY.md](REGISTRY.md)
+harness is deliberately exempt. The header storage chip explicitly distinguishes
+`harness · in memory`, `registry` (with its path on hover/focus), and
+`target unknown`, using `/storage`. See [REGISTRY.md](REGISTRY.md)
 § "Which database am I writing to".
 
-**UNVERIFIED:** the gate and banner behaviour above is covered by 13 specs in
-`web-angular/src/app/registry/target.spec.ts` and the endpoint was checked by
-`curl` on both servers, but nobody has clicked through it in a browser. Layout
-and pointer input are what the specs cannot reach.
+The target and gate behavior is covered by `target.spec.ts`. Phase 7 browser
+checks exercised harness session setup and editing without losing unfinished
+input. They do not establish a real-database browser walkthrough; the earlier
+endpoint checks used `curl` on both servers.
 
 ---
 
@@ -948,7 +957,7 @@ invariant 13 as a source-level check.
 | `503 {"status":"unseeded"}`, or the chat says "run `npm run seed` first" | Demo tables not created. The registry is unaffected | `npm run seed -w server` |
 | The entry UI's gate will not open — a checkbox asking you to confirm the database | Working as intended: the target is real (or could not be determined from a server that *is* answering), and the session needs one deliberate act. The harness never asks | Read the path it names. Tick it, or point at the harness |
 | Registry commands refuse with `--precision is required` | Not a bug. Precision is never defaulted; a missing one is an error | `--precision=day\|month\|year\|estimated` |
-| Regression suite "passes" instantly | It skipped. No API key | Check `# tests` is 12, not 0 |
+| Regression suite "passes" instantly | It skipped. No API key | Check each suite’s executed-test count and skip count |
 | `sqlite3 -readonly server/dairy.db` → `Error: in prepare, unable to open database file (14)` | WAL mode needs a `-shm`, and a read-only connection cannot create one. Normal whenever the sidecars are absent, so this fails *intermittently* depending on what last opened the file | `sqlite3 'file:server/dairy.db?immutable=1' '…'`, or just checksum it — see § 6 "Which one am I on?" |
 | `npm run harness:app` → the chat at `/chat` does nothing, `/api/health` is 404 | Working as intended. The harness mounts only `/api/registry` and `/api/harness`; it must never import `db.ts`, which is where the agent surface lives | For the chat, use the real loop plus `npm run seed -w server` and a key |
 

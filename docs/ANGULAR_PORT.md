@@ -91,7 +91,7 @@ Every component is **standalone**, `OnPush`, and uses signal-based `input()` / `
 improvement over the React prop chain).
 
 > **Scope: this table is the React → Angular port only.** Cycle 8 added a second
-> surface to the same app — the animal registry, now 37 non-spec files under
+> surface to the same app — the animal registry under
 > [web-angular/src/app/registry/](../web-angular/src/app/registry/) — which has
 > no React ancestor and so has no row here. It also brought the app's **first
 > router, first `HttpClient` and first use of `@angular/forms`**; before it,
@@ -102,7 +102,8 @@ improvement over the React prop chain).
 > sales screens in [REGISTRY_SALES.md](REGISTRY_SALES.md) § 12, and labour — plus
 > the URL structure, the day board at `/`, and why reads need no recording
 > session — in [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) § 12. None of it is
-> described here.
+> described here. The current five-section shell, palette, themes and assistant
+> overlay are specified in [UI_SYSTEM.md](UI_SYSTEM.md).
 >
 > It is no longer only an *entry* UI, which is why the wording above changed: the
 > app's root is a day board and most of its screens are reads.

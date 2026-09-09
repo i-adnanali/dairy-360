@@ -26,7 +26,14 @@
 // is the server's rule, not a UI preference.
 
 import {
-  ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild, viewChildren,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+  viewChildren,
 } from '@angular/core';
 import type { ElementRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -93,15 +100,24 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
                state, one screen offering the next step and the other not. -->
           <p appHelp data-role="no-dams">
             No females in the registry yet — a calving needs a dam.
-            <a routerLink="/animals/new" data-role="no-dams-cta" appTextLink tone="strong">Add an acquired animal</a>,
-            and it will be here when you come back.
+            <a routerLink="/animals/new" data-role="no-dams-cta" appTextLink tone="strong"
+              >Add an acquired animal</a
+            >, and it will be here when you come back.
           </p>
         } @else {
-          <select #firstField data-role="dam" [value]="damId()" (change)="setDam($any($event.target).value)" appInput class="w-full max-w-sm">
+          <select
+            #firstField
+            data-role="dam"
+            [value]="damId()"
+            (change)="setDam($any($event.target).value)"
+            appInput
+            class="w-full max-w-sm"
+          >
             <option value="">Choose a dam…</option>
             @for (d of dams(); track d.id) {
               <option [value]="d.id" [disabled]="!d.eligible">
-                {{ d.id }}{{ d.name ? ' — ' + d.name : '' }}{{ d.eligible ? '' : ' (' + d.ineligible_reason + ')' }}
+                {{ d.id }}{{ d.name ? ' — ' + d.name : ''
+                }}{{ d.eligible ? '' : ' (' + d.ineligible_reason + ')' }}
               </option>
             }
           </select>
@@ -122,7 +138,10 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
         <div>
           <div appSectionLabel legend>Calf sex</div>
           <app-chip-group
-            name="calf-sex" label="Calf sex" [options]="sexChips" [value]="calfSex()"
+            name="calf-sex"
+            label="Calf sex"
+            [options]="sexChips"
+            [value]="calfSex()"
             (changed)="setCalfSex($any($event))"
           />
         </div>
@@ -130,7 +149,10 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
         <div>
           <div appSectionLabel legend>Outcome</div>
           <app-chip-group
-            name="outcome" label="Outcome" [options]="outcomes" [value]="outcome()"
+            name="outcome"
+            label="Outcome"
+            [options]="outcomes"
+            [value]="outcome()"
             (changed)="setOutcome($any($event))"
           />
           <p class="mt-1.5 text-xs text-content-muted">
@@ -138,10 +160,13 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             still counts toward parity and the calving interval.
           </p>
           @if (outcome() !== 'live') {
-            <p class="mt-1.5 rounded-lg bg-warning-bg px-3 py-2 text-xs text-warning-strong" data-role="outcome-warning">
-              If you are unsure whether this calf survived, record it as <strong>live</strong>.
-              Live → died is repairable with a departure event; the reverse is not, and would
-              leave the animal permanently departed.
+            <p
+              class="mt-1.5 rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-primary"
+              data-role="outcome-warning"
+            >
+              If you are unsure whether this calf survived, record it as <strong>live</strong>. Live
+              → died is repairable with a departure event; the reverse is not, and would leave the
+              animal permanently departed.
             </p>
           }
         </div>
@@ -155,14 +180,18 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       />
 
       <app-identifier-input
-        field="sire_ref" label="Sire reference"
-        [value]="sireRef()" [suggestions]="identifiers.values().sire_ref"
+        field="sire_ref"
+        label="Sire reference"
+        [value]="sireRef()"
+        [suggestions]="identifiers.values().sire_ref"
         (changed)="sireRef.set($event)"
       />
 
       <app-identifier-input
-        field="observed_by" label="Observed by"
-        [value]="observedBy()" [suggestions]="identifiers.values().observed_by"
+        field="observed_by"
+        label="Observed by"
+        [value]="observedBy()"
+        [suggestions]="identifiers.values().observed_by"
         (changed)="observedBy.set($event)"
       />
 
@@ -175,24 +204,44 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
       <!-- Keyed on the code, not nested in the form-level error: this refusal
            names occurred_on, so its message goes to the date control. -->
       @if (state.hasCode('near_duplicate_calving')) {
-        <div class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="override">
+        <div
+          class="override-notice rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
+          data-role="override"
+        >
           <p>Far more likely a double entry than a real second calving — check the date first.</p>
           <label class="mt-2 block">
             <span class="mb-1 block text-xs font-medium">
               Why, if you want it on the record <span class="font-normal">(optional)</span>
             </span>
-            <input data-role="override_reason" [value]="overrideReason()"
+            <input
+              data-role="override_reason"
+              [value]="overrideReason()"
               (input)="overrideReason.set($any($event.target).value)"
               placeholder="twin born the following month, confirmed against the cycle card"
-              class="w-full rounded-lg border border-warning-line bg-surface-raised px-2 py-1.5 text-sm" />
+              class="w-full rounded-lg border border-line-strong bg-surface-raised px-2 py-1.5 text-sm"
+            />
           </label>
-          <button type="button" data-role="allow-duplicate" (click)="allowDuplicate.set(true); submit()"
-            class="mt-2 font-medium underline">Record it anyway</button>
+          <button
+            type="button"
+            data-role="allow-duplicate"
+            (click)="allowDuplicate.set(true); submit()"
+            class="mt-2 font-medium underline"
+          >
+            Record it anyway
+          </button>
         </div>
       }
 
       <div class="flex items-center gap-3">
-        <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton reason="calving-submit-reason">{{ state.submitting() ? 'Saving…' : 'Record calving' }}</button>
+        <button
+          type="submit"
+          data-role="submit"
+          [appButtonDisabled]="!canSubmit()"
+          appButton
+          reason="calving-submit-reason"
+        >
+          {{ state.submitting() ? 'Saving…' : 'Record calving' }}
+        </button>
         @if (blockedReason(); as r) {
           <span appHelp data-role="blocked" id="calving-submit-reason">{{ r }}</span>
         }
@@ -210,8 +259,8 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             </p>
           }
           <p class="mt-1 text-sm text-success-fg">
-            Dam is now <span class="font-mono">{{ r.dam.status?.status }}</span>,
-            parity {{ r.dam.status?.parity }}
+            Dam is now <span class="font-mono">{{ r.dam.status?.status }}</span
+            >, parity {{ r.dam.status?.parity }}
           </p>
           <div class="mt-2 flex gap-3 text-sm font-medium text-success-strong underline">
             <button type="button" (click)="open(r.dam.animal.id)">Open dam</button>
@@ -219,6 +268,9 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
           </div>
         </div>
       }
+      <p class="mt-2 text-xs text-content-muted">
+        Cmd/Ctrl+Enter saves from a field when the record is ready.
+      </p>
     </form>
   `,
 })
@@ -258,8 +310,11 @@ export class CalvingForm {
     { value: 'died_within_24h', label: 'Died within 24h' },
   ];
   protected readonly state = new FormState<{
-    calf_id: string; linked: boolean; superseded_origin_event_id: string | null;
-    dam: import('./types').AnimalDetail; calf: import('./types').AnimalDetail;
+    calf_id: string;
+    linked: boolean;
+    superseded_origin_event_id: string | null;
+    dam: import('./types').AnimalDetail;
+    calf: import('./types').AnimalDetail;
   }>();
 
   protected readonly dams = signal<LinkCandidate[]>([]);
@@ -307,10 +362,7 @@ export class CalvingForm {
    * putting in front of someone deciding whether to create a duplicate.
    */
   protected readonly canLoadCandidates = computed(
-    () =>
-      this.damId().length > 0 &&
-      this.when().status === 'complete' &&
-      this.calfSex() !== null,
+    () => this.damId().length > 0 && this.when().status === 'complete' && this.calfSex() !== null,
   );
 
   protected readonly canSubmit = computed(
@@ -391,11 +443,7 @@ export class CalvingForm {
     this.outcome.set(o);
   }
 
-  private async loadCandidates(
-    dam: string,
-    calfSex: RegistrySex,
-    w: PrecisionDate,
-  ): Promise<void> {
+  private async loadCandidates(dam: string, calfSex: RegistrySex, w: PrecisionDate): Promise<void> {
     const c = await this.api.linkCandidates({
       dam,
       calfSex,
@@ -416,21 +464,24 @@ export class CalvingForm {
     // Re-read candidates on submit in link mode so a stale list cannot be the
     // reason a link is attempted against an animal that has since changed.
     const r = await this.state.run((key) =>
-      this.api.recordCalving({
-        dam_id: this.damId(),
-        occurred_on: w.occurred_on,
-        occurred_time: w.occurred_time,
-        date_precision: w.date_precision,
-        calf_id: this.calfChoice(),
-        calf_sex: calfSex,
-        calf_name: this.calfName(),
-        outcome: this.outcome(),
-        sire_ref: blank(this.sireRef()),
-        observed_by: blank(this.observedBy()),
-        allow_near_duplicate: this.allowDuplicate(),
-        override_reason: blank(this.overrideReason()),
-        ...this.session.provenance(),
-      }, key),
+      this.api.recordCalving(
+        {
+          dam_id: this.damId(),
+          occurred_on: w.occurred_on,
+          occurred_time: w.occurred_time,
+          date_precision: w.date_precision,
+          calf_id: this.calfChoice(),
+          calf_sex: calfSex,
+          calf_name: this.calfName(),
+          outcome: this.outcome(),
+          sire_ref: blank(this.sireRef()),
+          observed_by: blank(this.observedBy()),
+          allow_near_duplicate: this.allowDuplicate(),
+          override_reason: blank(this.overrideReason()),
+          ...this.session.provenance(),
+        },
+        key,
+      ),
     );
     this.allowDuplicate.set(false);
     if (r) {

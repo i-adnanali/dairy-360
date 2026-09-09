@@ -10,7 +10,14 @@
 // permanent red band would be furniture within an hour, which is the same
 // reason /check has no badge that turns green.
 
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  inject,
+  input,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -21,53 +28,68 @@ import { Target } from './target';
   selector: 'app-session-bar',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (target.kind() === 'harness') {
-      <!-- Which database am I pointed at should never be a guess: the forms
-           write real records. -->
-      <div class="bg-warning-fill px-4 py-1.5 text-center text-xs font-medium text-warning-strong"
-        data-role="harness-banner">
-        Harness — {{ target.storage() }} fixture data, discarded when the process exits. This is not the real registry.
-      </div>
-    }
-
-    @if (session.ready()) {
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line-subtle bg-surface-page px-4 py-2 text-xs"
-        data-role="session-summary">
-        <span class="text-content-muted">Recording as</span>
-        <span class="font-medium text-content-primary">{{ session.recordedBy() }}</span>
-        <span class="text-content-muted">from</span>
-        <span class="font-medium text-content-primary">{{ session.sourceForm() }}</span>
+    @if (mode() === 'storage' || mode() === 'both') {
+      <span
+        tabindex="0"
+        class="storage-chip relative inline-block rounded-full border px-2 py-1 text-xs"
+        [class.border-line-strong]="target.kind() === 'real'"
+        [class.bg-warning-fill]="target.kind() !== 'real'"
+        [class.text-warning-strong]="target.kind() !== 'real'"
+        [attr.data-role]="target.kind() === 'harness' ? 'harness-banner' : 'target-summary'"
+        [attr.aria-label]="target.kind() === 'real' ? 'registry: ' + target.storage() : null"
+      >
+        {{
+          target.kind() === 'harness'
+            ? 'harness · in memory'
+            : target.kind() === 'real'
+              ? 'registry'
+              : 'target unknown'
+        }}
         @if (target.kind() === 'real') {
-          <span class="text-content-muted">into</span>
-          <span class="font-medium text-content-primary" data-role="target-summary"
-            [title]="target.storage()">{{ target.basename() }}</span>
+          <span
+            class="storage-path absolute left-0 top-full z-40 mt-1 max-w-[80vw] break-all rounded border border-line bg-surface-raised p-2 text-content-primary"
+            >{{ target.storage() }}</span
+          >
         }
-        <button type="button" data-role="change-session" (click)="change()"
-          class="ml-auto text-content-secondary underline">Change</button>
-      </div>
-    } @else {
-      <!-- STATED, not blank.
-           This row used to be absent when no session was set, because nothing
-           downstream rendered either -- the gate filled the screen, so there
-           was nothing to explain. Now that reads are free, an operator can be
-           three screens deep with no provenance set, and "nothing you do here
-           is being recorded" is exactly the kind of fact target.ts argues must
-           never be communicated by an absence. -->
-      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line-subtle
-        bg-surface-page px-4 py-2 text-xs" data-role="browsing">
-        <span class="text-content-muted">Browsing — nothing is being recorded.</span>
-        <button type="button" data-role="start-session" (click)="session.requestSetup()"
-          class="ml-auto font-medium text-content-heading underline">Start recording</button>
-      </div>
+      </span>
+    }
+    @if (mode() === 'session' || mode() === 'both') {
+      @if (session.ready()) {
+        <span data-role="session-summary">
+          <button
+            type="button"
+            class="rounded-full border border-line-strong px-2 py-1 text-xs text-content-primary"
+            data-role="change-session"
+            (click)="session.requestSetup()"
+          >
+            {{ session.sourceForm() }} · {{ session.recordedBy() }}
+          </button>
+        </span>
+      } @else {
+        <span data-role="browsing">
+          <button
+            type="button"
+            class="rounded-full border border-line px-2 py-1 text-xs text-content-subtle"
+            data-role="start-session"
+            (click)="session.requestSetup()"
+          >
+            browsing<span class="sr-only"> — nothing is being recorded</span>
+          </button>
+        </span>
+      }
     }
   `,
 })
-export class SessionBar {
+export class SessionBar implements OnInit {
+  readonly mode = input<'storage' | 'session' | 'both'>('both');
   protected readonly session = inject(Session);
   protected readonly target = inject(Target);
   private readonly router = inject(Router);
 
-  constructor() {
+  private readonly destroyRef = inject(DestroyRef);
+
+  ngOnInit() {
+    if (this.mode() === 'session') return;
     void this.target.probe();
 
     // Re-ask on every navigation.
@@ -86,7 +108,7 @@ export class SessionBar {
     this.router.events
       .pipe(
         filter((e) => e instanceof NavigationEnd),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => void this.target.reprobe());
   }

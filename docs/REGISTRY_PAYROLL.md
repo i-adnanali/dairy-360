@@ -961,7 +961,7 @@ to see whether the run is saveable without reading it.
 build: dihari are hired **a few times a month**. At that cadence an accelerator optimises a motion
 performed a handful of times, and it would cost a shortlist that has to be derived, ranked and kept
 honest. This is the same measurement the sales cycle made before cutting the batch price change
-([REGISTRY_SALES.md §12.2](REGISTRY_SALES.md#122-buyers--destinations-and-prices)) — *"written before
+([REGISTRY_SALES.md §12.2](REGISTRY_SALES.md#122-milkbuyers--destinations-and-prices)) — *"written before
 the farm was counted"*. Build the accelerator if the cadence turns out to be weekly.
 
 **Footer.** Cash total, and beside it the **package report**: for each person with a `milk` benefit,
@@ -984,7 +984,7 @@ and may well come back.
 
 `/labour/people/:id` is the statement: engagements as a timeline, the package as it stands and as it stood,
 wage periods, payments, running balance. The payment form lives here rather than on a route of its
-own, for [REGISTRY_SALES.md §12.3](REGISTRY_SALES.md#123-buyersid--the-statement)'s reason — a payment
+own, for [REGISTRY_SALES.md §12.3](REGISTRY_SALES.md#123-milkbuyersid--the-statement)'s reason — a payment
 is always *to somebody*, and a standalone form would open with a dropdown this screen has already
 answered.
 
@@ -1003,7 +1003,11 @@ said it was over the line, deferring the grouping *"until the seventh item exist
 not predicted from six"*. Payroll takes it to nine and the day board to **ten**. The condition was met
 twice over, and two separate decisions came out of it — they are separate because **a nav entry and a URL do different jobs.**
 
-#### The nav groups by ACTIVITY
+#### The original nav grouped by ACTIVITY
+
+**Superseded by UI phase 7:** the current header has Today, Herd, Milk, Labour
+and Check; each section owns its views and actions. See [UI_SYSTEM.md §12](UI_SYSTEM.md#12-the-shell--built-in-phase-7).
+The following records the earlier activity grouping.
 
 **Record** (Add animal, Record calving, Milking, Dispatch, Payroll) versus **Review** (Herd, Buyers,
 People, Check), with **Today** first and ungrouped because it is not a subject — it is the answer to
@@ -1020,7 +1024,8 @@ writing screens are already named for what they write.
 /                          the day board
 /animals                   herd list
 /animals/new               add an animal
-/animals/calvings/new      record a calving
+/animals/calvings           calving history (added in UI phase 7)
+/animals/calvings/new       record a calving
 /animals/:id               one animal
 /milk/milking              session roster
 /milk/dispatch             daily sheet
@@ -1033,7 +1038,7 @@ writing screens are already named for what they write.
 /chat                      the agent
 ```
 
-**The divergence from the nav is deliberate.** A URL names a *thing*; encoding the activity —
+**The original divergence from the nav was deliberate.** A URL names a *thing*; encoding the activity —
 `/record/milking` — would put one subject in two places and mean nothing to whoever received the
 link. The three prefixes are the three axes these documents already argue for and are not invented
 for the router: the animal record ([REGISTRY.md](REGISTRY.md)), milk and its counterparties
@@ -1052,8 +1057,8 @@ person, that reconcile against each other, and that
 quality-based pricing lands under `/milk`; absences (§11) land under `/labour`. A flat space was
 right at five screens and would have needed this same restructure again at fifteen.
 
-**One ordering rule is load-bearing and is asserted by a test:** `animals/new` must precede
-`animals/:id`, or the router matches the literal as an id and the add form becomes unreachable —
+**Literal routes must precede the parameter route:** `animals/new` and
+`animals/calvings` must precede `animals/:id`, or the router matches the literal as an id and the add form becomes unreachable —
 silently, by rendering the detail screen for an animal called "new".
 
 ### 12.4 `/` — the day board, and why it is not the herd list

@@ -407,6 +407,7 @@ app-session-required,
  * because "it happens not to matter today" is exactly the reasoning that left
  * app-session-required off the list for its whole life.
  */
+app-command-palette,
 app-assistant-panel,
 app-chart-card,
 app-composer,
@@ -661,3 +662,23 @@ app-chat-panel {
     scroll-behavior: auto !important;
   }
 }
+
+/* Phase 7 shell and table affordances. Resting border token deliberately held. */
+.phase7-nav a { padding: 0.6rem 0; white-space: nowrap; border-bottom: 2px solid transparent; color: rgb(var(--text-muted)); }
+.phase7-nav a.active { color: rgb(var(--text-primary)); border-bottom-color: currentColor; }
+.phase7-nav a:focus-visible, .identifier-link:focus-visible, .navigable-row:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; }
+.phase7-content > router-outlet + * > :first-child { margin-inline: auto; width: 100%; max-width: 1400px; }
+.phase7-content.phase7-form > router-outlet + * > :first-child { max-width: 720px; }
+.phase7-content app-session-gate > form, [data-role="session-setup"] app-session-gate > form { max-width: 720px; margin-inline: auto; }
+.phase7-content #add-person { max-width: 720px; }
+.phase7-content tbody tr:hover { background-color: rgb(var(--surface-sunken)); }
+.navigable-row { cursor: pointer; }
+.identifier-link { font-family: ui-monospace, monospace; color: rgb(var(--text-primary)); text-decoration: underline; text-decoration-color: rgb(var(--border-strong)); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.storage-path { display: none; }
+.storage-chip:hover .storage-path, .storage-chip:focus .storage-path { display: block; }
+.storage-chip:focus-visible { outline: 2px solid rgb(var(--focus-ring)); }
+
+.override-notice { border-left: 3px solid rgb(var(--border-strong)); }
+.anomaly-notice { border: 1px dashed rgb(var(--border-strong)); }
+
+.phase7-content app-chat-panel > div:first-child { max-width: 68ch; }

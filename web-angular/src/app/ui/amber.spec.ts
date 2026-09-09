@@ -1,39 +1,6 @@
-// ---------------------------------------------------------------------------
-// THE AMBER CHECK. docs/UI_SYSTEM.md §10.7, and §8's invariant table.
-// ---------------------------------------------------------------------------
-//
-// §4.2.1 reserves amber for exactly two meanings:
-//
-//   "This needs an answer from you"    the warning role, on unanswered rows and
-//                                      list items, incomplete session counters
-//                                      and /check findings
-//   "This is not the real registry"    warning-fill, the storage chip, and
-//                                      nowhere else
-//
-// "Nothing else may take amber", it says, "and §8's invariant table now checks
-// it."
-//
-// ---------------------------------------------------------------------------
-// AND IT WAS ALREADY FALSE WHEN IT WAS WRITTEN, WHICH IS WHY THIS IS A BASELINE
-// ---------------------------------------------------------------------------
-// PHASE5_PRECHECK.md's census, run before any phase-5 code, found 43 amber
-// utility occurrences at 26 sites in 15 files carrying FIVE meanings. Seventeen
-// of the 26 sat outside both permitted meanings, and every one of those was in
-// the content area -- so §6's justification for the unanswered state, "the only
-// amber in the content area", was never true.
-//
-// A spec asserting §4.2.1 as written would have failed on the day it was added
-// and would then have been deleted or exempted into meaninglessness, which is
-// how a guard becomes furniture. This one pins the census instead:
-//
-//   * every amber site must be CLASSIFIED, here, by whoever wrote it
-//   * a new amber site fails until somebody says which meaning it carries
-//   * a classified site that DISAPPEARS also fails, so the list cannot rot
-//
-// That makes the real cost visible -- five meanings, printed, every run --
-// without pretending the rule already holds. Re-pointing the seventeen is four
-// separate design decisions across two frozen forms, and it is recorded in
-// §16 as undecided rather than swept.
+// Phase 7: overrides, anomaly hints and liabilities use neutral treatments.
+// Amber's two remaining meanings are classified below. This guard checks files,
+// not semantics within a file; reviewers still need to classify each new use.
 
 /**
  * Every non-spec source under src/app, as TEXT.
@@ -63,25 +30,33 @@ const GROUPS: { dir: string; raw: Record<string, string> }[] = [
   {
     dir: 'src/app/registry/',
     raw: (import.meta as unknown as RawGlob).glob('../registry/*.ts', {
-      query: '?raw', import: 'default', eager: true,
+      query: '?raw',
+      import: 'default',
+      eager: true,
     }),
   },
   {
     dir: 'src/app/components/',
     raw: (import.meta as unknown as RawGlob).glob('../components/*.ts', {
-      query: '?raw', import: 'default', eager: true,
+      query: '?raw',
+      import: 'default',
+      eager: true,
     }),
   },
   {
     dir: 'src/app/core/',
     raw: (import.meta as unknown as RawGlob).glob('../core/*.ts', {
-      query: '?raw', import: 'default', eager: true,
+      query: '?raw',
+      import: 'default',
+      eager: true,
     }),
   },
   {
     dir: 'src/app/ui/',
     raw: (import.meta as unknown as RawGlob).glob('./*.ts', {
-      query: '?raw', import: 'default', eager: true,
+      query: '?raw',
+      import: 'default',
+      eager: true,
     }),
   },
 ];
@@ -126,7 +101,8 @@ function code(text: string): string {
   );
 }
 
-const AMBER = /\b(?:bg|text|border|ring|decoration|divide|fill|stroke|shadow|outline|from|to|via)-warning-(?:bg|fg|strong|line|fill)\b/;
+const AMBER =
+  /\b(?:bg|text|border|ring|decoration|divide|fill|stroke|shadow|outline|from|to|via)-warning-(?:bg|fg|strong|line|fill)\b/;
 
 /** Every `file:line` in src/app that sets an amber utility. */
 function sites(): string[] {
@@ -156,72 +132,19 @@ function sites(): string[] {
  * no-price span, and the roster's own row state, which never existed).
  */
 const NEEDS_AN_ANSWER = [
-  'src/app/ui/certainty.ts',        // the unanswered state, at value scale
-  'src/app/ui/surface.ts',          // the unanswered ROW -- §3.2's scale
-  'src/app/registry/today-board.ts',        // incomplete session counters x3
+  'src/app/ui/certainty.ts', // the unanswered state, at value scale
+  'src/app/ui/surface.ts', // the unanswered ROW -- §3.2's scale
+  'src/app/registry/today-board.ts', // incomplete session counters x3
   'src/app/registry/verification-panel.ts', // /check findings and notes
-  'src/app/registry/session-required.ts',   // no session: answer the gate first
+  'src/app/registry/session-required.ts', // no session: answer the gate first
 ];
 
 /** PERMITTED, meaning 2: "this is not the real registry". §12.2's chip. */
-const NOT_THE_REAL_REGISTRY = [
-  'src/app/registry/session-bar.ts',
-];
-
-/**
- * MEANING 3, unpermitted: "you are overriding a refusal".
- *
- * Four files. `calving-form` and `precision-date` sit on the frozen forms, so
- * B1/B2 reach them and phase 5 may not move them even if it wanted to.
- */
-const OVERRIDING_A_REFUSAL = [
-  'src/app/registry/event-form.ts',
-  'src/app/registry/correction-form.ts',
-  'src/app/registry/calving-form.ts',
-  'src/app/registry/precision-date.ts',
-];
-
-/** MEANING 4, unpermitted: "this looks unlike its neighbours". */
-const UNLIKE_ITS_NEIGHBOURS = [
-  'src/app/registry/milking-roster.ts',   // out-of-band litres
-  'src/app/registry/payroll-run.ts',      // expected litres != taken
-  'src/app/registry/duplicate-warning.ts',// a possible duplicate, on /animals/new
-];
-
-/** MEANING 5, unpermitted: "this is a liability, or a missing agreement". */
-const A_LIABILITY = [
-  'src/app/registry/person-detail.ts',  // negative balance
-  'src/app/registry/people-list.ts',    // negative balance
-  'src/app/registry/event-list.ts',     // "not billed"
-];
-
-/*
- * ---------------------------------------------------------------------------
- * ONE ENTRY HAS BEEN DELETED FROM THIS FILE, AND THE TEST BELOW IS WHY
- * ---------------------------------------------------------------------------
- * The census originally carried a sixth list, `HALF_MIGRATED`, holding
- * `src/app/components/message.ts` -- whose `agentClass()` returned
- * `bg-warning-bg text-agent-vendor-fg border-agent-vendor-line` for the vendor
- * arm. §4.3 states that "vendor has left amber, which was the point: a vendor
- * answer used to wear the same colour as an unanswered milking row". The
- * foreground and the border had moved to the agent ramp in `ed6235a`; the
- * BACKGROUND had not, so the vendor chip still rendered on the warning role in
- * the chat's content area -- the one element in the app mixing a categorical
- * ramp with a role, and the one place §4.2.1 says amber may not be.
- *
- * Phase 6b re-pointed it, and "still has amber in every file the census names"
- * FAILED on the next run, naming the file and the list it was in. That is the
- * rot-check doing the job it exists for: the record cannot go on claiming a cost
- * the app no longer pays, which is how §4.2.1 came to describe a rule it did not
- * have. The line is gone rather than commented out, and the history is here.
- */
+const NOT_THE_REAL_REGISTRY = ['src/app/registry/session-bar.ts'];
 
 const CLASSIFIED = new Map<string, string[]>([
   ['needs an answer from you (PERMITTED)', NEEDS_AN_ANSWER],
   ['not the real registry (PERMITTED)', NOT_THE_REAL_REGISTRY],
-  ['overriding a refusal', OVERRIDING_A_REFUSAL],
-  ['unlike its neighbours', UNLIKE_ITS_NEIGHBOURS],
-  ['a liability or missing agreement', A_LIABILITY],
 ]);
 
 describe('amber — §4.2.1 and §10.7', () => {
@@ -250,21 +173,9 @@ describe('amber — §4.2.1 and §10.7', () => {
     expect(stale).toEqual([]);
   });
 
-  it('is carried by exactly two permitted meanings and three unpermitted ones', () => {
-    // THE NUMBER THAT MATTERS, and it may go down but not up.
-    //
-    // §4.2.1 permits two meanings. PHASE5_PRECHECK.md's census found five, so
-    // three are unpermitted: an override, an anomaly hint, and a liability or
-    // missing agreement. Each is a real distinction that deserves its own name
-    // rather than a sweep onto amber, and §16 carries them as undecided.
-    //
-    // It was four until phase 6b. The fourth was never a MEANING -- it was
-    // message.ts's half-migrated vendor chip, which is a bug with an owner
-    // rather than a design decision, and counting it alongside the three
-    // flattered the other three by comparison. It is fixed and the entry is
-    // gone; see the note above A_LIABILITY.
+  it('is carried by exactly the two permitted meanings', () => {
     const unpermitted = [...CLASSIFIED.keys()].filter((k) => !k.includes('PERMITTED'));
-    expect(unpermitted.length).toBe(3);
+    expect(unpermitted.length).toBe(0);
     expect([...CLASSIFIED.keys()].filter((k) => k.includes('PERMITTED')).length).toBe(2);
   });
 

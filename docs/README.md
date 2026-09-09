@@ -9,7 +9,7 @@ Two kinds of document live here, and they have opposite lifecycles.
   later change gets its own record, and the older one gets a banner pointing at it.
 
 Everything in [`archive/`](archive/) is superseded and kept only for its reasoning.
-Nothing there describes anything that currently exists.
+Those documents are not current specifications; some of their proposals were later implemented with changes.
 
 ---
 
@@ -23,7 +23,7 @@ Nothing there describes anything that currently exists.
 | Work on the real-animal records | [REGISTRY.md](REGISTRY.md) |
 | Work on milk sales, home use, buyer balances | [REGISTRY_SALES.md](REGISTRY_SALES.md) |
 | Work on employees, packages and wages | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) |
-| Work on the frontend | [ANGULAR_PORT.md](ANGULAR_PORT.md) |
+| Work on the frontend | [UI_SYSTEM.md](UI_SYSTEM.md), then [ANGULAR_PORT.md](ANGULAR_PORT.md) for the chat state model |
 | Find out why a URL looks the way it does, or what `/` shows | [REGISTRY_PAYROLL.md §12.3–§12.6](REGISTRY_PAYROLL.md#123-navigation-and-url-structure--the-change-that-forced-both-decisions) |
 | Change the wire protocol | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) |
 | Know what is still unfinished | [OPEN.md](OPEN.md) |
@@ -41,7 +41,7 @@ Nothing there describes anything that currently exists.
 | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) | The AG-UI/SSE protocol, custom event channels, the interrupt/resume boundary, the React archival decision | Deep |
 | [REGISTRY.md](REGISTRY.md) | Real-animal records: schema, migrations, append-only guarantee, calving transaction, projections, CLI, HTTP surface, entry UI, invariants | Deep. The single most load-bearing document in the repo |
 | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | The entry surface — screens, the change list with build status, the defaults rule, the five-animal trial | Deep |
-| [UI_SYSTEM.md](UI_SYSTEM.md) | The design system, end to end: what was planned, what validation corrected, what is built, and what is left. Token vocabulary in both modes, fifteen primitives, the certainty axis, the trial gate and the one contamination accepted. Phases 0–4 built; 5–7 not | Deep, and the single source — the plan and the validation records were folded in and deleted. Every count measured at `dc0a160` |
+| [UI_SYSTEM.md](UI_SYSTEM.md) | The design system, end to end: what was planned, what validation corrected, what is built, and what is left. Token vocabulary in both modes, fifteen primitives, the certainty axis, the trial gate and four recorded contaminations. Phases 0–7 built; real-farm trial outstanding | Deep, and the single source — the plan and the validation records were folded in and deleted. Historical counts identify their baseline commits; current verification is in §9.4 |
 | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milk/milking` roster | Deep |
 | [REGISTRY_SALES.md](REGISTRY_SALES.md) | Milk sales, home use and the buyer ledger: destinations, effective-dated prices in 40-litre lots, the daily dispatch sheet, the reconciliation, migrations 4–5 | Deep |
 | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) | Labour: people and engagements, effective-dated packages with in-kind benefits, dihari, the monthly run, the wage ledger, migrations 6–7. Also §12.3–§12.6: the URL structure, the day board at `/`, and why reads need no recording session | Deep |
@@ -67,7 +67,7 @@ Each maps to a git tag. Read them for *why*, not for *what is true now*.
 | 7 · step 1 | [cycle-7-live-camera-validation.md](cycle-7-live-camera-validation.md) | `v0.9.0` | Live Frigate camera, payload deltas measured against Cycle 4's assumptions |
 | 7 · FU-3 | [Cycle7-fu3-double-take-validation.md](Cycle7-fu3-double-take-validation.md) | `v0.10.0` | Double Take + DeepStack on arm64, three blocking issues resolved |
 | 8 | [REGISTRY.md](REGISTRY.md) | `v0.11.0`, `v0.11.1` | The animal registry: schema, calving transaction, HTTP surface (also reference — see above) |
-| 8 · entry | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | `v0.12.0`…`v0.15.0` | The entry surface, built in three passes. Items 7–9 and 6b are still below the cut line |
+| 8 · entry | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | `v0.12.0`…`v0.15.0` | The entry surface, built in three passes. Items 7, 8 and 6b remain open; item 9 is partly built |
 | 8 · yield | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | untagged (`46d29c7`) | Per-animal milk yield, migration 3 |
 | 9 | [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) | untagged (`f3262d7`) | Registry read tools for the agent, and the six evals that matter |
 | — · sales | [REGISTRY_SALES.md](REGISTRY_SALES.md) | untagged | Milk sales, home use and the buyer ledger, migrations 4–5 (also reference — see above) |
@@ -108,9 +108,9 @@ commit, or the reference goes dead silently. That is why the names here are
 inconsistent (`SCREAMING_SNAKE`, `cycle-7-...`, `Cycle7-fu3-...`) and why they
 have been left that way.
 
-**Every document carries its status in the first ten lines** — complete and
-tagged, partially built with the cut line named, or superseded with a banner.
-A new document without one is incomplete.
+**Decision and implementation documents should state their status near the top** —
+complete with a baseline, partially built with remaining work named, or superseded
+with a pointer. Reference guides and indexes should state their scope instead.
 
 **Records get banners, not edits.** When a later cycle changes something a closed
 record describes, the record gets a pointer at the top ("Extended by Cycle 5…")

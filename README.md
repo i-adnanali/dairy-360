@@ -15,9 +15,23 @@ The multi-agent design (and what was deliberately *not* built — no second
 service/A2A, no orchestrator LLM, no auth) is documented in
 [docs/MULTI_AGENT.md](docs/MULTI_AGENT.md).
 
-![Welcome state of the dairy agent chat UI](docs/images/welcome_state.png)
-![Digest table returned by the agent](docs/images/digest_table.png)
-![Milk-yield chart with hover interaction](docs/images/chart_hover_demo.gif)
+The registry brings the day's outstanding work, animal histories, and milk
+recording into one workspace. These screenshots use the in-memory demo harness.
+
+**Today — see what still needs recording.**
+
+![Today board with outstanding milking, dispatch, and payroll work](docs/images/phase7/today.light.png)
+
+**Herd — browse status and dates without hiding uncertainty.**
+
+![Herd register in dark mode, including approximate birth dates and departed animals](docs/images/phase7/herd.dark.png)
+
+**Milking — record each animal's answer explicitly.**
+
+![Milking roster with per-animal recording controls](docs/images/phase7/milking.light.png)
+
+[View every application screen in light and dark mode](docs/images/phase7/README.md),
+including detail pages, entry forms, payroll, and the assistant.
 
 **Just want to see it run?** `npm run harness:app` — [one command, no key, no
 database](#just-looking-one-command-no-key-no-database).
@@ -72,8 +86,8 @@ per-animal milk yield is
 [docs/REGISTRY_MILKING.md](docs/REGISTRY_MILKING.md), the commercial half — who
 buys the milk, at what rate, and what they owe — is
 [docs/REGISTRY_SALES.md](docs/REGISTRY_SALES.md), and the people who work the
-herd are [docs/REGISTRY_PAYROLL.md](docs/REGISTRY_PAYROLL.md). Those five are
-the only description of any of it; this README does not restate them.
+herd are [docs/REGISTRY_PAYROLL.md](docs/REGISTRY_PAYROLL.md). Those guides own the domain behavior; [UI_SYSTEM.md](docs/UI_SYSTEM.md)
+owns the current presentation and shell.
 
 It has grown **three axes**, and the numbering says so: the animal record, the
 counterparties milk goes to, and the people the farm employs. Only the first is
@@ -97,7 +111,8 @@ salaried month because both are a dated range, and what is owed is the **same
 ledger as the buyers' with the sign the other way up**. An advance needs no
 flag: the balance simply goes negative and the next period walks it back.
 
-The agent reads all of that, and only reads it: three tools over the herd
+The agent has read-only tools over the herd and milk sales; it has no payroll
+tools. There are three tools over the herd
 (`list_registry_animals`, `get_registry_animal`, `get_calving_intervals`) and
 four over the sales side (`list_buyers`, `get_buyer_balance`, `get_dispatches`,
 `get_milk_reconciliation`). **Reads only** — real records are still entered
@@ -223,7 +238,7 @@ blocking items, known-safe defects, deferred capability, and undecided questions
 - **Frontend (Angular):** Angular 22 standalone + zoneless, signals, Tailwind CSS,
   `ng2-charts` (Chart.js), `marked` + `DOMPurify` for markdown.
 - **Model:** default `claude-sonnet-4-6` (override with `ANTHROPIC_MODEL`); falls
-  back to the latest Sonnet if the configured model string is rejected.
+  back once to `claude-sonnet-4-5` on a 400/404 before any output is emitted.
 
 > **Node version:** the **Angular 22** frontend requires Node
 > `^22.22.3 || ^24.15.0 || >=26`. Use a satisfying version (e.g. via `nvm`).
@@ -292,8 +307,8 @@ something is about to be written, and the write control says so where it stands.
 **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) is the verified long form of setup**
 — the Node floor and what ignores it, why `.env` is copied twice, the two run
 loops and how to tell which one you are in, the registry CLI, the fresh-clone
-path, and what a skipped test suite does and does not prove. Every command in it
-was run; the handful that could not be are marked unverified.
+path, and what a skipped test suite does and does not prove. Its verification
+dates distinguish measured results from current instructions and unverified steps.
 
 The two files own different halves and neither contains the other: the **registry
 CLI** (`registry:add`, `registry:calve`, `registry:event`,
@@ -348,8 +363,9 @@ npm test -w web-angular      # Vitest unit tests for the frontend
 ```
 
 > `npm test -w server` needs no DB file and no API key — the registry suites run
-> against `:memory:` and write nothing to disk. The **live-model regression
-> suites** (`test:regression`, and the `:core` / `:cap` / `:fallback` splits) do
+> against `:memory:`; backup tests also create and clean up temporary files.
+> They do not use the live database. The **live-model regression
+> suites** (`test:regression`, and the `:core` / `:cap` / `:fallback` / `:registry` splits) do
 > need a key and are documented in [docs/DEVELOPMENT.md § 5](docs/DEVELOPMENT.md);
 > a skipped run is not a pass.
 

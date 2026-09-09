@@ -1,8 +1,8 @@
 # Archive — superseded, kept for the reasoning
 
-Nothing in this directory describes anything that currently exists. Each file is
-here because the reasoning that turned out to be **wrong** is the useful part of
-the record — what was believed, what evidence corrected it, and what that cost.
+These are superseded proposals, not current specifications. Some ideas were
+implemented with changes; others were rejected. The record preserves what was
+believed, what evidence corrected it, and what that cost.
 Do not implement from any of them.
 
 Every file carries a banner at the top saying what supersedes it. If one ever

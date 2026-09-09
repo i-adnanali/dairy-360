@@ -33,22 +33,27 @@ import { Button } from '../ui/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Button, ChipGroup, HelpText, PageHeading, SectionLabel, TextInput],
   template: `
-    <form class="mx-auto max-w-lg rounded-2xl border border-line bg-surface-raised p-6"
-      data-role="gate" (submit)="onSubmit($event)">
+    <form
+      class="mx-auto max-w-lg rounded-2xl border border-line bg-surface-raised p-6"
+      data-role="gate"
+      (submit)="onSubmit($event)"
+    >
       <h2 appPageHeading>Before entering anything</h2>
       <p appHelp class="mt-1">
-        Both of these go on every record you write in this session. They are asked once rather
-        than on each form, and they are not defaulted — a mislabelled source reads exactly like a
-        correct one.
+        Both of these go on every record you write in this session. They are asked once rather than
+        on each form, and they are not defaulted — a mislabelled source reads exactly like a correct
+        one.
       </p>
 
       <div class="mt-5">
-        <div appSectionLabel legend>
-          Where is this coming from?
-        </div>
+        <div appSectionLabel legend>Where is this coming from?</div>
         <app-chip-group
-          name="source-form" label="Where is this coming from?" [vertical]="true"
-          [options]="forms" [value]="form()" (changed)="form.set($any($event))"
+          name="source-form"
+          label="Where is this coming from?"
+          [vertical]="true"
+          [options]="forms"
+          [value]="form()"
+          (changed)="form.set($any($event))"
         />
       </div>
 
@@ -56,8 +61,15 @@ import { Button } from '../ui/button';
         <span class="mb-1 block text-xs font-medium uppercase tracking-wide text-content-muted">
           Who is typing?
         </span>
-        <input data-role="recorded-by" [value]="who()" (input)="who.set($any($event.target).value)"
-          placeholder="a stable identifier, not a display name" appInput density="comfortable" class="w-full" />
+        <input
+          data-role="recorded-by"
+          [value]="who()"
+          (input)="who.set($any($event.target).value)"
+          placeholder="a stable identifier, not a display name"
+          appInput
+          density="comfortable"
+          class="w-full"
+        />
         <span class="mt-1 block text-xs text-content-muted">
           Recorded on every event as <span class="font-mono">recorded_by</span>. Whoever remembered
           it, if this is recall.
@@ -73,30 +85,31 @@ import { Button } from '../ui/button';
            where we could not find out. -->
       @if (target.probed()) {
         <div class="mt-5 border-t border-line-subtle pt-4" data-role="target">
-          <div appSectionLabel legend>
-            Where is this going?
-          </div>
+          <div appSectionLabel legend>Where is this going?</div>
 
           @switch (target.kind()) {
             @case ('harness') {
               <p class="text-sm text-content-secondary" data-role="target-harness">
                 <span class="font-medium text-content-primary">Harness</span> —
-                <span class="font-mono text-xs">{{ target.storage() }}</span>. Fixture data,
-                discarded when that process exits. Nothing you enter here is kept.
+                <span class="font-mono text-xs">{{ target.storage() }}</span
+                >. Fixture data, discarded when that process exits. Nothing you enter here is kept.
               </p>
             }
             @case ('real') {
               <p class="text-sm text-content-secondary" data-role="target-real">
                 <span class="font-medium text-content-primary">The real registry</span> —
-                <span class="font-mono text-xs">{{ target.storage() }}</span>. Every record you
-                enter is permanent: corrections are new events, and nothing is deleted.
+                <span class="font-mono text-xs">{{ target.storage() }}</span
+                >. Every record you enter is permanent: corrections are new events, and nothing is
+                deleted.
               </p>
             }
             @case ('unknown') {
               <p class="text-sm text-content-secondary" data-role="target-unknown">
-                {{ target.reachable()
-                  ? 'A server answered but would not say which database it holds — an older build, or something else serving /api. Treated as real, because it cannot be ruled out.'
-                  : 'No server answered. Nothing can be written until one does.' }}
+                {{
+                  target.reachable()
+                    ? 'A server answered but would not say which database it holds — an older build, or something else serving /api. Treated as real, because it cannot be ruled out.'
+                    : 'No server answered. Nothing can be written until one does.'
+                }}
               </p>
             }
           }
@@ -105,9 +118,16 @@ import { Button } from '../ui/button';
                because "we could not tell" must not resolve in the permissive
                direction. Not asked on the harness: see target.ts. -->
           @if (needsAck()) {
-            <label class="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-line bg-surface-raised px-3 py-2 text-sm">
-              <input type="checkbox" data-role="acknowledge-target" class="mt-0.5"
-                [checked]="acked()" (change)="acked.set($any($event.target).checked)" />
+            <label
+              class="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-line bg-surface-raised px-3 py-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                data-role="acknowledge-target"
+                class="mt-0.5"
+                [checked]="acked()"
+                (change)="acked.set($any($event.target).checked)"
+              />
               <span class="text-content-heading">
                 I mean to write to this database. This is not the harness.
               </span>
@@ -116,8 +136,15 @@ import { Button } from '../ui/button';
         </div>
       }
 
-      <button type="submit" data-role="start" [appButtonDisabled]="!canStart()" appButton class="mt-5 w-full"
-      >Start entering</button>
+      <button
+        type="submit"
+        data-role="start"
+        [appButtonDisabled]="!canStart()"
+        appButton
+        class="mt-5 w-full"
+      >
+        {{ session.ready() ? 'Update recording session' : 'Start entering' }}
+      </button>
     </form>
   `,
 })
@@ -148,8 +175,10 @@ export class SessionGate {
     { value: 'import', label: 'Import', hint: 'from another system' },
   ];
 
-  protected readonly form = signal<SourceForm | null>(null);
-  protected readonly who = signal('');
+  protected readonly form = signal<SourceForm | null>(
+    this.session.setupOpen() ? this.session.sourceForm() : null,
+  );
+  protected readonly who = signal(this.session.setupOpen() ? this.session.recordedBy() : '');
   protected readonly acked = signal(false);
 
   /**
@@ -169,9 +198,7 @@ export class SessionGate {
 
   protected readonly canStart = computed(
     () =>
-      this.form() !== null &&
-      this.who().trim().length > 0 &&
-      (!this.needsAck() || this.acked()),
+      this.form() !== null && this.who().trim().length > 0 && (!this.needsAck() || this.acked()),
   );
 
   constructor() {

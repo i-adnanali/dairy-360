@@ -7,6 +7,11 @@ document for the system itself.
 
 Measured against `521a965` (working tree clean apart from `docs/UI_SYSTEM.md`).
 
+**Historical snapshot:** the figures and source line numbers below belong to
+that baseline. UI phases 5–7 and the light approximate-token fix have since
+changed the rendering and census. For current behavior and remaining failures,
+see [UI_SYSTEM.md](docs/UI_SYSTEM.md), especially §§4.2.1, 4.5 and 9.4.
+
 **Headline:** phase 5 is not invalidated, but **check 2 falsifies a premise
 §6 and §4.2.1 both rest on**, and **check 1 finds that three of phase 5's own
 five states fail WCAG AA on every surface in both modes.** Neither is a reason

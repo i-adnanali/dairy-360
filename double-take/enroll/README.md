@@ -3,7 +3,7 @@
 Put **one** image here, named `synthetic_1.jpg` (or `.png`), before running
 `npm run enroll:synthetic -w server`.
 
-Everything else in this directory is gitignored. The image is not committed:
+Files other than this README and `PROVENANCE.txt` are gitignored. The image is not committed:
 this repo is public, and a face image in git is a face image in git even when
 the face is machine-generated.
 

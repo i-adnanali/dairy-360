@@ -1,35 +1,18 @@
 # UI system — the design system
 
-*Status: **phases 0–6 built and verified; 7 is not.** Specified against
-`816fe67`, validated against the code twice, and implemented over nine commits
-(`ef52fd4`…`d9c0057`). Frontend **328/328**, server **726/726**, production build
-clean. Both light and dark rendered on all fourteen screens, and the five
-certainty states proved in **greyscale**.*
+*Status: **phases 0–7 built**. Phase 7 was explicitly authorized before the
+five-animal trial; that trial has not run. The original phase-0–6 measurements
+below are historical, tied to their named commits. Phase 7's implementation and
+verification are recorded in §9.4. The resting `--border-default` token remains
+unchanged by explicit instruction.*
 
-*This is the **only** document for this work. It replaces the original plan, a
-separate adversarial-validation file, and the per-phase implementation records —
-all three were folded in here and deleted, because three documents disagreeing
-about the same counts is how the counts went wrong the first time. Every figure
-below was measured against the tree at `d9c0057`, not carried over.*
+*This is the reference for the UI system. PHASE5_PRECHECK.md is the historical
+contrast and amber census, not a description of the current tree. §§12–15 now
+describe implemented surfaces and conventions. §16 separates remaining
+verification debt and farm-use questions from completed work.*
 
-*Three items remain **BLOCKED** on the five-animal trial (§3). One contamination
-of that trial was **knowingly accepted** and is recorded in §3.4 — read it before
-reading the trial report. A ninth prediction is pre-registered in §3.5.*
-
-*§13 is **built** (phase 6b). §§12, 14 and 15 remain **specified and unbuilt**:
-the shell, four primitive gaps and the copy rules. They were written after the
-phase-4 renders and describe the end state the built work is a foundation for.*
-
-*Two documents accompany this one and neither replaces it.
-[PHASE5_PRECHECK.md](../PHASE5_PRECHECK.md) at the repo root holds the three
-measurements taken before phase 5 — the contrast sweep, the amber census, and
-the answer on whether §6's five states are renderable — because they are a
-snapshot of one moment rather than part of the system. Everything they concluded
-that outlives that moment has been folded in below.*
-
-**Reading order for a new session:** §2 for where things stand, §3 for what you
-may not touch, §8 for what will break if you are careless, §9 for the work,
-§10 for how to prove it, §12, §14 and §15 for what is specified but unbuilt.
+**Reading order:** §2 for the build history, §3.4 for the changed trial baseline,
+§8 for invariants, §9.4 for phase 7, and §§12–16 for the current system.
 
 ---
 
@@ -44,8 +27,8 @@ The design idea is that **certainty is the app's primary visual variable.** Ever
 screen distinguishes measured from approximate, observed from recalled, answered
 from deliberately-blank — and all of them looked the same. §6 gives that axis a
 treatment, and **it is built**: everything in phases 1–4 existed to make it
-expressible, and phase 5 spent it. What remains unbuilt is the chrome around it
-(§12) and four primitive gaps (§14).
+expressible, and phase 5 spent it. Phase 7 adds the chrome around it
+(§12) and the four primitive refinements (§14).
 
 **Presentation is not decided entirely in templates**, which is the fact that
 made the migration larger than it looked. Six TypeScript methods build class
@@ -69,7 +52,7 @@ All six were migrated in `ed6235a`.
 | **5** | Certainty vocabulary — §6, five states | **done** — `d36303e` |
 | **6a** | Chat into the shell: the route move and the height fix | **done** — `67fc15a` |
 | **6b** | Chat as a docked assistant panel — §13 | **done** — `d9c0057` |
-| **7** | B1, B2, B3; then the shell — §12 | **blocked** on the trial |
+| **7** | Shell, palette, status and keyboard refinements — §§12–15 | **built**, before the trial by explicit user instruction |
 
 **Phases 3 and 4 ran in the opposite order to the plan.** The recolour was what
 the work was for; dark mode is larger and separable. Nothing depended on the
@@ -84,10 +67,9 @@ grey, because `chip-group.chipClass()` still said `bg-farm-600` and a ramp canno
 tell a brand fill from muted text when both are farm-600. `ed6235a` moved all of
 them and deleted the ramp's last consumer.
 
-**Phase 6 is split.** 6a is a bug fix — the panel renders outside the shell today
-and would collapse inside it. 6b is design work with its own spec. As one commit
-they would produce a broken intermediate that is neither the old route nor the
-new panel.
+**Phase 6 was split.** 6a moved the chat route into the shell and fixed its
+height; 6b introduced the docked panel. Separating them kept the route fix
+independently reviewable.
 
 ### 2.1 What was measured, before and after
 
@@ -124,15 +106,18 @@ and no primitive collapses layout.
 certainty properties were declared in phase 1 and phase 5 simply consumed them,
 and the fifth state took `--text-disabled` rather than a name of its own.
 
-§12.5 still moves a subset: `mx-auto max-w-4xl space-y-6` is one string on every
-screen, and per-screen widths replace it with three.
+§12.5 subsequently changed the content measures. The baseline above predates
+those widths and should not be read as a census of the Phase 7 source.
 
 ---
 
-## 3. BLOCKED — awaiting the five-animal trial
+## 3. Original trial gates — phase 7 authorized before the trial
 
-Three items, and only these. Everything else proceeds. The predictions are
-`REGISTRY_ENTRY_UX.md` §11.
+These were the three gates for phases 0–6. The user explicitly authorized
+phase 7 before the trial; §3.4 records what that changes in interpreting it.
+The original predictions remain in `REGISTRY_ENTRY_UX.md` §11. Field order and
+the identical date-control treatment remain intact; the chrome, content widths,
+focus treatment and neutral warning treatments have changed.
 
 | # | Blocked | Prediction | Rule until the trial reports |
 |---|---|---|---|
@@ -243,6 +228,22 @@ was written*. The prediction's substance is friction from tabbing through blank
 optional fields, and one extra stop at the end of the sequence does not create
 that — but the number moved, and the comparison has to stay legible.
 
+**Phase 7 adds a fourth, explicitly accepted contamination.** The user asked to
+implement it before the trial. The five-section shell, storage/session chips,
+section actions, 720px form measure, input focus shadow, palette and neutral
+notice treatments change the surroundings and navigation of both entry forms.
+The write-log tokens and resting input border are unchanged. No field was added,
+removed or reordered; both date controls retain identical treatment.
+
+Predictions 1–3 and the single-date-field prediction now measure this layout;
+4 can be affected by the dam selector's focus treatment; 5 by the changed
+surrounding chrome; 6 is no longer a test of a missing shortcut because
+Cmd/Ctrl+Enter now submits the focused form. Prediction 9's refused-submit
+behaviour remains. Do not score a null result as validation of the old layout.
+The optional markers already existed in `IdentifierInput` and the form labels;
+phase 7 does not claim to have introduced them. The stronger resting-border
+proposal remains held separately and is not this contamination.
+
 ### 3.5 A ninth prediction, pre-registered
 
 §3.4's change may have created a friction none of the eight cover, so it is
@@ -340,26 +341,22 @@ than meaning, and both now pass **vacuously** — the literals are gone. Keeping
 danger on red and warning on amber is a design choice defended on convention, not
 a tested invariant. Whoever changes it should know the tests will not catch them.
 
-#### 4.2.1 Amber is reserved for two meanings — and carries five
+#### 4.2.1 Amber is reserved for two meanings
 
-§6 called the unanswered state "the only amber on the screen", which was already
-false when written: the harness banner is `bg-amber-200`
-([session-bar.ts:27](../web-angular/src/app/registry/session-bar.ts#L27)), pinned
-by [target.spec.ts](../web-angular/src/app/registry/target.spec.ts). Every
-harness screen had two ambers before phase 5 proposed a third — and the census
-below shows that "two" was itself a large undercount.
+PHASE5_PRECHECK.md §2 measured five meanings before phase 5. Phase 7 removes
+amber from overrides, anomaly hints, and balances. Overrides retain their reason
+and a neutral leading rule; anomaly notices retain text and a dashed boundary;
+liabilities remain named amounts such as “in advance”, in neutral text. These
+facts are not unanswered questions and no longer borrow the warning role.
 
 | Meaning | Token | Where |
 |---|---|---|
 | **This needs an answer from you** | `warning` role | unanswered rows and list items, incomplete session counters, `/check` findings |
-| **This is not the real registry** | `warning-fill` | the storage chip in the header (§12.2), and nowhere else |
+| **This is not the real registry, or the target is unknown** | `warning-fill` | the storage chip in the header (§12.2) |
 
-They coexist because the second is confined to one element in the **chrome** and
-never appears in the content area. **These are the two intended meanings, not
-the five currently in use.** The override, anomaly and liability meanings remain
-recorded debt (§16; PHASE5_PRECHECK.md §2). §8 points to the classified baseline
-check, not an enforcement of the two-meaning reservation. `danger`
-needs no equivalent reservation: an error panel is self-announcing.
+`ui/amber.spec.ts` classifies the remaining source files into these two groups.
+It rejects unclassified files and stale entries, not every new use inside an
+already classified file. Reviewers must still check each use's meaning.
 
 ### 4.3 Categorical ramp — agents
 
@@ -415,11 +412,9 @@ and **no fifth property was added** — see §2.1.
 `--certainty-absent` in both modes, which is the correct relationship: an absent
 answer is quieter than a given one, and no answer at all is quieter still.
 
-**One collision this created, and it is live.** `--text-disabled` also dresses a
-SUPERSEDED event in the timeline (`event-list.ts`), which is a statement about
-the record rather than about the certainty of anything in it. The two are told
-apart by the strike-through, which no certainty state has — adequate, and not the
-same as correct. §14.1's `ended` tone is the real fix and it is phase 7.
+**Superseded events have their own treatment.** Their date text is
+`content-subtle` with a strike-through, and the `ended` badge carries a dashed
+outline. They no longer borrow the no-record text token (§14.1).
 
 **Light approximate is now `#6C6A64` (108, 106, 100).** It keeps the warm neutral
 ramp between `--text-muted` (`#63615C`) and `--text-subtle` (`#82807A`), while
@@ -557,12 +552,12 @@ would undo that in the one place a person actually looks.
 | **Approximate** — estimated, month/year precision, recalled | `certainty-approx`, `border-b border-dotted` in `certainty-rule`, a qualifier naming the imprecision (§6.1) — **and, as built, `font-mono tabular-nums` too; see below** |
 | **Deliberately absent** — an answer was given: `not_measured`, `nothing taken`, nobody observed | `certainty-absent`, *italic*, always **words** |
 | **No record** — nothing was ever entered | `content-disabled`, roman, an en dash `–` |
-| **Unanswered** — still required | The `warning` role, with a row-scale highlight to make skipped rows findable; other amber meanings remain in the content area (§4.2.1) |
+| **Unanswered** — still required | The `warning` role, with a row-scale highlight to make skipped rows findable (§4.2.1) |
 
 The earlier rule "always words, never a dash" becomes: **an answer is always
 words; only the absence of an answer is a dash.**
 
-**ONE DEVIATION, TAKEN DELIBERATELY.** The table above lists `font-mono
+**ONE DEVIATION, TAKEN DELIBERATELY.** The original table listed `font-mono
 tabular-nums` under `known` alone, on the unstated assumption that an
 approximate value is words. It is not: `2017-03` is a figure, and every date
 column in this app holds both certainties at once. §5's rule is `font-mono` plus
@@ -766,7 +761,7 @@ to the app's largest inconsistency.
 `NotePanel` from the earliest draft **does not exist** and was not created. Its
 eight sites are stat tiles inside `verification-panel` and remain a local `@for`.
 
-§14 specifies four additions the set still needs — all four still unbuilt.
+§14 describes the four refinements now implemented in phase 7.
 
 ### 7.3 Button — the one sanctioned appearance change
 
@@ -813,8 +808,8 @@ out. Buttons and links take the ring, with `ring-offset-surface-page` — an off
 with no ground colour paints white on a dark page, which is the usual way a ring
 looks broken in dark.
 
-§14.4 completes the border shift, which is currently a colour change only and is
-close to invisible at a 1px border on a light surface.
+§14.4 adds a 1px focus shadow to that border shift. The earlier colour-only
+change was difficult to see against a light surface.
 
 ---
 
@@ -825,7 +820,7 @@ close to invisible at a 1px border on a light surface.
 | Invariant | How to check |
 |---|---|
 | **Spec-reached `data-role` hooks** must survive any markup move — 116 by the rule §10.3 now states | §10.3 |
-| **Amber's census must not grow**, and every site must be classified by meaning | `ui/amber.spec.ts` — and read §4.2.1's correction first |
+| **Amber must stay within its two meanings**; the file census catches new unclassified files | `ui/amber.spec.ts` — and read §4.2.1's correction first |
 | **The five certainty states must be separable without hue** — all ten pairs | `ui/certainty.spec.ts`, §6.3 |
 | **`templates.spec.ts`** — any registry file containing `.provenance()` must also contain `<app-session-required`, with two named route-gated exceptions. Its glob is `./*.ts`, registry only | in the suite |
 | **No backtick inside a `template:` literal** | `npm run check:templates` |
@@ -871,9 +866,9 @@ wholesale so its branches never coexist, and the three `[class.text-warning-fg]`
 bindings sit on elements whose base carries no competing colour.
 `routerLinkActive` was the only *additive* case.
 
-**§12.1 rebuilds the nav.** When it does, the active state should **replace**
-rather than add, or carry the `!` precedence deliberately. This trap is latent in
-any nav whose active class is additive.
+**§12.1 rebuilt the nav.** Its active selector overrides the base colour;
+section-view links retain explicit `!` precedence. The general trap remains
+relevant wherever two colour utilities can coexist.
 
 ### 8.2 Surfaces no fixture screen can show
 
@@ -999,54 +994,50 @@ context line is absent on the route, because there the route IS the assistant.
 **§12.6's shortcut registry was built here rather than deferred**, because §12.6
 is explicit that the first global key handler is the one that has to establish
 the owner. See §12.6 for what it does and refuses to do.
-### 9.4 Phase 7 — after the trial
+### 9.4 Phase 7 — built before the trial
 
-**The only phase left, and the gate has not moved.** B1, B2, B3; then the shell,
-specified in **§12**: header zones, the storage and session chips, five-section
-nav, the section bar, per-screen content widths, and the command palette. Plus
-`REGISTRY_ENTRY_UX.md` §11's held items — `Cmd+Enter`, the `(optional)` markers,
-`Recheck` to the top of `/check`.
+Implemented by explicit user instruction; §3.4 records the fourth contamination.
+The farm trial remains open and no trial-driven roster, defaults change, or
+recent-entry ledger is inferred from its absence.
 
-**Four things phases 5 and 6 have left on its doorstep**, none of them blocking
-and all of them cheaper to do inside §12 than beside it:
+- **Shell:** two header rows, five subject sections, storage and session chips,
+  section views/actions, 1400px table measure, 720px entry-form measure and
+  68ch help prose. Navigation resets the main scroll region. The assistant
+  toggle is in the header and `/chat` remains a supported deep link.
+- **Palette:** Cmd/Ctrl+K, keyboard selection, Escape, focus trapping/restoration,
+  lazy animal/person/destination reads, visible partial-load failures, section
+  navigation, session setup and Recheck. Write actions show their refusal reason
+  without a session; the handler checks again before navigation.
+- **Calvings:** `/animals/calvings` is a read-only browse view over the existing
+  per-animal APIs, at most six requests in flight. It preserves date precision
+  and superseded records; a failed history prevents a misleading partial table.
+  At large herd sizes this wants a paginated aggregate API, not more concurrency.
+- **Entry:** Cmd/Ctrl+Enter submits only the focused form through its native
+  handler. Existing validation and provenance remain authoritative. Session
+  editing preserves the mounted form and can be cancelled. Optional markers
+  were already present and are retained once each.
+- **Primitives:** ended badges, identifier links, keyboard/click targets on
+  navigating rows, neutral override/anomaly/liability treatments, input focus
+  shadow, shared error panels and the payroll summary. The chart now says
+  “daily yield”. Resting input borders remain unchanged.
+- **A rendering defect found during verification:** omitted optional override
+  fields no longer produce a “Written over the check” notice on ordinary events.
 
-- **The assistant toggle is parked.** §13.1 puts it in §12.1's header; it
-  currently sits in the existing header's row 1 beside the theme toggle, with a
-  comment at the call site pointing here. Note the tab-order consequence §11
-  already flagged for the theme toggle: there are now **two** controls ahead of
-  the nav rather than one.
-- **`/chat` has no entry point.** The route survives 6a and 6b and nothing links
-  to it. §12.4's five-section nav is where that gets decided — see §16.
-- **§14.1's `ended` tone is now load-bearing**, not cosmetic. `--text-disabled`
-  became §6's no-record colour in phase 5, and it also dresses a superseded event
-  in the timeline. The strike-through tells them apart, which is adequate rather
-  than correct. §4.5.
-- **Amber's twelve unpermitted sites** (§4.2.1) cannot move until B1/B2 clear,
-  because six of them sit on the frozen forms or on `/animals/new`.
+Verification: frontend **339/339 in 32 files**, server **726/726**, server
+TypeScript check, template/host guard and production build. Contrast remains
+**30 failures across 122 graded checks**, with the resting border intentionally
+unfixed. Browser verification covers palette search/navigation, session setup
+and preservation of an unfinished form. [Capture index](images/phase7/README.md)
+contains desktop and narrow-screen viewport images plus desaturated copies;
+these are not full-page captures or a separate live `--grey` run. The initial bundle is about **584 kB**, above the existing 500 kB
+warning budget; the CommonJS shared-package warning also remains.
 
-### 9.5 Primitive and token remainders
+### 9.5 Remaining work
 
-Small, independent, and each has a reason it was left:
-
-- **`StatusBadge` collapsed 3 of 6.** `event-list.ts:58` (different radius,
-  different stop, no `rounded-full`), `event-list.ts:84` (the amber "not billed"
-  tag) and `dispatch-sheet.ts:167` (a small aside). §14.1's tone vocabulary
-  resolves all three.
-- **`SummaryBar` collapsed 2 of 3.** `payroll-run.ts:248` is a `<footer>` with
-  `space-y-3 p-4` and no flex.
-- **`ErrorPanel` covers 26 of 35.** `chat-panel.ts:95` is a third radius *and* a
-  bordered treatment; `verification-panel.ts:81` is a `<li>`. Both are real
-  inconsistencies whose fix is visible, so they want a decision rather than a
-  quiet normalisation.
-- **Help prose demotion** (§5) — **done in phase 5**.
-- **`dayly yield`.** [chart-card.ts:51](../web-angular/src/app/components/chart-card.ts#L51)
-  concatenates `{{ dataset().interval }}ly`, and the server sends
-  `interval: 'day'`. **Still there** after phase 6b, which touched the chart's
-  neighbours and not the chart. One line, client-side, and it has now survived
-  three phases of somebody being in the file next door.
-- **The four `<thead>` elements** sharing `SectionLabel`'s class string were
-  skipped deliberately — a directive named for a label does not belong on a table
-  head — so that string survives at 4 occurrences.
+The five-animal trial and the decisions it informs remain open. So do the
+contrast failures, including the explicitly held resting input border, and
+colour-vision testing of the categorical agent ramp. Phase 7 implements the
+specified UI; it does not claim that these measurements or decisions happened.
 
 ### 9.6 Verification debt
 
@@ -1066,7 +1057,7 @@ Small, independent, and each has a reason it was left:
   ALSO in adjacent words reported and never failed. Three indicators moved to
   that last tier on the evidence of the code rather than on preference: the
   pending dot sits beside the word `Thinking…`, the tool-call dots sit beside
-  `{{ call().status }}`, and the harness banner says `harness · in memory` on
+  `{{ call().status }}`, and the storage chip says `harness · in memory` on
   itself.
 
   One fact that fell out and is worth stating once: **nothing in this app
@@ -1079,8 +1070,8 @@ Small, independent, and each has a reason it was left:
   `subtle` tone and §6.1's qualifier), and **`--border-default` at 1.37–1.66
   against a 3:1 threshold, which is an input's own border** — on `/animals/new`
   and `/milk/milking` a 1px `#CBC9C3` edge on white is the only thing marking
-  where a control is. §14.4 wants a shadow added to the FOCUS treatment; this
-  says the resting border is the weaker half.
+  where a control is. §14.4 adds a shadow to the focus treatment; the
+  resting border remains the weaker half and is explicitly held.
 
 - **The seven derived dark values** (§4.2) are now measured against their light
   counterparts, and six of the seven are contrast-matched within a reasonable
@@ -1114,9 +1105,9 @@ Small, independent, and each has a reason it was left:
 ```
 nvm use                       # 22.22.3; the default 22.3.0 is refused by the CLI
 npm run check:templates       # before anything compiles -- TWO checks now
-npm test -w web-angular       # 328/328, 31 files
+npm test -w web-angular       # 339/339, 32 files
 npm test -w server            # 726/726, 4 suites
-npm run build:angular         # production build, 555.12 kB initial
+npm run build:angular         # production build, about 584 kB initial
 npm run check:contrast        # 30 known failures, printed not gated -- §9.6
 ```
 
@@ -1161,16 +1152,17 @@ navigate **client-side**, or the session dies with the reload.
 
 ### 10.3 Hooks and the metric
 
-Both are simple source counts over `web-angular/src`: distinct `class="…"`
-values, and `data-role` values referenced by spec files. Expect **305 / 626**
-and **116** — and see §2.1 on why the first two went up.
+These are historical source counts at `d9c0057`: distinct `class="…"`
+values and `data-role` values referenced by spec files. That baseline yielded
+**305 / 626** and **116**. Phase 7 changed the source; these are not expected
+counts for the current checkout. See §2.1 for the original comparison.
 
 **The 115 this section used to claim is not reproducible**, and that is worth
 recording rather than quietly overwriting. A script that reproduces
 295 / 619 / 207 at `dc0a160` *exactly* — so the class-string rule is the one
 this document has been using — gives **110** spec-reached hooks at that same
-commit under the rule stated here, and 116 now. Counting instead every distinct
-`data-role` literal a spec mentions gives 114 then and 120 now. No rule tried
+commit under the rule stated here, and 116 at `d9c0057`. Counting instead every distinct
+`data-role` literal a spec mentions gives 114 then and 120 at `d9c0057`. No rule tried
 yields 115 at the commit the figure was measured at.
 
 So the delta is +6 under a stated rule, the absolute is 116 under that rule, and
@@ -1190,6 +1182,13 @@ modifiers specifically: `rgb(var(--surface-page) / 0.8)`,
 `rgb(var(--success-bg) / 0.4)`, `rgb(var(--border-subtle) / 0.6)`.
 
 ### 10.5 Screenshots
+
+The current [application gallery](images/phase7/README.md) covers all 15 routes
+in both themes, plus session setup and shell overlays. It uses fixed desktop
+viewport captures and a small set of mobile and grayscale checks. The legacy
+script below still enumerates 14 routes: it omits `/animals/calvings`, and it
+was not used to produce the Phase 7 gallery. Its older full-page capture method
+and measurements are retained here as history, not proof of current coverage.
 
 **This was a recipe for four phases and every phase re-implemented it by hand.
 It is now [scripts/shoot-screens.mjs](../scripts/shoot-screens.mjs)**, and the
@@ -1274,29 +1273,11 @@ picture.
 
 ### 10.7 The amber check
 
-A source scan, not a screenshot — and it is a spec now, not an instruction:
-[ui/amber.spec.ts](../web-angular/src/app/ui/amber.spec.ts).
-
-**What it asserts is not what this section asked for**, because what this
-section asked for was already false. See §4.2.1. Every `warning`-role utility in
-`src/app/**` must be **classified by meaning, in the spec, by whoever added it**;
-a new unclassified site fails, and so does a classified site that has lost its
-amber. Three globs rather than one, because `import.meta.glob` takes literals
-and `templates.spec.ts`'s single `./*.ts` covers registry alone — which is how
-`components/` went unprotected by the backtick guard for its whole life (§8.3).
-
-Two implementation notes, both found by the check misreporting itself:
-
-- **Comments are stripped before scanning.** A comment ABOUT amber is not a use
-  of it, and this file's own prose plus the explanation `people-list` now carries
-  for why its balance cell keeps `text-warning-fg` both matched a naive scan. A
-  guard that counts its own documentation grows every time somebody explains it.
-- **Stripping preserves line count.** Replacing a six-line `<!-- … -->` with `''`
-  shifts every line after it up by five, and the census then prints line numbers
-  pointing at the wrong code. A guard that misdirects is worse than no guard.
-
-It becomes simpler once §12.2 exists, because at that point the chip is one
-element and the second permitted meaning becomes mechanical.
+`ui/amber.spec.ts` scans non-spec component sources with comments removed and
+line numbers preserved. Phase 7's classified files carry the two intended
+meanings (§4.2.1). An unclassified file fails, as does a classified file that no
+longer contains amber. This is a file-level guard: adding another use inside an
+existing file still needs human review. It is not a proof of meaning per site.
 
 ---
 
@@ -1349,10 +1330,10 @@ element and the second permitted meaning becomes mechanical.
 
 ---
 
-## 12. The shell — specified, unbuilt
+## 12. The shell — built in phase 7
 
-Phase 7, gated on the trial: it changes the chrome around the frozen forms and
-the tab order into them.
+Built before the trial by explicit user instruction: it changes the chrome
+around the entry forms and the tab order into them. See §3.4.
 
 ### 12.1 Header — three zones, two rows
 
@@ -1361,7 +1342,7 @@ the tab order into them.
 | Zone | Contents |
 |---|---|
 | Left | App name, then the **storage chip** (§12.2) |
-| Right | The **session chip** (§12.3), theme toggle, assistant toggle |
+| Right | The **session chip** (§12.3), Search, theme toggle, assistant toggle |
 
 **Row 2 is the section nav**, same surface, `line-subtle` beneath. Five items:
 Today, Herd, Milk, Labour — then Check, pushed right with `margin-left: auto`.
@@ -1403,7 +1384,8 @@ amber appears outside the content area.
 ### 12.3 The session chip
 
 `recall · adnan` when a session is open; `browsing` in `content-subtle` when not.
-Click opens the gate.
+Click opens the gate for editing; the active session and mounted form survive
+until the change is submitted. Cancel keeps the existing session.
 
 This promotes the app's most consequential state out of being its faintest text.
 It also makes the reads-are-free / writes-are-gated split visible **before** a
@@ -1416,7 +1398,7 @@ action.
 
 | Section | Views | Actions |
 |---|---|---|
-| Today | — | Start a recording session |
+| Today | — | Start / change recording session |
 | Herd | Animals, Calvings | Record calving, **Add animal** |
 | Milk | Milking, Dispatch, Buyers | — |
 | Labour | People, Payroll | Add person |
@@ -1442,8 +1424,8 @@ exactly where the gate belongs.
 
 ### 12.5 Content width, per screen kind
 
-`mx-auto max-w-4xl` on everything is the current rule and it is wrong in both
-directions — too narrow for tables, too wide for prose.
+The previous blanket `max-w-4xl` rule is replaced by a measure based on the
+screen kind, so tables and entry forms no longer share one width.
 
 | Kind | Width | Screens |
 |---|---|---|
@@ -1454,11 +1436,12 @@ directions — too narrow for tables, too wide for prose.
 The prose measure is independent of its container: a note under a full-width
 table wraps at 68ch, not at the table's width.
 
-This is also the largest single reduction still available on §2.1's metric.
+This applies the width reduction proposed against §2.1’s historical metric;
+it does not substitute for remeasuring entry performance in the trial.
 
 ### 12.6 Command palette — `Cmd/Ctrl+K`
 
-Not built, and worth building. One operator, keyboard-heavy, long sittings, 31
+Built. One operator, keyboard-heavy, long sittings, 31
 animals with stable serials: typing `BD-0016` beats Herd → scan → click every
 time.
 
@@ -1472,7 +1455,7 @@ natural home for the held keyboard items in `REGISTRY_ENTRY_UX.md` §11.
 **Nothing registered a global key handler, and now something does.**
 [core/shortcuts.ts](../web-angular/src/app/core/shortcuts.ts), built in phase 6b
 because §13.1's `Cmd/Ctrl+/` was the first — and this section is explicit that
-the first is the one that has to establish the owner. `Cmd+K` and the held
+the first is the one that has to establish the owner. `Cmd+K` and
 `Cmd+Enter` register against it rather than adding listeners of their own.
 
 It is deliberately **not** a keymap system: no sequences, no contexts, no
@@ -1611,25 +1594,25 @@ with no provenance state at all while every manual write is stamped.
 
 ---
 
-## 14. Vocabulary the primitives still need
+## 14. Primitive refinements — built in phase 7
 
-Gaps in §7.2's inputs, found by rendering the design rather than by reading it.
+The gaps found by rendering the design are now implemented.
 
 ### 14.1 `StatusBadge` tones
 
-§9.5 records the badge collapsing 3 of 6. The tone set that resolves all three
-remainders:
+The badge now supports the following explicit tones (`default` is an alias for the existing
+`neutral` tone at existing call sites):
 
 | Tone | Appearance | Used by |
 |---|---|---|
-| `default` | `brand-badge` bg, `content-secondary` | in milk, dry, choti, katti, male |
+| `default` / `neutral` | `brand-badge` bg, `content-heading` | in milk, dry, choti, katti, male; kept, not sold |
 | `ended` | transparent bg, **dashed** `line` border, `content-subtle` | departed, closed engagement, inactive destination |
-| `warning` | `warning` role | not billed |
+| `warning` | `warning` role | available for unanswered-state labels; no current badge call site |
 | `brand` | `fill-brand` / `content-onFill` | the confirmation-card pill only |
 
-`ended` is the one the renders added, and it is the herd table's worst single
-offender: a departed animal currently wears the same solid pill as a lactating
-one, in a 31-row table where status is the most-scanned column.
+`ended` resolves the collision found in the renders: departed animals previously
+wore the same solid pill as lactating ones. The dashed outline now distinguishes
+them in the 31-row fixture.
 
 ### 14.2 Identifier links
 
@@ -1646,12 +1629,13 @@ needs the colour budget.
 `tbody tr:hover` → `surface-sunken`. Rows that navigate get `cursor: pointer` and
 a `focus-visible` ring on the **row**, not only on the link inside it.
 
-Neither is specified or present today, and a 31-row table at 13px with no hover
-target is hard to track across.
+Implemented by `RowLink` for the herd, calvings, people and billable buyer rows.
+Native links remain available; nested controls and modifier-clicks keep their
+own behaviour. Non-navigating rows receive hover treatment only.
 
 ### 14.4 Input focus, completed
 
-§7.4 chose a border shift over a ring for inputs. Complete it: border to `focus`,
+§7.4 chose a border shift over a ring for inputs. Phase 7 completes it: border to `focus`,
 **plus `box-shadow: 0 0 0 1px` in the same colour**, so the shift is visible at a
 1px border width. `composer.ts`'s existing pattern takes the shadow too, so the
 two stop differing.
@@ -1682,7 +1666,7 @@ from what the app already does:
 
 ## 16. Unverified, and undecided
 
-**Moved out of "unverified" by phases 5 and 6**
+**Completed verification and implementation**
 
 - ~~The seven derived dark values, and every contrast ratio.~~ Both computed.
   Six of the seven derived values are contrast-matched, one is not, and the
@@ -1691,8 +1675,7 @@ from what the app already does:
   in §4.5 clears three, leaving 30.
 - ~~Phase 5's greyscale acceptance has never been tested.~~ Tested, both ways:
   a desaturated capture and a spec that enumerates all ten pairs. §6.3.
-- ~~§§12–14 have been rendered as static mockups only.~~ **§13 is built and
-  measured in the app.** §§12 and 14 are still mockups only.
+- ~~§§12–14 have been rendered as static mockups only.~~ **§§12–14 are now built.** Phase 7 implements the shell and primitive refinements.
 
 **Unverified**
 
@@ -1706,35 +1689,31 @@ from what the app already does:
   item was written.
 - Compact/comfortable density assignment per screen is **proposed, not derived**,
   and rests on harness fixture data: 31 animals, 5 buyers, 3 people. It exercises
-  every table and both forms, but it is not the backfill — no murky-date animal,
-  no long calving history, no 31-row roster typed by hand. Row counts, column
+  every table and both forms, but it is not the backfill — no 31-row roster typed by hand. The fixture includes approximate dates and
+  long histories, but it is not evidence of entry friction. Row counts, column
   widths and the density split should be revisited against real entry.
 - **The certainty vocabulary has been read, not used.** Same disclosure the dark
-  values carry, and for the same reason: the fixture has one animal per precision
+  values carry, and for the same reason: the fixture covers every precision
   and a saved milking session, which is enough to render all five states and is
   not the backfill. The state the vocabulary exists for — a 31-row roster with
   one row skipped — was produced for a capture by asking for a date with no
   saved session, not by anybody skipping a row.
-- **§§12 and 14 have been rendered as static mockups only.** No part of the
-  shell or the four primitive additions has been built or measured in the app.
+- **The phase 7 UI has not had the real-farm trial.** Browser and fixture checks
+  establish implementation behaviour, not the predicted transcription friction.
 
 **Undecided**
 
-- **The three unpermitted meanings of amber** (§4.2.1), at twelve sites: an
-  override, an anomaly hint, and a liability or missing agreement. Each is a real
-  distinction and each wants its own name rather than a sweep onto the warning
-  role — but six of the twelve sit on the two frozen forms or on `/animals/new`,
-  so B1/B2 reach them and nothing can move until the trial reports. The census
-  spec holds the line in the meantime: they may not grow.
+- ~~The three extra meanings of amber.~~ **Resolved in phase 7:** overrides,
+  anomaly hints and liabilities retain their words with neutral treatments.
+  The remaining guard is file-level, as §10.7 states.
 - ~~Whether `--certainty-approx` and `--certainty-absent` should hold different
   light values.~~ **Resolved:** approximate is `#6C6A64`, absent remains
   `#82807A`. The three surface ratios and the choice are recorded in §4.5;
   both themes now give approximate greater text contrast than absent.
-- **Where `Recheck` lives** once §12.4 exists. `REGISTRY_ENTRY_UX.md` §11 holds
-  "`Recheck` to the top of `/check`"; §12.4 makes it a section action, which may
-  satisfy that item or may answer a different question.
+- ~~Where `Recheck` lives.~~ **Resolved:** the Check section bar; the standalone
+  verification component keeps its own top action when used without the shell.
 - **Whether the storage chip's neutral state is enough.** A real registry showing
-  a neutral chip is quieter than today's absence-of-banner, and §12.2's argument
+  a neutral chip is quieter than the former absence-of-banner, and §12.2's argument
   against alarm chrome may be wrong in this one case. Decide by using it, not by
   reasoning about it.
 - **Whether `--border-selected` and `--fill-brand` should diverge in value.** They
@@ -1745,8 +1724,5 @@ from what the app already does:
   overlay and the content beneath it. It is built as specified and
   `pointer-events-none`, so the content stays usable while it is dimmed — which
   narrows the question to whether the dim helps, rather than whether it blocks.
-- **Whether `/chat` should survive §12.4's nav.** The route is kept and nothing
-  links to it: the panel is how the assistant is reached, and below 1100px the
-  panel is the full content area, which is what the route renders anyway. So the
-  route is a deep link with no entry point. §12.4's five-section nav is where
-  that gets decided.
+- ~~Whether `/chat` should survive.~~ **Resolved:** retain it as a deep link;
+  the header panel is the normal entry point.

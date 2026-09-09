@@ -71,6 +71,10 @@ export const routes: Routes = [
         loadComponent: () => import('./registry/herd-list').then((m) => m.HerdList),
       },
       {
+        path: 'animals/calvings',
+        loadComponent: () => import('./registry/calvings-list').then((m) => m.CalvingsList),
+      },
+      {
         // `:id` is bound to AnimalDetailView.id by withComponentInputBinding().
         path: 'animals/:id',
         loadComponent: () => import('./registry/animal-detail').then((m) => m.AnimalDetailView),
@@ -87,18 +91,15 @@ export const routes: Routes = [
       // them by their foreign key rather than by what they are.
       {
         path: 'milk/milking',
-        loadComponent: () =>
-          import('./registry/milking-roster').then((m) => m.MilkingRosterScreen),
+        loadComponent: () => import('./registry/milking-roster').then((m) => m.MilkingRosterScreen),
       },
       {
         path: 'milk/dispatch',
-        loadComponent: () =>
-          import('./registry/dispatch-sheet').then((m) => m.DispatchSheetScreen),
+        loadComponent: () => import('./registry/dispatch-sheet').then((m) => m.DispatchSheetScreen),
       },
       {
         path: 'milk/buyers',
-        loadComponent: () =>
-          import('./registry/destinations-list').then((m) => m.DestinationsList),
+        loadComponent: () => import('./registry/destinations-list').then((m) => m.DestinationsList),
       },
       {
         // `:id` is bound to DestinationDetail.id by withComponentInputBinding().

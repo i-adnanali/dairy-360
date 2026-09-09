@@ -5,7 +5,13 @@
 // human should type.
 
 import {
-  ChangeDetectionStrategy, Component, computed, inject, input, signal, viewChild,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  signal,
+  viewChild,
 } from '@angular/core';
 import { RegistryApi } from './api';
 import { FormState } from './form-state';
@@ -44,19 +50,22 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
   template: `
     <form class="space-y-4" (submit)="onSubmit($event)">
       <div appCard>
-        <div appSectionLabel legend>
-          Which calving is the date wrong on?
-        </div>
+        <div appSectionLabel legend>Which calving is the date wrong on?</div>
         @if (correctable().length === 0) {
-          <p appHelp data-role="no-calvings">
-            No effective calvings on this animal to correct.
-          </p>
+          <p appHelp data-role="no-calvings">No effective calvings on this animal to correct.</p>
         } @else {
           <div class="space-y-1" data-role="calvings">
             @for (c of correctable(); track c.id) {
-              <button type="button" [attr.data-calving]="c.id" (click)="target.set(c.id)"
+              <button
+                type="button"
+                [attr.data-calving]="c.id"
+                (click)="target.set(c.id)"
                 class="flex w-full items-baseline gap-3 rounded-lg border px-3 py-2 text-left text-sm"
-                [class]="target() === c.id ? 'border-line-selected bg-surface-sunken' : 'border-line bg-surface-raised hover:border-line-strong'"
+                [class]="
+                  target() === c.id
+                    ? 'border-line-selected bg-surface-sunken'
+                    : 'border-line bg-surface-raised hover:border-line-strong'
+                "
               >
                 <span class="font-medium">{{ c.occurred_on }}</span>
                 <span appHelp size="xs">({{ c.date_precision }})</span>
@@ -78,15 +87,21 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
         />
 
         <div class="rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-secondary">
-          Both halves are written together: a superseding calving on the dam and a superseding
-          birth on the calf. If the calf did not live, its departure moves too — the three are
-          the same physical fact. The old events stay in the log, marked superseded.
+          Both halves are written together: a superseding calving on the dam and a superseding birth
+          on the calf. If the calf did not live, its departure moves too — the three are the same
+          physical fact. The old events stay in the log, marked superseded.
         </div>
 
         <label class="block">
           <span appFieldLabel>Why the change? (optional note)</span>
-          <input data-role="notes" [value]="notes()" (input)="notes.set($any($event.target).value)"
-            placeholder="e.g. remembered again on a second telling" appInput class="w-full max-w-md" />
+          <input
+            data-role="notes"
+            [value]="notes()"
+            (input)="notes.set($any($event.target).value)"
+            placeholder="e.g. remembered again on a second telling"
+            appInput
+            class="w-full max-w-md"
+          />
         </label>
 
         @if (state.formError(fields); as e) {
@@ -99,37 +114,62 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
              names occurred_on, so its message goes to the date control, and a
              button nested in that block would be unreachable. -->
         @if (state.hasCode('near_duplicate_calving')) {
-          <div class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="override">
+          <div
+            class="override-notice rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
+            data-role="override"
+          >
             <p>The corrected date lands near another calving on this dam — check it first.</p>
             <label class="mt-2 block">
               <span class="mb-1 block text-xs font-medium">
                 Why, if you want it on the record <span class="font-normal">(optional)</span>
               </span>
-              <input data-role="override_reason" [value]="overrideReason()"
+              <input
+                data-role="override_reason"
+                [value]="overrideReason()"
                 (input)="overrideReason.set($any($event.target).value)"
-                class="w-full rounded-lg border border-warning-line bg-surface-raised px-2 py-1.5 text-sm" />
+                class="w-full rounded-lg border border-line-strong bg-surface-raised px-2 py-1.5 text-sm"
+              />
             </label>
-            <button type="button" data-role="allow-duplicate" (click)="allowDuplicate.set(true); submit()"
-              class="mt-2 font-medium underline">Correct it anyway</button>
+            <button
+              type="button"
+              data-role="allow-duplicate"
+              (click)="allowDuplicate.set(true); submit()"
+              class="mt-2 font-medium underline"
+            >
+              Correct it anyway
+            </button>
           </div>
         }
 
         @if (session.ready()) {
-          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton
-          >{{ state.submitting() ? 'Correcting…' : 'Apply correction' }}</button>
+          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton>
+            {{ state.submitting() ? 'Correcting…' : 'Apply correction' }}
+          </button>
         } @else {
           <app-session-required what="a correction" />
         }
       }
 
       @if (state.result(); as r) {
-        <div class="rounded-xl border border-success-line bg-success-bg p-4 text-sm" data-role="result">
+        <div
+          class="rounded-xl border border-success-line bg-success-bg p-4 text-sm"
+          data-role="result"
+        >
           <p class="font-medium text-success-strong">Correction applied</p>
           <ul class="mt-1 space-y-0.5 text-success-fg">
-            <li>superseded calving <span class="font-mono text-xs">{{ r.superseded.calving_event_id }}</span></li>
-            <li>superseded birth <span class="font-mono text-xs">{{ r.superseded.birth_event_id }}</span></li>
+            <li>
+              superseded calving
+              <span class="font-mono text-xs">{{ r.superseded.calving_event_id }}</span>
+            </li>
+            <li>
+              superseded birth
+              <span class="font-mono text-xs">{{ r.superseded.birth_event_id }}</span>
+            </li>
             @if (r.superseded.departure_event_id) {
-              <li>superseded departure <span class="font-mono text-xs">{{ r.superseded.departure_event_id }}</span></li>
+              <li>
+                superseded departure
+                <span class="font-mono text-xs">{{ r.superseded.departure_event_id }}</span>
+              </li>
             }
           </ul>
           <p class="mt-2 text-success-fg">
@@ -166,7 +206,11 @@ export class CorrectionForm {
 
   protected readonly fields = FIELDS;
   protected readonly state = new FormState<{
-    superseded: { calving_event_id: string; birth_event_id: string; departure_event_id: string | null };
+    superseded: {
+      calving_event_id: string;
+      birth_event_id: string;
+      departure_event_id: string | null;
+    };
   }>();
 
   protected readonly target = signal('');
@@ -193,15 +237,19 @@ export class CorrectionForm {
     const w = entry.value;
     if (!w) return;
     const r = await this.state.run((key) =>
-      this.api.correctCalving(this.target(), {
-        occurred_on: w.occurred_on,
-        occurred_time: w.occurred_time,
-        date_precision: w.date_precision,
-        notes: blank(this.notes()),
-        allow_near_duplicate: this.allowDuplicate(),
-        override_reason: blank(this.overrideReason()),
-        ...this.session.provenance(),
-      }, key),
+      this.api.correctCalving(
+        this.target(),
+        {
+          occurred_on: w.occurred_on,
+          occurred_time: w.occurred_time,
+          date_precision: w.date_precision,
+          notes: blank(this.notes()),
+          allow_near_duplicate: this.allowDuplicate(),
+          override_reason: blank(this.overrideReason()),
+          ...this.session.provenance(),
+        },
+        key,
+      ),
     );
     this.allowDuplicate.set(false);
     if (r) {
