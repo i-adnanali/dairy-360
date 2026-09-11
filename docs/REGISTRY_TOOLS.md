@@ -82,8 +82,8 @@ That heading becomes a false statement the moment a real registry exists, and it
 
 Which herd a turn reads is decided by **which server is running**, not by inspecting the message:
 
-- the real server (`npm run dev`, port 4000) → `registry_*` in `dairy.db`
-- the registry harness (`npm run harness:app`, also port 4000) → an `:memory:` fixture herd, and **no agent endpoint at all**
+- the real server (`npm run dev`, port 6400) → `registry_*` in `dairy.db`
+- the registry harness (`npm run harness:app`, also port 6400) → an `:memory:` fixture herd, and **no agent endpoint at all**
 
 The dispatcher already guesses dairy-vs-vendor by keyword, and that is fine because both of those are fiction. Guessing between **fiction and record** is the one inference whose failure is silent and lands in the dangerous direction. This is the same reasoning that produced `GET /storage` (REGISTRY.md § "Which database am I writing to"): the question is answered as an affirmative fact, never inferred from an absence.
 

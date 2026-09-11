@@ -329,7 +329,7 @@ list this slice exists to deliver, mechanically. Roughly 120 lines.
   file in the repo is `docker-compose.langfuse.yml` (Langfuse observability
   infra); the app itself runs via npm/tsx. So Frigate is a standalone compose
   file, and on macOS Docker Desktop it must reach the host server as
-  `http://host.docker.internal:4000` — **not** `localhost:4000`.
+  `http://host.docker.internal:6400` — **not** `localhost:6400`.
 - ~~Point Frigate's webhook config at the existing ingestion endpoint~~ →
   **CONFIRMED WRONG, and it reshaped the slice.** Frigate publishes events over
   MQTT (`frigate/events`); it exposes no generic outbound HTTP webhook for

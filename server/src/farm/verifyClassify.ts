@@ -29,7 +29,7 @@ import { replayScenario } from './simulate';
 import { SCENARIOS, SCENARIO_NAMES, scenarioSpanDays } from './scenarios';
 import { summarizeDailyActivity, type CameraFinding } from '../tools/farmReads';
 
-const DEFAULT_BASE_URL = process.env.FARM_BASE_URL ?? 'http://localhost:4000';
+const DEFAULT_BASE_URL = process.env.FARM_BASE_URL ?? 'http://localhost:6400';
 
 interface ScenarioReport {
   name: string;

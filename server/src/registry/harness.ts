@@ -3,7 +3,7 @@ import { addFeedFixtures } from './feed-fixtures';
 // IN-MEMORY fixture herd.
 //
 //   npm run registry:harness -w server
-//   npm run registry:harness -w server -- --port=4100
+//   npm run registry:harness -w server -- --port=6410
 //
 // ---------------------------------------------------------------------------
 // HARD CONSTRAINT: never import `../db`.
@@ -42,7 +42,7 @@ interface Args {
 }
 
 export function parseArgs(argv: string[]): Args {
-  const args: Args = { port: 4100, empty: false, help: false };
+  const args: Args = { port: 6410, empty: false, help: false };
   for (const raw of argv) {
     const [flag, value] = raw.split('=');
     switch (flag) {
@@ -68,11 +68,11 @@ export function parseArgs(argv: string[]): Args {
 
 const USAGE = `
 Usage:
-  npm run registry:harness -w server [-- --port=4100] [-- --empty]
+  npm run registry:harness -w server [-- --port=6410] [-- --empty]
 
 Serves /api/registry over an IN-MEMORY fixture herd. Never opens dairy.db.
 
-  --port=<n>   default 4100 (the real server uses 4000)
+  --port=<n>   default 6410 (the real server uses 6400)
   --empty      start with an empty registry instead of the fixture herd
 
   --empty is not a throwaway option: the empty and one-row states are what the

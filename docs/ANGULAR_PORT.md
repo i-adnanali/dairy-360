@@ -194,7 +194,7 @@ shared tooltip (`interaction: { mode: 'index' }`). Registered via
 |---|---|---|
 | Node.js | `^22.22.3 \|\| ^24.15.0 \|\| >=26` (Angular 22 requirement) | - |
 | Angular | 22 (standalone, zoneless) | [web-angular/package.json](../web-angular/package.json) |
-| Dev server port | `4200` (proxies `/api` -> `:4000`) | [web-angular/proxy.conf.json](../web-angular/proxy.conf.json) |
+| Dev server port | `6420` (proxies `/api` -> `:6400`) | [web-angular/proxy.conf.json](../web-angular/proxy.conf.json) |
 | Run server + Angular | `npm run dev:angular` (and `npm run dev`, now an alias) | root [package.json](../package.json) |
 | Build Angular | `npm run build:angular` (builds shared first) | root [package.json](../package.json) |
 | Unit tests | `npm test -w web-angular` (Vitest) | - |

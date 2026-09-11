@@ -22,7 +22,7 @@ import { replayScenario, scenarioStartMs } from './simulate';
 import type { ExpectedRow, Scenario } from './scenarios';
 import { SCENARIOS, SCENARIO_NAMES, scenarioSpanDays } from './scenarios';
 
-const DEFAULT_BASE_URL = process.env.FARM_BASE_URL ?? 'http://localhost:4000';
+const DEFAULT_BASE_URL = process.env.FARM_BASE_URL ?? 'http://localhost:6400';
 
 /** Comparable fields of a row, in a stable order, for multiset matching. */
 const MATCH_FIELDS = ['event_type', 'camera_id', 'zone', 'identity', 'confidence'] as const;

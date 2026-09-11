@@ -252,7 +252,9 @@ nvm use && npm install     # first time only
 npm run harness:app
 ```
 
-Open <http://localhost:4200>. You land on the **day board** — the evening
+Local application ports use the **64xx** series: backend **6400**, standalone registry harness **6410**, Angular frontend **6420**, and built frontend preview **6430**. `harness:app` runs its backend on **6400** to share the Angular API proxy. The backend reads `PORT` from `server/.env`; keep it aligned with `web-angular/proxy.conf.json` when overriding it.
+
+Open <http://localhost:6420>. You land on the **day board** — the evening
 milking and dispatch outstanding, this month's payroll still to enter — over an
 in-memory herd of 31 animals with every life stage, calvings entered out of
 order, a paired date correction, an overridden check and dates at all four
@@ -291,11 +293,11 @@ cp .env.example .env          # docker compose reads this one (camera stack)
 # 3. create + seed the SQLite database (idempotent: drop + recreate)
 npm run seed -w server      # creates server/dairy.db
 
-# 4. run server (:4000) + Angular web (:4200); ng proxies /api -> :4000
+# 4. run server (:6400) + Angular web (:6420); ng proxies /api -> :6400
 npm run dev:angular
 ```
 
-Then open <http://localhost:4200> (Angular). The app opens on a **day board**
+Then open <http://localhost:6420> (Angular). The app opens on a **day board**
 at `/` — what still needs recording today, and nothing else — with the registry
 under `/animals`, milk under `/milk`, labour under `/labour`, feed under `/feed`, and the agent chat
 page at `/chat`. The registry is a separate surface over real herd records and
@@ -340,18 +342,18 @@ the regression suites, which are documented only there.
 ### Frontend + backend (app)
 
 ```bash
-# start server (:4000) + Angular (:4200) together; ng proxies /api -> :4000
+# start server (:6400) + Angular (:6420) together; ng proxies /api -> :6400
 npm run dev:angular
 # open the app
-open http://localhost:4200
+open http://localhost:6420
 
 # backend only (no Angular)
 npm run dev -w server
 
 # stop: press Ctrl-C in the terminal running it.
-# stop a stray/backgrounded instance (frees ports 4000 + 4200):
-lsof -tiTCP:4000 -sTCP:LISTEN | xargs -r kill
-lsof -tiTCP:4200 -sTCP:LISTEN | xargs -r kill
+# stop a stray/backgrounded instance (frees ports 6400 + 6420):
+lsof -tiTCP:6400 -sTCP:LISTEN | xargs -r kill
+lsof -tiTCP:6420 -sTCP:LISTEN | xargs -r kill
 ```
 
 ### Build, typecheck, test
@@ -374,15 +376,15 @@ npm test -w web-angular      # Vitest unit tests for the frontend
 ### Dummy data — the app with a herd in it, and no real database
 
 ```bash
-# harness (:4000, in-memory) + a 31-animal seeded herd + Angular (:4200)
+# harness (:6400, in-memory) + a 31-animal seeded herd + Angular (:6420)
 npm run harness:app
-open http://localhost:4200
+open http://localhost:6420
 
 # re-seed a harness that is already up (replays; does not duplicate)
 npm run harness:seed
 
 # confirm which database is behind /api -- `memory` is the discriminator
-curl http://localhost:4000/api/registry/storage
+curl http://localhost:6400/api/registry/storage
 # harness -> {"storage":":memory:","memory":true}
 # real    -> {"storage":"/.../server/dairy.db","memory":false}
 
@@ -398,8 +400,8 @@ stat -f '%Sm  %z bytes' server/dairy.db && shasum -a 256 server/dairy.db
 # nothing; it assumes no writer is active, which is what you are asserting.
 sqlite3 'file:server/dairy.db?immutable=1' 'select count(*) from registry_animals'
 
-# the PRODUCTION bundle instead of ng serve, on :4300
-npm run build:angular && npm run harness:serve -- --port=4300
+# the PRODUCTION bundle instead of ng serve, on :6430
+npm run build:angular && npm run harness:serve -- --port=6430
 ```
 
 `harness:app` and `npm run seed` fill **different tables for different
@@ -411,7 +413,7 @@ comparison is in [docs/DEVELOPMENT.md § 6](docs/DEVELOPMENT.md).
 
 ```bash
 # serve the registry API over an in-memory fixture herd; the explicit port matters
-npm run registry:harness -w server -- --port=4000
+npm run registry:harness -w server -- --port=6400
 
 # invariants, precision histogram, calving intervals, milk-record completeness
 npm run verify:registry -w server
@@ -435,7 +437,7 @@ npm run registry:backup -w server
 ### Status / health checks
 
 ```bash
-curl http://localhost:4000/api/health            # -> {"status":"ok","seeded":true,"anthropicKey":true}
+curl http://localhost:6400/api/health            # -> {"status":"ok","seeded":true,"anthropicKey":true}
 docker compose -f docker-compose.langfuse.yml ps  # Langfuse container health
 open http://localhost:3000                         # Langfuse UI
 ```

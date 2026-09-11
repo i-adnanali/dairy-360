@@ -314,9 +314,9 @@ Card label helpers: `tagLabel(animalId)` renders `TAG (name)` when a name exists
 | Confident face match | `>= 0.85`, `face_match` rows only | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
 | Unknown-cluster urgency | notable at occurrence `1`, urgent at `3`, `21`-day event-relative lookback | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
 | Camera-silence threshold | `15` minutes | [server/src/farm/classify.ts](../server/src/farm/classify.ts) |
-| Server port | `PORT` env or `4000` | [server/src/index.ts](../server/src/index.ts) |
-| Web dev port | `4200` (Angular `ng serve`, proxies `/api` -> 4000) | [web-angular/proxy.conf.json](../web-angular/proxy.conf.json) |
-| Registry harness port | `4100` by default — **pass `--port=4000`** to reach it through the proxy | [server/src/registry/harness.ts](../server/src/registry/harness.ts) |
+| Server port | `PORT` env or `6400` | [server/src/index.ts](../server/src/index.ts) |
+| Web dev port | `6420` (Angular `ng serve`, proxies `/api` -> 6400) | [web-angular/proxy.conf.json](../web-angular/proxy.conf.json) |
+| Registry harness port | `6410` by default — **pass `--port=6400`** to reach it through the proxy | [server/src/registry/harness.ts](../server/src/registry/harness.ts) |
 | Calf age threshold | `18` months (provisional) — the scheme's **only** age threshold; every other life-stage boundary is event-driven | [server/src/registry/project.ts](../server/src/registry/project.ts) |
 | Double-entry window | `60` days (provisional) | [server/src/registry/calving.ts](../server/src/registry/calving.ts) |
 | Gestation floor | `310` days — a biological constant, **not** provisional and with no override | [server/src/registry/calving.ts](../server/src/registry/calving.ts) |

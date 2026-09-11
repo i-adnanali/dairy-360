@@ -55,6 +55,7 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
+            "port": 6420,
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {

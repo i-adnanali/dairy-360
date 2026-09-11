@@ -1124,15 +1124,15 @@ asserts on the config object rather than a canvas.
 ### 10.2 The app, with fixture data
 
 ```
-npm run harness:app           # harness :4000 (:memory:), Angular :4200
+npm run harness:app           # harness :6400 (:memory:), Angular :6420
 node scripts/harness-seed.mjs # 83 writes, if the concurrent seed lost its race
 ```
 
-**The app is on :4200.** Port 4000 is the API and mounts only
+**The app is on :6420.** Port 6400 is the API and mounts only
 `/api/registry/*`, so `/` there is a 404 even when healthy.
 
 **Confirm you have the harness before seeding:**
-`curl -s localhost:4000/api/registry/storage` must say
+`curl -s localhost:6400/api/registry/storage` must say
 `{"storage":":memory:","memory":true}`. The seed refuses to run against a real
 `dairy.db` and it was right to at least once — a stale dev server held the port.
 
@@ -1173,7 +1173,7 @@ documents disagreeing over the same counts.
 ### 10.4 Zero-delta, when a change should be invisible
 
 The strongest check is not the screenshots — it is the compiled stylesheet.
-`curl -s localhost:4200/styles.css` before and after; the diff should be exactly
+`curl -s localhost:6420/styles.css` before and after; the diff should be exactly
 what you intended and nothing else. Phase 1's whole acceptance was that this diff
 contained only the `:root` block and one font stack.
 

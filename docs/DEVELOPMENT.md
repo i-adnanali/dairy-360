@@ -285,7 +285,7 @@ npm install                # first time only
 npm run harness:app
 ```
 
-Then open <http://localhost:4200>. You land on the **day board** over an
+Then open <http://localhost:6420>. You land on the **day board** over an
 **in-memory** herd of 31 animals — plus the buyers, prices and dispatch sessions
 the sales screens need, and the three staff the labour screens need — and
 `server/dairy.db` is never opened by any process this command starts.
@@ -295,7 +295,7 @@ terminals collapsed into one and a readable herd seeded into it:
 
 ```
 build:shared
-  ├─ harness   registry:harness --port=4000 --empty
+  ├─ harness   registry:harness --port=6400 --empty
   ├─ seed      scripts/harness-seed.mjs --wait=90
   └─ angular   ng serve
 ```
@@ -314,7 +314,7 @@ from `id.charCodeAt(8)`, which is `NaN` on a seven-character serial like
 
 `concurrently` does not order its processes, so the seed polls for the harness
 rather than assuming it won. Measured from cold: the seed logged
-`http://localhost:4000/api/registry` before the harness had bound the port,
+`http://localhost:6400/api/registry` before the harness had bound the port,
 waited, and then printed `target :memory: (memory: true) -- harness confirmed`.
 
 What lands, and why each row is there:
@@ -414,17 +414,17 @@ states which database is behind `/api` at boot instead, in both directions.
 ### Harness loop — fixture data, safe
 
 ```bash
-npm run registry:harness -w server -- --port=4000    # in-memory fixture herd
-npm start -w web-angular                             # app on :4200, proxies /api
+npm run registry:harness -w server -- --port=6400    # in-memory fixture herd
+npm start -w web-angular                             # app on :6420, proxies /api
 ```
 
 Add `--empty` and `npm run harness:seed` to get the herd above instead of the
 injected `staffedHerd()` plus feed fixtures. The HTTP walkthrough has its own
 serials and richer named-animal entry cases; do not layer it over the injected set.
 
-**`--port=4000` is not optional.** The harness defaults to **4100**;
-[`proxy.conf.json`](../web-angular/proxy.conf.json) targets **4000**. Omit the
-flag and the app cannot see the harness — it reaches whatever else holds 4000,
+**`--port=6400` is not optional.** The harness defaults to **6410**;
+[`proxy.conf.json`](../web-angular/proxy.conf.json) targets **6400**. Omit the
+flag and the app cannot see the harness — it reaches whatever else holds 6400,
 which if `npm run dev -w server` is up is the **real `dairy.db`**. That mismatch
 is what made these docs wrong for a cycle, and it fails in the dangerous
 direction: the harness terminal sits there printing its fixture herd, which reads
@@ -434,12 +434,12 @@ Putting the harness on the proxy's port makes the two **mutually exclusive** —
 the second process to start dies immediately:
 
 ```
-Error: listen EADDRINUSE: address already in use :::4000
+Error: listen EADDRINUSE: address already in use :::6400
 code: 'EADDRINUSE'   npm error code 1
 ```
 
 Verified end to end: 13 fixture animals reachable at
-`http://localhost:4200/api/registry/animals`, `storage: ":memory:"`. Add
+`http://localhost:6420/api/registry/animals`, `storage: ":memory:"`. Add
 `-- --empty` for the empty-herd state (`0 animal(s)  [--empty]`).
 
 ### Real loop — writes to `server/dairy.db`
@@ -452,13 +452,13 @@ npm start -w web-angular
 Or both together, which also builds `shared/`:
 
 ```bash
-npm run dev:angular          # [server] :4000 + [angular] :4200
+npm run dev:angular          # [server] :6400 + [angular] :6420
 ```
 
 ### Which one am I on?
 
 ```bash
-curl localhost:4000/api/registry/storage
+curl localhost:6400/api/registry/storage
 # harness -> {"storage":":memory:","memory":true}
 # real    -> {"storage":"/…/server/dairy.db","memory":false}
 ```
@@ -968,9 +968,9 @@ invariant 13 as a source-level check.
 |---|---|---|
 | `The Angular CLI requires a minimum Node.js version of v22.22.3…`, `npm error code 3` | node below the Angular floor. Only CLI commands care — the server suite still passes, which makes it confusing | `nvm use` |
 | `Cannot find module '@dairy/shared/dist/types.js'` | `shared/` not built. `npm run dev -w server` does not build it | `npm run build:shared` |
-| `Error: listen EADDRINUSE: … :::4000`, `code: 'EADDRINUSE'` | Two things want 4000 — usually the harness and the real server. **This is the good failure**: it is what makes "harness or real, never both" true | Kill the other: `lsof -tiTCP:4000 -sTCP:LISTEN \| xargs kill` |
-| `/api/*` returns **500** through `:4200` while the page itself loads (`GET /` is 200) | Nothing is listening on 4000. The dev server proxies `/api` to a target that is not there | Start a backend — harness or real |
-| `/api/registry/*` answers but with the **wrong** data (fixture herd when you wanted real, or the reverse) | Something else holds 4000 — including a stray `tsx watch` from another checkout. Observed during this write-up: the proxy silently served *another clone's* real `dairy.db` | `curl localhost:4000/api/registry/storage` and read the path |
+| `Error: listen EADDRINUSE: … :::6400`, `code: 'EADDRINUSE'` | Two things want 6400 — usually the harness and the real server. **This is the good failure**: it is what makes "harness or real, never both" true | Kill the other: `lsof -tiTCP:6400 -sTCP:LISTEN \| xargs kill` |
+| `/api/*` returns **500** through `:6420` while the page itself loads (`GET /` is 200) | Nothing is listening on 6400. The dev server proxies `/api` to a target that is not there | Start a backend — harness or real |
+| `/api/registry/*` answers but with the **wrong** data (fixture herd when you wanted real, or the reverse) | Something else holds 6400 — including a stray `tsx watch` from another checkout. Observed during this write-up: the proxy silently served *another clone's* real `dairy.db` | `curl localhost:6400/api/registry/storage` and read the path |
 | `anthropicKey: false`, or the chat returns `ANTHROPIC_API_KEY is not set` | Key is in the root `.env`, not `server/.env` | § 3 |
 | `503 {"status":"unseeded"}`, or the chat says "run `npm run seed` first" | Demo tables not created. The registry is unaffected | `npm run seed -w server` |
 | The entry UI's gate will not open — a checkbox asking you to confirm the database | Working as intended: the target is real (or could not be determined from a server that *is* answering), and the session needs one deliberate act. The harness never asks | Read the path it names. Tick it, or point at the harness |

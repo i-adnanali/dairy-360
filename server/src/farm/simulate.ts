@@ -17,7 +17,7 @@ import { daysAgo } from '../seed';
 import type { Scenario, ScenarioEvent } from './scenarios';
 import { SCENARIOS, SCENARIO_NAMES, scenarioSpanDays } from './scenarios';
 
-const DEFAULT_BASE_URL = process.env.FARM_BASE_URL ?? 'http://localhost:4000';
+const DEFAULT_BASE_URL = process.env.FARM_BASE_URL ?? 'http://localhost:6400';
 const DEFAULT_DAYS_AGO = 14;
 
 /** Set on every generated request so the endpoint can mark rows

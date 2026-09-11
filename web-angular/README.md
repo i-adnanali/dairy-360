@@ -12,7 +12,7 @@ Run the commands below from the **repository root**, using the Node version in
 npm run harness:app   # in-memory fixture registry + Angular, no API key needed
 ```
 
-Open `http://localhost:4200/`. To use the persistent server and agent instead,
+Open `http://localhost:6420/`. To use the persistent server and agent instead,
 follow [DEVELOPMENT.md](../docs/DEVELOPMENT.md); `npm run dev:angular` starts that
 pair. The fixture harness does not provide agent responses.
 

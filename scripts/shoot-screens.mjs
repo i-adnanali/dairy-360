@@ -8,7 +8,7 @@
  * the five certainty states are distinguishable IN GREYSCALE, and that is not
  * something anybody re-derives correctly at eleven at night. So it is a script.
  *
- * Usage, with `npm run harness:app` already up on :4200:
+ * Usage, with `npm run harness:app` already up on :6420:
  *
  *   node scripts/shoot-screens.mjs                    both themes
  *   node scripts/shoot-screens.mjs --grey             both themes, desaturated
@@ -42,7 +42,7 @@ import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const BASE = process.env.APP_URL ?? 'http://localhost:4200';
+const BASE = process.env.APP_URL ?? 'http://localhost:6420';
 /*
  * 1440 is §10.5's baseline width and every stored comparison is against it, so
  * --width is for verifying a breakpoint rather than for shooting a baseline.
@@ -396,7 +396,7 @@ async function capture(cdp, file) {
 async function firstId(kind) {
   const path = kind === 'buyer' ? 'destinations' : 'people';
   try {
-    const rows = await fetch(`http://localhost:4000/api/registry/${path}`).then((r) => r.json());
+    const rows = await fetch(`http://localhost:6400/api/registry/${path}`).then((r) => r.json());
     const list = Array.isArray(rows) ? rows : (rows.rows ?? rows.people ?? rows.destinations ?? []);
     return list[0]?.id ?? list[0]?.person_id ?? list[0]?.destination_id ?? null;
   } catch { return null; }

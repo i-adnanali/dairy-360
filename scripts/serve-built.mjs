@@ -5,7 +5,7 @@
 // ---------------------------------------------------------------------------
 // `RegistryApi` addresses the backend at a RELATIVE path -- `BASE =
 // '/api/registry'` (api.ts:12). In development, web-angular/proxy.conf.json
-// forwards /api to :4000 and the question never comes up. A production bundle
+// forwards /api to :6400 and the question never comes up. A production bundle
 // has no dev server and therefore no proxy, so `ng build` output served by any
 // plain static host answers /api/registry/animals with its own 404 -- and the
 // app renders "no server answered", which looks like a broken backend rather
@@ -31,8 +31,8 @@
 // state which database is behind /api at boot, affirmatively, in both
 // directions. Same principle as GET /storage.
 //
-//   node scripts/serve-built.mjs                       # :4300 -> api on :4000
-//   node scripts/serve-built.mjs --port=8080 --api=http://localhost:4100
+//   node scripts/serve-built.mjs                       # :6430 -> api on :6400
+//   node scripts/serve-built.mjs --port=8080 --api=http://localhost:6410
 //
 // NOT application code. Nothing in server/ or web-angular/ imports it.
 
@@ -49,15 +49,15 @@ const args = new Map(
 
 if (args.has('--help') || args.has('-h')) {
   console.log(
-    `Usage: node scripts/serve-built.mjs [--port=4300] [--api=http://localhost:4000] [--root=<dir>]\n\n` +
+    `Usage: node scripts/serve-built.mjs [--port=6430] [--api=http://localhost:6400] [--root=<dir>]\n\n` +
       `Serves web-angular/dist/web-angular/browser and reverse-proxies /api.\n` +
       `Run 'npm run build:angular' first.`,
   );
   process.exit(0);
 }
 
-const PORT = Number(args.get('--port') ?? 4300);
-const API_ORIGIN = String(args.get('--api') ?? 'http://localhost:4000').replace(/\/$/, '');
+const PORT = Number(args.get('--port') ?? 6430);
+const API_ORIGIN = String(args.get('--api') ?? 'http://localhost:6400').replace(/\/$/, '');
 const ROOT = resolve(
   String(args.get('--root') ?? 'web-angular/dist/web-angular/browser'),
 );
@@ -176,7 +176,7 @@ async function announceTarget() {
   } catch (e) {
     console.log(`  api       ${API_ORIGIN} -> NOT ANSWERING (${e.message})`);
     console.log(`            /api will return 502 until a backend is up. Start one:`);
-    console.log(`              npm run registry:harness -w server -- --port=4000 --empty`);
+    console.log(`              npm run registry:harness -w server -- --port=6400 --empty`);
   }
 }
 

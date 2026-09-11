@@ -864,7 +864,7 @@ npm run simulate:farm -w server -- --all --days-ago=14
 dev server already listening. Per scenario: `resetFarmEvents()` → replay that
 scenario → query `farm_events` directly → assert `expect`.
 
-It first checks that `:4000` answers at all, and treats the unseeded-`503` from
+It first checks that `:6400` answers at all, and treats the unseeded-`503` from
 `GET /api/health` as reachable-and-fine — ingestion does not depend on dairy
 seed data. Absent a server, it fails with a message saying to start one, the
 same degrade-gracefully convention as `/api/health` itself.

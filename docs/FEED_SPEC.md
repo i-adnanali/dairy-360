@@ -61,7 +61,7 @@ Architecture: Angular standalone components/signals, Express/TypeScript, SQLite 
 - Reads work without recording setup. Writes retain the existing provenance and storage-target safeguards.
 - Preserve unfinished forms through provenance editing and nested purchase/item creation. No new persistent browser drafts without separately revisiting that existing constraint.
 - Preserve current border tokens, date-precision and write-log conventions. Document the changed UI trial baseline honestly: the real five-animal trial was not completed at this baseline.
-- Root `npm run dev` starts the persistent server and frontend; `npm run harness:app` starts isolated fixtures. They compete for port 4000.
+- Root `npm run dev` starts the persistent server and frontend; `npm run harness:app` starts isolated fixtures. They compete for port 6400.
 
 ## 5. Navigation and screen flow
 
