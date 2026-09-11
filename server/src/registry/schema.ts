@@ -1248,6 +1248,25 @@ export interface Migration {
  * will not re-run entries below N, so an edit silently produces two different
  * schemas depending on when the database was created.
  */
+
+// Migration 8: feed records. Existing farm tables are untouched.
+const MIGRATION_8_FEED = `
+CREATE TABLE registry_feed_items (id TEXT PRIMARY KEY, revision INTEGER NOT NULL, data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE registry_feed_crops (id TEXT PRIMARY KEY, revision INTEGER NOT NULL, data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE registry_feed_expenses (id TEXT PRIMARY KEY, revision INTEGER NOT NULL, crop_id TEXT NOT NULL REFERENCES registry_feed_crops(id), data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE registry_feed_purchases (id TEXT PRIMARY KEY, revision INTEGER NOT NULL, item_id TEXT NOT NULL REFERENCES registry_feed_items(id), data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE registry_feed_daily (id TEXT PRIMARY KEY, revision INTEGER NOT NULL, on_date TEXT NOT NULL UNIQUE, data TEXT NOT NULL CHECK(json_valid(data)));
+CREATE TABLE registry_feed_lines (id TEXT PRIMARY KEY, summary_id TEXT NOT NULL REFERENCES registry_feed_daily(id) ON DELETE CASCADE, item_id TEXT NOT NULL REFERENCES registry_feed_items(id), position INTEGER NOT NULL, data TEXT NOT NULL CHECK(json_valid(data)), UNIQUE(summary_id, position));
+CREATE TABLE registry_feed_sources (id TEXT PRIMARY KEY, line_id TEXT NOT NULL REFERENCES registry_feed_lines(id) ON DELETE CASCADE, kind TEXT NOT NULL CHECK(kind IN ('crop','purchase','purchased','other','unknown')), crop_id TEXT REFERENCES registry_feed_crops(id), purchase_id TEXT REFERENCES registry_feed_purchases(id), CHECK((kind='crop' AND crop_id IS NOT NULL AND purchase_id IS NULL) OR (kind='purchase' AND purchase_id IS NOT NULL AND crop_id IS NULL) OR (kind IN ('purchased','other','unknown') AND crop_id IS NULL AND purchase_id IS NULL)));
+CREATE TABLE registry_feed_recipients (line_id TEXT NOT NULL REFERENCES registry_feed_lines(id) ON DELETE CASCADE, animal_id TEXT NOT NULL REFERENCES registry_animals(id), PRIMARY KEY(line_id,animal_id));
+CREATE TABLE registry_feed_revisions (id TEXT PRIMARY KEY, entity TEXT NOT NULL, entity_id TEXT NOT NULL, revision INTEGER NOT NULL, operation TEXT NOT NULL, before_json TEXT, after_json TEXT, provenance TEXT NOT NULL, recorded_at TEXT NOT NULL, UNIQUE(entity,entity_id,revision));
+CREATE TRIGGER registry_feed_revisions_no_update BEFORE UPDATE ON registry_feed_revisions BEGIN SELECT RAISE(ABORT, 'feed revisions are append-only'); END;
+CREATE TRIGGER registry_feed_revisions_no_delete BEFORE DELETE ON registry_feed_revisions BEGIN SELECT RAISE(ABORT, 'feed revisions are append-only'); END;
+CREATE TABLE registry_feed_requests (id TEXT PRIMARY KEY, hash TEXT NOT NULL, response TEXT NOT NULL);
+CREATE INDEX registry_feed_sources_crop ON registry_feed_sources(crop_id);
+CREATE INDEX registry_feed_sources_purchase ON registry_feed_sources(purchase_id);
+`;
+
 export const MIGRATIONS: readonly Migration[] = [
   { up: (db) => db.exec(MIGRATION_1_REGISTRY) },
   { up: (db) => db.exec(MIGRATION_2_ESTIMATED_JAN_FIRST), rebuildsTables: true },
@@ -1268,6 +1287,7 @@ export const MIGRATIONS: readonly Migration[] = [
   // set of plain CREATEs must not sit behind one review. THREE INBOUND foreign
   // keys, where migration 2 had one self-reference, so the same relaxation.
   { up: (db) => db.exec(MIGRATION_7_STAFF_DESTINATIONS), rebuildsTables: true },
+  { up: (db) => db.exec(MIGRATION_8_FEED) },
 ];
 
 /** The version a fully-migrated database reports. */
@@ -1483,6 +1503,17 @@ export function applyRegistrySchema(
 
 /** Every table this module creates, for the DROP-list guard and the rebuild. */
 export const REGISTRY_TABLES = [
+  'registry_feed_items',
+  'registry_feed_crops',
+  'registry_feed_expenses',
+  'registry_feed_purchases',
+  'registry_feed_daily',
+  'registry_feed_lines',
+  'registry_feed_sources',
+  'registry_feed_recipients',
+  'registry_feed_revisions',
+  'registry_feed_requests',
+
   'registry_animal_events',
   'registry_animal_status',
   'registry_animals',

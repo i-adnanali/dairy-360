@@ -181,7 +181,7 @@ already built; several assumed present were not.
 | Candidate search endpoint — `GET /link-candidates`, returns every animal marked eligible/ineligible with a server-computed reason, filtered by sex, applying `definitelyBefore` | `routes.ts:187`, `reads.ts:183` |
 | Storage target classification — `GET /storage`, `Target` resolves `harness \| real \| unknown`, re-probed on every navigation | `target.ts` |
 | Persistent session bar on every screen, with a Change button | `registry-shell.ts:15` |
-| `source_ref` column, `Provenance` field, route body parser, event-list display — but no form sends it | schema + routes |
+| Animal-event `source_ref` column, `Provenance` field, route body parser, event-list display — but no animal-entry form sends it | schema + routes |
 | Per-animal timeline — `animalDetail(db, animalId)` returns animal, status and every event oldest-first, including superseded ones with a computed `superseded_by_id` | `reads.ts:110` |
 | Projected parity and lactation state — `registry_animal_status` carries `status`, `parity`, `birth_on`, `birth_precision`, `open_lactation_id` | projection |
 | Animal detail route `/animals/:id` with an event timeline, composer and correction form | `app.routes.ts:40` |
@@ -342,6 +342,10 @@ date at all. Two of those asserted a pattern rather than a value — see the cor
 is the durable lesson from this item.
 
 ### 6.2 Server-side idempotency — BUILT (`v0.13.0`)
+
+This section records the animal-entry policy. The later feed domain uses durable
+successful-key/body binding; see [REGISTRY_FEED.md](REGISTRY_FEED.md). The older
+routes retain the process-local `(key, body)` behavior described below.
 
 An `Idempotency-Key` header, stored per key, returning the original result on replay. Not in the
 original brief and it should have been: it is the cheapest reduction of permanent-duplicate risk,
@@ -763,7 +767,8 @@ One original item remains open; session editing landed in UI phase 7.
   editable gate while preserving the current session and mounted form. Cancel
   keeps the old session; submitting applies the new source and recorder.
 - **`source_ref` capture.** The column, the `Provenance` field, the route parser and the event-list
-  display all exist. Only the capture UI is missing. Without it, provenance records that something
+  display all exist. The animal-entry/shared-session capture UI is missing; feed has
+  per-record source-reference controls in its own forms. Without animal-entry capture, provenance records that something
   came from *a* cycle card rather than *this* one, and in eighteen months it cannot be re-checked
   against the paper.
 

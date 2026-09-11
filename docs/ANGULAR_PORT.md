@@ -22,7 +22,7 @@ This document describes the resulting architecture, not the migration steps.
 
 ## Section 1 - State service (the core)
 
-All UI renders off a single injectable, [web-angular/src/app/core/chat-store.ts](../web-angular/src/app/core/chat-store.ts).
+The agent-chat UI renders off a single injectable, [web-angular/src/app/core/chat-store.ts](../web-angular/src/app/core/chat-store.ts).
 Its state model is a direct port of `web-react/src/App.tsx`: five state atoms and two
 derived values. The two imperative flows (`send`, `resolve`) each open an **AG-UI run** via
 an `@ag-ui/client` `HttpAgent` and feed the resulting event stream into the signals through a
@@ -102,7 +102,8 @@ improvement over the React prop chain).
 > sales screens in [REGISTRY_SALES.md](REGISTRY_SALES.md) § 12, and labour — plus
 > the URL structure, the day board at `/`, and why reads need no recording
 > session — in [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) § 12. None of it is
-> described here. The current five-section shell, palette, themes and assistant
+> described here. Feed routes and daily workflows are in [REGISTRY_FEED.md](REGISTRY_FEED.md).
+> The current six-section shell, palette, themes and assistant
 > overlay are specified in [UI_SYSTEM.md](UI_SYSTEM.md).
 >
 > It is no longer only an *entry* UI, which is why the wording above changed: the

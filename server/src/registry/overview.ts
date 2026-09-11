@@ -1,3 +1,4 @@
+import { feedStanding } from './feed';
 // Animal registry -- the day board (docs/REGISTRY_PAYROLL.md §12.4).
 //
 // What still needs recording. Assembled on the SERVER rather than by six client
@@ -41,6 +42,7 @@ export interface SessionStanding {
 
 export interface DayBoard {
   on: string;
+  feed: ReturnType<typeof feedStanding>;
   /** Per-animal yield. `expected` is the milking roster, derived from lactations. */
   milking: SessionStanding[];
   /** Milk leaving the bulk. `expected` counts STANDING destinations only. */
@@ -127,6 +129,7 @@ export function dayBoard(db: Db, on: string): DayBoard {
 
   return {
     on,
+    feed: feedStanding(db,on),
     milking,
     dispatch,
     payroll: {

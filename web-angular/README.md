@@ -1,7 +1,7 @@
 # Dairy 360 Angular frontend
 
 Current frontend: Angular 22, standalone components, signals and zoneless change
-detection. It includes the animal, milk and labour registry, plus the assistant.
+detection. It includes the animal, milk, feed and labour registry, plus the assistant.
 
 Run the commands below from the **repository root**, using the Node version in
 [`.nvmrc`](../.nvmrc). Install dependencies once with `npm install`.
@@ -33,6 +33,8 @@ covered in [UI_SYSTEM.md](../docs/UI_SYSTEM.md).
 ## Read next
 
 - [UI system](../docs/UI_SYSTEM.md): shell, primitives, certainty, themes and verification.
-- [Screen gallery](../docs/images/phase7/README.md): all routes in light and dark mode.
+- [Phase 7 gallery](../docs/images/phase7/README.md): historical routes and shell states.
+- [Feed gallery](../docs/images/feed/README.md): new feed routes, updated Today and mobile checks.
+- [Feed implementation](../docs/REGISTRY_FEED.md): daily entry, purchases, crops and corrections.
 - [Angular port](../docs/ANGULAR_PORT.md): chat state and component architecture.
 - [Entry UX](../docs/REGISTRY_ENTRY_UX.md): form behavior and the outstanding farm trial.

@@ -1031,6 +1031,10 @@ writing screens are already named for what they write.
 /milk/dispatch             daily sheet
 /milk/buyers               destinations and prices
 /milk/buyers/:id           the buyer statement
+/feed                      feed overview
+/feed/crops                crop cycles; /new and /:id for entry/detail
+/feed/purchases            purchases; /new and /:id for entry/detail
+/feed/daily                history; /:on for the daily account
 /labour/payroll            the monthly run
 /labour/people             staff list
 /labour/people/:id         the wage statement
@@ -1040,10 +1044,10 @@ writing screens are already named for what they write.
 
 **The original divergence from the nav was deliberate.** A URL names a *thing*; encoding the activity —
 `/record/milking` — would put one subject in two places and mean nothing to whoever received the
-link. The three prefixes are the three axes these documents already argue for and are not invented
-for the router: the animal record ([REGISTRY.md](REGISTRY.md)), milk and its counterparties
+link. The original three subject prefixes reflected the domains at the labour baseline: the animal record ([REGISTRY.md](REGISTRY.md)), milk and its counterparties
 ([REGISTRY_SALES.md §1](REGISTRY_SALES.md#this-is-not-step-5-and-the-numbering-should-not-absorb-it)),
-and the people the farm employs (§1 here).
+and the people the farm employs (§1 here). Feed now has its own `/feed` prefix
+for crop cycles, purchases and daily accounts ([REGISTRY_FEED.md](REGISTRY_FEED.md)).
 
 **Milking and dispatch sit under ONE prefix**, which is the only non-obvious placement. Filing them
 by foreign key would put production under `/animals` (because `registry_milkings` has an `animal_id`)
@@ -1051,7 +1055,7 @@ and disposition under `/buyers` — separating the two screens that are done min
 person, that reconcile against each other, and that
 [REGISTRY_SALES.md §15](REGISTRY_SALES.md#15-still-open) asks whether to merge. They are both milk.
 
-`/check` verifies all three axes, so it belongs to none of them and stays at the top level.
+`/check` verifies the registry domains, including feed integrity, so it belongs to none of them and stays at the top level.
 
 **What the depth buys:** step 5's breeding events, treatment and weight land under `/animals`;
 quality-based pricing lands under `/milk`; absences (§11) land under `/labour`. A flat space was
@@ -1067,10 +1071,11 @@ The root used to redirect to `/herd`, and the reason was on the record: *"this b
 herd, and the entry surface being one click deep would cost a click ~35 times in the first session."*
 
 That was an argument about the **backfill**, which [OPEN.md](OPEN.md) still records as not having
-run — and there are now three subsystems, so landing on any one of them privileges it arbitrarily.
+run — and there are multiple registry domains, so landing on any one of them privileges it arbitrarily.
 
 `/` now answers **"what still needs recording?"**: the two milking sessions, the two dispatch
-sessions, and the payroll. Each line is either *recorded* or a link to the screen that clears it,
+sessions, the daily feed account and payroll. Feed explicitly distinguishes recorded,
+partial and unrecorded. Each line links to the screen that reviews or completes it,
 carrying the exact date and session in its query string.
 
 **Every line is actionable or it is not on the page.** No herd count, no litres this month, no
@@ -1093,12 +1098,13 @@ Two judgements inside it that are easy to get wrong:
   the whole of it, so flagging it would make the line amber every day from the 1st to the 30th —
   and a line that is always amber is one nobody reads by the 3rd. This month is stated in passing
   and never flagged; last month unanswered *is* a prompt, and it disappears the moment it is settled.
-- **An empty farm reads as done.** `0 of 0` must not render as a task, or a fresh clone opens on a
-  page of work that does not exist.
+- **Empty milking/dispatch rosters do not create work.** `0 of 0` must not render as
+  outstanding roster work. Since feed was added, an absent daily account still reads
+  “Not recorded”; it is never inferred as no feeding or a complete account.
 
 And one thing it must never say: **"nothing outstanding" while last month is unpaid.** That is the
-single line somebody would trust without checking, so `allClear` includes the payroll and a test
-pins it.
+single line somebody would trust without checking, so `allClear` includes payroll
+and, since the feed extension, a complete daily feeding account. Tests pin the behavior.
 
 ### 12.5 Reads are free; the gate moved to the forms
 

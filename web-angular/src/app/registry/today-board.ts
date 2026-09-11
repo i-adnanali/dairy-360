@@ -59,7 +59,7 @@ import { PageHeading } from '../ui/heading';
         @if (allClear()) {
           <p class="rounded-xl border border-success-lineSoft bg-success-bg px-4 py-3 text-sm text-success-strong"
             data-role="all-clear">
-            Nothing outstanding. Both milkings and both dispatches are recorded, and the payroll is
+            Nothing outstanding. Milk, dispatch and feeding are recorded, and the payroll is
             settled.
           </p>
         }
@@ -94,6 +94,12 @@ import { PageHeading } from '../ui/heading';
           }
         </section>
 
+        <section class="space-y-2" data-role="feed">
+          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Feed</h3>
+          <a [routerLink]="['/feed/daily',b.on]" class="flex flex-wrap justify-between gap-2 rounded-xl border border-line-subtle bg-surface-raised px-4 py-3 text-sm">
+            <span>{{b.feed?.summary || 'Not recorded'}}</span><span>{{b.feed?.state === 'unrecorded' ? 'Record feeding' : 'Review / correct'}}</span>
+          </a>
+        </section>
         <section class="space-y-2" data-role="payroll">
           <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Payroll</h3>
           @if (b.payroll_previous; as prev) {
@@ -185,7 +191,8 @@ export class TodayBoard {
     return (
       b.milking.every((s) => s.complete) &&
       b.dispatch.every((s) => s.complete) &&
-      b.payroll_previous === null
+      b.payroll_previous === null &&
+      (!b.feed || b.feed.state === 'complete')
     );
   });
 

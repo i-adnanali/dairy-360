@@ -41,7 +41,7 @@ function toApiError(e: unknown): ApiError {
   if (e instanceof HttpErrorResponse) {
     const body = e.error as Partial<WireError> | null;
     if (body && typeof body.message === 'string' && typeof body.error === 'string') {
-      return new ApiError(body as WireError, e.status === 400 || e.status === 404);
+      return new ApiError(body as WireError, e.status === 400 || e.status === 404 || e.status === 409);
     }
     // A 500, or a network fault, or HTML from a dev server. NOT a refusal: the
     // operator cannot fix it by editing the form, and pretending otherwise
@@ -80,6 +80,13 @@ type MilkingSessionValue = import('./types').MilkingSession;
 @Injectable({ providedIn: 'root' })
 export class RegistryApi {
   private readonly http = inject(HttpClient);
+
+  feedGet<T>(path: string): Promise<T> {
+    return unwrap(firstValueFrom(this.http.get<T>(`${BASE}/feed/${path}`)));
+  }
+  feedWrite<T>(path: string, body: unknown, key: string): Promise<T> {
+    return unwrap(firstValueFrom(this.http.post<T>(`${BASE}/feed/${path}`, body, { headers: { 'Idempotency-Key': key } })));
+  }
 
   // --- reads ---------------------------------------------------------------
 

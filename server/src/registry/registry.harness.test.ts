@@ -92,6 +92,8 @@ test('no harness-reachable module names the forbidden imports at all', () => {
     // was missing from this list before they were added, which is what a list
     // maintained by hand does.
     'milking.ts',
+    'feed.ts',
+    'feed-fixtures.ts',
     'money.ts',
     'destinations.ts',
     'dispatch.ts',

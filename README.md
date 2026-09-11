@@ -9,18 +9,18 @@ one process: a **dairy agent** (animals, milk yields, feed, health events) and a
 of contact — reconciling milk *produced* against milk *delivered*. A thin
 per-turn dispatcher routes each message to the right agent (or both). The agents
 answer questions about the farm **and take real actions** — but every
-state-changing action is gated behind an explicit human confirmation.
+agent-requested state change is gated behind an explicit human confirmation.
 
 The multi-agent design (and what was deliberately *not* built — no second
 service/A2A, no orchestrator LLM, no auth) is documented in
 [docs/MULTI_AGENT.md](docs/MULTI_AGENT.md).
 
-The registry brings the day's outstanding work, animal histories, and milk
+The registry brings the day's outstanding work, animal histories, milk, feed and labour
 recording into one workspace. These screenshots use the in-memory demo harness.
 
 **Today — see what still needs recording.**
 
-![Today board with outstanding milking, dispatch, and payroll work](docs/images/phase7/today.light.png)
+![Today board with milking, dispatch, feed and payroll](docs/images/feed/today.light.png)
 
 **Herd — browse status and dates without hiding uncertainty.**
 
@@ -30,8 +30,9 @@ recording into one workspace. These screenshots use the in-memory demo harness.
 
 ![Milking roster with per-animal recording controls](docs/images/phase7/milking.light.png)
 
-[View every application screen in light and dark mode](docs/images/phase7/README.md),
-including detail pages, entry forms, payroll, and the assistant.
+[Phase 7 screen gallery](docs/images/phase7/README.md) ·
+[Feed routes and updated Today gallery](docs/images/feed/README.md).
+The galleries identify their build dates, themes and viewport coverage.
 
 **Just want to see it run?** `npm run harness:app` — [one command, no key, no
 database](#just-looking-one-command-no-key-no-database).
@@ -89,13 +90,12 @@ buys the milk, at what rate, and what they owe — is
 herd are [docs/REGISTRY_PAYROLL.md](docs/REGISTRY_PAYROLL.md). Those guides own the domain behavior; [UI_SYSTEM.md](docs/UI_SYSTEM.md)
 owns the current presentation and shell.
 
-It has grown **three axes**, and the numbering says so: the animal record, the
-counterparties milk goes to, and the people the farm employs. Only the first is
-a sequence of steps; the other two hang off nothing in it, which is why neither
-carries a step number.
+The registry covers the animal record, milk sales, labour and feed. Only the
+animal record uses the original step numbering. Feed adds crop cycles and expenses,
+original-unit purchases and one daily feeding account with corrections and history;
+[REGISTRY_FEED.md](docs/REGISTRY_FEED.md) records its implementation and limits.
 
-That last one is worth one sentence here because it is the half a dairy actually
-runs on. Milk leaves the bulk twice a day to a dodhi, to neighbouring households,
+Milk sales follow the farm’s actual collection arrangements. Milk leaves the bulk twice a day to a dodhi, to neighbouring households,
 and to the farm's own kitchen — so a **destination** covers all three, home use
 is recorded rather than lost in a gap, prices are **effective-dated and quoted in
 40-litre lots** the way the farm agrees them, and what is owed is a **ledger**
@@ -112,7 +112,7 @@ ledger as the buyers' with the sign the other way up**. An advance needs no
 flag: the balance simply goes negative and the next period walks it back.
 
 The agent has read-only tools over the herd and milk sales; it has no payroll
-tools. There are three tools over the herd
+or registry-feed tools. There are three tools over the herd
 (`list_registry_animals`, `get_registry_animal`, `get_calving_intervals`) and
 four over the sales side (`list_buyers`, `get_buyer_balance`, `get_dispatches`,
 `get_milk_reconciliation`). **Reads only** — real records are still entered
@@ -169,9 +169,9 @@ execute automatically inside the loop. Write tools (dairy:
 on their own: when the model calls one, `runAgentStream` **pauses** and emits a
 `PendingWrite` confirmation card (via the `agent.pending` CUSTOM event). Nothing is written until the
 user approves; the resume path executes only the approved writes and records a
-"declined" tool result for the rest. Re-sending the same approval does not
-double-write, because the server is stateless and only mutates on an explicit
-approval decision in that request. Both agents share this exact pause/resume
+"declined" tool result for the rest. Re-sending the same pre-write history and approval in a new request can repeat
+the write: approval consumption is local to one run, with no cross-request replay
+store. Registry HTTP idempotency does not protect agent executors. Both agents share this exact pause/resume
 mechanism.
 
 ### 3. Display data is not reasoning data
@@ -259,6 +259,8 @@ order, a paired date correction, an overridden check and dates at all four
 precisions. Behind it: a dodhi, two households and the farm's own kitchen with
 five sessions of milk sold and kept, and three staff — two salaried, one dihari
 — with last month paid, one balance open, one settled and one in advance.
+Feed fixtures add active/finished crops, expenses, measured and unweighed purchases,
+a mixed-source feeding day and a partial account; extend the range to see a missing day.
 
 Everything is seeded **over HTTP through the same routes the forms use**, so no
 row exists that the production write path would refuse. `server/dairy.db` is
@@ -295,8 +297,8 @@ npm run dev:angular
 
 Then open <http://localhost:4200> (Angular). The app opens on a **day board**
 at `/` — what still needs recording today, and nothing else — with the registry
-under `/animals`, milk under `/milk`, labour under `/labour`, and the agent chat
-panel at `/chat`. The registry is a separate surface over real herd records and
+under `/animals`, milk under `/milk`, labour under `/labour`, feed under `/feed`, and the agent chat
+page at `/chat`. The registry is a separate surface over real herd records and
 is documented in [docs/REGISTRY.md](docs/REGISTRY.md) — including how to run it
 against fixture data instead of the real database.
 
@@ -440,7 +442,7 @@ open http://localhost:3000                         # Langfuse UI
 
 ### Farm event ingestion (synthetic)
 
-Camera event plumbing — no hardware, no agent reasoning. Needs the server
+Synthetic camera-event plumbing — these commands need no hardware or agent reasoning. Needs the server
 running; see [docs/FARM_EVENTS.md](docs/FARM_EVENTS.md).
 
 ```bash
@@ -575,5 +577,10 @@ runs normally.
 
 ## Out of scope
 
-No auth/multi-user, no deletes, no IoT/hardware, no cloud deploy. Single-operator
-local demo backed by a local SQLite file.
+Authentication, multi-user tenancy, billing, inventory forecasting, nutrition
+recommendations and cloud deployment are outside the current local application.
+Domain-specific corrections/removals and camera ingestion are implemented.
+Animal events remain append-only; other domains have their own removal policies.
+
+See [REGISTRY_FEED.md](docs/REGISTRY_FEED.md) for feed verification, defaults and
+the documented CLI test-isolation incident; [OPEN.md](docs/OPEN.md) tracks remaining work.

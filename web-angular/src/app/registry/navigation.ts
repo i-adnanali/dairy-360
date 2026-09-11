@@ -1,3 +1,4 @@
+import { farmToday } from './today';
 import { Injectable, signal } from '@angular/core';
 
 export interface NavigationItem {
@@ -36,6 +37,7 @@ export const SECTIONS: Section[] = [
     ],
     actions: [],
   },
+  { label: 'Feed', path: '/feed', views: [{label:'Overview',path:'/feed'},{label:'Crops',path:'/feed/crops'},{label:'Purchases',path:'/feed/purchases'},{label:'Daily history',path:'/feed/daily'}], actions: [{label:'Record feeding',path:'/feed/daily/'+farmToday(),primary:true},{label:'Add crop',path:'/feed/crops/new'},{label:'Record purchase',path:'/feed/purchases/new'}] },
   {
     label: 'Labour',
     path: '/labour/people',

@@ -1104,9 +1104,27 @@ async function main() {
   await seedDispatches();
   await seedStaff();
   await seedPayroll();
+  await seedFeed();
   await report();
   await reportSales();
   await reportStaff();
+}
+
+// Feed writes use the same asserted in-memory target and real HTTP boundary.
+async function seedFeed() {
+  const by={revision:0,source_form:'direct_entry',recorded_by:RECORDER,source_ref:'harness fixture'};
+  const save=(entity,key,body)=>post('/feed/'+entity,'feed:'+key,{...by,...body});
+  const fodder=await save('items','fodder',{label:'Fresh fodder',category:'fresh_fodder',archived:false});
+  const khall=await save('items','khall',{label:'Khall',category:'concentrate',archived:false});
+  const silage=await save('items','silage',{label:'Silage',category:'silage',archived:false});
+  const crop=await save('crops','crop',{label:'Seasonal maize',plot:'East plot',acreage:2,status:'cutting',archived:false});
+  await save('crops','finished',{label:'Previous crop cycle',status:'finished',archived:false,sowing_on:'2025-01-01',sowing_precision:'year'});
+  await save('expenses','seed:'+today(),{crop_id:crop.id,on:today(),category:'seed',amount_minor:150000});
+  const purchase=await save('purchases','trolley:'+today(),{item_id:fodder.id,on:today(),quantity:null,unit:'trolley',pricing:'total',goods_minor:850000});
+  await save('purchases','silage:'+today(),{item_id:silage.id,on:today(),quantity:400,unit:'kg',pricing:'rate',basis_quantity:40,basis_unit:'kg',basis_price_minor:200000,transport_minor:10000});
+  const recipients=await (await fetch(API+'/feed/recipients?on='+today())).json();
+  await save('daily','daily:'+today(),{on:today(),fresh_status:'given',additional_status:'given',assessment:'enough',lines:[{item_id:fodder.id,quantity:null,preparation:'unknown',recipients:'unspecified',animal_ids:[],sources:[{kind:'crop',ref_id:crop.id},{kind:'purchase',ref_id:purchase.id}]},{item_id:khall.id,quantity:null,preparation:'water_mixed',recipients:'milking',animal_ids:recipients.milking.map(a=>a.id),recipients_confirmed:true,sources:[{kind:'unknown',ref_id:null}]}]});
+  await save('daily','partial:'+dayAgo(1),{on:dayAgo(1),fresh_status:'unknown',additional_status:'unknown',assessment:'unknown',lines:[]});
 }
 
 main().catch((e) => die(e.stack ?? String(e)));

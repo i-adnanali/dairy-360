@@ -143,9 +143,9 @@ When it fires, the digest carries `coarsened: true` and a `coarsenNote` so the m
 
 Reads execute automatically; writes never do. A write `tool_use` pauses the loop — the run ends with a `agent.pending` CUSTOM event (carrying the `PendingWrite` cards) plus a plain `RUN_FINISHED`; nothing is written until the client opens a resume run whose `forwardedProps.approvals` carries an `Approval` with `approved: true`. The pause is signalled via `agent.pending` rather than an AG-UI `RUN_FINISHED { outcome: interrupt }`, because the interrupt outcome makes `@ag-ui/client` reject the next run unless it carries a standard `resume[]` array — which fights this app's stateless `forwardedProps.approvals` resume (see [AGUI_MIGRATION.md](./AGUI_MIGRATION.md)).
 
-### 2.7 Stateless approvals / no double-write
+### 2.7 Stateless approvals / replay limitation
 
-Because the server keeps no pending-write state, a mutation happens *only* when the request body carries `approved: true` for that `toolUseId`. Re-sending the same approved conversation does not re-execute the write: on resume the loop consumes `remainingApprovals` once and the model's next reply no longer contains that `tool_use`.
+A mutation happens only when the request body carries `approved: true` for that `toolUseId`. `remainingApprovals` is consumed within one run. Re-sending the same pre-write conversation and approval in a new request can execute the write again: there is no cross-request replay store for agent executors. The normal client advances its history after success, but that is not an exactly-once guarantee. Registry HTTP request keys, including durable feed keys, apply only to their own routes.
 
 ### 2.8 Prompt-injection stance
 

@@ -60,7 +60,7 @@ If `farm_events` ever holds real camera rows alongside synthetic ones, that colu
 
 ## Decision 1 — Registry tables are `registry_*` in one database
 
-Seventeen tables, all prefixed, all disjoint from the demo tables:
+Twenty-seven tables through migration 8, all prefixed and disjoint from the demo tables:
 
 ```
 registry_animals            registry_lactations        registry_serial_counter
@@ -71,6 +71,11 @@ registry_dispatches         registry_payments
 registry_people             registry_engagements
 registry_pay_terms          registry_pay_benefits
 registry_wage_periods       registry_wage_payments
+registry_feed_items        registry_feed_crops
+registry_feed_expenses     registry_feed_purchases
+registry_feed_daily        registry_feed_lines
+registry_feed_sources      registry_feed_recipients
+registry_feed_revisions    registry_feed_requests
 ```
 
 `registry_milkings` arrived with step 4 (migration 3) — see
@@ -93,9 +98,11 @@ farm employs. Migration 7 then rebuilt `registry_destinations` to widen its
 `kind` enum and add a nullable `person_id`, which is how milk allocated as part
 of somebody's pay becomes a destination naming them.
 
-Three axes, and none of them is a step along the animal record.
+Feed adds a fourth domain in migration 8: crops/expenses, purchases and daily
+feeding, with immutable revisions and durable replay keys. See
+[REGISTRY_FEED.md](REGISTRY_FEED.md). Its relationships stay inside the registry.
 
-The prefix goes on all seventeen, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
+The prefix goes on all twenty-seven, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
 
 **No registry table has a foreign key to a demo table, and none ever may.** `resetSchema()` drops the demo tables children-first, which is the only reason `foreign_keys = ON` does not abort it; a registry → demo foreign key would start failing that DROP and would couple the two lifecycles.
 
@@ -126,7 +133,7 @@ The repo's first. Until now the schema was two template literals in `db.ts`: `SC
 
 ```
 registry/schema.ts
-  MIGRATIONS: readonly ((db: Db) => void)[]   ordered, append-only
+  MIGRATIONS: readonly Migration[]   ordered, append-only
   applyRegistrySchema(db)                     pragmas + migrate, any handle
 ```
 
@@ -631,7 +638,7 @@ Rules, in order, first match wins:
 
 ## Entry points
 
-The CLI came first and was the only way in for most of this cycle. **It is no longer the way the herd goes in** — that is the entry UI over the HTTP surface, both documented below, and agent tools are still deferred to the tools cycle. The commands remain, as the scriptable path and as the thing the domain core was extracted out of; every one follows the repo convention: `tsx`, hand-parsed `--flag=value` from `process.argv.slice(2)`, a `USAGE` string, and a `require.main === module` guard.
+The CLI came first and was the only way in for most of this cycle. **It is no longer the way the herd goes in** — that is the entry UI over the HTTP surface, both documented below, and agent writes remain deferred; the herd and sales read tools are already built. The commands remain, as the scriptable path and as the thing the domain core was extracted out of; every one follows the repo convention: `tsx`, hand-parsed `--flag=value` from `process.argv.slice(2)`, a `USAGE` string, and a `require.main === module` guard.
 
 **Seven commands: four that write herd data, plus the rebuild, the verifier and the backup.**
 
@@ -645,7 +652,7 @@ The CLI came first and was the only way in for most of this cycle. **It is no lo
 | `registry:backup` | nothing in the database — a snapshot + dump into `server/backups/` |
 | `verify:registry` | nothing |
 
-`verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–28 rather than inventing a second notion of "valid".
+`verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–28 plus feed integrity check 29 rather than inventing a second notion of "valid". Feed checks are skipped for snapshots predating the feed tables.
 
 ```bash
 # pass one -- the animals that arrived from elsewhere
@@ -804,12 +811,47 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 | POST | `/wage-payments` | `recordWagePayment` — only an `adjustment` may be signed, and it must say why |
 | POST | `/wage-payments/:id/delete` | remove one wage payment, by id |
 | POST | `/rebuild` | `registry:rebuild` |
+| GET | `/feed/recipients` | Date-specific herd and milking recipient suggestions |
+| GET | `/feed/history` | Date-range daily coverage |
+| GET | `/feed/overview` | Recorded costs, quantities and feeding coverage |
+| GET | `/feed/daily/on/:on` | One effective summary by local date |
+| GET | `/feed/items` | List records |
+| GET | `/feed/items/:id` | Review record |
+| GET | `/feed/items/:id/revisions` | Recoverable correction history |
+| POST | `/feed/items` | Create with provenance and revision 0 |
+| POST | `/feed/items/:id` | Correct with expected revision |
+| POST | `/feed/items/:id/delete` | Remove with reference protection; identities refuse and use archive instead |
+| GET | `/feed/crops` | List records |
+| GET | `/feed/crops/:id` | Review record |
+| GET | `/feed/crops/:id/revisions` | Recoverable correction history |
+| POST | `/feed/crops` | Create with provenance and revision 0 |
+| POST | `/feed/crops/:id` | Correct with expected revision |
+| POST | `/feed/crops/:id/delete` | Remove with reference protection; identities refuse and use archive instead |
+| GET | `/feed/expenses` | List records |
+| GET | `/feed/expenses/:id` | Review record |
+| GET | `/feed/expenses/:id/revisions` | Recoverable correction history |
+| POST | `/feed/expenses` | Create with provenance and revision 0 |
+| POST | `/feed/expenses/:id` | Correct with expected revision |
+| POST | `/feed/expenses/:id/delete` | Remove with reference protection; identities refuse and use archive instead |
+| GET | `/feed/purchases` | List records |
+| GET | `/feed/purchases/:id` | Review record |
+| GET | `/feed/purchases/:id/revisions` | Recoverable correction history |
+| POST | `/feed/purchases` | Create with provenance and revision 0 |
+| POST | `/feed/purchases/:id` | Correct with expected revision |
+| POST | `/feed/purchases/:id/delete` | Remove with reference protection; identities refuse and use archive instead |
+| GET | `/feed/daily` | List records |
+| GET | `/feed/daily/:id` | Review record |
+| GET | `/feed/daily/:id/revisions` | Recoverable correction history |
+| POST | `/feed/daily` | Create with provenance and revision 0 |
+| POST | `/feed/daily/:id` | Correct with expected revision |
+| POST | `/feed/daily/:id/delete` | Remove with reference protection; identities refuse and use archive instead |
+
 
 `registryRouter` is a **factory taking a `db` handle**, unlike `farmRouter` which is a const importing the singleton. That is what lets the harness serve the same routes over `:memory:`.
 
 ### Every WRITING route requires an `Idempotency-Key`
 
-Thirteen of the `POST`s above — every one except `/rebuild` — refuse a request
+Every `POST` above except `/rebuild` refuses a request
 without the header, with a 400 and `missing_idempotency_key`. `/rebuild` does not, because a rebuild
 appends nothing: it recomputes projections from the log, so running it twice lands on the same rows,
 which is invariant 0.
@@ -845,14 +887,14 @@ Both halves matter. The domain functions are unchanged and still append twice wh
 two calls **are** two writes unless something says they are one submission, and the key is what says
 so. A change that refused every second write would look identical to a fix in the first half alone.
 
-**Keyed on `(key, body)`, not on the key alone.** The client mints a key on first submit, reuses it
+**The older domains are keyed on `(key, body)`, not on the key alone.** The client mints a key on first submit, reuses it
 while a refusal is on screen, and clears it on success ([form-state.ts](../web-angular/src/app/registry/form-state.ts)).
 So a retry after a network fault replays; a failed-submit-then-edit-then-resubmit has a different
 body and is processed as new, with no client wiring and no "you reused a key" error to explain. Only
 successes are remembered — a 400 wrote nothing, and caching a transient failure would make it
 permanent for that key.
 
-**Storage is an in-process `Map`, and these are the holes.** No migration: putting request plumbing
+**Older-domain storage is an in-process `Map`, and these are the holes.** No migration: putting request plumbing
 into the schema holding the one set of unrecoverable records, to close a window measured in seconds
 on a single-user localhost app, is a bad trade. So keys do not survive a restart — and `npm run dev
 -w server` is `tsx watch`, which restarts on every file save. Not a hazard mid-transcription; real
@@ -861,6 +903,11 @@ both get a fresh key. Deriving the key from the payload would catch those and br
 distinct animals with no name, the same sex and the same arrival year post an identical body, which
 is the roster pass, not a hypothetical. If this app ever grows a second writer, this is the first
 decision to revisit.
+
+**Feed differs:** successful keys are durably bound to the route and body in
+`registry_feed_requests`. Identical retries survive restarts; changed content with
+a successful key returns `feed_conflict` (409). Failed attempts reserve nothing.
+This policy does not change the older domains above. See [REGISTRY_FEED.md](REGISTRY_FEED.md).
 
 ### `GET /storage` — the target, as a positive fact
 
@@ -927,9 +974,9 @@ Which is the "consistency checking cannot detect a wrong rule applied evenly" co
 
 ### Errors on the wire
 
-A domain refusal is `400` with the `RegistryError` wire shape; anything else is a `500`, because it is a bug and must not be dressed up as something an operator can fix. An unknown animal on a read is `404` in the same shape.
+A domain refusal is `400` with the `RegistryError` wire shape, except feed revision/date/key conflicts (`feed_conflict`), which are `409`; unexpected errors are `500`, because they indicate a bug and must not be dressed up as something an operator can fix. An unknown animal on a read is `404` in the same shape.
 
-`missing_idempotency_key` is the one code in `RegistryErrorCode` that is **not** a rule about the herd — it is about the request. It lives in that union anyway because it has to reach a client through the same `{ error, field, message }` shape as everything else, and a second error vocabulary for one case would mean every caller learning two. Its `field` is `idempotency-key`, so a client binds the message the same way it binds any other refusal.
+`missing_idempotency_key` describes the request rather than a rule about the herd. It lives in that union anyway because it has to reach a client through the same `{ error, field, message }` shape as everything else, and a second error vocabulary for one case would mean every caller learning two. Its `field` is `idempotency-key`, so a client binds the message the same way it binds any other refusal.
 
 The serialization matters more than it looks: `code` and `field` are class properties, and `JSON.stringify` on an `Error` subclass returns `{}` unless something converts it. One missing `toWire()` and every form receives an empty object — a bug invisible to a function-level test. That is most of why these routes are tested over real HTTP with a real server on an ephemeral port.
 
@@ -945,7 +992,7 @@ npm run registry:harness -w server -- --empty    # the first-hour state
 npm run harness:app                              # harness + a seeded herd + the app
 ```
 
-Serves `/api/registry` over an **`:memory:`** copy of the `cleanHerd()` fixture — 13 animals (six entered, six minted by calvings, one link candidate) covering all six statuses, a normally-closed lactation, an inferred close, an open lactation, a stillbirth, two departed animals, a farm-born calf and a paired correction. `GET /api/harness` says plainly that this is not `dairy.db`.
+Serves `/api/registry` over an injected **`:memory:`** database. The default is `staffedHerd()` plus `addFeedFixtures()`, covering animal history, milk/sales, labour and feed. `--empty` skips those records; `npm run harness:app` uses that empty start and a separate guarded HTTP walkthrough. `GET /api/harness` identifies the disposable database explicitly.
 
 Add `-- --port=4000` when driving the entry UI through it; see "The entry UI" for why.
 
@@ -1147,11 +1194,13 @@ npm run verify:registry  -w server
 | 26 | Nothing references an unknown person or engagement |
 | 27 | Only `adjustment` wage payments are signed, and a signed one carries a note |
 | 28 | `staff` destinations and people agree; no person has two milk destinations |
+| 29 | Feed effective JSON, relational lines/sources/recipients, foreign keys and latest revision agree; unknown values and missing days remain valid |
 
 **18–22 are argued in [REGISTRY_SALES.md §13](REGISTRY_SALES.md#13-invariants-1822) and 23–28 in
 [REGISTRY_PAYROLL.md §13](REGISTRY_PAYROLL.md#13-invariants-2328)**, where the reasoning for each
 lives beside the tables it defends. They are listed here because this is the canonical numbering and
-a reader counting invariants should not have to open three documents to find the end of the list.
+a reader counting invariants should not have to open several documents to find the end of the list.
+Feed check 29 is implemented by `checkFeed` and described in [REGISTRY_FEED.md](REGISTRY_FEED.md); it participates in Check, `verifyAll` and backup validation.
 
 **Four things the labour block deliberately does NOT check** — overlapping engagements, more than
 one open engagement, a wage period outside its engagement's range, and a wage amount differing from
@@ -1239,3 +1288,7 @@ Blocking rules:
 - **Registry status words are not dispatcher keywords.** `heifer`, `male` and `departed` are absent from `DAIRY_KEYWORDS` in [dispatch.ts](../server/src/agent/dispatch.ts), so a question phrased with them does not route to the dairy agent. No longer harmless-because-deferred, but still harmless in practice: the registry and sales tools are offered on **every** dispatcher branch, so a misrouted turn can still answer. See [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) §5.
 - **The target is re-checked on navigation, not on the write itself.** So one case survives: staying on a single form, having the server on that port replaced underneath, and submitting again without navigating. Everything else — a reload, reaching a form, moving between views — re-asks and sends you back to the gate if the answer changed. Closing it completely means a pre-flight probe inside the four write calls, which is a per-write request and would touch every existing form test; the trigger to build it is any real instance of the surviving case, or a second person entering data.
 - ~~**No agent tools over the registry.**~~ **Resolved, half of it.** Seven read tools exist — three over the herd ([REGISTRY_TOOLS.md](REGISTRY_TOOLS.md)) and four over sales and the ledger ([REGISTRY_SALES.md](REGISTRY_SALES.md)). The other half stands unchanged: **writes are still deferred**, and when they arrive they go through a confirmation-gated `WRITE_EXECUTOR`, with `record_calving` gated in particular — it creates an animal.
+
+## Feed domain
+
+Migration 8, effective feed records, immutable revisions, durable request keys, recipient snapshots and Check integration are documented in [REGISTRY_FEED.md](REGISTRY_FEED.md). Feed fixtures remain isolated. That document also records an unintended additive live schema migration caused by pre-existing CLI usage imports, and the isolation regression that now prevents it.

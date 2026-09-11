@@ -34,8 +34,15 @@ nothing else was re-measured.
 
 **Phase 7 verification — 2026-09-09:** 726 server tests, 339 frontend tests
 across 32 files, typecheck, template checks and the Angular production build pass.
-The initial bundle is 584.58 kB. These update §§4–5; earlier timings, install
-audit counts and environment observations remain dated measurements.
+The initial bundle was 584.58 kB. These are historical Phase 7 measurements;
+earlier timings, install audit counts and environment observations remain dated.
+
+**Feed verification — 2026-09-10:** 742 server tests and 347 frontend tests across
+33 files pass, with typecheck, template checks and the production build. Initial
+bundle: 596.16 kB. These are the latest runs in §§4–5. The first server run exposed
+a pre-existing CLI usage import that opened the live database and applied additive
+migration 8; the imports and isolation regression are fixed. Subsequent full tests
+leave the checksum unchanged. [Incident and verification](REGISTRY_FEED.md#database-preservation-incident-and-fix).
 
 ---
 
@@ -152,15 +159,17 @@ All three ran clean. How to tell each worked:
 | `npm run build -w server` | silent, exit 0; `server/dist/index.js` exists |
 | `npm run build:angular` | `Output location: .../web-angular/dist/web-angular` as the last line |
 
-**Two warnings are expected and pre-existing** on the Angular build — do not
+**Three warnings are present** on the Angular build — do not
 treat them as failures:
 
 ```
-▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 84.58 kB ...
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 96.16 kB ...
 ▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
+▲ [WARNING] NG8113: SummaryBar is not used within the template of PayrollRunScreen
 ```
 
-The Phase 7 initial bundle is 584.58 kB against the 500 kB warning budget.
+The 2026-09-10 feed build is 596.16 kB against the 500 kB warning budget.
+The budget already warned at the Phase 7 baseline of 584.58 kB.
 The CommonJS notice is about `shared/` emitting CJS.
 
 ---
@@ -168,19 +177,19 @@ The CommonJS notice is about `shared/` emitting CJS.
 ## 5. Test
 
 ```bash
-npm test -w server           # 726 tests, node:test via tsx
-npm test -w web-angular      # 339 tests across 32 files, Vitest (jsdom)
+npm test -w server           # 742 tests, node:test via tsx
+npm test -w web-angular      # 347 tests across 33 files, Vitest (jsdom)
 ```
 
-Both passed during Phase 7 verification in the working checkout. They need **no database file and no API key** —
+Both passed during feed verification on 2026-09-10 in the working checkout. They need **no database file and no API key** —
 registry fixtures use `new Database(':memory:')`. Backup tests also write
 snapshots in temporary directories and clean them up; the suite does not use
-the live database.
+the live database after the CLI-import isolation fix documented above.
 
-| Suite | Expected | Notes |
+| Suite | Latest measured result (2026-09-10) | Notes |
 |---|---|---|
-| `npm test -w server` | `# tests 726 / # pass 726 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
-| `npm test -w web-angular` | `Test Files 32 passed / Tests 339 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
+| `npm test -w server` | `# tests 742 / # pass 742 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
+| `npm test -w web-angular` | `Test Files 33 passed / Tests 347 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
 
 **`npm test -w web-angular` needs the node version `.nvmrc` pins** — the Angular CLI refuses below
 its floor and runs nothing, so `nvm use` first. See § 1; the failure mode is a green server suite
@@ -292,9 +301,9 @@ build:shared
 ```
 
 **`--empty` is why the seed exists and why it must stay an HTTP client.** The
-harness started *without* `--empty` serves `tradingHerd()` — a smaller fixture
-built in-process from `fixtures.ts` — which is a different herd with different
-serials. The two are not interchangeable, and the seed's own guard says so by
+harness started *without* `--empty` serves `staffedHerd()` plus `addFeedFixtures()` —
+a smaller fixture built in-process from `fixtures.ts` and `feed-fixtures.ts`, with
+different records and serials. The two are not interchangeable, and the seed's own guard says so by
 name if it finds the wrong one.
 
 The seed is an **HTTP client, not a fixture module**, and every row goes in
@@ -344,8 +353,8 @@ deliberately separate systems.** Confusing them is the likeliest first mistake:
 | | `npm run harness:app` | `npm run seed -w server` |
 |---|---|---|
 | Writes to | an in-memory database, discarded on exit | **`server/dairy.db`**, on disk |
-| Fills | `registry_*` — the herd | the six demo tables (`animals`, `milkings`, `vendors`, …) |
-| Feeds | the entry UI at `/animals`, `/animals/new`, `/animals/calvings/new`, `/check` | the **agent chat** at `/chat` |
+| Fills | `registry_*` — herd, milk, sales, labour and feed fixtures | the six demo tables (`animals`, `milkings`, `vendors`, …) |
+| Feeds | Today and the registry routes under `/animals`, `/milk`, `/feed`, `/labour`, plus `/check` | the **agent chat** at `/chat` |
 | Needs an API key | no | for the chat to answer, yes |
 | Repeatable | yes — and it never touches a real record | yes, by dropping and recreating those six tables |
 
@@ -375,11 +384,13 @@ npm run harness:serve        # serve the PRODUCTION bundle instead of ng serve
 ```
 
 `harness:seed` is **re-runnable**: every write carries a fixed
-`Idempotency-Key`, so a second run against a live harness replays all 51 writes
+`Idempotency-Key`, so a second run against the same running harness replays the fixture writes
 and changes nothing. Verified — two consecutive runs both ended at 31 animals /
 70 events / 17 lactations.
 
-The one sharp edge, found by hitting it: keys are keyed on `(key, **body**)`, so
+Feed additionally uses durable successful-key/body binding: changed content with a
+successful feed key refuses instead of creating another feed record. The following
+sharp edge still applies to the older-domain keys, keyed on `(key, **body**)`, so
 **editing `scripts/harness-seed.mjs` invalidates the replay** — the bodies no
 longer match, the writes are processed as new, and `dry_off` and `note` have no
 uniqueness guard, so they append a second time. It fails by *compounding*, not
@@ -408,9 +419,8 @@ npm start -w web-angular                             # app on :4200, proxies /ap
 ```
 
 Add `--empty` and `npm run harness:seed` to get the herd above instead of the
-13-animal `cleanHerd()` fixture. Without `--empty` the fixture animals are
-mostly nameless with no post number or ear tag, so nothing trips the
-near-duplicate warning.
+injected `staffedHerd()` plus feed fixtures. The HTTP walkthrough has its own
+serials and richer named-animal entry cases; do not layer it over the injected set.
 
 **`--port=4000` is not optional.** The harness defaults to **4100**;
 [`proxy.conf.json`](../web-angular/proxy.conf.json) targets **4000**. Omit the
@@ -511,7 +521,8 @@ Every command takes `--help`, and every date-bearing one **requires an explicit
 
 The first six ran successfully against a throwaway clone's `dairy.db` — real rows,
 then a real correction, then a non-vacuous `verify:registry`. None was run against
-the repo's own `dairy.db`, whose registry is still empty by design.
+the repo's own `dairy.db`. The dated checks below found no animal records;
+that is an observation, not a rule that the persistent registry must stay empty.
 
 **`registry:backup` and `verify:registry --db` were added later and verified
 differently** (2026-09-04): `registry:backup` was run against the repo's own
@@ -837,7 +848,7 @@ npm run verify:registry -w server
 
 `registry:rebuild` is required in both cases, because the projection tables are
 deliberately not in the dump. `verify:registry` is what makes the restore
-trustworthy rather than hopeful — it runs invariants 0–28, so it reports that the
+trustworthy rather than hopeful — it runs invariants 0–28 plus feed integrity check 29 when feed tables are present, so it reports that the
 restored data is *semantically* valid and not merely readable.
 
 **Verify a backup without restoring it**, which is the check worth running before
@@ -861,9 +872,10 @@ and the projections come back identical.
 
 ### Scheduling it
 
-Not wired up, because where the copies live is your decision. On macOS prefer
-`launchd` over `cron` — it survives sleep/wake, which is most of what a laptop
-does. A daily agent runs:
+The local daily job is documented earlier in this section under “Versioned
+history — running. Off-machine — not yet.” Additional destinations or an off-machine schedule are not configured
+by these instructions. For a separate macOS job, use absolute executable paths
+and an explicit destination. Its command is:
 
 ```
 npm run registry:backup -w server -- --out=<your private destination>
@@ -889,25 +901,31 @@ npm run dev:angular
 ```
 
 **What creates the database.** Nothing in `git`: `server/dairy.db` is gitignored.
-It is created the first time **any** process imports `server/src/db.ts` — the
-server, a `registry:*` command, `seed`. `new Database(DB_PATH)` creates the file,
+It is created the first time a process imports `server/src/db.ts` — for example
+the persistent server, a registry write command or `seed`. The harness and isolated unit tests must not import it. The four herd write CLI
+modules now defer that import until command execution, so importing their usage
+constants or asking for their help no longer opens the database. `new Database(DB_PATH)` creates the file,
 then `FARM_SCHEMA` and the migration runner apply.
 
 **Migrations run automatically**, at module load, no command needed. Immediately
 after the first server start, before any seed:
 
 ```
-user_version = 7
+user_version = 8
 tables: farm_events, registry_animal_events, registry_animal_status,
         registry_animals, registry_destination_prices, registry_destinations,
         registry_dispatches, registry_engagements, registry_lactations,
         registry_milkings, registry_parentage, registry_pay_benefits,
         registry_pay_terms, registry_payments, registry_people,
-        registry_serial_counter, registry_wage_payments, registry_wage_periods
+        registry_serial_counter, registry_wage_payments, registry_wage_periods,
+        registry_feed_items, registry_feed_crops, registry_feed_expenses,
+        registry_feed_purchases, registry_feed_daily, registry_feed_lines,
+        registry_feed_sources, registry_feed_recipients, registry_feed_revisions,
+        registry_feed_requests
 ```
 
-All seven registry migrations applied; the seventeen `registry_*` tables exist
-and are empty. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
+The current schema applies eight migrations; the 27 `registry_*` tables exist
+with no farm records. `registry_serial_counter` alone has its initial allocator row. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
 `feed_inventory`, `health_events`. Those are `resetSchema()`'s tables and only
 `seed()` creates them.
 
@@ -981,3 +999,7 @@ invariant 13 as a source-level check.
   and mutate `farm_events`. Verified at `v0.7.0` / `v0.8.0`.
 - **Any platform other than macOS on node 22.22.3.** The `better-sqlite3`
   prebuild and the `lsof` invocations above are the platform-sensitive parts.
+
+## Feed development (2026-09-10)
+
+Feed is included in the injected registry harness and guarded HTTP harness seed. Run `npm run harness:app` for disposable development; never run root `seed` for feed testing. The HTTP seed verifies harness identity before writes and can be replayed. Feed fixtures include unknown-date crops, expenses, original-unit purchases, mixed daily supply and partial accounts. [Implementation, checks and the corrected CLI-import isolation defect](REGISTRY_FEED.md). Use the feed [gallery](images/feed/README.md) alongside Phase 7 captures.

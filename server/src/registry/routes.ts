@@ -1,3 +1,4 @@
+import { checkFeed, feedList, feedGet, feedDaily, feedSave, feedRemove, feedRecipients, feedHistory, feedOverview, cropDays, object, type FeedEntity } from './feed';
 // Animal registry -- HTTP routes for the entry UI.
 //
 // ---------------------------------------------------------------------------
@@ -280,7 +281,7 @@ function handle(fn: (req: Request, res: Response) => void) {
       fn(req, res);
     } catch (e) {
       if (isRegistryError(e)) {
-        res.status(400).json(e.toWire());
+        res.status(e.code === 'feed_conflict' ? 409 : 400).json(e.toWire());
         return;
       }
       throw e; // a bug: Express turns this into a 500, which is what it is
@@ -349,6 +350,42 @@ export function registryRouter(db: Db): express.Router {
   // harness can serve an `:memory:` database, and a shared store would let one
   // router replay a response describing rows in the other's database.
   const replays = new IdempotencyStore();
+
+  // Feed uses the existing write gate, with durable key/body binding confined
+  // to this domain. Failed attempts remain editable; successful keys are immutable.
+  const feedWrite = (fn: (req: Request) => unknown) => write(new IdempotencyStore(), (req, res) => {
+    const result = db.transaction(() => {
+      const key = req.header(IDEMPOTENCY_HEADER)!.trim();
+      const hash = bodyHash({ path: req.path, body: req.body });
+      const prior = db.prepare('SELECT hash, response FROM registry_feed_requests WHERE id=?').get(key) as {hash:string;response:string}|undefined;
+      if (prior) {
+        if(prior.hash !== hash) throw new RegistryError('feed_conflict','This successful request key was already used with different content. Reload and review the saved record.');
+        return JSON.parse(prior.response) as unknown;
+      }
+      const response = fn(req);
+      db.prepare('INSERT INTO registry_feed_requests VALUES (?,?,?)').run(key,hash,JSON.stringify(response));
+      return response;
+    }).immediate();
+    res.json(result);
+  });
+  router.get('/feed/recipients', handle((req,res) => res.json(feedRecipients(db,String(req.query.on ?? farmToday())))));
+  router.get('/feed/history', handle((req,res) => res.json(feedHistory(db,String(req.query.from),String(req.query.to)))));
+  router.get('/feed/overview', handle((req,res) => {
+    const first = feedList(db,'daily').map(r=>String(r.on)).sort()[0];
+    res.json(feedOverview(db,String(req.query.from ?? first ?? farmToday()),String(req.query.to ?? farmToday())));
+  }));
+  router.get('/feed/daily/on/:on', handle((req,res) => res.json(feedDaily(db,req.params.on))));
+  for (const entity of ['items','crops','expenses','purchases','daily'] as FeedEntity[]) {
+    router.get('/feed/'+entity, handle((_req,res) => res.json(feedList(db,entity))));
+    router.get('/feed/'+entity+'/:id', handle((req,res) => {
+      const record = feedGet(db,entity,req.params.id);
+      res.json(entity==='crops' ? {...record, expenses:feedList(db,'expenses').filter(e=>e.crop_id===record.id), supply_days:cropDays(db,record.id)} : record);
+    }));
+    router.get('/feed/'+entity+'/:id/revisions', handle((req,res) => res.json(db.prepare('SELECT * FROM registry_feed_revisions WHERE entity=? AND entity_id=? ORDER BY revision').all(entity,req.params.id))));
+    router.post('/feed/'+entity, feedWrite(req => feedSave(db,entity,object(req.body))));
+    router.post('/feed/'+entity+'/:id', feedWrite(req => feedSave(db,entity,object(req.body),req.params.id)));
+    router.post('/feed/'+entity+'/:id/delete', feedWrite(req => feedRemove(db,entity,req.params.id,object(req.body))));
+  }
 
   // --- reads ---------------------------------------------------------------
 
@@ -527,7 +564,7 @@ export function registryRouter(db: Db): express.Router {
           lactations: snap.lactations.length,
           milkings: snap.milkings.length,
         },
-        violations: checkSnapshot(snap, asOf),
+        violations: [...checkSnapshot(snap, asOf), ...checkFeed(db)],
         histogram: precisionHistogram(snap.events),
         intervals: intervalReport(groupByAnimal(snap.events)),
         milking: milkingReport(snap.milkings, snap.lactations),

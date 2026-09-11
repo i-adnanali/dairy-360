@@ -1,3 +1,4 @@
+import { addFeedFixtures } from './feed-fixtures';
 // Animal registry -- development harness. Serves the registry API over an
 // IN-MEMORY fixture herd.
 //
@@ -127,6 +128,7 @@ function main(): void {
   // added: /payroll, /people and /people/:id opened onto an empty state
   // otherwise, and an empty screen is indistinguishable from a broken one.
   const db = args.empty ? freshDb() : staffedHerd(farmToday()).db;
+  if (!args.empty) addFeedFixtures(db, farmToday());
   const app = harnessApp(db);
 
   app.listen(args.port, () => {

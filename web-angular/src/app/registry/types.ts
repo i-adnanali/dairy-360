@@ -697,6 +697,7 @@ export interface SessionStanding {
 }
 
 export interface DayBoard {
+  feed?: {state: string; summary: string};
   on: string;
   milking: SessionStanding[];
   /** STANDING destinations only — an occasional household is not a gap. */

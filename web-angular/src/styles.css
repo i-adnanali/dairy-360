@@ -682,3 +682,5 @@ app-chat-panel {
 .anomaly-notice { border: 1px dashed rgb(var(--border-strong)); }
 
 .phase7-content app-chat-panel > div:first-child { max-width: 68ch; }
+
+app-feed-editor { display: block; }

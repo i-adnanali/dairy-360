@@ -13,7 +13,6 @@
 // refer to it -- and it keeps the serial sequence roughly chronological, which
 // is not required but makes the herd list far easier to read by eye.
 
-import { db } from '../db';
 import {
   CliError,
   PROVENANCE_FLAGS,
@@ -124,6 +123,8 @@ export function calveMain(argv: string[]): void {
   const damId = requireStr(flags, 'dam', 'e.g. BD-0001');
   const existingCalf = optStr(flags, 'calf');
 
+  // Importing usage/help must never open or migrate the farm database.
+  const { db } = require('../db') as typeof import('../db');
   const r = recordCalving(db, {
     dam_id: damId,
     occurred_on: requireDate(flags, 'on', 'the calving date'),

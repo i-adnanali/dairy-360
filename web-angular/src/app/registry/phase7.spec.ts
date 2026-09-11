@@ -120,10 +120,10 @@ async function shell() {
   return h;
 }
 describe('Phase 7 shell', () => {
-  it('shows five sections and gates section write actions', async () => {
+  it('shows six sections and gates section write actions', async () => {
     const h = await shell();
     const el = h.fixture.nativeElement as HTMLElement;
-    expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(5);
+    expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(6);
     expect(el.querySelector('[data-role="section-start-session"]')).toBeTruthy();
     expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeNull();
     TestBed.inject(Session).set('recall', 'Adnan');

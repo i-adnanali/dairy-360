@@ -217,7 +217,7 @@ import { TextLink } from '../ui/text';
       <div class="relative flex min-h-0 flex-1 flex-col">
         <main
           class="phase7-content flex-1 overflow-y-auto px-4 py-6"
-          [class.phase7-form]="writeOnlyRoute()"
+          [class.phase7-form]="writeOnlyRoute() || feedFormRoute()"
         >
           @if (writeOnlyRoute() && !session.ready()) {
             <app-session-gate />
@@ -251,6 +251,7 @@ export class RegistryShell {
    * beside the route table is a second copy, and the enumeration deleted from
    * routes.ts went stale three times before anyone removed it.
    */
+  protected readonly feedFormRoute = computed(() => /^\/feed\/(daily\/[^/]+|crops\/new|purchases\/new)$/.test(this.url().split(/[?#]/)[0]));
   protected readonly writeOnlyRoute = signal(this.declaresWrites());
 
   constructor() {

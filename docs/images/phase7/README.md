@@ -1,6 +1,8 @@
 # Application screenshot gallery
 
-All 15 application routes are represented below, with one light and one dark desktop capture each. Parameterized routes use one representative fixture record. Session setup and the two shell overlays are listed separately.
+Feed routes added on 2026-09-10 are in the [feed gallery](../feed/README.md). These Phase 7 captures remain historical.
+
+All 15 application routes present at the Phase 7 baseline are represented below, with one light and one dark desktop capture each. Parameterized routes use one representative fixture record. Session setup and the two shell overlays are listed separately.
 
 Captured on 2026-09-09 from the Phase 7 production build against an isolated in-memory harness. These are 1440×900 viewport captures: long pages continue below the image, and inline editing/validation states are not an exhaustive interaction catalogue. Fixture records are not real-farm trial evidence.
 

@@ -69,8 +69,9 @@ These remain open; the linked sections describe their consequences.
 
 ## Missing capability, deliberately deferred
 
-- **Session `source_ref` capture is missing.** In-place session editing is built;
-  the paper/card reference still has no entry control —
+- **Session-level `source_ref` capture is missing.** In-place session editing is built;
+  the shared session gate has no paper/card-reference control. Feed now captures
+  its own source reference per record —
   [REGISTRY_ENTRY_UX.md §6.8](REGISTRY_ENTRY_UX.md#68-session-band)
 
 Built when something needs them, not before.
@@ -114,7 +115,8 @@ Built when something needs them, not before.
 - **No batch price change.** Deliberate at three buyers, with a named trigger to
   build it — [REGISTRY_SALES.md §12.2](REGISTRY_SALES.md#122-milkbuyers--destinations-and-prices)
 - **No revisions trail on a corrected dispatch, payment, wage period or wage payment**, so a
-  changed figure leaves no history. Payroll deliberately did not invent a second answer and waits on
+  changed figure leaves no history in those domains. Feed has its own immutable revision trail;
+  it has not been generalized to sales or payroll. Payroll deliberately did not invent a second answer and waits on
   the sales one — [REGISTRY_SALES.md §8](REGISTRY_SALES.md#8-corrections-the-one-question-this-document-does-not-settle),
   [REGISTRY_PAYROLL.md §8](REGISTRY_PAYROLL.md#8-corrections)
 - **The six demo vendor tools and `get_yield_vs_deliveries` are now redundant**
@@ -190,3 +192,7 @@ Built when something needs them, not before.
 - **Doc naming is inconsistent** (`SCREAMING_SNAKE`, `cycle-7-…`, `Cycle7-fu3-…`)
   and left that way on purpose: ~300 code citations reference these filenames.
   See [README.md § Conventions](README.md#conventions).
+
+## Feed follow-up
+
+- **Real-farm feed usability remains unverified.** Isolated UI checks do not complete the farm trial — [REGISTRY_FEED.md reporting boundaries](REGISTRY_FEED.md#reporting-choices-and-boundaries).

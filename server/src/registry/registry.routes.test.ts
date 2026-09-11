@@ -1,3 +1,4 @@
+import { registryRouter } from './routes';
 // Animal registry -- the HTTP surface, exercised over REAL HTTP.
 //
 // ---------------------------------------------------------------------------
@@ -591,11 +592,11 @@ test('REGISTRY.md § HTTP surface lists exactly the routes the router mounts', (
       (m) => `${m[1]} ${m[2].split('?')[0]}`,
     ),
   );
-  const mounted = new Set(
-    [...src.matchAll(/router\.(get|post)\(\s*'([^']+)'/g)].map(
-      (m) => `${m[1].toUpperCase()} ${m[2]}`,
-    ),
-  );
+  // Inspect the router without binding a port; this covers generated routes too.
+  const db = freshDb();
+  const stack = registryRouter(db).stack as {route?: {path:string;methods:Record<string,boolean>}}[];
+  const mounted = new Set(stack.flatMap(layer => layer.route ? Object.keys(layer.route.methods).map(method=>`${method.toUpperCase()} ${layer.route!.path}`) : []));
+  db.close();
 
   assert.ok(mounted.size > 0, 'the matcher found no routes at all -- update it');
 

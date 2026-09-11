@@ -23,7 +23,6 @@
 // animals appear as a consequence. That is the two-pass order decision doc §11
 // prescribes, enforced by which command exists rather than by a note.
 
-import { db } from '../db';
 import {
   CliError,
   PROVENANCE_FLAGS,
@@ -116,6 +115,8 @@ export function main(argv: string[]): void {
 
   // Every rule below this line lives in addAcquiredAnimal(). This file only
   // turns flags into an input object and prints the result.
+  // Importing usage/help must never open or migrate the farm database.
+  const { db } = require('../db') as typeof import('../db');
   const result = addAcquiredAnimal(db, {
     sex: sex as RegistrySex,
     name: optStr(flags, 'name'),

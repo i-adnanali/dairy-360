@@ -8,7 +8,6 @@
 // validation rule via cli.ts but stay one-file-per-script, the convention every
 // other command in this repo follows.
 
-import { db } from '../db';
 import {
   CliError,
   PROVENANCE_FLAGS,
@@ -90,6 +89,8 @@ export function correctMain(argv: string[]): void {
 
   const asOf = optStr(flags, 'as-of') ?? farmToday();
 
+  // Importing usage/help must never open or migrate the farm database.
+  const { db } = require('../db') as typeof import('../db');
   const r = correctCalving(db, {
     calving_event_id: requireStr(flags, 'event', 'the calving event being corrected'),
     occurred_on: requireDate(flags, 'on', 'the corrected date'),

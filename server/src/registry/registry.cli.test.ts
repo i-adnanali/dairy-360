@@ -197,3 +197,9 @@ test('registry:correct-calving explains the pairing in its usage', () => {
   assert.match(CORRECT_USAGE, /invariant 6/);
   assert.match(CORRECT_USAGE, /Nothing is ever UPDATEd or DELETEd/);
 });
+
+// Usage imports run in this isolated test process; guard their entire dependency graph.
+test('CLI usage imports never open the live database or seed module', () => {
+  const loaded = Object.keys(require.cache).filter(p => /[/\\](db|seed)\.(ts|js)$/.test(p));
+  assert.deepEqual(loaded, []);
+});

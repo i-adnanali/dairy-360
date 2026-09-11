@@ -108,6 +108,14 @@ export const routes: Routes = [
           import('./registry/destination-detail').then((m) => m.DestinationDetail),
       },
 
+      { path: 'feed', data: { feedMode: 'overview' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
+      { path: 'feed/crops', data: { feedMode: 'crops' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
+      { path: 'feed/crops/:id', data: { feedMode: 'crops' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
+      { path: 'feed/purchases', data: { feedMode: 'purchases' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
+      { path: 'feed/purchases/:id', data: { feedMode: 'purchases' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
+      { path: 'feed/daily', data: { feedMode: 'daily' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
+      { path: 'feed/daily/:on', loadComponent: () => import('./registry/feed-daily').then(m => m.FeedDailyScreen) },
+
       // --- labour -------------------------------------------------------------
       {
         path: 'labour/payroll',

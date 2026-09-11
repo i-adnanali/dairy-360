@@ -90,6 +90,7 @@ export type RegistryErrorCode =
   | 'overlapping_wage_period'
   | 'untouched_permanent_engagement'
   // --- payload / dates ---
+  | 'feed_conflict'
   | 'invalid_payload'
   | 'invalid_precision'
   | 'precision_not_defaulted'

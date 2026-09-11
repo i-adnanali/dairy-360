@@ -25,7 +25,6 @@
 // Each refusal names the command to use instead. An operator hitting the wrong
 // one mid-backfill should be redirected, not just stopped.
 
-import { db } from '../db';
 import {
   CliError,
   PROVENANCE_FLAGS,
@@ -145,6 +144,8 @@ export function main(argv: string[]): void {
   // The refusals ABOVE stay here on purpose -- they are about which command you
   // invoked, and their messages name the command to use instead, which is a
   // fact about this transport rather than about the herd.
+  // Importing usage/help must never open or migrate the farm database.
+  const { db } = require('../db') as typeof import('../db');
   const result = appendLifeEvent(db, {
     animal_id: animalId,
     type: type as EnterableEventType,

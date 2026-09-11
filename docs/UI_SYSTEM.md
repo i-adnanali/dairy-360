@@ -1105,9 +1105,9 @@ specified UI; it does not claim that these measurements or decisions happened.
 ```
 nvm use                       # 22.22.3; the default 22.3.0 is refused by the CLI
 npm run check:templates       # before anything compiles -- TWO checks now
-npm test -w web-angular       # 339/339, 32 files
-npm test -w server            # 726/726, 4 suites
-npm run build:angular         # production build, about 584 kB initial
+npm test -w web-angular       # 347/347, 33 files (2026-09-10)
+npm test -w server            # 742/742, 4 suites (2026-09-10)
+npm run build:angular         # 596.16 kB initial in the 2026-09-10 build
 npm run check:contrast        # 30 known failures, printed not gated -- §9.6
 ```
 
@@ -1183,8 +1183,9 @@ modifiers specifically: `rgb(var(--surface-page) / 0.8)`,
 
 ### 10.5 Screenshots
 
-The current [application gallery](images/phase7/README.md) covers all 15 routes
-in both themes, plus session setup and shell overlays. It uses fixed desktop
+The historical [Phase 7 gallery](images/phase7/README.md) covers its 15 routes
+in both themes, plus session setup and shell overlays. The [feed gallery](images/feed/README.md)
+adds the feed routes, updated Today and representative light/dark/mobile checks. It uses fixed desktop
 viewport captures and a small set of mobile and grayscale checks. The legacy
 script below still enumerates 14 routes: it omits `/animals/calvings`, and it
 was not used to produce the Phase 7 gallery. Its older full-page capture method
@@ -1344,8 +1345,8 @@ around the entry forms and the tab order into them. See §3.4.
 | Left | App name, then the **storage chip** (§12.2) |
 | Right | The **session chip** (§12.3), Search, theme toggle, assistant toggle |
 
-**Row 2 is the section nav**, same surface, `line-subtle` beneath. Five items:
-Today, Herd, Milk, Labour — then Check, pushed right with `margin-left: auto`.
+**Row 2 is the section nav**, same surface, `line-subtle` beneath. Six items:
+Today, Herd, Milk, Feed, Labour — then Check, pushed right with `margin-left: auto`.
 Active takes `content-primary` with a 2px bottom border in the same colour;
 others `content-muted`.
 
@@ -1401,6 +1402,7 @@ action.
 | Today | — | Start / change recording session |
 | Herd | Animals, Calvings | Record calving, **Add animal** |
 | Milk | Milking, Dispatch, Buyers | — |
+| Feed | Overview, Crops, Purchases, Daily history | **Record feeding**, Add crop, Record purchase |
 | Labour | People, Payroll | Add person |
 | Check | — | Recheck |
 
@@ -1445,11 +1447,11 @@ Built. One operator, keyboard-heavy, long sittings, 31
 animals with stable serials: typing `BD-0016` beats Herd → scan → click every
 time.
 
-Scope: the five sections and their views; every animal by serial or name; every
+Scope: the six sections and their views; every animal by serial or name; every
 person and destination by name; and the §12.4 actions, shown disabled with their
 reason when no session is open.
 
-It is what lets the nav stay at five items as the app grows, and it is the
+It provides direct access across the six-item nav, and it is the
 natural home for the held keyboard items in `REGISTRY_ENTRY_UX.md` §11.
 
 **Nothing registered a global key handler, and now something does.**
@@ -1726,3 +1728,9 @@ from what the app already does:
   narrows the question to whether the dim helps, rather than whether it blocks.
 - ~~Whether `/chat` should survive.~~ **Resolved:** retain it as a deep link;
   the header panel is the normal entry point.
+
+## 17. Feed extension — 2026-09-10
+
+Feed adds one section between Milk and Labour, its contextual views/actions and command-palette entries. Existing cards, inputs, buttons, date parsing, recording setup and write announcements are reused. Daily entry and new crop/purchase routes use the shell’s compact form layout. Saved daily lines collapse for correction; review spells out sources, snapshots, preparation and unknown quantities. Partial and absent accounts use words, not colour alone.
+
+Desktop light/dark and 390px checks are in the [feed gallery](images/feed/README.md); the Phase 7 gallery remains historical. The five-animal farm trial is still outstanding. No resting border or other colour tokens changed; the current contrast report has 30 token failures. [Feed semantics and verification](REGISTRY_FEED.md).
