@@ -56,6 +56,12 @@ import { PageHeading } from '../ui/heading';
       }
 
       @if (board(); as b) {
+        @if (b.health; as h) {
+          <section class="space-y-2" data-role="health">
+            <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Animal health</h3>
+            <a routerLink="/animals/health" class="block rounded-xl border border-line-subtle bg-surface-raised px-4 py-3 text-sm">{{h.overdue}} overdue · {{h.due}} due today · {{h.withdrawals.length}} withdrawal instructions to review</a>
+          </section>
+        }
         @if (allClear()) {
           <p class="rounded-xl border border-success-lineSoft bg-success-bg px-4 py-3 text-sm text-success-strong"
             data-role="all-clear">
@@ -192,7 +198,8 @@ export class TodayBoard {
       b.milking.every((s) => s.complete) &&
       b.dispatch.every((s) => s.complete) &&
       b.payroll_previous === null &&
-      (!b.feed || b.feed.state === 'complete')
+      (!b.feed || b.feed.state === 'complete') &&
+      (!b.health || (b.health.overdue === 0 && b.health.due === 0 && b.health.withdrawals.length === 0))
     );
   });
 

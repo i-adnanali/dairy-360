@@ -225,6 +225,7 @@ export const OUT_OF_BAND = 0.5;
                   >
                     <td appCell density="compact">
                       <span class="font-mono text-content-heading">{{ row.animal_id }}</span>
+                      @for(w of row.health_withdrawals || []; track $index) {<p class="text-sm text-content-primary">{{w.target}} withdrawal: {{w.instruction || 'needs clarification'}} {{w.until || ''}}</p>}
                       <!-- An unnamed animal is a real no-record: she has a
                            serial and nobody has given her a name. -->
                       @if (row.name) {

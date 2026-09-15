@@ -20,10 +20,12 @@ Those documents are not current specifications; some of their proposals were lat
 | Run it locally, or fix a broken setup | [DEVELOPMENT.md](DEVELOPMENT.md) |
 | Understand how the system fits together | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) |
 | Understand the agent loop, guardrails, tool contracts | [TECHNICAL.md](TECHNICAL.md) |
+| Work on veterinary visits, treatments, vaccinations and life reports | [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) |
 | Work on the real-animal records | [REGISTRY.md](REGISTRY.md) |
 | Work on milk sales, home use, buyer balances | [REGISTRY_SALES.md](REGISTRY_SALES.md) |
 | Work on employees, packages and wages | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) |
-| Work on crops, expenses, purchases and daily feeding | [REGISTRY_FEED.md](REGISTRY_FEED.md) |
+| Work on crops, expenses, purchases and daily feeding | [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) | Veterinary visits, examinations, cases, plans, doses, tasks, attachment audit, vaccination cards and lifetime reporting; migration 9 | Current implementation and remaining capture gaps |
+| [REGISTRY_FEED.md](REGISTRY_FEED.md) |
 | Work on the frontend | [UI_SYSTEM.md](UI_SYSTEM.md), then [ANGULAR_PORT.md](ANGULAR_PORT.md) for the chat state model |
 | Find out why a URL looks the way it does, or what `/` shows | [REGISTRY_PAYROLL.md §12.3–§12.6](REGISTRY_PAYROLL.md#123-navigation-and-url-structure--the-change-that-forced-both-decisions) |
 | Change the wire protocol | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) |
@@ -46,6 +48,7 @@ Those documents are not current specifications; some of their proposals were lat
 | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milk/milking` roster | Deep |
 | [REGISTRY_SALES.md](REGISTRY_SALES.md) | Milk sales, home use and the buyer ledger: destinations, effective-dated prices in 40-litre lots, the daily dispatch sheet, the reconciliation, migrations 4–5 | Deep |
 | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) | Labour: people and engagements, effective-dated packages with in-kind benefits, dihari, the monthly run, the wage ledger, migrations 6–7. Also §12.3–§12.6: the URL structure, the day board at `/`, and why reads need no recording session | Deep |
+| [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) | Veterinary visits, examinations, cases, plans, doses, tasks, attachment audit, vaccination cards and lifetime reporting; migration 9 | Current implementation and remaining capture gaps |
 | [REGISTRY_FEED.md](REGISTRY_FEED.md) | Feed implementation: migration 8, crop costs, original-unit purchases, daily accounts, snapshots, audit/replay, Today and verification | Current implementation; [FEED_SPEC.md](FEED_SPEC.md) preserves the original requirements |
 | [FARM_EVENTS.md](FARM_EVENTS.md) | Camera-event ingestion: the real Frigate and Double Take payload shapes, normalization, the `farm_events` model | Deep. Cited from `payloadShape.ts`, `db.ts`, `shared/types.ts` |
 
@@ -94,6 +97,7 @@ which are closed.
 
 ## Handoffs and implementation records
 
+- [ANIMAL_HEALTH_SPEC.md](ANIMAL_HEALTH_SPEC.md): original codebase-validated requirements for health management and lifetime reports; implementation and refinements are in [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md).
 - [FEED_SPEC.md](FEED_SPEC.md): confirmed farm practices and original implementation specification; implemented, with current behavior in [REGISTRY_FEED.md](REGISTRY_FEED.md).
 - [AUTH_HANDOFF.md](AUTH_HANDOFF.md): historical, unapproved authentication brainstorm; later decisions deferred that work. It is not an active implementation requirement.
 - [Feed gallery](images/feed/README.md): new routes, Today integration and narrow-layout verification. [Phase 7 gallery](images/phase7/README.md) preserves the earlier baseline.

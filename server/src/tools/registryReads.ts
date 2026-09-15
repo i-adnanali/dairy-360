@@ -1,3 +1,5 @@
+import { animalHealth, healthBoard, lifeReport } from '../registry/health-reads';
+import { HealthError } from '../registry/health';
 // Registry read tools (Cycle 9; see docs/REGISTRY_TOOLS.md).
 //
 // The first tools in this repo that read a `registry_*` table -- facts about
@@ -67,6 +69,7 @@ function guarded(fn: () => ReadToolResult): ReadToolResult {
   try {
     return fn();
   } catch (e: unknown) {
+    if (e instanceof HealthError) return { modelDigest: e.toWire() };
     if (isRegistryError(e)) return { modelDigest: { ...e.toWire() } satisfies ToolError };
     throw e;
   }
@@ -229,6 +232,11 @@ export function getCalvingIntervals(db: Db, args: Args): ReadToolResult {
 // and guardIds guards both. See REGISTRY_TOOLS.md §6.
 
 export const REGISTRY_READ_TOOLS: ToolSchema[] = [
+  ...[
+    {name:'get_registry_health', description:'Health records and actual vaccinations for a REAL registry animal. Plans are not administered doses. Preserve unknown details and source record IDs.'},
+    {name:'get_registry_life_report', description:'Complete recorded life report for a REAL registry animal: health, reproduction, production, feed and coverage gaps. Never interpret missing records as no events or shared costs as individual profit.'},
+  ].map(t=>({...t, input_schema:{type:'object' as const, properties:{serial:{type:'string'}}, required:['serial']}})),
+  {name:'get_registry_health_board', description:'Due and overdue REAL registry health tasks, open cases and recorded withdrawal instructions. No diagnosis or treatment advice.', input_schema:{type:'object',properties:{on:{type:'string'}}}},
   {
     name: 'list_registry_animals',
     description:
@@ -276,6 +284,9 @@ export function registryReadExecutors(
   db: Db,
 ): Record<string, (args: Args) => ReadToolResult> {
   return {
+    get_registry_health: (args) => guarded(() => ({modelDigest: animalHealth(db, serialOf(args))})),
+    get_registry_life_report: (args) => guarded(() => ({modelDigest: lifeReport(db, serialOf(args))})),
+    get_registry_health_board: (args) => guarded(() => ({modelDigest: healthBoard(db, typeof args.on==='string'?args.on:undefined)})),
     list_registry_animals: (args) => guarded(() => listRegistryAnimals(db, args)),
     get_registry_animal: (args) => guarded(() => getRegistryAnimal(db, args)),
     get_calving_intervals: (args) => guarded(() => getCalvingIntervals(db, args)),

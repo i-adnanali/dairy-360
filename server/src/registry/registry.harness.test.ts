@@ -73,6 +73,7 @@ test('no harness-reachable module names the forbidden imports at all', () => {
     'routes.ts',
     'reads.ts',
     'fixtures.ts',
+    'health-fixtures.ts',
     'entry.ts',
     'calving.ts',
     'projectStore.ts',

@@ -117,6 +117,11 @@ test('the backed-up tables are exactly the non-projection registry tables', () =
       'registry_feed_revisions',
       'registry_feed_sources',
 
+      'registry_health_attachment_links',
+      'registry_health_attachments',
+      'registry_health_records',
+      'registry_health_requests',
+      'registry_health_revisions',
       'registry_milkings',
       'registry_pay_benefits',
       'registry_pay_terms',

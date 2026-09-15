@@ -684,3 +684,23 @@ app-chat-panel {
 .phase7-content app-chat-panel > div:first-child { max-width: 68ch; }
 
 app-feed-editor { display: block; }
+
+/* Animal report printing: release the application shell's scrolling viewport. */
+@media print {
+  html:has(app-life-report), body:has(app-life-report),
+  app-registry-shell:has(app-life-report), app-registry-shell:has(app-life-report) > div,
+  app-registry-shell:has(app-life-report) main {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+  }
+  app-registry-shell:has(app-life-report) > div > header,
+  app-registry-shell:has(app-life-report) [data-role="section-bar"],
+  app-registry-shell:has(app-life-report) app-assistant-panel,
+  app-registry-shell:has(app-life-report) app-command-palette {
+    display: none !important;
+  }
+  @page { margin: 15mm; }
+}

@@ -1,3 +1,4 @@
+import { healthBoard } from './health-reads';
 import { feedStanding } from './feed';
 // Animal registry -- the day board (docs/REGISTRY_PAYROLL.md §12.4).
 //
@@ -41,6 +42,7 @@ export interface SessionStanding {
 }
 
 export interface DayBoard {
+  health: ReturnType<typeof healthBoard>;
   on: string;
   feed: ReturnType<typeof feedStanding>;
   /** Per-animal yield. `expected` is the milking roster, derived from lactations. */
@@ -128,6 +130,7 @@ export function dayBoard(db: Db, on: string): DayBoard {
   const prevRun = payrollRun(db, prev.from, prev.to, on);
 
   return {
+    health: healthBoard(db, on),
     on,
     feed: feedStanding(db,on),
     milking,

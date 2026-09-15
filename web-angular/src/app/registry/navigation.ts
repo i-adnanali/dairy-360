@@ -21,6 +21,7 @@ export const SECTIONS: Section[] = [
     views: [
       { label: 'Animals', path: '/animals' },
       { label: 'Calvings', path: '/animals/calvings' },
+      { label: 'Health', path: '/animals/health' },
     ],
     actions: [
       { label: 'Record calving', path: '/animals/calvings/new' },

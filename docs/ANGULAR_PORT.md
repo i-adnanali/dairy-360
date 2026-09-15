@@ -207,3 +207,11 @@ The agent loop and all guardrails are unchanged - see [TECHNICAL.md](./TECHNICAL
 wire contract is now AG-UI streaming over SSE (`POST /api/agent/run`) rather than the
 original blocking `POST /api/chat`; that migration is documented in
 [AGUI_MIGRATION.md](./AGUI_MIGRATION.md).
+
+## Health extension — 2026-09-15
+
+The lazy `/animals/health` screen sits within Herd and guards unsaved drafts.
+`/animals/:id/report` combines the vaccination card and recorded lifetime sections.
+Today and milking include health work/withdrawal notices. These registry components
+use HTTP reads and forms independently of the AG-UI chat state described above.
+See [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md).

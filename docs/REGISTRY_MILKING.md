@@ -510,3 +510,12 @@ holds — do not migrate for it alone — so it now waits for migration 4 rather
   count, is very likely to apply to a roster of a dozen rows — wait for it before hardening §9.1.
 
 ---
+
+## Health integration — 2026-09-15
+
+The roster API adds recorded health withdrawal notices, displayed beside daily
+recording without changing measured production. Animal profiles now link to a
+lifetime report combining milk, health, reproduction and feed history. This does
+not implement the deferred lactation curve, structured breeding events or an
+automatic health note from a `sick` milking reason. See
+[REGISTRY_HEALTH.md](REGISTRY_HEALTH.md).

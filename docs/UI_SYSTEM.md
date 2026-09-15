@@ -1734,3 +1734,18 @@ from what the app already does:
 Feed adds one section between Milk and Labour, its contextual views/actions and command-palette entries. Existing cards, inputs, buttons, date parsing, recording setup and write announcements are reused. Daily entry and new crop/purchase routes use the shell’s compact form layout. Saved daily lines collapse for correction; review spells out sources, snapshots, preparation and unknown quantities. Partial and absent accounts use words, not colour alone.
 
 Desktop light/dark and 390px checks are in the [feed gallery](images/feed/README.md); the Phase 7 gallery remains historical. The five-animal farm trial is still outstanding. No resting border or other colour tokens changed; the current contrast report has 30 token failures. [Feed semantics and verification](REGISTRY_FEED.md).
+
+## 18. Health extension — 2026-09-15
+
+Herd includes Health (`/animals/health`); animal profiles link to the lifetime report
+and vaccination card (`/animals/:id/report`). Health browsing needs no session;
+recording uses the session gate, revisions preserve drafts on conflict, and leaving
+an unsaved form prompts before navigation. Today adds due health work and the
+milking roster adds recorded withdrawal notices.
+
+Report sections initially show ten records, with Show more and complete JSON export.
+Print styles expand records, hide shell navigation and release scrolling for browser
+printing. A 390px-wide report and desktop workflows were checked against an isolated
+harness without console errors. Actual Save-as-PDF output and real-farm acceptance
+remain unverified. Prior galleries and measurements retain their original dates.
+See [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for full behavior and validation.

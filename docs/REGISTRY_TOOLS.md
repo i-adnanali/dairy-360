@@ -4,7 +4,7 @@
 > and its text is left as written; two counts in it are now historical rather than wrong-then:
 >
 > - "`ALL_TOOLS` advertises 21 tools ... **not one of them reads a `registry_*` table**" was true at
->   `f3262d7` and is what this cycle set out to change. It is now 28, of which seven read the
+>   `f3262d7` and is what this cycle set out to change. At the sales checkpoint it became 28, of which seven read the
 >   registry: the three below, plus `list_buyers`, `get_buyer_balance`, `get_dispatches` and
 >   `get_milk_reconciliation` over the sales tables.
 > - The deferral of `get_milking_record` for want of fixture rows is **closed**: `fixtures.ts` now
@@ -13,6 +13,12 @@
 > Decision 1 (reads unrestricted, writes deferred) and Decision 2 (the demo tool surface is not
 > touched) both still stand, and the sales tools were built under them.
 
+
+> **Current extension (2026-09-15):** health adds `get_registry_health`,
+> `get_registry_health_board` and `get_registry_life_report`, for ten registry
+> reads overall. Feed and health now have registry storage; the missing-table
+> mapping below describes the Cycle 9 baseline only. See
+> [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for the delivered contracts.
 
 ## Context
 
@@ -341,3 +347,10 @@ The answer closed with *"would you like to log a milking for her?"* — a capabi
 - **`search_animals` has no registry equivalent.** Deliberate for now: fuzzy-matching `BD-0001` against 5-20 animals is not a problem worth a tool, and `list_registry_animals` returns the whole herd well inside a digest budget. It becomes worth building at a herd size the farm does not have.
 - **No `get_lactation_history`.** REGISTRY.md:45 names it as one of the two tools that would trigger the merge. `get_registry_animal` returns the event list a lactation history would be derived from, so the specific tool is unnecessary until there is something to say about a lactation that its events don't already say — most likely alongside `get_milking_record`.
 - **Digest size is unbudgeted.** `get_registry_animal` returns every event including superseded ones, with full payloads and four provenance columns each. At 5-20 animals with a handful of events each this is nothing. There is no cap, no `tooMany` flag, and no measurement of where it stops being nothing — unlike `search_animals` (8) and `get_farm_events` (50), both of which have one. The trigger to build one is the first animal with a long timeline, not a herd-size threshold.
+
+## Current status of the write-offer finding — 2026-09-15
+
+The system prompt now explicitly says registry reads only and directs users to
+entry screens when recording is requested. It also forbids demo health tools for
+registry serials. The earlier “one clause” implementation gap is closed; a dedicated
+live-model eval proving that the model consistently follows it remains open.

@@ -537,17 +537,17 @@ function dbAtVersion1(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('a fresh database lands on the current target version, now 8', () => {
+test('a fresh database lands on the current target version, now 9', () => {
   // The literal is deliberate and this test is meant to fail when a migration is
   // added: it forces whoever adds one to state the new number here rather than
   // letting TARGET_VERSION verify itself against itself.
   const db = freshDb();
   assert.equal(db.pragma('user_version', { simple: true }), TARGET_VERSION);
-  assert.equal(TARGET_VERSION, 8);
+  assert.equal(TARGET_VERSION, 9);
   db.close();
 });
 
-test('migrations 2 through 8 upgrade a v1 database and PRESERVE its rows', () => {
+test('migrations 2 through 9 upgrade a v1 database and PRESERVE its rows', () => {
   // The rebuild is create-copy-drop-rename. The copy is the part that would
   // silently lose data if it were wrong, so it is tested with data present --
   // even though the real database was empty when this shipped.
@@ -569,10 +569,10 @@ test('migrations 2 through 8 upgrade a v1 database and PRESERVE its rows', () =>
 
   const result = runMigrations(db);
   assert.equal(result.from, 1);
-  assert.equal(result.to, 8);
+  assert.equal(result.to, 9);
   assert.equal(
     result.applied,
-    7,
+    8,
     'the estimated-convention rebuild, the milking table, the override columns, ' +
       'the four sales tables, the six labour tables AND the staff-destination rebuild',
   );
@@ -672,10 +672,10 @@ test('migration 4 MOVES a payload override into the columns, and out of the payl
 
   const result = runMigrations(db);
   assert.equal(result.from, 3);
-  assert.equal(result.to, 8);
+  assert.equal(result.to, 9);
   assert.equal(
     result.applied,
-    5,
+    6,
     'the override rebuild, the sales tables, the labour tables and the staff rebuild',
   );
 

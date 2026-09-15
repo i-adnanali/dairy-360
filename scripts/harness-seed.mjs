@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 // Seed a walkthrough herd into the registry HARNESS, over HTTP.
 //
 // ---------------------------------------------------------------------------
@@ -1105,6 +1106,7 @@ async function main() {
   await seedStaff();
   await seedPayroll();
   await seedFeed();
+  await seedHealth();
   await report();
   await reportSales();
   await reportStaff();
@@ -1125,6 +1127,35 @@ async function seedFeed() {
   const recipients=await (await fetch(API+'/feed/recipients?on='+today())).json();
   await save('daily','daily:'+today(),{on:today(),fresh_status:'given',additional_status:'given',assessment:'enough',lines:[{item_id:fodder.id,quantity:null,preparation:'unknown',recipients:'unspecified',animal_ids:[],sources:[{kind:'crop',ref_id:crop.id},{kind:'purchase',ref_id:purchase.id}]},{item_id:khall.id,quantity:null,preparation:'water_mixed',recipients:'milking',animal_ids:recipients.milking.map(a=>a.id),recipients_confirmed:true,sources:[{kind:'unknown',ref_id:null}]}]});
   await save('daily','partial:'+dayAgo(1),{on:dayAgo(1),fresh_status:'unknown',additional_status:'unknown',assessment:'unknown',lines:[]});
+}
+
+// Shared declarative scenarios; reads no database and uses production HTTP writes.
+async function seedHealth() {
+  const scenario = JSON.parse(await readFile(new URL('../server/src/registry/health-fixture-scenario.json', import.meta.url), 'utf8'));
+  const on = today();
+  const animals = (await (await fetch(API+'/animals')).json());
+  const rows = Array.isArray(animals) ? animals : animals.animals;
+  const resident = rows.filter(a=>a.status !== 'departed').slice(0,3);
+  if (resident.length < 3) throw new Error('Health fixtures need three resident animals');
+  const refs = {};
+  const day = offset => new Date(Date.parse(on+'T12:00:00Z')+offset*86400000).toISOString().slice(0,10);
+  const resolve = value => {
+    if (Array.isArray(value)) return value.map(resolve);
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,resolve(v)]));
+    if (typeof value !== 'string') return value;
+    if (value.startsWith('$animal:')) return resident[Number(value.slice(8))].id;
+    if (value.startsWith('$day:')) return day(Number(value.slice(5)));
+    if (value.startsWith('$until:')) return day(Number(value.slice(7)))+'T18:00:00+05:00';
+    if (value === '$month') return on.slice(0,7)+'-01';
+    return value.replace(/\$ref:([\w-]+)/g,(_,key)=>{if(!refs[key]) throw new Error('Missing health fixture reference '+key);return refs[key];});
+  };
+  for (const step of scenario) {
+    const result = await post(resolve(step.path),'health:'+on+':'+step.key,{
+      recorded_by:'health_fixture',source_form:'direct_entry',source_ref:'Synthetic harness health card',...resolve(step.body)
+    });
+    if (result.id) refs[step.key] = result.id;
+  }
+  console.log('Health: visits, cases, courses, doses, round outcomes, tasks, corrections, attachment and costs seeded.');
 }
 
 main().catch((e) => die(e.stack ?? String(e)));

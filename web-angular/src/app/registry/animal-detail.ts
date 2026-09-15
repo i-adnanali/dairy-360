@@ -1,3 +1,5 @@
+import { RouterLink } from '@angular/router';
+import { Button } from '../ui/button';
 // One animal's record: identity, derived status, event list, and the two forms
 // that act on it.
 
@@ -22,6 +24,7 @@ type Tab = 'events' | 'add-event' | 'correct';
   selector: 'app-animal-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    RouterLink, Button,
     Card,
     Certainty,
     CorrectionForm,
@@ -131,6 +134,8 @@ type Tab = 'events' | 'add-event' | 'correct';
 
         @switch (tab()) {
           @case ('events') {
+            <a appButton variant="secondary" [routerLink]="['/animals',d.animal.id,'report']">Life report / vaccination card</a>
+            <a appButton variant="secondary" routerLink="/animals/health">Manage health</a>
             <app-event-list [events]="d.events" />
           }
           @case ('add-event') {

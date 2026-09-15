@@ -45,9 +45,9 @@ These remain open; the linked sections describe their consequences.
   HTTP idempotency keys do not cover agent executors —
   [TECHNICAL.md §1.3](TECHNICAL.md#13-the-write-gate-pause-and-resume).
 
-- **The model offers registry writes it cannot perform.** `log_milking` hits the
-  demo table and `guardIds` rejects a `BD-` serial, so the offer is a confusing
-  dead end. One clause in the prompt, and it wants its own eval —
+- **Registry-write refusal needs a dedicated live-model eval.** The prompt now
+  explicitly directs recording to registry screens and forbids demo health tools
+  for registry serials. The earlier observed offer needs regression coverage —
   [REGISTRY_TOOLS.md § Open items](REGISTRY_TOOLS.md#open-items)
 - **Real Double Take labels every unknown face `'unknown'`**, so classification
   rule 2 counts all strangers as one person — [cycle-7-followups.md FU-4](cycle-7-followups.md#fu-4)
@@ -70,8 +70,8 @@ These remain open; the linked sections describe their consequences.
 ## Missing capability, deliberately deferred
 
 - **Session-level `source_ref` capture is missing.** In-place session editing is built;
-  the shared session gate has no paper/card-reference control. Feed now captures
-  its own source reference per record —
+  the shared session gate has no paper/card-reference control. Feed and health now capture
+  their own source reference per record —
   [REGISTRY_ENTRY_UX.md §6.8](REGISTRY_ENTRY_UX.md#68-session-band)
 
 Built when something needs them, not before.
@@ -115,7 +115,7 @@ Built when something needs them, not before.
 - **No batch price change.** Deliberate at three buyers, with a named trigger to
   build it — [REGISTRY_SALES.md §12.2](REGISTRY_SALES.md#122-milkbuyers--destinations-and-prices)
 - **No revisions trail on a corrected dispatch, payment, wage period or wage payment**, so a
-  changed figure leaves no history in those domains. Feed has its own immutable revision trail;
+  changed figure leaves no history in those domains. Feed and health have their own immutable revision trails;
   it has not been generalized to sales or payroll. Payroll deliberately did not invent a second answer and waits on
   the sales one — [REGISTRY_SALES.md §8](REGISTRY_SALES.md#8-corrections-the-one-question-this-document-does-not-settle),
   [REGISTRY_PAYROLL.md §8](REGISTRY_PAYROLL.md#8-corrections)
@@ -196,3 +196,13 @@ Built when something needs them, not before.
 ## Feed follow-up
 
 - **Real-farm feed usability remains unverified.** Isolated UI checks do not complete the farm trial — [REGISTRY_FEED.md reporting boundaries](REGISTRY_FEED.md#reporting-choices-and-boundaries).
+
+## Health and lifetime-report follow-up
+
+- Structured weight, movement, breed, breeding/pregnancy and discarded-milk capture
+  remain stage 3; the report labels unsupported coverage — [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md#using-it).
+- Health/report real-farm acceptance and actual browser Save-as-PDF output remain
+  unverified; isolated browser checks are recorded — [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md#validation).
+- Large-history server pagination and scheduled cleanup of unlinked uploads are
+  not implemented; the current API returns full snapshots and cleanup is an explicit
+  helper — [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md#interfaces).

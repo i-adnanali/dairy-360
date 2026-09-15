@@ -170,7 +170,7 @@ flowchart LR
 
 ## Section 3 - Tool contracts
 
-Schemas: [server/src/tools/index.ts](../server/src/tools/index.ts), except the reconciliation and farm-monitor schemas, which are colocated with their executors. Executors: dairy in [server/src/tools/reads.ts](../server/src/tools/reads.ts) + [server/src/tools/writes.ts](../server/src/tools/writes.ts); vendor in [server/src/tools/vendorReads.ts](../server/src/tools/vendorReads.ts) + [server/src/tools/vendorWrites.ts](../server/src/tools/vendorWrites.ts); reconciliation in [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts); farm monitor in [server/src/tools/farmReads.ts](../server/src/tools/farmReads.ts) + [server/src/tools/farmWrites.ts](../server/src/tools/farmWrites.ts). Which schemas are offered on a given turn is chosen by the dispatcher (`toolsForAgent(agent)`): the dairy set, the vendor set, or all + `get_yield_vs_deliveries` for `both`. The three farm-monitor tools are **agent-agnostic** and appended to every branch (Cycle 5; see [FARM_MONITOR.md](FARM_MONITOR.md) Decision 6). Shared types: [shared/src/types.ts](../shared/src/types.ts).
+Schemas: [server/src/tools/index.ts](../server/src/tools/index.ts), except the reconciliation, farm-monitor and registry schemas, which are colocated with their executors. Executors: dairy in [server/src/tools/reads.ts](../server/src/tools/reads.ts) + [server/src/tools/writes.ts](../server/src/tools/writes.ts); vendor in [server/src/tools/vendorReads.ts](../server/src/tools/vendorReads.ts) + [server/src/tools/vendorWrites.ts](../server/src/tools/vendorWrites.ts); reconciliation in [server/src/tools/reconcile.ts](../server/src/tools/reconcile.ts); farm monitor in [server/src/tools/farmReads.ts](../server/src/tools/farmReads.ts) + [server/src/tools/farmWrites.ts](../server/src/tools/farmWrites.ts). Which schemas are offered on a given turn is chosen by the dispatcher (`toolsForAgent(agent)`): the dairy set, the vendor set, or all + `get_yield_vs_deliveries` for `both`. The three farm-monitor tools are **agent-agnostic** and appended to every branch (Cycle 5; see [FARM_MONITOR.md](FARM_MONITOR.md) Decision 6). Shared types: [shared/src/types.ts](../shared/src/types.ts).
 
 ### 3.1 Plumbing types
 
@@ -327,3 +327,21 @@ Card label helpers: `tagLabel(animalId)` renders `TAG (name)` when a name exists
 | Env vars | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `PORT`, `AGENT_MAX_ITERATIONS`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL`, plus `RUN_REGRESSION` (regression gate), `FARM_BASE_URL` + `FRIGATE_MQTT_URL` + `DEEPSTACK_URL` (farm scripts), and `TZ` / `NODE_ENV` | `server/.env`, loaded by `dotenv/config` — **cwd-relative, and dotenv does not search parents**, so a repo-root `.env` is invisible to the server. `.env.example` explains both destinations |
 
 See [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md) for the request lifecycle, architecture, and data-model diagrams.
+
+## Registry health read contracts — current extension
+
+Registry schemas/executors are colocated in [registryReads.ts](../server/src/tools/registryReads.ts)
+and [salesReads.ts](../server/src/tools/salesReads.ts). Six herd/health tools and four
+sales reads are offered in every dispatcher branch alongside the farm-monitor tools.
+The demo `get_health_events`, `log_health_event` and `schedule_health_event` contracts
+above continue to address demo tables only.
+
+| Tool | Input | Result |
+|---|---|---|
+| `get_registry_health` | Required `serial` | Animal health records, actual vaccinations, withdrawals and coverage |
+| `get_registry_health_board` | Optional `on` | Due/upcoming/overdue tasks, open cases and withdrawals |
+| `get_registry_life_report` | Required `serial` | Complete recorded life snapshot, sections, totals and coverage gaps |
+
+These are read-only; registry serial guards and structured health errors apply.
+HTTP health writes use durable idempotency and expected revisions; see
+[REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for the distinct API contract.

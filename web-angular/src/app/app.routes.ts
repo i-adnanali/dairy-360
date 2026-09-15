@@ -51,6 +51,9 @@ export const routes: Routes = [
         loadComponent: () => import('./registry/today-board').then((m) => m.TodayBoard),
       },
 
+      { path: 'animals/health', canDeactivate: [(component: {canLeave:()=>boolean}) => component.canLeave()], loadComponent: () => import('./registry/health-page').then(m => m.HealthPage) },
+      { path: 'animals/:id/report', loadComponent: () => import('./registry/life-report').then(m => m.LifeReport) },
+
       // --- the animal record -------------------------------------------------
       {
         // BEFORE `animals/:id`. See the header.

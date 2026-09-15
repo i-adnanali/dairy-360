@@ -305,10 +305,13 @@ test("v7 upgrade adds feed while preserving populated milk, animal and payroll r
     "requests",
   ])
     f.db.exec("DROP TABLE registry_feed_" + t);
+  // Remove later health schema too: this fixture simulates a genuine v7 database.
+  for (const t of ['attachment_links','revisions','requests','attachments','records'])
+    f.db.exec('DROP TABLE registry_health_' + t);
   f.db.pragma("user_version = 7");
   const result = applyRegistrySchema(f.db);
-  assert.equal(result.applied, 1);
-  assert.equal(result.to, 8);
+  assert.equal(result.applied, 2);
+  assert.equal(result.to, 9);
   assert.deepEqual(
     tables.map((t) => f.db.prepare("SELECT * FROM " + t).all()),
     before,

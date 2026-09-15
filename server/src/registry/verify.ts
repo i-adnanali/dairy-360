@@ -1,3 +1,4 @@
+import { checkHealth } from './health';
 import { checkFeed } from './feed';
 // Animal registry -- the rebuild-based invariants (0, 1, 2).
 //
@@ -166,6 +167,7 @@ export function verifyAll(live: Db, asOf: string, dbSource: string): Violation[]
     ...checkLactationIdStability(live, asOf),
     ...checkSnapshot(snapshot(live), asOf),
     ...checkFeed(live),
+    ...checkHealth(live),
     ...checkDbSourceIsolation(dbSource),
   ];
 }

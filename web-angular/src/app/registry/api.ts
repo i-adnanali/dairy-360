@@ -88,6 +88,13 @@ export class RegistryApi {
     return unwrap(firstValueFrom(this.http.post<T>(`${BASE}/feed/${path}`, body, { headers: { 'Idempotency-Key': key } })));
   }
 
+  healthGet<T>(path: string): Promise<T> {
+    return unwrap(firstValueFrom(this.http.get<T>(`${BASE}/${path}`)));
+  }
+  healthWrite<T>(path: string, body: unknown, key: string): Promise<T> {
+    return unwrap(firstValueFrom(this.http.post<T>(`${BASE}/${path}`, body, {headers:{'Idempotency-Key':key}})));
+  }
+
   // --- reads ---------------------------------------------------------------
 
   herd(): Promise<HerdRow[]> {

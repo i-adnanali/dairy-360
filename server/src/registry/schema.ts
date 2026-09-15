@@ -1,3 +1,4 @@
+import { HEALTH_SCHEMA, HEALTH_TABLES } from './health-schema';
 // Animal registry -- schema and the repo's first migration runner
 // (see docs/REGISTRY.md; decision doc §2.4, §4).
 //
@@ -1288,6 +1289,7 @@ export const MIGRATIONS: readonly Migration[] = [
   // keys, where migration 2 had one self-reference, so the same relaxation.
   { up: (db) => db.exec(MIGRATION_7_STAFF_DESTINATIONS), rebuildsTables: true },
   { up: (db) => db.exec(MIGRATION_8_FEED) },
+  { up: (db) => db.exec(HEALTH_SCHEMA) },
 ];
 
 /** The version a fully-migrated database reports. */
@@ -1503,6 +1505,7 @@ export function applyRegistrySchema(
 
 /** Every table this module creates, for the DROP-list guard and the rebuild. */
 export const REGISTRY_TABLES = [
+  ...HEALTH_TABLES,
   'registry_feed_items',
   'registry_feed_crops',
   'registry_feed_expenses',

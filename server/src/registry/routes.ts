@@ -1,3 +1,5 @@
+import { healthWithdrawals } from './health-reads';
+import { healthRouter } from './health-routes';
 import { checkFeed, feedList, feedGet, feedDaily, feedSave, feedRemove, feedRecipients, feedHistory, feedOverview, cropDays, object, type FeedEntity } from './feed';
 // Animal registry -- HTTP routes for the entry UI.
 //
@@ -345,6 +347,7 @@ function write(store: IdempotencyStore, fn: (req: Request, res: Response) => voi
 
 export function registryRouter(db: Db): express.Router {
   const router = express.Router();
+  router.use(healthRouter(db));
 
   // Per-router, not module-level. registryRouter is a FACTORY precisely so the
   // harness can serve an `:memory:` database, and a shared store would let one
@@ -443,7 +446,8 @@ export function registryRouter(db: Db): express.Router {
     handle((req, res) => {
       const on = typeof req.query.on === 'string' ? req.query.on : farmToday();
       const session = req.query.session === 'evening' ? 'evening' : 'morning';
-      res.json(milkingRoster(db, { occurred_on: on, session }));
+      const roster = milkingRoster(db, { occurred_on: on, session });
+      res.json({...roster, rows: roster.rows.map(row => ({...row, health_withdrawals: healthWithdrawals(db, row.animal_id, `${on}T00:00:00+05:00`)}))});
     }),
   );
 

@@ -22,6 +22,7 @@ const DAIRY_KEYWORDS = [
   'animal', 'animals', 'herd', 'milk', 'milking', 'milkings', 'yield', 'yields',
   'produce', 'produced', 'production', 'feed', 'fodder', 'silage', 'bran',
   'concentrate', 'health', 'vaccination', 'vaccine', 'vet', 'treatment',
+  'withdrawal', 'dose', 'doses', 'veterinary', 'vaccinations', 'profile', 'lifetime',
   'breeding', 'calf', 'calves', 'buffalo', 'buffaloes', 'cow', 'cows',
   'lactating', 'pregnant', 'group', 'kundi', 'nili', 'ravi',
 ];

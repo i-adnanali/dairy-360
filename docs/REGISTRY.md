@@ -60,7 +60,7 @@ If `farm_events` ever holds real camera rows alongside synthetic ones, that colu
 
 ## Decision 1 — Registry tables are `registry_*` in one database
 
-Twenty-seven tables through migration 8, all prefixed and disjoint from the demo tables:
+Thirty-two tables through migration 9, all prefixed and disjoint from the demo tables:
 
 ```
 registry_animals            registry_lactations        registry_serial_counter
@@ -76,6 +76,9 @@ registry_feed_expenses     registry_feed_purchases
 registry_feed_daily        registry_feed_lines
 registry_feed_sources      registry_feed_recipients
 registry_feed_revisions    registry_feed_requests
+registry_health_records    registry_health_revisions
+registry_health_requests   registry_health_attachments
+registry_health_attachment_links
 ```
 
 `registry_milkings` arrived with step 4 (migration 3) — see
@@ -102,7 +105,11 @@ Feed adds a fourth domain in migration 8: crops/expenses, purchases and daily
 feeding, with immutable revisions and durable replay keys. See
 [REGISTRY_FEED.md](REGISTRY_FEED.md). Its relationships stay inside the registry.
 
-The prefix goes on all twenty-seven, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
+Migration 9 adds five health source tables for revisioned clinical records, durable
+requests and retained attachments. [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) owns
+health workflows, API routes, lifetime reporting and implementation limits.
+
+The prefix goes on all thirty-two, not only the colliding `animals`. The set is the unit: a consistent prefix makes the boundary legible at a glance, lets the isolation guard be a single substring check, and makes any future rename mechanical.
 
 **No registry table has a foreign key to a demo table, and none ever may.** `resetSchema()` drops the demo tables children-first, which is the only reason `foreign_keys = ON` does not abort it; a registry → demo foreign key would start failing that DROP and would couple the two lifecycles.
 
@@ -652,7 +659,7 @@ The CLI came first and was the only way in for most of this cycle. **It is no lo
 | `registry:backup` | nothing in the database — a snapshot + dump into `server/backups/` |
 | `verify:registry` | nothing |
 
-`verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–28 plus feed integrity check 29 rather than inventing a second notion of "valid". Feed checks are skipped for snapshots predating the feed tables.
+`verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–28 plus feed integrity check 29 and health integrity check 30 rather than inventing a second notion of "valid". Feed and health checks are skipped for snapshots predating their respective tables.
 
 ```bash
 # pass one -- the animals that arrived from elsewhere
@@ -1195,6 +1202,7 @@ npm run verify:registry  -w server
 | 27 | Only `adjustment` wage payments are signed, and a signed one carries a note |
 | 28 | `staff` destinations and people agree; no person has two milk destinations |
 | 29 | Feed effective JSON, relational lines/sources/recipients, foreign keys and latest revision agree; unknown values and missing days remain valid |
+| 30 | Health revision continuity/current JSON, completion evidence and attachment checksums agree |
 
 **18–22 are argued in [REGISTRY_SALES.md §13](REGISTRY_SALES.md#13-invariants-1822) and 23–28 in
 [REGISTRY_PAYROLL.md §13](REGISTRY_PAYROLL.md#13-invariants-2328)**, where the reasoning for each
@@ -1256,7 +1264,7 @@ Blocking rules:
 
 ## Known fidelity gaps
 
-- **The registry is empty.** The schema, transaction, projections, entry points and verification are built and tested; no real animal has been entered, because the herd list does not exist yet. Every `verify:registry` run against the live database therefore passes vacuously. The full path — add, calve, correct, dry off, verify — has been exercised end to end against the live database with throwaway data, which was then removed by dropping the registry tables and letting the migration recreate them.
+- **Historical live-data check (Cycle 8): the registry was empty.** This is not a claim about the current farm database; this documentation audit did not open it. At that checkpoint, the schema, transaction, projections, entry points and verification are built and tested; no real animal has been entered, because the herd list does not exist yet. Every `verify:registry` run against the live database therefore passes vacuously. The full path — add, calve, correct, dry off, verify — has been exercised end to end against the live database with throwaway data, which was then removed by dropping the registry tables and letting the migration recreate them.
 - **The append-only guarantee is per-connection, not per-database.** See Decision 7. A `sqlite3` CLI session can bypass it; the boot assertion protects the application's own handle only.
 - **`registry:add` cannot record an animal's dam.** An acquired animal gets no parentage edges, so a bought-in animal whose dam is known on the farm cannot have that edge asserted yet. The `certainty` column exists for it; nothing writes it.
 - **There is no way to correct a non-calving event through a command.** `registry:event` appends; superseding a `dry_off`, `departure` or `note` requires calling `appendEvent()` with `supersedes_id` directly. Only the calving pair, the one that is near-certain during a backfill, has a first-class correction API. (`acquired` is the exception: link mode supersedes it, though only into a `birth`.)

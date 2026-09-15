@@ -1,7 +1,7 @@
 # Dairy 360 Angular frontend
 
 Current frontend: Angular 22, standalone components, signals and zoneless change
-detection. It includes the animal, milk, feed and labour registry, plus the assistant.
+detection. It includes the animal, health, milk, feed and labour registry, plus the assistant.
 
 Run the commands below from the **repository root**, using the Node version in
 [`.nvmrc`](../.nvmrc). Install dependencies once with `npm install`.
@@ -38,3 +38,11 @@ covered in [UI_SYSTEM.md](../docs/UI_SYSTEM.md).
 - [Feed implementation](../docs/REGISTRY_FEED.md): daily entry, purchases, crops and corrections.
 - [Angular port](../docs/ANGULAR_PORT.md): chat state and component architecture.
 - [Entry UX](../docs/REGISTRY_ENTRY_UX.md): form behavior and the outstanding farm trial.
+
+Health entry and due work live at `/animals/health` within Herd. Animal profiles
+link to `/animals/:id/report` for the life report and vaccination card. Report
+sections expand progressively; JSON export and browser print include all loaded
+records. See [Health implementation](../docs/REGISTRY_HEALTH.md).
+
+The standard harness seeds these health screens as well: due work, visits, doses,
+round outcomes, follow-up results and vaccination-card history are ready to browse.

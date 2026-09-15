@@ -1055,9 +1055,11 @@ and disposition under `/buyers` — separating the two screens that are done min
 person, that reconcile against each other, and that
 [REGISTRY_SALES.md §15](REGISTRY_SALES.md#15-still-open) asks whether to merge. They are both milk.
 
-`/check` verifies the registry domains, including feed integrity, so it belongs to none of them and stays at the top level.
+`/check` verifies the registry domains, including feed and health integrity, so it belongs to none of them and stays at the top level.
 
-**What the depth buys:** step 5's breeding events, treatment and weight land under `/animals`;
+**What the depth buys:** health is implemented at `/animals/health`, with reports at
+`/animals/:id/report`. Structured breeding and weight capture remain deferred under
+the animal domain;
 quality-based pricing lands under `/milk`; absences (§11) land under `/labour`. A flat space was
 right at five screens and would have needed this same restructure again at fifteen.
 

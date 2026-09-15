@@ -1,4 +1,26 @@
-# Markdown audit — 2026-09-11
+# Markdown audits
+
+## Current audit — 2026-09-15
+
+Scanned all 38 repository-owned Markdown files with targeted searches for stale
+feature, schema, route, tool, backup and validation claims. Compared affected
+references with registry schema/verification, health routes/read models, Angular
+routes, agent prompts/tool schemas and package scripts.
+
+Updated the READMEs and current references for migration 9 (32 registry tables),
+health integrity check 30, durable health writes, veterinary/vaccination workflows,
+lifetime reporting, and six herd/health assistant reads plus four sales reads.
+Corrected the harness chat response, fresh-schema example, backup source scope and
+Langfuse server environment-file instructions. Updated remaining-work entries and
+marked original tool/spec findings as baseline history. Added the latest recorded
+implementation validation without relabeling old measurements as fresh tests.
+
+Validation: local Markdown file targets and `git diff --check`. Documentation-only
+audit; no runtime tests rerun, live database inspection, deployment, camera/model
+checks or verification of running backup services. Historical source-line citations
+remain tied to their recorded baselines; they are not current line-number guarantees.
+
+## Historical audit — 2026-09-11
 
 Scanned all 35 repository-owned Markdown files present at the start of the sweep (17,745 lines), including the root, Angular, enrolment, archive and gallery READMEs. Dependency/generated files are outside this inventory. Compared current claims with package scripts, route/navigation definitions, schema and fixture code, agent approval handling, verification code and the recorded feed build/test outputs. This was a documentation-only pass; it did not rerun live-model/camera checks, inspect current backup services, or open the farm database.
 

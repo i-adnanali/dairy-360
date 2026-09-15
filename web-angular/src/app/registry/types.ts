@@ -156,6 +156,7 @@ export interface MilkingRow {
 }
 
 export interface RosterRow {
+  health_withdrawals?: {target:string;status:string;instruction?:string;until?:string}[];
   animal_id: string;
   name: string | null;
   days_in_milk: number;
@@ -697,6 +698,7 @@ export interface SessionStanding {
 }
 
 export interface DayBoard {
+  health?: {overdue:number;due:number;upcoming:number;withdrawals:unknown[]};
   feed?: {state: string; summary: string};
   on: string;
   milking: SessionStanding[];

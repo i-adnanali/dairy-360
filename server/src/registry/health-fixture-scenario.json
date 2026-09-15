@@ -1,0 +1,484 @@
+[
+  {
+    "key": "product",
+    "path": "/health/products",
+    "body": {
+      "name": "Demonstration vaccine (not a clinical protocol)",
+      "kind": "vaccine"
+    }
+  },
+  {
+    "key": "visit",
+    "path": "/health/visits",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "vet": "Dr Fixture",
+      "reason": "Demonstration vaccination and treatment round",
+      "status": "open"
+    }
+  },
+  {
+    "key": "case",
+    "path": "/health/cases",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:0",
+      "title": "Observation requiring follow-up",
+      "status": "open"
+    }
+  },
+  {
+    "key": "exam0",
+    "path": "/health/examinations",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:0",
+      "visit_id": "$ref:visit",
+      "findings": "Synthetic observation for workflow practice",
+      "diagnosis": "Fixture finding",
+      "certainty": "suspected"
+    }
+  },
+  {
+    "key": "exam1",
+    "path": "/health/examinations",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:1",
+      "visit_id": "$ref:visit",
+      "findings": "Synthetic observation for workflow practice",
+      "diagnosis": "Fixture finding",
+      "certainty": "suspected"
+    }
+  },
+  {
+    "key": "exam2",
+    "path": "/health/examinations",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:2",
+      "visit_id": "$ref:visit",
+      "findings": "Synthetic observation for workflow practice",
+      "diagnosis": "Fixture finding",
+      "certainty": "suspected"
+    }
+  },
+  {
+    "key": "plan",
+    "path": "/health/plans",
+    "body": {
+      "animal_id": "$animal:0",
+      "case_id": "$ref:case",
+      "kind": "vaccination",
+      "instructions": "Demonstration course; dates are fixture data, not clinical advice",
+      "prescriber": "Dr Fixture",
+      "status": "active"
+    }
+  },
+  {
+    "key": "given",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "administration",
+      "instructions": "Fixture given",
+      "due_on": "$day:-2",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "overdue",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "administration",
+      "instructions": "Fixture overdue",
+      "due_on": "$day:-1",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "due",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "administration",
+      "instructions": "Fixture due",
+      "due_on": "$day:0",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "upcoming",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "administration",
+      "instructions": "Fixture upcoming",
+      "due_on": "$day:3",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "recheck",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "recheck",
+      "instructions": "Fixture recheck",
+      "due_on": "$day:0",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "test",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "test",
+      "instructions": "Fixture test",
+      "due_on": "$day:-1",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "missed",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "administration",
+      "instructions": "Fixture missed",
+      "due_on": "$day:-1",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "cancelled",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:0",
+      "plan_id": "$ref:plan",
+      "kind": "administration",
+      "instructions": "Fixture cancelled",
+      "due_on": "$day:1",
+      "assignee": "Dr Fixture"
+    }
+  },
+  {
+    "key": "dose",
+    "path": "/health/administrations",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:0",
+      "visit_id": "$ref:visit",
+      "product_id": "$ref:product",
+      "product_name": "Demonstration vaccine (not a clinical protocol)",
+      "kind": "vaccine",
+      "amount": 1,
+      "unit": "fixture unit",
+      "route": "recorded fixture route",
+      "administrator": "Dr Fixture",
+      "batch": "DEMO-LOT-001",
+      "milk_withdrawal": {
+        "state": "none",
+        "instruction": "Synthetic no-withdrawal entry",
+        "issuer": "Dr Fixture"
+      },
+      "meat_withdrawal": {
+        "state": "unknown"
+      },
+      "task_id": "$ref:given"
+    }
+  },
+  {
+    "key": "correct-dose",
+    "path": "/health/administrations/$ref:dose/revise",
+    "body": {
+      "expected_revision": 1,
+      "correction_reason": "Corrected synthetic batch transcription",
+      "batch": "DEMO-LOT-002"
+    }
+  },
+  {
+    "key": "miss",
+    "path": "/health/tasks/$ref:missed/actions",
+    "body": {
+      "expected_revision": 1,
+      "action": "miss",
+      "reason": "Synthetic missed round"
+    }
+  },
+  {
+    "key": "cancel",
+    "path": "/health/tasks/$ref:cancelled/actions",
+    "body": {
+      "expected_revision": 1,
+      "action": "cancel",
+      "reason": "Synthetic cancellation after vet review"
+    }
+  },
+  {
+    "key": "result",
+    "path": "/health/results",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:0",
+      "task_id": "$ref:test",
+      "kind": "test",
+      "result": "Synthetic test result; no clinical interpretation"
+    }
+  },
+  {
+    "key": "treatment",
+    "path": "/health/plans",
+    "body": {
+      "animal_id": "$animal:1",
+      "kind": "treatment",
+      "instructions": "Synthetic treatment instruction",
+      "prescriber": "Dr Fixture",
+      "status": "active"
+    }
+  },
+  {
+    "key": "medicine",
+    "path": "/health/administrations",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:1",
+      "visit_id": "$ref:visit",
+      "plan_id": "$ref:treatment",
+      "product_name": "Demonstration medicine",
+      "kind": "medicine",
+      "amount": 1,
+      "unit": "fixture unit",
+      "route": "recorded fixture route",
+      "administrator": "Dr Fixture",
+      "milk_withdrawal": {
+        "state": "specified",
+        "instruction": "Synthetic withdrawal instruction for UI demonstration",
+        "issuer": "Dr Fixture",
+        "until": "$until:2"
+      },
+      "meat_withdrawal": {
+        "state": "unknown"
+      }
+    }
+  },
+  {
+    "key": "cost",
+    "path": "/health/costs",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:1",
+      "administration_id": "$ref:medicine",
+      "amount_minor": 125000,
+      "currency": "PKR"
+    }
+  },
+  {
+    "key": "shared-cost",
+    "path": "/health/costs",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "visit_id": "$ref:visit",
+      "amount_minor": 200000,
+      "currency": "PKR"
+    }
+  },
+  {
+    "key": "history",
+    "path": "/health/administrations",
+    "body": {
+      "animal_id": "$animal:2",
+      "occurred_on": "$month",
+      "date_precision": "month",
+      "product_name": "Historical vaccine, details incomplete",
+      "kind": "vaccine",
+      "details_unknown": true,
+      "unknown_reason": "Synthetic paper card without dose details",
+      "external_history_reason": "Demonstration of approximate historical documentation"
+    }
+  },
+  {
+    "key": "round",
+    "path": "/health/rounds",
+    "body": {
+      "confirmed": true,
+      "shared": {
+        "occurred_on": "$day:-2",
+        "date_precision": "day",
+        "animal_id": null,
+        "visit_id": "$ref:visit",
+        "product_id": "$ref:product",
+        "product_name": "Demonstration round vaccine",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-001",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        }
+      },
+      "rows": [
+        {
+          "animal_id": "$animal:0",
+          "disposition": "given"
+        },
+        {
+          "animal_id": "$animal:1",
+          "disposition": "deferred",
+          "due_on": "$day:4",
+          "reason": "Synthetic veterinary deferral"
+        },
+        {
+          "animal_id": "$animal:2",
+          "disposition": "not_given",
+          "reason": "Synthetic not-given outcome"
+        }
+      ]
+    }
+  },
+  {
+    "key": "void-dose",
+    "path": "/health/administrations",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:0",
+      "visit_id": "$ref:visit",
+      "product_id": "$ref:product",
+      "product_name": "Entered-in-error fixture vaccine",
+      "kind": "vaccine",
+      "amount": 1,
+      "unit": "fixture unit",
+      "route": "recorded fixture route",
+      "administrator": "Dr Fixture",
+      "batch": "DEMO-LOT-001",
+      "milk_withdrawal": {
+        "state": "none",
+        "instruction": "Synthetic no-withdrawal entry",
+        "issuer": "Dr Fixture"
+      },
+      "meat_withdrawal": {
+        "state": "unknown"
+      }
+    }
+  },
+  {
+    "key": "void",
+    "path": "/health/administrations/$ref:void-dose/void",
+    "body": {
+      "expected_revision": 1,
+      "reason": "Demonstration of retained void history"
+    }
+  },
+  {
+    "key": "attachment",
+    "path": "/health/attachments",
+    "body": {
+      "filename": "fixture-vet-card.png",
+      "base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1cAAAAASUVORK5CYII="
+    }
+  },
+  {
+    "key": "close-visit",
+    "path": "/health/visits/$ref:visit/revise",
+    "body": {
+      "expected_revision": 1,
+      "correction_reason": "Visit finished; pending tasks remain open",
+      "status": "closed",
+      "attachment_ids": ["$ref:attachment"]
+    }
+  },
+  {
+    "key": "resolved",
+    "path": "/health/cases",
+    "body": {
+      "occurred_on": "$day:-2",
+      "date_precision": "day",
+      "animal_id": "$animal:2",
+      "title": "Resolved demonstration episode",
+      "status": "resolved",
+      "outcome": "Recorded recovery in fixture"
+    }
+  },
+  {
+    "key": "completed-plan",
+    "path": "/health/plans",
+    "body": {
+      "animal_id": "$animal:2",
+      "kind": "treatment",
+      "instructions": "Completed historical demonstration course",
+      "prescriber": "Dr Fixture",
+      "status": "completed"
+    }
+  },
+  {
+    "key": "stopped-plan",
+    "path": "/health/plans",
+    "body": {
+      "animal_id": "$animal:2",
+      "kind": "treatment",
+      "instructions": "Stopped demonstration course",
+      "prescriber": "Dr Fixture",
+      "status": "stopped",
+      "reason": "Synthetic veterinary review"
+    }
+  },
+  {
+    "key": "followup-task",
+    "path": "/health/tasks",
+    "body": {
+      "animal_id": "$animal:2",
+      "kind": "recheck",
+      "due_on": "$day:-1",
+      "instructions": "Completed synthetic follow-up"
+    }
+  },
+  {
+    "key": "followup-result",
+    "path": "/health/results",
+    "body": {
+      "animal_id": "$animal:2",
+      "task_id": "$ref:followup-task",
+      "kind": "follow_up",
+      "occurred_on": "$day:-1",
+      "date_precision": "day",
+      "result": "Synthetic recovery recorded"
+    }
+  },
+  {
+    "key": "closed-case",
+    "path": "/health/cases/$ref:resolved/revise",
+    "body": {
+      "expected_revision": 1,
+      "correction_reason": "Demonstration episode closed after follow-up",
+      "status": "closed",
+      "outcome": "No further follow-up in this synthetic case"
+    }
+  }
+]

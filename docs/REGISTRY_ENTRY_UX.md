@@ -931,8 +931,11 @@ wants the second.
 one, `observed_by` becomes the primary provenance field rather than a nearly-unused one, and today's
 date becomes a legitimate default — because today is a fact, not a guess.
 
-**New event types.** Milk yield per animal per session, feed, health and treatment, and above all
-heat, service and pregnancy check. Breeding events are the significant gap: without service dates a
+**Current capture status (2026-09-15).** Per-animal milk, feed and health/treatment
+recording are implemented in separate registry domains; they did not expand the
+original life-event enum. See [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for visits,
+vaccinations and lifetime reporting. Heat, service and structured pregnancy checks
+remain deferred. Breeding events are the significant gap: without service dates a
 long calving interval can be observed but never explained.
 
 Two constraints to respect in the meantime: keep `source_form` and `source_ref` genuinely per-event

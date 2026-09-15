@@ -1,3 +1,4 @@
+import { addHealthFixtures } from './health-fixtures';
 import { addFeedFixtures } from './feed-fixtures';
 // Animal registry -- development harness. Serves the registry API over an
 // IN-MEMORY fixture herd.
@@ -87,6 +88,7 @@ one -- a harness that saved its state would be a second registry.
 export function harnessApp(db: Db): express.Express {
   const app = express();
   app.use(cors());
+  app.use('/api/registry/health/attachments', express.json({ limit: '14mb' }));
   app.use(express.json({ limit: '2mb' }));
   app.use('/api/registry', registryRouter(db));
 
@@ -128,7 +130,10 @@ function main(): void {
   // added: /payroll, /people and /people/:id opened onto an empty state
   // otherwise, and an empty screen is indistinguishable from a broken one.
   const db = args.empty ? freshDb() : staffedHerd(farmToday()).db;
-  if (!args.empty) addFeedFixtures(db, farmToday());
+  if (!args.empty) {
+    addFeedFixtures(db, farmToday());
+    addHealthFixtures(db, farmToday());
+  }
   const app = harnessApp(db);
 
   app.listen(args.port, () => {

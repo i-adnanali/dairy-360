@@ -19,6 +19,7 @@ const app = express();
 const PORT = Number(process.env.PORT) || 6400;
 
 app.use(cors());
+app.use('/api/registry/health/attachments', express.json({ limit: '14mb' }));
 app.use(express.json({ limit: '2mb' }));
 
 const SEED_HINT =

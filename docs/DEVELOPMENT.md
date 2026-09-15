@@ -848,7 +848,7 @@ npm run verify:registry -w server
 
 `registry:rebuild` is required in both cases, because the projection tables are
 deliberately not in the dump. `verify:registry` is what makes the restore
-trustworthy rather than hopeful — it runs invariants 0–28 plus feed integrity check 29 when feed tables are present, so it reports that the
+trustworthy rather than hopeful — it runs invariants 0–28 plus feed integrity check 29 and health integrity check 30 when their tables are present, so it reports that the
 restored data is *semantically* valid and not merely readable.
 
 **Verify a backup without restoring it**, which is the check worth running before
@@ -911,7 +911,7 @@ then `FARM_SCHEMA` and the migration runner apply.
 after the first server start, before any seed:
 
 ```
-user_version = 8
+user_version = 9
 tables: farm_events, registry_animal_events, registry_animal_status,
         registry_animals, registry_destination_prices, registry_destinations,
         registry_dispatches, registry_engagements, registry_lactations,
@@ -921,10 +921,12 @@ tables: farm_events, registry_animal_events, registry_animal_status,
         registry_feed_items, registry_feed_crops, registry_feed_expenses,
         registry_feed_purchases, registry_feed_daily, registry_feed_lines,
         registry_feed_sources, registry_feed_recipients, registry_feed_revisions,
-        registry_feed_requests
+        registry_feed_requests, registry_health_records, registry_health_revisions,
+        registry_health_requests, registry_health_attachments,
+        registry_health_attachment_links
 ```
 
-The current schema applies eight migrations; the 27 `registry_*` tables exist
+The current schema applies nine migrations; the 32 `registry_*` tables exist
 with no farm records. `registry_serial_counter` alone has its initial allocator row. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
 `feed_inventory`, `health_events`. Those are `resetSchema()`'s tables and only
 `seed()` creates them.
@@ -1003,3 +1005,22 @@ invariant 13 as a source-level check.
 ## Feed development (2026-09-10)
 
 Feed is included in the injected registry harness and guarded HTTP harness seed. Run `npm run harness:app` for disposable development; never run root `seed` for feed testing. The HTTP seed verifies harness identity before writes and can be replayed. Feed fixtures include unknown-date crops, expenses, original-unit purchases, mixed daily supply and partial accounts. [Implementation, checks and the corrected CLI-import isolation defect](REGISTRY_FEED.md). Use the feed [gallery](images/feed/README.md) alongside Phase 7 captures.
+
+## Health extension — 2026-09-15
+
+Migration 9 adds five health source tables, included automatically in binary and
+logical registry backups, including attachment bytes. Existing nonempty databases
+use the pre-migration backup path. Health writes have durable request keys and
+revision conflicts, independently of the older process-local registry keys.
+See [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for routes and operating limits.
+
+Latest recorded implementation validation: 765 server tests, 351 Angular tests,
+server typecheck, template checks and production build passed with Node 22.22.3.
+Initial bundle: 596.28 kB; budget/CommonJS/unused payroll component warnings remain.
+These measurements supersede earlier dated totals, not their historical results.
+The documentation audit did not rerun runtime tests or access live farm data.
+
+The standard harness now includes reusable health/vaccination scenarios in both
+startup paths. See [the health walkthrough](REGISTRY_HEALTH.md#standard-harness-walkthrough)
+for record coverage and replay/reset behavior. After this fixture extension, the
+recorded server suite total is 766 passing tests (2026-09-15).

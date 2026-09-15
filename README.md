@@ -15,7 +15,7 @@ The multi-agent design (and what was deliberately *not* built — no second
 service/A2A, no orchestrator LLM, no auth) is documented in
 [docs/MULTI_AGENT.md](docs/MULTI_AGENT.md).
 
-The registry brings the day's outstanding work, animal histories, milk, feed and labour
+The registry brings the day's outstanding work, animal histories, veterinary care, milk, feed and labour
 recording into one workspace. These screenshots use the in-memory demo harness.
 
 **Today — see what still needs recording.**
@@ -90,7 +90,7 @@ buys the milk, at what rate, and what they owe — is
 herd are [docs/REGISTRY_PAYROLL.md](docs/REGISTRY_PAYROLL.md). Those guides own the domain behavior; [UI_SYSTEM.md](docs/UI_SYSTEM.md)
 owns the current presentation and shell.
 
-The registry covers the animal record, milk sales, labour and feed. Only the
+The registry covers the animal record, milk sales, labour, feed and health. Only the
 animal record uses the original step numbering. Feed adds crop cycles and expenses,
 original-unit purchases and one daily feeding account with corrections and history;
 [REGISTRY_FEED.md](docs/REGISTRY_FEED.md) records its implementation and limits.
@@ -111,9 +111,18 @@ salaried month because both are a dated range, and what is owed is the **same
 ledger as the buyers' with the sign the other way up**. An advance needs no
 flag: the balance simply goes negative and the next period walks it back.
 
-The agent has read-only tools over the herd and milk sales; it has no payroll
-or registry-feed tools. There are three tools over the herd
-(`list_registry_animals`, `get_registry_animal`, `get_calving_intervals`) and
+Health management at `/animals/health` records veterinary visits, examinations, cases,
+plans, actual doses, follow-ups, attachments and correction history. Animal profiles
+link to `/animals/:id/report` for the vaccination card and recorded life report,
+with JSON export and browser printing. Today shows due health work; the milking
+roster shows recorded withdrawal instructions. See [REGISTRY_HEALTH.md](docs/REGISTRY_HEALTH.md)
+for the workflow and remaining capture gaps.
+
+The agent has read-only tools over the herd, health, life reports and milk sales.
+It has no payroll or dedicated registry-feed tools; the life report includes feed
+participation. There are six herd tools
+(`list_registry_animals`, `get_registry_animal`, `get_calving_intervals`,
+`get_registry_health`, `get_registry_health_board`, `get_registry_life_report`) and
 four over the sales side (`list_buyers`, `get_buyer_balance`, `get_dispatches`,
 `get_milk_reconciliation`). **Reads only** — real records are still entered
 through the registry UI, deliberately. The point is not chat-over-a-database:
@@ -263,6 +272,11 @@ five sessions of milk sold and kept, and three staff — two salaried, one dihar
 — with last month paid, one balance open, one settled and one in advance.
 Feed fixtures add active/finished crops, expenses, measured and unweighed purchases,
 a mixed-source feeding day and a partial account; extend the range to see a missing day.
+Health fixtures add a veterinary visit with examinations, vaccination and treatment
+plans, actual doses, a round with given/deferred/not-given outcomes, due/overdue
+work, completed tests and follow-ups, correction/void history, a sample attachment
+and recorded costs. Open **Herd → Health**, then an animal’s life report.
+Clinical details are explicitly synthetic; fixture dates are relative to today.
 
 Everything is seeded **over HTTP through the same routes the forms use**, so no
 row exists that the production write path would refuse. `server/dairy.db` is
@@ -406,7 +420,8 @@ npm run build:angular && npm run harness:serve -- --port=6430
 
 `harness:app` and `npm run seed` fill **different tables for different
 screens** — registry vs the six demo tables, entry UI vs the agent chat. Under
-`harness:app` the chat at `/chat` will report unseeded, which is correct. The
+`harness:app` the chat API is absent (404); only the persistent server provides
+the friendly unseeded response. The
 comparison is in [docs/DEVELOPMENT.md § 6](docs/DEVELOPMENT.md).
 
 ### Registry — the real records
@@ -423,7 +438,7 @@ npm run verify:registry -w server -- --db=backups/<file>.db
 # recompute the projection tables from the event log
 npm run registry:rebuild -w server
 
-# snapshot the four irreplaceable tables (VACUUM INTO + a diffable .sql dump)
+# snapshot all registry source tables (VACUUM INTO + a diffable .sql dump)
 npm run registry:backup -w server
 ```
 
@@ -525,7 +540,7 @@ docker compose -f docker-compose.langfuse.yml down -v
 ```
 
 > After creating a project in the Langfuse UI, copy its public + secret keys into
-> `.env` (`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY`; `LANGFUSE_BASE_URL`
+> `server/.env` (`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY`; `LANGFUSE_BASE_URL`
 > defaults to `http://localhost:3000`) and restart the server. On startup it
 > prints `[tracing] Langfuse enabled -> http://localhost:3000`. With the keys
 > unset, tracing is silently disabled and the agent runs normally.
@@ -534,7 +549,7 @@ docker compose -f docker-compose.langfuse.yml down -v
 
 ```bash
 docker compose -f docker-compose.langfuse.yml down -v   # tear down Langfuse + trace data
-npm run seed -w server                                   # reset server/dairy.db to seeded state
+npm run seed -w server                                   # reset demo tables; registry records remain intact
 ```
 
 > Re-seed if you approved any write actions during a session — approved writes
@@ -552,7 +567,7 @@ from the wire protocol.
 # 1. start the Langfuse stack (Postgres, ClickHouse, Redis, MinIO, web + worker)
 docker compose -f docker-compose.langfuse.yml up -d
 
-# 2. open the UI, create a project, copy its keys into .env
+# 2. open the UI, create a project, copy its keys into server/.env
 open http://localhost:3000        # LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY
 
 # 3. run the app as usual; traces stream to Langfuse
