@@ -1,5 +1,8 @@
 # Feed management
 
+> Current extension (2026-09-16): Feed history sections now page loaded records locally (25/50/100 rows); their API responses still contain the full collections.
+> See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
+
 Implemented 2026-09-10 from [FEED_SPEC.md](FEED_SPEC.md). The specification records the confirmed farm practice; this document describes the shipped implementation and verification.
 
 ## Workflows

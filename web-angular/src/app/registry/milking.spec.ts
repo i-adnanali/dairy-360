@@ -97,7 +97,8 @@ describe('MilkingRoster', () => {
   it('renders the roster it was given — there is no picker', async () => {
     const { el } = await mount();
     expect(el.querySelectorAll('[data-row]').length).toBe(2);
-    expect(el.querySelector('select')).toBeNull();
+    expect(el.querySelector('select[name=animal]')).toBeNull();
+    expect(el.querySelector('app-pagination')).toBeTruthy();
     // The context that does the error-catching, all free from existing data.
     expect(el.querySelector('[data-row="BD-0001"] [data-role="dim"]')!.textContent).toContain('120');
     expect(el.querySelector('[data-row="BD-0001"] [data-role="previous"]')!.textContent).toContain('6');
@@ -248,5 +249,26 @@ describe('MilkingRoster', () => {
     expect(el.querySelector('[data-role="nobody"]')).not.toBeNull();
     expect(el.querySelector('[data-role="nobody"]')!.textContent).toContain('dried off');
     expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
+  });
+});
+
+describe('Milking pagination', () => {
+  it('preserves drafts, validates hidden rows and submits the entire session', async () => {
+    const roster = {...ROSTER, rows:Array.from({length:30},(_,i)=>({...ROSTER.rows[0],animal_id:`A${i}`,name:`Animal ${i}`}))};
+    const {fixture,el,http}=await mount(roster);
+    const screen=fixture.componentInstance as any;
+    for(let i=0;i<25;i++)type(fixture,el,`A${i}`,'1');
+    expect(el.querySelector('[data-role="submit"]')?.getAttribute('aria-disabled')).toBe('true');
+    const next=Array.from(el.querySelectorAll('app-pagination button')).find(b=>b.textContent?.trim()==='Next') as HTMLButtonElement;
+    expect(next.type).toBe('button');next.click();fixture.detectChanges();
+    expect(cell(el,'A0')).toBeNull();
+    for(let i=25;i<30;i++)type(fixture,el,`A${i}`,'2');
+    screen.tablePage.set(1);fixture.detectChanges();expect(cell(el,'A0').value).toBe('1');
+    type(fixture,el,'A0','bad');screen.tablePage.set(2);fixture.detectChanges();
+    await screen.submit();fixture.detectChanges();expect(screen.tablePage()).toBe(1);expect(el.textContent).toContain('valid non-negative');http.expectNone(`${BASE}/milking/session`);
+    type(fixture,el,'A0','1');screen.tablePage.set(2);fixture.detectChanges();void screen.submit();
+    const request=http.expectOne(`${BASE}/milking/session`);expect(request.request.body.entries).toHaveLength(30);expect(request.request.body.entries[0].yield_litres).toBe(1);expect(request.request.body.entries[29].yield_litres).toBe(2);
+    request.flush({message:'Test refusal',error:'invalid_payload'},{status:400,statusText:'Bad request'});
+    await settle(fixture);
   });
 });

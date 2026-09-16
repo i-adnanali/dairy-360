@@ -996,6 +996,9 @@ is explicit that the first global key handler is the one that has to establish
 the owner. See §12.6 for what it does and refuses to do.
 ### 9.4 Phase 7 — built before the trial
 
+This is the Phase 7 baseline. Current navigation and pagination supersede its
+five-section shell and per-animal calving reads; see §19.
+
 Implemented by explicit user instruction; §3.4 records the fourth contamination.
 The farm trial remains open and no trial-driven roster, defaults change, or
 recent-entry ledger is inferred from its absence.
@@ -1447,11 +1450,11 @@ Built. One operator, keyboard-heavy, long sittings, 31
 animals with stable serials: typing `BD-0016` beats Herd → scan → click every
 time.
 
-Scope: the six sections and their views; every animal by serial or name; every
+Scope: the seven sections and their views; every animal by serial or name; every
 person and destination by name; and the §12.4 actions, shown disabled with their
 reason when no session is open.
 
-It provides direct access across the six-item nav, and it is the
+It provides direct access across the seven-item nav, and it is the
 natural home for the held keyboard items in `REGISTRY_ENTRY_UX.md` §11.
 
 **Nothing registered a global key handler, and now something does.**
@@ -1743,9 +1746,23 @@ recording uses the session gate, revisions preserve drafts on conflict, and leav
 an unsaved form prompts before navigation. Today adds due health work and the
 milking roster adds recorded withdrawal notices.
 
-Report sections initially show ten records, with Show more and complete JSON export.
+Report sections now use local pagination (25/50/100 rows), with complete JSON export.
 Print styles expand records, hide shell navigation and release scrolling for browser
 printing. A 390px-wide report and desktop workflows were checked against an isolated
 harness without console errors. Actual Save-as-PDF output and real-farm acceptance
 remain unverified. Prior galleries and measurements retain their original dates.
 See [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for full behavior and validation.
+
+## 19. Analytics and pagination extension — 2026-09-16
+
+Analytics is the second main navigation section at `/analytics`. Daily, weekly and
+monthly views show production, recording coverage, reconciliation and comparison
+cards, a trend chart, and paginated animal/session details. Detail filters do not
+change full-period cards. Empty, incomplete and stale-refresh states are explicit.
+
+Shared controls offer 25/50/100 rows. Analytics, herd, calvings, buyers and people
+use server pagination. Buyer statements, feed/health histories, life reports and
+Check page loaded collections locally; their response sizes are unchanged.
+Milking and dispatch retain all draft rows across pages, validate the whole session
+and save the whole session. Life report print/export retains all loaded records.
+See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) for validation and remaining limitations.

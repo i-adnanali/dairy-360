@@ -1,3 +1,5 @@
+import { pagedList } from './paged-list';
+import { Pagination } from '../ui/pagination';
 import { ShellActions } from './navigation';
 import { IdentifierLink, RowLink } from '../ui/navigation';
 // The herd table. Exists to CHECK YOUR OWN WORK, not to be a dashboard.
@@ -27,7 +29,7 @@ import { StatusBadge } from '../ui/surface';
 @Component({
   selector: 'app-herd-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Pagination,
     IdentifierLink,
     RowLink,
     Button,
@@ -41,11 +43,16 @@ import { StatusBadge } from '../ui/surface';
     StatusBadge,
   ],
   template: `
+    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
+    @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
+
     <div class="mx-auto max-w-4xl">
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (rows() === null) {
         <p appHelp data-role="loading">Loading…</p>
+      } @else if (rows()!.length === 0 && paging.url.value().search) {
+        <p>No matching animals. Clear the search to see the herd.</p>
       } @else if (rows()!.length === 0) {
         <!-- THE EMPTY STATE. What the first hour looks like before any row
              exists: one thing to do, and no furniture pretending there is data. -->
@@ -66,7 +73,7 @@ import { StatusBadge } from '../ui/surface';
       } @else {
         <div class="mb-3 flex items-baseline justify-between">
           <h2 appPageHeading>
-            {{ rows()!.length }} {{ rows()!.length === 1 ? 'animal' : 'animals' }}
+            {{ paging.result()?.totalItems }} {{ paging.result()?.totalItems === 1 ? 'animal' : 'animals' }}
           </h2>
           @if (!shell.inShell()) {
             <a
@@ -173,6 +180,7 @@ import { StatusBadge } from '../ui/surface';
               }
             </tbody>
           </table>
+          <app-pagination [page]="paging.result()!.page" [pageSize]="paging.result()!.pageSize" [total]="paging.result()!.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>
         </div>
       }
     </div>
@@ -193,20 +201,7 @@ export class HerdList {
     return precisionParts(r.birth_on, r.birth_precision);
   }
 
-  private readonly api = inject(RegistryApi);
-
-  protected readonly rows = signal<HerdRow[] | null>(null);
-  protected readonly loadError = signal<string | null>(null);
-
-  constructor() {
-    void this.load();
-  }
-
-  private async load(): Promise<void> {
-    try {
-      this.rows.set(await this.api.herd());
-    } catch (e) {
-      this.loadError.set(e instanceof Error ? e.message : String(e));
-    }
-  }
+  protected readonly paging = pagedList<HerdRow>('animals');
+  protected readonly rows = computed(() => this.paging.result()?.items ?? null);
+  protected readonly loadError = this.paging.error;
 }

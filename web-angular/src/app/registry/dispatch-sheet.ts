@@ -1,3 +1,4 @@
+import { Pagination } from '../ui/pagination';
 import { StatusBadge } from '../ui/surface';
 // `/dispatch` -- where the milk went (docs/REGISTRY_SALES.md §12.1).
 //
@@ -78,7 +79,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 @Component({
   selector: 'app-dispatch-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Pagination,
     StatusBadge,
     Button,
     Card,
@@ -177,7 +178,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                 </tr>
               </thead>
               <tbody>
-                @for (row of s.standing; track row.destination_id; let i = $index) {
+                @for (row of s.standing.slice(tableOffset(), tableOffset()+tableSize()); track row.destination_id; let i = $index) {
                   <!-- The standing rows are the ones the header calls "leave
                        none of these unanswered", so they are exactly §3.2's
                        case: a destination lost in the sheet, findable at row
@@ -247,7 +248,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                           [value]="draft(row.destination_id).litres"
                           [disabled]="draft(row.destination_id).status === 'none'"
                           (input)="typeLitres(row.destination_id, $any($event.target).value)"
-                          (keydown)="onKey($event, i)"
+                          (keydown)="onKey($event, i + tableOffset())"
                           class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
                         <button
@@ -293,6 +294,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                 }
               </tbody>
             </table>
+            <app-pagination [page]="tablePage()" [pageSize]="tableSize()" [total]="s.standing.length" (pageChange)="tablePage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
+            @if(pageError()){<p role="alert" class="p-3">{{pageError()}}</p>}
           </div>
 
           <!-- OFFERED, never required -->
@@ -306,9 +309,10 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
               >
                 Only if they came — nothing to answer here
               </div>
+              <app-pagination [page]="occasionalPage()" [pageSize]="tableSize()" [total]="s.occasional.length" (pageChange)="occasionalPage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
               <table class="w-full text-left text-sm">
                 <tbody>
-                  @for (row of s.occasional; track row.destination_id) {
+                  @for (row of s.occasional.slice((occasionalPage()-1)*tableSize(), occasionalPage()*tableSize()); track row.destination_id) {
                     <tr appRowDivider [attr.data-row]="row.destination_id">
                       <td appCell density="compact" tone="heading">
                         {{ row.name }}
@@ -433,6 +437,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
         } @else {
           <app-session-required what="this session" />
         }
+        @if (untouchedStanding().length) {<button appButton variant="secondary" type="button" (click)="showUnanswered()">Go to first unanswered destination</button>}
         @if (blockedReason(); as b) {
           <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
         }
@@ -441,11 +446,17 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
   `,
 })
 export class DispatchSheetScreen {
+  protected readonly occasionalPage = signal(1);
+  protected readonly tablePage = signal(1);
+  protected readonly tableSize = signal(25);
+  protected readonly pageError = signal('');
+  protected tableOffset(): number { return (this.tablePage()-1)*this.tableSize(); }
   private readonly api = inject(RegistryApi);
   protected readonly session_ = inject(Session);
   private readonly writeLog = inject(WriteLog);
   protected readonly identifiers = inject(Identifiers);
 
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly cells = viewChildren<ElementRef<HTMLInputElement>>('cell');
 
   protected readonly fields = [
@@ -498,6 +509,7 @@ export class DispatchSheetScreen {
   }
 
   private async load(on: string, session: MilkingSession): Promise<void> {
+    this.occasionalPage.set(1); this.tablePage.set(1); this.pageError.set('');
     try {
       const s = await this.api.dispatchSheet(on, session);
       // A session already saved comes back filled in, so re-opening one is a
@@ -567,14 +579,15 @@ export class DispatchSheetScreen {
   }
 
   /** Enter commits and advances. Same motion as the milking roster. */
+  protected showUnanswered(): void { const id=this.untouchedStanding()[0]?.destination_id; const index=this.sheet()?.standing.findIndex(r=>r.destination_id===id) ?? -1; if(index<0)return; this.tablePage.set(Math.floor(index/this.tableSize())+1); setTimeout(()=>this.cells()[index%this.tableSize()]?.nativeElement.focus(),0); }
+
   protected onKey(e: KeyboardEvent, index: number): void {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    const el = this.cells()[index + 1]?.nativeElement;
-    if (el) {
-      el.focus();
-      if (!el.disabled) el.select();
-    }
+    const next = index + 1;
+    if(next >= (this.sheet()?.standing.length ?? 0)) return;
+    this.tablePage.set(Math.floor(next / this.tableSize()) + 1);
+    setTimeout(() => { const el = this.cells()[next % this.tableSize()]?.nativeElement; el?.focus(); if(el && !el.disabled) el.select(); }, 0);
   }
 
   protected previousText(row: SheetRow): string {
@@ -778,6 +791,16 @@ export class DispatchSheetScreen {
     const s = this.sheet();
     if (!s) return;
     const d = this.drafts();
+    const allRows = this.allRows();
+    const invalid = allRows.findIndex(row => { const draft = d[row.destination_id] ?? EMPTY; return draft.status === 'taken' && (!draft.litres.trim() || !Number.isFinite(Number(draft.litres)) || Number(draft.litres) < 0); });
+    if(invalid >= 0) {
+      if(invalid < s.standing.length) this.tablePage.set(Math.floor(invalid / this.tableSize())+1);
+      else this.occasionalPage.set(Math.floor((invalid-s.standing.length)/this.tableSize())+1);
+      this.pageError.set('Enter valid non-negative litres for '+allRows[invalid].name);
+      setTimeout(() => Array.from(this.element.nativeElement.querySelectorAll<HTMLInputElement>('input[data-role]')).find(el=>el.getAttribute('data-role') === 'litres-'+allRows[invalid].destination_id)?.focus(),0);
+      return;
+    }
+    this.pageError.set('');
 
     // Only rows with an answer are sent. An untouched OCCASIONAL row is not an
     // omission -- it is the normal state of a neighbour who did not come.

@@ -1,3 +1,5 @@
+import { pagedList } from './paged-list';
+import { Pagination } from '../ui/pagination';
 import { StatusBadge } from '../ui/surface';
 import { IdentifierLink, RowLink } from '../ui/navigation';
 // `/people` -- who works here, and what they are owed
@@ -60,7 +62,7 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-people-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Pagination,
     StatusBadge,
     IdentifierLink,
     RowLink,
@@ -81,6 +83,9 @@ import { Button } from '../ui/button';
     TextInput,
   ],
   template: `
+    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
+    @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
+
     <div class="mx-auto max-w-4xl space-y-6">
       <header>
         <h2 appPageHeading>People</h2>
@@ -117,7 +122,7 @@ import { Button } from '../ui/button';
               </tr>
             </thead>
             <tbody>
-              @for (p of list; track p.person_id) {
+              @for (p of paging.result()?.items ?? []; track p.person_id) {
                 <tr
                   appRowDivider
                   [appRowLink]="'/labour/people/' + p.person_id"
@@ -188,6 +193,8 @@ import { Button } from '../ui/button';
               }
             </tbody>
           </table>
+          @if (paging.result(); as pg) {<app-pagination [page]="pg.page" [pageSize]="pg.pageSize" [total]="pg.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>}
+          @if (paging.error()) {<p role="alert">{{paging.error()}}</p>}
         }
       } @else {
         <p appHelp tone="subtle">Loading…</p>
@@ -368,6 +375,7 @@ import { Button } from '../ui/button';
   `,
 })
 export class PeopleList {
+  protected readonly paging = pagedList<WageBalanceRow>('people');
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
@@ -396,6 +404,7 @@ export class PeopleList {
   }
 
   private async load(): Promise<void> {
+    this.paging.refresh();
     try {
       this.rows.set(await this.api.people(farmToday()));
       this.loadError.set(null);

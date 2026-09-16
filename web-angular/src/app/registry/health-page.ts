@@ -1,3 +1,4 @@
+import { LocalPagination } from '../ui/local-pagination';
 import { SessionRequired } from './session-required';
 import { Component, ChangeDetectionStrategy, HostListener, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +17,7 @@ import { FieldLabel, HelpText } from '../ui/text';
 @Component({
   selector: 'app-health-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [LocalPagination,
     SessionRequired,
     FormsModule,
     RouterLink,
@@ -129,7 +130,8 @@ import { FieldLabel, HelpText } from '../ui/text';
             ><input appInput [(ngModel)]="assigneeFilter" placeholder="Filter by name"
           /></label>
         </div>
-        @for (t of visibleTasks(); track t.id) {
+        <app-local-pagination #pages0="localPagination" [total]="visibleTasks().length"/>
+          @for (t of pages0.records(visibleTasks()); track t.id) {
           <div class="border-t border-stroke pt-3 space-y-2">
             <p>
               <a [routerLink]="['/animals', t.animal_id]">{{ t.animal_id }}</a> ·
@@ -187,7 +189,8 @@ import { FieldLabel, HelpText } from '../ui/text';
         }
         <details>
           <summary>Open cases ({{ b.open_cases.length }})</summary>
-          @for (c of b.open_cases; track c.id) {
+          <app-local-pagination #pages1="localPagination" [total]="b.open_cases.length"/>
+          @for (c of pages1.records(b.open_cases); track c.id) {
             <p>
               {{ label(c) }}
               <button appButton variant="secondary" (click)="edit(c)">Review case</button>
@@ -198,7 +201,8 @@ import { FieldLabel, HelpText } from '../ui/text';
           <summary>
             Withdrawal instructions requiring attention ({{ b.withdrawals.length }})
           </summary>
-          @for (w of b.withdrawals; track $index) {
+          <app-local-pagination #pages2="localPagination" [total]="b.withdrawals.length"/>
+          @for (w of pages2.records(b.withdrawals); track $index) {
             <p>
               {{ w.animal_id }} · {{ w.product_name }} · {{ w.target }} · {{ words(w.status) }}
               {{ w.until || 'End needs clarification' }} · {{ w.instruction }}
@@ -223,7 +227,8 @@ import { FieldLabel, HelpText } from '../ui/text';
       ><button appButton variant="secondary" (click)="create(entity)">
         Add {{ words(entity) }}
       </button>
-      @for (r of visibleRecords(); track r.id) {
+      <app-local-pagination #pages3="localPagination" [total]="visibleRecords().length"/>
+          @for (r of pages3.rows(visibleRecords()); track r.id) {
         <article class="border-t border-stroke py-3 space-y-2">
           <p class="font-medium">{{ label(r) }}</p>
           <p appHelp>

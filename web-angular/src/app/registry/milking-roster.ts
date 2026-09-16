@@ -1,3 +1,4 @@
+import { Pagination } from '../ui/pagination';
 // One milking session. The whole feature is this screen; the rest is reading.
 //
 // ---------------------------------------------------------------------------
@@ -101,7 +102,7 @@ export const OUT_OF_BAND = 0.5;
 @Component({
   selector: 'app-milking-roster',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Pagination,
     Button,
     Card,
     Cell,
@@ -202,7 +203,7 @@ export const OUT_OF_BAND = 0.5;
                 </tr>
               </thead>
               <tbody>
-                @for (row of r.rows; track row.animal_id; let i = $index) {
+                @for (row of r.rows.slice(tableOffset(), tableOffset()+tableSize()); track row.animal_id; let i = $index) {
                   <!-- §6's fifth state, at the scale §3.2 confines it to. An
                        untouched row already BLOCKS the save and is named in
                        "blockedReason()"; what it did not do was look any
@@ -287,7 +288,7 @@ export const OUT_OF_BAND = 0.5;
                             draft(row.animal_id).status !== 'measured'
                           "
                           (input)="typeLitres(row.animal_id, $any($event.target).value)"
-                          (keydown)="onKey($event, i)"
+                          (keydown)="onKey($event, i + tableOffset())"
                           class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
                         <button
@@ -340,6 +341,8 @@ export const OUT_OF_BAND = 0.5;
                 }
               </tbody>
             </table>
+            <app-pagination [page]="tablePage()" [pageSize]="tableSize()" [total]="r.rows.length" (pageChange)="tablePage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1)"/>
+            @if(pageError()){<p role="alert" class="p-3">{{pageError()}}</p>}
           </div>
 
           <!-- The total catches a ten-fold typo that no per-row rule will,
@@ -378,6 +381,7 @@ export const OUT_OF_BAND = 0.5;
         } @else {
           <app-session-required what="this session" />
         }
+        @if (untouched().length) {<button appButton variant="secondary" type="button" (click)="showUnanswered()">Go to first unanswered animal</button>}
         @if (blockedReason(); as b) {
           <span appHelp data-role="blocked" id="milking-submit-reason">{{ b }}</span>
         }
@@ -386,6 +390,10 @@ export const OUT_OF_BAND = 0.5;
   `,
 })
 export class MilkingRosterScreen {
+  protected readonly tablePage = signal(1);
+  protected readonly tableSize = signal(25);
+  protected readonly pageError = signal('');
+  protected tableOffset(): number { return (this.tablePage()-1)*this.tableSize(); }
   private readonly api = inject(RegistryApi);
   protected readonly session_ = inject(Session);
   private readonly writeLog = inject(WriteLog);
@@ -458,6 +466,7 @@ export class MilkingRosterScreen {
   }
 
   private async load(on: string, session: MilkingSession): Promise<void> {
+    this.tablePage.set(1); this.pageError.set('');
     try {
       const r = await this.api.milkingRoster(on, session);
       // A session already saved comes back filled in, so re-opening one is a
@@ -545,15 +554,12 @@ export class MilkingRosterScreen {
     }
   }
 
+  protected showUnanswered(): void { const id=this.untouched()[0]?.animal_id; const index=this.roster()?.rows.findIndex(r=>r.animal_id===id) ?? -1; if(index>=0)this.focusRow(index); }
+
   private focusRow(index: number): void {
-    const cells = this.cells();
-    const el = cells[index]?.nativeElement;
-    if (el && !el.disabled) {
-      el.focus();
-      el.select();
-    } else if (el) {
-      el.focus();
-    }
+    if(index >= (this.roster()?.rows.length ?? 0)) return;
+    this.tablePage.set(Math.floor(index / this.tableSize()) + 1);
+    setTimeout(() => { const el = this.cells()[index % this.tableSize()]?.nativeElement; el?.focus(); if(el && !el.disabled) el.select(); }, 0);
   }
 
   protected previousText(row: RosterRow): string {
@@ -680,6 +686,9 @@ export class MilkingRosterScreen {
     const r = this.roster();
     if (r === null || this.blockedReason() !== null) return;
     const d = this.drafts();
+    const invalid = r.rows.findIndex(row => { const draft = d[row.animal_id] ?? EMPTY; return draft.status === 'measured' && (!draft.litres.trim() || !Number.isFinite(Number(draft.litres)) || Number(draft.litres) < 0); });
+    if(invalid >= 0) { this.pageError.set('Enter a valid non-negative milk measurement for '+r.rows[invalid].animal_id); this.focusRow(invalid); return; }
+    this.pageError.set('');
 
     const entries = r.rows.map((row) => {
       const draft = d[row.animal_id] ?? EMPTY;

@@ -305,6 +305,7 @@ class FakeDestApi {
     },
   ];
   saved: unknown = null;
+  list() { return Promise.resolve({items: structuredClone(this.rows),page:1,pageSize:25,totalItems:this.rows.length,totalPages:1,sort:'identifier',direction:'asc'}); }
   destinations(): Promise<unknown[]> {
     return Promise.resolve(structuredClone(this.rows));
   }
@@ -411,5 +412,18 @@ describe('DestinationsList', () => {
     homeChip.click();
     fixture.detectChanges();
     expect(el.querySelector('[data-role="home-note"]')!.textContent).toContain('never billed');
+  });
+});
+
+describe('Dispatch pagination', () => {
+  afterEach(() => TestBed.resetTestingModule());
+  it('keeps first-page drafts and sends all standing rows from the final page', async () => {
+    const api=new FakeApi();api.sheet.standing=Array.from({length:30},(_,i)=>row({destination_id:`D${i}`,name:`Buyer ${i}`}));api.sheet.occasional=[];
+    const {fixture,el}=await renderSheet(api);const screen=fixture.componentInstance as any;
+    for(let i=0;i<25;i++){const input=el.querySelector(`[data-role="litres-D${i}"]`) as HTMLInputElement;input.value='1';input.dispatchEvent(new Event('input'));}
+    fixture.detectChanges();const next=Array.from(el.querySelectorAll('app-pagination button')).find(b=>b.textContent?.trim()==='Next') as HTMLButtonElement;next.click();fixture.detectChanges();expect(api.saved).toBeNull();
+    for(let i=25;i<30;i++){const input=el.querySelector(`[data-role="litres-D${i}"]`) as HTMLInputElement;input.value='2';input.dispatchEvent(new Event('input'));}
+    fixture.detectChanges();screen.tablePage.set(1);fixture.detectChanges();expect((el.querySelector('[data-role="litres-D0"]') as HTMLInputElement).value).toBe('1');screen.tablePage.set(2);fixture.detectChanges();
+    await screen.onSubmit(new Event('submit'));expect((api.saved?.['entries'] as unknown[]).length).toBe(30);
   });
 });

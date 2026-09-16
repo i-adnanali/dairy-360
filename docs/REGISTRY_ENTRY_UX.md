@@ -1,5 +1,8 @@
 # Registry entry UX — design decisions
 
+> Current extension (2026-09-16): Main lists and analytics now use server pagination; composite histories and editable session sheets use local pagination.
+> See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
+
 Status: **passes 1, 2 and 3 are built** — items 0, 1 and 2 (`v0.13.0`); items 3, 4, B2 and 5
 (`v0.14.0`); items 6a and 10 (`v0.15.0`). Items 7, 8 and 6b remain open; item 9 is partly built:
 **7 and 8 are gated on the five-animal trial**, which has not run — see §11. The cut line records the original build plan; later changes are identified below.

@@ -1,5 +1,8 @@
 # Milk sales, home use and the buyer ledger — design decisions
 
+> Current extension (2026-09-16): Buyer lists use server pagination. Statements page loaded rows locally; dispatch sheets retain and save all draft rows across pages.
+> See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
+
 Status: **built.** Migrations 4 and 5, `money.ts`, the three domain modules, thirteen HTTP routes,
 invariants 18–22, the `/milk/dispatch`, `/milk/buyers` and `/milk/buyers/:id` screens, the `/check` reconciliation
 panel, the fixtures and four read tools all landed together. Server 622 tests, frontend 233 across
@@ -1034,4 +1037,3 @@ import, and a test asserts the rewritten payload has sorted keys.
 no CHECK. Migration 3 as shipped has one. That changed the cost of §7's decision here — adding a
 `source_form` value costs two CHECK changes, not one, and one of them rebuilds the irreplaceable
 table — so the cheaper-looking answer the doc implied was never available. Corrected in that document.
-

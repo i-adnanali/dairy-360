@@ -45,6 +45,7 @@ export const routes: Routes = [
     path: '',
     component: RegistryShell,
     children: [
+      { path: 'analytics', loadComponent: () => import('./registry/analytics-page').then(m => m.AnalyticsPage) },
       {
         path: '',
         pathMatch: 'full',

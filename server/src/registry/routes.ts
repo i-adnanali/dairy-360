@@ -1,3 +1,5 @@
+import { registryList } from './lists';
+import { analytics } from './analytics';
 import { healthWithdrawals } from './health-reads';
 import { healthRouter } from './health-routes';
 import { checkFeed, feedList, feedGet, feedDaily, feedSave, feedRemove, feedRecipients, feedHistory, feedOverview, cropDays, object, type FeedEntity } from './feed';
@@ -348,6 +350,13 @@ function write(store: IdempotencyStore, fn: (req: Request, res: Response) => voi
 export function registryRouter(db: Db): express.Router {
   const router = express.Router();
   router.use(healthRouter(db));
+  router.get('/lists/:kind', handle((req, res) => res.json(registryList(db, req.params.kind, req.query))));
+  for (const endpoint of ['overview', 'production', 'reconciliation']) {
+    router.get('/analytics/' + endpoint, handle((req, res) => {
+      const report = analytics(db, { ...req.query, ...(endpoint === 'overview' ? {} : { table: endpoint }) });
+      res.json(report);
+    }));
+  }
 
   // Per-router, not module-level. registryRouter is a FACTORY precisely so the
   // harness can serve an `:memory:` database, and a shared store would let one

@@ -1,3 +1,4 @@
+import { analyticsHerd } from './analytics-fixtures';
 import { addHealthFixtures } from './health-fixtures';
 import { addFeedFixtures } from './feed-fixtures';
 // Animal registry -- development harness. Serves the registry API over an
@@ -39,11 +40,12 @@ import type { Db } from './schema';
 interface Args {
   port: number;
   empty: boolean;
+  analytics: boolean;
   help: boolean;
 }
 
 export function parseArgs(argv: string[]): Args {
-  const args: Args = { port: 6410, empty: false, help: false };
+  const args: Args = { port: 6410, empty: false, analytics: false, help: false };
   for (const raw of argv) {
     const [flag, value] = raw.split('=');
     switch (flag) {
@@ -52,6 +54,9 @@ export function parseArgs(argv: string[]): Args {
         if (!Number.isInteger(args.port) || args.port < 1) {
           throw new Error(`--port must be a positive integer, got '${value}'`);
         }
+        break;
+      case '--analytics':
+        args.analytics = true;
         break;
       case '--empty':
         args.empty = true;
@@ -64,6 +69,7 @@ export function parseArgs(argv: string[]): Args {
         throw new Error(`unknown flag '${raw}'\n\n${USAGE}`);
     }
   }
+  if (args.empty && args.analytics) throw new Error('--empty and --analytics are mutually exclusive');
   return args;
 }
 
@@ -74,6 +80,7 @@ Usage:
 Serves /api/registry over an IN-MEMORY fixture herd. Never opens dairy.db.
 
   --port=<n>   default 6410 (the real server uses 6400)
+  --analytics  30 milked animals, three full months plus current month, analytics edge cases
   --empty      start with an empty registry instead of the fixture herd
 
   --empty is not a throwaway option: the empty and one-row states are what the
@@ -129,8 +136,10 @@ function main(): void {
   // ...and PLUS the people who work it, for the same reason the sales rows were
   // added: /payroll, /people and /people/:id opened onto an empty state
   // otherwise, and an empty screen is indistinguishable from a broken one.
-  const db = args.empty ? freshDb() : staffedHerd(farmToday()).db;
-  if (!args.empty) {
+  const fixture = args.analytics ? analyticsHerd(farmToday()) : null;
+  const db = fixture?.db ?? (args.empty ? freshDb() : staffedHerd(farmToday()).db);
+  if (fixture) console.log('Analytics scenario dates:', fixture.scenarios);
+  if (!args.empty && !args.analytics) {
     addFeedFixtures(db, farmToday());
     addHealthFixtures(db, farmToday());
   }

@@ -246,3 +246,5 @@ export type AnthropicMessage = {
   role: 'user' | 'assistant';
   content: string | ContentBlock[];
 };
+
+export type { Coverage, MilkMetrics, AnalyticsBucket, ProductionRow, Page, AnalyticsReport } from './analytics';

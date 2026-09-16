@@ -81,6 +81,14 @@ type MilkingSessionValue = import('./types').MilkingSession;
 export class RegistryApi {
   private readonly http = inject(HttpClient);
 
+  list<T>(kind: string, query: Record<string, string>): Promise<import('@dairy/shared').Page<T>> {
+    return unwrap(firstValueFrom(this.http.get<import('@dairy/shared').Page<T>>(`${BASE}/lists/${kind}`, {params: query})));
+  }
+
+  analytics(query: Record<string, string>): Promise<import('@dairy/shared').AnalyticsReport> {
+    return unwrap(firstValueFrom(this.http.get<import('@dairy/shared').AnalyticsReport>(`${BASE}/analytics/overview`, { params: query })));
+  }
+
   feedGet<T>(path: string): Promise<T> {
     return unwrap(firstValueFrom(this.http.get<T>(`${BASE}/feed/${path}`)));
   }

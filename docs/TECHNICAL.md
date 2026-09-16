@@ -345,3 +345,12 @@ above continue to address demo tables only.
 These are read-only; registry serial guards and structured health errors apply.
 HTTP health writes use durable idempotency and expected revisions; see
 [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for the distinct API contract.
+
+## Registry analytics read model
+
+The owner dashboard uses `/api/registry/analytics/{overview,production,reconciliation}`.
+`server/src/registry/analytics.ts` separates transaction-backed reads from pure
+metric calculation, with contracts in `shared/src/analytics.ts`. No agent/model
+call or new schema is needed. Main list endpoints under `/lists/:kind` sort and
+page independently of selector catalogs. See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md)
+for null/zero handling, expected-session coverage, comparisons and pagination.

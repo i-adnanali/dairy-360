@@ -1,6 +1,31 @@
 # Markdown audits
 
-## Current audit — 2026-09-15
+## Current audit — 2026-09-16
+
+Scanned all 39 repository-owned Markdown files for stale analytics, navigation,
+pagination, harness and validation claims. Updated the root and Angular READMEs,
+setup guide, documentation index, architecture/technical references, UI system,
+registry domain docs, open work and analytics specification. Corrected a malformed
+index row, the six-section navigation claim and obsolete life-report Show more
+behavior. Historical records, baseline counts and dated galleries retain their
+context; current extension notes identify superseding implementation.
+
+Added a separate `harness:analytics` command and isolated scenario builder: 30
+milked dams, 30 calves, three full months plus the current month, page boundaries,
+complete comparisons, missing/pending sessions, unmeasured/not-milked answers,
+explicit zero and both signs of production-minus-dispatch. Standard walkthrough
+fixtures are unchanged. Analytics exports and server paging for composite histories
+remain open, explicitly distinguished from delivered UI pagination.
+
+Validation: 778 server tests pass, including fixture semantics and isolation;
+server/shared typecheck passes. Checked 906 local Markdown file-link targets
+(no missing files) and whitespace. A live HTTP smoke check confirmed isolated
+storage, 60 animals, two destinations, monthly comparison and production page 2. Earlier frontend/build/browser results remain dated implementation
+evidence in ANALYTICS_SPEC.md; this documentation/harness change does not alter
+frontend code. External links, all heading anchors, running backup services and
+real-farm data/practices were not revalidated. No persistent farm DB was opened.
+
+## Historical audit — 2026-09-15
 
 Scanned all 38 repository-owned Markdown files with targeted searches for stale
 feature, schema, route, tool, backup and validation claims. Compared affected

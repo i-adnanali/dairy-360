@@ -206,3 +206,12 @@ Built when something needs them, not before.
 - Large-history server pagination and scheduled cleanup of unlinked uploads are
   not implemented; the current API returns full snapshots and cleanup is an explicit
   helper — [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md#interfaces).
+
+## Analytics follow-ups — 2026-09-16
+
+First-release production/reconciliation dashboards and table controls are built.
+See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md). Remaining work: real-farm trial of
+recording adoption, milk carryover and buyer settlement conventions; server paging
+for large composite histories; analytics report/export adapters; and later feed,
+health and financial analytics. Monthly payment practice alone does not define an
+overdue balance, and production-minus-dispatch is not established milk loss.

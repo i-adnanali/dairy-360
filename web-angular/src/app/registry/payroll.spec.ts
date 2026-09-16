@@ -124,6 +124,7 @@ class FakeApi {
       total_minor: 4_500_000,
     });
   }
+  list() { return Promise.resolve({items: structuredClone(this.peopleRows),page:1,pageSize:25,totalItems:this.peopleRows.length,totalPages:1,sort:'identifier',direction:'asc'}); }
   people(): Promise<WageBalanceRow[]> {
     return Promise.resolve(structuredClone(this.peopleRows));
   }

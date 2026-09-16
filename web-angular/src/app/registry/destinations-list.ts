@@ -1,3 +1,5 @@
+import { pagedList } from './paged-list';
+import { Pagination } from '../ui/pagination';
 import { RowLink } from '../ui/navigation';
 import { StatusBadge } from '../ui/surface';
 // `/buyers` -- destinations, and what they pay (docs/REGISTRY_SALES.md §12.2).
@@ -54,7 +56,7 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-destinations-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Pagination,
     RowLink,
     StatusBadge,
     Button,
@@ -74,6 +76,9 @@ import { Button } from '../ui/button';
     TextLink,
   ],
   template: `
+    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
+    @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
+
     <div class="mx-auto max-w-4xl space-y-6">
       <header>
         <h2 appPageHeading>Buyers</h2>
@@ -109,7 +114,7 @@ import { Button } from '../ui/button';
                 </tr>
               </thead>
               <tbody>
-                @for (d of list; track d.id) {
+                @for (d of paging.result()?.items ?? []; track d.id) {
                   <tr
                     appRowDivider
                     [appRowLink]="d.billable ? '/milk/buyers/' + d.id : null"
@@ -175,6 +180,8 @@ import { Button } from '../ui/button';
                 }
               </tbody>
             </table>
+          @if (paging.result(); as pg) {<app-pagination [page]="pg.page" [pageSize]="pg.pageSize" [total]="pg.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>}
+          @if (paging.error()) {<p role="alert">{{paging.error()}}</p>}
           </div>
         }
       } @else if (!loadError()) {
@@ -346,6 +353,7 @@ import { Button } from '../ui/button';
   `,
 })
 export class DestinationsList {
+  protected readonly paging = pagedList<DestinationListRow>('destinations');
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
@@ -385,6 +393,7 @@ export class DestinationsList {
   }
 
   private async load(): Promise<void> {
+    this.paging.refresh();
     try {
       this.rows.set(await this.api.destinations(farmToday()));
       this.loadError.set(null);

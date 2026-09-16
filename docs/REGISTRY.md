@@ -773,6 +773,10 @@ Mounted at `/api/registry` on the real server ([index.ts](../server/src/index.ts
 
 | | Route | |
 |---|---|---|
+| GET | `/analytics/overview` | full-period milk metrics, coverage, chart buckets and paginated detail; see ANALYTICS_SPEC.md |
+| GET | `/analytics/production` | production-oriented analytics response with paginated animals |
+| GET | `/analytics/reconciliation` | reconciliation-oriented analytics response with paginated sessions |
+| GET | `/lists/:kind` | paginated animals, calvings, destinations or people; catalogs retain their original endpoints |
 | GET | `/animals` | herd table: identity + derived status + effective event count |
 | GET | `/animals/:id` | one animal, its status, and its **full** event list |
 | GET | `/animals/:id/calvings` | the correction picker's source |
@@ -999,7 +1003,7 @@ npm run registry:harness -w server -- --empty    # the first-hour state
 npm run harness:app                              # harness + a seeded herd + the app
 ```
 
-Serves `/api/registry` over an injected **`:memory:`** database. The default is `staffedHerd()` plus `addFeedFixtures()`, covering animal history, milk/sales, labour and feed. `--empty` skips those records; `npm run harness:app` uses that empty start and a separate guarded HTTP walkthrough. `GET /api/harness` identifies the disposable database explicitly.
+Serves `/api/registry` over an injected **`:memory:`** database. The default is `staffedHerd()` plus `addFeedFixtures()` and `addHealthFixtures()`, covering animal history, milk/sales, labour, feed and health. The separate `--analytics` mode uses `analyticsHerd()` for multi-month milk review and pagination; see [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md). `--empty` skips those records; `npm run harness:app` uses that empty start and a separate guarded HTTP walkthrough. `GET /api/harness` identifies the disposable database explicitly.
 
 Add `-- --port=6400` when driving the entry UI through it; see "The entry UI" for why.
 

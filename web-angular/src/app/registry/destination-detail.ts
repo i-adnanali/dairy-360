@@ -1,3 +1,4 @@
+import { LocalPagination } from '../ui/local-pagination';
 // `/buyers/:id` -- the statement (docs/REGISTRY_SALES.md §12.3).
 //
 // The screen you hand to a dodhi.
@@ -48,7 +49,7 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-destination-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [LocalPagination,
     Button,
     Card,
     Cell,
@@ -110,9 +111,12 @@ import { Button } from '../ui/button';
             </div>
 
             <!-- THE EVIDENCE: the rows underneath it. -->
-            <table class="w-full text-left text-sm">
+            <app-local-pagination #dispatchPages="localPagination" [total]="m.dispatches.length"/>
+              <app-local-pagination #paymentPages="localPagination" [total]="m.payments.length"/>
+
+              <table class="w-full text-left text-sm">
               <tbody>
-                @for (d of m.dispatches; track d.id) {
+                @for (d of dispatchPages.rows(m.dispatches); track d.id) {
                   <tr appRowDivider [attr.data-dispatch]="d.id">
                     <td appCell tone="secondary">{{ d.occurred_on }} {{ d.session }}</td>
                     <td appCell tone="secondary">
@@ -142,7 +146,7 @@ import { Button } from '../ui/button';
                     </td>
                   </tr>
                 }
-                @for (p of m.payments; track p.id) {
+                @for (p of paymentPages.rows(m.payments); track p.id) {
                   <tr class="border-t border-line-hairline bg-success-bg/40" [attr.data-payment]="p.id">
                     <td appCell tone="secondary">{{ p.occurred_on }}</td>
                     <td appCell tone="secondary">
@@ -234,8 +238,9 @@ import { Button } from '../ui/button';
         @if (s.prices.length > 0) {
           <section appCard data-role="price-history">
             <h3 class="mb-2 text-sm font-semibold text-content-primary">Agreed rates</h3>
+            <app-local-pagination #pricePages="localPagination" [total]="s.prices.length"/>
             <ul class="space-y-1 text-sm text-content-secondary">
-              @for (p of s.prices; track p.id) {
+              @for (p of pricePages.rows(s.prices); track p.id) {
                 <li>
                   from {{ p.effective_from }} —
                   <span class="font-medium">{{ rate(p.price_minor, p.price_unit_litres) }}</span>

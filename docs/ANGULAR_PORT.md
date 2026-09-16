@@ -103,7 +103,7 @@ improvement over the React prop chain).
 > the URL structure, the day board at `/`, and why reads need no recording
 > session — in [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) § 12. None of it is
 > described here. Feed routes and daily workflows are in [REGISTRY_FEED.md](REGISTRY_FEED.md).
-> The current six-section shell, palette, themes and assistant
+> The current seven-section shell, palette, themes and assistant
 > overlay are specified in [UI_SYSTEM.md](UI_SYSTEM.md).
 >
 > It is no longer only an *entry* UI, which is why the wording above changed: the

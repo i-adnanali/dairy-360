@@ -46,7 +46,7 @@ records overlap date ranges rather than disappearing due to their stored first-d
 convention. Estimated history remains visible because its bounds are uncertain.
 
 The report includes full JSON export and a print layout for browser Save as PDF.
-Long sections initially show ten records; Show more expands them. Print/export includes
+Long sections use local pagination with 25, 50 or 100 records per page. Print/export includes
 all loaded records. Source fields remain available separately from readable record
 content. New structured weight, movement, breed, breeding/pregnancy and discarded-milk
 capture is **not included**: these are stage 3, explicitly identified as gaps.
@@ -113,8 +113,8 @@ missing references 404, stale revisions/key conflicts 409, oversized file payloa
 The UI is consolidated at `/animals/health` rather than introducing separate visit/case
 routes for every action. Record selectors link the entities. The report lives at
 `/animals/:id/report`. Report responses contain all records in one consistent read
-snapshot; the initial UI uses progressive disclosure rather than server cursor
-pagination. This is appropriate to the current farm-sized registry; server pagination
+snapshot; the UI pages these already-loaded records locally. See
+[analytics and pagination](ANALYTICS_SPEC.md) for the shared controls. Server pagination
 is a scaling follow-up, and neither exports nor counts silently truncate history.
 
 Assistant reads: `get_registry_health`, `get_registry_health_board` and

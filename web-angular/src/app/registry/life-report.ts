@@ -1,3 +1,4 @@
+import { LocalPagination } from '../ui/local-pagination';
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +12,7 @@ import { HelpText } from '../ui/text';
 @Component({
   selector: 'app-life-report',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule, Button, TextInput, Card, ErrorPanel, PageHeading, HelpText],
+  imports: [LocalPagination,RouterLink, FormsModule, Button, TextInput, Card, ErrorPanel, PageHeading, HelpText],
   styles: [
     `
       :host {
@@ -169,7 +170,8 @@ import { HelpText } from '../ui/text';
                 <section appCard class="space-y-3">
                   <h3 class="font-medium">{{ words(key) }} · {{ words(r.sections[key].state) }}</h3>
                   <p appHelp>{{ r.sections[key].note }}</p>
-                  @for (record of visibleRows(key); track $index) {
+                  <app-local-pagination #sectionPages="localPagination" class="no-print" [hidden]="printing()" [total]="r.sections[key].records.length"/>
+                  @for (record of printing() ? r.sections[key].records : sectionPages.rows(r.sections[key].records); track $index) {
                     <article class="border-t border-stroke pt-3">
                       @for (line of summaryLines(record); track $index) {
                         <p class="detail">{{ line }}</p>
@@ -188,15 +190,7 @@ import { HelpText } from '../ui/text';
                   @if (!r.sections[key].records.length) {
                     <p appHelp>No records available in this section.</p>
                   }
-                  @if (!printing() && r.sections[key].records.length > limit) {
-                    <p class="no-print" appHelp>
-                      Showing {{ limit }} of {{ r.sections[key].records.length }}. Print and JSON
-                      export include every record.
-                    </p>
-                    <button appButton variant="secondary" class="no-print" (click)="limit += 100">
-                      Show more
-                    </button>
-                  }
+
                 </section>
               }
               <section appCard>

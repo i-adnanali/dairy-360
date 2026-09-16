@@ -1,3 +1,6 @@
+import { computed } from '@angular/core';
+import { pagedList } from './paged-list';
+import { Pagination } from '../ui/pagination';
 // A herd-wide read over the existing per-animal timeline contract. Precision
 // and correction status travel with the dates; failed reads never look empty.
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
@@ -14,7 +17,7 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
 @Component({
   selector: 'app-calvings-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Pagination,
     RouterLink,
     Certainty,
     Qualifier,
@@ -26,6 +29,9 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
     RowLink,
   ],
   template: `
+    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
+    @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
+
     <div class="space-y-4">
       <h2 appPageHeading>Calvings</h2>
       <p class="max-w-[68ch] text-sm text-content-muted">
@@ -76,6 +82,7 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
               }
             </tbody>
           </table>
+          <app-pagination [page]="paging.result()!.page" [pageSize]="paging.result()!.pageSize" [total]="paging.result()!.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>
         </div>
       } @else {
         <p role="status">Loading calvings…</p>
@@ -84,39 +91,9 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
   `,
 })
 export class CalvingsList {
-  private readonly api = inject(RegistryApi);
-  readonly rows = signal<{ animal: HerdRow; event: TimelineEvent }[] | null>(null);
-  readonly error = signal<string | null>(null);
+  readonly paging = pagedList<{animal:HerdRow;event:TimelineEvent}>('calvings','date');
+  readonly rows = computed(() => this.paging.result()?.items ?? null);
+  readonly error = this.paging.error;
   readonly precision = precisionParts;
-  constructor() {
-    void this.load();
-  }
-  async load(): Promise<void> {
-    this.error.set(null);
-    this.rows.set(null);
-    try {
-      const herd = await this.api.herd();
-      const rows: { animal: HerdRow; event: TimelineEvent }[] = [];
-      // Bound concurrency; the current herd is small but an import need not be.
-      for (let i = 0; i < herd.length; i += 6) {
-        const batch = await Promise.all(
-          herd
-            .slice(i, i + 6)
-            .map(async (animal) =>
-              (await this.api.calvings(animal.id)).map((event) => ({ animal, event })),
-            ),
-        );
-        rows.push(...batch.flat());
-      }
-      this.rows.set(
-        rows.sort(
-          (a, b) =>
-            b.event.occurred_on.localeCompare(a.event.occurred_on) ||
-            a.event.id.localeCompare(b.event.id),
-        ),
-      );
-    } catch (e) {
-      this.error.set(e instanceof Error ? e.message : String(e));
-    }
-  }
+  load() { this.paging.refresh(); }
 }

@@ -1,3 +1,4 @@
+import { LocalPagination } from '../ui/local-pagination';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -20,7 +21,7 @@ import { PageHeading } from '../ui/heading';
 @Component({
   selector: 'app-feed-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [LocalPagination,
     RouterLink,
     FormsModule,
     SessionRequired,
@@ -161,7 +162,8 @@ import { PageHeading } from '../ui/heading';
           }
           <section appCard>
             <h3 class="font-medium">Feeding history</h3>
-            @for (d of o.days; track d.on) {
+            <app-local-pagination #pages0="localPagination" [total]="o.days.length"/>
+          @for (d of pages0.rows(o.days); track d.on) {
               <div class="flex flex-wrap justify-between gap-2 border-b border-line-subtle py-2">
                 <a class="underline" [routerLink]="['/feed/daily', d.on]">{{ d.on }}</a
                 ><span>{{
@@ -208,7 +210,8 @@ import { PageHeading } from '../ui/heading';
             </div>
           }
           <section appCard class="space-y-3">
-            @for (r of filtered(); track r.id) {
+            <app-local-pagination #pages1="localPagination" [total]="filtered().length"/>
+          @for (r of pages1.rows(filtered()); track r.id) {
               <div class="border-b border-line-subtle py-3">
                 <a class="underline font-medium" [routerLink]="['/feed', mode, r.id]">{{
                   mode === 'crops' ? r.label : itemName(r.item_id) + ' · ' + r.on
@@ -295,7 +298,8 @@ import { PageHeading } from '../ui/heading';
                 >
                   Add expense
                 </button>
-                @for (e of d.expenses; track e.id) {
+                <app-local-pagination #pages2="localPagination" [total]="(d.expenses ?? []).length"/>
+          @for (e of pages2.rows(d.expenses ?? []); track e.id) {
                   <div class="flex flex-wrap gap-3">
                     <span
                       >{{ e.on }} · {{ words(e.category) }} · {{ money(e.amount_minor) }} ·
@@ -353,7 +357,8 @@ import { PageHeading } from '../ui/heading';
       @if (revisions().length) {
         <section appCard class="space-y-3">
           <h3 class="font-medium">Recoverable correction history</h3>
-          @for (r of revisions(); track r.id) {
+          <app-local-pagination #pages3="localPagination" [total]="revisions().length"/>
+          @for (r of pages3.rows(revisions()); track r.id) {
             <details>
               <summary>{{ r.operation }} · revision {{ r.revision }} · {{ r.recorded_at }}</summary>
               <pre class="whitespace-pre-wrap break-all text-xs">{{ r.before_json }}</pre>

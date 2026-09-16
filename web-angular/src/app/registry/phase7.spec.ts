@@ -17,12 +17,17 @@ const api = {
   people: () => Promise.resolve([{ person_id: 'p1', identifier: 'imran', name: 'Imran' }]),
   destinations: () => Promise.resolve([{ id: 'd1', name: 'Home' }]),
 };
-function setup(overrides = {}) {
+function setup(overrides: Record<string, any> = {}) {
+  const list = async () => {
+    const events = overrides['calvings'] ? await overrides['calvings']() : [];
+    const items = events.map((event: any) => ({animal:{id:'BD-0001',name:'Noori'},event}));
+    return {items,page:1,pageSize:25,totalItems:items.length,totalPages:items.length?1:0,sort:'date',direction:'desc'};
+  };
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
       provideRouter([]),
-      { provide: RegistryApi, useValue: { ...api, ...overrides } },
+      { provide: RegistryApi, useValue: { ...api, list, ...overrides } },
     ],
   });
 }
@@ -120,10 +125,10 @@ async function shell() {
   return h;
 }
 describe('Phase 7 shell', () => {
-  it('shows six sections and gates section write actions', async () => {
+  it('shows seven sections and gates section write actions', async () => {
     const h = await shell();
     const el = h.fixture.nativeElement as HTMLElement;
-    expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(6);
+    expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(7);
     expect(el.querySelector('[data-role="section-start-session"]')).toBeTruthy();
     expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeNull();
     TestBed.inject(Session).set('recall', 'Adnan');

@@ -347,7 +347,8 @@ describe('reads without a session', () => {
         },
       ]),
     };
-    const el = await browse(api, '/labour/people');
+    const items = await api.people();
+    const el = await browse({...api, list: () => Promise.resolve({items,page:1,pageSize:25,totalItems:items.length,totalPages:1,sort:'identifier',direction:'asc'})}, '/labour/people');
     // The list -- a pure read -- is there.
     expect(el.querySelector('[data-role="people-table"]')).toBeTruthy();
     // The submit is not, and the prompt stands where it was.

@@ -1,5 +1,8 @@
 # Labour: people, engagements, packages and the wage ledger — design decisions
 
+> Current extension (2026-09-16): People lists now use server pagination. Analytics is a separate main section; Today remains the outstanding-work board.
+> See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
+
 Status: **built.** Migrations 6 and 7, `people.ts`, `payroll.ts`, `wages.ts`, `overview.ts`,
 fourteen HTTP routes, invariants 23–28 and four report lines, the `/labour/payroll`,
 `/labour/people` and `/labour/people/:id` screens, the `/check` panel and the fixtures. The same

@@ -24,8 +24,8 @@ Those documents are not current specifications; some of their proposals were lat
 | Work on the real-animal records | [REGISTRY.md](REGISTRY.md) |
 | Work on milk sales, home use, buyer balances | [REGISTRY_SALES.md](REGISTRY_SALES.md) |
 | Work on employees, packages and wages | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) |
-| Work on crops, expenses, purchases and daily feeding | [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) | Veterinary visits, examinations, cases, plans, doses, tasks, attachment audit, vaccination cards and lifetime reporting; migration 9 | Current implementation and remaining capture gaps |
-| [REGISTRY_FEED.md](REGISTRY_FEED.md) |
+| Work on crops, expenses, purchases and daily feeding | [REGISTRY_FEED.md](REGISTRY_FEED.md) |
+| Work on owner milk analytics and table pagination | [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) |
 | Work on the frontend | [UI_SYSTEM.md](UI_SYSTEM.md), then [ANGULAR_PORT.md](ANGULAR_PORT.md) for the chat state model |
 | Find out why a URL looks the way it does, or what `/` shows | [REGISTRY_PAYROLL.md §12.3–§12.6](REGISTRY_PAYROLL.md#123-navigation-and-url-structure--the-change-that-forced-both-decisions) |
 | Change the wire protocol | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) |
@@ -44,7 +44,8 @@ Those documents are not current specifications; some of their proposals were lat
 | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) | The AG-UI/SSE protocol, custom event channels, the interrupt/resume boundary, the React archival decision | Deep |
 | [REGISTRY.md](REGISTRY.md) | Real-animal records: schema, migrations, append-only guarantee, calving transaction, projections, CLI, HTTP surface, entry UI, invariants | Deep. The single most load-bearing document in the repo |
 | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | The entry surface — screens, the change list with build status, the defaults rule, the five-animal trial | Deep |
-| [UI_SYSTEM.md](UI_SYSTEM.md) | The design system, end to end: what was planned, what validation corrected, what is built, and what is left. Token vocabulary in both modes, fifteen primitives, the certainty axis, the trial gate and four recorded contaminations. Phases 0–7 built; real-farm trial outstanding | Deep, and the single source — the plan and the validation records were folded in and deleted. Historical counts identify their baseline commits; Phase 7 verification is in §9.4; the feed extension is in §17 |
+| [UI_SYSTEM.md](UI_SYSTEM.md) | The design system, end to end: what was planned, what validation corrected, what is built, and what is left. Token vocabulary in both modes, fifteen primitives, the certainty axis, the trial gate and four recorded contaminations. Phases 0–7 built; real-farm trial outstanding | Deep, and the single source — the plan and the validation records were folded in and deleted. Historical counts identify their baseline commits; Phase 7 verification is in §9.4; feed is in §17, health in §18 and analytics/pagination in §19 |
+| [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) | Owner daily/weekly/monthly production and reconciliation, metric semantics, pagination and disposable analytics harness | Implemented first release; refinements and limitations in §11 |
 | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milk/milking` roster | Deep |
 | [REGISTRY_SALES.md](REGISTRY_SALES.md) | Milk sales, home use and the buyer ledger: destinations, effective-dated prices in 40-litre lots, the daily dispatch sheet, the reconciliation, migrations 4–5 | Deep |
 | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) | Labour: people and engagements, effective-dated packages with in-kind benefits, dihari, the monthly run, the wage ledger, migrations 6–7. Also §12.3–§12.6: the URL structure, the day board at `/`, and why reads need no recording session | Deep |
@@ -114,7 +115,7 @@ which are closed.
 
 ## Documentation audit
 
-[2026-09-11 Markdown audit](DOC_AUDIT.md) records the 35-file sweep, corrections,
+[2026-09-16 Markdown audit](DOC_AUDIT.md) records the 39-file sweep, corrections,
 validation and the distinction between current references and historical evidence.
 
 ## Conventions
@@ -134,3 +135,7 @@ with a pointer. Reference guides and indexes should state their scope instead.
 record describes, the record gets a pointer at the top ("Extended by Cycle 5…")
 and keeps its original text. See the top of [FARM_EVENTS.md](FARM_EVENTS.md) for
 the pattern.
+
+[Analytics screen gallery](images/analytics/README.md): daily, weekly and monthly reviews,
+light/dark themes, production pagination, reconciliation and mobile captures
+from the dedicated fixture harness (2026-09-16).

@@ -1,5 +1,8 @@
 # Registry milk logging — design decisions
 
+> Current extension (2026-09-16): The editable roster now pages 25/50/100 rows while retaining drafts and validating/saving the whole session.
+> See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
+
 Status: **built.** Migration 3, the write boundary, the `/milk/milking` roster, invariants 14–17, the
 `/check` completeness panel and the harness fixture all landed together. Server 480 tests, frontend
 210 across 22 files *at the time this landed* — counts move; a run is the authority.

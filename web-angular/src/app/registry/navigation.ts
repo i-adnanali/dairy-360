@@ -15,6 +15,7 @@ export interface Section {
 }
 export const SECTIONS: Section[] = [
   { label: 'Today', path: '/', views: [], actions: [] },
+  { label: 'Analytics', path: '/analytics', views: [], actions: [] },
   {
     label: 'Herd',
     path: '/animals',

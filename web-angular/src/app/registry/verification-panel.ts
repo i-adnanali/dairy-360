@@ -1,3 +1,4 @@
+import { LocalPagination } from '../ui/local-pagination';
 import { ShellActions } from './navigation';
 // The verification read: invariants, precision histogram, calving intervals.
 //
@@ -49,7 +50,7 @@ import { SubHeading } from '../ui/heading';
 @Component({
   selector: 'app-verification-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [LocalPagination,
     Card,
     Cell,
     Certainty,
@@ -99,7 +100,8 @@ import { SubHeading } from '../ui/heading';
             </p>
           } @else {
             <ul class="mt-2 space-y-1" data-role="violations">
-              @for (x of data.violations; track x.detail) {
+              <app-local-pagination #checkPages0="localPagination" [total]="data.violations.length"/>
+              @for (x of checkPages0.rows(data.violations); track x.detail) {
                 <li appErrorPanel>
                   <span class="font-mono text-xs">[{{ x.invariant }}] {{ x.name }}</span>
                   <span class="ml-2">{{ x.detail }}</span>
@@ -126,7 +128,8 @@ import { SubHeading } from '../ui/heading';
             </p>
           } @else {
             <ul class="mt-2 space-y-1" data-role="labour">
-              @for (l of data.labour; track l.detail) {
+              <app-local-pagination #checkPages1="localPagination" [total]="data.labour.length"/>
+              @for (l of checkPages1.rows(data.labour); track l.detail) {
                 <li class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong">
                   <span class="font-mono text-xs">{{ l.kind }}</span>
                   <span class="ml-2">{{ l.detail }}</span>
@@ -189,6 +192,7 @@ import { SubHeading } from '../ui/heading';
               No animal has two or more calvings yet.
             </p>
           } @else {
+            <app-local-pagination #intervalPages="localPagination" [total]="data.intervals.intervals.length"/>
             <table class="mt-2 w-full text-left text-sm" data-role="intervals">
               <thead class="text-xs uppercase tracking-wide text-content-muted">
                 <tr>
@@ -200,7 +204,7 @@ import { SubHeading } from '../ui/heading';
                 </tr>
               </thead>
               <tbody>
-                @for (i of data.intervals.intervals; track i.animal_id + i.ordinal) {
+                @for (i of intervalPages.rows(data.intervals.intervals); track i.animal_id + i.ordinal) {
                   <tr appRowDivider>
                     <td appCell tone="heading" class="font-mono">{{ i.animal_id }}</td>
                     <td appCell tone="secondary">{{ i.from_on }}</td>
@@ -419,7 +423,8 @@ import { SubHeading } from '../ui/heading';
                     </tr>
                   </thead>
                   <tbody>
-                    @for (s of r.incomplete; track s.occurred_on + s.session) {
+                    <app-local-pagination #checkPages2="localPagination" [total]="r.incomplete.length"/>
+              @for (s of checkPages2.rows(r.incomplete); track s.occurred_on + s.session) {
                       <tr appRowDivider>
                         <td appCell tone="secondary">{{ s.occurred_on }} {{ s.session }}</td>
                         <td appCell numeric tone="secondary">
@@ -439,7 +444,8 @@ import { SubHeading } from '../ui/heading';
                     Billed at something other than the agreed rate
                   </h4>
                   <ul class="mt-1 space-y-1 text-sm text-content-secondary">
-                    @for (o of r.off_schedule; track o.dispatch_id) {
+                    <app-local-pagination #checkPages3="localPagination" [total]="r.off_schedule.length"/>
+              @for (o of checkPages3.rows(r.off_schedule); track o.dispatch_id) {
                       <li>
                         {{ o.occurred_on }} {{ o.session }} · {{ o.name }} — billed
                         {{ rate(o.captured_minor, o.captured_unit_litres) }}, agreed

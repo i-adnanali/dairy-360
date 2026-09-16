@@ -3,7 +3,7 @@
 A working AI **multi-agent system** for managing a dairy farm. Two agents share one process — a **dairy agent** (animals, milk yields, feed, health events) and a **vendor/sales agent** (vendors, deliveries, balances) — with one deliberate point of contact: reconciling milk *produced* against milk *delivered*. A thin per-turn dispatcher routes each message to the dairy agent, the vendor agent, or both. The agents answer questions about the farm **and take real actions** - but every agent-requested state change is gated behind an explicit human confirmation. This document explains how the system is put together, with a deliberate focus on the **agentic workflow**; the multi-agent design is in [MULTI_AGENT.md](./MULTI_AGENT.md).
 
 The application also has a direct registry workspace for animals, milk, feed and labour.
-Its six-section shell, command palette and contextual assistant are described in
+Its seven-section shell, command palette and contextual assistant are described in
 [UI_SYSTEM.md](UI_SYSTEM.md); registry writes use explicit forms and provenance,
 while the agent’s registry tools remain read-only. The diagrams below focus on
 the agent path, not the full registry HTTP surface.
@@ -429,3 +429,12 @@ The demo herd (~14 animals) fits cheaply inside the system prompt, so `buildSyst
 ## 12. Out of scope
 
 The application remains local and single-operator. Authentication, tenancy, billing, cloud deployment, feed inventory forecasting and nutrition recommendations are out of scope. Domain-specific removal/correction flows and real camera ingestion exist; the animal event log remains append-only.
+
+## Owner analytics
+
+The seven main sections are Today, Analytics, Herd, Milk, Feed, Labour and Check.
+`/analytics` reads the registry directly through versioned production and
+reconciliation contracts. It supports daily, Monday-based weekly and calendar-month
+reviews, with explicit recording coverage and comparisons over completed dates.
+The read/calculation layer is reusable by future reporting/export adapters; those
+adapters are not built. See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md).

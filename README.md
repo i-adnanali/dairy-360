@@ -16,7 +16,9 @@ service/A2A, no orchestrator LLM, no auth) is documented in
 [docs/MULTI_AGENT.md](docs/MULTI_AGENT.md).
 
 The registry brings the day's outstanding work, animal histories, veterinary care, milk, feed and labour
-recording into one workspace. These screenshots use the in-memory demo harness.
+recording into one workspace, with daily, weekly and monthly production and milk
+reconciliation at `/analytics`. These screenshots are historical harness captures;
+they predate the Analytics navigation item and current pagination.
 
 **Today — see what still needs recording.**
 
@@ -601,3 +603,26 @@ Animal events remain append-only; other domains have their own removal policies.
 
 See [REGISTRY_FEED.md](docs/REGISTRY_FEED.md) for feed verification, defaults and
 the documented CLI test-isolation incident; [OPEN.md](docs/OPEN.md) tracks remaining work.
+
+## Analytics dashboard and demo data
+
+Run `npm run harness:analytics` from the repository root, then open
+`http://localhost:6420/analytics`. This starts an isolated in-memory backend on
+6400 and Angular on 6420; stop `dev` or `harness:app` first because they share
+those ports. No API key is needed, and fixture writes are discarded on exit.
+
+The dedicated scenario has 30 milked dams plus 30 calves, two milk destinations,
+three completed calendar months and the current month through farm today.
+It exercises comparisons, 25-row pagination, missing and pending sessions,
+unmeasured and not-milked answers, explicit zero yield, home use, and positive
+and negative production-minus-dispatch differences. The CLI prints scenario dates.
+The regular `harness:app` remains the broader animal/feed/health/labour walkthrough.
+
+See [analytics specification](docs/ANALYTICS_SPEC.md) for formulas, coverage, API contracts,
+implementation limits and the scenario review checklist. Analytics and main lists
+use server pagination; composite histories and editable session sheets page their
+already-loaded data. Analytics exports and scheduled reporting are future work.
+
+[Analytics screen gallery](docs/images/analytics/README.md): daily, weekly and monthly reviews,
+light/dark themes, production pagination, reconciliation and mobile captures
+from the dedicated fixture harness (2026-09-16).
