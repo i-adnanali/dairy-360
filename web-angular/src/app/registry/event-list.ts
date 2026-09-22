@@ -111,7 +111,7 @@ import type { PrecisionParts } from './precision-display';
             @if (summary(e); as s) {
               <p
                 class="mt-1 text-sm"
-                [class]="e.effective ? 'text-content-secondary' : 'text-content-disabled'"
+                [class]="e.effective ? 'text-content-secondary' : 'text-content-subtle'"
                 data-role="summary"
               >
                 {{ s }}

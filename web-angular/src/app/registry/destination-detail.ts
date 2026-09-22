@@ -111,8 +111,8 @@ import { Button } from '../ui/button';
             </div>
 
             <!-- THE EVIDENCE: the rows underneath it. -->
-            <app-local-pagination #dispatchPages="localPagination" [total]="m.dispatches.length"/>
-              <app-local-pagination #paymentPages="localPagination" [total]="m.payments.length"/>
+            <app-local-pagination label="Deliveries" #dispatchPages="localPagination" [total]="m.dispatches.length"/>
+              <app-local-pagination label="Payments" #paymentPages="localPagination" [total]="m.payments.length"/>
 
               <table class="w-full text-left text-sm">
               <tbody>
@@ -238,7 +238,7 @@ import { Button } from '../ui/button';
         @if (s.prices.length > 0) {
           <section appCard data-role="price-history">
             <h3 class="mb-2 text-sm font-semibold text-content-primary">Agreed rates</h3>
-            <app-local-pagination #pricePages="localPagination" [total]="s.prices.length"/>
+            <app-local-pagination label="Rates" #pricePages="localPagination" [total]="s.prices.length"/>
             <ul class="space-y-1 text-sm text-content-secondary">
               @for (p of pricePages.rows(s.prices); track p.id) {
                 <li>

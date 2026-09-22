@@ -16,6 +16,8 @@ verification debt and farm-use questions from completed work.*
 
 ---
 
+**2026-09-21 B1 update:** §20 records the implemented design-spec v1.1 foundation changes. It supersedes older current-state claims about no-record/disabled text, generic pagination and native Health leave prompts. Historical phase measurements below remain historical. The six resting-border contrast pairs remain explicitly held.
+
 ## 1. What this is
 
 The app was not badly themed. It was **untokenised and drifted**: one custom
@@ -282,7 +284,7 @@ modifiers working.
 | `--text-heading` | `#2E2D2A` | `#E8E6E0` | `content-heading` |
 | `--text-secondary` | `#4A4844` | `#C4C2B9` | `content-secondary` |
 | `--text-muted` | `#63615C` | `#9E9C93` | `content-muted` |
-| `--text-subtle` | `#82807A` | `#7C7B74` | `content-subtle` |
+| `--text-subtle` | `#6C6A64` | `#9E9C93` | `content-subtle` |
 | `--text-disabled` | `#A8A69E` | `#57564F` | `content-disabled` |
 | `--text-on-fill` | `#FFFFFF` | `#20120A` | `content-onFill` |
 | `--border-hairline` | `#EFEEEB` | `#232220` | `line-hairline` |
@@ -404,13 +406,11 @@ and **no fifth property was added** — see §2.1.
 |---|---|---|
 | `--certainty-known` | `#1A1917` | `#F0EFEA` |
 | `--certainty-approx` | `#6C6A64` | `#9E9C93` |
-| `--certainty-rule` | `#A8A69E` | `#57564F` |
-| `--certainty-absent` | `#82807A` | `#7C7B74` |
+| `--certainty-rule` | `#82807A` | `#7C7B74` |
+| `--certainty-absent` | `#6C6A64` | `#9E9C93` |
+| `--certainty-no-record` | `#6C6A64` | `#9E9C93` |
 
-**No record** — §6's fifth state — needs **no new token**. It is
-`--text-disabled`, which already exists and already sits one step past
-`--certainty-absent` in both modes, which is the correct relationship: an absent
-answer is quieter than a given one, and no answer at all is quieter still.
+**No record** uses `--certainty-no-record` following B1. Missing information is meaningful content and has the same readable contrast as absence; roman dash versus italic words distinguishes the two. `--text-disabled` is reserved for inactive controls.
 
 **Superseded events have their own treatment.** Their date text is
 `content-subtle` with a strike-through, and the `ended` badge carries a dashed
@@ -551,7 +551,7 @@ would undo that in the one place a person actually looks.
 | **Known** — measured, exact day, observed | `certainty-known`, `font-mono tabular-nums`, no ornament |
 | **Approximate** — estimated, month/year precision, recalled | `certainty-approx`, `border-b border-dotted` in `certainty-rule`, a qualifier naming the imprecision (§6.1) — **and, as built, `font-mono tabular-nums` too; see below** |
 | **Deliberately absent** — an answer was given: `not_measured`, `nothing taken`, nobody observed | `certainty-absent`, *italic*, always **words** |
-| **No record** — nothing was ever entered | `content-disabled`, roman, an en dash `–` |
+| **No record** — nothing was ever entered | `certainty-no-record`, roman, an en dash `–`, accessible “No record” label |
 | **Unanswered** — still required | The `warning` role, with a row-scale highlight to make skipped rows findable (§4.2.1) |
 
 The earlier rule "always words, never a dash" becomes: **an answer is always
@@ -1115,10 +1115,7 @@ npm run check:contrast        # 30 known failures, printed not gated -- §9.6
 ```
 
 `check:templates` runs the backtick guard and the `display: block` host guard,
-and prints a line for each. `check:contrast` is aliased with `--report` so it
-prints rather than exiting non-zero: the 30 failures are recorded debt, not
-regressions, and a command that always fails is a command nobody runs. Drop the
-flag to use it as a gate once they are fixed.
+and prints a line for each. `check:contrast` now gates unexpected failures and unreviewed disabled-text consumers. B1 permits only six exact resting-border pairs, which remain printed as held debt; there is no broad report-only bypass.
 
 `Not implemented: HTMLCanvasElement's getContext()` prints on every frontend run.
 jsdom has no 2D context; it is not a failure, and it is why `chart-card.spec.ts`
@@ -1766,3 +1763,19 @@ Check page loaded collections locally; their response sizes are unchanged.
 Milking and dispatch retain all draft rows across pages, validate the whole session
 and save the whole session. Life report print/export retains all loaded records.
 See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) for validation and remaining limitations.
+
+
+## 20. Design improvements — Batch B1, 2026-09-21
+
+Implemented against `f3c2373` under [implementation specification v1.1](reviews/design-spec-2026-09-17/IMPLEMENTATION_SPEC.md). [Progress and verification](implementation/B1-PROGRESS.md) records the exact boundary and remaining acceptance work. B2 has not started.
+
+- Meaningful subtle/absent/no-record text now meets 4.5:1 across page, raised and sunken surfaces in both themes; certainty rules meet 3:1. Superseded event content uses readable subtle text. The contrast command now fails for unexpected failures or unreviewed disabled-text consumers, allowing only six exact held resting-border pairs. Write-log values and border-default are unchanged.
+- Shared Button retains variants and sizes, adds orthogonal danger intent and busy semantics, and gives native disabled controls the same muted treatment. Capture-phase activation blocking prevents custom-disabled/busy buttons and anchors reaching template click handlers. Callers retain save/shortcut guards; this does not replace domain validation.
+- Input frames recognize explicit aria-invalid styling. Health selects/textareas use appInput; undefined border references in Health/Life report are replaced with existing tokens. Historical date entry and report print/export logic are unchanged.
+- Quantity fields name the animal/destination; payroll amounts name the person and monetary role. Dam is associated with its existing select. ChipGroup labels are required; hints describe rather than name options. IdentifierInput separates label/help with unique IDs and supports contextual help; protected form default guidance remains intact. Session recorder help is separately associated.
+- Pagination requires a collection label. Empty collections have no pager; totals up to 25 show count only. Larger collections retain the size selector even when one page fits, and show navigation only for multiple pages. Disabled applies to the selector as well. Page shrinking clamps the index; totals and drafts are independent of paging. Buyer statement collection restructuring remains B4.
+- Milking has a labelled local horizontal scroll region, a keyboard stop only when it overflows, a visible scroll cue and unbroken serials. This repairs clipping; mobile cards remain B3.
+- DraftRegistry pilots in Milking and Health share one CDK dialog using the already-installed CDK. Initial focus is Keep editing, Escape/backdrop cancel, focus is trapped/restored, and discard resumes the requested transition. Router activation/deactivation checks deduplicate by navigation ID; Milking query changes are guarded before loading. Session setup application and explicit session clearing consult participants. Mandatory storage-target invalidation still clears authorization immediately.
+- Dirty equality includes raw Milking entries/observer and Health editor/round/action fields; reverting becomes pristine. Local pagination does not discard drafts. Pending saves block transitions; native unload warning is attached only while dirty/pending. Read generations ignore stale roster/Health responses. Drafts remain memory-only.
+
+Full writer enrollment, saved-view/correction flow, uncertain-write outcome resolution and conflict UX across every writer remain B2. Native Health void confirmation is also unchanged until that workflow pass. Actual print/PDF, assistant live behavior, screen-reader/real-phone keyboard checks and operator validation are not claimed here.

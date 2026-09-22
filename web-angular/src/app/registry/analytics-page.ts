@@ -361,7 +361,7 @@ import { PageHeading } from '../ui/heading';
             }
           </table>
         </div>
-        <app-pagination
+        <app-pagination label="Analytics details"
           [page]="visiblePage().page"
           [pageSize]="visiblePage().pageSize"
           [total]="visiblePage().totalItems"

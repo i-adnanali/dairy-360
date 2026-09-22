@@ -1,3 +1,4 @@
+@import "@angular/cdk/overlay-prebuilt.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,7 +54,7 @@
   --text-heading: 46 45 42;  /* #2E2D2A */
   --text-secondary: 74 72 68;  /* #4A4844 */
   --text-muted: 99 97 92;  /* #63615C */
-  --text-subtle: 130 128 122;  /* #82807A */
+  --text-subtle: 108 106 100;
   --text-disabled: 168 166 158;  /* #A8A69E */
   --text-on-fill: 255 255 255;  /* #FFFFFF */
 
@@ -193,8 +194,9 @@
    */
   --certainty-known: 26 25 23;  /* #1A1917 */
   --certainty-approx: 108 106 100;  /* #6C6A64 */
-  --certainty-rule: 168 166 158;  /* #A8A69E */
-  --certainty-absent: 130 128 122;  /* #82807A */
+  --certainty-rule: 130 128 122;
+  --certainty-absent: 108 106 100;
+  --certainty-no-record: 108 106 100;
 }
 
 /*
@@ -229,7 +231,7 @@
   --text-heading: 232 230 224;    /* #E8E6E0 */
   --text-secondary: 196 194 185;  /* #C4C2B9 */
   --text-muted: 158 156 147;      /* #9E9C93 */
-  --text-subtle: 124 123 116;     /* #7C7B74 */
+  --text-subtle: 158 156 147;
   --text-disabled: 87 86 79;      /* #57564F */
   --text-on-fill: 32 18 10;       /* #20120A */
   /* --- lines --- */
@@ -274,8 +276,9 @@
   /* --- certainty --- */
   --certainty-known: 240 239 234; /* #F0EFEA */
   --certainty-approx: 158 156 147; /* #9E9C93 */
-  --certainty-rule: 87 86 79;     /* #57564F */
-  --certainty-absent: 124 123 116; /* #7C7B74 */
+  --certainty-rule: 124 123 116;
+  --certainty-absent: 158 156 147;
+  --certainty-no-record: 158 156 147;
 
   /*
    * NO DARK COLUMN IN THE DOCUMENT. These seven were added during the token
@@ -707,3 +710,6 @@ app-feed-editor { display: block; }
   }
   @page { margin: 15mm; }
 }
+
+app-draft-dialog { display: block; }
+[data-overflow="false"] + .scroll-cue { display: none; }

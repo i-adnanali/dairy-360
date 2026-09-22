@@ -180,7 +180,7 @@ import { StatusBadge } from '../ui/surface';
               }
             </tbody>
           </table>
-          <app-pagination [page]="paging.result()!.page" [pageSize]="paging.result()!.pageSize" [total]="paging.result()!.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>
+          <app-pagination label="Animals" [page]="paging.result()!.page" [pageSize]="paging.result()!.pageSize" [total]="paging.result()!.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>
         </div>
       }
     </div>

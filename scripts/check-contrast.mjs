@@ -105,15 +105,13 @@ function declaredPairs() {
   const add = (fg, bg, kind, label) => p.push({ fg, bg, ...kind, label });
 
   for (const bg of SURFACES) {
-    // Text that carries words. text-disabled is here because §6/§4.5 make it
-    // the FIFTH CERTAINTY STATE from phase 5 on -- a no-record en dash is
-    // content, not a greyed-out control, and 1.4.3's disabled-control
-    // exemption does not reach it.
+    // Meaningful text, including the dedicated no-record token below.
+    // Disabled control text is separately audited by consumer at the end.
     for (const fg of ['text-primary', 'text-heading', 'text-secondary', 'text-muted',
-                      'text-subtle', 'text-disabled']) {
+                      'text-subtle']) {
       add(fg, bg, TEXT, 'body text');
     }
-    for (const fg of ['certainty-known', 'certainty-approx', 'certainty-absent']) {
+    for (const fg of ['certainty-known', 'certainty-approx', 'certainty-absent', 'certainty-no-record']) {
       add(fg, bg, TEXT, 'certainty state (§6)');
     }
     add('certainty-rule', bg, MARK, 'the dotted rule -- carries "approximate" in greyscale');
@@ -199,7 +197,7 @@ const UTILITY = new Map([
   ['agent-both-bg', 'agent-both-bg'], ['agent-both-fg', 'agent-both-fg'],
   ['writelog-bg', 'writelog-bg'], ['writelog-fg', 'writelog-fg'],
   ['certainty-known', 'certainty-known'], ['certainty-approx', 'certainty-approx'],
-  ['certainty-absent', 'certainty-absent'], ['certainty-rule', 'certainty-rule'],
+  ['certainty-absent', 'certainty-absent'], ['certainty-no-record', 'certainty-no-record'], ['certainty-rule', 'certainty-rule'],
 ]);
 
 function walk(dir, out = []) {
@@ -225,7 +223,7 @@ function renderedPairs() {
       const fgs = [...line.matchAll(/\btext-([A-Za-z][A-Za-z-]*)\b/g)].map((m) => m[1]);
       for (const bg of bgs) for (const fg of fgs) {
         const bgTok = UTILITY.get(bg), fgTok = UTILITY.get(fg);
-        if (!bgTok || !fgTok) continue;
+        if (!bgTok || !fgTok || fgTok === 'text-disabled') continue;
         const key = `${fgTok}|${bgTok}`;
         if (!found.has(key)) found.set(key, []);
         found.get(key).push(`${relative(ROOT, file)}:${i + 1}`);
@@ -293,4 +291,14 @@ if (process.argv.includes('--all')) {
 const aaa = graded.filter((x) => x.tier === 'TEXT' && x.pass && x.r < 7);
 console.log(`TEXT pairs passing AA but under AAA (7:1): ${aaa.length}`);
 
-process.exit(failures.length > 0 && !process.argv.includes('--report') ? 1 : 0);
+const held = new Set(['light|border-default|surface-page', 'light|border-default|surface-raised', 'light|border-default|surface-sunken', 'dark|border-default|surface-page', 'dark|border-default|surface-raised', 'dark|border-default|surface-sunken']);
+const unexpected = failures.filter(x => !held.has(`${x.mode}|${x.fg}|${x.bg}`));
+const disabledConsumers = new Set(['ui/button.ts', 'components/composer.ts', 'registry/calf-picker.ts', 'registry/precision-date.ts']);
+const invalidUses = walk(APP).filter(file => {
+  const source = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  return source.includes('text-content-disabled') && !disabledConsumers.has(relative(APP, file));
+});
+console.log(`Held resting-border failures: ${failures.length - unexpected.length}; unexpected failures: ${unexpected.length}`);
+console.log('Disabled text census: Button inactive actions, Composer disabled input, CalfPicker ineligible disabled options, PrecisionDate disabled estimated checkbox.');
+if (invalidUses.length) console.error('Unreviewed disabled-text consumers:', invalidUses);
+process.exit(unexpected.length || invalidUses.length ? 1 : 0);

@@ -82,7 +82,7 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
               }
             </tbody>
           </table>
-          <app-pagination [page]="paging.result()!.page" [pageSize]="paging.result()!.pageSize" [total]="paging.result()!.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>
+          <app-pagination label="Calvings" [page]="paging.result()!.page" [pageSize]="paging.result()!.pageSize" [total]="paging.result()!.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>
         </div>
       } @else {
         <p role="status">Loading calvings…</p>

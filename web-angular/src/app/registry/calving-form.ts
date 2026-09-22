@@ -93,7 +93,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
 
       <!-- dam -->
       <div appCard>
-        <div appSectionLabel legend>Dam</div>
+        <label appSectionLabel legend for="calving-dam">Dam</label>
         @if (dams().length === 0) {
           <!-- Was a dead end with no way out, while /herd's empty state already
                linked to /add. The asymmetry was the bug: the same nothing-yet
@@ -105,7 +105,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             >, and it will be here when you come back.
           </p>
         } @else {
-          <select
+          <select id="calving-dam"
             #firstField
             data-role="dam"
             [value]="damId()"

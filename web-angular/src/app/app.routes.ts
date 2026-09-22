@@ -38,12 +38,14 @@
 // rather than after the parameterised route, so the rule reads as one rule.
 
 import type { Routes } from '@angular/router';
+import { draftActivate, draftDeactivate } from './registry/draft-registry';
 import { RegistryShell } from './registry/registry-shell';
 
 export const routes: Routes = [
   {
     path: '',
     component: RegistryShell,
+    canActivateChild: [draftActivate],
     children: [
       { path: 'analytics', loadComponent: () => import('./registry/analytics-page').then(m => m.AnalyticsPage) },
       {
@@ -52,7 +54,7 @@ export const routes: Routes = [
         loadComponent: () => import('./registry/today-board').then((m) => m.TodayBoard),
       },
 
-      { path: 'animals/health', canDeactivate: [(component: {canLeave:()=>boolean}) => component.canLeave()], loadComponent: () => import('./registry/health-page').then(m => m.HealthPage) },
+      { path: 'animals/health', canDeactivate: [draftDeactivate], runGuardsAndResolvers: 'always', loadComponent: () => import('./registry/health-page').then(m => m.HealthPage) },
       { path: 'animals/:id/report', loadComponent: () => import('./registry/life-report').then(m => m.LifeReport) },
 
       // --- the animal record -------------------------------------------------
@@ -95,6 +97,7 @@ export const routes: Routes = [
       // them by their foreign key rather than by what they are.
       {
         path: 'milk/milking',
+        canDeactivate: [draftDeactivate], runGuardsAndResolvers: 'always',
         loadComponent: () => import('./registry/milking-roster').then((m) => m.MilkingRosterScreen),
       },
       {

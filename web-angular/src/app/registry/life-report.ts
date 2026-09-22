@@ -29,7 +29,7 @@ import { HelpText } from '../ui/text';
         border-collapse: collapse;
       }
       tr {
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid rgb(var(--border-default));
       }
       .detail {
         white-space: pre-wrap;
@@ -124,7 +124,7 @@ import { HelpText } from '../ui/text';
                   vaccination.
                 </p>
                 @for (v of r.health.vaccinations; track v.id) {
-                  <article class="border-t border-stroke py-3">
+                  <article class="border-t border-line py-3">
                     <p>{{ v.product_name }} · {{ date(v.occurred_on, v.date_precision) }}</p>
                     <p>
                       {{ v.amount ?? 'Unknown amount' }} {{ v.unit }} ·
@@ -170,9 +170,9 @@ import { HelpText } from '../ui/text';
                 <section appCard class="space-y-3">
                   <h3 class="font-medium">{{ words(key) }} · {{ words(r.sections[key].state) }}</h3>
                   <p appHelp>{{ r.sections[key].note }}</p>
-                  <app-local-pagination #sectionPages="localPagination" class="no-print" [hidden]="printing()" [total]="r.sections[key].records.length"/>
+                  <app-local-pagination [label]="words(key)" #sectionPages="localPagination" class="no-print" [hidden]="printing()" [total]="r.sections[key].records.length"/>
                   @for (record of printing() ? r.sections[key].records : sectionPages.rows(r.sections[key].records); track $index) {
-                    <article class="border-t border-stroke pt-3">
+                    <article class="border-t border-line pt-3">
                       @for (line of summaryLines(record); track $index) {
                         <p class="detail">{{ line }}</p>
                       }

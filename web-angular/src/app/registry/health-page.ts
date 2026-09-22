@@ -1,6 +1,7 @@
+import { DraftRegistry } from './draft-registry';
 import { LocalPagination } from '../ui/local-pagination';
 import { SessionRequired } from './session-required';
-import { Component, ChangeDetectionStrategy, HostListener, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { RegistryApi } from './api';
@@ -40,9 +41,9 @@ import { FieldLabel, HelpText } from '../ui/text';
       select,
       textarea {
         width: 100%;
-        padding: 0.6rem;
-        border: 1px solid var(--border);
-        border-radius: 0.4rem;
+
+
+
         background: transparent;
       }
       textarea {
@@ -99,7 +100,7 @@ import { FieldLabel, HelpText } from '../ui/text';
         </div>
         <label
           ><span appFieldLabel>Filter animal</span
-          ><select [(ngModel)]="animalFilter">
+          ><select appInput [(ngModel)]="animalFilter">
             <option value="">All animals</option>
             @for (a of animals(); track a.id) {
               <option [value]="a.id">{{ a.id }} · {{ a.name || 'Unnamed' }}</option>
@@ -109,7 +110,7 @@ import { FieldLabel, HelpText } from '../ui/text';
         <div class="rows">
           <label
             ><span appFieldLabel>Task type</span
-            ><select [(ngModel)]="taskFilter">
+            ><select appInput [(ngModel)]="taskFilter">
               <option value="">All task types</option>
               <option value="administration">Doses</option>
               <option value="recheck">Rechecks</option>
@@ -118,7 +119,7 @@ import { FieldLabel, HelpText } from '../ui/text';
           >
           <label
             ><span appFieldLabel>Due status</span
-            ><select [(ngModel)]="standingFilter">
+            ><select appInput [(ngModel)]="standingFilter">
               <option value="">All outstanding</option>
               <option value="overdue">Overdue</option>
               <option value="due">Due today</option>
@@ -130,9 +131,9 @@ import { FieldLabel, HelpText } from '../ui/text';
             ><input appInput [(ngModel)]="assigneeFilter" placeholder="Filter by name"
           /></label>
         </div>
-        <app-local-pagination #pages0="localPagination" [total]="visibleTasks().length"/>
+        <app-local-pagination label="Health tasks" #pages0="localPagination" [total]="visibleTasks().length"/>
           @for (t of pages0.records(visibleTasks()); track t.id) {
-          <div class="border-t border-stroke pt-3 space-y-2">
+          <div class="border-t border-line pt-3 space-y-2">
             <p>
               <a [routerLink]="['/animals', t.animal_id]">{{ t.animal_id }}</a> ·
               {{ t.instructions }} · {{ t.due_on }} {{ t.due_time }} · {{ t.standing }}
@@ -145,7 +146,7 @@ import { FieldLabel, HelpText } from '../ui/text';
               ><button
                 appButton
                 variant="secondary"
-                (click)="actionTask = t; action = 'defer'; actionReason = ''; newDue = ''"
+                (click)="openAction(t)"
               >
                 Defer / miss / cancel
               </button>
@@ -156,10 +157,11 @@ import { FieldLabel, HelpText } from '../ui/text';
           <p appHelp>No outstanding tasks for this selection.</p>
         }
         @if (actionTask && session.ready()) {
-          <form class="space-y-3" (ngSubmit)="saveAction()">
+          <form id="health-action" class="space-y-3" (ngSubmit)="saveAction()">
+            <fieldset [disabled]="busy()" class="space-y-3">
             <p>{{ actionTask.instructions }}</p>
             <label
-              >Action<select name="action" [(ngModel)]="action">
+              >Action<select appInput name="action" [(ngModel)]="action">
                 <option value="defer">Defer</option>
                 <option value="miss">Missed</option>
                 <option value="cancel">Cancel</option>
@@ -181,15 +183,15 @@ import { FieldLabel, HelpText } from '../ui/text';
                 name="actionReason"
                 [(ngModel)]="actionReason"
                 required /></label
-            ><button appButton [disabled]="busy()">Save task action</button
-            ><button appButton variant="secondary" type="button" (click)="actionTask = null">
+            ></fieldset><button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">Save task action</button
+            ><button appButton variant="secondary" type="button" (click)="closeDrafts()">
               Back
             </button>
           </form>
         }
         <details>
           <summary>Open cases ({{ b.open_cases.length }})</summary>
-          <app-local-pagination #pages1="localPagination" [total]="b.open_cases.length"/>
+          <app-local-pagination label="Open health cases" #pages1="localPagination" [total]="b.open_cases.length"/>
           @for (c of pages1.records(b.open_cases); track c.id) {
             <p>
               {{ label(c) }}
@@ -201,7 +203,7 @@ import { FieldLabel, HelpText } from '../ui/text';
           <summary>
             Withdrawal instructions requiring attention ({{ b.withdrawals.length }})
           </summary>
-          <app-local-pagination #pages2="localPagination" [total]="b.withdrawals.length"/>
+          <app-local-pagination label="Withdrawal instructions" #pages2="localPagination" [total]="b.withdrawals.length"/>
           @for (w of pages2.records(b.withdrawals); track $index) {
             <p>
               {{ w.animal_id }} · {{ w.product_name }} · {{ w.target }} · {{ words(w.status) }}
@@ -214,12 +216,12 @@ import { FieldLabel, HelpText } from '../ui/text';
     <div class="flex flex-wrap gap-2">
       <button appButton (click)="create('visits')">Start vet visit</button
       ><button appButton variant="secondary" (click)="create('administrations')">Record dose</button
-      ><button appButton variant="secondary" (click)="roundOpen = true">Vaccination round</button>
+      ><button appButton variant="secondary" (click)="openRound()">Vaccination round</button>
     </div>
     <section appCard class="space-y-3">
       <label
         ><span appFieldLabel>Records</span
-        ><select [(ngModel)]="entity" (change)="loadRecords()">
+        ><select appInput [(ngModel)]="entity" (change)="loadRecords()">
           @for (e of entities; track e) {
             <option [value]="e">{{ words(e) }}</option>
           }
@@ -227,9 +229,9 @@ import { FieldLabel, HelpText } from '../ui/text';
       ><button appButton variant="secondary" (click)="create(entity)">
         Add {{ words(entity) }}
       </button>
-      <app-local-pagination #pages3="localPagination" [total]="visibleRecords().length"/>
+      <app-local-pagination label="Health records" #pages3="localPagination" [total]="visibleRecords().length"/>
           @for (r of pages3.rows(visibleRecords()); track r.id) {
-        <article class="border-t border-stroke py-3 space-y-2">
+        <article class="border-t border-line py-3 space-y-2">
           <p class="font-medium">{{ label(r) }}</p>
           <p appHelp>
             {{ r.status || r.kind }} · {{ r.date_precision }} · revision {{ r.revision }} · recorded
@@ -278,7 +280,7 @@ import { FieldLabel, HelpText } from '../ui/text';
       <section appCard>
         <h3 class="font-medium">Correction history</h3>
         @for (v of revisions(); track v.id) {
-          <div class="border-t border-stroke py-2">
+          <div class="border-t border-line py-2">
             <p>
               Revision {{ v.revision }} · {{ v.operation }} · {{ v.recorded_at }} · {{ v.reason }}
             </p>
@@ -311,12 +313,13 @@ import { FieldLabel, HelpText } from '../ui/text';
           administrator separately.
         </p>
         <form class="space-y-4" (ngSubmit)="save()">
+          <fieldset [disabled]="busy()" class="space-y-4">
           <div class="rows">
             @for (f of fields[editEntity]; track f.key) {
               <label
                 ><span appFieldLabel>{{ f.label }}</span>
                 @if (f.reference) {
-                  <select
+                  <select appInput
                     [name]="f.key"
                     [attr.name]="f.key"
                     [(ngModel)]="form[f.key]"
@@ -329,7 +332,7 @@ import { FieldLabel, HelpText } from '../ui/text';
                     }
                   </select>
                 } @else if (f.type === 'select') {
-                  <select
+                  <select appInput
                     [name]="f.key"
                     [attr.name]="f.key"
                     [(ngModel)]="form[f.key]"
@@ -341,7 +344,7 @@ import { FieldLabel, HelpText } from '../ui/text';
                     }
                   </select>
                 } @else if (f.type === 'textarea') {
-                  <textarea
+                  <textarea appInput
                     [name]="f.key"
                     [attr.name]="f.key"
                     [(ngModel)]="form[f.key]"
@@ -373,7 +376,7 @@ import { FieldLabel, HelpText } from '../ui/text';
               <fieldset class="space-y-2">
                 <legend class="font-medium">{{ target }} withdrawal instruction</legend>
                 <label
-                  >Recorded state<select
+                  >Recorded state<select appInput
                     [name]="target + 'State'"
                     [(ngModel)]="form[target + '_withdrawal'].state"
                   >
@@ -424,7 +427,7 @@ import { FieldLabel, HelpText } from '../ui/text';
               type="file"
               accept="image/jpeg,image/png,application/pdf"
               (change)="upload($event)"
-              [disabled]="busy()"
+              [disabled]="busy()" [attr.aria-busy]="busy() || null"
           /></label>
           @for (id of form.attachment_ids || []; track id) {
             <p>
@@ -439,8 +442,9 @@ import { FieldLabel, HelpText } from '../ui/text';
               ><input appInput name="reason" [(ngModel)]="form.correction_reason" required
             /></label>
           }
+          </fieldset>
           <div class="flex flex-wrap gap-2">
-            <button appButton type="submit" [disabled]="busy()">
+            <button appButton type="submit" [disabled]="busy()" [busy]="busy()">
               {{ busy() ? 'Saving…' : 'Save record' }}</button
             ><button appButton variant="secondary" type="button" (click)="closeEditor()">
               Close
@@ -450,7 +454,8 @@ import { FieldLabel, HelpText } from '../ui/text';
                 appButton
                 variant="secondary"
                 type="button"
-                [disabled]="busy()"
+                [disabled]="busy()" [attr.aria-busy]="busy() || null"
+                intent="danger"
                 (click)="voidRecord()"
               >
                 Void record with reason
@@ -464,10 +469,11 @@ import { FieldLabel, HelpText } from '../ui/text';
       <section appCard class="space-y-3">
         <h3 class="font-medium">Vaccination round</h3>
         <p appHelp>Confirm each animal separately. This batch saves all rows together.</p>
-        <form class="space-y-3" (ngSubmit)="saveRound()">
+        <form id="health-round" class="space-y-3" (ngSubmit)="saveRound()">
+          <fieldset [disabled]="busy()" class="space-y-3">
           <div class="rows">
             <label
-              >Visit<select name="roundVisit" [(ngModel)]="round.visit_id">
+              >Visit<select appInput name="roundVisit" [(ngModel)]="round.visit_id">
                 <option value="">No visit linked</option>
                 @for (v of catalog()['visits'] || []; track v.id) {
                   <option [value]="v.id">{{ label(v) }}</option>
@@ -507,10 +513,10 @@ import { FieldLabel, HelpText } from '../ui/text';
             /></label>
           </div>
           @for (a of animals(); track a.id) {
-            <div class="rows border-t border-stroke py-2">
+            <div class="rows border-t border-line py-2">
               <label
                 >{{ a.id }} · {{ a.name
-                }}<select [name]="'round-' + a.id" [(ngModel)]="roundRows[a.id].disposition">
+                }}<select appInput [name]="'round-' + a.id" [(ngModel)]="roundRows[a.id].disposition">
                   <option value="">Not selected</option>
                   <option value="given">Given</option>
                   <option value="deferred">Deferred</option>
@@ -543,9 +549,9 @@ import { FieldLabel, HelpText } from '../ui/text';
           }
           <label
             ><input type="checkbox" name="confirmed" [(ngModel)]="roundConfirmed" required /> I
-            checked the selected animals and their individual outcomes.</label
-          ><button appButton [disabled]="busy()">Save vaccination round</button
-          ><button appButton variant="secondary" type="button" (click)="roundOpen = false">
+            checked the selected animals and their individual outcomes.</label>
+          </fieldset><button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">Save vaccination round</button
+          ><button appButton variant="secondary" type="button" (click)="closeDrafts()">
             Close round
           </button>
         </form>
@@ -594,16 +600,31 @@ export class HealthPage {
   private roundKey = '';
   protected label = healthLabel;
   protected words = healthWords;
+  private readonly drafts = inject(DraftRegistry);
+  private loadGeneration = 0;
+  private editorOrigin: HTMLElement | null = null;
   constructor() {
+    this.drafts.register({
+      owner: 'health', context: () => this.editEntity + '/' + (this.editing?.id ?? 'new'),
+      description: () => 'Health · ' + this.editEntity + (this.form.animal_id ? ' · ' + this.form.animal_id : ''),
+      snapshot: () => JSON.stringify([this.form, this.round, this.roundRows, this.roundConfirmed, this.action, this.actionReason, this.newDue]),
+      baseline: () => this.draftBaseline,
+      dirty: () => this.hasUnsavedChanges(), pending: () => this.busy(),
+      discard: () => this.resetDrafts(),
+      replaces: url => new URL(url, 'http://local').pathname !== '/animals/health',
+    }, inject(DestroyRef));
     void this.load();
   }
+  ngDoCheck() { this.drafts.syncUnload(); }
   protected async load() {
+    const generation = ++this.loadGeneration;
     try {
       const [b, a, ...lists] = await Promise.all([
         this.api.healthGet<any>('health/board?on=' + this.on),
         this.api.herd(),
         ...this.entities.map((e) => this.api.healthGet<HealthRecord[]>('health/' + e)),
       ]);
+      if (generation !== this.loadGeneration) return;
       this.board.set(b);
       this.animals.set(a);
       const c: Record<string, HealthRecord[]> = {};
@@ -651,8 +672,10 @@ export class HealthPage {
         (!this.form.animal_id || !r.animal_id || r.animal_id === this.form.animal_id),
     );
   }
-  protected create(entity: string, initial: Record<string, any> = {}) {
-    if (!this.canLeave()) return;
+  protected async create(entity: string, initial: Record<string, any> = {}) {
+    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts();
+    this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = entity;
     this.editing = null;
     this.form = {
@@ -667,11 +690,14 @@ export class HealthPage {
     this.key = '';
     this.error.set('');
     setTimeout(() =>
-      document.getElementById('health-editor')?.scrollIntoView({ behavior: 'smooth' }),
+      this.focusEditor(),
     );
+    return true;
   }
-  protected edit(r: HealthRecord) {
-    if (!this.canLeave()) return;
+  protected async edit(r: HealthRecord) {
+    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts();
+    this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = r.entity;
     this.editing = r;
     this.form = structuredClone(r);
@@ -680,31 +706,47 @@ export class HealthPage {
     this.editorOpen = true;
     this.key = '';
     setTimeout(() =>
-      document.getElementById('health-editor')?.scrollIntoView({ behavior: 'smooth' }),
+      this.focusEditor(),
     );
   }
   hasUnsavedChanges() {
     return (
       (this.editorOpen && JSON.stringify(this.form) !== this.draftBaseline) ||
       (this.roundOpen &&
-        (Object.keys(this.round).length > 0 ||
+        (this.roundConfirmed || Object.keys(this.round).length > 0 ||
           Object.values(this.roundRows).some((r) => r.disposition))) ||
-      !!(this.actionTask && (this.actionReason || this.newDue))
+      !!(this.actionTask && (this.action !== 'defer' || this.actionReason || this.newDue))
     );
   }
-  canLeave() {
-    return (
-      !this.hasUnsavedChanges() || confirm('Leave this form? Unsaved health changes will be lost.')
-    );
+  canLeave() { return this.drafts.request(p => p.owner === 'health'); }
+  private resetDrafts() {
+    this.editorOpen = false; this.actionTask = null; this.roundOpen = false;
+    this.form = {}; this.round = {}; this.roundConfirmed = false;
+    this.roundRows = Object.fromEntries(this.animals().map(a => [a.id, {disposition: ''}]));
+    this.action = 'defer'; this.actionReason = ''; this.newDue = '';
+    this.key = ''; this.actionKey = ''; this.roundKey = '';
   }
-  @HostListener('window:beforeunload', ['$event']) beforeUnload(event: BeforeUnloadEvent) {
-    if (this.hasUnsavedChanges()) {
-      event.preventDefault();
-      event.returnValue = '';
-    }
+  private focusEditor() {
+    const editor = document.getElementById('health-editor');
+    editor?.scrollIntoView?.({block: 'nearest'});
+    editor?.querySelector<HTMLElement>('input, select, textarea')?.focus();
   }
-  protected closeEditor() {
-    if (confirm('Close this form? Unsaved changes will be lost.')) this.editorOpen = false;
+  protected async closeDrafts() {
+    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts(); this.editorOrigin?.focus();
+  }
+  protected closeEditor() { return this.closeDrafts(); }
+  protected async openRound() {
+    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts(); this.editorOrigin = document.activeElement as HTMLElement;
+    this.roundOpen = true;
+    setTimeout(() => document.querySelector<HTMLElement>('#health-round select')?.focus());
+  }
+  protected async openAction(t: HealthRecord) {
+    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts(); this.editorOrigin = document.activeElement as HTMLElement;
+    this.actionTask = t;
+    setTimeout(() => document.querySelector<HTMLElement>('#health-action select')?.focus());
   }
   protected referenceChanged(key: string) {
     if (key === 'product_id') {
@@ -776,8 +818,8 @@ export class HealthPage {
       await this.load();
     });
   }
-  protected complete(t: HealthRecord) {
-    this.create(t.kind === 'administration' ? 'administrations' : 'results', {
+  protected async complete(t: HealthRecord) {
+    const created = await this.create(t.kind === 'administration' ? 'administrations' : 'results', {
       animal_id: t.animal_id,
       task_id: t.id,
       plan_id: t.plan_id,
@@ -785,7 +827,7 @@ export class HealthPage {
       product_id: t.product_id,
       kind: t.kind === 'test' ? 'test' : t.kind === 'recheck' ? 'follow_up' : undefined,
     });
-    this.referenceChanged('product_id');
+    if (created) this.referenceChanged('product_id');
   }
   protected async saveAction() {
     await this.run(async () => {

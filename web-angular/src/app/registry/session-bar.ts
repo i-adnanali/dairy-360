@@ -1,3 +1,4 @@
+import { DraftRegistry } from './draft-registry';
 // Session provenance: set once, shown always, applied to every write.
 //
 // And the target: which database the writes are landing in, stated in BOTH
@@ -113,7 +114,9 @@ export class SessionBar implements OnInit {
       .subscribe(() => void this.target.reprobe());
   }
 
-  protected change(): void {
+  private readonly drafts = inject(DraftRegistry);
+  protected async change(): Promise<void> {
+    if (this.drafts.hasChanges() && !(await this.drafts.request())) return;
     this.session.clear();
   }
 }

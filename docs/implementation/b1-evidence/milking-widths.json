@@ -1,0 +1,42 @@
+[
+  {
+    "document": 360,
+    "overflow": "auto",
+    "region": 326,
+    "tabindex": "0",
+    "table": 539,
+    "width": 360
+  },
+  {
+    "document": 390,
+    "overflow": "auto",
+    "region": 356,
+    "tabindex": "0",
+    "table": 539,
+    "width": 390
+  },
+  {
+    "document": 768,
+    "overflow": "auto",
+    "region": 734,
+    "tabindex": null,
+    "table": 734,
+    "width": 768
+  },
+  {
+    "document": 1024,
+    "overflow": "auto",
+    "region": 990,
+    "tabindex": null,
+    "table": 990,
+    "width": 1024
+  },
+  {
+    "document": 1440,
+    "overflow": "auto",
+    "region": 1398,
+    "tabindex": null,
+    "table": 1398,
+    "width": 1440
+  }
+]

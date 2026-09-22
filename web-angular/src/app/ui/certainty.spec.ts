@@ -68,12 +68,9 @@ describe('the certainty vocabulary — §6 five states', () => {
     expect(cls('absent')).toContain('italic');
     expect(cls('absent')).not.toContain('border-dotted');
 
-    // No record: §4.5's rule that this state gets NO NEW TOKEN. It is
-    // --text-disabled, which already sits one step past --certainty-absent in
-    // both modes. A `certainty-norecord` token appearing here would mean
-    // somebody added a fifth name for a value that already had one.
-    expect(cls('no-record')).toContain('text-content-disabled');
-    expect(cls('no-record')).not.toContain('certainty-');
+    // B1: missing information is readable content in both themes.
+    expect(cls('no-record')).toContain('text-certainty-no-record');
+    expect(cls('no-record')).not.toContain('text-content-disabled');
     expect(cls('no-record')).not.toContain('italic');
 
     // Unanswered: the warning role, and DELIBERATELY NO CERTAINTY TOKEN --

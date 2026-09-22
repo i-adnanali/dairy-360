@@ -193,7 +193,7 @@ import { Button } from '../ui/button';
               }
             </tbody>
           </table>
-          @if (paging.result(); as pg) {<app-pagination [page]="pg.page" [pageSize]="pg.pageSize" [total]="pg.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>}
+          @if (paging.result(); as pg) {<app-pagination label="People" [page]="pg.page" [pageSize]="pg.pageSize" [total]="pg.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>}
           @if (paging.error()) {<p role="alert">{{paging.error()}}</p>}
         }
       } @else {
@@ -310,7 +310,7 @@ import { Button } from '../ui/button';
 
             <div class="space-y-1">
               <span appSubHeading>Kind</span>
-              <app-chip-group
+              <app-chip-group label="Engagement kind"
                 name="kind"
                 [options]="kindChips"
                 [value]="engageKind()"

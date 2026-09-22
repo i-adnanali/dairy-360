@@ -123,18 +123,15 @@ interface DihariDraft {
               data-role="to"
             />
           </label>
-          <label class="space-y-1">
-            <span class="block text-xs font-medium uppercase tracking-wide text-content-muted">
-              Paid out by
-            </span>
-            <app-identifier-input
+          <div class="space-y-1">
+            <app-identifier-input help="Person associated with this record, if known. Use a stable identifier, not a display name."
               field="observed_by"
               label="Paid out by"
               name="observed_by"
               [value]="observedBy()"
               (changed)="observedBy.set($event)"
             />
-          </label>
+          </div>
         </div>
       </header>
 
@@ -188,6 +185,7 @@ interface DihariDraft {
                       <input
                         type="text"
                         inputmode="decimal"
+                        [attr.aria-label]="'Wage amount (Rs) for ' + row.person.identifier"
                         [value]="amountOf(row)"
                         (input)="setAmount(row, $any($event.target).value)"
                         [disabled]="!row.term"
@@ -310,6 +308,7 @@ interface DihariDraft {
                   <input
                     type="text"
                     inputmode="decimal"
+                    [attr.aria-label]="'Daily wage amount (Rs) for ' + dailyPerson(draft.engagement_id)"
                     [value]="draft.amount"
                     (input)="setDraft($index, { amount: $any($event.target).value })"
                     appInput
@@ -382,6 +381,7 @@ interface DihariDraft {
   `,
 })
 export class PayrollRunScreen {
+  protected dailyPerson(id: string): string { return this.run()?.daily_candidates.find(c => c.engagement.id === id)?.person.identifier ?? 'unselected person'; }
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);

@@ -41,20 +41,29 @@ export const IDENTIFIER_GUIDANCE = {
 
 export type IdentifierField = keyof typeof IDENTIFIER_GUIDANCE;
 
+let identifierInstance = 0;
+
 @Component({
   selector: 'app-identifier-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FieldLabel, TextInput],
   template: `
-    <label class="block">
-      <span appFieldLabel>
-        {{ label() }} <span class="font-normal text-content-subtle">(optional)</span>
-      </span>
+    <div class="block">
+      <label [attr.for]="listId() + '-input'">
+        <span appFieldLabel>
+          {{ label() }} <span class="font-normal text-content-subtle">(optional)</span>
+        </span>
+      </label>
       <input
         [attr.data-role]="field()"
         [attr.list]="listId()"
+        [id]="listId() + '-input'"
+        [attr.aria-describedby]="listId() + '-help'"
         [value]="value()"
-        (input)="changed.emit($any($event.target).value)" appInput class="w-full max-w-md"
+        [disabled]="disabled()"
+        (input)="changed.emit($any($event.target).value)"
+        appInput
+        class="w-full max-w-md"
       />
       <!-- Suggestions only. An empty datalist is harmless: the input behaves
            exactly as a plain text field, which is the state of a fresh
@@ -64,16 +73,23 @@ export type IdentifierField = keyof typeof IDENTIFIER_GUIDANCE;
           <option [value]="v"></option>
         }
       </datalist>
-      <span class="mt-1 block text-xs text-content-muted" [attr.data-role]="field() + '-hint'">
+      <span
+        [id]="listId() + '-help'"
+        class="mt-1 block text-xs text-content-muted"
+        [attr.data-role]="field() + '-hint'"
+      >
         {{ guidance() }}
       </span>
-    </label>
+    </div>
   `,
 })
 export class IdentifierInput {
   readonly field = input.required<IdentifierField>();
   readonly label = input.required<string>();
   readonly value = input('');
+  readonly disabled = input(false);
+  readonly help = input<string | null>(null);
+  private readonly instance = identifierInstance++;
   readonly suggestions = input<string[]>([]);
   readonly changed = output<string>();
 
@@ -82,6 +98,6 @@ export class IdentifierInput {
    * one of them win for both inputs -- and on the workbench there will be
    * several of these on one page.
    */
-  protected readonly listId = computed(() => `identifier-list-${this.field()}`);
-  protected readonly guidance = computed(() => IDENTIFIER_GUIDANCE[this.field()]);
+  protected readonly listId = computed(() => `identifier-list-${this.field()}-${this.instance}`);
+  protected readonly guidance = computed(() => this.help() ?? IDENTIFIER_GUIDANCE[this.field()]);
 }

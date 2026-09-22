@@ -1,4 +1,6 @@
 // One button. Three radii, two fills and four disabled treatments became one.
+// B1 adds busy/danger and native disabled treatment. Capture-phase blocking now
+// precedes Angular template listeners; the implementation history below predates it.
 //
 // ---------------------------------------------------------------------------
 // THE DEFECT
@@ -75,7 +77,15 @@
 // and message.ts:16 is the user's own chat bubble, which section 9 separately
 // wants QUIETED rather than unified. Neither takes this directive.
 
-import { Directive, booleanAttribute, computed, input } from '@angular/core';
+import {
+  DestroyRef,
+  ElementRef,
+  Directive,
+  booleanAttribute,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
 
 /** `primary` is the filled action, `secondary` the bordered one, `link` bare. */
 export type ButtonVariant = 'primary' | 'secondary' | 'link';
@@ -93,14 +103,29 @@ const PAD: Record<ButtonSize, string> = {
     '[class]': 'cls()',
     // `null` removes the attribute rather than writing aria-disabled="false",
     // which assistive technology treats as present-and-false rather than absent.
-    '[attr.aria-disabled]': 'disabled() ? "true" : null',
+    '[attr.aria-disabled]': 'disabled() || busy() ? "true" : null',
     '[attr.aria-describedby]': 'disabled() && reason() ? reason() : null',
+    '[attr.aria-busy]': 'busy() ? "true" : null',
     '(click)': 'onClick($event)',
   },
 })
 export class Button {
+  constructor() {
+    const element = inject(ElementRef).nativeElement as HTMLElement;
+    const block = (event: Event) => {
+      if (this.disabled() || this.busy()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    };
+    // Capture runs before Angular's coalesced template/host listeners, including anchors.
+    element.addEventListener('click', block, true);
+    inject(DestroyRef).onDestroy(() => element.removeEventListener('click', block, true));
+  }
   readonly variant = input<ButtonVariant>('primary');
   readonly size = input<ButtonSize>('md');
+  readonly intent = input<'normal' | 'danger'>('normal');
+  readonly busy = input(false, { transform: booleanAttribute });
 
   /**
    * Blocked, but present and focusable.
@@ -128,12 +153,21 @@ export class Button {
       // the usual way a ring looks broken in dark mode.
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus ' +
       'focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page ' +
-      PAD[this.size()];
-    if (this.disabled()) {
+      PAD[this.size()] +
+      ' disabled:cursor-not-allowed disabled:!bg-surface-sunken disabled:!text-content-disabled disabled:hover:!bg-surface-sunken';
+    if (this.disabled() || this.busy()) {
       // Visibly inert: a flat sunken ground with disabled-weight text. The old
       // `bg-farm-300` was a light tan under WHITE text, which reads as an
       // enabled button in an unusual colour and still invites the click.
       return `${base} cursor-not-allowed bg-surface-sunken text-content-disabled`;
+    }
+    if (this.intent() === 'danger') {
+      const treatment =
+        this.variant() === 'link'
+          ? 'text-danger-fg underline'
+          : (this.variant() === 'secondary' ? 'border border-danger-line ' : '') +
+            'bg-danger-bg text-danger-fg';
+      return `${base} ${treatment} hover:brightness-95`;
     }
     switch (this.variant()) {
       case 'secondary':
@@ -155,6 +189,6 @@ export class Button {
    * rely on their handler's own re-check. See the header.
    */
   protected onClick(e: Event): void {
-    if (this.disabled()) e.preventDefault();
+    if (this.disabled() || this.busy()) e.preventDefault();
   }
 }

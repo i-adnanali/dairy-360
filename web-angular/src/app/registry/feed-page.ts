@@ -162,7 +162,7 @@ import { PageHeading } from '../ui/heading';
           }
           <section appCard>
             <h3 class="font-medium">Feeding history</h3>
-            <app-local-pagination #pages0="localPagination" [total]="o.days.length"/>
+            <app-local-pagination label="Feeding days" #pages0="localPagination" [total]="o.days.length"/>
           @for (d of pages0.rows(o.days); track d.on) {
               <div class="flex flex-wrap justify-between gap-2 border-b border-line-subtle py-2">
                 <a class="underline" [routerLink]="['/feed/daily', d.on]">{{ d.on }}</a
@@ -210,7 +210,7 @@ import { PageHeading } from '../ui/heading';
             </div>
           }
           <section appCard class="space-y-3">
-            <app-local-pagination #pages1="localPagination" [total]="filtered().length"/>
+            <app-local-pagination label="Feed records" #pages1="localPagination" [total]="filtered().length"/>
           @for (r of pages1.rows(filtered()); track r.id) {
               <div class="border-b border-line-subtle py-3">
                 <a class="underline font-medium" [routerLink]="['/feed', mode, r.id]">{{
@@ -298,7 +298,7 @@ import { PageHeading } from '../ui/heading';
                 >
                   Add expense
                 </button>
-                <app-local-pagination #pages2="localPagination" [total]="(d.expenses ?? []).length"/>
+                <app-local-pagination label="Expenses" #pages2="localPagination" [total]="(d.expenses ?? []).length"/>
           @for (e of pages2.rows(d.expenses ?? []); track e.id) {
                   <div class="flex flex-wrap gap-3">
                     <span
@@ -357,7 +357,7 @@ import { PageHeading } from '../ui/heading';
       @if (revisions().length) {
         <section appCard class="space-y-3">
           <h3 class="font-medium">Recoverable correction history</h3>
-          <app-local-pagination #pages3="localPagination" [total]="revisions().length"/>
+          <app-local-pagination label="Revision history" #pages3="localPagination" [total]="revisions().length"/>
           @for (r of pages3.rows(revisions()); track r.id) {
             <details>
               <summary>{{ r.operation }} · revision {{ r.revision }} · {{ r.recorded_at }}</summary>

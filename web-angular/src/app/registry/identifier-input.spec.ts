@@ -90,3 +90,13 @@ describe('IdentifierInput', () => {
     ]);
   });
 });
+
+it('separates contextual help from the input name and gives repeated roles unique IDs', () => {
+  const a=make('observed_by'), b=make('observed_by');
+  a.fixture.componentRef.setInput('help','Person who milked these animals, if known.'); a.fixture.detectChanges();
+  const input=a.el.querySelector('input')!;
+  expect(a.el.querySelector('label')!.htmlFor).toBe(input.id);
+  expect(a.el.querySelector('label')!.textContent).not.toContain('Person who milked');
+  expect(a.el.querySelector('[id="'+input.getAttribute('aria-describedby')+'"]')!.textContent).toContain('Person who milked');
+  expect(input.id).not.toBe(b.el.querySelector('input')!.id);
+});

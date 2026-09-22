@@ -60,6 +60,8 @@ export interface ChipOption {
           type="button"
           role="radio"
           [attr.aria-checked]="value() === o.value"
+          [attr.aria-label]="o.label"
+          [attr.aria-describedby]="o.hint ? name() + '-hint-' + i : null"
           [attr.data-chip]="o.value"
           [attr.data-index]="i"
           [tabindex]="tabIndexFor(i)"
@@ -73,7 +75,7 @@ export interface ChipOption {
           }
           <span>{{ o.label }}</span>
           @if (o.hint) {
-            <span class="ml-2 text-xs opacity-75">{{ o.hint }}</span>
+            <span [id]="name() + '-hint-' + i" class="ml-2 text-xs">{{ o.hint }}</span>
           }
         </button>
       }
@@ -84,7 +86,7 @@ export class ChipGroup {
   readonly options = input.required<ChipOption[]>();
   /** Null means unanswered, which is a legitimate state -- see the header. */
   readonly value = input<string | null>(null);
-  readonly label = input('Choose one');
+  readonly label = input.required<string>();
   /** Used for the group's `data-role`, so specs can find a particular group. */
   readonly name = input('chips');
   readonly vertical = input(false);

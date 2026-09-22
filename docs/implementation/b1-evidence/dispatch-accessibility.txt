@@ -1,0 +1,98 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "direct_entry · b1-fixture"
+  - button "Search ⌘K"
+  - 'button "Theme: light. Switch to dark."': light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Milking":
+    - /url: /milk/milking
+  - link "Dispatch" [active]:
+    - /url: /milk/dispatch
+  - link "Buyers":
+    - /url: /milk/buyers
+- main:
+  - heading "Where the milk went" [level=2]
+  - paragraph: One session, and everything that left the bulk in it — sold and kept. The dodhi and the house are on every sheet; a neighbour appears only when they took something.
+  - generic: Date
+  - textbox "Date": 2026-09-21
+  - generic: Session
+  - radiogroup "Session":
+    - radio "Morning":
+      - generic: "1"
+      - generic: Morning
+    - radio "Evening" [checked]:
+      - generic: "2"
+      - generic: Evening
+  - generic: Handed over by (optional)
+  - combobox "Handed over by (optional)"
+  - generic: Person who handed over the milk, if known. Use a stable identifier, not a display name.
+  - paragraph: Defaults to today and this session — the one place a date is defaulted, because today is a fact rather than a guess. Change it to enter a session you missed.
+  - generic: Every session — leave none of these unanswered
+  - table:
+    - rowgroup:
+      - row "Goes to Yesterday evening Rate Litres Amount":
+        - columnheader "Goes to"
+        - columnheader "Yesterday evening"
+        - columnheader "Rate"
+        - columnheader "Litres"
+        - columnheader "Amount"
+    - rowgroup:
+      - row "Bashir (dodhi) nothing Rs 7,000.00 / 40 L Nothing taken by Bashir (dodhi) No record":
+        - cell "Bashir (dodhi)"
+        - cell "nothing"
+        - cell "Rs 7,000.00 / 40 L"
+        - cell "Nothing taken by Bashir (dodhi)":
+          - textbox "Litres for Bashir (dodhi) — 2026-09-21 evening"
+          - button "Nothing taken by Bashir (dodhi)": nothing taken
+        - cell "No record": –
+      - row "Homekept, not sold 6 not billed Nothing taken by Home No record":
+        - cell "Homekept, not sold"
+        - cell "6"
+        - cell "not billed"
+        - cell "Nothing taken by Home":
+          - textbox "Litres for Home — 2026-09-21 evening"
+          - button "Nothing taken by Home": nothing taken
+        - cell "No record": –
+  - navigation "Standing destinations pagination":
+    - generic: 1–2 of 2
+  - generic: Only if they came — nothing to answer here
+  - navigation "Occasional destinations pagination":
+    - generic: 1–3 of 3
+  - table:
+    - rowgroup:
+      - row "Ali (next door) Rs 9,000.00 / 40 L Record milk taken by Ali (next door)":
+        - cell "Ali (next door) Rs 9,000.00 / 40 L"
+        - cell "Record milk taken by Ali (next door)":
+          - button "Record milk taken by Ali (next door)": they took some
+      - row "Bibi (corner house) Rs 9,000.00 / 40 L Record milk taken by Bibi (corner house)":
+        - cell "Bibi (corner house) Rs 9,000.00 / 40 L"
+        - cell "Record milk taken by Bibi (corner house)":
+          - button "Record milk taken by Bibi (corner house)": they took some
+      - row "Imran (milk allowance) not billed Record milk taken by Imran (milk allowance)":
+        - cell "Imran (milk allowance) not billed"
+        - cell "Record milk taken by Imran (milk allowance)":
+          - button "Record milk taken by Imran (milk allowance)": they took some
+  - generic: Answered 0 of 2 required
+  - generic: Out 0 L · billed Rs 0.00
+  - generic: Measured this session 0 L
+  - paragraph: Production this session is a lower bound — 6 in milk with no row yet. Milk going out can exceed it, and that is the missing measurement rather than missing milk.
+  - button "Save session" [disabled]
+  - button "Go to first unanswered destination"
+  - generic: "Still to answer: Bashir (dodhi), Home."

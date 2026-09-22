@@ -1,3 +1,4 @@
+import { DraftRegistry } from './draft-registry';
 // The gate every form is behind.
 //
 // Provenance is set ONCE per session and applied to every write, because a
@@ -57,11 +58,15 @@ import { Button } from '../ui/button';
         />
       </div>
 
-      <label class="mt-5 block">
-        <span class="mb-1 block text-xs font-medium uppercase tracking-wide text-content-muted">
-          Who is typing?
-        </span>
+      <div class="mt-5 block">
+        <label for="session-recorder">
+          <span class="mb-1 block text-xs font-medium uppercase tracking-wide text-content-muted">
+            Who is typing?
+          </span>
+        </label>
         <input
+          id="session-recorder"
+          aria-describedby="session-recorder-help"
           data-role="recorded-by"
           [value]="who()"
           (input)="who.set($any($event.target).value)"
@@ -70,11 +75,11 @@ import { Button } from '../ui/button';
           density="comfortable"
           class="w-full"
         />
-        <span class="mt-1 block text-xs text-content-muted">
+        <span id="session-recorder-help" class="mt-1 block text-xs text-content-muted">
           Recorded on every event as <span class="font-mono">recorded_by</span>. Whoever remembered
           it, if this is recall.
         </span>
-      </label>
+      </div>
 
       <p class="mt-4 rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-secondary">
         Whether someone actually <em>saw</em> a thing is asked per record, and left blank by
@@ -165,6 +170,7 @@ export class SessionGate {
   }
 
   protected readonly session = inject(Session);
+  private readonly drafts = inject(DraftRegistry);
   protected readonly target = inject(Target);
 
   protected readonly forms: { value: SourceForm; label: string; hint: string }[] = [
@@ -209,9 +215,15 @@ export class SessionGate {
     void this.target.probe();
   }
 
-  protected start(): void {
+  protected async start(): Promise<void> {
     const f = this.form();
     if (f === null || !this.canStart()) return;
+    if (
+      (f !== this.session.sourceForm() || this.who().trim() !== this.session.recordedBy()) &&
+      this.drafts.hasChanges() &&
+      !(await this.drafts.request())
+    )
+      return;
     this.target.enter();
     this.session.set(f, this.who());
   }

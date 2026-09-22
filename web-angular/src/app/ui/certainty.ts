@@ -87,10 +87,8 @@ export type CertaintyState =
  * qualifier word, which is three marks and not one. §6's own contrast for
  * `known` is "NO ORNAMENT", and that still holds exactly.
  *
- * `no-record` is `content-disabled` and NOT a new token, per §4.5: it already
- * sits one step past `--certainty-absent` in both modes, which is the correct
- * relationship -- an absent answer is quieter than a given one, and no answer
- * at all is quieter still.
+ * No-record is meaningful content: B1 gives it a readable dedicated token.
+ * It remains distinct through the dash and its accessible No record label.
  *
  * `unanswered` is the `warning` role and deliberately has no certainty token
  * of its own (§4.5): "a second name for one value is how the two drift apart".
@@ -104,7 +102,7 @@ const TREATMENT: Record<CertaintyState, string> = {
     'text-certainty-approx font-mono tabular-nums ' +
     'border-b border-dotted border-certainty-rule',
   absent: 'text-certainty-absent italic',
-  'no-record': 'text-content-disabled',
+  'no-record': 'text-certainty-no-record',
   unanswered: 'font-medium text-warning-fg',
 };
 
@@ -116,7 +114,7 @@ const TREATMENT: Record<CertaintyState, string> = {
  */
 @Directive({
   selector: '[appCertainty]',
-  host: { '[class]': 'cls()' },
+  host: { '[class]': 'cls()', '[attr.aria-label]': 'state() === "no-record" ? "No record" : null' },
 })
 export class Certainty {
   readonly state = input.required<CertaintyState>({ alias: 'appCertainty' });

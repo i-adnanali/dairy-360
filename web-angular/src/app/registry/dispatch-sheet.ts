@@ -132,7 +132,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             />
           </div>
           <div class="ml-auto">
-            <app-identifier-input
+            <app-identifier-input help="Person who handed over the milk, if known. Use a stable identifier, not a display name."
               field="observed_by"
               label="Handed over by"
               [value]="handedBy()"
@@ -243,6 +243,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                       <div class="flex flex-wrap items-center gap-2">
                         <input
                           #cell
+                          [attr.aria-label]="'Litres for ' + row.name + ' — ' + on() + ' ' + session()"
                           [attr.data-role]="'litres-' + row.destination_id"
                           inputmode="decimal"
                           [value]="draft(row.destination_id).litres"
@@ -253,7 +254,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         />
                         <button
                           type="button"
-                          [attr.data-role]="'none-' + row.destination_id"
+                          [attr.aria-label]="'Nothing taken by ' + row.name"
+                            [attr.data-role]="'none-' + row.destination_id"
                           (click)="markNone(row.destination_id)"
                           [class]="noneClass(row.destination_id)"
                         >
@@ -261,6 +263,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         </button>
                         @if (draft(row.destination_id).status === 'none') {
                           <input
+                            [attr.aria-label]="'Reason nothing taken by ' + row.name"
                             [attr.data-role]="'reason-' + row.destination_id"
                             [value]="draft(row.destination_id).reason"
                             (input)="setReason(row.destination_id, $any($event.target).value)"
@@ -294,7 +297,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                 }
               </tbody>
             </table>
-            <app-pagination [page]="tablePage()" [pageSize]="tableSize()" [total]="s.standing.length" (pageChange)="tablePage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
+            <app-pagination label="Standing destinations" [page]="tablePage()" [pageSize]="tableSize()" [total]="s.standing.length" (pageChange)="tablePage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
             @if(pageError()){<p role="alert" class="p-3">{{pageError()}}</p>}
           </div>
 
@@ -309,7 +312,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
               >
                 Only if they came — nothing to answer here
               </div>
-              <app-pagination [page]="occasionalPage()" [pageSize]="tableSize()" [total]="s.occasional.length" (pageChange)="occasionalPage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
+              <app-pagination label="Occasional destinations" [page]="occasionalPage()" [pageSize]="tableSize()" [total]="s.occasional.length" (pageChange)="occasionalPage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
               <table class="w-full text-left text-sm">
                 <tbody>
                   @for (row of s.occasional.slice((occasionalPage()-1)*tableSize(), occasionalPage()*tableSize()); track row.destination_id) {
@@ -334,6 +337,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         @if (draft(row.destination_id).status === null) {
                           <button
                             type="button"
+                            [attr.aria-label]="'Record milk taken by ' + row.name"
                             [attr.data-role]="'add-' + row.destination_id"
                             (click)="addOccasional(row.destination_id)"
                             class="rounded-lg border border-line bg-surface-raised px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
@@ -343,7 +347,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         } @else {
                           <div class="flex items-center gap-2">
                             <input
-                              [attr.data-role]="'litres-' + row.destination_id"
+                              [attr.aria-label]="'Litres for ' + row.name + ' — ' + on() + ' ' + session()"
+                          [attr.data-role]="'litres-' + row.destination_id"
                               inputmode="decimal"
                               [value]="draft(row.destination_id).litres"
                               (input)="typeLitres(row.destination_id, $any($event.target).value)"
@@ -358,7 +363,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                             >
                             <button
                               type="button"
-                              [attr.data-role]="'remove-' + row.destination_id"
+                              [attr.aria-label]="'Did not come: ' + row.name"
+                            [attr.data-role]="'remove-' + row.destination_id"
                               (click)="removeOccasional(row.destination_id)"
                               class="text-xs text-content-subtle underline hover:text-content-secondary"
                             >

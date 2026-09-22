@@ -6,7 +6,7 @@ import { Pagination } from './pagination';
   exportAs: 'localPagination',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Pagination],
-  template: `<app-pagination
+  template: `<app-pagination [label]="label()" [disabled]="disabled()"
     [page]="current()"
     [pageSize]="size()"
     [total]="total()"
@@ -16,6 +16,8 @@ import { Pagination } from './pagination';
 })
 export class LocalPagination {
   readonly total = input(0);
+  readonly label = input.required<string>();
+  readonly disabled = input(false);
   readonly page = signal(1);
   readonly size = signal(25);
   records(rows: any[]): readonly any[] {

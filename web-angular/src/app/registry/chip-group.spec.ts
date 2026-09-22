@@ -22,6 +22,7 @@ function make(options = OUTCOMES, value: string | null = 'live') {
   fixture.componentRef.setInput('options', options);
   fixture.componentRef.setInput('value', value);
   fixture.componentRef.setInput('name', 'outcome');
+  fixture.componentRef.setInput('label', 'Outcome');
   fixture.detectChanges();
   const el = fixture.nativeElement as HTMLElement;
 

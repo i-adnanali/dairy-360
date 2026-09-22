@@ -155,6 +155,7 @@ module.exports = {
           approx: token('certainty-approx'),
           rule: token('certainty-rule'),
           absent: token('certainty-absent'),
+          'no-record': token('certainty-no-record'),
         },
       },
     },

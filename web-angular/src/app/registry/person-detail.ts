@@ -292,7 +292,7 @@ import { Button } from '../ui/button';
 
           <div class="space-y-1">
             <span appSubHeading>Method</span>
-            <app-chip-group
+            <app-chip-group label="Payment method"
               name="method"
               [options]="methodChips"
               [value]="method()"

@@ -61,7 +61,7 @@ export class TextInput {
   readonly density = input<InputDensity>('compact');
   protected readonly cls = computed(
     () =>
-      'rounded-lg border border-line text-sm ' +
+      'rounded-lg border border-line text-sm aria-[invalid=true]:border-danger-fg ' +
       // A BORDER SHIFT, NOT A RING, and that follows composer.ts rather than
       // section 7's "ring on every interactive primitive". composer deliberately
       // traded the native outline for `focus:border-farm-500`, and section 7

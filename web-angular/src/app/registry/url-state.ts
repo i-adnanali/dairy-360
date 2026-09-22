@@ -40,7 +40,7 @@ export interface UrlParams<K extends string> {
   /** The current values: whatever the URL says, else the default. */
   value: Signal<Record<K, string>>;
   /** Write some keys back to the URL. Others are left alone. */
-  set: (patch: Partial<Record<K, string>>) => void;
+  set: (patch: Partial<Record<K, string>>) => Promise<boolean>;
 }
 
 /**
@@ -74,8 +74,8 @@ export function urlParams<K extends string>(defaults: Record<K, string>): UrlPar
     return out;
   });
 
-  const set = (patch: Partial<Record<K, string>>): void => {
-    void router.navigate([], {
+  const set = (patch: Partial<Record<K, string>>): Promise<boolean> => {
+    return router.navigate([], {
       relativeTo: route,
       queryParams: patch,
       queryParamsHandling: 'merge',
