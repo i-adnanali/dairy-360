@@ -224,3 +224,53 @@ describe('dateBlocker — the shared rule three forms must not disagree about', 
     );
   });
 });
+
+describe('PrecisionDate existing values', () => {
+  it.each([
+    ['day', '2023-07-06', '05:30', '6 Jul 2023'],
+    ['month', '2023-03-01', null, 'Mar 2023'],
+    ['year', '2023-01-01', null, '2023'],
+    ['estimated', '2023-01-01', null, '2023'],
+  ])('round-trips %s and resets only with a new generation', (precision, on, time, text) => {
+    const { fixture, el, type, val } = make();
+    const value = { occurred_on: on, date_precision: precision, occurred_time: time };
+    fixture.componentRef.setInput('initialValue', value);
+    fixture.componentRef.setInput('resetKey', 'record-r1');
+    fixture.detectChanges();
+    expect(val()).toEqual(value);
+    expect((el.querySelector('[data-role=date-text]') as HTMLInputElement).value).toBe(text);
+    type('Sep');
+    fixture.componentRef.setInput('initialValue', { ...value });
+    fixture.detectChanges();
+    expect((el.querySelector('[data-role=date-text]') as HTMLInputElement).value).toBe('Sep');
+    fixture.componentRef.setInput('initialValue', null);
+    fixture.componentRef.setInput('resetKey', 'new');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.entry().status).toBe('empty');
+  });
+  it('does not restore hidden time when day precision returns', () => {
+    const { fixture, el, type, val } = make();
+    type('6 Jul 2023');
+    const input = el.querySelector('[data-role=time]') as HTMLInputElement;
+    input.value = '05:30';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    type('2023');
+    type('6 Jul 2023');
+    expect(val().occurred_time).toBeNull();
+    fixture.componentRef.setInput('allowTime', false);
+    fixture.detectChanges();
+    expect(el.querySelector('[data-role=time]')).toBeNull();
+  });
+  it('blocks saved values that would silently normalize an unrepresentable date', () => {
+    const { fixture } = make();
+    fixture.componentRef.setInput('initialValue', {
+      occurred_on: '2023-03-14',
+      date_precision: 'month',
+      occurred_time: null,
+    });
+    fixture.componentRef.setInput('resetKey', 'bad-record');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.entry().status).toBe('incomplete');
+  });
+});

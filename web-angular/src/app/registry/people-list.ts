@@ -1,3 +1,5 @@
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 import { pagedList } from './paged-list';
 import { Pagination } from '../ui/pagination';
 import { StatusBadge } from '../ui/surface';
@@ -62,7 +64,9 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-people-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Pagination,
+  imports: [
+    WriteLock,
+    Pagination,
     StatusBadge,
     IdentifierLink,
     RowLink,
@@ -83,8 +87,18 @@ import { Button } from '../ui/button';
     TextInput,
   ],
   template: `
-    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
-    @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
+    <label class="mb-3 block text-sm text-content-secondary"
+      >Search records
+      <input
+        type="search"
+        maxlength="100"
+        class="rounded border border-line bg-surface-page p-2"
+        [value]="paging.url.value().search"
+        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
+    /></label>
+    @if (paging.loading()) {
+      <p role="status" class="text-sm text-content-muted">Loading records…</p>
+    }
 
     <div class="mx-auto max-w-4xl space-y-6">
       <header>
@@ -193,8 +207,20 @@ import { Button } from '../ui/button';
               }
             </tbody>
           </table>
-          @if (paging.result(); as pg) {<app-pagination label="People" [page]="pg.page" [pageSize]="pg.pageSize" [total]="pg.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>}
-          @if (paging.error()) {<p role="alert">{{paging.error()}}</p>}
+          @if (paging.result(); as pg) {
+            <app-pagination
+              label="People"
+              [page]="pg.page"
+              [pageSize]="pg.pageSize"
+              [total]="pg.totalItems"
+              [disabled]="paging.loading()"
+              (pageChange)="paging.url.set({ page: '' + $event })"
+              (sizeChange)="paging.url.set({ pageSize: '' + $event, page: '1' })"
+            />
+          }
+          @if (paging.error()) {
+            <p role="alert">{{ paging.error() }}</p>
+          }
         }
       } @else {
         <p appHelp tone="subtle">Loading…</p>
@@ -202,6 +228,7 @@ import { Button } from '../ui/button';
 
       <!-- Add a person. The identifier is asked for HERE and nowhere else. -->
       <form
+        [appWriteLock]="personState"
         class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
         (submit)="submitPerson($event)"
         data-role="add-person"
@@ -266,7 +293,12 @@ import { Button } from '../ui/button';
         }
 
         @if (session.ready()) {
-          <button type="submit" [appButtonDisabled]="!canAddPerson()" appButton>
+          <button
+            type="submit"
+            [appButtonDisabled]="!canAddPerson()"
+            appButton
+            [busy]="personState.submitting()"
+          >
             {{ personState.submitting() ? 'Saving…' : 'Add person' }}
           </button>
         } @else {
@@ -280,6 +312,7 @@ import { Button } from '../ui/button';
       @if (rows(); as list) {
         @if (list.length > 0) {
           <form
+            [appWriteLock]="engageState"
             class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
             (submit)="submitEngagement($event)"
             data-role="add-engagement"
@@ -310,7 +343,8 @@ import { Button } from '../ui/button';
 
             <div class="space-y-1">
               <span appSubHeading>Kind</span>
-              <app-chip-group label="Engagement kind"
+              <app-chip-group
+                label="Engagement kind"
                 name="kind"
                 [options]="kindChips"
                 [value]="engageKind()"
@@ -362,7 +396,12 @@ import { Button } from '../ui/button';
             }
 
             @if (session.ready()) {
-              <button type="submit" [appButtonDisabled]="!canEngage()" appButton>
+              <button
+                type="submit"
+                [appButtonDisabled]="!canEngage()"
+                appButton
+                [busy]="engageState.submitting()"
+              >
                 {{ engageState.submitting() ? 'Saving…' : 'Open stint' }}
               </button>
             } @else {
@@ -375,6 +414,8 @@ import { Button } from '../ui/button';
   `,
 })
 export class PeopleList {
+  protected personDraft!: ReturnType<typeof writerDraft>;
+  protected engageDraft!: ReturnType<typeof writerDraft>;
   protected readonly paging = pagedList<WageBalanceRow>('people');
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
@@ -400,6 +441,23 @@ export class PeopleList {
   ];
 
   constructor() {
+    this.personDraft = writerDraft({
+      name: 'New person',
+      fields: { identifier: this.identifier, name: this.name, contact: this.contact },
+      states: [this.personState],
+    });
+
+    this.engageDraft = writerDraft({
+      name: 'Engagement',
+      fields: {
+        engagePerson: this.engagePerson,
+        engageKind: this.engageKind,
+        engageRole: this.engageRole,
+        engageFrom: this.engageFrom,
+      },
+      states: [this.engageState],
+    });
+
     void this.load();
   }
 
@@ -447,16 +505,17 @@ export class PeopleList {
   protected async submitPerson(e: Event): Promise<void> {
     e.preventDefault();
     if (!this.canAddPerson()) return;
-    const result = await this.personState.run((key) =>
-      this.api.addPerson(
-        {
-          identifier: this.identifier().trim(),
-          name: this.name().trim() || null,
-          contact: this.contact().trim() || null,
-          recorded_by: this.session.provenance().recorded_by,
-        },
-        key,
-      ),
+    const result = await this.personState.runRequest(
+      () =>
+        [
+          {
+            identifier: this.identifier().trim(),
+            name: this.name().trim() || null,
+            contact: this.contact().trim() || null,
+            recorded_by: this.session.provenance().recorded_by,
+          },
+        ] as const,
+      (request, key) => this.api.addPerson(request[0], key),
     );
     if (result) {
       this.writeLog.announce(
@@ -465,6 +524,7 @@ export class PeopleList {
       this.identifier.set('');
       this.name.set('');
       this.contact.set('');
+      this.personDraft.accept();
       await this.load();
     }
   }
@@ -474,17 +534,18 @@ export class PeopleList {
     if (!this.canEngage()) return;
     const personId = this.engagePerson();
     const who = this.rows()?.find((p) => p.person_id === personId)?.identifier ?? personId;
-    const result = await this.engageState.run((key) =>
-      this.api.addEngagement(
-        personId,
-        {
-          kind: this.engageKind(),
-          role: this.engageRole().trim() || null,
-          started_on: this.engageFrom(),
-          recorded_by: this.session.provenance().recorded_by,
-        },
-        key,
-      ),
+    const result = await this.engageState.runRequest(
+      () =>
+        [
+          personId,
+          {
+            kind: this.engageKind(),
+            role: this.engageRole().trim() || null,
+            started_on: this.engageFrom(),
+            recorded_by: this.session.provenance().recorded_by,
+          },
+        ] as const,
+      (request, key) => this.api.addEngagement(request[0], request[1], key),
     );
     if (result) {
       this.writeLog.announce(
@@ -492,6 +553,7 @@ export class PeopleList {
           `${this.engageFrom()} — record the package next`,
       );
       this.engageRole.set('');
+      this.engageDraft.accept();
       await this.load();
     }
   }

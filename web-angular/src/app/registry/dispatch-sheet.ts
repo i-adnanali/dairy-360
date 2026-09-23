@@ -1,3 +1,6 @@
+import { untracked } from '@angular/core';
+import { writerDraft, replacesContext } from './writer-draft';
+import { WriteLock } from './write-lock';
 import { Pagination } from '../ui/pagination';
 import { StatusBadge } from '../ui/surface';
 // `/dispatch` -- where the milk went (docs/REGISTRY_SALES.md §12.1).
@@ -79,7 +82,9 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 @Component({
   selector: 'app-dispatch-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Pagination,
+  imports: [
+    WriteLock,
+    Pagination,
     StatusBadge,
     Button,
     Card,
@@ -99,7 +104,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
     TextLink,
   ],
   template: `
-    <form class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
+    <form [appWriteLock]="state" class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
       <header>
         <h2 appPageHeading>Where the milk went</h2>
         <p appHelp class="mt-1">
@@ -132,7 +137,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             />
           </div>
           <div class="ml-auto">
-            <app-identifier-input help="Person who handed over the milk, if known. Use a stable identifier, not a display name."
+            <app-identifier-input
+              help="Person who handed over the milk, if known. Use a stable identifier, not a display name."
               field="observed_by"
               label="Handed over by"
               [value]="handedBy()"
@@ -178,7 +184,11 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                 </tr>
               </thead>
               <tbody>
-                @for (row of s.standing.slice(tableOffset(), tableOffset()+tableSize()); track row.destination_id; let i = $index) {
+                @for (
+                  row of s.standing.slice(tableOffset(), tableOffset() + tableSize());
+                  track row.destination_id;
+                  let i = $index
+                ) {
                   <!-- The standing rows are the ones the header calls "leave
                        none of these unanswered", so they are exactly §3.2's
                        case: a destination lost in the sheet, findable at row
@@ -243,7 +253,9 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                       <div class="flex flex-wrap items-center gap-2">
                         <input
                           #cell
-                          [attr.aria-label]="'Litres for ' + row.name + ' — ' + on() + ' ' + session()"
+                          [attr.aria-label]="
+                            'Litres for ' + row.name + ' — ' + on() + ' ' + session()
+                          "
                           [attr.data-role]="'litres-' + row.destination_id"
                           inputmode="decimal"
                           [value]="draft(row.destination_id).litres"
@@ -255,7 +267,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         <button
                           type="button"
                           [attr.aria-label]="'Nothing taken by ' + row.name"
-                            [attr.data-role]="'none-' + row.destination_id"
+                          [attr.data-role]="'none-' + row.destination_id"
                           (click)="markNone(row.destination_id)"
                           [class]="noneClass(row.destination_id)"
                         >
@@ -297,8 +309,17 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                 }
               </tbody>
             </table>
-            <app-pagination label="Standing destinations" [page]="tablePage()" [pageSize]="tableSize()" [total]="s.standing.length" (pageChange)="tablePage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
-            @if(pageError()){<p role="alert" class="p-3">{{pageError()}}</p>}
+            <app-pagination
+              label="Standing destinations"
+              [page]="tablePage()"
+              [pageSize]="tableSize()"
+              [total]="s.standing.length"
+              (pageChange)="tablePage.set($event)"
+              (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"
+            />
+            @if (pageError()) {
+              <p role="alert" class="p-3">{{ pageError() }}</p>
+            }
           </div>
 
           <!-- OFFERED, never required -->
@@ -312,10 +333,23 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
               >
                 Only if they came — nothing to answer here
               </div>
-              <app-pagination label="Occasional destinations" [page]="occasionalPage()" [pageSize]="tableSize()" [total]="s.occasional.length" (pageChange)="occasionalPage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"/>
+              <app-pagination
+                label="Occasional destinations"
+                [page]="occasionalPage()"
+                [pageSize]="tableSize()"
+                [total]="s.occasional.length"
+                (pageChange)="occasionalPage.set($event)"
+                (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"
+              />
               <table class="w-full text-left text-sm">
                 <tbody>
-                  @for (row of s.occasional.slice((occasionalPage()-1)*tableSize(), occasionalPage()*tableSize()); track row.destination_id) {
+                  @for (
+                    row of s.occasional.slice(
+                      (occasionalPage() - 1) * tableSize(),
+                      occasionalPage() * tableSize()
+                    );
+                    track row.destination_id
+                  ) {
                     <tr appRowDivider [attr.data-row]="row.destination_id">
                       <td appCell density="compact" tone="heading">
                         {{ row.name }}
@@ -347,8 +381,10 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         } @else {
                           <div class="flex items-center gap-2">
                             <input
-                              [attr.aria-label]="'Litres for ' + row.name + ' — ' + on() + ' ' + session()"
-                          [attr.data-role]="'litres-' + row.destination_id"
+                              [attr.aria-label]="
+                                'Litres for ' + row.name + ' — ' + on() + ' ' + session()
+                              "
+                              [attr.data-role]="'litres-' + row.destination_id"
                               inputmode="decimal"
                               [value]="draft(row.destination_id).litres"
                               (input)="typeLitres(row.destination_id, $any($event.target).value)"
@@ -364,7 +400,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                             <button
                               type="button"
                               [attr.aria-label]="'Did not come: ' + row.name"
-                            [attr.data-role]="'remove-' + row.destination_id"
+                              [attr.data-role]="'remove-' + row.destination_id"
                               (click)="removeOccasional(row.destination_id)"
                               class="text-xs text-content-subtle underline hover:text-content-secondary"
                             >
@@ -437,13 +473,18 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             [appButtonDisabled]="!canSubmit()"
             appButton
             reason="dispatch-submit-reason"
+            [busy]="state.submitting()"
           >
             {{ state.submitting() ? 'Saving…' : 'Save session' }}
           </button>
         } @else {
           <app-session-required what="this session" />
         }
-        @if (untouchedStanding().length) {<button appButton variant="secondary" type="button" (click)="showUnanswered()">Go to first unanswered destination</button>}
+        @if (untouchedStanding().length) {
+          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
+            Go to first unanswered destination
+          </button>
+        }
         @if (blockedReason(); as b) {
           <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
         }
@@ -452,11 +493,14 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
   `,
 })
 export class DispatchSheetScreen {
+  protected writer!: ReturnType<typeof writerDraft>;
   protected readonly occasionalPage = signal(1);
   protected readonly tablePage = signal(1);
   protected readonly tableSize = signal(25);
   protected readonly pageError = signal('');
-  protected tableOffset(): number { return (this.tablePage()-1)*this.tableSize(); }
+  protected tableOffset(): number {
+    return (this.tablePage() - 1) * this.tableSize();
+  }
   private readonly api = inject(RegistryApi);
   protected readonly session_ = inject(Session);
   private readonly writeLog = inject(WriteLog);
@@ -490,7 +534,8 @@ export class DispatchSheetScreen {
    * either puts it in the query string, at which point the URL names that
    * specific sheet and can be sent to somebody. See url-state.ts.
    */
-  private readonly url = urlParams({ on: farmToday(), session: likelySession() });
+  private readonly contextDefaults = { on: farmToday(), session: likelySession() };
+  private readonly url = urlParams(this.contextDefaults);
   protected readonly on = computed(() => this.url.value().on);
   // VALIDATED, not cast: `?session=lunch` is a URL somebody can type, and
   // passing it through would produce a server refusal on a screen that has no
@@ -506,18 +551,37 @@ export class DispatchSheetScreen {
   private readonly drafts = signal<Record<string, Draft>>({});
 
   constructor() {
+    this.writer = writerDraft({
+      name: 'Dispatch',
+      description: () => 'Dispatch · ' + this.on() + ' · ' + this.session(),
+      fields: { drafts: this.drafts, handedBy: this.handedBy },
+      states: [this.state],
+      replaces: replacesContext(
+        '/milk/dispatch',
+        () => ({ on: this.on(), session: this.session() }),
+        this.contextDefaults,
+      ),
+    });
+
     void this.identifiers.refresh();
     effect(() => {
       const on = this.on();
       const s = this.session();
-      void this.load(on, s);
+      void untracked(() => this.load(on, s));
     });
   }
 
+  private loadGeneration = 0;
   private async load(on: string, session: MilkingSession): Promise<void> {
-    this.occasionalPage.set(1); this.tablePage.set(1); this.pageError.set('');
+    const generation = ++this.loadGeneration;
+    const observerAtLoad = this.handedBy();
+    this.sheet.set(null);
+    this.occasionalPage.set(1);
+    this.tablePage.set(1);
+    this.pageError.set('');
     try {
       const s = await this.api.dispatchSheet(on, session);
+      if (generation !== this.loadGeneration) return;
       // A session already saved comes back filled in, so re-opening one is a
       // correction rather than a blank slate that would overwrite it.
       const drafts: Record<string, Draft> = {};
@@ -533,13 +597,17 @@ export class DispatchSheetScreen {
       this.drafts.set(drafts);
       this.sheet.set(s);
       this.loadError.set(null);
+      this.writer.accept({ drafts: this.drafts(), handedBy: observerAtLoad });
     } catch (e) {
+      if (generation !== this.loadGeneration) return;
       this.loadError.set(e instanceof Error ? e.message : String(e));
     }
   }
 
-  protected setOn(v: string): void {
-    if (v.length > 0) this.url.set({ on: v });
+  protected async setOn(v: string): Promise<void> {
+    if (v.length > 0) await this.url.set({ on: v });
+    const input = document.querySelector<HTMLInputElement>('input[data-role="on"]');
+    if (input) input.value = this.on();
   }
 
   protected setSession(s: MilkingSession): void {
@@ -551,6 +619,7 @@ export class DispatchSheetScreen {
   }
 
   private patch(id: string, d: Partial<Draft>): void {
+    if (this.state.locked()) return;
     this.drafts.update((all) => ({ ...all, [id]: { ...(all[id] ?? EMPTY), ...d } }));
   }
 
@@ -585,15 +654,25 @@ export class DispatchSheetScreen {
   }
 
   /** Enter commits and advances. Same motion as the milking roster. */
-  protected showUnanswered(): void { const id=this.untouchedStanding()[0]?.destination_id; const index=this.sheet()?.standing.findIndex(r=>r.destination_id===id) ?? -1; if(index<0)return; this.tablePage.set(Math.floor(index/this.tableSize())+1); setTimeout(()=>this.cells()[index%this.tableSize()]?.nativeElement.focus(),0); }
+  protected showUnanswered(): void {
+    const id = this.untouchedStanding()[0]?.destination_id;
+    const index = this.sheet()?.standing.findIndex((r) => r.destination_id === id) ?? -1;
+    if (index < 0) return;
+    this.tablePage.set(Math.floor(index / this.tableSize()) + 1);
+    setTimeout(() => this.cells()[index % this.tableSize()]?.nativeElement.focus(), 0);
+  }
 
   protected onKey(e: KeyboardEvent, index: number): void {
     if (e.key !== 'Enter') return;
     e.preventDefault();
     const next = index + 1;
-    if(next >= (this.sheet()?.standing.length ?? 0)) return;
+    if (next >= (this.sheet()?.standing.length ?? 0)) return;
     this.tablePage.set(Math.floor(next / this.tableSize()) + 1);
-    setTimeout(() => { const el = this.cells()[next % this.tableSize()]?.nativeElement; el?.focus(); if(el && !el.disabled) el.select(); }, 0);
+    setTimeout(() => {
+      const el = this.cells()[next % this.tableSize()]?.nativeElement;
+      el?.focus();
+      if (el && !el.disabled) el.select();
+    }, 0);
   }
 
   protected previousText(row: SheetRow): string {
@@ -798,12 +877,30 @@ export class DispatchSheetScreen {
     if (!s) return;
     const d = this.drafts();
     const allRows = this.allRows();
-    const invalid = allRows.findIndex(row => { const draft = d[row.destination_id] ?? EMPTY; return draft.status === 'taken' && (!draft.litres.trim() || !Number.isFinite(Number(draft.litres)) || Number(draft.litres) < 0); });
-    if(invalid >= 0) {
-      if(invalid < s.standing.length) this.tablePage.set(Math.floor(invalid / this.tableSize())+1);
-      else this.occasionalPage.set(Math.floor((invalid-s.standing.length)/this.tableSize())+1);
-      this.pageError.set('Enter valid non-negative litres for '+allRows[invalid].name);
-      setTimeout(() => Array.from(this.element.nativeElement.querySelectorAll<HTMLInputElement>('input[data-role]')).find(el=>el.getAttribute('data-role') === 'litres-'+allRows[invalid].destination_id)?.focus(),0);
+    const invalid = allRows.findIndex((row) => {
+      const draft = d[row.destination_id] ?? EMPTY;
+      return (
+        draft.status === 'taken' &&
+        (!draft.litres.trim() || !Number.isFinite(Number(draft.litres)) || Number(draft.litres) < 0)
+      );
+    });
+    if (invalid >= 0) {
+      if (invalid < s.standing.length)
+        this.tablePage.set(Math.floor(invalid / this.tableSize()) + 1);
+      else
+        this.occasionalPage.set(Math.floor((invalid - s.standing.length) / this.tableSize()) + 1);
+      this.pageError.set('Enter valid non-negative litres for ' + allRows[invalid].name);
+      setTimeout(
+        () =>
+          Array.from(
+            this.element.nativeElement.querySelectorAll<HTMLInputElement>('input[data-role]'),
+          )
+            .find(
+              (el) => el.getAttribute('data-role') === 'litres-' + allRows[invalid].destination_id,
+            )
+            ?.focus(),
+        0,
+      );
       return;
     }
     this.pageError.set('');
@@ -827,17 +924,18 @@ export class DispatchSheetScreen {
             },
       );
 
-    const result = await this.state.run((key) =>
-      this.api.saveDispatchSession(
-        {
-          occurred_on: s.occurred_on,
-          session: s.session,
-          observed_by: this.handedBy().trim().length > 0 ? this.handedBy().trim() : null,
-          entries,
-          ...this.session_.provenance(),
-        },
-        key,
-      ),
+    const result = await this.state.runRequest(
+      () =>
+        [
+          {
+            occurred_on: s.occurred_on,
+            session: s.session,
+            observed_by: this.handedBy().trim().length > 0 ? this.handedBy().trim() : null,
+            entries,
+            ...this.session_.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.saveDispatchSession(request[0], key),
     );
 
     if (result) {
@@ -847,6 +945,7 @@ export class DispatchSheetScreen {
           (result.updated > 0 ? ` (${result.updated} corrected)` : ''),
       );
       void this.identifiers.refresh();
+      this.writer.accept();
       await this.load(this.on(), this.session());
     }
   }

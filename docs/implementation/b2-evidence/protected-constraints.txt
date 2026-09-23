@@ -1,0 +1,5 @@
+web-angular/src/app/registry/animal-form.ts: 8 field/control invocations before; 8 after; count/order/attributes identical: True
+web-angular/src/app/registry/calving-form.ts: 8 field/control invocations before; 8 after; count/order/attributes identical: True
+web-angular/src/styles.css: byte-identical to B1: True
+web-angular/src/app/registry/after-write.ts: byte-identical to B1: True
+web-angular/src/app/registry/life-report.ts: byte-identical to B1: True

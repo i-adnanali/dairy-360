@@ -47,15 +47,26 @@ export const routes: Routes = [
     component: RegistryShell,
     canActivateChild: [draftActivate],
     children: [
-      { path: 'analytics', loadComponent: () => import('./registry/analytics-page').then(m => m.AnalyticsPage) },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./registry/analytics-page').then((m) => m.AnalyticsPage),
+      },
       {
         path: '',
-        pathMatch: 'full',
+        pathMatch: 'full' as const,
         loadComponent: () => import('./registry/today-board').then((m) => m.TodayBoard),
       },
 
-      { path: 'animals/health', canDeactivate: [draftDeactivate], runGuardsAndResolvers: 'always', loadComponent: () => import('./registry/health-page').then(m => m.HealthPage) },
-      { path: 'animals/:id/report', loadComponent: () => import('./registry/life-report').then(m => m.LifeReport) },
+      {
+        path: 'animals/health',
+        canDeactivate: [draftDeactivate],
+        runGuardsAndResolvers: 'always',
+        loadComponent: () => import('./registry/health-page').then((m) => m.HealthPage),
+      },
+      {
+        path: 'animals/:id/report',
+        loadComponent: () => import('./registry/life-report').then((m) => m.LifeReport),
+      },
 
       // --- the animal record -------------------------------------------------
       {
@@ -97,7 +108,8 @@ export const routes: Routes = [
       // them by their foreign key rather than by what they are.
       {
         path: 'milk/milking',
-        canDeactivate: [draftDeactivate], runGuardsAndResolvers: 'always',
+        canDeactivate: [draftDeactivate],
+        runGuardsAndResolvers: 'always',
         loadComponent: () => import('./registry/milking-roster').then((m) => m.MilkingRosterScreen),
       },
       {
@@ -115,13 +127,40 @@ export const routes: Routes = [
           import('./registry/destination-detail').then((m) => m.DestinationDetail),
       },
 
-      { path: 'feed', data: { feedMode: 'overview' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
-      { path: 'feed/crops', data: { feedMode: 'crops' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
-      { path: 'feed/crops/:id', data: { feedMode: 'crops' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
-      { path: 'feed/purchases', data: { feedMode: 'purchases' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
-      { path: 'feed/purchases/:id', data: { feedMode: 'purchases' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
-      { path: 'feed/daily', data: { feedMode: 'daily' }, loadComponent: () => import('./registry/feed-page').then(m => m.FeedPage) },
-      { path: 'feed/daily/:on', loadComponent: () => import('./registry/feed-daily').then(m => m.FeedDailyScreen) },
+      {
+        path: 'feed',
+        data: { feedMode: 'overview' },
+        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+      },
+      {
+        path: 'feed/crops',
+        data: { feedMode: 'crops' },
+        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+      },
+      {
+        path: 'feed/crops/:id',
+        data: { feedMode: 'crops' },
+        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+      },
+      {
+        path: 'feed/purchases',
+        data: { feedMode: 'purchases' },
+        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+      },
+      {
+        path: 'feed/purchases/:id',
+        data: { feedMode: 'purchases' },
+        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+      },
+      {
+        path: 'feed/daily',
+        data: { feedMode: 'daily' },
+        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+      },
+      {
+        path: 'feed/daily/:on',
+        loadComponent: () => import('./registry/feed-daily').then((m) => m.FeedDailyScreen),
+      },
 
       // --- labour -------------------------------------------------------------
       {
@@ -168,7 +207,11 @@ export const routes: Routes = [
         path: 'chat',
         loadComponent: () => import('./components/chat-panel').then((m) => m.ChatPanel),
       },
-    ],
+    ].map((route) => ({
+      ...route,
+      canDeactivate: [draftDeactivate],
+      runGuardsAndResolvers: 'always' as const,
+    })),
   },
   { path: '**', redirectTo: '' },
 ];

@@ -1,0 +1,62 @@
+
+> dairy-360@1.0.0 build:angular
+> npm run build:shared && npm run build -w web-angular
+
+
+> dairy-360@1.0.0 build:shared
+> npm run build -w shared
+
+
+> @dairy/shared@1.0.0 build
+> tsc -p tsconfig.json
+
+
+> web-angular@0.0.0 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names              |  Raw size | Estimated transfer size
+main-IFKHZQG4.js    | main               | 624.07 kB |               169.01 kB
+styles-MJENYDBJ.css | styles             |  36.77 kB |                 6.86 kB
+
+                    | Initial total      | 660.85 kB |               175.87 kB
+
+Lazy chunk files    | Names              |  Raw size | Estimated transfer size
+chunk-CK078dni.js   | chat-panel         | 346.14 kB |                67.76 kB
+chunk-DatG4ZDq.js   | health-page        |  43.36 kB |                10.04 kB
+chunk-DEsSpOmK.js   | -                  |  42.79 kB |                 9.22 kB
+chunk-BlfxC8vG.js   | animal-detail      |  27.92 kB |                 7.12 kB
+chunk-CN2amcM2.js   | feed-daily         |  27.10 kB |                 7.00 kB
+chunk-Ap7AEIp4.js   | feed-page          |  22.29 kB |                 6.07 kB
+chunk-D2OZfcNx.js   | dispatch-sheet     |  22.24 kB |                 6.35 kB
+chunk-tdH-jHUv.js   | milking-roster     |  20.16 kB |                 6.26 kB
+chunk-DYaoejIc.js   | -                  |  19.84 kB |                 5.07 kB
+chunk-D2j1ESP4.js   | calving-form       |  18.82 kB |                 5.48 kB
+chunk-C1OfNXlg.js   | analytics-page     |  18.72 kB |                 5.46 kB
+chunk-C9swbXS0.js   | verification-panel |  16.05 kB |                 4.36 kB
+chunk-XcmcrmuH.js   | person-detail      |  15.98 kB |                 4.55 kB
+chunk-IwnJJe_s.js   | destinations-list  |  15.37 kB |                 4.67 kB
+chunk-CZkC1ak3.js   | payroll-run        |  15.22 kB |                 4.67 kB
+...and 25 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [6.876 seconds] - 2026-09-23T01:39:21.201Z
+
+▲ [WARNING] NG8113: SummaryBar is not used within the template of PayrollRunScreen [plugin angular-compiler]
+
+    src/app/registry/payroll-run.ts:87:4:
+      87 │     SummaryBar,
+         ╵     ~~~~~~~~~~
+
+
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 160.85 kB with a total of 660.85 kB.
+
+
+▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Output location: /Users/adnanali/personal/dairy-360/web-angular/dist/web-angular
+

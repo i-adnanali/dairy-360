@@ -45,23 +45,37 @@ describe('monthBounds', () => {
 // The run
 // ---------------------------------------------------------------------------
 
-const runRow = (
-  identifier: string,
-  over: Partial<PayrollRunRow> = {},
-): PayrollRunRow => ({
+const runRow = (identifier: string, over: Partial<PayrollRunRow> = {}): PayrollRunRow => ({
   engagement: {
-    id: `eng_${identifier}`, person_id: `per_${identifier}`, kind: 'permanent',
-    role: 'milker', started_on: '2026-01-01', ended_on: null, end_reason: null,
-    note: null, recorded_by: 'a', recorded_at: 't',
+    id: `eng_${identifier}`,
+    person_id: `per_${identifier}`,
+    kind: 'permanent',
+    role: 'milker',
+    started_on: '2026-01-01',
+    ended_on: null,
+    end_reason: null,
+    note: null,
+    recorded_by: 'a',
+    recorded_at: 't',
   },
   person: {
-    id: `per_${identifier}`, identifier, name: identifier, contact: null, note: null,
-    recorded_by: 'a', recorded_at: 't',
+    id: `per_${identifier}`,
+    identifier,
+    name: identifier,
+    contact: null,
+    note: null,
+    recorded_by: 'a',
+    recorded_at: 't',
   },
   term: {
-    id: `trm_${identifier}`, engagement_id: `eng_${identifier}`,
-    effective_from: '2026-01-01', cash_minor: 2_500_000, cash_period: 'month',
-    recorded_by: 'a', recorded_at: 't', note: null,
+    id: `trm_${identifier}`,
+    engagement_id: `eng_${identifier}`,
+    effective_from: '2026-01-01',
+    cash_minor: 2_500_000,
+    cash_period: 'month',
+    recorded_by: 'a',
+    recorded_at: 't',
+    note: null,
   },
   benefits: [],
   suggested_minor: 2_500_000,
@@ -76,12 +90,32 @@ const RUN: PayrollRun = {
   permanent: [
     runRow('imran', {
       benefits: [
-        { id: 'b1', term_id: 'trm_imran', kind: 'milk', quantity: 2, unit: 'L', period: 'day', note: null },
-        { id: 'b2', term_id: 'trm_imran', kind: 'accommodation', quantity: null, unit: null, period: null, note: null },
+        {
+          id: 'b1',
+          term_id: 'trm_imran',
+          kind: 'milk',
+          quantity: 2,
+          unit: 'L',
+          period: 'day',
+          note: null,
+        },
+        {
+          id: 'b2',
+          term_id: 'trm_imran',
+          kind: 'accommodation',
+          quantity: null,
+          unit: null,
+          period: null,
+          note: null,
+        },
       ],
       milk: {
-        allowance_per_day: 2, allowance_period: 'day', taken_litres: 74,
-        expected_litres: 60, through_on: '2026-09-30', partial: false,
+        allowance_per_day: 2,
+        allowance_period: 'day',
+        taken_litres: 74,
+        expected_litres: 60,
+        through_on: '2026-09-30',
+        partial: false,
       },
     }),
     runRow('abdul', { suggested_minor: 2_000_000 }),
@@ -90,9 +124,16 @@ const RUN: PayrollRun = {
   daily_candidates: [
     runRow('rashid', {
       engagement: {
-        id: 'eng_rashid', person_id: 'per_rashid', kind: 'daily', role: null,
-        started_on: '2026-01-01', ended_on: null, end_reason: null, note: null,
-        recorded_by: 'a', recorded_at: 't',
+        id: 'eng_rashid',
+        person_id: 'per_rashid',
+        kind: 'daily',
+        role: null,
+        started_on: '2026-01-01',
+        ended_on: null,
+        end_reason: null,
+        note: null,
+        recorded_by: 'a',
+        recorded_at: 't',
       },
       suggested_minor: 120_000,
     }),
@@ -120,11 +161,24 @@ class FakeApi {
   saveRun(body: Record<string, unknown>): Promise<unknown> {
     this.saved = body;
     return Promise.resolve({
-      from_on: '2026-09-01', to_on: '2026-09-30', written: 2, updated: 0,
+      from_on: '2026-09-01',
+      to_on: '2026-09-30',
+      written: 2,
+      updated: 0,
       total_minor: 4_500_000,
     });
   }
-  list() { return Promise.resolve({items: structuredClone(this.peopleRows),page:1,pageSize:25,totalItems:this.peopleRows.length,totalPages:1,sort:'identifier',direction:'asc'}); }
+  list() {
+    return Promise.resolve({
+      items: structuredClone(this.peopleRows),
+      page: 1,
+      pageSize: 25,
+      totalItems: this.peopleRows.length,
+      totalPages: 1,
+      sort: 'identifier',
+      direction: 'asc',
+    });
+  }
   people(): Promise<WageBalanceRow[]> {
     return Promise.resolve(structuredClone(this.peopleRows));
   }
@@ -193,7 +247,9 @@ describe('PayrollRunScreen', () => {
     expect(el.querySelector('[data-role="daily"]')!.textContent).toContain('only the days');
     // Nothing in the dihari block is required, so the run is saveable with the
     // salaried rows pre-filled and no dihari at all.
-    expect(el.querySelector<HTMLButtonElement>('[data-role="save"]')!.getAttribute('aria-disabled')).toBeNull();
+    expect(
+      el.querySelector<HTMLButtonElement>('[data-role="save"]')!.getAttribute('aria-disabled'),
+    ).toBeNull();
   });
 
   it('BLOCKS the save when a salaried figure is cleared', async () => {
@@ -202,7 +258,9 @@ describe('PayrollRunScreen', () => {
     input.value = '';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(el.querySelector<HTMLButtonElement>('[data-role="save"]')!.getAttribute('aria-disabled')).toBe('true');
+    expect(
+      el.querySelector<HTMLButtonElement>('[data-role="save"]')!.getAttribute('aria-disabled'),
+    ).toBe('true');
     expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain(
       'an omission is not an answer',
     );
@@ -231,8 +289,12 @@ describe('PayrollRunScreen', () => {
     const api = new FakeApi();
     api.run.through_on = '2026-09-07';
     api.run.permanent[0].milk = {
-      allowance_per_day: 2, allowance_period: 'day', taken_litres: 14,
-      expected_litres: 14, through_on: '2026-09-07', partial: true,
+      allowance_per_day: 2,
+      allowance_period: 'day',
+      taken_litres: 14,
+      expected_litres: 14,
+      through_on: '2026-09-07',
+      partial: true,
     };
     const { el } = await render(PayrollRunScreen, api);
     const milk = el.querySelector('[data-role="milk"]')!;
@@ -254,10 +316,17 @@ describe('PayrollRunScreen', () => {
     // it with the agreement.
     const api = new FakeApi();
     api.run.permanent[0].existing = {
-      id: 'wag_1', engagement_id: 'eng_imran', kind: 'wage',
-      from_on: '2026-09-01', to_on: '2026-09-30', amount_minor: 2_200_000,
-      observed_by: null, recorded_by: 'a', recorded_at: 't',
-      source_form: 'direct_entry', note: 'four days leave',
+      id: 'wag_1',
+      engagement_id: 'eng_imran',
+      kind: 'wage',
+      from_on: '2026-09-01',
+      to_on: '2026-09-30',
+      amount_minor: 2_200_000,
+      observed_by: null,
+      recorded_by: 'a',
+      recorded_at: 't',
+      source_form: 'direct_entry',
+      note: 'four days leave',
     };
     const { el } = await render(PayrollRunScreen, api);
     expect(el.querySelector<HTMLInputElement>('[data-role="amount-imran"]')!.value).toBe('22000');
@@ -282,6 +351,19 @@ describe('PayrollRunScreen', () => {
     const entries = api.saved!['entries'] as { amount_minor: number }[];
     expect(entries[0].amount_minor).toBe(2_500_000);
     expect(entries.length).toBe(2);
+  });
+
+  it('does not silently omit a partially entered daily wage', async () => {
+    const api = new FakeApi();
+    const { fixture, el } = await render(PayrollRunScreen, api);
+    el.querySelector<HTMLButtonElement>('[data-role="add-day"]')!.click();
+    fixture.detectChanges();
+    el.querySelector<HTMLButtonElement>('[data-role="save"]')!.click();
+    await Promise.resolve();
+    expect(api.saved).toBeNull();
+    expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain(
+      'incomplete daily wage',
+    );
   });
 
   it('sends a dihari day with its OWN date, not the run range', async () => {
@@ -316,8 +398,14 @@ describe('PeopleList', () => {
   afterEach(() => TestBed.resetTestingModule());
 
   const balance = (over: Partial<WageBalanceRow>): WageBalanceRow => ({
-    person_id: 'per_1', identifier: 'imran', name: 'Imran', engaged: true,
-    balance_minor: 0, last_period_on: null, last_payment_on: null, ...over,
+    person_id: 'per_1',
+    identifier: 'imran',
+    name: 'Imran',
+    engaged: true,
+    balance_minor: 0,
+    last_period_on: null,
+    last_payment_on: null,
+    ...over,
   });
 
   it('SHOWS somebody with no open stint rather than hiding them', async () => {
@@ -380,9 +468,16 @@ describe('PersonDetail', () => {
     as_of: '2026-09-07',
     engagements: [
       {
-        id: 'eng_1', person_id: 'per_imran', kind: 'permanent', role: 'milker',
-        started_on: '2026-01-01', ended_on: null, end_reason: null, note: null,
-        recorded_by: 'a', recorded_at: 't',
+        id: 'eng_1',
+        person_id: 'per_imran',
+        kind: 'permanent',
+        role: 'milker',
+        started_on: '2026-01-01',
+        ended_on: null,
+        end_reason: null,
+        note: null,
+        recorded_by: 'a',
+        recorded_at: 't',
       },
     ],
     packages: [
@@ -391,14 +486,43 @@ describe('PersonDetail', () => {
         terms: [],
         current: {
           term: {
-            id: 'trm_1', engagement_id: 'eng_1', effective_from: '2026-01-01',
-            cash_minor: 2_500_000, cash_period: 'month', recorded_by: 'a',
-            recorded_at: 't', note: null,
+            id: 'trm_1',
+            engagement_id: 'eng_1',
+            effective_from: '2026-01-01',
+            cash_minor: 2_500_000,
+            cash_period: 'month',
+            recorded_by: 'a',
+            recorded_at: 't',
+            note: null,
           },
           benefits: [
-            { id: 'b1', term_id: 'trm_1', kind: 'milk', quantity: 2, unit: 'L', period: 'day', note: null },
-            { id: 'b2', term_id: 'trm_1', kind: 'flour', quantity: 20, unit: 'kg', period: 'month', note: null },
-            { id: 'b3', term_id: 'trm_1', kind: 'accommodation', quantity: null, unit: null, period: null, note: null },
+            {
+              id: 'b1',
+              term_id: 'trm_1',
+              kind: 'milk',
+              quantity: 2,
+              unit: 'L',
+              period: 'day',
+              note: null,
+            },
+            {
+              id: 'b2',
+              term_id: 'trm_1',
+              kind: 'flour',
+              quantity: 20,
+              unit: 'kg',
+              period: 'month',
+              note: null,
+            },
+            {
+              id: 'b3',
+              term_id: 'trm_1',
+              kind: 'accommodation',
+              quantity: null,
+              unit: null,
+              period: null,
+              note: null,
+            },
           ],
         },
       },
@@ -411,16 +535,31 @@ describe('PersonDetail', () => {
         closing_minor: 1_000_000,
         periods: [
           {
-            id: 'wag_1', engagement_id: 'eng_1', kind: 'wage', from_on: '2026-08-01',
-            to_on: '2026-08-31', amount_minor: 2_500_000, observed_by: null,
-            recorded_by: 'a', recorded_at: 't', source_form: 'direct_entry', note: null,
+            id: 'wag_1',
+            engagement_id: 'eng_1',
+            kind: 'wage',
+            from_on: '2026-08-01',
+            to_on: '2026-08-31',
+            amount_minor: 2_500_000,
+            observed_by: null,
+            recorded_by: 'a',
+            recorded_at: 't',
+            source_form: 'direct_entry',
+            note: null,
           },
         ],
         payments: [
           {
-            id: 'wpy_1', person_id: 'per_imran', occurred_on: '2026-09-02',
-            amount_minor: 1_500_000, method: 'cash', reference: null, observed_by: null,
-            recorded_by: 'a', recorded_at: 't', note: null,
+            id: 'wpy_1',
+            person_id: 'per_imran',
+            occurred_on: '2026-09-02',
+            amount_minor: 1_500_000,
+            method: 'cash',
+            reference: null,
+            observed_by: null,
+            recorded_by: 'a',
+            recorded_at: 't',
+            note: null,
           },
         ],
       },
@@ -498,8 +637,13 @@ describe('PersonDetail', () => {
     // not treat that as an empty error state.
     const api = new FakeApi();
     api.statement = {
-      ...structuredClone(STATEMENT), engagements: [], packages: [], months: [],
-      earned_minor: 0, paid_minor: 0, balance_minor: 0,
+      ...structuredClone(STATEMENT),
+      engagements: [],
+      packages: [],
+      months: [],
+      earned_minor: 0,
+      paid_minor: 0,
+      balance_minor: 0,
     };
     const { el } = await render(PersonDetail, api, { id: 'per_imran' });
     expect(el.querySelector('[data-role="no-stints"]')!.textContent).toContain('never employed');

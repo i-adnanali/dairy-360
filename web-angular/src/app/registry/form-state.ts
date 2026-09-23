@@ -29,9 +29,9 @@
 //                                    request may have succeeded server-side and
 //                                    failed in transit, and only a reused key
 //                                    can tell the server those are one write.
-//   failed submit, edit, resubmit -> same key, but the BODY changed, and the
-//                                    server keys on (key, body) -- so it is
-//                                    processed as new with no wiring here.
+//   domain refusal, edit, resubmit -> definite refusal permits a changed body.
+//   indeterminate outcome -> exact frozen request and key; fields remain locked.
+//
 //   success, then the next animal -> key cleared, so a genuinely new record is
 //                                    never mistaken for a replay of the last.
 //
@@ -45,7 +45,7 @@
 // What no client-side key can cover: a page refresh, or a second tab. Both get
 // a fresh FormState. Stated in idempotency.ts alongside the server's own hole.
 
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { ApiError } from './api';
 
 /** A key only has to be unique and opaque; it is never parsed. */
@@ -57,6 +57,26 @@ function newIdempotencyKey(): string {
 
 export class FormState<T> {
   readonly submitting = signal(false);
+  readonly uncertain = signal(false);
+  readonly locked = computed(() => this.submitting() || this.uncertain());
+  private request: unknown = undefined;
+  private retryOperation: (() => Promise<T>) | null = null;
+
+  async runRequest<A>(
+    snapshot: () => A,
+    send: (request: A, key: string) => Promise<T>,
+  ): Promise<T | null> {
+    if (this.submitting()) return null;
+    if (!this.uncertain()) {
+      try {
+        this.request = structuredClone(snapshot());
+      } catch (error) {
+        this.error.set(new ApiError({ error: 'invalid_request', message: String(error) }, true));
+        return null;
+      }
+    }
+    return this.run((key) => send(structuredClone(this.request) as A, key));
+  }
   /** The last refusal, or null. */
   readonly error = signal<ApiError | null>(null);
   /** The last success, for the "what just happened" panel. */
@@ -116,11 +136,18 @@ export class FormState<T> {
    * submit closure that ignores it does not typecheck.
    */
   async run(fn: (idempotencyKey: string) => Promise<T>): Promise<T | null> {
+    if (this.submitting()) return null;
     this.submitting.set(true);
     this.error.set(null);
     const key = this.idempotencyKey();
     try {
-      const r = await fn(key);
+      const operation =
+        this.uncertain() && this.retryOperation ? this.retryOperation : () => fn(key);
+      this.retryOperation = operation;
+      const r = await operation();
+      this.uncertain.set(false);
+      this.retryOperation = null;
+      this.request = undefined;
       this.result.set(r);
       // Success ends the attempt sequence. The next submit is a NEW record and
       // must not be recognised as a replay of this one.
@@ -129,7 +156,14 @@ export class FormState<T> {
     } catch (e) {
       // Deliberately keeps the key: the next click is a retry of this same
       // write, and the request may already have landed.
-      this.error.set(e instanceof ApiError ? e : new ApiError({ error: 'unknown', message: String(e) }, false));
+      const error =
+        e instanceof ApiError ? e : new ApiError({ error: 'unknown', message: String(e) }, false);
+      this.uncertain.set(!error.isRefusal);
+      if (error.isRefusal) {
+        this.retryOperation = null;
+        this.request = undefined;
+      }
+      this.error.set(error);
       return null;
     } finally {
       this.submitting.set(false);
@@ -137,6 +171,9 @@ export class FormState<T> {
   }
 
   reset(): void {
+    if (this.locked()) return;
+    this.retryOperation = null;
+    this.request = undefined;
     this.error.set(null);
     this.result.set(null);
     this.key.set(null);

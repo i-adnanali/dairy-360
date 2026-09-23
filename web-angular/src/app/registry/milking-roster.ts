@@ -1,3 +1,4 @@
+import { WriteLock } from './write-lock';
 import { DraftRegistry } from './draft-registry';
 import { DestroyRef } from '@angular/core';
 import { ScrollRegion } from '../ui/scroll-region';
@@ -106,7 +107,10 @@ export const OUT_OF_BAND = 0.5;
 @Component({
   selector: 'app-milking-roster',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Pagination, ScrollRegion,
+  imports: [
+    WriteLock,
+    Pagination,
+    ScrollRegion,
     Button,
     Card,
     Cell,
@@ -125,7 +129,7 @@ export const OUT_OF_BAND = 0.5;
     TextLink,
   ],
   template: `
-    <form class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
+    <form [appWriteLock]="state" class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
       <header>
         <h2 appPageHeading>Record a milking</h2>
         <p appHelp class="mt-1">
@@ -159,7 +163,8 @@ export const OUT_OF_BAND = 0.5;
             />
           </div>
           <div class="ml-auto">
-            <app-identifier-input help="Person who milked these animals, if known. Use a stable identifier, not a display name."
+            <app-identifier-input
+              help="Person who milked these animals, if known. Use a stable identifier, not a display name."
               field="observed_by"
               label="Milked by"
               [value]="milkedBy()"
@@ -189,7 +194,10 @@ export const OUT_OF_BAND = 0.5;
             and she will be here.
           </p>
         } @else {
-          <div appScrollRegion="Milking quantities" class="rounded-xl border border-line bg-surface-raised">
+          <div
+            appScrollRegion="Milking quantities"
+            class="rounded-xl border border-line bg-surface-raised"
+          >
             <table class="w-full text-left text-sm">
               <thead
                 class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
@@ -208,7 +216,11 @@ export const OUT_OF_BAND = 0.5;
                 </tr>
               </thead>
               <tbody>
-                @for (row of r.rows.slice(tableOffset(), tableOffset()+tableSize()); track row.animal_id; let i = $index) {
+                @for (
+                  row of r.rows.slice(tableOffset(), tableOffset() + tableSize());
+                  track row.animal_id;
+                  let i = $index
+                ) {
                   <!-- §6's fifth state, at the scale §3.2 confines it to. An
                        untouched row already BLOCKS the save and is named in
                        "blockedReason()"; what it did not do was look any
@@ -230,8 +242,15 @@ export const OUT_OF_BAND = 0.5;
                     "
                   >
                     <td appCell density="compact">
-                      <span class="font-mono whitespace-nowrap text-content-heading">{{ row.animal_id }}</span>
-                      @for(w of row.health_withdrawals || []; track $index) {<p class="text-sm text-content-primary">{{w.target}} withdrawal: {{w.instruction || 'needs clarification'}} {{w.until || ''}}</p>}
+                      <span class="font-mono whitespace-nowrap text-content-heading">{{
+                        row.animal_id
+                      }}</span>
+                      @for (w of row.health_withdrawals || []; track $index) {
+                        <p class="text-sm text-content-primary">
+                          {{ w.target }} withdrawal: {{ w.instruction || 'needs clarification' }}
+                          {{ w.until || '' }}
+                        </p>
+                      }
                       <!-- An unnamed animal is a real no-record: she has a
                            serial and nobody has given her a name. -->
                       @if (row.name) {
@@ -286,7 +305,12 @@ export const OUT_OF_BAND = 0.5;
                         <input
                           #cell
                           [attr.aria-label]="'Litres for ' + row.animal_id + ' ' + (row.name || '')"
-                          appInput [attr.aria-invalid]="invalidAnimal() === row.animal_id ? true : null" [attr.aria-describedby]="invalidAnimal() === row.animal_id ? 'milking-entry-error' : null" [readonly]="state.submitting()"
+                          appInput
+                          [attr.aria-invalid]="invalidAnimal() === row.animal_id ? true : null"
+                          [attr.aria-describedby]="
+                            invalidAnimal() === row.animal_id ? 'milking-entry-error' : null
+                          "
+                          [readonly]="state.submitting()"
                           [attr.data-role]="'litres-' + row.animal_id"
                           inputmode="decimal"
                           [value]="draft(row.animal_id).litres"
@@ -301,7 +325,9 @@ export const OUT_OF_BAND = 0.5;
                         <button
                           type="button"
                           [attr.aria-label]="'Not measured for ' + row.animal_id"
-                          [attr.aria-pressed]="draft(row.animal_id).status === 'milked_not_measured'"
+                          [attr.aria-pressed]="
+                            draft(row.animal_id).status === 'milked_not_measured'
+                          "
                           [disabled]="state.submitting()"
                           [attr.data-role]="'m-' + row.animal_id"
                           (click)="mark(row.animal_id, 'milked_not_measured')"
@@ -356,11 +382,22 @@ export const OUT_OF_BAND = 0.5;
                 }
               </tbody>
             </table>
-            <app-pagination label="Milking animals" [page]="tablePage()" [pageSize]="tableSize()" [total]="r.rows.length" (pageChange)="tablePage.set($event)" (sizeChange)="tableSize.set($event); tablePage.set(1)"/>
-            @if(pageError()){<p id="milking-entry-error" role="alert" class="p-3">{{pageError()}}</p>}
+            <app-pagination
+              label="Milking animals"
+              [page]="tablePage()"
+              [pageSize]="tableSize()"
+              [total]="r.rows.length"
+              (pageChange)="tablePage.set($event)"
+              (sizeChange)="tableSize.set($event); tablePage.set(1)"
+            />
+            @if (pageError()) {
+              <p id="milking-entry-error" role="alert" class="p-3">{{ pageError() }}</p>
+            }
           </div>
 
-          <p class="scroll-cue text-xs text-content-muted">Scroll horizontally to reach all quantities.</p>
+          <p class="scroll-cue text-xs text-content-muted">
+            Scroll horizontally to reach all quantities.
+          </p>
 
           <p class="text-xs text-content-muted">– means No record.</p>
 
@@ -383,7 +420,15 @@ export const OUT_OF_BAND = 0.5;
       }
 
       @if (state.error(); as e) {
-        <p appErrorPanel id="milking-server-error" tabindex="-1" role="alert" data-role="error-form">{{ e.message }}</p>
+        <p
+          appErrorPanel
+          id="milking-server-error"
+          tabindex="-1"
+          role="alert"
+          data-role="error-form"
+        >
+          {{ e.message }}
+        </p>
       }
 
       <div class="flex items-center gap-3">
@@ -393,14 +438,19 @@ export const OUT_OF_BAND = 0.5;
             data-role="submit"
             [appButtonDisabled]="!canSubmit()"
             appButton
-            reason="milking-submit-reason" [busy]="state.submitting()"
+            reason="milking-submit-reason"
+            [busy]="state.submitting()"
           >
             {{ state.submitting() ? 'Saving…' : 'Save session' }}
           </button>
         } @else {
           <app-session-required what="this session" />
         }
-        @if (untouched().length) {<button appButton variant="secondary" type="button" (click)="showUnanswered()">Go to first unanswered animal</button>}
+        @if (untouched().length) {
+          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
+            Go to first unanswered animal
+          </button>
+        }
         @if (blockedReason(); as b) {
           <span appHelp data-role="blocked" id="milking-submit-reason">{{ b }}</span>
         }
@@ -413,7 +463,9 @@ export class MilkingRosterScreen {
   protected readonly tableSize = signal(25);
   protected readonly pageError = signal('');
   protected readonly invalidAnimal = signal<string | null>(null);
-  protected tableOffset(): number { return (this.tablePage()-1)*this.tableSize(); }
+  protected tableOffset(): number {
+    return (this.tablePage() - 1) * this.tableSize();
+  }
   private readonly api = inject(RegistryApi);
   protected readonly session_ = inject(Session);
   private readonly writeLog = inject(WriteLog);
@@ -479,27 +531,49 @@ export class MilkingRosterScreen {
   private baselineDrafts: Record<string, Draft> = {};
   private baselineObserver = '';
   private loadGeneration = 0;
-  private snapshot() { return JSON.stringify({drafts: this.drafts(), observer: this.milkedBy()}); }
+  private snapshot() {
+    return JSON.stringify({ drafts: this.drafts(), observer: this.milkedBy() });
+  }
   private acceptBaseline(observer = this.milkedBy()) {
     this.baselineDrafts = structuredClone(this.drafts());
     this.baselineObserver = observer;
-    this.baseline.set(JSON.stringify({drafts: this.drafts(), observer}));
+    this.baseline.set(JSON.stringify({ drafts: this.drafts(), observer }));
   }
   constructor() {
     const defaults = { on: this.on(), session: this.session() };
     this.acceptBaseline();
-    this.registry.register({
-      owner: 'milking', context: () => this.on() + '/' + this.session(),
-      description: () => 'Milking · ' + this.on() + ' · ' + this.session(),
-      snapshot: () => this.snapshot(), baseline: () => this.baseline(),
-      dirty: () => this.snapshot() !== this.baseline(), pending: () => this.state.submitting(),
-      discard: () => { this.drafts.set(structuredClone(this.baselineDrafts)); this.milkedBy.set(this.baselineObserver); this.state.reset(); },
-      replaces: url => {
-        const u = new URL(url, 'http://local');
-        return u.pathname !== '/milk/milking' || (u.searchParams.get('on') || defaults.on) !== this.on() || (u.searchParams.get('session') || defaults.session) !== this.session();
+    this.registry.register(
+      {
+        owner: 'milking',
+        context: () => this.on() + '/' + this.session(),
+        description: () => 'Milking · ' + this.on() + ' · ' + this.session(),
+        snapshot: () => this.snapshot(),
+        baseline: () => this.baseline(),
+        dirty: () => this.snapshot() !== this.baseline(),
+        pending: () => this.state.locked(),
+        unresolved: () => this.state.uncertain(),
+        discard: () => {
+          this.drafts.set(structuredClone(this.baselineDrafts));
+          this.milkedBy.set(this.baselineObserver);
+          this.state.reset();
+        },
+        replaces: (url) => {
+          const u = new URL(url, 'http://local');
+          return (
+            u.pathname !== '/milk/milking' ||
+            (u.searchParams.get('on') || defaults.on) !== this.on() ||
+            (u.searchParams.get('session') || defaults.session) !== this.session()
+          );
+        },
       },
-    }, inject(DestroyRef));
-    effect(() => { this.snapshot(); this.baseline(); this.state.submitting(); this.registry.syncUnload(); });
+      inject(DestroyRef),
+    );
+    effect(() => {
+      this.snapshot();
+      this.baseline();
+      this.state.locked();
+      this.registry.syncUnload();
+    });
     void this.identifiers.refresh();
     // One effect over date+session rather than a call in each setter, which is
     // how one setter ends up forgetting to reload and the screen shows a roster
@@ -515,7 +589,8 @@ export class MilkingRosterScreen {
     const generation = ++this.loadGeneration;
     const observer = this.milkedBy();
     this.roster.set(null);
-    this.tablePage.set(1); this.pageError.set('');
+    this.tablePage.set(1);
+    this.pageError.set('');
     try {
       const r = await this.api.milkingRoster(on, session);
       if (generation !== this.loadGeneration) return;
@@ -542,10 +617,13 @@ export class MilkingRosterScreen {
   }
 
   protected setOn(v: string): void {
-    if (v.length > 0) void this.url.set({ on: v }).then(() => {
-      const control = this.element.nativeElement.querySelector('[data-role=on]') as HTMLInputElement | null;
-      if (control) control.value = this.on();
-    });
+    if (v.length > 0)
+      void this.url.set({ on: v }).then(() => {
+        const control = this.element.nativeElement.querySelector(
+          '[data-role=on]',
+        ) as HTMLInputElement | null;
+        if (control) control.value = this.on();
+      });
   }
 
   protected setSession(s: MilkingSession): void {
@@ -568,13 +646,13 @@ export class MilkingRosterScreen {
    * nothing, which is what `not_milked` is for.
    */
   protected typeLitres(id: string, v: string): void {
-    if (this.state.submitting()) return;
+    if (this.state.locked()) return;
     const trimmed = v.trim();
     this.patch(id, { litres: v, status: trimmed.length === 0 ? null : 'measured', reason: '' });
   }
 
   protected mark(id: string, status: MilkingStatus): void {
-    if (this.state.submitting()) return;
+    if (this.state.locked()) return;
     const current = this.draft(id).status;
     // Clicking the active one again returns the row to untouched, so a
     // mis-click is undone the same way it was made.
@@ -582,11 +660,11 @@ export class MilkingRosterScreen {
   }
 
   protected setMilkedBy(value: string): void {
-    if (!this.state.submitting()) this.milkedBy.set(value);
+    if (!this.state.locked()) this.milkedBy.set(value);
   }
 
   protected setReason(id: string, v: string): void {
-    if (this.state.submitting()) return;
+    if (this.state.locked()) return;
     this.patch(id, { reason: v });
   }
 
@@ -616,12 +694,20 @@ export class MilkingRosterScreen {
     }
   }
 
-  protected showUnanswered(): void { const id=this.untouched()[0]?.animal_id; const index=this.roster()?.rows.findIndex(r=>r.animal_id===id) ?? -1; if(index>=0)this.focusRow(index); }
+  protected showUnanswered(): void {
+    const id = this.untouched()[0]?.animal_id;
+    const index = this.roster()?.rows.findIndex((r) => r.animal_id === id) ?? -1;
+    if (index >= 0) this.focusRow(index);
+  }
 
   private focusRow(index: number): void {
-    if(index >= (this.roster()?.rows.length ?? 0)) return;
+    if (index >= (this.roster()?.rows.length ?? 0)) return;
     this.tablePage.set(Math.floor(index / this.tableSize()) + 1);
-    setTimeout(() => { const el = this.cells()[index % this.tableSize()]?.nativeElement; el?.focus(); if(el && !el.disabled) el.select(); }, 0);
+    setTimeout(() => {
+      const el = this.cells()[index % this.tableSize()]?.nativeElement;
+      el?.focus();
+      if (el && !el.disabled) el.select();
+    }, 0);
   }
 
   protected previousText(row: RosterRow): string {
@@ -748,9 +834,23 @@ export class MilkingRosterScreen {
     const r = this.roster();
     if (this.state.submitting() || r === null || this.blockedReason() !== null) return;
     const d = this.drafts();
-    const invalid = r.rows.findIndex(row => { const draft = d[row.animal_id] ?? EMPTY; return draft.status === 'measured' && (!draft.litres.trim() || !Number.isFinite(Number(draft.litres)) || Number(draft.litres) < 0); });
-    if(invalid >= 0) { this.invalidAnimal.set(r.rows[invalid].animal_id); this.pageError.set('Enter a valid non-negative milk measurement for '+r.rows[invalid].animal_id); this.focusRow(invalid); return; }
-    this.pageError.set(''); this.invalidAnimal.set(null);
+    const invalid = r.rows.findIndex((row) => {
+      const draft = d[row.animal_id] ?? EMPTY;
+      return (
+        draft.status === 'measured' &&
+        (!draft.litres.trim() || !Number.isFinite(Number(draft.litres)) || Number(draft.litres) < 0)
+      );
+    });
+    if (invalid >= 0) {
+      this.invalidAnimal.set(r.rows[invalid].animal_id);
+      this.pageError.set(
+        'Enter a valid non-negative milk measurement for ' + r.rows[invalid].animal_id,
+      );
+      this.focusRow(invalid);
+      return;
+    }
+    this.pageError.set('');
+    this.invalidAnimal.set(null);
 
     const entries = r.rows.map((row) => {
       const draft = d[row.animal_id] ?? EMPTY;
@@ -762,20 +862,25 @@ export class MilkingRosterScreen {
       return base;
     });
 
-    const saved = await this.state.run((key) =>
-      this.api.saveMilkingSession(
-        {
-          occurred_on: r.occurred_on,
-          session: r.session,
-          observed_by: blank(this.milkedBy()),
-          entries,
-          ...this.session_.provenance(),
-        },
-        key,
-      ),
+    const saved = await this.state.runRequest(
+      () =>
+        [
+          {
+            occurred_on: r.occurred_on,
+            session: r.session,
+            observed_by: blank(this.milkedBy()),
+            entries,
+            ...this.session_.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.saveMilkingSession(request[0], key),
     );
 
-    if (!saved) setTimeout(() => this.element.nativeElement.querySelector('#milking-server-error')?.focus(), 0);
+    if (!saved)
+      setTimeout(
+        () => this.element.nativeElement.querySelector('#milking-server-error')?.focus(),
+        0,
+      );
     if (saved) {
       this.acceptBaseline();
       void this.identifiers.refresh();

@@ -1,3 +1,5 @@
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 // Add an acquired animal. Pass one of the backfill.
 
 import {
@@ -38,6 +40,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
   selector: 'app-animal-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WriteLock,
     Button,
     Card,
     ChipGroup,
@@ -53,10 +56,10 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
     TextInput,
   ],
   template: `
-    <!-- A real <form>, which is what makes Enter submit from any text field.
+    <!-- A real <form [appWriteLock]="state">, which is what makes Enter submit from any text field.
          Before this there was no form element anywhere in the registry and
          every button was type="button", so Enter did nothing on any screen. -->
-    <form class="mx-auto max-w-2xl" (submit)="onSubmit($event)">
+    <form [appWriteLock]="state" class="mx-auto max-w-2xl" (submit)="onSubmit($event)">
       <header class="mb-4">
         <h2 appPageHeading>Add an acquired animal</h2>
         <p appHelp class="mt-1">
@@ -176,6 +179,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
             [appButtonDisabled]="!canSubmit()"
             appButton
             reason="animal-submit-reason"
+            [busy]="state.submitting()"
           >
             {{ state.submitting() ? 'Saving…' : 'Add animal' }}
           </button>
@@ -215,6 +219,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
   `,
 })
 export class AnimalForm {
+  protected writer!: ReturnType<typeof writerDraft>;
   /**
    * The NATIVE submit event, not FormsModule's `ngSubmit`.
    *
@@ -286,6 +291,24 @@ export class AnimalForm {
   );
 
   constructor() {
+    this.writer = writerDraft({
+      name: 'New animal',
+      fields: {
+        sex: this.sex,
+        name: this.name,
+        from: this.from,
+        postNo: this.postNo,
+        tagNo: this.tagNo,
+        observedBy: this.observedBy,
+        acquired: this.acquired,
+        birth: this.birth,
+      },
+      states: [this.state],
+      afterRestore: () => {
+        this.dateControls().forEach((c) => c.reset());
+      },
+    });
+
     void this.identifiers.refresh();
   }
 
@@ -295,23 +318,24 @@ export class AnimalForm {
     // Belt and braces behind the disabled button: an incomplete optional date
     // must never reach the wire as a null.
     if (a.status !== 'complete' || b.status === 'incomplete') return;
-    const r = await this.state.run((key) =>
-      this.api.addAnimal(
-        {
-          sex: this.sex(),
-          name: blank(this.name()),
-          acquired_on: a.value.occurred_on,
-          date_precision: a.value.date_precision,
-          birth_on: b.status === 'complete' ? b.value.occurred_on : null,
-          birth_precision: b.status === 'complete' ? b.value.date_precision : null,
-          from: blank(this.from()),
-          post_no: blank(this.postNo()),
-          tag_no: blank(this.tagNo()),
-          observed_by: blank(this.observedBy()),
-          ...this.session.provenance(),
-        },
-        key,
-      ),
+    const r = await this.state.runRequest(
+      () =>
+        [
+          {
+            sex: this.sex(),
+            name: blank(this.name()),
+            acquired_on: a.value.occurred_on,
+            date_precision: a.value.date_precision,
+            birth_on: b.status === 'complete' ? b.value.occurred_on : null,
+            birth_precision: b.status === 'complete' ? b.value.date_precision : null,
+            from: blank(this.from()),
+            post_no: blank(this.postNo()),
+            tag_no: blank(this.tagNo()),
+            observed_by: blank(this.observedBy()),
+            ...this.session.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.addAnimal(request[0], key),
     );
     // Refreshed AFTER the write, so a name typed on this animal is offered on
     // the next one. That is the whole point of the datalist.
@@ -341,6 +365,7 @@ export class AnimalForm {
     this.birth.set({ status: 'empty' });
     this.writeLog.announce(`Wrote ${id}${name ? ` — ${name}` : ''}. Ready for the next.`);
     focusAfterWrite(this.firstField()?.nativeElement);
+    this.writer.accept();
   }
 
   protected open(id: string): void {

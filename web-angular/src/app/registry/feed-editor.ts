@@ -1,3 +1,8 @@
+import { JsonPipe } from '@angular/common';
+import { ElementRef, untracked } from '@angular/core';
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
+import { PrecisionDateControl, DateEntry, PrecisionDate } from './precision-date';
 import { Component, ChangeDetectionStrategy, inject, input, output, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RegistryApi } from './api';
@@ -17,6 +22,9 @@ import { formatMinor, rupeesToMinor } from './money';
   selector: 'app-feed-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    JsonPipe,
+    WriteLock,
+    PrecisionDateControl,
     FormsModule,
     SessionRequired,
     TextInput,
@@ -27,7 +35,37 @@ import { formatMinor, rupeesToMinor } from './money';
     HelpText,
   ],
   template: `
-    <form appCard class="space-y-4" (ngSubmit)="save()" data-role="feed-editor">
+    <form
+      [appWriteLock]="state"
+      appCard
+      class="space-y-4"
+      (ngSubmit)="save()"
+      data-role="feed-editor"
+    >
+      @if (record()) {
+        <p appHelp>
+          Saved record · revision {{ originalRecord?.revision }} · recorded by
+          {{ originalRecord?.recorded_by }} · {{ originalRecord?.source_form }} ·
+          {{ originalRecord?.source_ref || 'no source reference' }}
+        </p>
+      }
+      @if (state.error()?.code === 'feed_conflict') {
+        <button appButton variant="secondary" type="button" (click)="compareLatest()">
+          Compare latest saved record
+        </button>
+      }
+      @if (latest) {
+        <section appCard>
+          <h3>Latest saved revision {{ latest.revision }}</h3>
+          <pre class="whitespace-pre-wrap break-all">{{ latest | json }}</pre>
+          <button appButton variant="secondary" type="button" (click)="latest = null">
+            Keep my draft
+          </button>
+          <button appButton intent="danger" type="button" (click)="adoptLatest()">
+            Discard draft and load latest
+          </button>
+        </section>
+      }
       <h3 class="font-medium">{{ record()?.id ? 'Correct' : 'Add' }} {{ noun() }}</h3>
       @if (entity() === 'items' || entity() === 'crops') {
         <label class="block"
@@ -72,20 +110,13 @@ import { formatMinor, rupeesToMinor } from './money';
           </select></label
         >
         @for (k of dateKeys; track k) {
-          <label class="block"
-            ><span appFieldLabel>{{ words(k) }} date (optional)</span
-            ><input
-              appInput
-              [name]="k"
-              [(ngModel)]="dates[k]"
-              placeholder="2026, Aug 2026, or 10 Sep 2026"
-              class="w-full"
-          /></label>
-          <label class="flex gap-2 text-sm"
-            ><input type="checkbox" [name]="k + 'guess'" [(ngModel)]="guesses[k]" />Even the year is
-            a guess</label
-          >
-          <p appHelp>{{ reading(k) }}</p>
+          <app-precision-date
+            [label]="words(k) + ' date (optional)'"
+            [allowTime]="false"
+            [initialValue]="dateValue(k)"
+            [resetKey]="dateGeneration"
+            (changed)="dateChanged(k, $event)"
+          />
         }
         <p appHelp>
           Unknown dates and acreage are valid. Finishing does not invent a last cutting date.
@@ -253,14 +284,22 @@ import { formatMinor, rupeesToMinor } from './money';
         <p appErrorPanel role="alert">{{ localError }}</p>
       }
       @if (session.ready()) {
-        <p appHelp>Recording as {{ session.sourceForm() }} · {{ session.recordedBy() }}</p>
-        <button appButton type="submit" [appButtonDisabled]="state.submitting()">
+        <p appHelp>
+          {{ record() ? 'This correction will be recorded by' : 'This entry will be recorded by' }}
+          {{ session.recordedBy() }} · {{ session.sourceForm() }}
+        </p>
+        <button
+          appButton
+          type="submit"
+          [appButtonDisabled]="state.submitting() || (!!record() && !writer.meaningful())"
+          [busy]="state.submitting()"
+        >
           {{ state.submitting() ? 'Saving…' : 'Save ' + noun() }}
         </button>
       } @else {
         <app-session-required [what]="noun()" />
       }
-      <button appButton variant="secondary" type="button" (click)="cancelled.emit()">Cancel</button>
+      <button appButton variant="secondary" type="button" (click)="cancel()">Cancel</button>
     </form>
   `,
 })
@@ -273,6 +312,8 @@ export class FeedEditor {
   readonly cancelled = output<void>();
   readonly addItem = output<void>();
   readonly session = inject(Session);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly origin = document.activeElement as HTMLElement | null;
   private readonly api = inject(RegistryApi);
   private readonly log = inject(WriteLog);
   readonly state = new FormState<FeedRecord>();
@@ -295,8 +336,94 @@ export class FeedEditor {
   transport = 0;
   other = 0;
   localError = '';
+  latest: FeedRecord | null = null;
+  originalRecord: FeedRecord | null = null;
+  async compareLatest() {
+    if (!this.record()) return;
+    const entity = this.entity(),
+      id = this.record()!.id;
+    try {
+      const latest = await this.api.feedGet<FeedRecord>(entity + '/' + id);
+      if (this.entity() === entity && this.record()?.id === id) this.latest = latest;
+    } catch (error) {
+      this.localError = String(error);
+    }
+  }
+  async adoptLatest() {
+    const latest = this.latest;
+    if (!latest) return;
+    await this.writer.transition(() => {
+      this.originalRecord = structuredClone(latest);
+      this.draft = { ...blankFeed(), ...structuredClone(latest) };
+      this.rate = latest.basis_price_minor === null ? null : latest.basis_price_minor / 100;
+      this.goods = latest.goods_minor === null ? null : latest.goods_minor / 100;
+      this.amount = latest.amount_minor === null ? null : latest.amount_minor / 100;
+      this.transport = latest.transport_minor / 100;
+      this.other = latest.other_minor / 100;
+      this.dateEntries = {};
+      this.dateGeneration++;
+      this.latest = null;
+      this.state.reset();
+    });
+  }
+
+  readonly writer = writerDraft({
+    name: 'Feed editor',
+    states: [this.state],
+    snapshot: () => ({
+      draft: this.draft,
+      incompleteDates: Object.fromEntries(
+        Object.entries(this.dateEntries ?? {}).filter(([, e]) => e.status === 'incomplete'),
+      ),
+      rate: this.rate,
+      goods: this.goods,
+      amount: this.amount,
+      transport: this.transport,
+      other: this.other,
+    }),
+    restore: (value) => {
+      Object.assign(this, value);
+      this.dateEntries = {};
+      this.dateGeneration++;
+    },
+  });
+  dateGeneration = 0;
+  dateEntries: Record<string, DateEntry> = {};
+  ngDoCheck() {
+    this.writer.check();
+  }
+  async cancel() {
+    if (await this.writer.transition(() => this.cancelled.emit()))
+      setTimeout(() => this.origin?.focus());
+  }
+  dateValue(k: string): PrecisionDate | null {
+    const draft = this.draft as any;
+    return draft[k + '_on']
+      ? {
+          occurred_on: draft[k + '_on'],
+          date_precision: draft[k + '_precision'],
+          occurred_time: null,
+        }
+      : null;
+  }
+  dateChanged(k: string, entry: DateEntry) {
+    this.dateEntries[k] = entry;
+    this.dates[k] =
+      entry.status === 'complete'
+        ? entry.value.occurred_on
+        : entry.status === 'incomplete'
+          ? '?'
+          : '';
+    this.guesses[k] = entry.status === 'complete' && entry.value.date_precision === 'estimated';
+    if (entry.status !== 'incomplete')
+      Object.assign(this.draft, {
+        [k + '_on']: entry.status === 'complete' ? entry.value.occurred_on : null,
+        [k + '_precision']: entry.status === 'complete' ? entry.value.date_precision : null,
+      });
+  }
   constructor() {
     effect(() => {
+      this.originalRecord = this.record() ? structuredClone(this.record()!) : null;
       this.draft = {
         ...blankFeed(),
         ...structuredClone(this.record() ?? {}),
@@ -307,6 +434,7 @@ export class FeedEditor {
       this.amount = this.draft.amount_minor === null ? null : this.draft.amount_minor / 100;
       this.transport = this.draft.transport_minor / 100;
       this.other = this.draft.other_minor / 100;
+      this.dateGeneration++;
       for (const k of this.dateKeys) {
         const d = this.draft as unknown as Record<string, unknown>;
         const on = String(d[k + '_on'] ?? ''),
@@ -315,6 +443,10 @@ export class FeedEditor {
           p === 'month' ? on.slice(0, 7) : p === 'year' || p === 'estimated' ? on.slice(0, 4) : on;
         this.guesses[k] = p === 'estimated';
       }
+      untracked(() => this.writer.accept());
+      setTimeout(() =>
+        this.host.nativeElement.querySelector<HTMLInputElement>('input, select')?.focus(),
+      );
     });
   }
   words(v: string) {
@@ -339,7 +471,12 @@ export class FeedEditor {
         : 'Date unknown';
   }
   async save() {
-    if (!this.session.ready() || this.state.submitting()) return;
+    if (
+      !this.session.ready() ||
+      this.state.submitting() ||
+      (this.record() && !this.writer.meaningful() && !this.state.uncertain())
+    )
+      return;
     this.localError = '';
     for (const value of [this.rate, this.goods, this.amount, this.transport, this.other]) {
       if (value !== null && rupeesToMinor(String(value)) === null) {
@@ -358,7 +495,7 @@ export class FeedEditor {
     };
     if (this.entity() === 'crops')
       for (const k of this.dateKeys) {
-        const e = parseDateEntry(this.dates[k] ?? '', { estimated: this.guesses[k] ?? false });
+        const e = this.dateEntries[k] ?? ({ status: 'empty' } as DateEntry);
         if (e.status === 'incomplete') {
           this.localError = `Finish or clear the ${this.words(k)} date.`;
           return;
@@ -368,15 +505,13 @@ export class FeedEditor {
           [k + '_precision']: e.status === 'complete' ? e.value.date_precision : null,
         });
       }
-    const r = await this.state.run((key) =>
-      this.api.feedWrite<FeedRecord>(
-        this.entity() + (this.draft.id ? '/' + this.draft.id : ''),
-        body,
-        key,
-      ),
+    const r = await this.state.runRequest(
+      () => [this.entity() + (this.draft.id ? '/' + this.draft.id : ''), body] as const,
+      (request, key) => this.api.feedWrite<FeedRecord>(request[0], request[1], key),
     );
     if (r) {
       this.log.announce(`Saved ${this.noun()}${r.label ? ' ' + r.label : ''}.`);
+      this.writer.accept();
       this.saved.emit(r);
     }
   }

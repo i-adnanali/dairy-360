@@ -1,3 +1,6 @@
+import { effect } from '@angular/core';
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 import { LocalPagination } from '../ui/local-pagination';
 // `/buyers/:id` -- the statement (docs/REGISTRY_SALES.md §12.3).
 //
@@ -49,7 +52,9 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-destination-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LocalPagination,
+  imports: [
+    WriteLock,
+    LocalPagination,
     Button,
     Card,
     Cell,
@@ -79,42 +84,60 @@ import { Button } from '../ui/button';
             <div appSectionLabel>
               {{ s.balance_minor < 0 ? 'In credit' : 'Owes' }}
             </div>
-            <div class="text-xl font-semibold"
+            <div
+              class="text-xl font-semibold"
               [class]="s.balance_minor > 0 ? 'text-content-primary' : 'text-success-fg'"
-              data-role="balance">{{ balanceText(s) }}</div>
+              data-role="balance"
+            >
+              {{ balanceText(s) }}
+            </div>
           </div>
         </header>
 
         <p appHelp data-role="totals">
-          {{ s.litres }} L over {{ s.months.length }} month(s) · billed {{ money(s.billed_minor) }}
-          · paid {{ money(s.paid_minor) }}
+          {{ s.litres }} L over {{ s.months.length }} month(s) · billed
+          {{ money(s.billed_minor) }} · paid {{ money(s.paid_minor) }}
         </p>
 
         @if (s.months.length === 0) {
-          <p appCard empty
-            data-role="empty">Nothing recorded for {{ s.name }} yet.</p>
+          <p appCard empty data-role="empty">Nothing recorded for {{ s.name }} yet.</p>
         }
 
         @for (m of s.months; track m.month) {
-          <section class="overflow-hidden rounded-xl border border-line bg-surface-raised"
-            [attr.data-month]="m.month">
+          <section
+            class="overflow-hidden rounded-xl border border-line bg-surface-raised"
+            [attr.data-month]="m.month"
+          >
             <!-- THE ARTIFACT: one line per month. -->
-            <div class="flex flex-wrap items-baseline justify-between gap-3 border-b border-line-subtle bg-surface-page px-4 py-2 text-sm">
+            <div
+              class="flex flex-wrap items-baseline justify-between gap-3 border-b border-line-subtle bg-surface-page px-4 py-2 text-sm"
+            >
               <span class="font-semibold text-content-primary">{{ monthLabel(m.month) }}</span>
               <span class="text-content-secondary" [attr.data-role]="'summary-' + m.month">
-                {{ m.litres }} L · billed {{ money(m.billed_minor) }} · paid {{ money(m.paid_minor) }}
+                {{ m.litres }} L · billed {{ money(m.billed_minor) }} · paid
+                {{ money(m.paid_minor) }}
                 ·
                 <span class="font-medium text-content-primary">
-                  {{ m.closing_minor === 0 ? 'settled' : money(m.closing_minor) + ' carried forward' }}
+                  {{
+                    m.closing_minor === 0 ? 'settled' : money(m.closing_minor) + ' carried forward'
+                  }}
                 </span>
               </span>
             </div>
 
             <!-- THE EVIDENCE: the rows underneath it. -->
-            <app-local-pagination label="Deliveries" #dispatchPages="localPagination" [total]="m.dispatches.length"/>
-              <app-local-pagination label="Payments" #paymentPages="localPagination" [total]="m.payments.length"/>
+            <app-local-pagination
+              label="Deliveries"
+              #dispatchPages="localPagination"
+              [total]="m.dispatches.length"
+            />
+            <app-local-pagination
+              label="Payments"
+              #paymentPages="localPagination"
+              [total]="m.payments.length"
+            />
 
-              <table class="w-full text-left text-sm">
+            <table class="w-full text-left text-sm">
               <tbody>
                 @for (d of dispatchPages.rows(m.dispatches); track d.id) {
                   <tr appRowDivider [attr.data-dispatch]="d.id">
@@ -122,10 +145,14 @@ import { Button } from '../ui/button';
                     <td appCell tone="secondary">
                       <!-- "nothing taken" is §6's third state: an answer was
                            given, so it is words and it is italic. -->
-                      <span [appCertainty]="d.status === 'taken' ? 'known' : 'absent'"
+                      <span
+                        [appCertainty]="d.status === 'taken' ? 'known' : 'absent'"
                         [attr.data-certainty]="d.status === 'taken' ? 'known' : 'absent'"
-                      >{{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}</span>
-                      @if (d.reason) { <span class="text-content-subtle">— {{ d.reason }}</span> }
+                        >{{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}</span
+                      >
+                      @if (d.reason) {
+                        <span class="text-content-subtle">— {{ d.reason }}</span>
+                      }
                     </td>
                     <!-- AN EMPTY CELL, WHICH §15 RULE 1 FORBIDS OUTRIGHT:
                          "rateText" returned '' for a dispatch with no price, so
@@ -135,29 +162,39 @@ import { Button } from '../ui/button';
                          exactly this. -->
                     <td appCell small tone="muted" [attr.data-role]="'rate-' + d.id">
                       @if (rateState(d); as st) {
-                        <span [appCertainty]="st" [attr.data-certainty]="st">{{ rateText(d) }}</span>
+                        <span [appCertainty]="st" [attr.data-certainty]="st">{{
+                          rateText(d)
+                        }}</span>
                       } @else {
                         {{ rateText(d) }}
                       }
                     </td>
                     <td appCell numeric tone="heading">
-                      <span [appCertainty]="amountState(d)" [attr.data-certainty]="amountState(d)"
-                      >{{ amountText(d) }}</span>
+                      <span
+                        [appCertainty]="amountState(d)"
+                        [attr.data-certainty]="amountState(d)"
+                        >{{ amountText(d) }}</span
+                      >
                     </td>
                   </tr>
                 }
                 @for (p of paymentPages.rows(m.payments); track p.id) {
-                  <tr class="border-t border-line-hairline bg-success-bg/40" [attr.data-payment]="p.id">
+                  <tr
+                    class="border-t border-line-hairline bg-success-bg/40"
+                    [attr.data-payment]="p.id"
+                  >
                     <td appCell tone="secondary">{{ p.occurred_on }}</td>
                     <td appCell tone="secondary">
                       {{ p.method }}
-                      @if (p.reference) { <span class="text-content-subtle">· {{ p.reference }}</span> }
-                      @if (p.note) { <span class="text-content-subtle">— {{ p.note }}</span> }
+                      @if (p.reference) {
+                        <span class="text-content-subtle">· {{ p.reference }}</span>
+                      }
+                      @if (p.note) {
+                        <span class="text-content-subtle">— {{ p.note }}</span>
+                      }
                     </td>
                     <td appCell></td>
-                    <td appCell numeric emphasis tone="success">
-                      −{{ money(p.amount_minor) }}
-                    </td>
+                    <td appCell numeric emphasis tone="success">−{{ money(p.amount_minor) }}</td>
                   </tr>
                 }
               </tbody>
@@ -167,25 +204,46 @@ import { Button } from '../ui/button';
 
         <!-- record a payment ------------------------------------------- -->
         @if (s.billable) {
-          <form appCard class="space-y-3"
-            data-role="payment-form" (submit)="submitPayment($event)">
+          <form
+            [appWriteLock]="payState"
+            appCard
+            class="space-y-3"
+            data-role="payment-form"
+            (submit)="submitPayment($event)"
+          >
             <h3 appSectionHeading>Record a payment</h3>
 
             <div class="flex flex-wrap items-end gap-3">
               <label class="block">
                 <span appFieldLabel>Amount (Rs)</span>
-                <input data-role="pay-amount" inputmode="decimal" [value]="amount()"
-                  (input)="amount.set($any($event.target).value)" appInput class="w-32" />
+                <input
+                  data-role="pay-amount"
+                  inputmode="decimal"
+                  [value]="amount()"
+                  (input)="amount.set($any($event.target).value)"
+                  appInput
+                  class="w-32"
+                />
               </label>
               <label class="block">
                 <span appFieldLabel>On</span>
-                <input type="date" data-role="pay-on" [value]="occurredOn()"
-                  (change)="occurredOn.set($any($event.target).value)" appInput />
+                <input
+                  type="date"
+                  data-role="pay-on"
+                  [value]="occurredOn()"
+                  (change)="occurredOn.set($any($event.target).value)"
+                  appInput
+                />
               </label>
               <div>
                 <div appFieldLabel inline>How</div>
-                <app-chip-group name="method" label="Method" [options]="methodChips"
-                  [value]="method()" (changed)="method.set($any($event))" />
+                <app-chip-group
+                  name="method"
+                  label="Method"
+                  [options]="methodChips"
+                  [value]="method()"
+                  (changed)="method.set($any($event))"
+                />
               </div>
             </div>
 
@@ -193,9 +251,14 @@ import { Button } from '../ui/button';
               <span appFieldLabel>
                 Reference {{ method() === 'adjustment' ? '' : '(optional)' }}
               </span>
-              <input data-role="pay-reference" [value]="reference()"
+              <input
+                data-role="pay-reference"
+                [value]="reference()"
                 (input)="reference.set($any($event.target).value)"
-                placeholder="cheque no., transfer ref, khata page" appInput class="w-72" />
+                placeholder="cheque no., transfer ref, khata page"
+                appInput
+                class="w-72"
+              />
             </label>
 
             @if (method() === 'adjustment') {
@@ -205,14 +268,23 @@ import { Button } from '../ui/button';
                    audited a month later. -->
               <label class="block">
                 <span appFieldLabel>Why (required)</span>
-                <input data-role="pay-note" [value]="note()"
+                <input
+                  data-role="pay-note"
+                  [value]="note()"
                   (input)="note.set($any($event.target).value)"
-                  placeholder="written off, agreed at settlement…" appInput class="w-full" />
+                  placeholder="written off, agreed at settlement…"
+                  appInput
+                  class="w-full"
+                />
               </label>
               <div class="flex items-center gap-2 text-xs text-content-secondary">
                 <label class="flex items-center gap-1">
-                  <input type="checkbox" data-role="pay-negative" [checked]="negative()"
-                    (change)="negative.set($any($event.target).checked)" />
+                  <input
+                    type="checkbox"
+                    data-role="pay-negative"
+                    [checked]="negative()"
+                    (change)="negative.set($any($event.target).checked)"
+                  />
                   reduces what they owe
                 </label>
                 <span class="text-content-subtle">
@@ -226,8 +298,15 @@ import { Button } from '../ui/button';
             }
 
             @if (session.ready()) {
-              <button type="submit" data-role="pay-submit" [appButtonDisabled]="!canPay()" appButton
-              >{{ payState.submitting() ? 'Saving…' : 'Record payment' }}</button>
+              <button
+                type="submit"
+                data-role="pay-submit"
+                [appButtonDisabled]="!canPay()"
+                appButton
+                [busy]="payState.submitting()"
+              >
+                {{ payState.submitting() ? 'Saving…' : 'Record payment' }}
+              </button>
             } @else {
               <app-session-required what="a payment" />
             }
@@ -238,13 +317,19 @@ import { Button } from '../ui/button';
         @if (s.prices.length > 0) {
           <section appCard data-role="price-history">
             <h3 class="mb-2 text-sm font-semibold text-content-primary">Agreed rates</h3>
-            <app-local-pagination label="Rates" #pricePages="localPagination" [total]="s.prices.length"/>
+            <app-local-pagination
+              label="Rates"
+              #pricePages="localPagination"
+              [total]="s.prices.length"
+            />
             <ul class="space-y-1 text-sm text-content-secondary">
               @for (p of pricePages.rows(s.prices); track p.id) {
                 <li>
                   from {{ p.effective_from }} —
                   <span class="font-medium">{{ rate(p.price_minor, p.price_unit_litres) }}</span>
-                  @if (p.note) { <span class="text-content-subtle">· {{ p.note }}</span> }
+                  @if (p.note) {
+                    <span class="text-content-subtle">· {{ p.note }}</span>
+                  }
                 </li>
               }
             </ul>
@@ -257,6 +342,7 @@ import { Button } from '../ui/button';
   `,
 })
 export class DestinationDetail {
+  protected writer!: ReturnType<typeof writerDraft>;
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
@@ -284,13 +370,32 @@ export class DestinationDetail {
   ];
 
   constructor() {
+    this.writer = writerDraft({
+      name: 'Buyer payment',
+      fields: {
+        amount: this.amount,
+        occurredOn: this.occurredOn,
+        method: this.method,
+        reference: this.reference,
+        note: this.note,
+        negative: this.negative,
+      },
+      states: [this.payState],
+    });
+
     // An effect rather than ngOnInit, so navigating between two buyers reloads.
-    void Promise.resolve().then(() => this.load());
+    effect(() => {
+      this.id();
+      void this.load();
+    });
   }
 
   private async load(): Promise<void> {
     try {
-      this.statement.set(await this.api.statement(this.id()));
+      const id = this.id();
+      const statement = await this.api.statement(id);
+      if (id !== this.id()) return;
+      this.statement.set(statement);
       this.loadError.set(null);
     } catch (e) {
       this.loadError.set(e instanceof Error ? e.message : String(e));
@@ -342,8 +447,18 @@ export class DestinationDetail {
   protected monthLabel(month: string): string {
     const [y, m] = month.split('-').map(Number);
     const names = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return `${names[m - 1]} ${y}`;
   }
@@ -365,19 +480,20 @@ export class DestinationDetail {
     const signed =
       this.method() === 'adjustment' && this.negative() ? -Math.abs(minor) : Math.abs(minor);
 
-    const result = await this.payState.run((key) =>
-      this.api.recordPayment(
-        {
-          destination_id: this.id(),
-          occurred_on: this.occurredOn(),
-          amount_minor: signed,
-          method: this.method(),
-          reference: this.reference().trim().length > 0 ? this.reference().trim() : null,
-          note: this.note().trim().length > 0 ? this.note().trim() : null,
-          recorded_by: this.session.provenance().recorded_by,
-        },
-        key,
-      ),
+    const result = await this.payState.runRequest(
+      () =>
+        [
+          {
+            destination_id: this.id(),
+            occurred_on: this.occurredOn(),
+            amount_minor: signed,
+            method: this.method(),
+            reference: this.reference().trim().length > 0 ? this.reference().trim() : null,
+            note: this.note().trim().length > 0 ? this.note().trim() : null,
+            recorded_by: this.session.provenance().recorded_by,
+          },
+        ] as const,
+      (request, key) => this.api.recordPayment(request[0], key),
     );
 
     if (result) {
@@ -385,6 +501,7 @@ export class DestinationDetail {
       this.amount.set('');
       this.reference.set('');
       this.note.set('');
+      this.writer.accept();
       await this.load();
     }
   }

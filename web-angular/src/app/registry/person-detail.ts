@@ -1,3 +1,5 @@
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 import { StatusBadge } from '../ui/surface';
 // `/people/:id` -- the statement (docs/REGISTRY_PAYROLL.md §12.2).
 //
@@ -63,6 +65,7 @@ import { Button } from '../ui/button';
   selector: 'app-person-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WriteLock,
     StatusBadge,
     Button,
     Card,
@@ -164,7 +167,13 @@ import { Button } from '../ui/button';
         </section>
 
         @if (closing(); as e) {
-          <form appCard class="space-y-3" (submit)="submitClose($event)" data-role="close-form">
+          <form
+            [appWriteLock]="closeState"
+            appCard
+            class="space-y-3"
+            (submit)="submitClose($event)"
+            data-role="close-form"
+          >
             <h3 appSectionHeading>Close the stint</h3>
             <p appHelp size="xs" tone="subtle">
               A final settlement dated after this is fine and is not an error — /check reports it so
@@ -202,7 +211,7 @@ import { Button } from '../ui/button';
             }
             <div class="flex gap-2">
               @if (session.ready()) {
-                <button type="submit" appButton>
+                <button type="submit" appButton [busy]="closeState.submitting()">
                   {{ closeState.submitting() ? 'Saving…' : 'Close stint' }}
                 </button>
               } @else {
@@ -210,7 +219,7 @@ import { Button } from '../ui/button';
               }
               <button
                 type="button"
-                (click)="closing.set(null)"
+                (click)="closeInline()"
                 class="rounded-lg px-4 py-2 text-sm text-content-secondary"
               >
                 Cancel
@@ -284,6 +293,7 @@ import { Button } from '../ui/button';
 
         <!-- Record a payment. -->
         <form
+          [appWriteLock]="payState"
           class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
           (submit)="submitPayment($event)"
           data-role="payment-form"
@@ -292,7 +302,8 @@ import { Button } from '../ui/button';
 
           <div class="space-y-1">
             <span appSubHeading>Method</span>
-            <app-chip-group label="Payment method"
+            <app-chip-group
+              label="Payment method"
               name="method"
               [options]="methodChips"
               [value]="method()"
@@ -392,7 +403,12 @@ import { Button } from '../ui/button';
           }
 
           @if (session.ready()) {
-            <button type="submit" [appButtonDisabled]="!canPay()" appButton>
+            <button
+              type="submit"
+              [appButtonDisabled]="!canPay()"
+              appButton
+              [busy]="payState.submitting()"
+            >
               {{ payState.submitting() ? 'Saving…' : 'Record payment' }}
             </button>
           } @else {
@@ -408,6 +424,12 @@ import { Button } from '../ui/button';
   `,
 })
 export class PersonDetail {
+  protected closeInline() {
+    return this.closeDraft.transition(() => this.closing.set(null));
+  }
+
+  protected closeDraft!: ReturnType<typeof writerDraft>;
+  protected payDraft!: ReturnType<typeof writerDraft>;
   /** Bound from the route by withComponentInputBinding(). */
   readonly id = input.required<string>();
 
@@ -440,6 +462,25 @@ export class PersonDetail {
   protected readonly formatMinor = formatMinor;
 
   constructor() {
+    this.closeDraft = writerDraft({
+      name: 'Close engagement',
+      fields: { endedOn: this.endedOn, endReason: this.endReason },
+      states: [this.closeState],
+    });
+
+    this.payDraft = writerDraft({
+      name: 'Person payment',
+      fields: {
+        method: this.method,
+        amount: this.amount,
+        paidOn: this.paidOn,
+        reference: this.reference,
+        note: this.note,
+        observedBy: this.observedBy,
+      },
+      states: [this.payState],
+    });
+
     effect(() => {
       const id = this.id();
       void this.load(id);
@@ -448,7 +489,9 @@ export class PersonDetail {
 
   private async load(id: string): Promise<void> {
     try {
-      this.statement.set(await this.api.person(id, farmToday()));
+      const statement = await this.api.person(id, farmToday());
+      if (id !== this.id()) return;
+      this.statement.set(statement);
       this.loadError.set(null);
     } catch (e) {
       this.loadError.set(e instanceof Error ? e.message : String(e));
@@ -482,27 +525,28 @@ export class PersonDetail {
     return `${b.quantity} ${b.unit} ${b.kind} / ${b.period}`;
   }
 
-  protected openClose(e: Engagement): void {
-    this.closing.set(e);
-    this.endedOn.set(farmToday());
-    this.endReason.set('');
-    this.closeState.reset();
+  protected async openClose(e: Engagement): Promise<void> {
+    await this.closeDraft.transition(() => {
+      this.closing.set(e);
+      this.endedOn.set(farmToday());
+      this.endReason.set('');
+      this.closeState.reset();
+    });
   }
 
   protected async submitClose(ev: Event): Promise<void> {
     ev.preventDefault();
     const e = this.closing();
     if (!e) return;
-    const ok = await this.closeState.run((key) =>
-      this.api.updateEngagement(
-        e.id,
-        { ended_on: this.endedOn(), end_reason: this.endReason().trim() || null },
-        key,
-      ),
+    const ok = await this.closeState.runRequest(
+      () =>
+        [e.id, { ended_on: this.endedOn(), end_reason: this.endReason().trim() || null }] as const,
+      (request, key) => this.api.updateEngagement(request[0], request[1], key),
     );
     if (ok) {
       this.writeLog.announce(`Stint closed ${this.endedOn()}`);
       this.closing.set(null);
+      this.closeDraft.accept();
       await this.load(this.id());
     }
   }
@@ -523,20 +567,21 @@ export class PersonDetail {
     const minor = rupeesToMinor(this.amount());
     if (minor === null || !this.canPay()) return;
 
-    const result = await this.payState.run((key) =>
-      this.api.recordWagePayment(
-        {
-          person_id: this.id(),
-          occurred_on: this.paidOn(),
-          amount_minor: minor,
-          method: this.method(),
-          reference: this.reference().trim() || null,
-          observed_by: this.observedBy().trim() || null,
-          note: this.note().trim() || null,
-          recorded_by: this.session.provenance().recorded_by,
-        },
-        key,
-      ),
+    const result = await this.payState.runRequest(
+      () =>
+        [
+          {
+            person_id: this.id(),
+            occurred_on: this.paidOn(),
+            amount_minor: minor,
+            method: this.method(),
+            reference: this.reference().trim() || null,
+            observed_by: this.observedBy().trim() || null,
+            note: this.note().trim() || null,
+            recorded_by: this.session.provenance().recorded_by,
+          },
+        ] as const,
+      (request, key) => this.api.recordWagePayment(request[0], key),
     );
     if (result) {
       this.writeLog.announce(
@@ -545,6 +590,7 @@ export class PersonDetail {
       this.amount.set('');
       this.note.set('');
       this.reference.set('');
+      this.payDraft.accept();
       await this.load(this.id());
     }
   }

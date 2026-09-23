@@ -13,6 +13,7 @@ export interface DraftParticipant {
   baseline: () => string;
   dirty: () => boolean;
   pending: () => boolean;
+  unresolved?: () => boolean;
   discard: () => void;
   replaces: (url: string) => boolean;
 }
@@ -23,23 +24,37 @@ export interface DraftParticipant {
     class="rounded-xl border border-line bg-surface-raised p-6 text-content-primary shadow-xl space-y-4"
   >
     <h2 id="draft-title" class="text-lg font-semibold">
-      {{ data.pending ? 'Saving; wait for the result.' : 'Discard unsaved changes?' }}
+      {{
+        data.title ||
+          (data.unresolved
+            ? 'Resolve the save outcome before leaving.'
+            : data.pending
+              ? 'Saving; wait for the result.'
+              : 'Discard unsaved changes?')
+      }}
     </h2>
     <p id="draft-description">{{ data.description }}</p>
     <div class="flex flex-wrap gap-3">
       <button appButton variant="secondary" data-role="keep-editing" (click)="ref.close(false)">
-        Keep editing
+        {{ data.cancelLabel || 'Keep editing' }}
       </button>
       @if (!data.pending) {
         <button appButton intent="danger" data-role="discard-changes" (click)="ref.close(true)">
-          Discard changes
+          {{ data.confirmLabel || 'Discard changes' }}
         </button>
       }
     </div>
   </section>`,
 })
 export class DraftDialog {
-  readonly data = inject<{ pending: boolean; description: string }>(DIALOG_DATA);
+  readonly data = inject<{
+    pending: boolean;
+    unresolved: boolean;
+    description: string;
+    title?: string;
+    cancelLabel?: string;
+    confirmLabel?: string;
+  }>(DIALOG_DATA);
   readonly ref = inject(DialogRef<boolean>);
 }
 @Injectable({ providedIn: 'root' })
@@ -59,6 +74,22 @@ export class DraftRegistry {
   };
   constructor() {
     inject(DestroyRef).onDestroy(() => window.removeEventListener('beforeunload', this.unload));
+  }
+  async confirm(title: string, description: string, confirmLabel: string): Promise<boolean> {
+    if (this.transition) return false;
+    const ref = this.dialog.open<boolean>(DraftDialog, {
+      data: { title, description, confirmLabel, cancelLabel: 'Cancel', pending: false },
+      ariaModal: true,
+      ariaLabelledBy: 'draft-title',
+      ariaDescribedBy: 'draft-description',
+      autoFocus: '[data-role="keep-editing"]',
+      restoreFocus: true,
+      width: 'min(32rem, calc(100vw - 2rem))',
+    });
+    this.transition = firstValueFrom(ref.closed)
+      .then((value) => value === true)
+      .finally(() => (this.transition = null));
+    return this.transition;
   }
   register(p: DraftParticipant, destroy: DestroyRef) {
     if (this.participants.has(p.owner)) throw new Error('Duplicate draft owner: ' + p.owner);
@@ -94,7 +125,11 @@ export class DraftRegistry {
     if (!selected.length) return Promise.resolve(true);
     const pending = selected.some((p) => p.pending());
     const ref = this.dialog.open<boolean>(DraftDialog, {
-      data: { pending, description: selected.map((p) => p.description()).join('; ') },
+      data: {
+        pending,
+        unresolved: selected.some((p) => p.unresolved?.()),
+        description: selected.map((p) => p.description()).join('; '),
+      },
       ariaModal: true,
       ariaLabelledBy: 'draft-title',
       ariaDescribedBy: 'draft-description',

@@ -1,7 +1,17 @@
+import { precisionParts } from './precision-display';
+import { FormState } from './form-state';
+import { PrecisionDateControl, DateEntry, PrecisionDate, dateBlocker } from './precision-date';
 import { DraftRegistry } from './draft-registry';
 import { LocalPagination } from '../ui/local-pagination';
 import { SessionRequired } from './session-required';
-import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { RegistryApi } from './api';
@@ -18,7 +28,9 @@ import { FieldLabel, HelpText } from '../ui/text';
 @Component({
   selector: 'app-health-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LocalPagination,
+  imports: [
+    PrecisionDateControl,
+    LocalPagination,
     SessionRequired,
     FormsModule,
     RouterLink,
@@ -41,8 +53,6 @@ import { FieldLabel, HelpText } from '../ui/text';
       select,
       textarea {
         width: 100%;
-
-
 
         background: transparent;
       }
@@ -79,13 +89,28 @@ import { FieldLabel, HelpText } from '../ui/text';
         @for (line of recordLines(latest); track $index) {
           <p>{{ line }}</p>
         }
+        @for (entry of recordObjects(latest); track entry.key) {
+          <details>
+            <summary>{{ words(entry.key) }}</summary>
+            <pre class="whitespace-pre-wrap break-all text-xs">{{ entry.value }}</pre>
+          </details>
+        }
         <p appHelp>
           Your draft remains in the form below. Review both before applying your correction.
         </p>
         <button appButton variant="secondary" (click)="acceptRevision(latest)">
-          Use this revision for my correction
+          Discard draft and load latest
+        </button>
+        <button appButton variant="secondary" (click)="conflictRecord.set(null)">
+          Keep my draft
         </button>
       </section>
+    }
+    @if (writeState.uncertain()) {
+      <p role="status">
+        The save outcome is unknown. Fields are locked until the exact request is retried.
+      </p>
+      <button appButton [busy]="busy()" (click)="retryLast()">Retry same request</button>
     }
     @if (notice()) {
       <p role="status" appHelp>{{ notice() }}</p>
@@ -131,8 +156,12 @@ import { FieldLabel, HelpText } from '../ui/text';
             ><input appInput [(ngModel)]="assigneeFilter" placeholder="Filter by name"
           /></label>
         </div>
-        <app-local-pagination label="Health tasks" #pages0="localPagination" [total]="visibleTasks().length"/>
-          @for (t of pages0.records(visibleTasks()); track t.id) {
+        <app-local-pagination
+          label="Health tasks"
+          #pages0="localPagination"
+          [total]="visibleTasks().length"
+        />
+        @for (t of pages0.records(visibleTasks()); track t.id) {
           <div class="border-t border-line pt-3 space-y-2">
             <p>
               <a [routerLink]="['/animals', t.animal_id]">{{ t.animal_id }}</a> ·
@@ -143,11 +172,7 @@ import { FieldLabel, HelpText } from '../ui/text';
             }
             <div class="flex flex-wrap gap-2">
               <button appButton variant="secondary" (click)="complete(t)">Record completion</button
-              ><button
-                appButton
-                variant="secondary"
-                (click)="openAction(t)"
-              >
+              ><button appButton variant="secondary" (click)="openAction(t)">
                 Defer / miss / cancel
               </button>
             </div>
@@ -158,32 +183,31 @@ import { FieldLabel, HelpText } from '../ui/text';
         }
         @if (actionTask && session.ready()) {
           <form id="health-action" class="space-y-3" (ngSubmit)="saveAction()">
-            <fieldset [disabled]="busy()" class="space-y-3">
-            <p>{{ actionTask.instructions }}</p>
-            <label
-              >Action<select appInput name="action" [(ngModel)]="action">
-                <option value="defer">Defer</option>
-                <option value="miss">Missed</option>
-                <option value="cancel">Cancel</option>
-              </select></label
-            >
-            @if (action === 'defer') {
+            <fieldset [disabled]="locked()" class="space-y-3">
+              <p>{{ actionTask.instructions }}</p>
               <label
-                >Replacement date<input
-                  appInput
-                  type="date"
-                  name="newDue"
-                  [(ngModel)]="newDue"
-                  required
+                >Action<select appInput name="action" [(ngModel)]="action">
+                  <option value="defer">Defer</option>
+                  <option value="miss">Missed</option>
+                  <option value="cancel">Cancel</option>
+                </select></label
+              >
+              @if (action === 'defer') {
+                <label
+                  >Replacement date<input
+                    appInput
+                    type="date"
+                    name="newDue"
+                    [(ngModel)]="newDue"
+                    required
+                /></label>
+              }
+              <label
+                >Reason<input appInput name="actionReason" [(ngModel)]="actionReason" required
               /></label>
-            }
-            <label
-              >Reason<input
-                appInput
-                name="actionReason"
-                [(ngModel)]="actionReason"
-                required /></label
-            ></fieldset><button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">Save task action</button
+            </fieldset>
+            <button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">
+              Save task action</button
             ><button appButton variant="secondary" type="button" (click)="closeDrafts()">
               Back
             </button>
@@ -191,7 +215,11 @@ import { FieldLabel, HelpText } from '../ui/text';
         }
         <details>
           <summary>Open cases ({{ b.open_cases.length }})</summary>
-          <app-local-pagination label="Open health cases" #pages1="localPagination" [total]="b.open_cases.length"/>
+          <app-local-pagination
+            label="Open health cases"
+            #pages1="localPagination"
+            [total]="b.open_cases.length"
+          />
           @for (c of pages1.records(b.open_cases); track c.id) {
             <p>
               {{ label(c) }}
@@ -203,7 +231,11 @@ import { FieldLabel, HelpText } from '../ui/text';
           <summary>
             Withdrawal instructions requiring attention ({{ b.withdrawals.length }})
           </summary>
-          <app-local-pagination label="Withdrawal instructions" #pages2="localPagination" [total]="b.withdrawals.length"/>
+          <app-local-pagination
+            label="Withdrawal instructions"
+            #pages2="localPagination"
+            [total]="b.withdrawals.length"
+          />
           @for (w of pages2.records(b.withdrawals); track $index) {
             <p>
               {{ w.animal_id }} · {{ w.product_name }} · {{ w.target }} · {{ words(w.status) }}
@@ -229,8 +261,12 @@ import { FieldLabel, HelpText } from '../ui/text';
       ><button appButton variant="secondary" (click)="create(entity)">
         Add {{ words(entity) }}
       </button>
-      <app-local-pagination label="Health records" #pages3="localPagination" [total]="visibleRecords().length"/>
-          @for (r of pages3.rows(visibleRecords()); track r.id) {
+      <app-local-pagination
+        label="Health records"
+        #pages3="localPagination"
+        [total]="visibleRecords().length"
+      />
+      @for (r of pages3.rows(visibleRecords()); track r.id) {
         <article class="border-t border-line py-3 space-y-2">
           <p class="font-medium">{{ label(r) }}</p>
           <p appHelp>
@@ -292,7 +328,7 @@ import { FieldLabel, HelpText } from '../ui/text';
         <button appButton variant="secondary" (click)="revisions.set([])">Close history</button>
       </section>
     }
-    @if (editing && !session.ready()) {
+    @if (editing && !savedView && !session.ready()) {
       <section appCard>
         <h3>Saved record</h3>
         @for (line of recordLines(editing); track $index) {
@@ -300,169 +336,232 @@ import { FieldLabel, HelpText } from '../ui/text';
         }
       </section>
     }
-    @if ((editorOpen || roundOpen || actionTask) && !session.ready()) {
+    @if (((editorOpen && !savedView) || roundOpen || actionTask) && !session.ready()) {
       <app-session-required what="health records" />
     }
-    @if (editorOpen && session.ready()) {
+    @if (editorOpen && (session.ready() || savedView)) {
       <section appCard class="space-y-4" id="health-editor">
         <h3 class="font-medium">
-          {{ editing ? 'Review / correct' : 'Record' }} {{ words(editEntity) }}
+          {{ savedView ? 'Saved record' : editing ? 'Correct' : 'Record' }} {{ words(editEntity) }}
         </h3>
-        <p appHelp>
-          The recorder and source come from your recording session. Enter the actual vet or
-          administrator separately.
-        </p>
-        <form class="space-y-4" (ngSubmit)="save()">
-          <fieldset [disabled]="busy()" class="space-y-4">
-          <div class="rows">
-            @for (f of fields[editEntity]; track f.key) {
-              <label
-                ><span appFieldLabel>{{ f.label }}</span>
-                @if (f.reference) {
-                  <select appInput
-                    [name]="f.key"
-                    [attr.name]="f.key"
-                    [(ngModel)]="form[f.key]"
-                    [required]="!!f.required"
-                    (change)="referenceChanged(f.key)"
-                  >
-                    <option value="">Unknown / not linked</option>
-                    @for (r of options(f.reference); track r.id) {
-                      <option [value]="r.id">{{ label(r) }}</option>
-                    }
-                  </select>
-                } @else if (f.type === 'select') {
-                  <select appInput
-                    [name]="f.key"
-                    [attr.name]="f.key"
-                    [(ngModel)]="form[f.key]"
-                    [required]="!!f.required"
-                  >
-                    <option value="">Choose</option>
-                    @for (v of f.options; track v) {
-                      <option [value]="v">{{ words(v) }}</option>
-                    }
-                  </select>
-                } @else if (f.type === 'textarea') {
-                  <textarea appInput
-                    [name]="f.key"
-                    [attr.name]="f.key"
-                    [(ngModel)]="form[f.key]"
-                    [required]="!!f.required"
-                  ></textarea>
-                } @else if (f.type === 'checkbox') {
-                  <input
-                    type="checkbox"
-                    [name]="f.key"
-                    [attr.name]="f.key"
-                    [(ngModel)]="form[f.key]"
-                  />
-                } @else {
-                  <input
-                    appInput
-                    [type]="f.type || 'text'"
-                    [name]="f.key"
-                    [attr.name]="f.key"
-                    [(ngModel)]="form[f.key]"
-                    [required]="!!f.required"
-                    step="any"
-                  />
-                }
-              </label>
-            }
-          </div>
-          @if (editEntity === 'administrations') {
-            @for (target of targets; track target) {
-              <fieldset class="space-y-2">
-                <legend class="font-medium">{{ target }} withdrawal instruction</legend>
-                <label
-                  >Recorded state<select appInput
-                    [name]="target + 'State'"
-                    [(ngModel)]="form[target + '_withdrawal'].state"
-                  >
-                    <option value="unknown">Unknown</option>
-                    <option value="none">Explicitly none per instruction</option>
-                    <option value="specified">Specified by veterinarian</option>
-                  </select></label
-                >
-                @if (form[target + '_withdrawal'].state !== 'unknown') {
-                  <label
-                    >Instruction<input
-                      appInput
-                      [name]="target + 'Instruction'"
-                      [(ngModel)]="form[target + '_withdrawal'].instruction"
-                      required /></label
-                  ><label
-                    >Issuer<input
-                      appInput
-                      [name]="target + 'Issuer'"
-                      [(ngModel)]="form[target + '_withdrawal'].issuer"
-                      required
-                  /></label>
-                  @if (form[target + '_withdrawal'].state === 'specified') {
+        @if (!savedView) {
+          <p appHelp>
+            The recorder and source come from your recording session. Enter the actual vet or
+            administrator separately.
+          </p>
+        }
+        @if (editing) {
+          <p appHelp>
+            Saved · revision {{ editing.revision }} · recorded by {{ editing.recorded_by }} ·
+            {{ editing['source_form'] }} · {{ editing['source_ref'] || 'no source reference' }}
+          </p>
+        }
+        @if (savedView) {
+          @for (line of recordLines(editing!); track $index) {
+            <p>{{ line }}</p>
+          }
+          @for (entry of recordObjects(editing!); track entry.key) {
+            <details>
+              <summary>{{ words(entry.key) }}</summary>
+              <pre class="whitespace-pre-wrap break-all text-xs">{{ entry.value }}</pre>
+            </details>
+          }
+          <button appButton (click)="beginCorrection()">Correct record</button>
+          <button appButton variant="secondary" (click)="closeEditor()">Close</button>
+        } @else {
+          <p appHelp>
+            {{ editing ? 'This correction will be recorded by' : 'This entry will be recorded by' }}
+            {{ session.recordedBy() }} · {{ session.sourceForm() }}
+          </p>
+          <form class="space-y-4" (ngSubmit)="save()">
+            <fieldset [disabled]="locked()" class="space-y-4">
+              <div class="rows">
+                @for (f of fields[editEntity]; track f.key) {
+                  @if (f.key === 'date_precision') {
+                    <app-precision-date
+                      label="Record date"
+                      [initialValue]="initialDate"
+                      [resetKey]="dateGeneration"
+                      (changed)="dateChanged($event)"
+                    />
+                  } @else if (f.key !== 'occurred_on' && f.key !== 'occurred_time') {
                     <label
-                      >Exact end timestamp with timezone, if given<input
-                        appInput
-                        [name]="target + 'Until'"
-                        [(ngModel)]="form[target + '_withdrawal'].until"
-                        placeholder="YYYY-MM-DDTHH:MM:SS+05:00"
-                    /></label>
-                    <p appHelp>
-                      Leave blank if the end needs clarification. The app does not invent release
-                      times.
-                    </p>
+                      ><span appFieldLabel>{{ f.label }}</span>
+                      @if (f.reference) {
+                        <select
+                          appInput
+                          [name]="f.key"
+                          [attr.name]="f.key"
+                          [(ngModel)]="form[f.key]"
+                          [required]="!!f.required"
+                          (change)="referenceChanged(f.key)"
+                        >
+                          <option value="">Unknown / not linked</option>
+                          @for (r of options(f.reference); track r.id) {
+                            <option [value]="r.id">{{ label(r) }}</option>
+                          }
+                        </select>
+                      } @else if (f.type === 'select') {
+                        <select
+                          appInput
+                          [name]="f.key"
+                          [attr.name]="f.key"
+                          [(ngModel)]="form[f.key]"
+                          [required]="!!f.required"
+                        >
+                          <option value="">Choose</option>
+                          @for (v of f.options; track v) {
+                            <option [value]="v">{{ words(v) }}</option>
+                          }
+                        </select>
+                      } @else if (f.type === 'textarea') {
+                        <textarea
+                          appInput
+                          [name]="f.key"
+                          [attr.name]="f.key"
+                          [(ngModel)]="form[f.key]"
+                          [required]="!!f.required"
+                        ></textarea>
+                      } @else if (f.type === 'checkbox') {
+                        <input
+                          type="checkbox"
+                          [name]="f.key"
+                          [attr.name]="f.key"
+                          [(ngModel)]="form[f.key]"
+                        />
+                      } @else {
+                        <input
+                          appInput
+                          [type]="f.type || 'text'"
+                          [name]="f.key"
+                          [attr.name]="f.key"
+                          [(ngModel)]="form[f.key]"
+                          [required]="!!f.required"
+                          step="any"
+                        />
+                      }
+                    </label>
                   }
                 }
-              </fieldset>
-            }
-          }
-          <label
-            ><span appFieldLabel>Source reference / prescription number</span
-            ><input appInput name="source_ref" [(ngModel)]="form.source_ref"
-          /></label>
-          <label
-            ><span appFieldLabel
-              >Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)</span
-            ><input
-              type="file"
-              accept="image/jpeg,image/png,application/pdf"
-              (change)="upload($event)"
-              [disabled]="busy()" [attr.aria-busy]="busy() || null"
-          /></label>
-          @for (id of form.attachment_ids || []; track id) {
-            <p>
-              <a [href]="'/api/registry/health/attachments/' + id" target="_blank" rel="noopener"
-                >Download attached document</a
-              >
-            </p>
-          }
-          @if (editing) {
-            <label
-              ><span appFieldLabel>Reason for correction / status change</span
-              ><input appInput name="reason" [(ngModel)]="form.correction_reason" required
-            /></label>
-          }
-          </fieldset>
-          <div class="flex flex-wrap gap-2">
-            <button appButton type="submit" [disabled]="busy()" [busy]="busy()">
-              {{ busy() ? 'Saving…' : 'Save record' }}</button
-            ><button appButton variant="secondary" type="button" (click)="closeEditor()">
-              Close
-            </button>
-            @if (editing && editEntity !== 'tasks') {
+              </div>
+              @if (editEntity === 'administrations') {
+                @for (target of targets; track target) {
+                  <fieldset class="space-y-2">
+                    <legend class="font-medium">{{ target }} withdrawal instruction</legend>
+                    <label
+                      >Recorded state<select
+                        appInput
+                        [name]="target + 'State'"
+                        [(ngModel)]="form[target + '_withdrawal'].state"
+                      >
+                        <option value="unknown">Unknown</option>
+                        <option value="none">Explicitly none per instruction</option>
+                        <option value="specified">Specified by veterinarian</option>
+                      </select></label
+                    >
+                    @if (form[target + '_withdrawal'].state !== 'unknown') {
+                      <label
+                        >Instruction<input
+                          appInput
+                          [name]="target + 'Instruction'"
+                          [(ngModel)]="form[target + '_withdrawal'].instruction"
+                          required /></label
+                      ><label
+                        >Issuer<input
+                          appInput
+                          [name]="target + 'Issuer'"
+                          [(ngModel)]="form[target + '_withdrawal'].issuer"
+                          required
+                      /></label>
+                      @if (form[target + '_withdrawal'].state === 'specified') {
+                        <label
+                          >Exact end timestamp with timezone, if given<input
+                            appInput
+                            [name]="target + 'Until'"
+                            [(ngModel)]="form[target + '_withdrawal'].until"
+                            placeholder="YYYY-MM-DDTHH:MM:SS+05:00"
+                        /></label>
+                        <p appHelp>
+                          Leave blank if the end needs clarification. The app does not invent
+                          release times.
+                        </p>
+                      }
+                    }
+                  </fieldset>
+                }
+              }
+              <label
+                ><span appFieldLabel>Source reference / prescription number</span
+                ><input appInput name="source_ref" [(ngModel)]="form.source_ref"
+              /></label>
+              <label
+                ><span appFieldLabel
+                  >Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)</span
+                ><input
+                  type="file"
+                  accept="image/jpeg,image/png,application/pdf"
+                  (change)="upload($event)"
+                  [disabled]="busy()"
+                  [attr.aria-busy]="busy() || null"
+              /></label>
+              @if (uploadStatus) {
+                <p role="status" appHelp>{{ uploadStatus }}</p>
+              }
+              @if (uploadStatus.startsWith('Upload failed') && !writeState.uncertain()) {
+                <button appButton variant="secondary" type="button" (click)="uploadSelected()">
+                  Retry failed upload
+                </button>
+              }
+              @for (id of form.attachment_ids || []; track id) {
+                <p>
+                  <a
+                    [href]="'/api/registry/health/attachments/' + id"
+                    target="_blank"
+                    rel="noopener"
+                    >Download attached document</a
+                  >
+                </p>
+              }
+              @if (editing) {
+                <label
+                  ><span appFieldLabel>Reason for correction / status change</span
+                  ><input
+                    appInput
+                    name="correction_reason"
+                    [(ngModel)]="form.correction_reason"
+                    required
+                /></label>
+              }
+            </fieldset>
+            <div class="flex flex-wrap gap-2">
               <button
                 appButton
-                variant="secondary"
-                type="button"
-                [disabled]="busy()" [attr.aria-busy]="busy() || null"
-                intent="danger"
-                (click)="voidRecord()"
+                type="submit"
+                [disabled]="
+                  busy() || !session.ready() || (!meaningfulChange() && !writeState.uncertain())
+                "
+                [busy]="busy()"
               >
-                Void record with reason
+                {{ busy() ? 'Saving…' : 'Save record' }}</button
+              ><button appButton variant="secondary" type="button" (click)="closeEditor()">
+                Close
               </button>
-            }
-          </div>
-        </form>
+              @if (editing && editEntity !== 'tasks') {
+                <button
+                  appButton
+                  variant="secondary"
+                  type="button"
+                  [disabled]="busy()"
+                  [attr.aria-busy]="busy() || null"
+                  intent="danger"
+                  (click)="voidRecord()"
+                >
+                  Void record with reason
+                </button>
+              }
+            </div>
+          </form>
+        }
       </section>
     }
     @if (roundOpen && session.ready()) {
@@ -470,87 +569,95 @@ import { FieldLabel, HelpText } from '../ui/text';
         <h3 class="font-medium">Vaccination round</h3>
         <p appHelp>Confirm each animal separately. This batch saves all rows together.</p>
         <form id="health-round" class="space-y-3" (ngSubmit)="saveRound()">
-          <fieldset [disabled]="busy()" class="space-y-3">
-          <div class="rows">
-            <label
-              >Visit<select appInput name="roundVisit" [(ngModel)]="round.visit_id">
-                <option value="">No visit linked</option>
-                @for (v of catalog()['visits'] || []; track v.id) {
-                  <option [value]="v.id">{{ label(v) }}</option>
-                }
-              </select></label
-            ><label
-              >Date<input
-                appInput
-                type="date"
-                name="roundDate"
-                [(ngModel)]="round.occurred_on"
-                required /></label
-            ><label
-              >Vaccine name<input
-                appInput
-                name="roundProduct"
-                [(ngModel)]="round.product_name"
-                required /></label
-            ><label>Batch<input appInput name="roundBatch" [(ngModel)]="round.batch" /></label
-            ><label
-              >Amount<input
-                appInput
-                type="number"
-                step="any"
-                name="roundAmount"
-                [(ngModel)]="round.amount"
-                required /></label
-            ><label>Unit<input appInput name="roundUnit" [(ngModel)]="round.unit" required /></label
-            ><label
-              >Route<input appInput name="roundRoute" [(ngModel)]="round.route" required /></label
-            ><label
-              >Administered by<input
-                appInput
-                name="roundBy"
-                [(ngModel)]="round.administrator"
-                required
-            /></label>
-          </div>
-          @for (a of animals(); track a.id) {
-            <div class="rows border-t border-line py-2">
+          <fieldset [disabled]="locked()" class="space-y-3">
+            <div class="rows">
               <label
-                >{{ a.id }} · {{ a.name
-                }}<select appInput [name]="'round-' + a.id" [(ngModel)]="roundRows[a.id].disposition">
-                  <option value="">Not selected</option>
-                  <option value="given">Given</option>
-                  <option value="deferred">Deferred</option>
-                  <option value="not_given">Not given</option>
+                >Visit<select appInput name="roundVisit" [(ngModel)]="round.visit_id">
+                  <option value="">No visit linked</option>
+                  @for (v of catalog()['visits'] || []; track v.id) {
+                    <option [value]="v.id">{{ label(v) }}</option>
+                  }
                 </select></label
-              >
-              @if (
-                roundRows[a.id].disposition === 'deferred' ||
-                roundRows[a.id].disposition === 'not_given'
-              ) {
+              ><label
+                >Date<input
+                  appInput
+                  type="date"
+                  name="roundDate"
+                  [(ngModel)]="round.occurred_on"
+                  required /></label
+              ><label
+                >Vaccine name<input
+                  appInput
+                  name="roundProduct"
+                  [(ngModel)]="round.product_name"
+                  required /></label
+              ><label>Batch<input appInput name="roundBatch" [(ngModel)]="round.batch" /></label
+              ><label
+                >Amount<input
+                  appInput
+                  type="number"
+                  step="any"
+                  name="roundAmount"
+                  [(ngModel)]="round.amount"
+                  required /></label
+              ><label
+                >Unit<input appInput name="roundUnit" [(ngModel)]="round.unit" required /></label
+              ><label
+                >Route<input appInput name="roundRoute" [(ngModel)]="round.route" required /></label
+              ><label
+                >Administered by<input
+                  appInput
+                  name="roundBy"
+                  [(ngModel)]="round.administrator"
+                  required
+              /></label>
+            </div>
+            @for (a of animals(); track a.id) {
+              <div class="rows border-t border-line py-2">
                 <label
-                  >Reason<input
+                  >{{ a.id }} · {{ a.name
+                  }}<select
                     appInput
-                    [name]="'reason-' + a.id"
-                    [(ngModel)]="roundRows[a.id].reason"
-                    required
-                /></label>
-                @if (roundRows[a.id].disposition === 'deferred') {
+                    [name]="'round-' + a.id"
+                    [(ngModel)]="roundRows[a.id].disposition"
+                  >
+                    <option value="">Not selected</option>
+                    <option value="given">Given</option>
+                    <option value="deferred">Deferred</option>
+                    <option value="not_given">Not given</option>
+                  </select></label
+                >
+                @if (
+                  roundRows[a.id].disposition === 'deferred' ||
+                  roundRows[a.id].disposition === 'not_given'
+                ) {
                   <label
-                    >New due date<input
+                    >Reason<input
                       appInput
-                      type="date"
-                      [name]="'due-' + a.id"
-                      [(ngModel)]="roundRows[a.id].due_on"
+                      [name]="'reason-' + a.id"
+                      [(ngModel)]="roundRows[a.id].reason"
                       required
                   /></label>
+                  @if (roundRows[a.id].disposition === 'deferred') {
+                    <label
+                      >New due date<input
+                        appInput
+                        type="date"
+                        [name]="'due-' + a.id"
+                        [(ngModel)]="roundRows[a.id].due_on"
+                        required
+                    /></label>
+                  }
                 }
-              }
-            </div>
-          }
-          <label
-            ><input type="checkbox" name="confirmed" [(ngModel)]="roundConfirmed" required /> I
-            checked the selected animals and their individual outcomes.</label>
-          </fieldset><button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">Save vaccination round</button
+              </div>
+            }
+            <label
+              ><input type="checkbox" name="confirmed" [(ngModel)]="roundConfirmed" required /> I
+              checked the selected animals and their individual outcomes.</label
+            >
+          </fieldset>
+          <button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">
+            Save vaccination round</button
           ><button appButton variant="secondary" type="button" (click)="closeDrafts()">
             Close round
           </button>
@@ -595,27 +702,116 @@ export class HealthPage {
   protected roundRows: Record<string, any> = {};
   protected roundConfirmed = false;
   private draftBaseline = '';
-  private key = '';
-  private actionKey = '';
-  private roundKey = '';
+  protected savedView = false;
+  protected dateGeneration = 0;
+  protected initialDate: PrecisionDate | null = null;
+  protected dateEntry: DateEntry = { status: 'empty' };
+  protected readonly writeState = new FormState<any>();
+  protected uploadStatus = '';
+  private pendingAttachment: File | null = null;
+  private retryAction: (() => Promise<void>) | null = null;
+  protected locked() {
+    return this.busy() || this.writeState.uncertain();
+  }
+  private setDate() {
+    if (this.form.occurred_on) this.form.occurred_time ??= null;
+    this.initialDate = this.form.occurred_on
+      ? {
+          occurred_on: this.form.occurred_on,
+          date_precision: this.form.date_precision,
+          occurred_time: this.form.occurred_time ?? null,
+        }
+      : null;
+    this.dateEntry = this.initialDate
+      ? { status: 'complete', value: this.initialDate, reading: '' }
+      : { status: 'empty' };
+    this.dateGeneration++;
+  }
+  protected dateChanged(entry: DateEntry) {
+    this.dateEntry = entry;
+    if (entry.status === 'complete') Object.assign(this.form, entry.value);
+    else if (entry.status === 'empty') {
+      delete this.form.occurred_on;
+      delete this.form.date_precision;
+      delete this.form.occurred_time;
+    }
+  }
+  protected beginCorrection() {
+    if (!this.locked()) {
+      this.savedView = false;
+      setTimeout(() => this.focusEditor());
+    }
+  }
+  protected meaningfulChange() {
+    if (!this.editing) return this.hasUnsavedChanges();
+    const payload = (value: any) =>
+      JSON.stringify(
+        Object.fromEntries(
+          Object.entries(value)
+            .filter(
+              ([key]) =>
+                ![
+                  'correction_reason',
+                  'recorded_by',
+                  'source_form',
+                  'recorded_at',
+                  'updated_at',
+                  'revision',
+                ].includes(key),
+            )
+            .sort(([a], [b]) => a.localeCompare(b)),
+        ),
+      );
+    return (
+      payload({ ...this.form, occurred_time: this.form.occurred_time ?? null }) !==
+      payload({ ...this.editing, occurred_time: this.editing['occurred_time'] ?? null })
+    );
+  }
+  private async write<T>(path: string, body: unknown): Promise<T> {
+    const value = await this.writeState.runRequest(
+      () => ({ path, body }),
+      (request, key) => this.api.healthWrite<T>(request.path, request.body, key),
+    );
+    if (value === null) throw this.writeState.error();
+    return value as T;
+  }
   protected label = healthLabel;
   protected words = healthWords;
   private readonly drafts = inject(DraftRegistry);
+  private readonly changeDetector = inject(ChangeDetectorRef);
   private loadGeneration = 0;
   private editorOrigin: HTMLElement | null = null;
   constructor() {
-    this.drafts.register({
-      owner: 'health', context: () => this.editEntity + '/' + (this.editing?.id ?? 'new'),
-      description: () => 'Health · ' + this.editEntity + (this.form.animal_id ? ' · ' + this.form.animal_id : ''),
-      snapshot: () => JSON.stringify([this.form, this.round, this.roundRows, this.roundConfirmed, this.action, this.actionReason, this.newDue]),
-      baseline: () => this.draftBaseline,
-      dirty: () => this.hasUnsavedChanges(), pending: () => this.busy(),
-      discard: () => this.resetDrafts(),
-      replaces: url => new URL(url, 'http://local').pathname !== '/animals/health',
-    }, inject(DestroyRef));
+    this.drafts.register(
+      {
+        owner: 'health',
+        context: () => this.editEntity + '/' + (this.editing?.id ?? 'new'),
+        description: () =>
+          'Health · ' + this.editEntity + (this.form.animal_id ? ' · ' + this.form.animal_id : ''),
+        snapshot: () =>
+          JSON.stringify([
+            this.form,
+            this.round,
+            this.roundRows,
+            this.roundConfirmed,
+            this.action,
+            this.actionReason,
+            this.newDue,
+          ]),
+        baseline: () => this.draftBaseline,
+        dirty: () => this.hasUnsavedChanges(),
+        pending: () => this.locked(),
+        unresolved: () => this.writeState.uncertain(),
+        discard: () => this.resetDrafts(),
+        replaces: (url) => new URL(url, 'http://local').pathname !== '/animals/health',
+      },
+      inject(DestroyRef),
+    );
     void this.load();
   }
-  ngDoCheck() { this.drafts.syncUnload(); }
+  ngDoCheck() {
+    this.drafts.syncUnload();
+  }
   protected async load() {
     const generation = ++this.loadGeneration;
     try {
@@ -673,11 +869,12 @@ export class HealthPage {
     );
   }
   protected async create(entity: string, initial: Record<string, any> = {}) {
-    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
+    if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
     this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = entity;
     this.editing = null;
+    this.savedView = false;
     this.form = {
       ...initial,
       animal_id: initial['animal_id'] ?? this.animalFilter,
@@ -685,66 +882,97 @@ export class HealthPage {
       milk_withdrawal: { state: 'unknown' },
       meat_withdrawal: { state: 'unknown' },
     };
+    this.setDate();
     this.draftBaseline = JSON.stringify(this.form);
     this.editorOpen = true;
-    this.key = '';
+    this.changeDetector.markForCheck();
+
     this.error.set('');
-    setTimeout(() =>
-      this.focusEditor(),
-    );
+    setTimeout(() => this.focusEditor());
     return true;
   }
   protected async edit(r: HealthRecord) {
-    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
+    if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
     this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = r.entity;
-    this.editing = r;
+    this.editing = structuredClone(r);
+    this.savedView = true;
     this.form = structuredClone(r);
     this.form.correction_reason = '';
+    this.setDate();
     this.draftBaseline = JSON.stringify(this.form);
     this.editorOpen = true;
-    this.key = '';
-    setTimeout(() =>
-      this.focusEditor(),
-    );
+    this.changeDetector.markForCheck();
+
+    setTimeout(() => this.focusEditor());
   }
   hasUnsavedChanges() {
     return (
-      (this.editorOpen && JSON.stringify(this.form) !== this.draftBaseline) ||
+      this.pendingAttachment !== null ||
+      (this.editorOpen &&
+        (JSON.stringify(this.form) !== this.draftBaseline ||
+          this.dateEntry.status === 'incomplete')) ||
       (this.roundOpen &&
-        (this.roundConfirmed || Object.keys(this.round).length > 0 ||
-          Object.values(this.roundRows).some((r) => r.disposition))) ||
+        (this.roundConfirmed ||
+          Object.keys(this.round).length > 0 ||
+          Object.values(this.roundRows).some((r) =>
+            Object.values(r).some((value) => value !== '' && value != null),
+          ))) ||
       !!(this.actionTask && (this.action !== 'defer' || this.actionReason || this.newDue))
     );
   }
-  canLeave() { return this.drafts.request(p => p.owner === 'health'); }
+  canLeave() {
+    return this.drafts.request((p) => p.owner === 'health');
+  }
   private resetDrafts() {
-    this.editorOpen = false; this.actionTask = null; this.roundOpen = false;
-    this.form = {}; this.round = {}; this.roundConfirmed = false;
-    this.roundRows = Object.fromEntries(this.animals().map(a => [a.id, {disposition: ''}]));
-    this.action = 'defer'; this.actionReason = ''; this.newDue = '';
-    this.key = ''; this.actionKey = ''; this.roundKey = '';
+    this.editorOpen = false;
+    this.actionTask = null;
+    this.roundOpen = false;
+    this.pendingAttachment = null;
+    this.uploadStatus = '';
+    this.form = {};
+    this.dateEntry = { status: 'empty' };
+    this.savedView = false;
+    this.round = {};
+    this.roundConfirmed = false;
+    this.roundRows = Object.fromEntries(this.animals().map((a) => [a.id, { disposition: '' }]));
+    this.action = 'defer';
+    this.actionReason = '';
+    this.newDue = '';
+
+    this.changeDetector.markForCheck();
   }
   private focusEditor() {
     const editor = document.getElementById('health-editor');
-    editor?.scrollIntoView?.({block: 'nearest'});
-    editor?.querySelector<HTMLElement>('input, select, textarea')?.focus();
+    editor?.scrollIntoView?.({ block: 'nearest' });
+    const target =
+      editor?.querySelector<HTMLElement>('input, select, textarea') ??
+      editor?.querySelector<HTMLElement>('h3');
+    if (target) {
+      if (target.tagName === 'H3') target.tabIndex = -1;
+      target.focus();
+    }
   }
   protected async closeDrafts() {
-    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
-    this.resetDrafts(); this.editorOrigin?.focus();
+    if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts();
+    this.editorOrigin?.focus();
   }
-  protected closeEditor() { return this.closeDrafts(); }
+  protected closeEditor() {
+    return this.closeDrafts();
+  }
   protected async openRound() {
-    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
-    this.resetDrafts(); this.editorOrigin = document.activeElement as HTMLElement;
+    if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts();
+    this.editorOrigin = document.activeElement as HTMLElement;
     this.roundOpen = true;
     setTimeout(() => document.querySelector<HTMLElement>('#health-round select')?.focus());
   }
   protected async openAction(t: HealthRecord) {
-    if (this.drafts.hasChanges(p => p.owner === 'health') && !(await this.canLeave())) return;
-    this.resetDrafts(); this.editorOrigin = document.activeElement as HTMLElement;
+    if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
+    this.resetDrafts();
+    this.editorOrigin = document.activeElement as HTMLElement;
     this.actionTask = t;
     setTimeout(() => document.querySelector<HTMLElement>('#health-action select')?.focus());
   }
@@ -764,36 +992,58 @@ export class HealthPage {
     }
     return { recorded_by: this.session.recordedBy(), source_form: this.session.sourceForm() };
   }
+  protected retryLast() {
+    if (this.retryAction) return this.run(this.retryAction);
+    return Promise.resolve();
+  }
   private async run(fn: () => Promise<void>) {
     if (this.busy()) return;
     this.busy.set(true);
     this.error.set('');
     try {
-      await fn();
+      const action = this.writeState.uncertain() && this.retryAction ? this.retryAction : fn;
+      this.retryAction = action;
+      await action();
+      this.retryAction = null;
       this.shell.refresh();
     } catch (e) {
       this.error.set(String(e));
+      if (this.uploadStatus.startsWith('Uploading'))
+        this.uploadStatus = 'Upload failed. The attachment has not been linked to this record.';
+      setTimeout(() => document.querySelector<HTMLElement>('[role=alert]')?.focus());
     } finally {
       this.busy.set(false);
     }
   }
   protected async save() {
+    if (!this.writeState.uncertain()) {
+      if (this.savedView || !this.meaningfulChange()) return;
+      if (this.fields[this.editEntity].some((f) => f.key === 'date_precision')) {
+        const error = dateBlocker(this.dateEntry, { label: 'record date', required: true });
+        if (error) {
+          this.error.set(error);
+          this.focusEditor();
+          return;
+        }
+      }
+    }
     await this.run(async () => {
       const b = { ...this.form, ...this.provenance(), expected_revision: this.editing?.revision };
       if (this.editEntity === 'costs' && (b as any).amount_minor === '')
         (b as any).amount_minor = null;
       if (this.editEntity === 'costs' && (b as any).amount_minor === undefined)
         (b as any).amount_minor = null;
-      this.key ||= crypto.randomUUID();
-      const r = await this.api.healthWrite<HealthRecord>(
+
+      const r = await this.write<HealthRecord>(
         'health/' + this.editEntity + (this.editing ? '/' + this.editing.id + '/revise' : ''),
         b,
-        this.key,
       );
-      this.key = '';
+
       this.editing = r;
       this.form = structuredClone(r);
       this.form.correction_reason = '';
+      this.savedView = true;
+      this.setDate();
       this.draftBaseline = JSON.stringify(this.form);
       this.notice.set('Record saved.');
       await this.load();
@@ -803,16 +1053,23 @@ export class HealthPage {
     await this.run(async () => {
       if (!this.editing) return;
       if (!this.form.correction_reason?.trim()) throw new Error('Enter the reason before voiding.');
-      if (!confirm('Void this record? Its history will remain available.')) return;
-      await this.api.healthWrite(
-        'health/' + this.editEntity + '/' + this.editing.id + '/void',
-        {
-          ...this.provenance(),
-          reason: this.form.correction_reason,
-          expected_revision: this.editing.revision,
-        },
-        crypto.randomUUID(),
-      );
+      if (
+        !this.writeState.uncertain() &&
+        !(await this.drafts.confirm(
+          'Void this record?',
+          this.label(this.editing) +
+            ' · ' +
+            (this.editing.occurred_on ?? this.editing.due_on ?? '') +
+            '. Its history will remain available.',
+          'Void record',
+        ))
+      )
+        return;
+      await this.write('health/' + this.editEntity + '/' + this.editing.id + '/void', {
+        ...this.provenance(),
+        reason: this.form.correction_reason,
+        expected_revision: this.editing.revision,
+      });
       this.editorOpen = false;
       this.notice.set('Record voided; audit history retained.');
       await this.load();
@@ -832,45 +1089,53 @@ export class HealthPage {
   protected async saveAction() {
     await this.run(async () => {
       if (!this.actionTask) return;
-      this.actionKey ||= crypto.randomUUID();
-      await this.api.healthWrite(
-        'health/tasks/' + this.actionTask.id + '/actions',
-        {
-          ...this.provenance(),
-          expected_revision: this.actionTask.revision,
-          action: this.action,
-          reason: this.actionReason,
-          due_on: this.newDue,
-        },
-        this.actionKey,
-      );
-      this.actionKey = '';
+
+      await this.write('health/tasks/' + this.actionTask.id + '/actions', {
+        ...this.provenance(),
+        expected_revision: this.actionTask.revision,
+        action: this.action,
+        reason: this.actionReason,
+        due_on: this.newDue,
+      });
+
       this.actionTask = null;
       await this.load();
     });
   }
+  protected recordObjects(r: HealthRecord) {
+    return Object.entries(r)
+      .filter(([, value]) => value !== null && typeof value === 'object')
+      .map(([key, value]) => ({ key, value: JSON.stringify(value, null, 2) }));
+  }
   protected recordLines(r: HealthRecord) {
     return Object.entries(r)
-      .filter(([, v]) => v !== null && typeof v !== 'object')
-      .map(([k, v]) => `${healthWords(k)}: ${v}`);
+      .filter(([k, v]) => v !== null && typeof v !== 'object' && k !== 'date_precision')
+      .map(([k, v]) => {
+        if (k === 'occurred_on') {
+          const date = precisionParts(v as string, r.date_precision as any);
+          return 'Date: ' + date.figure + (date.qualifier ? ' ' + date.qualifier : '');
+        }
+        return `${healthWords(k)}: ${v}`;
+      });
   }
   protected async reviewConflict() {
     if (!this.editing) return;
+    const entity = this.editEntity,
+      id = this.editing.id;
     try {
-      this.conflictRecord.set(
-        await this.api.healthGet<HealthRecord>('health/' + this.editEntity + '/' + this.editing.id),
-      );
-    } catch (e) {
-      this.error.set(String(e));
+      const latest = await this.api.healthGet<HealthRecord>('health/' + entity + '/' + id);
+      if (this.editEntity === entity && this.editing?.id === id) this.conflictRecord.set(latest);
+    } catch (error) {
+      if (this.editEntity === entity && this.editing?.id === id) this.error.set(String(error));
     }
   }
-  protected acceptRevision(r: HealthRecord) {
-    this.editing = r;
-    this.key = '';
+  protected async acceptRevision(r: HealthRecord) {
+    if (this.locked()) return;
+    if (this.hasUnsavedChanges() && !(await this.canLeave())) return;
+    await this.edit(r);
     this.conflictRecord.set(null);
-    this.notice.set(
-      'Latest revision selected. Review your draft and save with a correction reason.',
-    );
+    this.writeState.reset();
+    this.notice.set('Latest saved revision loaded.');
   }
   protected async history(r: HealthRecord) {
     try {
@@ -889,8 +1154,15 @@ export class HealthPage {
   }
   protected async upload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file || this.locked()) return;
+    this.pendingAttachment = file;
+    await this.uploadSelected();
+  }
+  protected async uploadSelected() {
+    const file = this.pendingAttachment;
     if (!file) return;
     await this.run(async () => {
+      this.uploadStatus = 'Uploading ' + file.name + '…';
       const p = this.provenance();
       if (file.size > 10 * 1024 * 1024) throw new Error('Maximum file size is 10 MiB.');
       if ((this.form.attachment_ids ?? []).length >= 10)
@@ -901,30 +1173,34 @@ export class HealthPage {
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      const a = await this.api.healthWrite<any>(
-        'health/attachments',
-        { ...p, filename: file.name, base64 },
-        crypto.randomUUID(),
-      );
+      const a = await this.write<any>('health/attachments', { ...p, filename: file.name, base64 });
       this.form.attachment_ids = [...(this.form.attachment_ids ?? []), a.id];
+      this.pendingAttachment = null;
+      this.uploadStatus = 'Attachment stored. Save the record to link it.';
     });
   }
   protected async saveRound() {
     await this.run(async () => {
-      this.roundKey ||= crypto.randomUUID();
-      await this.api.healthWrite(
-        'health/rounds',
-        {
-          ...this.provenance(),
-          confirmed: this.roundConfirmed,
-          shared: { ...this.round, date_precision: 'day', kind: 'vaccine' },
-          rows: Object.entries(this.roundRows)
-            .filter(([, r]) => r.disposition)
-            .map(([animal_id, r]) => ({ ...r, animal_id })),
-        },
-        this.roundKey,
-      );
-      this.roundKey = '';
+      if (
+        Object.values(this.roundRows).some(
+          (row) =>
+            !row.disposition && Object.values(row).some((value) => value !== '' && value != null),
+        )
+      ) {
+        throw new Error(
+          'Choose a disposition for each vaccination row you started, or clear that row.',
+        );
+      }
+
+      await this.write('health/rounds', {
+        ...this.provenance(),
+        confirmed: this.roundConfirmed,
+        shared: { ...this.round, date_precision: 'day', kind: 'vaccine' },
+        rows: Object.entries(this.roundRows)
+          .filter(([, r]) => r.disposition)
+          .map(([animal_id, r]) => ({ ...r, animal_id })),
+      });
+
       this.roundOpen = false;
       this.round = {};
       this.roundRows = {};

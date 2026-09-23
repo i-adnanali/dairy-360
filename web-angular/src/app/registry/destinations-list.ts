@@ -1,3 +1,5 @@
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 import { pagedList } from './paged-list';
 import { Pagination } from '../ui/pagination';
 import { RowLink } from '../ui/navigation';
@@ -56,7 +58,9 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-destinations-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Pagination,
+  imports: [
+    WriteLock,
+    Pagination,
     RowLink,
     StatusBadge,
     Button,
@@ -76,8 +80,18 @@ import { Button } from '../ui/button';
     TextLink,
   ],
   template: `
-    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
-    @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
+    <label class="mb-3 block text-sm text-content-secondary"
+      >Search records
+      <input
+        type="search"
+        maxlength="100"
+        class="rounded border border-line bg-surface-page p-2"
+        [value]="paging.url.value().search"
+        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
+    /></label>
+    @if (paging.loading()) {
+      <p role="status" class="text-sm text-content-muted">Loading records…</p>
+    }
 
     <div class="mx-auto max-w-4xl space-y-6">
       <header>
@@ -180,8 +194,20 @@ import { Button } from '../ui/button';
                 }
               </tbody>
             </table>
-          @if (paging.result(); as pg) {<app-pagination label="Buyers" [page]="pg.page" [pageSize]="pg.pageSize" [total]="pg.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>}
-          @if (paging.error()) {<p role="alert">{{paging.error()}}</p>}
+            @if (paging.result(); as pg) {
+              <app-pagination
+                label="Buyers"
+                [page]="pg.page"
+                [pageSize]="pg.pageSize"
+                [total]="pg.totalItems"
+                [disabled]="paging.loading()"
+                (pageChange)="paging.url.set({ page: '' + $event })"
+                (sizeChange)="paging.url.set({ pageSize: '' + $event, page: '1' })"
+              />
+            }
+            @if (paging.error()) {
+              <p role="alert">{{ paging.error() }}</p>
+            }
           </div>
         }
       } @else if (!loadError()) {
@@ -190,7 +216,13 @@ import { Button } from '../ui/button';
 
       <!-- change a rate ------------------------------------------------- -->
       @if (pricing(); as d) {
-        <form appCard class="space-y-3" data-role="price-form" (submit)="submitPrice($event)">
+        <form
+          [appWriteLock]="priceState"
+          appCard
+          class="space-y-3"
+          data-role="price-form"
+          (submit)="submitPrice($event)"
+        >
           <h3 appSectionHeading>Rate for {{ d.name }}</h3>
 
           <div class="flex flex-wrap items-end gap-3">
@@ -253,6 +285,7 @@ import { Button } from '../ui/button';
                 data-role="price-submit"
                 [appButtonDisabled]="pricePreview() === null || priceState.submitting()"
                 appButton
+                [busy]="priceState.submitting()"
               >
                 {{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}
               </button>
@@ -262,7 +295,7 @@ import { Button } from '../ui/button';
             <button
               type="button"
               data-role="price-cancel"
-              (click)="pricing.set(null)"
+              (click)="closeInline()"
               class="rounded-xl border border-line px-4 py-2 text-sm text-content-secondary"
             >
               Cancel
@@ -272,7 +305,13 @@ import { Button } from '../ui/button';
       }
 
       <!-- add a destination ---------------------------------------------- -->
-      <form appCard class="space-y-3" data-role="add-form" (submit)="submitDestination($event)">
+      <form
+        [appWriteLock]="addState"
+        appCard
+        class="space-y-3"
+        data-role="add-form"
+        (submit)="submitDestination($event)"
+      >
         <h3 appSectionHeading>Add a destination</h3>
 
         <div class="flex flex-wrap items-end gap-3">
@@ -342,7 +381,13 @@ import { Button } from '../ui/button';
         }
 
         @if (session.ready()) {
-          <button type="submit" data-role="add-submit" [appButtonDisabled]="!canAdd()" appButton>
+          <button
+            type="submit"
+            data-role="add-submit"
+            [appButtonDisabled]="!canAdd()"
+            appButton
+            [busy]="addState.submitting()"
+          >
             {{ addState.submitting() ? 'Saving…' : 'Add destination' }}
           </button>
         } @else {
@@ -353,6 +398,12 @@ import { Button } from '../ui/button';
   `,
 })
 export class DestinationsList {
+  protected closeInline() {
+    return this.priceDraft.transition(() => this.pricing.set(null));
+  }
+
+  protected addDraft!: ReturnType<typeof writerDraft>;
+  protected priceDraft!: ReturnType<typeof writerDraft>;
   protected readonly paging = pagedList<DestinationListRow>('destinations');
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
@@ -389,6 +440,27 @@ export class DestinationsList {
   ];
 
   constructor() {
+    this.addDraft = writerDraft({
+      name: 'New destination',
+      fields: {
+        name: this.name,
+        kind: this.kind,
+        standing: this.standing,
+        startedOn: this.startedOn,
+      },
+      states: [this.addState],
+    });
+
+    this.priceDraft = writerDraft({
+      name: 'Buyer rate',
+      fields: {
+        priceAmount: this.priceAmount,
+        priceUnit: this.priceUnit,
+        priceFrom: this.priceFrom,
+      },
+      states: [this.priceState],
+    });
+
     void this.load();
   }
 
@@ -427,14 +499,16 @@ export class DestinationsList {
       !this.addState.submitting() && this.name().trim().length > 0 && this.startedOn().length > 0,
   );
 
-  protected openPrice(d: DestinationListRow): void {
-    this.pricing.set(d);
-    // Pre-filled from the CURRENT agreement, not blank: a rate change is
-    // usually an edit to a number the operator already knows, and re-typing the
-    // lot size every time is where 40 becomes 4.
-    this.priceAmount.set(d.price ? minorToRupees(d.price.price_minor) : '');
-    this.priceUnit.set(d.price ? String(d.price.price_unit_litres) : '40');
-    this.priceFrom.set(farmToday());
+  protected async openPrice(d: DestinationListRow): Promise<void> {
+    await this.priceDraft.transition(() => {
+      this.pricing.set(d);
+      // Pre-filled from the CURRENT agreement, not blank: a rate change is
+      // usually an edit to a number the operator already knows, and re-typing the
+      // lot size every time is where 40 becomes 4.
+      this.priceAmount.set(d.price ? minorToRupees(d.price.price_minor) : '');
+      this.priceUnit.set(d.price ? String(d.price.price_unit_litres) : '40');
+      this.priceFrom.set(farmToday());
+    });
   }
 
   /**
@@ -471,21 +545,23 @@ export class DestinationsList {
     // request nobody asked for.
     if (!d || !p || this.priceState.submitting()) return;
 
-    const ok = await this.priceState.run((key) =>
-      this.api.setPrice(
-        d.id,
-        {
-          effective_from: this.priceFrom(),
-          price_minor: p.minor,
-          price_unit_litres: p.unit,
-          recorded_by: this.session.provenance().recorded_by,
-        },
-        key,
-      ),
+    const ok = await this.priceState.runRequest(
+      () =>
+        [
+          d.id,
+          {
+            effective_from: this.priceFrom(),
+            price_minor: p.minor,
+            price_unit_litres: p.unit,
+            recorded_by: this.session.provenance().recorded_by,
+          },
+        ] as const,
+      (request, key) => this.api.setPrice(request[0], request[1], key),
     );
     if (ok) {
       this.writeLog.announce(`${d.name}: ${p.rate} from ${this.priceFrom()}`);
       this.pricing.set(null);
+      this.priceDraft.accept();
       await this.load();
     }
   }
@@ -495,19 +571,20 @@ export class DestinationsList {
     if (!this.canAdd()) return;
 
     const kind = this.kind();
-    const result = await this.addState.run((key) =>
-      this.api.addDestination(
-        {
-          name: this.name().trim(),
-          kind,
-          standing: this.standing() === 'yes',
-          started_on: this.startedOn(),
-          // Explicit rather than omitted, so the server never has to infer it.
-          billable: kind !== 'home',
-          recorded_by: this.session.provenance().recorded_by,
-        },
-        key,
-      ),
+    const result = await this.addState.runRequest(
+      () =>
+        [
+          {
+            name: this.name().trim(),
+            kind,
+            standing: this.standing() === 'yes',
+            started_on: this.startedOn(),
+            // Explicit rather than omitted, so the server never has to infer it.
+            billable: kind !== 'home',
+            recorded_by: this.session.provenance().recorded_by,
+          },
+        ] as const,
+      (request, key) => this.api.addDestination(request[0], key),
     );
     if (result) {
       this.writeLog.announce(
@@ -517,6 +594,7 @@ export class DestinationsList {
             : ' — kept milk, never billed'),
       );
       this.name.set('');
+      this.addDraft.accept();
       await this.load();
     }
   }

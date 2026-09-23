@@ -1,3 +1,6 @@
+import { untracked } from '@angular/core';
+import { writerDraft, replacesContext } from './writer-draft';
+import { WriteLock } from './write-lock';
 import { SummaryBar } from '../ui/surface';
 // `/payroll` -- the monthly run (docs/REGISTRY_PAYROLL.md §12.1).
 //
@@ -80,6 +83,7 @@ interface DihariDraft {
   selector: 'app-payroll-run',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WriteLock,
     SummaryBar,
     Button,
     Card,
@@ -93,7 +97,7 @@ interface DihariDraft {
     TextInput,
   ],
   template: `
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div [appWriteLock]="state" class="mx-auto max-w-4xl space-y-6">
       <header class="space-y-3">
         <h2 appPageHeading>Payroll</h2>
         <div class="flex flex-wrap items-end gap-4">
@@ -124,7 +128,8 @@ interface DihariDraft {
             />
           </label>
           <div class="space-y-1">
-            <app-identifier-input help="Person associated with this record, if known. Use a stable identifier, not a display name."
+            <app-identifier-input
+              help="Person associated with this record, if known. Use a stable identifier, not a display name."
               field="observed_by"
               label="Paid out by"
               name="observed_by"
@@ -308,7 +313,9 @@ interface DihariDraft {
                   <input
                     type="text"
                     inputmode="decimal"
-                    [attr.aria-label]="'Daily wage amount (Rs) for ' + dailyPerson(draft.engagement_id)"
+                    [attr.aria-label]="
+                      'Daily wage amount (Rs) for ' + dailyPerson(draft.engagement_id)
+                    "
                     [value]="draft.amount"
                     (input)="setDraft($index, { amount: $any($event.target).value })"
                     appInput
@@ -356,6 +363,8 @@ interface DihariDraft {
           @if (session.ready()) {
             <button
               type="button"
+              data-write-retry
+              [busy]="state.submitting()"
               (click)="save()"
               [appButtonDisabled]="!canSave()"
               appButton
@@ -367,10 +376,10 @@ interface DihariDraft {
           } @else {
             <app-session-required what="this run" />
           }
-          @if (!allAnswered()) {
+          @if (!allAnswered() || !dailyAnswered()) {
             <p appHelp size="xs" data-role="blocked" id="payroll-save-reason">
-              Every salaried person in this period needs a figure. If somebody was paid nothing,
-              enter nothing and say why in a note — an omission is not an answer.
+              Answer every salaried wage and finish or remove each incomplete daily wage row. Enter
+              zero only for a known zero wage; an omission is not an answer.
             </p>
           }
         </footer>
@@ -381,7 +390,13 @@ interface DihariDraft {
   `,
 })
 export class PayrollRunScreen {
-  protected dailyPerson(id: string): string { return this.run()?.daily_candidates.find(c => c.engagement.id === id)?.person.identifier ?? 'unselected person'; }
+  protected writer!: ReturnType<typeof writerDraft>;
+  protected dailyPerson(id: string): string {
+    return (
+      this.run()?.daily_candidates.find((c) => c.engagement.id === id)?.person.identifier ??
+      'unselected person'
+    );
+  }
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
@@ -415,19 +430,36 @@ export class PayrollRunScreen {
   protected readonly formatMinor = formatMinor;
 
   constructor() {
+    this.writer = writerDraft({
+      name: 'Payroll',
+      description: () => 'Payroll · ' + this.from() + ' to ' + this.to(),
+      fields: { amounts: this.amounts, drafts: this.drafts, observedBy: this.observedBy },
+      states: [this.state],
+      replaces: replacesContext(
+        '/labour/payroll',
+        () => ({ from: this.from(), to: this.to() }),
+        this.bounds,
+      ),
+    });
+
     // Driven by the URL rather than by the date controls, so a link that
     // arrives with ?from=&to= already set loads that period -- which is the
     // whole point of putting the period in the URL.
     effect(() => {
       const from = this.from();
       const to = this.to();
-      void this.load(from, to);
+      void untracked(() => this.load(from, to));
     });
   }
 
+  private loadGeneration = 0;
   private async load(from: string, to: string): Promise<void> {
+    const generation = ++this.loadGeneration;
+    const observerAtLoad = this.observedBy();
+    this.run.set(null);
     try {
       const r = await this.api.payrollRun(from, to);
+      if (generation !== this.loadGeneration) return;
       this.run.set(r);
       // Pre-fill from what is already recorded, else from the agreement. A row
       // already saved must come back showing the SAVED figure, not the default,
@@ -441,17 +473,27 @@ export class PayrollRunScreen {
       this.amounts.set(next);
       this.drafts.set([]);
       this.loadError.set(null);
+      this.writer.accept({
+        amounts: this.amounts(),
+        drafts: this.drafts(),
+        observedBy: observerAtLoad,
+      });
     } catch (e) {
+      if (generation !== this.loadGeneration) return;
       this.loadError.set(e instanceof Error ? e.message : String(e));
     }
   }
 
-  protected setFrom(v: string): void {
-    if (v.length > 0) this.url.set({ from: v });
+  protected async setFrom(v: string): Promise<void> {
+    if (v.length > 0) await this.url.set({ from: v });
+    const input = document.querySelector<HTMLInputElement>('input[data-role="from"]');
+    if (input) input.value = this.from();
   }
 
-  protected setTo(v: string): void {
-    if (v.length > 0) this.url.set({ to: v });
+  protected async setTo(v: string): Promise<void> {
+    if (v.length > 0) await this.url.set({ to: v });
+    const input = document.querySelector<HTMLInputElement>('input[data-role="to"]');
+    if (input) input.value = this.to();
   }
 
   /** §6's no-record glyph, for the template. An en dash. */
@@ -490,10 +532,12 @@ export class PayrollRunScreen {
   }
 
   protected setAmount(row: PayrollRunRow, value: string): void {
+    if (this.state.locked()) return;
     this.amounts.update((m) => ({ ...m, [row.engagement.id]: value }));
   }
 
   protected addDraft(): void {
+    if (this.state.locked()) return;
     this.drafts.update((d) => [
       ...d,
       { engagement_id: '', on: this.to(), amount: this.suggestedDihari() },
@@ -506,10 +550,12 @@ export class PayrollRunScreen {
   }
 
   protected setDraft(i: number, patch: Partial<DihariDraft>): void {
+    if (this.state.locked()) return;
     this.drafts.update((d) => d.map((x, n) => (n === i ? { ...x, ...patch } : x)));
   }
 
   protected removeDraft(i: number): void {
+    if (this.state.locked()) return;
     this.drafts.update((d) => d.filter((_, n) => n !== i));
   }
 
@@ -541,8 +587,15 @@ export class PayrollRunScreen {
     return total;
   });
 
+  protected readonly dailyAnswered = computed(() =>
+    this.drafts().every(
+      (d) => d.engagement_id.length > 0 && d.on.length > 0 && rupeesToMinor(d.amount) !== null,
+    ),
+  );
+
   protected readonly canSave = computed(
-    () => !this.state.submitting() && this.allAnswered() && this.run() !== null,
+    () =>
+      !this.state.submitting() && this.allAnswered() && this.dailyAnswered() && this.run() !== null,
   );
 
   protected async save(): Promise<void> {
@@ -560,23 +613,25 @@ export class PayrollRunScreen {
     }
 
     const observed = this.observedBy().trim();
-    const result = await this.state.run((key) =>
-      this.api.saveRun(
-        {
-          from_on: this.from(),
-          to_on: this.to(),
-          entries:
-            observed.length > 0 ? entries.map((e) => ({ ...e, observed_by: observed })) : entries,
-          ...this.session.provenance(),
-        },
-        key,
-      ),
+    const result = await this.state.runRequest(
+      () =>
+        [
+          {
+            from_on: this.from(),
+            to_on: this.to(),
+            entries:
+              observed.length > 0 ? entries.map((e) => ({ ...e, observed_by: observed })) : entries,
+            ...this.session.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.saveRun(request[0], key),
     );
     if (result) {
       this.writeLog.announce(
         `Payroll ${this.from()} to ${this.to()}: ${result.written} recorded, ` +
           `${formatMinor(result.total_minor)}`,
       );
+      this.writer.accept();
       await this.load(this.from(), this.to());
     }
   }

@@ -58,7 +58,12 @@ describe('health management', () => {
       c = f.componentInstance as any;
     await f.whenStable();
     TestBed.inject(Session).set('direct_entry', 'operator');
-    c.create('visits');
+    await c.create('visits');
+    c.dateChanged({
+      status: 'complete',
+      value: { occurred_on: '2026-09-17', date_precision: 'day', occurred_time: null },
+      reading: '',
+    });
     c.form.vet = 'Doctor';
     await c.save();
     await c.save();
@@ -78,11 +83,165 @@ describe('health management', () => {
       c = f.componentInstance as any;
     await f.whenStable();
     TestBed.inject(Session).set('direct_entry', 'operator');
-    c.create('visits');
+    await c.create('visits');
+    c.dateChanged({
+      status: 'complete',
+      value: { occurred_on: '2026-09-17', date_precision: 'day', occurred_time: null },
+      reading: '',
+    });
     c.form.reason = 'Routine examination';
     await c.save();
     expect(c.form.reason).toBe('Routine examination');
     expect(c.form.correction_reason).toBe('');
+  });
+  it('opens saved history as view, preserves precision and never silently adopts a newer revision', async () => {
+    const f = TestBed.createComponent(HealthPage),
+      c = f.componentInstance as any;
+    await f.whenStable();
+    TestBed.inject(Session).set('direct_entry', 'spec-review');
+    await f.whenStable();
+    const record = {
+      id: 'visit-fixture',
+      entity: 'visits',
+      revision: 2,
+      recorded_by: 'adnan',
+      source_form: 'recall',
+      occurred_on: '2023-03-01',
+      date_precision: 'month',
+      occurred_time: null,
+      reason: 'Original reason',
+      vet: 'Doctor',
+    };
+    await c.edit(record);
+    f.detectChanges();
+    expect(c.savedView).toBe(true);
+    expect(c.hasUnsavedChanges()).toBe(false);
+    await c.save();
+    expect(write).not.toHaveBeenCalled();
+    Array.from(f.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+      .find((b) => b.textContent?.trim() === 'Correct record')!
+      .click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(c.meaningfulChange()).toBe(false);
+    f.changeDetectorRef.markForCheck();
+    f.detectChanges();
+    await f.whenStable();
+    f.componentRef.changeDetectorRef.markForCheck();
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('textarea[name="reason"]').value).toBe('Original reason');
+    const correction = f.nativeElement.querySelector(
+      'input[name="correction_reason"]',
+    ) as HTMLInputElement;
+    correction.value = 'Clarifying';
+    correction.dispatchEvent(new Event('input'));
+    f.detectChanges();
+    expect(c.form.reason).toBe('Original reason');
+    expect(c.dateEntry.value).toEqual({
+      occurred_on: '2023-03-01',
+      date_precision: 'month',
+      occurred_time: null,
+    });
+    c.form.reason = 'Corrected reason';
+    c.form.correction_reason = 'Transcription correction';
+    write.mockRejectedValue(
+      new ApiError({ error: 'health_conflict', message: 'Original conflict prose' }, true),
+    );
+    await c.save();
+    expect(write.mock.calls[0][1].expected_revision).toBe(2);
+    expect(write.mock.calls[0][1].recorded_by).toBe('spec-review');
+    expect(c.editing.recorded_by).toBe('adnan');
+    const latest = { ...record, revision: 3, reason: 'Other correction' };
+    const keep = c.acceptRevision(latest);
+    await new Promise((r) => setTimeout(r, 0));
+    f.detectChanges();
+    document.querySelector<HTMLButtonElement>('[data-role=keep-editing]')!.click();
+    await keep;
+    expect(c.form.reason).toBe('Corrected reason');
+    expect(c.editing.revision).toBe(2);
+    const discard = c.acceptRevision(latest);
+    await new Promise((r) => setTimeout(r, 0));
+    f.detectChanges();
+    document.querySelector<HTMLButtonElement>('[data-role=discard-changes]')!.click();
+    await discard;
+    expect(c.form.reason).toBe('Other correction');
+    expect(c.editing.revision).toBe(3);
+    expect(c.savedView).toBe(true);
+  });
+  it('cancelling a void keeps the correction and makes no write', async () => {
+    const f = TestBed.createComponent(HealthPage),
+      c = f.componentInstance as any;
+    TestBed.inject(Session).set('direct_entry', 'fixture');
+    await f.whenStable();
+    await c.edit({
+      id: 'visit-fixture',
+      entity: 'visits',
+      revision: 2,
+      occurred_on: '2023-01-01',
+      date_precision: 'year',
+      vet: 'Doctor',
+    });
+    c.beginCorrection();
+    c.form.correction_reason = 'Reason retained';
+    const pending = c.voidRecord();
+    await new Promise((r) => setTimeout(r, 0));
+    f.detectChanges();
+    expect(document.body.textContent).toContain('Void this record?');
+    document.querySelector<HTMLButtonElement>('[data-role=keep-editing]')!.click();
+    await pending;
+    expect(write).not.toHaveBeenCalled();
+    expect(c.form.correction_reason).toBe('Reason retained');
+  });
+  it('clearing a historical date remains dirty and blocks the write', async () => {
+    const f = TestBed.createComponent(HealthPage),
+      c = f.componentInstance as any;
+    await f.whenStable();
+    TestBed.inject(Session).set('direct_entry', 'fixture');
+    await c.edit({
+      id: 'fixture',
+      entity: 'visits',
+      revision: 1,
+      occurred_on: '2023-01-01',
+      date_precision: 'year',
+      vet: 'Doctor',
+    });
+    c.beginCorrection();
+    c.dateChanged({ status: 'empty' });
+    expect(c.hasUnsavedChanges()).toBe(true);
+    await c.save();
+    expect(write).not.toHaveBeenCalled();
+  });
+  it('retries a lost attachment response with the same bytes and key without linking twice', async () => {
+    const f = TestBed.createComponent(HealthPage),
+      c = f.componentInstance as any;
+    await f.whenStable();
+    TestBed.inject(Session).set('direct_entry', 'fixture');
+    await c.create('visits');
+    write
+      .mockRejectedValueOnce(new ApiError({ error: 'network', message: 'Response lost' }, false))
+      .mockResolvedValue({ id: 'attachment-fixture' });
+    await c.upload({
+      target: { files: [new File(['synthetic'], 'fixture.txt', { type: 'text/plain' })] },
+    } as unknown as Event);
+    expect(c.writeState.uncertain()).toBe(true);
+    expect(c.hasUnsavedChanges()).toBe(true);
+    const original = structuredClone(write.mock.calls[0]);
+    await c.retryLast();
+    expect(write.mock.calls[1]).toEqual(original);
+    expect(c.form.attachment_ids).toEqual(['attachment-fixture']);
+    expect(c.uploadStatus).toContain('Save the record to link it');
+  });
+  it('does not omit a started vaccination row without a disposition', async () => {
+    const f = TestBed.createComponent(HealthPage),
+      c = f.componentInstance as any;
+    await f.whenStable();
+    TestBed.inject(Session).set('direct_entry', 'fixture');
+    await c.openRound();
+    c.roundRows = { 'animal-fixture': { disposition: '', reason: 'Needs review' } };
+    await c.saveRound();
+    expect(write).not.toHaveBeenCalled();
+    expect(c.hasUnsavedChanges()).toBe(true);
+    expect(c.error()).toContain('Choose a disposition');
   });
   it('keeps health literal route before the animal serial route', () => {
     const paths = routes[0].children!.map((r) => r.path);

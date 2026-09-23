@@ -1,13 +1,19 @@
+import { DraftRegistry } from './draft-registry';
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 import {
   Component,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   inject,
   signal,
   effect,
   ElementRef,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { JsonPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RegistryApi } from './api';
 import { Session } from './session';
@@ -27,6 +33,8 @@ import { farmToday } from './today';
   selector: 'app-feed-daily',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WriteLock,
+    JsonPipe,
     FormsModule,
     RouterLink,
     SessionRequired,
@@ -54,9 +62,10 @@ import { farmToday } from './today';
       @if (loaded()) {
         @if (draft.id) {
           <p appHelp>
-            Saved {{ draft.completeness }} account · revision {{ draft.revision }} ·
-            {{ draft.source_form }} · {{ draft.recorded_by }}. Editing keeps confirmed recipients
-            unless refreshed.
+            Saved · revision {{ originalRecord?.revision }} · recorded by
+            {{ originalRecord?.recorded_by }}. {{ originalRecord?.source_form }} ·
+            {{ originalRecord?.source_ref || 'no source reference' }}. Editing keeps confirmed
+            recipients unless refreshed.
           </p>
         }
         @if (purchaseSaved()) {
@@ -68,6 +77,7 @@ import { farmToday } from './today';
           </p>
         }
         <form
+          [appWriteLock]="state"
           class="space-y-5"
           (ngSubmit)="review ? save() : reviewDraft()"
           data-role="feed-daily-form"
@@ -79,8 +89,8 @@ import { farmToday } from './today';
                 appInput
                 type="date"
                 name="on"
-                [(ngModel)]="draft.on"
-                (ngModelChange)="refreshSuggestions()"
+                [ngModel]="draft.on"
+                (ngModelChange)="changeDate($event)"
                 required
             /></label>
             <section appCard class="space-y-4">
@@ -340,18 +350,37 @@ import { farmToday } from './today';
                     {{ l.quantity === null ? 'Unmeasured' : l.quantity + ' ' + l.unit }} ·
                     {{ words(l.preparation) }}
                   </p>
-                  <p>{{ words(l.recipients) }}: {{ recipientNames(l) || 'not specified' }}</p>
+                  <p>
+                    {{
+                      l.recipients === 'unspecified'
+                        ? 'Recipients not specified'
+                        : words(l.recipients) +
+                          ': ' +
+                          (recipientNames(l) || 'No recipients selected')
+                    }}
+                  </p>
                   <p>{{ l.purpose }} {{ l.notes }}</p>
                 </div>
               }
               <p>{{ draft.notes }}</p>
               <p appHelp>
-                Provenance: {{ session.sourceForm() || draft.source_form }} ·
-                {{ session.recordedBy() || draft.recorded_by }} ·
-                {{ draft.source_ref || 'no source reference' }}
+                @if (originalRecord) {
+                  Saved record: {{ originalRecord.recorded_by }} ·
+                  {{ originalRecord.source_form }} ·
+                  {{ originalRecord.source_ref || 'no source reference' }}.
+                }
+                @if (!savedView) {
+                  {{
+                    originalRecord
+                      ? 'This correction will be recorded by'
+                      : 'This entry will be recorded by'
+                  }}
+                  {{ session.recordedBy() }} · {{ session.sourceForm() }} ·
+                  {{ draft.source_ref || 'no source reference' }}
+                }
               </p>
             </section>
-            <button appButton variant="secondary" type="button" (click)="review = false">
+            <button appButton variant="secondary" type="button" (click)="beginEdit()">
               {{ draft.id ? 'Edit account' : 'Back to editing' }}
             </button>
           }
@@ -369,17 +398,32 @@ import { farmToday } from './today';
           @if (latest()) {
             <section appCard>
               <h3>Latest saved account</h3>
+              <p appHelp>
+                Original revision {{ originalRecord?.revision }}; your draft is still based on
+                revision {{ draft.revision }}.
+              </p>
               <p>{{ latest()?.on }} · revision {{ latest()?.revision }} · {{ latest()?.notes }}</p>
+              <details>
+                <summary>Latest saved details</summary>
+                <pre class="whitespace-pre-wrap break-all text-xs">{{ latest() | json }}</pre>
+              </details>
               <button appButton variant="secondary" type="button" (click)="adoptLatest()">
-                Use latest saved account (discard this draft)
+                Discard draft and load latest
+              </button>
+              <button appButton variant="secondary" type="button" (click)="latest.set(null)">
+                Keep my draft
               </button>
             </section>
           }
-          @if (session.ready()) {
+          @if (session.ready() && !savedView) {
+            @if (!writer.meaningful()) {
+              <p appHelp>No changes to save.</p>
+            }
             <button
               appButton
               type="submit"
-              [appButtonDisabled]="state.submitting() || nested !== ''"
+              [appButtonDisabled]="state.submitting() || nested !== '' || !writer.meaningful()"
+              [busy]="state.submitting()"
             >
               {{
                 state.submitting()
@@ -389,7 +433,7 @@ import { farmToday } from './today';
                     : 'Review feeding summary'
               }}
             </button>
-          } @else {
+          } @else if (!session.ready()) {
             <app-session-required what="this feeding summary" />
           }
           <a routerLink="/" appButton variant="secondary">Cancel daily entry</a>
@@ -409,7 +453,7 @@ import { farmToday } from './today';
               <p>{{ r.provenance }}</p>
             </details>
           }
-          <button appButton variant="secondary" type="button" (click)="removing = true">
+          <button appButton variant="secondary" type="button" (click)="confirmRemoval()">
             Remove summary
           </button>
         }
@@ -425,20 +469,29 @@ import { farmToday } from './today';
               [appButtonDisabled]="!session.ready() || state.submitting()"
             >
               Confirm removal</button
-            ><button appButton variant="secondary" (click)="removing = false">Keep summary</button>
+            ><button
+              appButton
+              variant="secondary"
+              [disabled]="state.locked()"
+              (click)="removing = false"
+            >
+              Keep summary
+            </button>
           </div>
         }
         @if (nested) {
           <app-feed-editor
+            #nestedEditor
             [entity]="nested"
             [items]="items()"
             (saved)="nestedSaved($event)"
             (cancelled)="nested = ''"
-            (addItem)="nestedItem = true"
+            (addItem)="openNestedItem()"
           />
         }
         @if (nestedItem) {
           <app-feed-editor
+            #nestedItemEditor
             entity="items"
             (saved)="itemSaved($event)"
             (cancelled)="nestedItem = false"
@@ -475,10 +528,39 @@ export class FeedDailyScreen {
   localError = '';
   originalId = '';
   readonly assessments = ['enough', 'short', 'surplus', 'unknown', 'not_applicable'];
+  private readonly draftRegistry = inject(DraftRegistry);
+  originalRecord: FeedRecord | null = null;
+  savedView = false;
+  readonly writer = writerDraft({
+    name: 'Daily feeding',
+    description: () => 'Daily feeding · ' + this.draft.on,
+    states: [this.state],
+    snapshot: () => this.draft,
+    restore: (value) => {
+      this.draft = structuredClone(value);
+    },
+  });
+  private loadGeneration = 0;
+  ngDoCheck() {
+    this.writer.check();
+  }
+  beginEdit() {
+    this.savedView = false;
+    this.review = false;
+    setTimeout(() => this.host.nativeElement.querySelector('input')?.focus());
+  }
+  async changeDate(on: string) {
+    await this.router.navigate(['/feed/daily', on]);
+    const input = this.host.nativeElement.querySelector(
+      'input[name="on"]',
+    ) as HTMLInputElement | null;
+    if (input) input.value = this.draft.on;
+  }
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(() => void this.load());
   }
   async load() {
+    const generation = ++this.loadGeneration;
     this.loaded.set(false);
     try {
       const on = this.route.snapshot.paramMap.get('on') ?? farmToday();
@@ -486,9 +568,13 @@ export class FeedDailyScreen {
         this.api.feedGet<FeedRecord | null>('daily/on/' + on),
         this.catalogues(),
       ]);
+      if (generation !== this.loadGeneration) return;
+      this.originalRecord = r ? structuredClone(r) : null;
+      this.savedView = !!r;
       this.draft = { ...blankFeed(), ...structuredClone(r ?? {}), on: r?.on ?? on };
       this.originalId = r?.id ?? '';
       this.review = !!r;
+      this.writer.accept();
       await this.refreshSuggestions();
       this.loadError.set('');
       this.loaded.set(true);
@@ -507,8 +593,11 @@ export class FeedDailyScreen {
     this.purchases.set(p);
   }
   async refreshSuggestions() {
+    const on = this.draft.on;
     try {
-      this.suggestions.set(await this.api.feedGet('recipients?on=' + this.draft.on));
+      const suggestions = await this.api.feedGet<any>('recipients?on=' + on);
+      if (on !== this.draft.on) return;
+      this.suggestions.set(suggestions);
     } catch (e) {
       this.localError = String(e);
     }
@@ -593,6 +682,10 @@ export class FeedDailyScreen {
   }
   reviewDraft() {
     this.localError = '';
+    if (!this.writer.meaningful()) {
+      this.localError = 'No changes to save.';
+      return;
+    }
     if (!this.draft.fresh_status || !this.draft.additional_status || !this.draft.assessment) {
       this.localError =
         'Answer fresh fodder, supply assessment and additional feed before review. Unknown is a valid partial account.';
@@ -603,25 +696,54 @@ export class FeedDailyScreen {
       return;
     }
     this.review = true;
+    setTimeout(() => {
+      const heading = this.host.nativeElement.querySelector('form h3') as HTMLElement | null;
+      if (heading) {
+        heading.tabIndex = -1;
+        heading.focus();
+      }
+    });
   }
   async save() {
-    if (!this.session.ready() || this.state.submitting() || this.nested || !this.review) return;
-    const r = await this.state.run((k) =>
-      this.api.feedWrite<FeedRecord>(
-        'daily' + (this.originalId ? '/' + this.originalId : ''),
-        { ...this.draft, ...this.session.provenance() },
-        k,
-      ),
+    if (
+      !this.session.ready() ||
+      this.state.submitting() ||
+      this.nested ||
+      !this.review ||
+      this.savedView ||
+      (!this.writer.meaningful() && !this.state.uncertain())
+    )
+      return;
+    const r = await this.state.runRequest(
+      () =>
+        [
+          'daily' + (this.originalId ? '/' + this.originalId : ''),
+          { ...this.draft, ...this.session.provenance() },
+        ] as const,
+      (request, key) => this.api.feedWrite<FeedRecord>(request[0], request[1], key),
     );
     if (r) {
       this.log.announce(
         `Feed ${r.completeness === 'partial' ? 'partially ' : ''}recorded for ${r.on}.`,
       );
+      this.writer.accept();
       await this.router.navigate(['/'], { queryParams: { on: r.on } });
     }
   }
-  openNested(entity: string) {
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  readonly nestedEditor = viewChild<FeedEditor>('nestedEditor');
+  readonly nestedItemEditor = viewChild<FeedEditor>('nestedItemEditor');
+  async openNestedItem() {
+    const editor = this.nestedItemEditor();
+    if (editor && !(await editor.writer.transition(() => {}))) return;
+    this.nestedItem = true;
+    this.changeDetector.markForCheck();
+  }
+  async openNested(entity: string) {
+    const editor = this.nestedEditor();
+    if (editor && !(await editor.writer.transition(() => {}))) return;
     this.nested = entity;
+    this.changeDetector.markForCheck();
     requestAnimationFrame(() => {
       const input = this.host.nativeElement.querySelector(
         'app-feed-editor input',
@@ -640,8 +762,10 @@ export class FeedDailyScreen {
     await this.catalogues();
   }
   async loadLatest() {
+    const on = this.draft.on;
     try {
-      const latest = await this.api.feedGet<FeedRecord | null>('daily/on/' + this.draft.on);
+      const latest = await this.api.feedGet<FeedRecord | null>('daily/on/' + on);
+      if (on !== this.draft.on) return;
       this.latest.set(latest);
       if (!latest)
         this.localError = 'This date no longer has a saved account. Your draft is preserved.';
@@ -667,27 +791,46 @@ export class FeedDailyScreen {
       this.localError = String(e);
     }
   }
-  adoptLatest() {
+  async adoptLatest() {
     const r = this.latest();
-    if (r) {
-      this.draft = structuredClone(r);
-      this.originalId = r.id;
-      this.review = false;
-      this.state.reset();
-      this.latest.set(null);
-    }
+    if (r)
+      await this.writer.transition(() => {
+        this.originalRecord = structuredClone(r);
+        this.savedView = true;
+        this.draft = { ...blankFeed(), ...structuredClone(r) };
+        this.originalId = r.id;
+        this.review = true;
+        this.state.reset();
+        this.latest.set(null);
+      });
+  }
+  async confirmRemoval() {
+    if (this.state.locked()) return;
+    if (this.draftRegistry.hasChanges() && !(await this.draftRegistry.request())) return;
+    if (
+      !(await this.draftRegistry.confirm(
+        'Remove feeding summary?',
+        this.draft.on + '. The audit trail remains. This date returns to not recorded.',
+        'Remove summary',
+      ))
+    )
+      return;
+    this.removing = true;
+    await this.remove();
   }
   async remove() {
     if (!this.session.ready() || this.state.submitting()) return;
-    const r = await this.state.run((k) =>
-      this.api.feedWrite<FeedRecord>(
-        'daily/' + this.originalId + '/delete',
-        { revision: this.draft.revision, ...this.session.provenance() },
-        k,
-      ),
+    const r = await this.state.runRequest(
+      () =>
+        [
+          'daily/' + this.originalId + '/delete',
+          { revision: this.draft.revision, ...this.session.provenance() },
+        ] as const,
+      (request, key) => this.api.feedWrite<FeedRecord>(request[0], request[1], key),
     );
     if (r) {
       this.log.announce('Removed feeding summary; audit trail retained.');
+      this.writer.accept();
       await this.router.navigate(['/'], { queryParams: { on: this.draft.on } });
     }
   }

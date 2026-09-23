@@ -1,3 +1,4 @@
+import { DraftRegistry } from './draft-registry';
 import { RouterLink } from '@angular/router';
 import { Button } from '../ui/button';
 // One animal's record: identity, derived status, event list, and the two forms
@@ -24,7 +25,8 @@ type Tab = 'events' | 'add-event' | 'correct';
   selector: 'app-animal-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    RouterLink, Button,
+    RouterLink,
+    Button,
     Card,
     Certainty,
     CorrectionForm,
@@ -119,7 +121,7 @@ type Tab = 'events' | 'add-event' | 'correct';
             <button
               type="button"
               [attr.data-tab]="t.id"
-              (click)="tab.set(t.id)"
+              (click)="selectTab(t.id)"
               class="-mb-px border-b-2 px-3 py-2 text-sm"
               [class]="
                 tab() === t.id
@@ -134,7 +136,9 @@ type Tab = 'events' | 'add-event' | 'correct';
 
         @switch (tab()) {
           @case ('events') {
-            <a appButton variant="secondary" [routerLink]="['/animals',d.animal.id,'report']">Life report / vaccination card</a>
+            <a appButton variant="secondary" [routerLink]="['/animals', d.animal.id, 'report']"
+              >Life report / vaccination card</a
+            >
             <a appButton variant="secondary" routerLink="/animals/health">Manage health</a>
             <app-event-list [events]="d.events" />
           }
@@ -158,6 +162,12 @@ type Tab = 'events' | 'add-event' | 'correct';
   `,
 })
 export class AnimalDetailView {
+  private readonly drafts = inject(DraftRegistry);
+  protected async selectTab(tab: Tab) {
+    if (tab === this.tab()) return;
+    if (!this.drafts.hasChanges() || (await this.drafts.request())) this.tab.set(tab);
+  }
+
   /** §6's no-record glyph, for the template. An en dash. */
   protected readonly noRecord = NO_RECORD;
 
@@ -209,7 +219,9 @@ export class AnimalDetailView {
 
   private async load(id: string): Promise<void> {
     try {
-      this.detail.set(await this.api.animal(id));
+      const detail = await this.api.animal(id);
+      if (id !== this.id()) return;
+      this.detail.set(detail);
       this.loadError.set(null);
     } catch (e) {
       this.loadError.set(e instanceof Error ? e.message : String(e));

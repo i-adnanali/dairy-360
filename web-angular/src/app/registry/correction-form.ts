@@ -1,3 +1,5 @@
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 // Correct a calving's date. The paired (or triple) correction.
 //
 // Reached from an animal's record, not from a menu: the flow is pick animal ->
@@ -36,6 +38,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
   selector: 'app-correction-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WriteLock,
     Button,
     Card,
     ErrorPanel,
@@ -48,7 +51,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
     TextInput,
   ],
   template: `
-    <form class="space-y-4" (submit)="onSubmit($event)">
+    <form [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
       <div appCard>
         <div appSectionLabel legend>Which calving is the date wrong on?</div>
         @if (correctable().length === 0) {
@@ -142,7 +145,13 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
         }
 
         @if (session.ready()) {
-          <button type="submit" data-role="submit" [appButtonDisabled]="!canSubmit()" appButton>
+          <button
+            type="submit"
+            data-role="submit"
+            [appButtonDisabled]="!canSubmit()"
+            appButton
+            [busy]="state.submitting()"
+          >
             {{ state.submitting() ? 'Correcting…' : 'Apply correction' }}
           </button>
         } @else {
@@ -181,6 +190,24 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
   `,
 })
 export class CorrectionForm {
+  constructor() {
+    this.writer = writerDraft({
+      name: 'Calving correction',
+      fields: {
+        target: this.target,
+        when: this.when,
+        notes: this.notes,
+        allowDuplicate: this.allowDuplicate,
+        overrideReason: this.overrideReason,
+      },
+      states: [this.state],
+      afterRestore: () => {
+        this.dateControl()?.reset();
+      },
+    });
+  }
+
+  protected writer!: ReturnType<typeof writerDraft>;
   /**
    * The NATIVE submit event, not FormsModule's `ngSubmit`.
    *
@@ -236,20 +263,21 @@ export class CorrectionForm {
     if (entry.status !== 'complete') return;
     const w = entry.value;
     if (!w) return;
-    const r = await this.state.run((key) =>
-      this.api.correctCalving(
-        this.target(),
-        {
-          occurred_on: w.occurred_on,
-          occurred_time: w.occurred_time,
-          date_precision: w.date_precision,
-          notes: blank(this.notes()),
-          allow_near_duplicate: this.allowDuplicate(),
-          override_reason: blank(this.overrideReason()),
-          ...this.session.provenance(),
-        },
-        key,
-      ),
+    const r = await this.state.runRequest(
+      () =>
+        [
+          this.target(),
+          {
+            occurred_on: w.occurred_on,
+            occurred_time: w.occurred_time,
+            date_precision: w.date_precision,
+            notes: blank(this.notes()),
+            allow_near_duplicate: this.allowDuplicate(),
+            override_reason: blank(this.overrideReason()),
+            ...this.session.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.correctCalving(request[0], request[1], key),
     );
     this.allowDuplicate.set(false);
     if (r) {
@@ -259,6 +287,7 @@ export class CorrectionForm {
       this.overrideReason.set('');
       this.writeLog.announce('Correction written. The superseded events remain in the log.');
       this.done()?.();
+      this.writer.accept();
     }
   }
 }

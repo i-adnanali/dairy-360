@@ -1,0 +1,62 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "direct_entry · spec-review"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- link "Record feeding":
+  - /url: /feed/daily/2026-09-22
+- link "Add crop":
+  - /url: /feed/crops/new
+- link "Record purchase":
+  - /url: /feed/purchases/new
+- main:
+  - heading "Daily feeding" [level=2]
+  - paragraph: One account for the day. Unknown quantity and unspecified recipients are valid.
+  - paragraph: Saved · revision 1 · recorded by adnan. direct_entry · harness fixture. Editing keeps confirmed recipients unless refreshed.
+  - heading "Review 2026-09-17" [level=3]
+  - paragraph: "Fresh fodder: given · supply enough. Additional feed: given."
+  - paragraph: Recorded feeding account
+  - strong: Fresh fodder
+  - paragraph: "Own crop: Seasonal maize; Purchase: 2026-09-17"
+  - paragraph: Unmeasured · unknown
+  - paragraph: "unspecified: not specified"
+  - paragraph
+  - strong: Khall
+  - paragraph: unknown source
+  - paragraph: Unmeasured · water mixed
+  - paragraph: "milking: BD-0001 Noori, BD-0002 Sohni, BD-0011 Bhoori, BD-0012 Lali, BD-0016 Mithi, BD-0022 Neeli"
+  - paragraph
+  - paragraph: B2 synthetic correction draft
+  - paragraph: "Saved record: adnan · direct_entry · harness fixture. This correction will be recorded by spec-review · direct_entry · harness fixture"
+  - button "Edit account"
+  - button "Save feeding summary" [active]
+  - link "Cancel daily entry":
+    - /url: /
+  - button "Correction history"
+  - button "Remove summary"

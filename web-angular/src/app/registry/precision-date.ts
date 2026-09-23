@@ -44,6 +44,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { canEstimate, parseDateEntry } from './date-parse';
 import type { DateEntry, PrecisionDate } from './date-parse';
@@ -52,6 +53,8 @@ import { ErrorPanel } from '../ui/surface';
 import { FieldLabel } from '../ui/text';
 import { HelpText } from '../ui/text';
 import { TextInput } from '../ui/input';
+
+let nextDateId = 0;
 
 export type { DateEntry, PrecisionDate } from './date-parse';
 
@@ -90,8 +93,12 @@ export function dateBlocker(
           <span appFieldLabel>Date</span>
           <input
             data-role="date-text"
+            [attr.aria-invalid]="entry().status === 'incomplete' || error() ? true : null"
+            [attr.aria-describedby]="
+              error() ? errorId : entry().status === 'incomplete' ? incompleteId : null
+            "
             [value]="text()"
-            (input)="text.set($any($event.target).value)"
+            (input)="setText($any($event.target).value)"
             placeholder="2019, Mar 2019, or 6 Jul 2023"
             appInput
             class="w-56"
@@ -100,7 +107,7 @@ export function dateBlocker(
 
         <!-- Only at day precision, and only because a day was typed. There is
              no such thing as knowing the hour but not the day. -->
-        @if (precision() === 'day') {
+        @if (allowTime() && precision() === 'day') {
           <label class="block">
             <span appFieldLabel>
               Time <span class="font-normal text-content-subtle">(optional)</span>
@@ -159,6 +166,7 @@ export function dateBlocker(
           <p
             class="mt-3 rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
             data-role="incomplete"
+            [id]="incompleteId"
           >
             {{ incompleteMessage() }}
           </p>
@@ -175,7 +183,7 @@ export function dateBlocker(
       }
 
       @if (error(); as e) {
-        <p appErrorPanel class="mt-3" data-role="error">
+        <p appErrorPanel class="mt-3" data-role="error" [id]="errorId">
           {{ e }}
         </p>
       }
@@ -183,7 +191,18 @@ export function dateBlocker(
   `,
 })
 export class PrecisionDateControl {
+  protected readonly errorId = 'precision-error-' + ++nextDateId;
+  protected readonly incompleteId = this.errorId + '-incomplete';
   readonly label = input('Date');
+  readonly initialValue = input<PrecisionDate | null>(null);
+  readonly resetKey = input<string | number>(0);
+  readonly allowTime = input(true);
+  private readonly initializationError = signal('');
+  readonly raw = computed(() => ({
+    text: this.text(),
+    time: this.time(),
+    estimated: this.estimated(),
+  }));
   /** Server refusal text for this control's field, shown verbatim. */
   readonly error = input<string | null>(null);
   /**
@@ -206,12 +225,14 @@ export class PrecisionDateControl {
   protected readonly canEstimate = computed(() => canEstimate(this.text()));
 
   readonly entry = computed<DateEntry>(() =>
-    parseDateEntry(this.text(), {
-      // Held but not applied where it cannot apply: the parser ignores it above
-      // a year, so a stale tick cannot alter a month or a day.
-      estimated: this.estimated(),
-      time: this.time(),
-    }),
+    this.initializationError()
+      ? { status: 'incomplete', message: this.initializationError() }
+      : parseDateEntry(this.text(), {
+          // Held but not applied where it cannot apply: the parser ignores it above
+          // a year, so a stale tick cannot alter a month or a day.
+          estimated: this.estimated(),
+          time: this.allowTime() ? this.time() : '',
+        }),
   );
 
   protected readonly precision = computed(() => {
@@ -230,6 +251,13 @@ export class PrecisionDateControl {
   });
 
   constructor() {
+    effect(() => {
+      this.resetKey();
+      untracked(() => this.initialize(this.initialValue()));
+    });
+    effect(() => {
+      if (this.precision() !== 'day' || !this.allowTime()) this.time.set('');
+    });
     // One effect over the computed value, rather than an emit() in every input
     // handler -- which is how one handler ends up forgetting to call it and the
     // parent silently keeps a stale date.
@@ -245,7 +273,55 @@ export class PrecisionDateControl {
    * emitted value would leave the date on screen -- the same trap CalfPicker's
    * reset() exists for.
    */
+  setText(text: string) {
+    this.initializationError.set('');
+    this.text.set(text);
+  }
+  private initialize(value: PrecisionDate | null) {
+    this.reset();
+    if (!value) return;
+    const [year, month, day] = value.occurred_on.split('-');
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const text =
+      value.date_precision === 'day'
+        ? `${Number(day)} ${months[Number(month) - 1]} ${year}`
+        : value.date_precision === 'month'
+          ? `${months[Number(month) - 1]} ${year}`
+          : year;
+    const parsed = parseDateEntry(text, {
+      estimated: value.date_precision === 'estimated',
+      time: value.occurred_time ?? '',
+    });
+    this.text.set(text);
+    this.estimated.set(value.date_precision === 'estimated');
+    this.time.set(value.occurred_time ?? '');
+    if (
+      parsed.status !== 'complete' ||
+      parsed.value.occurred_on !== value.occurred_on ||
+      parsed.value.date_precision !== value.date_precision ||
+      parsed.value.occurred_time !== (value.occurred_time ?? null) ||
+      (!this.allowTime() && !!value.occurred_time)
+    ) {
+      this.initializationError.set(
+        'The saved date cannot be represented without changing its precision or time. Resolve the date before saving.',
+      );
+    }
+  }
   reset(): void {
+    this.initializationError.set('');
     this.text.set('');
     this.time.set('');
     this.estimated.set(false);

@@ -1,3 +1,5 @@
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 // Record a calving. Pass two of the backfill.
 //
 // ---------------------------------------------------------------------------
@@ -65,6 +67,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
   selector: 'app-calving-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WriteLock,
     Button,
     CalfPicker,
     Card,
@@ -81,8 +84,8 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
     TextLink,
   ],
   template: `
-    <!-- A real <form>: Enter submits from any text field. -->
-    <form class="mx-auto max-w-2xl space-y-4" (submit)="onSubmit($event)">
+    <!-- A real <form [appWriteLock]="state">: Enter submits from any text field. -->
+    <form [appWriteLock]="state" class="mx-auto max-w-2xl space-y-4" (submit)="onSubmit($event)">
       <header>
         <h2 appPageHeading>Record a calving</h2>
         <p appHelp class="mt-1">
@@ -105,7 +108,8 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             >, and it will be here when you come back.
           </p>
         } @else {
-          <select id="calving-dam"
+          <select
+            id="calving-dam"
             #firstField
             data-role="dam"
             [value]="damId()"
@@ -239,6 +243,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
           [appButtonDisabled]="!canSubmit()"
           appButton
           reason="calving-submit-reason"
+          [busy]="state.submitting()"
         >
           {{ state.submitting() ? 'Saving…' : 'Record calving' }}
         </button>
@@ -275,6 +280,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
   `,
 })
 export class CalvingForm {
+  protected writer!: ReturnType<typeof writerDraft>;
   /**
    * The NATIVE submit event, not FormsModule's `ngSubmit`.
    *
@@ -387,6 +393,28 @@ export class CalvingForm {
   private readonly picker = viewChild(CalfPicker);
 
   constructor() {
+    this.writer = writerDraft({
+      name: 'Calving',
+      fields: {
+        damId: this.damId,
+        when: this.when,
+        calfSex: this.calfSex,
+        outcome: this.outcome,
+        calfChoice: this.calfChoice,
+        calfAnswered: this.calfAnswered,
+        calfName: this.calfName,
+        sireRef: this.sireRef,
+        observedBy: this.observedBy,
+        allowDuplicate: this.allowDuplicate,
+        overrideReason: this.overrideReason,
+      },
+      states: [this.state],
+      afterRestore: () => {
+        this.dateControls().forEach((c) => c.reset());
+        this.picker()?.reset();
+      },
+    });
+
     void this.api.damCandidates().then((d) => this.dams.set(d));
     void this.identifiers.refresh();
 
@@ -450,6 +478,15 @@ export class CalvingForm {
       occurredOn: w.occurred_on,
       datePrecision: w.date_precision,
     });
+    const current = this.when();
+    if (
+      this.damId() !== dam ||
+      this.calfSex() !== calfSex ||
+      current.status !== 'complete' ||
+      current.value.occurred_on !== w.occurred_on ||
+      current.value.date_precision !== w.date_precision
+    )
+      return;
     this.candidates.set(c);
   }
 
@@ -463,25 +500,26 @@ export class CalvingForm {
     const w = entry.value;
     // Re-read candidates on submit in link mode so a stale list cannot be the
     // reason a link is attempted against an animal that has since changed.
-    const r = await this.state.run((key) =>
-      this.api.recordCalving(
-        {
-          dam_id: this.damId(),
-          occurred_on: w.occurred_on,
-          occurred_time: w.occurred_time,
-          date_precision: w.date_precision,
-          calf_id: this.calfChoice(),
-          calf_sex: calfSex,
-          calf_name: this.calfName(),
-          outcome: this.outcome(),
-          sire_ref: blank(this.sireRef()),
-          observed_by: blank(this.observedBy()),
-          allow_near_duplicate: this.allowDuplicate(),
-          override_reason: blank(this.overrideReason()),
-          ...this.session.provenance(),
-        },
-        key,
-      ),
+    const r = await this.state.runRequest(
+      () =>
+        [
+          {
+            dam_id: this.damId(),
+            occurred_on: w.occurred_on,
+            occurred_time: w.occurred_time,
+            date_precision: w.date_precision,
+            calf_id: this.calfChoice(),
+            calf_sex: calfSex,
+            calf_name: this.calfName(),
+            outcome: this.outcome(),
+            sire_ref: blank(this.sireRef()),
+            observed_by: blank(this.observedBy()),
+            allow_near_duplicate: this.allowDuplicate(),
+            override_reason: blank(this.overrideReason()),
+            ...this.session.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.recordCalving(request[0], key),
     );
     this.allowDuplicate.set(false);
     if (r) {
@@ -511,6 +549,7 @@ export class CalvingForm {
         `Wrote a calving on ${this.damId()} — calf ${r.calf_id}${r.linked ? ', linked' : ', created'}. Ready for the next.`,
       );
       focusAfterWrite(this.firstField()?.nativeElement);
+      this.writer.accept();
     }
   }
 

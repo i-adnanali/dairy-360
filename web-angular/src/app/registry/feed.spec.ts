@@ -74,11 +74,16 @@ describe('feed editor', () => {
     f.componentRef.setInput('entity', 'crops');
     TestBed.inject(Session).set('recall', 'farmer');
     await settle(f);
-    f.componentInstance.dates['sowing'] = 'sometime in spring';
+    const date = f.nativeElement.querySelector('[data-role="date-text"]') as HTMLInputElement;
+    date.value = 'sometime in spring';
+    date.dispatchEvent(new Event('input'));
+    f.detectChanges();
     await f.componentInstance.save();
     expect(write).not.toHaveBeenCalled();
     expect(f.componentInstance.localError).toContain('Finish or clear');
-    f.componentInstance.dates['sowing'] = '2025';
+    date.value = '2025';
+    date.dispatchEvent(new Event('input'));
+    f.detectChanges();
     await f.componentInstance.save();
     expect(write.mock.calls[0][1].sowing_on).toBe('2025-01-01');
     expect(write.mock.calls[0][1].sowing_precision).toBe('year');
@@ -190,5 +195,92 @@ describe('daily feeding', () => {
     expect(l.animal_ids).toEqual(['BD-0001']);
     expect(l.recipients_confirmed).toBe(false);
     expect(l.quantity).toBeNull();
+  });
+});
+
+describe('saved feeding correction semantics', () => {
+  it('keeps saved provenance, prevents unchanged/reverted saves, and explicitly discards on conflict', async () => {
+    const record = {
+      ...blankFeed(),
+      id: 'feed-fixture',
+      on: '2026-09-17',
+      revision: 2,
+      recorded_by: 'adnan',
+      source_form: 'recall',
+      source_ref: 'old notebook',
+      notes: 'Original note',
+      fresh_status: 'unknown',
+      additional_status: 'unknown',
+      assessment: 'unknown',
+    };
+    const latest = { ...record, revision: 3, notes: 'Another recorder updated this' };
+    const read = vi.fn(async (path: string) =>
+      path.startsWith('daily/on/')
+        ? record
+        : path.startsWith('recipients')
+          ? { herd: [], milking: [] }
+          : [],
+    );
+    const write = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError({ error: 'feed_conflict', message: 'Original revision conflict' }, true),
+      );
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: { paramMap: of({}), snapshot: { paramMap: { get: () => record.on } } },
+        },
+        { provide: RegistryApi, useValue: { feedGet: read, feedWrite: write } },
+      ],
+    });
+    TestBed.inject(Session).set('direct_entry', 'spec-review');
+    const f = TestBed.createComponent(FeedDailyScreen);
+    await settle(f);
+    const c = f.componentInstance;
+    expect(c.savedView).toBe(true);
+    expect(f.nativeElement.textContent).toContain('recorded by adnan');
+    expect(f.nativeElement.querySelector('button[type=submit]')).toBeNull();
+    (Array.from(f.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
+      .find((b) => b.textContent?.trim() === 'Edit account')!
+      .click();
+    await settle(f);
+    c.reviewDraft();
+    await c.save();
+    expect(write).not.toHaveBeenCalled();
+    c.draft.notes = 'Changed note';
+    c.draft.notes = 'Original note';
+    c.reviewDraft();
+    expect(c.localError).toBe('No changes to save.');
+    field(f, 'notes', 'Changed note');
+    f.nativeElement
+      .querySelector('form')
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await settle(f);
+    expect(f.nativeElement.textContent).toContain(
+      'This correction will be recorded by spec-review',
+    );
+    await c.save();
+    expect(write.mock.calls[0][1].revision).toBe(2);
+    expect(write.mock.calls[0][1].recorded_by).toBe('spec-review');
+    expect(c.originalRecord!.recorded_by).toBe('adnan');
+    expect(c.draft.notes).toBe('Changed note');
+    c.latest.set(latest);
+    const keep = c.adoptLatest();
+    await new Promise((r) => setTimeout(r, 0));
+    f.detectChanges();
+    document.querySelector<HTMLButtonElement>('[data-role=keep-editing]')!.click();
+    await keep;
+    expect(c.draft.notes).toBe('Changed note');
+    expect(c.draft.revision).toBe(2);
+    const discard = c.adoptLatest();
+    await new Promise((r) => setTimeout(r, 0));
+    f.detectChanges();
+    document.querySelector<HTMLButtonElement>('[data-role=discard-changes]')!.click();
+    await discard;
+    expect(c.draft.revision).toBe(3);
+    expect(c.savedView).toBe(true);
   });
 });

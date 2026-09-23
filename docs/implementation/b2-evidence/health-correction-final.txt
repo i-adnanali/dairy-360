@@ -1,0 +1,183 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "direct_entry · spec-review"
+  - button "Search ⌘K"
+  - 'button "Theme: dark. Switch to system."': dark
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Animals":
+    - /url: /animals
+  - link "Calvings":
+    - /url: /animals/calvings
+  - link "Health":
+    - /url: /animals/health
+- link "Record calving":
+  - /url: /animals/calvings/new
+- link "Add animal":
+  - /url: /animals/new
+- main:
+  - heading "Animal health" [level=2]
+  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.
+  - generic: Health board date
+  - textbox "Health board date": 2026-09-23
+  - generic: 5 overdue · 0 due · 0 upcoming
+  - generic: Filter animal
+  - combobox "Filter animal":
+    - option "All animals" [selected]
+    - option "BD-0001 · Noori"
+    - option "BD-0002 · Sohni"
+    - option "BD-0003 · Kali"
+    - option "BD-0004 · Bholi"
+    - option "BD-0005 · Rani"
+    - option "BD-0006 · Chandni"
+    - option "BD-0007 · Heera"
+    - option "BD-0008 · Zeba"
+    - option "BD-0009 · Guddi"
+    - option "BD-0010 · Pari"
+    - option "BD-0011 · Bhoori"
+    - option "BD-0012 · Lali"
+    - option "BD-0013 · Kalo"
+    - option "BD-0014 · Reshma"
+    - option "BD-0015 · Sadqa"
+    - option "BD-0016 · Mithi"
+    - option "BD-0017 · Unnamed"
+    - option "BD-0018 · Unnamed"
+    - option "BD-0019 · Chitti"
+    - option "BD-0020 · Unnamed"
+    - option "BD-0021 · Unnamed"
+    - option "BD-0022 · Neeli"
+    - option "BD-0023 · Unnamed"
+    - option "BD-0024 · Unnamed"
+    - option "BD-0025 · Unnamed"
+    - option "BD-0026 · Unnamed"
+    - option "BD-0027 · Unnamed"
+    - option "BD-0028 · Unnamed"
+    - option "BD-0029 · Unnamed"
+    - option "BD-0030 · Unnamed"
+    - option "BD-0031 · Unnamed"
+  - generic: Task type
+  - combobox "Task type":
+    - option "All task types" [selected]
+    - option "Doses"
+    - option "Rechecks"
+    - option "Tests"
+  - generic: Due status
+  - combobox "Due status":
+    - option "All outstanding" [selected]
+    - option "Overdue"
+    - option "Due today"
+    - option "Upcoming"
+  - generic: Assigned person
+  - textbox "Assigned person":
+    - /placeholder: Filter by name
+  - navigation "Health tasks pagination":
+    - generic: 1–5 of 5
+  - paragraph:
+    - link "BD-0001":
+      - /url: /animals/BD-0001
+    - text: · Fixture overdue · 2026-09-16 · overdue
+  - button "Record completion"
+  - button "Defer / miss / cancel"
+  - paragraph:
+    - link "BD-0001":
+      - /url: /animals/BD-0001
+    - text: · Fixture recheck · 2026-09-17 · overdue
+  - button "Record completion"
+  - button "Defer / miss / cancel"
+  - paragraph:
+    - link "BD-0001":
+      - /url: /animals/BD-0001
+    - text: · Fixture due · 2026-09-17 · overdue
+  - button "Record completion"
+  - button "Defer / miss / cancel"
+  - paragraph:
+    - link "BD-0001":
+      - /url: /animals/BD-0001
+    - text: · Fixture upcoming · 2026-09-20 · overdue
+  - button "Record completion"
+  - button "Defer / miss / cancel"
+  - paragraph:
+    - link "BD-0002":
+      - /url: /animals/BD-0002
+    - text: · Demonstration round vaccine · 2026-09-21 · overdue
+  - button "Record completion"
+  - button "Defer / miss / cancel"
+  - generic "Open cases (1)"
+  - generic "Withdrawal instructions requiring attention (5)"
+  - button "Start vet visit"
+  - button "Record dose"
+  - button "Vaccination round"
+  - generic: Records
+  - combobox "Records":
+    - option "visits" [selected]
+    - option "examinations"
+    - option "cases"
+    - option "products"
+    - option "plans"
+    - option "tasks"
+    - option "administrations"
+    - option "results"
+    - option "costs"
+  - button "Add visits"
+  - navigation "Health records pagination":
+    - generic: 1–1 of 1
+  - article:
+    - paragraph: Demonstration vaccination and treatment round · 2026-09-15
+    - paragraph: closed · day · revision 2 · recorded by health_fixture
+    - button "View / edit"
+    - button "History"
+    - button "Examine animal"
+    - button "Record dose"
+  - heading "Correct visits" [level=3]
+  - paragraph: The recorder and source come from your recording session. Enter the actual vet or administrator separately.
+  - paragraph: Saved · revision 2 · recorded by health_fixture · direct_entry · Synthetic harness health card
+  - paragraph: This correction will be recorded by spec-review · direct_entry
+  - group "Record date":
+    - generic: Record date
+    - generic: Date
+    - textbox "Date":
+      - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+      - text: 15 Sep 2026
+    - generic: Time (optional)
+    - textbox "Time (optional)"
+    - checkbox "Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1" [disabled]
+    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+    - paragraph: Reading this asreading as an exact day — 2026-09-15
+    - paragraph: Not what you meant? Type it more precisely — Mar 2019 for a month, 6 Jul 2023 for a day. Nothing here can claim a day you did not type.
+  - generic: Veterinarian (enter unknown if unavailable)
+  - textbox "Veterinarian (enter unknown if unavailable)": Dr Fixture
+  - generic: Reason for visit
+  - textbox "Reason for visit": Demonstration vaccination and treatment round
+  - generic: Visit status
+  - combobox "Visit status":
+    - option "Choose"
+    - option "open"
+    - option "closed" [selected]
+  - generic: Source reference / prescription number
+  - textbox "Source reference / prescription number": Synthetic harness health card
+  - generic: Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)
+  - button "Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)"
+  - paragraph:
+    - link "Download attached document":
+      - /url: /api/registry/health/attachments/2ff4725f-b884-4cb2-8f82-18ffa9a59b54
+  - generic: Reason for correction / status change
+  - textbox "Reason for correction / status change": Synthetic cancellation check
+  - button "Save record" [disabled]
+  - button "Close"
+  - button "Void record with reason"

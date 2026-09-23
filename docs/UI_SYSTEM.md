@@ -1767,7 +1767,7 @@ See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) for validation and remaining limitati
 
 ## 20. Design improvements — Batch B1, 2026-09-21
 
-Implemented against `f3c2373` under [implementation specification v1.1](reviews/design-spec-2026-09-17/IMPLEMENTATION_SPEC.md). [Progress and verification](implementation/B1-PROGRESS.md) records the exact boundary and remaining acceptance work. B2 has not started.
+Implemented against `f3c2373` under [implementation specification v1.1](reviews/design-spec-2026-09-17/IMPLEMENTATION_SPEC.md). [Progress and verification](implementation/B1-PROGRESS.md) records the historical B1 boundary and remaining acceptance work. See §21 for B2.
 
 - Meaningful subtle/absent/no-record text now meets 4.5:1 across page, raised and sunken surfaces in both themes; certainty rules meet 3:1. Superseded event content uses readable subtle text. The contrast command now fails for unexpected failures or unreviewed disabled-text consumers, allowing only six exact held resting-border pairs. Write-log values and border-default are unchanged.
 - Shared Button retains variants and sizes, adds orthogonal danger intent and busy semantics, and gives native disabled controls the same muted treatment. Capture-phase activation blocking prevents custom-disabled/busy buttons and anchors reaching template click handlers. Callers retain save/shortcut guards; this does not replace domain validation.
@@ -1779,3 +1779,14 @@ Implemented against `f3c2373` under [implementation specification v1.1](reviews/
 - Dirty equality includes raw Milking entries/observer and Health editor/round/action fields; reverting becomes pristine. Local pagination does not discard drafts. Pending saves block transitions; native unload warning is attached only while dirty/pending. Read generations ignore stale roster/Health responses. Drafts remain memory-only.
 
 Full writer enrollment, saved-view/correction flow, uncertain-write outcome resolution and conflict UX across every writer remain B2. Native Health void confirmation is also unchanged until that workflow pass. Actual print/PDF, assistant live behavior, screen-reader/real-phone keyboard checks and operator validation are not claimed here.
+
+
+## 21. Design improvements — Batch B2, 2026-09-23
+
+Implemented against B1 commit `9227928`. [B2 progress and verification](implementation/B2-PROGRESS.md) records changed files, evidence and remaining acceptance checks. B3 has not started.
+
+All rendered writers now participate in shared draft navigation/context/session checks. Shared request snapshots retain the original endpoint, body and idempotency key after an unknown outcome; editing remains locked until retry resolves. Definite refusals preserve draft inputs and server prose. Latest revisions are compared separately and never silently rebased into the local draft.
+
+PrecisionDate adds initialization/reset generation and an optional time capability without changing protected form defaults. Health historical dates and precision-capable crop dates use it; planned and exact business dates keep their schema. Feed/Health saved history opens in view, corrections identify proposed provenance, and unchanged corrections cannot save. Shared destructive confirmation retains reasons and revision-history semantics. Incomplete started Payroll/Health round rows block submission rather than disappearing from the request.
+
+Animal/calving field order/count/treatment, write-log prominence, held resting borders and Life report print/export code remain unchanged. Drafts stay in memory. The B1 paragraph describing full-writer and native Health confirmation work as future B2 scope is historical and is superseded by this section. Operator, assistive-device, actual print/PDF and live assistant acceptance remain outstanding.

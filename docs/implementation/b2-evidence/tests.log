@@ -1,0 +1,33 @@
+
+> web-angular@0.0.0 test
+> ng test --watch=false
+
+❯ Building...
+✔ Building...
+Application bundle generation complete. [4.766 seconds] - 2026-09-23T01:39:10.013Z
+
+▲ [WARNING] NG8113: SummaryBar is not used within the template of PayrollRunScreen [plugin angular-compiler]
+
+    src/app/registry/payroll-run.ts:87:4:
+      87 │     SummaryBar,
+         ╵     ~~~~~~~~~~
+
+
+
+ RUN  v4.1.9 /Users/adnanali/personal/dairy-360/web-angular
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  40 passed (40)
+      Tests  414 passed (414)
+   Start at  06:39:10
+   Duration  6.11s (transform 3.60s, setup 4.41s, import 6.72s, tests 16.86s, environment 30.38s)
+

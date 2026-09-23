@@ -1,3 +1,5 @@
+import { writerDraft } from './writer-draft';
+import { WriteLock } from './write-lock';
 // Append a life event: dry_off, departure, or note.
 
 import {
@@ -45,6 +47,7 @@ const FIELDS = [
   selector: 'app-event-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WriteLock,
     Button,
     Card,
     ChipGroup,
@@ -59,7 +62,7 @@ const FIELDS = [
     TextInput,
   ],
   template: `
-    <form class="space-y-4" (submit)="onSubmit($event)">
+    <form [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
       <div appCard>
         <div appSectionLabel legend>What happened?</div>
         <app-chip-group
@@ -214,6 +217,7 @@ const FIELDS = [
               [appButtonDisabled]="!canSubmit()"
               appButton
               reason="event-submit-reason"
+              [busy]="state.submitting()"
             >
               {{ state.submitting() ? 'Saving…' : 'Record ' + t }}
             </button>
@@ -229,6 +233,7 @@ const FIELDS = [
   `,
 })
 export class EventForm {
+  protected writer!: ReturnType<typeof writerDraft>;
   /**
    * The NATIVE submit event, not FormsModule's `ngSubmit`.
    *
@@ -283,6 +288,24 @@ export class EventForm {
   );
 
   constructor() {
+    this.writer = writerDraft({
+      name: 'Animal event',
+      fields: {
+        type: this.type,
+        when: this.when,
+        reason: this.reason,
+        to: this.to,
+        text: this.text,
+        observedBy: this.observedBy,
+        allowAfterDeparture: this.allowAfterDeparture,
+        overrideReason: this.overrideReason,
+      },
+      states: [this.state],
+      afterRestore: () => {
+        this.dateControl()?.reset();
+      },
+    });
+
     void this.identifiers.refresh();
   }
 
@@ -291,28 +314,28 @@ export class EventForm {
     const t = this.type();
     if (entry.status !== 'complete' || !t) return;
     const w = entry.value;
-    const r = await this.state.run((key) =>
-      this.api.addEvent(
-        {
-          animal_id: this.animalId(),
-          type: t,
-          occurred_on: w.occurred_on,
-          occurred_time: w.occurred_time,
-          date_precision: w.date_precision,
-          reason: blank(this.reason()),
-          to: blank(this.to()),
-          text: blank(this.text()),
-          observed_by: blank(this.observedBy()),
-          allow_after_departure: this.allowAfterDeparture(),
-          override_reason: blank(this.overrideReason()),
-          ...this.session.provenance(),
-        },
-        key,
-      ),
+    const r = await this.state.runRequest(
+      () =>
+        [
+          {
+            animal_id: this.animalId(),
+            type: t,
+            occurred_on: w.occurred_on,
+            occurred_time: w.occurred_time,
+            date_precision: w.date_precision,
+            reason: blank(this.reason()),
+            to: blank(this.to()),
+            text: blank(this.text()),
+            observed_by: blank(this.observedBy()),
+            allow_after_departure: this.allowAfterDeparture(),
+            override_reason: blank(this.overrideReason()),
+            ...this.session.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.addEvent(request[0], key),
     );
     this.allowAfterDeparture.set(false);
     if (r) {
-      this.saved()?.(r.animal);
       this.type.set(null);
       this.when.set({ status: 'empty' });
       this.reason.set('');
@@ -323,6 +346,8 @@ export class EventForm {
       this.dateControl()?.reset();
       this.when.set({ status: 'empty' });
       this.observedBy.set('');
+      this.writer.accept();
+      this.saved()?.(r.animal);
       this.writeLog.announce(`Recorded a ${t} on ${this.animalId()}.`);
     }
   }

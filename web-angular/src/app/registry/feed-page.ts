@@ -1,3 +1,6 @@
+import { ChangeDetectorRef, viewChild } from '@angular/core';
+import { DraftRegistry } from './draft-registry';
+import { writerDraft } from './writer-draft';
 import { LocalPagination } from '../ui/local-pagination';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
@@ -21,7 +24,8 @@ import { PageHeading } from '../ui/heading';
 @Component({
   selector: 'app-feed-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LocalPagination,
+  imports: [
+    LocalPagination,
     RouterLink,
     FormsModule,
     SessionRequired,
@@ -61,14 +65,14 @@ import { PageHeading } from '../ui/heading';
       @if (catalogue) {
         <section appCard class="space-y-3">
           <h3 class="font-medium">Feed items</h3>
-          <button appButton variant="secondary" (click)="itemEdit = null; itemOpen = true">
+          <button appButton variant="secondary" (click)="openEditor('item', null)">
             Create item
           </button>
           @for (i of items(); track i.id) {
             <div class="flex flex-wrap gap-3">
               <span
                 >{{ i.label }} · {{ words(i.category) }}{{ i.archived ? ' · archived' : '' }}</span
-              ><button appButton variant="secondary" (click)="itemEdit = i; itemOpen = true">
+              ><button appButton variant="secondary" (click)="openEditor('item', i)">
                 Edit / archive
               </button>
             </div>
@@ -162,8 +166,12 @@ import { PageHeading } from '../ui/heading';
           }
           <section appCard>
             <h3 class="font-medium">Feeding history</h3>
-            <app-local-pagination label="Feeding days" #pages0="localPagination" [total]="o.days.length"/>
-          @for (d of pages0.rows(o.days); track d.on) {
+            <app-local-pagination
+              label="Feeding days"
+              #pages0="localPagination"
+              [total]="o.days.length"
+            />
+            @for (d of pages0.rows(o.days); track d.on) {
               <div class="flex flex-wrap justify-between gap-2 border-b border-line-subtle py-2">
                 <a class="underline" [routerLink]="['/feed/daily', d.on]">{{ d.on }}</a
                 ><span>{{
@@ -183,11 +191,12 @@ import { PageHeading } from '../ui/heading';
           @if (id === 'new') {
             <div class="max-w-[720px]">
               <app-feed-editor
+                #primaryEditor
                 [entity]="mode"
                 [items]="items()"
-                (saved)="saved($event)"
+                (saved)="saved($event, 'primary')"
                 (cancelled)="cancelEditor()"
-                (addItem)="itemEdit = null; itemOpen = true"
+                (addItem)="openEditor('item', null)"
               />
             </div>
           }
@@ -210,8 +219,12 @@ import { PageHeading } from '../ui/heading';
             </div>
           }
           <section appCard class="space-y-3">
-            <app-local-pagination label="Feed records" #pages1="localPagination" [total]="filtered().length"/>
-          @for (r of pages1.rows(filtered()); track r.id) {
+            <app-local-pagination
+              label="Feed records"
+              #pages1="localPagination"
+              [total]="filtered().length"
+            />
+            @for (r of pages1.rows(filtered()); track r.id) {
               <div class="border-b border-line-subtle py-3">
                 <a class="underline font-medium" [routerLink]="['/feed', mode, r.id]">{{
                   mode === 'crops' ? r.label : itemName(r.item_id) + ' · ' + r.on
@@ -263,11 +276,11 @@ import { PageHeading } from '../ui/heading';
                 </p>
               }
               <p>{{ d.notes }}</p>
-              <button appButton variant="secondary" (click)="editRecord = d; editor = true">
+              <button appButton variant="secondary" (click)="openEditor('primary', d)">
                 Correct{{ mode === 'crops' ? ' / finish / archive' : '' }}
               </button>
               @if (mode === 'purchases') {
-                <button appButton variant="secondary" (click)="removeTarget = d">
+                <button appButton variant="secondary" (click)="startRemoval(d)">
                   Remove purchase
                 </button>
               }
@@ -278,12 +291,13 @@ import { PageHeading } from '../ui/heading';
             @if (editor) {
               <div class="max-w-[720px]">
                 <app-feed-editor
+                  #primaryEditor
                   [entity]="mode"
                   [record]="editRecord"
                   [items]="items()"
-                  (saved)="saved($event)"
+                  (saved)="saved($event, 'primary')"
                   (cancelled)="cancelEditor()"
-                  (addItem)="itemEdit = null; itemOpen = true"
+                  (addItem)="openEditor('item', null)"
                 />
               </div>
             }
@@ -291,26 +305,22 @@ import { PageHeading } from '../ui/heading';
               <section appCard class="space-y-3">
                 <h3 class="font-medium">Expenses recorded so far — {{ money(expenseTotal(d)) }}</h3>
                 <p appHelp>Do not duplicate existing payroll salaries.</p>
-                <button
-                  appButton
-                  variant="secondary"
-                  (click)="expenseEdit = null; expenseOpen = true"
-                >
+                <button appButton variant="secondary" (click)="openEditor('expense', null)">
                   Add expense
                 </button>
-                <app-local-pagination label="Expenses" #pages2="localPagination" [total]="(d.expenses ?? []).length"/>
-          @for (e of pages2.rows(d.expenses ?? []); track e.id) {
+                <app-local-pagination
+                  label="Expenses"
+                  #pages2="localPagination"
+                  [total]="(d.expenses ?? []).length"
+                />
+                @for (e of pages2.rows(d.expenses ?? []); track e.id) {
                   <div class="flex flex-wrap gap-3">
                     <span
                       >{{ e.on }} · {{ words(e.category) }} · {{ money(e.amount_minor) }} ·
                       {{ e.notes }}</span
-                    ><button
-                      appButton
-                      variant="secondary"
-                      (click)="expenseEdit = e; expenseOpen = true"
-                    >
+                    ><button appButton variant="secondary" (click)="openEditor('expense', e)">
                       Correct expense</button
-                    ><button appButton variant="secondary" (click)="removeTarget = e">
+                    ><button appButton variant="secondary" (click)="startRemoval(e)">
                       Remove expense
                     </button>
                     <button appButton variant="secondary" (click)="showRevisions(e, 'expenses')">
@@ -322,10 +332,11 @@ import { PageHeading } from '../ui/heading';
               @if (expenseOpen) {
                 <div class="max-w-[720px]">
                   <app-feed-editor
+                    #expenseEditor
                     entity="expenses"
                     [cropId]="d.id"
                     [record]="expenseEdit"
-                    (saved)="saved($event)"
+                    (saved)="saved($event, 'expense')"
                     (cancelled)="expenseOpen = false"
                   />
                 </div>
@@ -347,9 +358,10 @@ import { PageHeading } from '../ui/heading';
       @if (itemOpen) {
         <div class="max-w-[720px]">
           <app-feed-editor
+            #itemEditor
             entity="items"
             [record]="itemEdit"
-            (saved)="saved($event)"
+            (saved)="saved($event, 'item')"
             (cancelled)="itemOpen = false"
           />
         </div>
@@ -357,7 +369,11 @@ import { PageHeading } from '../ui/heading';
       @if (revisions().length) {
         <section appCard class="space-y-3">
           <h3 class="font-medium">Recoverable correction history</h3>
-          <app-local-pagination label="Revision history" #pages3="localPagination" [total]="revisions().length"/>
+          <app-local-pagination
+            label="Revision history"
+            #pages3="localPagination"
+            [total]="revisions().length"
+          />
           @for (r of pages3.rows(revisions()); track r.id) {
             <details>
               <summary>{{ r.operation }} · revision {{ r.revision }} · {{ r.recorded_at }}</summary>
@@ -370,6 +386,9 @@ import { PageHeading } from '../ui/heading';
       }
       @if (removeTarget) {
         <section appCard>
+          @if (state.uncertain()) {
+            <p role="status">Removal outcome unknown. Retry the same removal before leaving.</p>
+          }
           <p>
             Remove this {{ removeTarget.crop_id ? 'expense' : 'purchase' }}? The audit trail
             remains. A linked purchase cannot be removed.
@@ -381,7 +400,14 @@ import { PageHeading } from '../ui/heading';
           } @else {
             <app-session-required what="this removal" />
           }
-          <button appButton variant="secondary" (click)="removeTarget = null">Keep record</button>
+          <button
+            appButton
+            variant="secondary"
+            [disabled]="state.locked()"
+            (click)="removeTarget = null"
+          >
+            Keep record
+          </button>
           @if (state.error(); as e) {
             <p appErrorPanel>{{ e.message }}</p>
           }
@@ -430,8 +456,49 @@ export class FeedPage {
   expenseOpen = false;
   expenseEdit: FeedRecord | null = null;
   removeTarget: FeedRecord | null = null;
+  private readonly primaryEditor = viewChild<FeedEditor>('primaryEditor');
+  private readonly itemEditor = viewChild<FeedEditor>('itemEditor');
+  private readonly expenseEditor = viewChild<FeedEditor>('expenseEditor');
+  private readonly drafts = inject(DraftRegistry);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private loadGeneration = 0;
+  private readonly removalDraft = writerDraft({
+    name: 'Feed removal',
+    fields: {},
+    states: [this.state],
+  });
+  async openEditor(slot: 'primary' | 'item' | 'expense', record: FeedRecord | null) {
+    const editor =
+      slot === 'item'
+        ? this.itemEditor()
+        : slot === 'expense'
+          ? this.expenseEditor()
+          : this.primaryEditor();
+    const open = () => {
+      if (slot === 'item') {
+        this.itemEdit = record;
+        this.itemOpen = true;
+      } else if (slot === 'expense') {
+        this.expenseEdit = record;
+        this.expenseOpen = true;
+      } else {
+        this.editRecord = record;
+        this.editor = true;
+      }
+    };
+    if (editor) await editor.writer.transition(open);
+    else open();
+    this.changeDetector.markForCheck();
+  }
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.editor = false;
+      this.itemOpen = false;
+      this.expenseOpen = false;
+      this.editRecord = null;
+      this.expenseEdit = null;
+      this.itemEdit = null;
+      this.detail.set(null);
       this.mode = this.route.snapshot.data['feedMode'] ?? 'overview';
       this.id = this.route.snapshot.paramMap.get('id') ?? '';
       void this.load();
@@ -486,20 +553,31 @@ export class FeedPage {
     );
   }
   async load() {
+    const generation = ++this.loadGeneration,
+      mode = this.mode,
+      id = this.id;
     this.loading.set(true);
     this.error.set('');
     try {
-      this.items.set(await this.api.feedGet<FeedRecord[]>('items'));
-      if (this.mode === 'overview' || this.mode === 'daily') await this.loadRange();
+      const items = await this.api.feedGet<FeedRecord[]>('items');
+      if (generation !== this.loadGeneration) return;
+      this.items.set(items);
+      if (mode === 'overview' || mode === 'daily') await this.loadRange();
       else {
-        this.records.set(await this.api.feedGet<FeedRecord[]>(this.mode));
-        if (this.id && this.id !== 'new')
-          this.detail.set(await this.api.feedGet<FeedRecord>(this.mode + '/' + this.id));
+        const [records, detail] = await Promise.all([
+          this.api.feedGet<FeedRecord[]>(mode),
+          id && id !== 'new'
+            ? this.api.feedGet<FeedRecord>(mode + '/' + id)
+            : Promise.resolve(null),
+        ]);
+        if (generation !== this.loadGeneration) return;
+        this.records.set(records);
+        this.detail.set(detail);
       }
-    } catch (e) {
-      this.error.set(String(e));
+    } catch (error) {
+      if (generation === this.loadGeneration) this.error.set(String(error));
     } finally {
-      this.loading.set(false);
+      if (generation === this.loadGeneration) this.loading.set(false);
     }
   }
   async loadRange() {
@@ -519,14 +597,13 @@ export class FeedPage {
     this.editor = false;
     if (this.id === 'new') void this.router.navigate(['/feed', this.mode]);
   }
-  async saved(r: FeedRecord) {
-    const primary = !this.itemOpen && !this.expenseOpen;
-    this.itemOpen = false;
-    this.expenseOpen = false;
-    if (primary) this.editor = false;
-    if (primary && this.id === 'new') {
+  async saved(r: FeedRecord, slot: 'primary' | 'item' | 'expense' = 'primary') {
+    if (slot === 'item') this.itemOpen = false;
+    else if (slot === 'expense') this.expenseOpen = false;
+    else this.editor = false;
+    if (slot === 'primary' && this.id === 'new')
       await this.router.navigate(['/feed', this.mode, r.id]);
-    } else await this.load();
+    else await this.load();
   }
   async showRevisions(d: FeedRecord, entity = this.mode) {
     try {
@@ -535,15 +612,33 @@ export class FeedPage {
       this.error.set(String(e));
     }
   }
+  async startRemoval(record: FeedRecord) {
+    if (this.state.locked()) return;
+    if (this.drafts.hasChanges() && !(await this.drafts.request())) return;
+    if (
+      !(await this.drafts.confirm(
+        'Remove feed record?',
+        (record.crop_id ? 'Expense' : 'Purchase') +
+          ' · ' +
+          record.on +
+          '. The audit trail remains. A linked purchase cannot be removed.',
+        'Remove record',
+      ))
+    )
+      return;
+    this.removeTarget = record;
+    await this.remove();
+  }
   async remove() {
     const r = this.removeTarget;
     if (!r || !this.session.ready() || this.state.submitting()) return;
-    const v = await this.state.run((k) =>
-      this.api.feedWrite(
-        (r.crop_id ? 'expenses' : 'purchases') + '/' + r.id + '/delete',
-        { revision: r.revision, ...this.session.provenance() },
-        k,
-      ),
+    const v = await this.state.runRequest(
+      () =>
+        [
+          (r.crop_id ? 'expenses' : 'purchases') + '/' + r.id + '/delete',
+          { revision: r.revision, ...this.session.provenance() },
+        ] as const,
+      (request, key) => this.api.feedWrite(request[0], request[1], key),
     );
     if (v) {
       this.log.announce('Removed feed record; audit trail retained.');
