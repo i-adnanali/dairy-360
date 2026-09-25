@@ -1,0 +1,9 @@
+B3 final browser checks — Codex in-app browser
+Synthetic memory fixture only; no browser form writes submitted.
+Milking: raw 123. and focus retained 390→1440; m advances; 25 answered of 101; first-unanswered focuses BD-1025 on page 2.
+Dispatch: raw 99. retained 390→768; Tab reaches Nothing taken, Shift+Tab returns to quantity; field and button clear of compact save bar.
+Payroll: raw 123. retained across resize; first-unanswered focuses fixture-person-75 on page 4; 390×450 height simulation keeps active field at y356–400 and save bar static.
+Health: board 2026-09-17 shows 1 overdue / 2 due / 2 upcoming; completed/cancelled filters contain no completion buttons; source opens Saved record; unfinished action reason retained after resize and Keep editing.
+Shell: Feed create links occur once each; ready Analytics has no section band; Today retains Change recording session; Check has one Recheck; page width stable with assistant open/closed.
+Protected animal and calving form measures: 720px at desktop; date placeholders/treatment unchanged.
+Native phone keyboard, native screen reader and actual browser zoom not tested.

@@ -1,0 +1,25 @@
+
+> web-angular@0.0.0 test
+> ng test --watch=false
+
+❯ Building...
+✔ Building...
+Application bundle generation complete. [5.031 seconds] - 2026-09-23T12:01:28.166Z
+
+
+ RUN  v4.1.9 /Users/adnanali/personal/dairy-360/web-angular
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  41 passed (41)
+      Tests  418 passed (418)
+   Start at  17:01:28
+   Duration  6.17s (transform 4.21s, setup 3.84s, import 6.96s, tests 14.69s, environment 34.50s)

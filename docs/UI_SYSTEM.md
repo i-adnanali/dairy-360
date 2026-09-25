@@ -1790,3 +1790,15 @@ All rendered writers now participate in shared draft navigation/context/session 
 PrecisionDate adds initialization/reset generation and an optional time capability without changing protected form defaults. Health historical dates and precision-capable crop dates use it; planned and exact business dates keep their schema. Feed/Health saved history opens in view, corrections identify proposed provenance, and unchanged corrections cannot save. Shared destructive confirmation retains reasons and revision-history semantics. Incomplete started Payroll/Health round rows block submission rather than disappearing from the request.
 
 Animal/calving field order/count/treatment, write-log prominence, held resting borders and Life report print/export code remain unchanged. Drafts stay in memory. The B1 paragraph describing full-writer and native Health confirmation work as future B2 scope is historical and is superseded by this section. Operator, assistive-device, actual print/PDF and live assistant acceptance remain outstanding.
+
+## 22. Design improvements — Batch B3, 2026-09-25
+
+B3 operational layouts are implemented against B2 `450045c`. [Progress and verification](implementation/B3-PROGRESS.md) supersedes the prior “B3 has not started” statements. B4/B5 remain unstarted.
+
+Pages now declare entry (720px), review (1400px) or report (1100px) measures; inline editors declare entry measures. Main padding is 16px below 768px and 24px above. The old implicit first-child width rule is removed. Page headers own contextual create actions. The shell keeps section navigation, recording-session actions and Recheck, and omits genuinely empty bands. Protected animal/calving controls and their 720px measure remain unchanged.
+
+Milking, Dispatch and Payroll keep one DOM/control tree across widths: desktop tables reflow to mobile entry cards below 768px, with visible field/context labels and at least 44px entry targets. Raw drafts, certainty semantics and full-collection totals remain independent of layout and pagination. Payroll adds named paging and first-unanswered navigation. Compact save summaries remain sticky while browsing rows, return to normal flow while a field is focused, and retain totals/first-unanswered immediately above them. Browsing-mode session-required notices use normal flow.
+
+Health has explicit status summaries and task hierarchy using server standings; terminal tasks have no completion action. Withdrawal notices group by animal and medium, keep attention/unknown-end summaries visible, and expose original instructions and source records. Only identical record/revision references deduplicate; missing revision never implies equality or safety. Clinical and financial calculations, record correction semantics and vaccination transaction behavior are unchanged.
+
+Final checks: 418 frontend and 778 server tests pass, build/typecheck/template checks pass, and contrast reports only the six held border exceptions. Forty light/dark responsive combinations are recorded in the B3 evidence. Operator, native assistive-device/phone/zoom, print/PDF and live-assistant release checks remain explicitly unverified.

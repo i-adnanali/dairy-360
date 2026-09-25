@@ -1,3 +1,4 @@
+import { WithdrawalNotices } from './withdrawal-notices';
 import { WriteLock } from './write-lock';
 import { DraftRegistry } from './draft-registry';
 import { DestroyRef } from '@angular/core';
@@ -108,6 +109,7 @@ export const OUT_OF_BAND = 0.5;
   selector: 'app-milking-roster',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    WithdrawalNotices,
     WriteLock,
     Pagination,
     ScrollRegion,
@@ -129,19 +131,31 @@ export const OUT_OF_BAND = 0.5;
     TextLink,
   ],
   template: `
-    <form [appWriteLock]="state" class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
+    <form
+      data-page-layout="review"
+      [appWriteLock]="state"
+      class="entry-sheet space-y-4"
+      (submit)="onSubmit($event)"
+    >
       <header>
         <h2 appPageHeading>Record a milking</h2>
         <p appHelp class="mt-1">
-          Everyone in milk on this date, in one pass. An animal left untouched blocks the save — if
-          she was milked and nobody weighed it, say so; that is a real answer and a guessed number
-          is not.
+          Answer every animal. Enter litres, or choose Not measured / Not milked.
         </p>
+        <p appHelp>
+          In a quantity field: Enter moves to the next animal; m = Not measured; n = Not milked.
+        </p>
+        <details class="text-sm text-content-secondary">
+          <summary>About this roster</summary>
+          Every animal in milk on this date needs an answer. Not measured records milking without a
+          measurement; Not milked records that no milk was taken. Select an active alternative again
+          to clear it.
+        </details>
       </header>
 
       <!-- when -->
       <div appCard>
-        <div class="flex flex-wrap items-end gap-4">
+        <div class="entry-context flex flex-wrap items-end gap-4">
           <label class="block">
             <span appFieldLabel>Date</span>
             <input
@@ -162,7 +176,7 @@ export const OUT_OF_BAND = 0.5;
               (changed)="setSession($any($event))"
             />
           </div>
-          <div class="ml-auto">
+          <div class="md:ml-auto">
             <app-identifier-input
               help="Person who milked these animals, if known. Use a stable identifier, not a display name."
               field="observed_by"
@@ -198,7 +212,7 @@ export const OUT_OF_BAND = 0.5;
             appScrollRegion="Milking quantities"
             class="rounded-xl border border-line bg-surface-raised"
           >
-            <table class="w-full text-left text-sm">
+            <table class="entry-table w-full text-left text-sm">
               <thead
                 class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
               >
@@ -211,7 +225,8 @@ export const OUT_OF_BAND = 0.5;
                   <th scope="col" appCell numeric>Yesterday {{ r.previous_session.session }}</th>
                   <th scope="col" appCell numeric>Recent {{ r.session }} mean</th>
                   <th scope="col" appCell>
-                    Litres — or <span class="font-mono">m</span> / <span class="font-mono">n</span>
+                    Litres — or <span class="font-mono">m</span> /
+                    <span class="font-mono">n</span>
                   </th>
                 </tr>
               </thead>
@@ -242,15 +257,12 @@ export const OUT_OF_BAND = 0.5;
                     "
                   >
                     <td appCell density="compact">
+                      @if (draft(row.animal_id).status === null) {
+                        <span class="mobile-entry-label">Not answered</span>
+                      }
                       <span class="font-mono whitespace-nowrap text-content-heading">{{
                         row.animal_id
                       }}</span>
-                      @for (w of row.health_withdrawals || []; track $index) {
-                        <p class="text-sm text-content-primary">
-                          {{ w.target }} withdrawal: {{ w.instruction || 'needs clarification' }}
-                          {{ w.until || '' }}
-                        </p>
-                      }
                       <!-- An unnamed animal is a real no-record: she has a
                            serial and nobody has given her a name. -->
                       @if (row.name) {
@@ -267,6 +279,7 @@ export const OUT_OF_BAND = 0.5;
                          start date's precision -- an honest limit, not a
                          claim. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="dim">
+                      <span class="mobile-entry-label">Days in milk: </span>
                       {{ row.days_in_milk }}
                     </td>
                     <!-- ---------------------------------------------------------
@@ -281,6 +294,9 @@ export const OUT_OF_BAND = 0.5;
                          but unweighed, 1 not milked" precisely so they are never
                          blended; this is the screen where a person acts on it. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
+                      <span class="mobile-entry-label"
+                        >Yesterday {{ r.previous_session.session }}:
+                      </span>
                       <span
                         [appCertainty]="previousState(row)"
                         [attr.data-certainty]="previousState(row)"
@@ -292,6 +308,7 @@ export const OUT_OF_BAND = 0.5;
                          quantities rather than spending a word on them: "~9.9"
                          reads as "about" in the width a figure column has. -->
                     <td appCell density="compact" numeric tone="secondary" data-role="mean">
+                      <span class="mobile-entry-label">Recent {{ r.session }} mean: </span>
                       <span
                         [appCertainty]="row.recent_mean === null ? 'no-record' : 'approximate'"
                         [attr.data-certainty]="
@@ -300,10 +317,15 @@ export const OUT_OF_BAND = 0.5;
                         >{{ meanText(row) }}</span
                       >
                     </td>
-                    <td appCell density="compact">
+                    <td appCell density="compact" class="entry-answer">
+                      <app-withdrawal-notices [notices]="row.health_withdrawals || []" />
+                      <label class="mobile-entry-label" [attr.for]="'quantity-' + row.animal_id"
+                        >Litres for {{ row.animal_id }} {{ row.name }}</label
+                      >
                       <div class="flex flex-wrap items-center gap-2">
                         <input
                           #cell
+                          [id]="'quantity-' + row.animal_id"
                           [attr.aria-label]="'Litres for ' + row.animal_id + ' ' + (row.name || '')"
                           appInput
                           [attr.aria-invalid]="invalidAnimal() === row.animal_id ? true : null"
@@ -314,13 +336,9 @@ export const OUT_OF_BAND = 0.5;
                           [attr.data-role]="'litres-' + row.animal_id"
                           inputmode="decimal"
                           [value]="draft(row.animal_id).litres"
-                          [disabled]="
-                            draft(row.animal_id).status !== null &&
-                            draft(row.animal_id).status !== 'measured'
-                          "
                           (input)="typeLitres(row.animal_id, $any($event.target).value)"
                           (keydown)="onKey($event, i + tableOffset())"
-                          class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
+                          class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
                         <button
                           type="button"
@@ -404,14 +422,10 @@ export const OUT_OF_BAND = 0.5;
           <!-- The total catches a ten-fold typo that no per-row rule will,
                because the operator knows roughly what the herd gives. -->
           <div appSummaryBar class="flex flex-wrap items-center gap-x-6 gap-y-2 bg-surface-page">
-            <span data-role="resolved">
-              <span class="font-medium text-content-primary">{{ resolved() }}</span>
-              <span class="text-content-muted"> of {{ r.rows.length }} answered</span>
-            </span>
             <span data-role="total">
-              <span class="text-content-muted">Herd total </span>
+              <span class="text-content-muted">Measured total </span>
               <span class="font-medium text-content-primary">{{ total() }} L</span>
-              <span class="text-content-muted"> from {{ measuredCount() }} measured</span>
+              <span class="text-content-muted"> · {{ measuredCount() }} measured</span>
             </span>
           </div>
         }
@@ -431,7 +445,21 @@ export const OUT_OF_BAND = 0.5;
         </p>
       }
 
-      <div class="flex items-center gap-3">
+      <div class="entry-summary-details space-y-2">
+        @if (untouched().length) {
+          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
+            Go to first unanswered animal
+          </button>
+        }
+        @if (blockedReason(); as b) {
+          <span appHelp data-role="blocked" id="milking-submit-reason">{{ b }}</span>
+        }
+      </div>
+      <div appSummaryBar class="entry-save-bar">
+        <span data-role="resolved">
+          <span class="font-medium text-content-primary">{{ resolved() }}</span>
+          <span class="text-content-muted"> of {{ roster()?.rows?.length || 0 }} answered</span>
+        </span>
         @if (session_.ready()) {
           <button
             type="submit"
@@ -445,14 +473,6 @@ export const OUT_OF_BAND = 0.5;
           </button>
         } @else {
           <app-session-required what="this session" />
-        }
-        @if (untouched().length) {
-          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
-            Go to first unanswered animal
-          </button>
-        }
-        @if (blockedReason(); as b) {
-          <span appHelp data-role="blocked" id="milking-submit-reason">{{ b }}</span>
         }
       </div>
     </form>

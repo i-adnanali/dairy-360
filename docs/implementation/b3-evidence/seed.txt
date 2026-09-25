@@ -1,0 +1,154 @@
+registry harness seed  ->  http://localhost:6470/api/registry
+
+target   :memory:  (memory: true)  -- harness confirmed
+
+pass one -- animals that arrived from elsewhere
+  BD-0001  Noori    heifer     day-precision calving history -> MEASURED intervals
+  BD-0002  Sohni    heifer     calvings entered OUT OF ORDER
+  BD-0003  Kali     heifer     mixed-precision pair + a pre-applied paired date correction
+  BD-0004  Bholi    heifer     the matriarch; her 2018 calving LINKS to Reshma
+  BD-0005  Rani     heifer     one calving, then dried off -> majj . dry
+  BD-0006  Chandni  heifer     NO birth date -> choti despite her age; ranks FIRST in the calf picker
+  BD-0007  Heera    male       male -> the calf picker's sex-mismatch refusal
+  BD-0008  Zeba     heifer     sold in 2024 -> departed; an overridden write and a post-departure note
+  BD-0009  Guddi    heifer     THE OLD MAIDEN -- parity 0, ~8 years old -> choti, not majj
+  BD-0010  Pari     calf       katti at 17 months, parity 0 -- the age side of the boundary
+  BD-0011  Bhoori   calf       ITEM 10: recorded age 15 months AND parity 1 -> must read majj, not katti
+  BD-0012  Lali     heifer     a stillbirth that still opens a lactation and counts toward parity
+  BD-0013  Kalo     heifer     one edit from Kali -> the name_near duplicate warning
+  BD-0014  Reshma   heifer     entered as acquired in pass one; pass two LINKS her and sharpens her birth date
+  BD-0015  Sadqa    calf       the IN-WINDOW eligible calf-picker candidate for a Mar 2026 calving (28d apart)
+
+pass two -- calvings and life events, oldest-first per animal
+  noori-c1             calving  BD-0001  2021-02-11 (day)  minted BD-0016
+  noori-d1             dry_off   BD-0001  2021-11-06 (day)
+  noori-c2             calving  BD-0001  2022-07-19 (day)  minted BD-0017
+  noori-d2             dry_off   BD-0001  2023-04-02 (day)
+  noori-c3             calving  BD-0001  2024-01-08 (day)  minted BD-0018
+  noori-note           note      BD-0001  2026-02-14 (day)
+  sohni-c2             calving  BD-0002  2022-12-01 (month)  minted BD-0019
+  sohni-c3             calving  BD-0002  2024-04-01 (month)  minted BD-0020
+  sohni-c1             calving  BD-0002  2021-06-01 (month)  minted BD-0021
+  kali-c1              calving  BD-0003  2022-09-14 (day)  minted BD-0022
+  kali-c2              calving  BD-0003  2024-02-01 (month)  minted BD-0023
+  kali-d1              dry_off   BD-0003  2025-11-01 (month)
+  bholi-c1-link        calving  BD-0004  2018-06-01 (month)  LINKED BD-0014
+  bholi-c2             calving  BD-0004  2019-11-01 (month)  minted BD-0024
+  bholi-d1             dry_off   BD-0004  2020-08-01 (month)
+  rani-c1              calving  BD-0005  2023-10-01 (month)  minted BD-0025
+  rani-d1              dry_off   BD-0005  2024-07-01 (month)
+  lali-c1              calving  BD-0012  2023-05-01 (month)  minted BD-0026  + departure(died) on the calf
+  lali-d1              dry_off   BD-0012  2024-02-01 (month)
+  lali-c2              calving  BD-0012  2024-11-01 (month)  minted BD-0027
+  bhoori-c1            calving  BD-0011  2026-07-01 (month)  minted BD-0028
+  zeba-c1              calving  BD-0008  2022-08-01 (month)  minted BD-0029
+  zeba-dep             departure BD-0008  2024-05-01 (month)
+  zeba-dry-override    dry_off   BD-0008  2024-03-01 (month)  [OVERRIDE recorded]
+  zeba-note            note      BD-0008  2024-09-12 (day)
+  dep-noori-c3-calf    departure BD-0018  2024-04-01 (month)
+  dep-sohni-c3-calf    departure BD-0020  2024-07-01 (month)
+  dep-rani-c1-calf     departure BD-0025  2024-01-01 (month)
+  dep-noori-c2-calf    departure BD-0017  2024-03-01 (month)
+  dep-sohni-c1-calf    departure BD-0021  2023-09-01 (month)
+  dep-bholi-c2-calf    departure BD-0024  2021-05-01 (month)
+  dep-zeba-c1-calf     departure BD-0029  2024-05-01 (month)
+  died-lali-c2-calf    departure BD-0027  2025-03-01 (month)
+  mithi-c1             calving  BD-0016  2025-06-14 (day)  minted BD-0030
+  neeli-c1             calving  BD-0022  2026-05-01 (month)  minted BD-0031
+  kali-c1-correction   paired correction on BD-0003 + BD-0022 -> 2022-10-02 (day)
+
+milking  5 sessions across 6 animals in milk
+
+dest     4 destinations (1 dodhi, 2 households, home)
+dispatch 5 sessions + 1 part payment
+
+staff    3 people (2 salaried, 1 dihari) + 1 milk allowance
+payroll  2026-08-01 to 2026-08-31 recorded; this month left outstanding
+Health: visits, cases, courses, doses, round outcomes, tasks, corrections, attachment and costs seeded.
+
+herd     31 animals
+  id        name      status     parity  birth                    post  tag
+  BD-0001   Noori     lactating  3       2017-03-01 (month)       1     PK-4412
+  BD-0002   Sohni     lactating  3       2016-01-01 (year)        2     PK-4418
+  BD-0003   Kali      dry        2       2018-01-01 (estimated)   3     PK-4425
+  BD-0004   Bholi     dry        2       2012-01-01 (estimated)   4     PK-4430
+  BD-0005   Rani      dry        1       2019-07-01 (month)       5     PK-4431
+  BD-0006   Chandni   heifer     0       unknown                  6     PK-4437
+  BD-0007   Heera     male       0       2023-06-01 (month)       7     PK-4440
+  BD-0008   Zeba      departed   1       2018-01-01 (year)        8     PK-4444
+  BD-0009   Guddi     heifer     0       2018-01-01 (estimated)   9     PK-4450
+  BD-0010   Pari      calf       0       2025-04-01 (month)       10    PK-4455
+  BD-0011   Bhoori    lactating  1       2025-06-01 (month)       11    PK-4460
+  BD-0012   Lali      lactating  2       2018-01-01 (estimated)   12    PK-4465
+  BD-0013   Kalo      heifer     0       2019-01-01 (estimated)   13    PK-4470
+  BD-0014   Reshma    heifer     0       2018-06-01 (month)       14    PK-4475
+  BD-0015   Sadqa     calf       0       2026-02-01 (month)       15    PK-4485
+  BD-0016   Mithi     lactating  1       2021-02-11 (day)         -     -
+  BD-0017   -         departed   0       2022-07-19 (day)         -     -
+  BD-0018   -         departed   0       2024-01-08 (day)         -     -
+  BD-0019   Chitti    heifer     0       2022-12-01 (month)       -     -
+  BD-0020   -         departed   0       2024-04-01 (month)       -     -
+  BD-0021   -         departed   0       2021-06-01 (month)       -     -
+  BD-0022   Neeli     lactating  1       2022-10-02 (day)         -     -
+  BD-0023   -         heifer     0       2024-02-01 (month)       -     -
+  BD-0024   -         departed   0       2019-11-01 (month)       -     -
+  BD-0025   -         departed   0       2023-10-01 (month)       -     -
+  BD-0026   -         departed   0       2023-05-01 (month)       -     -
+  BD-0027   -         departed   0       2024-11-01 (month)       -     -
+  BD-0028   -         calf       0       2026-07-01 (month)       -     -
+  BD-0029   -         departed   0       2022-08-01 (month)       -     -
+  BD-0030   -         calf       0       2025-06-14 (day)         -     -
+  BD-0031   -         calf       0       2026-05-01 (month)       -     -
+
+link-mode promotions (enter, then SHARPEN)
+  BD-0014 Reshma: acquired -> birth (origin now born_on_farm, birth 2018-06-01 month)
+
+check    as_of 2026-09-17  |  31 animals, 70 events, 17 lactations
+  violations  none
+  intervals   measured n=2 mean 531d range 523-538d
+              approximate n=5 mean 518d range 487-550d
+
+milk     28 row(s) over 5 session(s), 4 complete
+  measured 22  |  milked, not measured 5  |  not milked 1
+    2026-09-17 morning  6/6 recorded, 5 measured
+  ! 2026-09-16 evening  4/6 recorded, 2 measured
+    2026-09-16 morning  6/6 recorded, 5 measured
+    2026-09-15 evening  6/6 recorded, 4 measured
+    2026-09-15 morning  6/6 recorded, 6 measured
+
+identifier values now offered by the datalists
+  observed_by    abdul | Abdul | imran | rafiq
+  acquired_from  chak 42 dairy | Chak 42 dairy | Sahiwal mandi
+  sire_ref       sultan | Sultan | Toori Wala
+
+129 writes issued. Re-run this command any time: the fixed
+Idempotency-Keys make every one of them a replay while this harness lives.
+
+buyers
+  Ali (next door)        household  when they come  Rs 9,000 / 40 L
+  Bashir (dodhi)         dodhi      every session   Rs 7,000 / 40 L
+  Bibi (corner house)    household  when they come  Rs 9,000 / 40 L
+  Home                   home       every session   not billed
+  Imran (milk allowance) staff      when they come  not billed
+
+balances
+  Ali (next door)        Rs 3825.00
+  Bashir (dodhi)         Rs 8737.50
+  Bibi (corner house)    Rs 2700.00
+
+where the milk went
+  measured   135.2 L  (5 milked, not weighed)
+  sold       107.5 L
+  kept home  16.5 L
+  gap        11.2 L  (no percentage -- production is a lower bound)
+  sessions   5/5 with every standing buyer answered
+
+what is owed to staff
+  abdul      settled
+  imran      Rs 7000.00
+  rashid     Rs 2400.00 in advance
+
+today
+  milking    morning ok  evening 0/6
+  dispatch   morning ok  evening 0/2
+  payroll    last month settled, 2 of 2 to enter this month

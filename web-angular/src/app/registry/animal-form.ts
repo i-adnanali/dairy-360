@@ -59,7 +59,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
     <!-- A real <form [appWriteLock]="state">, which is what makes Enter submit from any text field.
          Before this there was no form element anywhere in the registry and
          every button was type="button", so Enter did nothing on any screen. -->
-    <form [appWriteLock]="state" class="mx-auto max-w-2xl" (submit)="onSubmit($event)">
+    <form data-page-layout="entry" [appWriteLock]="state" class="mx-auto max-w-2xl" (submit)="onSubmit($event)">
       <header class="mb-4">
         <h2 appPageHeading>Add an acquired animal</h2>
         <p appHelp class="mt-1">

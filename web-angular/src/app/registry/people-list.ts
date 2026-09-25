@@ -87,6 +87,7 @@ import { Button } from '../ui/button';
     TextInput,
   ],
   template: `
+    <div data-page-layout="review">
     <label class="mb-3 block text-sm text-content-secondary"
       >Search records
       <input
@@ -100,9 +101,9 @@ import { Button } from '../ui/button';
       <p role="status" class="text-sm text-content-muted">Loading records…</p>
     }
 
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div class="mx-auto  space-y-6">
       <header>
-        <h2 appPageHeading>People</h2>
+        <div class="page-header"><h2 appPageHeading>People</h2><a appButton href="#add-person" (click)="focusAdd($event)">Add person</a></div>
         <p appHelp class="mt-1">
           Everyone the farm employs, and what is owed to them. Also anyone whose name appears on a
           record — the vet, whoever sold you an animal — so “everything Imran milked” has somebody
@@ -227,7 +228,7 @@ import { Button } from '../ui/button';
       }
 
       <!-- Add a person. The identifier is asked for HERE and nowhere else. -->
-      <form
+      <form data-page-layout="entry"
         [appWriteLock]="personState"
         class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
         (submit)="submitPerson($event)"
@@ -311,7 +312,7 @@ import { Button } from '../ui/button';
            returning gets a second stint rather than an edited first one. -->
       @if (rows(); as list) {
         @if (list.length > 0) {
-          <form
+          <form data-page-layout="entry"
             [appWriteLock]="engageState"
             class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
             (submit)="submitEngagement($event)"
@@ -411,9 +412,12 @@ import { Button } from '../ui/button';
         }
       }
     </div>
+
+    </div>
   `,
 })
 export class PeopleList {
+  protected focusAdd(event: Event) { event.preventDefault(); const field = document.querySelector<HTMLInputElement>('#add-person input'); field?.focus(); field?.scrollIntoView({ block: 'center' }); }
   protected personDraft!: ReturnType<typeof writerDraft>;
   protected engageDraft!: ReturnType<typeof writerDraft>;
   protected readonly paging = pagedList<WageBalanceRow>('people');

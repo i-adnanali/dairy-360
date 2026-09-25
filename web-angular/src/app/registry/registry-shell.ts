@@ -92,57 +92,55 @@ import { TextLink } from '../ui/text';
           }
         </nav>
       </header>
-      <div class="border-b border-line-subtle bg-surface-sunken px-4" data-role="section-bar">
-        <div
-          class="mx-auto flex min-h-12 max-w-[1400px] flex-wrap items-center justify-between gap-3 py-2"
-        >
-          <nav class="flex flex-wrap gap-4 text-sm" aria-label="Section views">
-            @for (view of activeSection().views; track view.path) {
-              <a
-                [routerLink]="view.path"
-                routerLinkActive="font-medium !text-content-primary"
-                [routerLinkActiveOptions]="{ exact: true }"
-                appTextLink
-                >{{ view.label }}</a
-              >
+      @if (
+        activeSection().views.length ||
+        !session.ready() ||
+        activeSection().label === 'Today' ||
+        activeSection().label === 'Check'
+      ) {
+        <div class="border-b border-line-subtle bg-surface-sunken px-4" data-role="section-bar">
+          <div
+            class="mx-auto flex min-h-12 max-w-[1400px] flex-wrap items-center justify-between gap-3 py-2"
+          >
+            @if (activeSection().views.length) {
+              <nav class="flex flex-wrap gap-4 text-sm" aria-label="Section views">
+                @for (view of activeSection().views; track view.path) {
+                  <a
+                    [routerLink]="view.path"
+                    routerLinkActive="font-medium !text-content-primary"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    appTextLink
+                    >{{ view.label }}</a
+                  >
+                }
+              </nav>
             }
-          </nav>
-          <div class="flex flex-wrap gap-3">
-            @if (activeSection().label === 'Check') {
-              <button
-                type="button"
-                appButton
-                variant="secondary"
-                (click)="actions.refresh()"
-                data-role="section-recheck"
-              >
-                Recheck
-              </button>
-            } @else if (!session.ready() || activeSection().label === 'Today') {
-              <button
-                type="button"
-                appButton
-                variant="secondary"
-                (click)="session.requestSetup()"
-                data-role="section-start-session"
-              >
-                {{ session.ready() ? 'Change recording session' : 'Start a recording session' }}
-              </button>
-            } @else {
-              @for (action of activeSection().actions; track action.path) {
-                <a
-                  [routerLink]="action.path"
-                  [fragment]="action.fragment"
-                  (click)="focusAction(action.fragment)"
+            <div class="flex flex-wrap gap-3">
+              @if (activeSection().label === 'Check') {
+                <button
+                  type="button"
                   appButton
-                  [variant]="action.primary ? 'primary' : 'secondary'"
-                  >{{ action.label }}</a
+                  variant="secondary"
+                  (click)="actions.refresh()"
+                  data-role="section-recheck"
                 >
+                  Recheck
+                </button>
+              } @else if (!session.ready() || activeSection().label === 'Today') {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  (click)="session.requestSetup()"
+                  data-role="section-start-session"
+                >
+                  {{ session.ready() ? 'Change recording session' : 'Start a recording session' }}
+                </button>
               }
-            }
+            </div>
           </div>
         </div>
-      </div>
+      }
       <app-command-palette #palette />
 
       <!-- WHAT JUST HAPPENED, without looking for it.
@@ -215,10 +213,7 @@ import { TextLink } from '../ui/text';
            panel's "inset-y-0" resolves against a box taller than the viewport.
            --------------------------------------------------------------- -->
       <div class="relative flex min-h-0 flex-1 flex-col">
-        <main
-          class="phase7-content flex-1 overflow-y-auto px-4 py-6"
-          [class.phase7-form]="writeOnlyRoute() || feedFormRoute()"
-        >
+        <main class="phase7-content flex-1 overflow-y-auto px-4 py-6">
           @if (writeOnlyRoute() && !session.ready()) {
             <app-session-gate />
           } @else {
@@ -251,7 +246,6 @@ export class RegistryShell {
    * beside the route table is a second copy, and the enumeration deleted from
    * routes.ts went stale three times before anyone removed it.
    */
-  protected readonly feedFormRoute = computed(() => /^\/feed\/(daily\/[^/]+|crops\/new|purchases\/new)$/.test(this.url().split(/[?#]/)[0]));
   protected readonly writeOnlyRoute = signal(this.declaresWrites());
 
   constructor() {
@@ -266,7 +260,10 @@ export class RegistryShell {
         );
       }
     });
-    inject(DestroyRef).onDestroy(() => this.actions.inShell.set(false));
+    inject(DestroyRef).onDestroy(() => {
+      this.actions.inShell.set(false);
+      this.headingObserver?.disconnect();
+    });
     const undo = inject(Shortcuts).register('mod+enter', 'RegistryShell', (e) => {
       if (document.querySelector('[data-role="command-dialog"]')) return;
       const focused = e.target as HTMLElement | null;
@@ -287,6 +284,7 @@ export class RegistryShell {
               this.focusAction('add-person');
             } else {
               document.querySelector('main')?.scrollTo({ top: 0 });
+              this.focusPageHeading();
             }
           },
           { injector: this.injector },
@@ -318,6 +316,25 @@ export class RegistryShell {
    * string, which url-state.ts puts there precisely so a specific roster can be
    * named and sent to somebody.
    */
+  private headingObserver?: MutationObserver;
+  private focusPageHeading(): void {
+    this.headingObserver?.disconnect();
+    const main = document.querySelector('main');
+    if (!main) return;
+    const focus = () => {
+      const heading = main.querySelector<HTMLElement>('h2');
+      if (!heading) return false;
+      heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+      this.headingObserver?.disconnect();
+      return true;
+    };
+    if (!focus()) {
+      this.headingObserver = new MutationObserver(() => focus());
+      this.headingObserver.observe(main, { childList: true, subtree: true });
+    }
+  }
+
   protected focusAction(fragment?: string): void {
     if (!fragment) return;
     const form = document.getElementById(fragment);

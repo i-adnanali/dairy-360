@@ -38,10 +38,11 @@ type Tab = 'events' | 'add-event' | 'correct';
     StatusBadge,
   ],
   template: `
+    <div data-page-layout="review">
     @if (loadError(); as e) {
       <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
     } @else if (detail(); as d) {
-      <div class="mx-auto max-w-3xl space-y-5">
+      <div class="mx-auto  space-y-5">
         <header appCard>
           <div class="flex flex-wrap items-baseline gap-x-3">
             <h2 class="font-mono text-xl font-semibold text-content-primary" data-role="serial">
@@ -159,6 +160,8 @@ type Tab = 'events' | 'add-event' | 'correct';
     } @else {
       <p appHelp data-role="loading">Loading…</p>
     }
+
+    </div>
   `,
 })
 export class AnimalDetailView {

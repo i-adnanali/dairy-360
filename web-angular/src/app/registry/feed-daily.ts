@@ -48,7 +48,7 @@ import { farmToday } from './today';
     FeedEditor,
   ],
   template: `
-    <div class="mx-auto max-w-[720px] space-y-5">
+    <div data-page-layout="entry" class="mx-auto max-w-[720px] space-y-5">
       <header>
         <h2 appPageHeading>Daily feeding</h2>
         <p appHelp>

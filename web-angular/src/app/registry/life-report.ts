@@ -66,7 +66,8 @@ import { HelpText } from '../ui/text';
       }
     `,
   ],
-  template: `<div class="space-y-5">
+  template: `
+    <div data-page-layout="report" class="space-y-5">
     <header>
       <h2 appPageHeading>Animal lifetime report</h2>
       <p appHelp>Recorded history with evidence, uncertainty and coverage gaps.</p>
@@ -212,7 +213,8 @@ import { HelpText } from '../ui/text';
         </tbody>
       </table>
     }
-  </div>`,
+  </div>
+  `,
 })
 export class LifeReport {
   private api = inject(RegistryApi);

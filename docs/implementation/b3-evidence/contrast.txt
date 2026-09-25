@@ -1,0 +1,34 @@
+
+> dairy-360@1.0.0 check:contrast
+> node scripts/check-contrast.mjs
+
+
+WCAG contrast over the token layer
+  122 graded checks (TEXT/FOCUS/MARK), 6 failures
+  96 INFO rows, reported and never failed
+
+--- LIGHT: 3 failure(s) ---
+  MARK    1.54:1  needs 3  (SC 1.4.11)
+        border-default #CBC9C3  on  surface-page #F7F7F5
+        an input's own border
+  MARK    1.66:1  needs 3  (SC 1.4.11)
+        border-default #CBC9C3  on  surface-raised #FFFFFF
+        an input's own border
+  MARK    1.43:1  needs 3  (SC 1.4.11)
+        border-default #CBC9C3  on  surface-sunken #EFEEEB
+        an input's own border
+
+--- DARK: 3 failure(s) ---
+  MARK    1.59:1  needs 3  (SC 1.4.11)
+        border-default #3A3934  on  surface-page #141413
+        an input's own border
+  MARK    1.49:1  needs 3  (SC 1.4.11)
+        border-default #3A3934  on  surface-raised #1C1B1A
+        an input's own border
+  MARK    1.37:1  needs 3  (SC 1.4.11)
+        border-default #3A3934  on  surface-sunken #232220
+        an input's own border
+
+TEXT pairs passing AA but under AAA (7:1): 48
+Held resting-border failures: 6; unexpected failures: 0
+Disabled text census: Button inactive actions, Composer disabled input, CalfPicker ineligible disabled options, PrecisionDate disabled estimated checkbox.

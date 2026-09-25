@@ -35,7 +35,7 @@ import { formatMinor, rupeesToMinor } from './money';
     HelpText,
   ],
   template: `
-    <form
+    <form data-page-layout="entry"
       [appWriteLock]="state"
       appCard
       class="space-y-4"

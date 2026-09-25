@@ -1,3 +1,4 @@
+import { ScrollRegion } from '../ui/scroll-region';
 import { untracked } from '@angular/core';
 import { writerDraft, replacesContext } from './writer-draft';
 import { WriteLock } from './write-lock';
@@ -83,6 +84,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
   selector: 'app-dispatch-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ScrollRegion,
     WriteLock,
     Pagination,
     StatusBadge,
@@ -104,7 +106,12 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
     TextLink,
   ],
   template: `
-    <form [appWriteLock]="state" class="mx-auto max-w-4xl space-y-4" (submit)="onSubmit($event)">
+    <form
+      data-page-layout="review"
+      [appWriteLock]="state"
+      class="entry-sheet space-y-4"
+      (submit)="onSubmit($event)"
+    >
       <header>
         <h2 appPageHeading>Where the milk went</h2>
         <p appHelp class="mt-1">
@@ -115,7 +122,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
 
       <!-- when -->
       <div appCard>
-        <div class="flex flex-wrap items-end gap-4">
+        <div class="entry-context flex flex-wrap items-end gap-4">
           <label class="block">
             <span appFieldLabel>Date</span>
             <input
@@ -136,7 +143,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
               (changed)="setSession($any($event))"
             />
           </div>
-          <div class="ml-auto">
+          <div class="md:ml-auto">
             <app-identifier-input
               help="Person who handed over the milk, if known. Use a stable identifier, not a display name."
               field="observed_by"
@@ -164,23 +171,28 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           </p>
         } @else {
           <!-- MUST be answered -->
-          <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
+          <div
+            appScrollRegion="Standing dispatch quantities"
+            class="rounded-xl border border-line bg-surface-raised"
+          >
             <div
               class="border-b border-line-subtle bg-surface-page px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-secondary"
               data-role="standing-head"
             >
               Every session — leave none of these unanswered
             </div>
-            <table class="w-full text-left text-sm">
+            <table class="entry-table w-full text-left text-sm">
               <thead
                 class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
               >
                 <tr>
-                  <th appCell>Goes to</th>
-                  <th appCell numeric nowrap>Yesterday {{ s.previous_session.session }}</th>
-                  <th appCell numeric nowrap>Rate</th>
-                  <th appCell>Litres</th>
-                  <th appCell numeric>Amount</th>
+                  <th scope="col" appCell>Goes to</th>
+                  <th scope="col" appCell numeric nowrap>
+                    Yesterday {{ s.previous_session.session }}
+                  </th>
+                  <th scope="col" appCell numeric nowrap>Rate</th>
+                  <th scope="col" appCell>Litres</th>
+                  <th scope="col" appCell numeric>Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -203,6 +215,9 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                     "
                   >
                     <td appCell density="compact" nowrap>
+                      @if (draft(row.destination_id).status === null) {
+                        <span class="mobile-entry-label">Not answered</span>
+                      }
                       <span class="text-content-heading">{{ row.name }}</span>
                       @if (!row.billable) {
                         <span appBadge class="ml-2 whitespace-nowrap" data-role="not-billed"
@@ -211,6 +226,9 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                       }
                     </td>
                     <td appCell density="compact" numeric tone="secondary" data-role="previous">
+                      <span class="mobile-entry-label"
+                        >Yesterday {{ s.previous_session.session }}:
+                      </span>
                       <span
                         [appCertainty]="previousState(row)"
                         [attr.data-certainty]="previousState(row)"
@@ -241,6 +259,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                       class="text-right"
                       data-role="rate"
                     >
+                      <span class="mobile-entry-label">Rate: </span>
                       @if (rateState(row); as st) {
                         <span [appCertainty]="st" [attr.data-certainty]="st">{{
                           rateText(row)
@@ -249,24 +268,31 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         {{ rateText(row) }}
                       }
                     </td>
-                    <td appCell density="compact">
+                    <td appCell density="compact" class="entry-answer">
+                      <label
+                        class="mobile-entry-label"
+                        [attr.for]="'quantity-' + row.destination_id"
+                        >Litres for {{ row.name }}</label
+                      >
                       <div class="flex flex-wrap items-center gap-2">
                         <input
                           #cell
+                          appInput
+                          [id]="'quantity-' + row.destination_id"
                           [attr.aria-label]="
                             'Litres for ' + row.name + ' — ' + on() + ' ' + session()
                           "
                           [attr.data-role]="'litres-' + row.destination_id"
                           inputmode="decimal"
                           [value]="draft(row.destination_id).litres"
-                          [disabled]="draft(row.destination_id).status === 'none'"
                           (input)="typeLitres(row.destination_id, $any($event.target).value)"
                           (keydown)="onKey($event, i + tableOffset())"
-                          class="w-24 rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
+                          class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
                         />
                         <button
                           type="button"
                           [attr.aria-label]="'Nothing taken by ' + row.name"
+                          [attr.aria-pressed]="draft(row.destination_id).status === 'none'"
                           [attr.data-role]="'none-' + row.destination_id"
                           (click)="markNone(row.destination_id)"
                           [class]="noneClass(row.destination_id)"
@@ -299,6 +325,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                       tone="secondary"
                       [attr.data-role]="'amount-' + row.destination_id"
                     >
+                      <span class="mobile-entry-label">Amount: </span>
                       <span
                         [appCertainty]="amountState(row)"
                         [attr.data-certainty]="amountState(row)"
@@ -325,7 +352,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           <!-- OFFERED, never required -->
           @if (s.occasional.length > 0) {
             <div
-              class="overflow-hidden rounded-xl border border-dashed border-line bg-surface-raised"
+              appScrollRegion="Occasional dispatch quantities"
+              class="rounded-xl border border-dashed border-line bg-surface-raised"
             >
               <div
                 class="border-b border-line-subtle px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-muted"
@@ -341,7 +369,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                 (pageChange)="occasionalPage.set($event)"
                 (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"
               />
-              <table class="w-full text-left text-sm">
+              <table class="entry-table w-full text-left text-sm">
                 <tbody>
                   @for (
                     row of s.occasional.slice(
@@ -367,7 +395,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                           }}</span>
                         }
                       </td>
-                      <td appCell density="compact">
+                      <td appCell density="compact" class="entry-answer">
                         @if (draft(row.destination_id).status === null) {
                           <button
                             type="button"
@@ -379,8 +407,15 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                             they took some
                           </button>
                         } @else {
+                          <label
+                            class="mobile-entry-label"
+                            [attr.for]="'quantity-' + row.destination_id"
+                            >Litres for {{ row.name }}</label
+                          >
                           <div class="flex items-center gap-2">
                             <input
+                              appInput
+                              [id]="'quantity-' + row.destination_id"
                               [attr.aria-label]="
                                 'Litres for ' + row.name + ' — ' + on() + ' ' + session()
                               "
@@ -388,7 +423,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                               inputmode="decimal"
                               [value]="draft(row.destination_id).litres"
                               (input)="typeLitres(row.destination_id, $any($event.target).value)"
-                              class="w-24 rounded-lg border border-line px-2 py-1 text-sm"
+                              class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm"
                             />
                             <span
                               class="text-sm"
@@ -421,13 +456,6 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             appSummaryBar
             class="flex flex-wrap items-center justify-between gap-4 bg-surface-raised"
           >
-            <span data-role="resolved">
-              <span class="text-content-muted">Answered </span>
-              <span class="font-medium text-content-primary"
-                >{{ answered() }} of {{ s.standing.length }}</span
-              >
-              <span class="text-content-muted"> required</span>
-            </span>
             <span data-role="out">
               <span class="text-content-muted">Out </span>
               <span class="font-medium text-content-primary">{{ totalLitres() }} L</span>
@@ -465,7 +493,25 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
         <p appErrorPanel data-role="error-form">{{ e }}</p>
       }
 
-      <div class="flex items-center gap-3">
+      <div class="entry-summary-details space-y-2">
+        @if (untouchedStanding().length) {
+          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
+            Go to first unanswered destination
+          </button>
+        }
+        @if (blockedReason(); as b) {
+          <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
+        }
+      </div>
+      <div appSummaryBar class="entry-save-bar">
+        <span data-role="resolved">
+          <span class="font-medium text-content-primary"
+            >{{ answered() }} of {{ sheet()?.standing?.length || 0 }}</span
+          >
+          <span class="text-content-muted">
+            answered<span class="sr-only"> required destinations</span></span
+          >
+        </span>
         @if (session_.ready()) {
           <button
             type="submit"
@@ -479,14 +525,6 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           </button>
         } @else {
           <app-session-required what="this session" />
-        }
-        @if (untouchedStanding().length) {
-          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
-            Go to first unanswered destination
-          </button>
-        }
-        @if (blockedReason(); as b) {
-          <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
         }
       </div>
     </form>

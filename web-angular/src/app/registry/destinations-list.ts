@@ -80,6 +80,7 @@ import { Button } from '../ui/button';
     TextLink,
   ],
   template: `
+    <div data-page-layout="review">
     <label class="mb-3 block text-sm text-content-secondary"
       >Search records
       <input
@@ -93,7 +94,7 @@ import { Button } from '../ui/button';
       <p role="status" class="text-sm text-content-muted">Loading records…</p>
     }
 
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div class="mx-auto  space-y-6">
       <header>
         <h2 appPageHeading>Buyers</h2>
         <p appHelp class="mt-1">
@@ -394,6 +395,8 @@ import { Button } from '../ui/button';
           <app-session-required what="a destination" />
         }
       </form>
+    </div>
+
     </div>
   `,
 })

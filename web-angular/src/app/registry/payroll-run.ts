@@ -1,3 +1,7 @@
+import { ElementRef } from '@angular/core';
+import { Pagination } from '../ui/pagination';
+import { ScrollRegion } from '../ui/scroll-region';
+import { RowDivider } from '../ui/surface';
 import { untracked } from '@angular/core';
 import { writerDraft, replacesContext } from './writer-draft';
 import { WriteLock } from './write-lock';
@@ -83,6 +87,9 @@ interface DihariDraft {
   selector: 'app-payroll-run',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    Pagination,
+    ScrollRegion,
+    RowDivider,
     WriteLock,
     SummaryBar,
     Button,
@@ -97,10 +104,10 @@ interface DihariDraft {
     TextInput,
   ],
   template: `
-    <div [appWriteLock]="state" class="mx-auto max-w-4xl space-y-6">
+    <div data-page-layout="review" [appWriteLock]="state" class="entry-sheet space-y-6">
       <header class="space-y-3">
         <h2 appPageHeading>Payroll</h2>
-        <div class="flex flex-wrap items-end gap-4">
+        <div class="entry-context flex flex-wrap items-end gap-4">
           <label class="space-y-1">
             <span class="block text-xs font-medium uppercase tracking-wide text-content-muted"
               >From</span
@@ -148,7 +155,8 @@ interface DihariDraft {
         <!-- Salaried. Above the divider: every row must be answered. -->
         <section class="space-y-3" data-role="permanent">
           <h3 appSectionHeading>
-            Salaried <span class="font-normal text-content-muted">— every row needs a figure</span>
+            Salaried
+            <span class="font-normal text-content-muted">— every row needs a figure</span>
           </h3>
 
           @if (r.permanent.length === 0) {
@@ -156,97 +164,125 @@ interface DihariDraft {
               Nobody was on a salaried stint in this period.
             </p>
           } @else {
-            <ul class="space-y-2">
-              @for (row of r.permanent; track row.engagement.id) {
-                <li
-                  class="rounded-xl border border-line-subtle bg-surface-raised p-3"
-                  [attr.data-engagement]="row.engagement.id"
-                >
-                  <div class="flex flex-wrap items-baseline justify-between gap-2">
-                    <div>
-                      <span class="font-mono text-sm text-content-primary">{{
-                        row.person.identifier
-                      }}</span>
-                      @if (row.engagement.role) {
-                        <span class="ml-2 text-xs text-content-subtle">{{
-                          row.engagement.role
+            <div appScrollRegion="Salaried wage entries">
+              <table class="entry-table payroll-table w-full text-left text-sm">
+                <thead>
+                  <tr>
+                    <th scope="col">Person / period</th>
+                    <th scope="col">Agreement</th>
+                    <th scope="col">Wage amount (Rs)</th>
+                    <th scope="col">Package context</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    row of r.permanent.slice(
+                      (tablePage() - 1) * tableSize(),
+                      tablePage() * tableSize()
+                    );
+                    track row.engagement.id
+                  ) {
+                    <tr
+                      appRowDivider
+                      [unanswered]="!validAmount(row)"
+                      [attr.data-certainty]="!validAmount(row) ? 'unanswered' : null"
+                      [attr.data-engagement]="row.engagement.id"
+                    >
+                      <td>
+                        <span class="font-mono whitespace-nowrap text-sm text-content-primary">{{
+                          row.person.identifier
                         }}</span>
-                      }
-                    </div>
-                    <!-- The AGREEMENT, read-only and visibly separate from the
-                         figure being entered. -->
-                    <span appHelp size="xs" data-role="agreement">
-                      @if (row.term) {
-                        agreed {{ rate(row) }}
-                      } @else {
-                        <span class="text-danger-soft">no package agreed — record one first</span>
-                      }
-                    </span>
-                  </div>
+                        @if (row.engagement.role) {
+                          <span class="ml-2 text-xs text-content-subtle">{{
+                            row.engagement.role
+                          }}</span>
+                        }
+                        <p class="text-xs text-content-muted">{{ from() }} – {{ to() }}</p>
+                        @if (!validAmount(row)) {
+                          <p class="text-sm">Not answered — enter a valid wage</p>
+                        }
+                      </td>
+                      <td>
+                        <span appHelp size="xs" data-role="agreement">
+                          @if (row.term) {
+                            agreed {{ rate(row) }}
+                          } @else {
+                            <span class="text-danger-soft"
+                              >no package agreed — record one first</span
+                            >
+                          }
+                        </span>
+                      </td>
+                      <td class="entry-answer">
+                        <label class="flex flex-wrap items-center gap-2">
+                          <span class="mobile-entry-label"
+                            >Wage amount (Rs) for {{ row.person.identifier }}</span
+                          >
+                          <input
+                            type="text"
+                            inputmode="decimal"
+                            [attr.aria-label]="'Wage amount (Rs) for ' + row.person.identifier"
+                            [value]="amountOf(row)"
+                            (input)="setAmount(row, $any($event.target).value)"
+                            [disabled]="!row.term"
+                            appInput
+                            density="comfortable"
+                            class="w-32 text-right font-mono tabular-nums disabled:bg-surface-page"
+                            [attr.data-role]="'amount-' + row.person.identifier"
+                          />
+                        </label>
+                        @if (row.existing) {
+                          <span appHelp size="xs" tone="subtle" data-role="already-saved">
+                            already recorded as {{ formatMinor(row.existing.amount_minor) }}
+                          </span>
+                        }
+                      </td>
+                      <td>
+                        @if (row.milk; as m) {
+                          <p class="mt-2 text-xs text-content-muted" data-role="milk">
+                            milk allowance
 
-                  <div class="mt-2 flex flex-wrap items-center gap-3">
-                    <label class="flex items-center gap-2">
-                      <span appHelp size="xs">Rs</span>
-                      <input
-                        type="text"
-                        inputmode="decimal"
-                        [attr.aria-label]="'Wage amount (Rs) for ' + row.person.identifier"
-                        [value]="amountOf(row)"
-                        (input)="setAmount(row, $any($event.target).value)"
-                        [disabled]="!row.term"
-                        appInput
-                        density="comfortable"
-                        class="w-32 text-right font-mono tabular-nums disabled:bg-surface-page"
-                        [attr.data-role]="'amount-' + row.person.identifier"
-                      />
-                    </label>
-                    @if (row.existing) {
-                      <span appHelp size="xs" tone="subtle" data-role="already-saved">
-                        already recorded as {{ formatMinor(row.existing.amount_minor) }}
-                      </span>
-                    }
-                  </div>
-
-                  <!-- The package report, per person. The allowance is on the
-                       agreement; the litres are dispatch rows. That they can
-                       differ is information, not an error. -->
-                  <!-- "to date" when the period is still running. Without it a
-                       2 L/day allowance opened on the 7th reads as a 46 L
-                       shortfall made of days that have not happened. -->
-                  @if (row.milk; as m) {
-                    <p class="mt-2 text-xs text-content-muted" data-role="milk">
-                      milk allowance
-                      <!-- No allowance on the agreement is a no-record, not a
-                           zero: a person with no milk in their package has no
-                           expected figure to compare against, which is why
-                           "differs()" returns false for null rather than
-                           treating it as 0 L due. -->
-                      <span
-                        [appCertainty]="m.expected_litres === null ? 'no-record' : 'known'"
-                        [attr.data-certainty]="m.expected_litres === null ? 'no-record' : 'known'"
-                        >{{ m.expected_litres ?? noRecord }}</span
-                      >
-                      L due{{ m.partial ? ' to date' : '' }},
-                      <span
-                        [class.text-content-secondary]="differs(m.expected_litres, m.taken_litres)"
-                      >
-                        {{ m.taken_litres }} L taken
-                      </span>
-                      @if (m.partial) {
-                        <span class="text-content-subtle">(through {{ m.through_on }})</span>
-                      }
-                    </p>
+                            <span
+                              [appCertainty]="m.expected_litres === null ? 'no-record' : 'known'"
+                              [attr.data-certainty]="
+                                m.expected_litres === null ? 'no-record' : 'known'
+                              "
+                              >{{ m.expected_litres ?? noRecord }}</span
+                            >
+                            L due{{ m.partial ? ' to date' : '' }},
+                            <span
+                              [class.text-content-secondary]="
+                                differs(m.expected_litres, m.taken_litres)
+                              "
+                            >
+                              {{ m.taken_litres }} L taken
+                            </span>
+                            @if (m.partial) {
+                              <span class="text-content-subtle">(through {{ m.through_on }})</span>
+                            }
+                          </p>
+                        }
+                        @if (packageLines(row); as lines) {
+                          @if (lines.length > 0) {
+                            <p appHelp size="xs" tone="subtle" class="mt-1" data-role="package">
+                              {{ lines.join(' · ') }}
+                            </p>
+                          }
+                        }
+                      </td>
+                    </tr>
                   }
-                  @if (packageLines(row); as lines) {
-                    @if (lines.length > 0) {
-                      <p appHelp size="xs" tone="subtle" class="mt-1" data-role="package">
-                        {{ lines.join(' · ') }}
-                      </p>
-                    }
-                  }
-                </li>
-              }
-            </ul>
+                </tbody>
+              </table>
+            </div>
+            <app-pagination
+              label="Salaried wages"
+              [page]="tablePage()"
+              [pageSize]="tableSize()"
+              [total]="r.permanent.length"
+              (pageChange)="tablePage.set($event)"
+              (sizeChange)="tableSize.set($event); tablePage.set(1)"
+            />
           }
         </section>
 
@@ -283,7 +319,7 @@ interface DihariDraft {
           } @else {
             @for (draft of drafts(); track $index) {
               <div
-                class="flex flex-wrap items-end gap-2 rounded-lg border border-line-subtle bg-surface-raised p-2"
+                class="entry-context flex flex-wrap items-end gap-2 rounded-lg border border-line-subtle bg-surface-raised p-2"
                 data-role="dihari-draft"
               >
                 <label class="space-y-1">
@@ -343,11 +379,8 @@ interface DihariDraft {
         </section>
 
         <!-- Footer: what this run costs, and whether it can be saved. -->
-        <footer class="space-y-3 rounded-xl border border-line bg-surface-page p-4">
+        <footer class="space-y-3">
           <div class="flex flex-wrap items-baseline justify-between gap-3 text-sm">
-            <span class="font-medium text-content-primary" data-role="answered">
-              {{ answeredCount() }} of {{ r.permanent.length }} salaried answered
-            </span>
             <span class="font-mono tabular-nums text-content-primary" data-role="total">
               {{ formatMinor(draftTotalMinor()) }}
             </span>
@@ -360,28 +393,40 @@ interface DihariDraft {
             <p appErrorPanel data-role="entries-error">{{ msg }}</p>
           }
 
-          @if (session.ready()) {
-            <button
-              type="button"
-              data-write-retry
-              [busy]="state.submitting()"
-              (click)="save()"
-              [appButtonDisabled]="!canSave()"
-              appButton
-              data-role="save"
-              reason="payroll-save-reason"
-            >
-              {{ state.submitting() ? 'Saving…' : 'Save run' }}
-            </button>
-          } @else {
-            <app-session-required what="this run" />
-          }
           @if (!allAnswered() || !dailyAnswered()) {
             <p appHelp size="xs" data-role="blocked" id="payroll-save-reason">
               Answer every salaried wage and finish or remove each incomplete daily wage row. Enter
               zero only for a known zero wage; an omission is not an answer.
             </p>
           }
+          @if (!allAnswered() || !dailyAnswered()) {
+            <button appButton variant="secondary" type="button" (click)="showUnanswered()">
+              Go to first unanswered wage
+            </button>
+          }
+          <div appSummaryBar class="entry-save-bar">
+            <span class="font-medium text-content-primary" data-role="answered">
+              {{ answeredCount() }} of {{ r.permanent.length }} answered<span class="sr-only">
+                salaried wages</span
+              >
+            </span>
+            @if (session.ready()) {
+              <button
+                type="button"
+                data-write-retry
+                [busy]="state.submitting()"
+                (click)="save()"
+                [appButtonDisabled]="!canSave()"
+                appButton
+                data-role="save"
+                reason="payroll-save-reason"
+              >
+                {{ state.submitting() ? 'Saving…' : 'Save run' }}
+              </button>
+            } @else {
+              <app-session-required what="this run" />
+            }
+          </div>
         </footer>
       } @else {
         <p appHelp tone="subtle">Loading…</p>
@@ -390,6 +435,38 @@ interface DihariDraft {
   `,
 })
 export class PayrollRunScreen {
+  protected readonly tablePage = signal(1);
+  protected readonly tableSize = signal(25);
+  private readonly element: ElementRef<HTMLElement> = inject(ElementRef);
+  protected validAmount(row: PayrollRunRow) {
+    return rupeesToMinor(this.amountOf(row)) !== null;
+  }
+  protected showUnanswered() {
+    const index = this.run()?.permanent.findIndex((row) => !this.validAmount(row)) ?? -1;
+    if (index >= 0) {
+      this.tablePage.set(Math.floor(index / this.tableSize()) + 1);
+      setTimeout(() => {
+        const rows = this.element.nativeElement.querySelectorAll<HTMLElement>('[data-engagement]');
+        const row = rows[index % this.tableSize()];
+        const input = row?.querySelector<HTMLInputElement>('input');
+        if (input && !input.disabled) input.focus();
+        else {
+          row?.setAttribute('tabindex', '-1');
+          row?.focus();
+        }
+        row?.scrollIntoView({ block: 'center' });
+      });
+    } else {
+      const index = this.drafts().findIndex(
+        (d) => !d.engagement_id || !d.on || rupeesToMinor(d.amount) === null,
+      );
+      const row = this.element.nativeElement.querySelectorAll<HTMLElement>(
+        '[data-role="dihari-draft"]',
+      )[index];
+      row?.querySelector<HTMLElement>('select, input')?.focus();
+      row?.scrollIntoView({ block: 'center' });
+    }
+  }
   protected writer!: ReturnType<typeof writerDraft>;
   protected dailyPerson(id: string): string {
     return (
@@ -457,6 +534,7 @@ export class PayrollRunScreen {
     const generation = ++this.loadGeneration;
     const observerAtLoad = this.observedBy();
     this.run.set(null);
+    this.tablePage.set(1);
     try {
       const r = await this.api.payrollRun(from, to);
       if (generation !== this.loadGeneration) return;

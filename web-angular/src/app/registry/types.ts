@@ -156,7 +156,7 @@ export interface MilkingRow {
 }
 
 export interface RosterRow {
-  health_withdrawals?: {target:string;status:string;instruction?:string;until?:string}[];
+  health_withdrawals?: import('./withdrawal-notices').WithdrawalNotice[];
   animal_id: string;
   name: string | null;
   days_in_milk: number;

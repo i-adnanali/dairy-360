@@ -63,7 +63,7 @@ import { SubHeading } from '../ui/heading';
     SubHeading,
   ],
   template: `
-    <div class="mx-auto max-w-3xl space-y-5">
+    <div data-page-layout="review" class="mx-auto  space-y-5">
       <header>
         <h2 appPageHeading>Check the records</h2>
         <p appHelp class="mt-1">

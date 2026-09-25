@@ -30,6 +30,26 @@ describe('health management', () => {
       ],
     });
   });
+  it('orders server standings stably and shows terminal tasks without completion actions', async () => {
+    const f = TestBed.createComponent(HealthPage), c = f.componentInstance as any;
+    await f.whenStable();
+    const task = (id: string, standing: string, due_on: string, status = 'pending') => ({id, animal_id:'BD-0001', instructions:id, kind:'administration', standing, due_on, status, assignee:'Ali'});
+    c.board.set({ overdue:2, due:1, upcoming:1, withdrawals:[], open_cases:[], tasks:[
+      task('future','upcoming','2026-09-20'), task('today','due','2026-09-17'),
+      task('b','overdue','2026-09-16'), task('a','overdue','2026-09-16'),
+      task('done','completed','2026-09-10','completed'), task('cancelled','cancelled','2026-09-10','cancelled')
+    ] }); f.detectChanges();
+    expect(c.visibleTasks().map((t: any) => t.id)).toEqual(['a','b','today','future']);
+    expect(f.nativeElement.textContent).toContain('Assigned to Ali');
+    const select = f.nativeElement.querySelector('select[ng-reflect-name]') ?? Array.from(f.nativeElement.querySelectorAll('select') as NodeListOf<HTMLSelectElement>).find(s => s.textContent?.includes('All outstanding'))!;
+    select.value = 'completed'; select.dispatchEvent(new Event('change')); await f.whenStable(); f.detectChanges();
+    expect(c.visibleTasks().map((t: any) => t.id)).toEqual(['done']);
+    expect(f.nativeElement.querySelector('.health-task').textContent).toContain('Completed');
+    expect(f.nativeElement.querySelector('.health-task button')).toBeNull();
+    select.value = 'cancelled'; select.dispatchEvent(new Event('change')); await f.whenStable(); f.detectChanges();
+    expect(c.visibleTasks().map((t: any) => t.id)).toEqual(['cancelled']);
+  });
+
   it('gates forms and submissions until provenance is set, preserving the draft', async () => {
     const f = TestBed.createComponent(HealthPage),
       c = f.componentInstance as any;

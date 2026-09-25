@@ -62,7 +62,7 @@ const FIELDS = [
     TextInput,
   ],
   template: `
-    <form [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
+    <form data-page-layout="entry" [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
       <div appCard>
         <div appSectionLabel legend>What happened?</div>
         <app-chip-group

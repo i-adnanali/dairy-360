@@ -85,7 +85,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
   ],
   template: `
     <!-- A real <form [appWriteLock]="state">: Enter submits from any text field. -->
-    <form [appWriteLock]="state" class="mx-auto max-w-2xl space-y-4" (submit)="onSubmit($event)">
+    <form data-page-layout="entry" [appWriteLock]="state" class="mx-auto max-w-2xl space-y-4" (submit)="onSubmit($event)">
       <header>
         <h2 appPageHeading>Record a calving</h2>
         <p appHelp class="mt-1">

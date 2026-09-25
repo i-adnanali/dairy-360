@@ -45,7 +45,7 @@ import { PageHeading } from '../ui/heading';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ErrorPanel, HelpText, PageHeading, RouterLink],
   template: `
-    <div class="mx-auto max-w-2xl space-y-6">
+    <div data-page-layout="review" class="mx-auto  space-y-6">
       <header>
         <h2 appPageHeading>Today</h2>
         <p appHelp class="mt-1" data-role="date">{{ prettyDate() }}</p>

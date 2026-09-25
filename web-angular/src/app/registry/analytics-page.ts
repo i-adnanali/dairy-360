@@ -25,7 +25,8 @@ import { PageHeading } from '../ui/heading';
   selector: 'app-analytics-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DecimalPipe, RouterLink, BaseChartDirective, Pagination, Button, PageHeading],
-  template: `<div class="mx-auto max-w-6xl space-y-6">
+  template: `
+    <div data-page-layout="review"><div class="mx-auto  space-y-6">
     <header class="flex flex-wrap items-start justify-between gap-4">
       <div>
         <p class="text-sm text-content-muted">Farm review</p>
@@ -375,7 +376,9 @@ import { PageHeading } from '../ui/heading';
         </p>
       </section>
     }
-  </div>`,
+  </div>
+    </div>
+  `,
   styles: [
     `
       select,

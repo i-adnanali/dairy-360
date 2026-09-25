@@ -51,7 +51,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
     TextInput,
   ],
   template: `
-    <form [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
+    <form data-page-layout="entry" [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
       <div appCard>
         <div appSectionLabel legend>Which calving is the date wrong on?</div>
         @if (correctable().length === 0) {

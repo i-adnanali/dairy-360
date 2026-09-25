@@ -125,7 +125,7 @@ async function shell() {
   return h;
 }
 describe('Phase 7 shell', () => {
-  it('shows seven sections and gates section write actions', async () => {
+  it('shows seven sections and leaves contextual write actions to pages', async () => {
     const h = await shell();
     const el = h.fixture.nativeElement as HTMLElement;
     expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(7);
@@ -133,7 +133,7 @@ describe('Phase 7 shell', () => {
     expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeNull();
     TestBed.inject(Session).set('recall', 'Adnan');
     h.detectChanges();
-    expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeTruthy();
+    expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeNull();
   });
   it('submits the focused form through its native handler with the platform chord', async () => {
     const h = await shell();

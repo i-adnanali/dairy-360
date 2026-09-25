@@ -1,3 +1,4 @@
+import { Button } from '../ui/button';
 import { computed } from '@angular/core';
 import { pagedList } from './paged-list';
 import { Pagination } from '../ui/pagination';
@@ -17,7 +18,7 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
 @Component({
   selector: 'app-calvings-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Pagination,
+  imports: [Button,Pagination,
     RouterLink,
     Certainty,
     Qualifier,
@@ -29,11 +30,12 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
     RowLink,
   ],
   template: `
+    <div data-page-layout="review">
     <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
     @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
 
     <div class="space-y-4">
-      <h2 appPageHeading>Calvings</h2>
+      <header class="page-header"><h2 appPageHeading>Calvings</h2><a routerLink="/animals/calvings/new" appButton>Record calving</a></header>
       <p class="max-w-[68ch] text-sm text-content-muted">
         Recorded calvings across the herd. Open the animal to inspect or correct its history.
         Approximate dates keep their recorded precision.
@@ -87,6 +89,8 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
       } @else {
         <p role="status">Loading calvings…</p>
       }
+    </div>
+
     </div>
   `,
 })

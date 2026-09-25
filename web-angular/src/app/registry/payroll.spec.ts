@@ -225,6 +225,25 @@ async function render<T>(component: Type<T>, api: FakeApi, inputs?: Record<strin
 describe('PayrollRunScreen', () => {
   afterEach(() => TestBed.resetTestingModule());
 
+  it('retains raw page-one wages and focuses the first unanswered wage across 101 rows', async () => {
+    HTMLElement.prototype.scrollIntoView = vi.fn();
+    const api = new FakeApi();
+    api.run.permanent = Array.from({ length: 101 }, (_, i) => runRow('person-' + i));
+    api.run.permanent[75].suggested_minor = null;
+    const { fixture, el } = await render(PayrollRunScreen, api);
+    const c = fixture.componentInstance as any;
+    const input = el.querySelector<HTMLInputElement>('[data-role="amount-person-0"]')!;
+    input.value = '00123.00'; input.dispatchEvent(new Event('input')); fixture.detectChanges();
+    c.showUnanswered(); fixture.detectChanges();
+    await new Promise(r => setTimeout(r, 0));
+    expect(c.tablePage()).toBe(4);
+    expect(document.activeElement?.getAttribute('data-role')).toBe('amount-person-75');
+    expect(c.answeredCount()).toBe(100);
+    c.tablePage.set(1); fixture.detectChanges();
+    expect(el.querySelector<HTMLInputElement>('[data-role="amount-person-0"]')!.value).toBe('00123.00');
+    expect(el.querySelectorAll('[data-role="amount-person-0"]')).toHaveLength(1);
+  });
+
   it('PRE-FILLS from the agreement and leaves the field editable', async () => {
     // The pre-filled figure is a DEFAULT. A month with leave is settled by
     // conversation, and a field that looks read-only is how it gets paid in

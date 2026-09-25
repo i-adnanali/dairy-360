@@ -154,7 +154,11 @@ describe('MilkingRoster', () => {
   it('m and n answer a row without leaving the keyboard', async () => {
     const { el, fixture } = await mount();
     press(fixture, el, 'BD-0001', 'm');
-    expect(cell(el, 'BD-0001').disabled).toBe(true);
+    expect(cell(el, 'BD-0001').disabled).toBe(false);
+    expect(el.querySelector('[data-role="m-BD-0001"]')?.getAttribute('aria-pressed')).toBe('true');
+    type(fixture, el, 'BD-0001', '7.');
+    expect(el.querySelector('[data-role="m-BD-0001"]')?.getAttribute('aria-pressed')).toBe('false');
+    expect(cell(el, 'BD-0001').value).toBe('7.');
     press(fixture, el, 'BD-0002', 'n');
     expect(el.querySelector('[data-role="reason-BD-0002"]')).not.toBeNull();
   });

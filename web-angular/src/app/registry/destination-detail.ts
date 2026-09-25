@@ -72,7 +72,8 @@ import { Button } from '../ui/button';
     TextInput,
   ],
   template: `
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div data-page-layout="report">
+    <div class="mx-auto  space-y-6">
       <a routerLink="/milk/buyers" class="text-sm text-content-muted underline">← all buyers</a>
 
       @if (loadError(); as e) {
@@ -204,7 +205,7 @@ import { Button } from '../ui/button';
 
         <!-- record a payment ------------------------------------------- -->
         @if (s.billable) {
-          <form
+          <form data-page-layout="entry"
             [appWriteLock]="payState"
             appCard
             class="space-y-3"
@@ -338,6 +339,8 @@ import { Button } from '../ui/button';
       } @else {
         <p appHelp data-role="loading">Loading…</p>
       }
+    </div>
+
     </div>
   `,
 })

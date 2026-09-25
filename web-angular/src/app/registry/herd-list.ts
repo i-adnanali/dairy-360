@@ -43,10 +43,11 @@ import { StatusBadge } from '../ui/surface';
     StatusBadge,
   ],
   template: `
+    <div data-page-layout="review">
     <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
     @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
 
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto ">
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (rows() === null) {
@@ -75,11 +76,11 @@ import { StatusBadge } from '../ui/surface';
           <h2 appPageHeading>
             {{ paging.result()?.totalItems }} {{ paging.result()?.totalItems === 1 ? 'animal' : 'animals' }}
           </h2>
-          @if (!shell.inShell()) {
+          @if (true) {
             <a
               routerLink="/animals/new"
               class="text-sm font-medium text-content-secondary underline"
-              >Add an animal</a
+              >Add animal</a
             >
           }
         </div>
@@ -183,6 +184,8 @@ import { StatusBadge } from '../ui/surface';
           <app-pagination label="Animals" [page]="paging.result()!.page" [pageSize]="paging.result()!.pageSize" [total]="paging.result()!.totalItems" [disabled]="paging.loading()" (pageChange)="paging.url.set({page: ''+$event})" (sizeChange)="paging.url.set({pageSize: ''+$event, page: '1'})"/>
         </div>
       }
+    </div>
+
     </div>
   `,
 })

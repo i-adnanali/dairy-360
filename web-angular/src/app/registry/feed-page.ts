@@ -39,21 +39,13 @@ import { PageHeading } from '../ui/heading';
     PageHeading,
   ],
   template: `
-    <div class="space-y-5">
+    <div data-page-layout="review" class="space-y-5">
       <header>
         <h2 appPageHeading>{{ title() }}</h2>
         <p appHelp>
           Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured;
           recorded costs are not cash paid or feed consumed cost.
         </p>
-      </header>
-      @if (error()) {
-        <p appErrorPanel role="alert">{{ error() }}</p>
-        <button appButton variant="secondary" (click)="load()">Retry</button>
-      }
-      @if (loading()) {
-        <p appHelp>Loading feed records…</p>
-      }
       <div class="flex flex-wrap gap-2">
         <a appButton variant="secondary" routerLink="/feed/crops/new">Add crop</a
         ><a appButton variant="secondary" routerLink="/feed/purchases/new">Record purchase</a
@@ -62,6 +54,15 @@ import { PageHeading } from '../ui/heading';
           Feed catalogue
         </button>
       </div>
+      </header>
+      @if (error()) {
+        <p appErrorPanel role="alert">{{ error() }}</p>
+        <button appButton variant="secondary" (click)="load()">Retry</button>
+      }
+      @if (loading()) {
+        <p appHelp>Loading feed records…</p>
+      }
+
       @if (catalogue) {
         <section appCard class="space-y-3">
           <h3 class="font-medium">Feed items</h3>

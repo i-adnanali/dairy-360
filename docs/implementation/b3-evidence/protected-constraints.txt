@@ -1,0 +1,9 @@
+animal-form: control count, order, and invocation attributes identical to B2 (8 controls). Only explicit form measure added.
+calving-form: control count, order, and invocation attributes identical to B2 (8 controls). Only explicit form measure added.
+border-default: all light/dark values unchanged.
+writelog-bg: all light/dark values unchanged.
+writelog-fg: all light/dark values unchanged.
+writelog-line: all light/dark values unchanged.
+Write-log visible markup/treatment unchanged.
+Life report class, print and JSON export handlers unchanged; template only receives report wrapper.
+Shared B1/B2 draft, precision, write-lock and request snapshot helpers byte-identical to B2.

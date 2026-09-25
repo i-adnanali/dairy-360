@@ -82,7 +82,8 @@ import { Button } from '../ui/button';
     TextInput,
   ],
   template: `
-    <div class="mx-auto max-w-4xl space-y-6">
+    <div data-page-layout="review">
+    <div class="mx-auto  space-y-6">
       <a routerLink="/labour/people" class="text-sm text-content-muted underline">← People</a>
 
       @if (loadError(); as e) {
@@ -167,7 +168,7 @@ import { Button } from '../ui/button';
         </section>
 
         @if (closing(); as e) {
-          <form
+          <form data-page-layout="entry"
             [appWriteLock]="closeState"
             appCard
             class="space-y-3"
@@ -292,7 +293,7 @@ import { Button } from '../ui/button';
         </section>
 
         <!-- Record a payment. -->
-        <form
+        <form data-page-layout="entry"
           [appWriteLock]="payState"
           class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
           (submit)="submitPayment($event)"
@@ -420,6 +421,8 @@ import { Button } from '../ui/button';
           <p appHelp tone="subtle">Loading…</p>
         }
       }
+    </div>
+
     </div>
   `,
 })
