@@ -1,0 +1,772 @@
+[
+  {
+    "name": "check",
+    "theme": "light",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": [
+      {
+        "client": 294,
+        "label": "histogram",
+        "scroll": 309,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "label": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "label": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "light",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": [
+      {
+        "client": 324,
+        "label": "histogram",
+        "scroll": 324,
+        "tabindex": null
+      },
+      {
+        "client": 324,
+        "label": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "label": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "light",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": [
+      {
+        "client": 686,
+        "label": "histogram",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "label": "intervals",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "label": "milking sessions",
+        "scroll": 686,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "light",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": [
+      {
+        "client": 942,
+        "label": "histogram",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "label": "intervals",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "label": "milking sessions",
+        "scroll": 942,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "light",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": [
+      {
+        "client": 1358,
+        "label": "histogram",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "label": "intervals",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "label": "milking sessions",
+        "scroll": 1358,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "dark",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": [
+      {
+        "client": 294,
+        "label": "histogram",
+        "scroll": 309,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "label": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "label": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "dark",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": [
+      {
+        "client": 324,
+        "label": "histogram",
+        "scroll": 324,
+        "tabindex": null
+      },
+      {
+        "client": 324,
+        "label": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "label": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "dark",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": [
+      {
+        "client": 686,
+        "label": "histogram",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "label": "intervals",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "label": "milking sessions",
+        "scroll": 686,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "dark",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": [
+      {
+        "client": 942,
+        "label": "histogram",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "label": "intervals",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "label": "milking sessions",
+        "scroll": 942,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "check",
+    "theme": "dark",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": [
+      {
+        "client": 1358,
+        "label": "histogram",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "label": "intervals",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "label": "milking sessions",
+        "scroll": 1358,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "light",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 286,
+        "label": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "light",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 316,
+        "label": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "light",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 678,
+        "label": "Animal production details",
+        "scroll": 678,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "light",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 934,
+        "label": "Animal production details",
+        "scroll": 934,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "light",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 1350,
+        "label": "Animal production details",
+        "scroll": 1350,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "dark",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 286,
+        "label": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "dark",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 316,
+        "label": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "dark",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 678,
+        "label": "Animal production details",
+        "scroll": 678,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "dark",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 934,
+        "label": "Animal production details",
+        "scroll": 934,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "analytics",
+    "theme": "dark",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": [
+      {
+        "client": 0,
+        "label": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 1350,
+        "label": "Animal production details",
+        "scroll": 1350,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "life",
+    "theme": "light",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "light",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "light",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "light",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "light",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "dark",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "dark",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "dark",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "dark",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": []
+  },
+  {
+    "name": "life",
+    "theme": "dark",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": []
+  },
+  {
+    "name": "statement",
+    "theme": "light",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": [
+      {
+        "client": 294,
+        "label": "Deliveries — September 2026",
+        "scroll": 451,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "label": "Payments — September 2026",
+        "scroll": 302,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "light",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": [
+      {
+        "client": 324,
+        "label": "Deliveries — September 2026",
+        "scroll": 451,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "label": "Payments — September 2026",
+        "scroll": 324,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "light",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": [
+      {
+        "client": 686,
+        "label": "Deliveries — September 2026",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "label": "Payments — September 2026",
+        "scroll": 686,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "light",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": [
+      {
+        "client": 942,
+        "label": "Deliveries — September 2026",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "label": "Payments — September 2026",
+        "scroll": 942,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "light",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": [
+      {
+        "client": 1066,
+        "label": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "label": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "dark",
+    "width": 360,
+    "document": 360,
+    "main": 360,
+    "regions": [
+      {
+        "client": 294,
+        "label": "Deliveries — September 2026",
+        "scroll": 451,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "label": "Payments — September 2026",
+        "scroll": 302,
+        "tabindex": "0"
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "dark",
+    "width": 390,
+    "document": 390,
+    "main": 390,
+    "regions": [
+      {
+        "client": 324,
+        "label": "Deliveries — September 2026",
+        "scroll": 451,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "label": "Payments — September 2026",
+        "scroll": 324,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "dark",
+    "width": 768,
+    "document": 768,
+    "main": 768,
+    "regions": [
+      {
+        "client": 686,
+        "label": "Deliveries — September 2026",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "label": "Payments — September 2026",
+        "scroll": 686,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "dark",
+    "width": 1024,
+    "document": 1024,
+    "main": 1024,
+    "regions": [
+      {
+        "client": 942,
+        "label": "Deliveries — September 2026",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "label": "Payments — September 2026",
+        "scroll": 942,
+        "tabindex": null
+      }
+    ]
+  },
+  {
+    "name": "statement",
+    "theme": "dark",
+    "width": 1440,
+    "document": 1440,
+    "main": 1440,
+    "regions": [
+      {
+        "client": 1066,
+        "label": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "label": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ]
+  }
+]

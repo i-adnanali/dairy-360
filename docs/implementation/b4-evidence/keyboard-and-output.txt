@@ -1,0 +1,31 @@
+B4 browser observations, 2026-09-25–26. Synthetic :memory: harness only.
+
+Life report: clicking/Enter on Milk (101) focuses #report-milk and scrolls the
+heading into view. Next via Enter moves Milk from 1–25 to 26–50 of 101.
+Include corrections + Apply adds Superseded animal events and Health revision
+history; Enter on the latter focuses #report-health-revisions. Revision summaries
+show Superseded revision / Latest retained revision and original correction reason.
+
+Statement: Enter on Deliveries Next moves to 26–50 of 101, leaving Payments at
+1–25 of 26. Payments Next moves independently to 26–26. Delivery page-size 100
+then 25 resets/clamps only its own page. Full-period totals remain identical.
+
+Analytics: all nine period/session controls exercised. Enter on Show data expands
+its semantic table and sets aria-expanded=true. At 390px the chart data region
+is tabindex=0, clientWidth=316, scrollWidth=571. ArrowRight scrolls it by 40px
+(observed after the browser's scroll animation). Enter on a chart table date
+updates detailOn=2026-09-01/detailSession=all while preserving the selected
+month/evening filters. Existing Milking/Dispatch day links remain in reconciliation.
+Final accessible snapshot confirms No measurements is its accessible name.
+
+Print / Save as PDF was clicked from Milk page two. No inspectable native
+preview or PDF artifact was returned by the available in-app surface. This is
+an attempted action, not verified printed-output completeness.
+Export complete JSON was clicked with corrections enabled; waiting for a native
+download event timed out after 10 seconds and supplied no inspectable artifact.
+This is not proof of truncated JSON. A component test captures the generated
+Blob and compares every original field, correction and unknown field exactly.
+
+Not performed: native screen reader, real-phone keyboard, actual browser zoom,
+representative operator trial, live assistant, inspected native PDF/printout or
+native downloaded JSON file. No release-readiness or ship-without-trial decision.

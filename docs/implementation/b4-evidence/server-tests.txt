@@ -1,0 +1,4718 @@
+
+> @dairy/server@1.0.0 test
+> tsx --test src/*.test.ts src/farm/*.test.ts src/registry/*.test.ts src/tools/*.test.ts
+
+TAP version 13
+# Subtest: the capture tooling never loads db.ts, seed.ts or better-sqlite3
+ok 1 - the capture tooling never loads db.ts, seed.ts or better-sqlite3
+  ---
+  duration_ms: 145.714167
+  type: 'test'
+  ...
+# Subtest: ./simulate is the transitive trap this guard exists for
+ok 2 - ./simulate is the transitive trap this guard exists for
+  ---
+  duration_ms: 98.129209
+  type: 'test'
+  ...
+# Subtest: the frigate capture stack declares its own compose project name
+ok 3 - the frigate capture stack declares its own compose project name
+  ---
+  duration_ms: 1.417875
+  type: 'test'
+  ...
+# Subtest: no two compose files resolve to the same project name
+ok 4 - no two compose files resolve to the same project name
+  ---
+  duration_ms: 2.538042
+  type: 'test'
+  ...
+# Subtest: no env file sets COMPOSE_PROJECT_NAME, which would override name:
+ok 5 - no env file sets COMPOSE_PROJECT_NAME, which would override name:
+  ---
+  duration_ms: 0.91475
+  type: 'test'
+  ...
+# Subtest: MATCH_CONFIDENT separates the scenario library cleanly
+ok 6 - MATCH_CONFIDENT separates the scenario library cleanly
+  ---
+  duration_ms: 0.849917
+  type: 'test'
+  ...
+# Subtest: MATCH_CONFIDENT is not applied to detection rows
+ok 7 - MATCH_CONFIDENT is not applied to detection rows
+  ---
+  duration_ms: 0.160417
+  type: 'test'
+  ...
+# Subtest: RECURRENCE compares occurrence number, not prior count
+ok 8 - RECURRENCE compares occurrence number, not prior count
+  ---
+  duration_ms: 0.12125
+  type: 'test'
+  ...
+# Subtest: LOOKBACK_DAYS covers recurring-unknown-visitor with real margin
+ok 9 - LOOKBACK_DAYS covers recurring-unknown-visitor with real margin
+  ---
+  duration_ms: 0.191167
+  type: 'test'
+  ...
+# Subtest: RESTRICTED_ZONES excludes gate, which recurring-unknown-visitor needs
+ok 10 - RESTRICTED_ZONES excludes gate, which recurring-unknown-visitor needs
+  ---
+  duration_ms: 0.048792
+  type: 'test'
+  ...
+# Subtest: off-hours is computed in FARM_TZ, not host-local
+ok 11 - off-hours is computed in FARM_TZ, not host-local
+  ---
+  duration_ms: 0.300583
+  type: 'test'
+  ...
+# Subtest: WORK_HOURS boundaries are inclusive of start, exclusive of end
+ok 12 - WORK_HOURS boundaries are inclusive of start, exclusive of end
+  ---
+  duration_ms: 0.227209
+  type: 'test'
+  ...
+# Subtest: farm-local date and day bounds round-trip
+ok 13 - farm-local date and day bounds round-trip
+  ---
+  duration_ms: 0.129125
+  type: 'test'
+  ...
+# Subtest: rule 1 overrides recurrence and confidence, for any event_type
+ok 14 - rule 1 overrides recurrence and confidence, for any event_type
+  ---
+  duration_ms: 0.194583
+  type: 'test'
+  ...
+# Subtest: restricted zone during work hours is not urgent on rule 1 alone
+ok 15 - restricted zone during work hours is not urgent on rule 1 alone
+  ---
+  duration_ms: 0.275542
+  type: 'test'
+  ...
+# Subtest: off-hours in an unrestricted zone is not urgent on rule 1 alone
+ok 16 - off-hours in an unrestricted zone is not urgent on rule 1 alone
+  ---
+  duration_ms: 0.045
+  type: 'test'
+  ...
+# Subtest: rule 3 fires only for face_match below threshold
+ok 17 - rule 3 fires only for face_match below threshold
+  ---
+  duration_ms: 0.044833
+  type: 'test'
+  ...
+# Subtest: a null zone never matches a restricted zone
+ok 18 - a null zone never matches a restricted zone
+  ---
+  duration_ms: 0.03025
+  type: 'test'
+  ...
+# Subtest: normal-weekday: every row routine
+ok 19 - normal-weekday: every row routine
+  ---
+  duration_ms: 0.305208
+  type: 'test'
+  ...
+# Subtest: night-visitor-unknown: all three rows urgent
+ok 20 - night-visitor-unknown: all three rows urgent
+  ---
+  duration_ms: 0.404208
+  type: 'test'
+  ...
+# Subtest: recurring-unknown-visitor: notable at 1, urgent by 3
+ok 21 - recurring-unknown-visitor: notable at 1, urgent by 3
+  ---
+  duration_ms: 0.205333
+  type: 'test'
+  ...
+# Subtest: low-confidence-match: detection routine, face match notable
+ok 22 - low-confidence-match: detection routine, face match notable
+  ---
+  duration_ms: 0.145959
+  type: 'test'
+  ...
+# Subtest: camera-dropout and absent-employee produce no per-event flags
+ok 23 - camera-dropout and absent-employee produce no per-event flags
+  ---
+  duration_ms: 0.313334
+  type: 'test'
+  ...
+# Subtest: the cluster id shared across two scenarios is still shared
+ok 24 - the cluster id shared across two scenarios is still shared
+  ---
+  duration_ms: 0.053792
+  type: 'test'
+  ...
+# Subtest: absent-employee asserts an enrolled identity is missing
+ok 25 - absent-employee asserts an enrolled identity is missing
+  ---
+  duration_ms: 0.097417
+  type: 'test'
+  ...
+# Subtest: retention: the committed example config passes
+ok 26 - retention: the committed example config passes
+  ---
+  duration_ms: 1.290791
+  type: 'test'
+  ...
+# Subtest: retention: an omitted save: key is an error, not a pass
+ok 27 - retention: an omitted save: key is an error, not a pass
+  ---
+  duration_ms: 0.143333
+  type: 'test'
+  ...
+# Subtest: retention: save: true and base64: box are both caught
+ok 28 - retention: save: true and base64: box are both caught
+  ---
+  duration_ms: 0.1185
+  type: 'test'
+  ...
+# Subtest: retention: a commented-out setting cannot satisfy the check
+ok 29 - retention: a commented-out setting cannot satisfy the check
+  ---
+  duration_ms: 0.064791
+  type: 'test'
+  ...
+# Subtest: retention: a rekognition block is caught
+ok 30 - retention: a rekognition block is caught
+  ---
+  duration_ms: 0.055792
+  type: 'test'
+  ...
+# Subtest: gallery: exactly the synthetic subject passes
+ok 31 - gallery: exactly the synthetic subject passes
+  ---
+  duration_ms: 0.131084
+  type: 'test'
+  ...
+# Subtest: gallery: an EMPTY gallery is a failure, not a safe default
+ok 32 - gallery: an EMPTY gallery is a failure, not a safe default
+  ---
+  duration_ms: 0.105125
+  type: 'test'
+  ...
+# Subtest: gallery: any other subject blocks the capture
+ok 33 - gallery: any other subject blocks the capture
+  ---
+  duration_ms: 0.051791
+  type: 'test'
+  ...
+# Subtest: gallery: a failed list response does not read as an empty gallery
+ok 34 - gallery: a failed list response does not read as an empty gallery
+  ---
+  duration_ms: 0.173292
+  type: 'test'
+  ...
+# Subtest: recognition: a real match passes
+ok 35 - recognition: a real match passes
+  ---
+  duration_ms: 0.321083
+  type: 'test'
+  ...
+# Subtest: recognition: THE RESTART TRAP — enrolled but unrecognised
+ok 36 - recognition: THE RESTART TRAP — enrolled but unrecognised
+  ---
+  duration_ms: 0.053833
+  type: 'test'
+  ...
+# Subtest: recognition: no face detected is distinguished from no match
+ok 37 - recognition: no face detected is distinguished from no match
+  ---
+  duration_ms: 0.038167
+  type: 'test'
+  ...
+# Subtest: recognition: a zero-confidence self-match is rejected
+ok 38 - recognition: a zero-confidence self-match is rejected
+  ---
+  duration_ms: 0.043625
+  type: 'test'
+  ...
+# Subtest: double take config disables face-crop saving for BOTH match and unknown
+ok 39 - double take config disables face-crop saving for BOTH match and unknown
+  ---
+  duration_ms: 1.345292
+  type: 'test'
+  ...
+# Subtest: double take config keeps image bytes out of the MQTT payload
+ok 40 - double take config keeps image bytes out of the MQTT payload
+  ---
+  duration_ms: 0.262125
+  type: 'test'
+  ...
+# Subtest: double take config declares NO cloud detector
+ok 41 - double take config declares NO cloud detector
+  ---
+  duration_ms: 0.231042
+  type: 'test'
+  ...
+# Subtest: double take does not write identities back onto Frigate events
+ok 42 - double take does not write identities back onto Frigate events
+  ---
+  duration_ms: 0.156834
+  type: 'test'
+  ...
+# Subtest: biometric storage is on named volumes, never bind-mounted into the repo
+ok 43 - biometric storage is on named volumes, never bind-mounted into the repo
+  ---
+  duration_ms: 0.640917
+  type: 'test'
+  ...
+# Subtest: the double take UI and the detector are not exposed beyond loopback
+ok 44 - the double take UI and the detector are not exposed beyond loopback
+  ---
+  duration_ms: 0.1775
+  type: 'test'
+  ...
+# Subtest: the enrolment image is gitignored but its provenance is not
+ok 45 - the enrolment image is gitignored but its provenance is not
+  ---
+  duration_ms: 0.396209
+  type: 'test'
+  ...
+# Subtest: epochSecondsToIso: Frigate epoch float -> ISO-8601 UTC
+ok 46 - epochSecondsToIso: Frigate epoch float -> ISO-8601 UTC
+  ---
+  duration_ms: 1.3505
+  type: 'test'
+  ...
+# Subtest: epochSecondsToIso: rejects non-positive, non-finite, and millisecond values
+ok 47 - epochSecondsToIso: rejects non-positive, non-finite, and millisecond values
+  ---
+  duration_ms: 0.096833
+  type: 'test'
+  ...
+# Subtest: isoToIso: canonicalizes to UTC, rejects garbage
+ok 48 - isoToIso: canonicalizes to UTC, rejects garbage
+  ---
+  duration_ms: 0.074917
+  type: 'test'
+  ...
+# Subtest: percentToUnit: Double Take 0-100 -> 0..1 with no float artifacts
+ok 49 - percentToUnit: Double Take 0-100 -> 0..1 with no float artifacts
+  ---
+  duration_ms: 0.061666
+  type: 'test'
+  ...
+# Subtest: frigate: type "new" -> one detection row, zone from entered_zones
+ok 50 - frigate: type "new" -> one detection row, zone from entered_zones
+  ---
+  duration_ms: 0.228708
+  type: 'test'
+  ...
+# Subtest: frigate: falls back to current_zones, then to null
+ok 51 - frigate: falls back to current_zones, then to null
+  ---
+  duration_ms: 0.071875
+  type: 'test'
+  ...
+# Subtest: frigate: falls back to score when top_score is absent
+ok 52 - frigate: falls back to score when top_score is absent
+  ---
+  duration_ms: 0.112833
+  type: 'test'
+  ...
+# Subtest: frigate: has_snapshot false -> null snapshot_ref
+ok 53 - frigate: has_snapshot false -> null snapshot_ref
+  ---
+  duration_ms: 0.074709
+  type: 'test'
+  ...
+# Subtest: frigate: update and end are accepted but not persisted
+ok 54 - frigate: update and end are accepted but not persisted
+  ---
+  duration_ms: 0.310416
+  type: 'test'
+  ...
+# Subtest: frigate: false_positive is accepted but not persisted
+ok 55 - frigate: false_positive is accepted but not persisted
+  ---
+  duration_ms: 0.850292
+  type: 'test'
+  ...
+# Subtest: frigate: a malformed update is still rejected, not skipped
+ok 56 - frigate: a malformed update is still rejected, not skipped
+  ---
+  duration_ms: 0.217791
+  type: 'test'
+  ...
+# Subtest: frigate: rejects missing required fields
+ok 57 - frigate: rejects missing required fields
+  ---
+  duration_ms: 0.199875
+  type: 'test'
+  ...
+# Subtest: frigate: rejects a bad envelope
+ok 58 - frigate: rejects a bad envelope
+  ---
+  duration_ms: 0.1915
+  type: 'test'
+  ...
+# Subtest: frigate: rejects an out-of-range start_time
+ok 59 - frigate: rejects an out-of-range start_time
+  ---
+  duration_ms: 0.276584
+  type: 'test'
+  ...
+# Subtest: frigate: synthetic flag comes from options, never the payload
+ok 60 - frigate: synthetic flag comes from options, never the payload
+  ---
+  duration_ms: 0.202
+  type: 'test'
+  ...
+# Subtest: double take: a match -> one face_match row, confidence rescaled to 0..1
+ok 61 - double take: a match -> one face_match row, confidence rescaled to 0..1
+  ---
+  duration_ms: 0.19025
+  type: 'test'
+  ...
+# Subtest: double take: event_type comes from array membership, not the name
+ok 62 - double take: event_type comes from array membership, not the name
+  ---
+  duration_ms: 0.163459
+  type: 'test'
+  ...
+# Subtest: double take: misses land as low-confidence face_match rows
+ok 63 - double take: misses land as low-confidence face_match rows
+  ---
+  duration_ms: 0.075125
+  type: 'test'
+  ...
+# Subtest: double take: one POST fans out to one row per face
+ok 64 - double take: one POST fans out to one row per face
+  ---
+  duration_ms: 0.385542
+  type: 'test'
+  ...
+# Subtest: double take: accepts the singular `match` topic shape
+ok 65 - double take: accepts the singular `match` topic shape
+  ---
+  duration_ms: 0.096
+  type: 'test'
+  ...
+# Subtest: double take: all face arrays empty -> accepted, nothing stored
+ok 66 - double take: all face arrays empty -> accepted, nothing stored
+  ---
+  duration_ms: 0.039542
+  type: 'test'
+  ...
+# Subtest: double take: no face arrays at all -> rejected
+ok 67 - double take: no face arrays at all -> rejected
+  ---
+  duration_ms: 0.040542
+  type: 'test'
+  ...
+# Subtest: double take: rejects missing required fields
+ok 68 - double take: rejects missing required fields
+  ---
+  duration_ms: 0.091
+  type: 'test'
+  ...
+# Subtest: double take: rejects a nameless face rather than dropping it
+ok 69 - double take: rejects a nameless face rather than dropping it
+  ---
+  duration_ms: 0.042584
+  type: 'test'
+  ...
+# Subtest: double take: rejects a non-object face entry
+ok 70 - double take: rejects a non-object face entry
+  ---
+  duration_ms: 0.035208
+  type: 'test'
+  ...
+# Subtest: double take: missing confidence is null, not zero
+ok 71 - double take: missing confidence is null, not zero
+  ---
+  duration_ms: 0.04025
+  type: 'test'
+  ...
+# Subtest: double take: empty zones array -> null zone
+ok 72 - double take: empty zones array -> null zone
+  ---
+  duration_ms: 0.038
+  type: 'test'
+  ...
+# Subtest: double take: rejects an unparseable timestamp
+ok 73 - double take: rejects an unparseable timestamp
+  ---
+  duration_ms: 0.030958
+  type: 'test'
+  ...
+# Subtest: shapePaths: scalars, nesting and null
+ok 74 - shapePaths: scalars, nesting and null
+  ---
+  duration_ms: 1.657959
+  type: 'test'
+  ...
+# Subtest: shapePaths: the root container is not recorded
+ok 75 - shapePaths: the root container is not recorded
+  ---
+  duration_ms: 0.180292
+  type: 'test'
+  ...
+# Subtest: shapePaths: array indices collapse to one [] segment, no dot
+ok 76 - shapePaths: array indices collapse to one [] segment, no dot
+  ---
+  duration_ms: 0.072958
+  type: 'test'
+  ...
+# Subtest: shapePaths: an EMPTY container is a type at its own path, not an absence
+ok 77 - shapePaths: an EMPTY container is a type at its own path, not an absence
+  ---
+  duration_ms: 0.051708
+  type: 'test'
+  ...
+# Subtest: shapePaths: within one payload a heterogeneous array keeps the last type
+ok 78 - shapePaths: within one payload a heterogeneous array keeps the last type
+  ---
+  duration_ms: 0.199583
+  type: 'test'
+  ...
+# Subtest: ancestorPaths: walks both separators, nearest first
+ok 79 - ancestorPaths: walks both separators, nearest first
+  ---
+  duration_ms: 0.116875
+  type: 'test'
+  ...
+# Subtest: aggregateShapes: counts presence and unions types across payloads
+ok 80 - aggregateShapes: counts presence and unions types across payloads
+  ---
+  duration_ms: 0.117875
+  type: 'test'
+  ...
+# Subtest: diffShapes: a documented field the real payload omits is only_in_documented
+ok 81 - diffShapes: a documented field the real payload omits is only_in_documented
+  ---
+  duration_ms: 7.148375
+  type: 'test'
+  ...
+# Subtest: diffShapes: identical shapes produce zero deltas
+ok 82 - diffShapes: identical shapes produce zero deltas
+  ---
+  duration_ms: 0.21325
+  type: 'test'
+  ...
+# Subtest: diffShapes: an empty array vs a populated one is ONE type_changed
+ok 83 - diffShapes: an empty array vs a populated one is ONE type_changed
+  ---
+  duration_ms: 0.393625
+  type: 'test'
+  ...
+# Subtest: diffShapes: a genuinely missing field under a POPULATED container is still reported
+ok 84 - diffShapes: a genuinely missing field under a POPULATED container is still reported
+  ---
+  duration_ms: 0.080541
+  type: 'test'
+  ...
+# Subtest: diffShapes: a field in some but not all captured payloads is sometimes_present
+ok 85 - diffShapes: a field in some but not all captured payloads is sometimes_present
+  ---
+  duration_ms: 0.065375
+  type: 'test'
+  ...
+# Subtest: diffShapes: `only` scopes the comparison to one subtree
+ok 86 - diffShapes: `only` scopes the comparison to one subtree
+  ---
+  duration_ms: 0.075084
+  type: 'test'
+  ...
+# Subtest: diffShapes: `only` keeps array-indexed children of the scoped root
+ok 87 - diffShapes: `only` keeps array-indexed children of the scoped root
+  ---
+  duration_ms: 0.051792
+  type: 'test'
+  ...
+# Subtest: diffShapes: output is deterministic across runs
+ok 88 - diffShapes: output is deterministic across runs
+  ---
+  duration_ms: 0.077375
+  type: 'test'
+  ...
+# Subtest: groupByKind: preserves severity order and drops empty groups
+ok 89 - groupByKind: preserves severity order and drops empty groups
+  ---
+  duration_ms: 0.078625
+  type: 'test'
+  ...
+# Subtest: formatDelta: names the absent side explicitly
+ok 90 - formatDelta: names the absent side explicitly
+  ---
+  duration_ms: 0.116958
+  type: 'test'
+  ...
+# Subtest: redact: a base64 face image is replaced
+ok 91 - redact: a base64 face image is replaced
+  ---
+  duration_ms: 10.082291
+  type: 'test'
+  ...
+# Subtest: redact: base64 is caught in every array a face can arrive in
+ok 92 - redact: base64 is caught in every array a face can arrive in
+  ---
+  duration_ms: 0.189
+  type: 'test'
+  ...
+# Subtest: redact: a long string is caught even under an unexpected key
+ok 93 - redact: a long string is caught even under an unexpected key
+  ---
+  duration_ms: 0.156458
+  type: 'test'
+  ...
+# Subtest: redact: the length rule leaves realistic payload strings alone
+ok 94 - redact: the length rule leaves realistic payload strings alone
+  ---
+  duration_ms: 0.05975
+  type: 'test'
+  ...
+# Subtest: redact: the length threshold is applied at the boundary, not approximately
+ok 95 - redact: the length threshold is applied at the boundary, not approximately
+  ---
+  duration_ms: 0.065959
+  type: 'test'
+  ...
+# Subtest: redact: SHAPE is preserved exactly -- the deltas list stays valid
+ok 96 - redact: SHAPE is preserved exactly -- the deltas list stays valid
+  ---
+  duration_ms: 0.381708
+  type: 'test'
+  ...
+# Subtest: redact: base64:null is left as null, not rewritten
+ok 97 - redact: base64:null is left as null, not rewritten
+  ---
+  duration_ms: 0.070167
+  type: 'test'
+  ...
+# Subtest: redact: the input is not mutated
+ok 98 - redact: the input is not mutated
+  ---
+  duration_ms: 0.227916
+  type: 'test'
+  ...
+# Subtest: redact: non-redacted values survive byte-identically
+ok 99 - redact: non-redacted values survive byte-identically
+  ---
+  duration_ms: 0.255541
+  type: 'test'
+  ...
+# Subtest: containsInlineImage: detects what the redactor is meant to remove
+ok 100 - containsInlineImage: detects what the redactor is meant to remove
+  ---
+  duration_ms: 0.304958
+  type: 'test'
+  ...
+# Subtest: containsInlineImage: the sentinel itself is not flagged
+ok 101 - containsInlineImage: the sentinel itself is not flagged
+  ---
+  duration_ms: 0.0445
+  type: 'test'
+  ...
+# Subtest: analytics harness covers comparisons, pagination, missing, pending, zero and signed differences
+ok 102 - analytics harness covers comparisons, pagination, missing, pending, zero and signed differences
+  ---
+  duration_ms: 1763.63
+  type: 'test'
+  ...
+# Subtest: analytics harness flag is explicit and incompatible with empty mode
+ok 103 - analytics harness flag is explicit and incompatible with empty mode
+  ---
+  duration_ms: 0.646083
+  type: 'test'
+  ...
+# Subtest: full animal-days, explicit exceptions and unmeasured sessions stay distinct
+ok 104 - full animal-days, explicit exceptions and unmeasured sessions stay distinct
+  ---
+  duration_ms: 1.59725
+  type: 'test'
+  ...
+# Subtest: an entirely absent session or day remains expected; future and today are separate
+ok 105 - an entirely absent session or day remains expected; future and today are separate
+  ---
+  duration_ms: 0.925708
+  type: 'test'
+  ...
+# Subtest: unexpected animal measurements cannot fill missing expected slots
+ok 106 - unexpected animal measurements cannot fill missing expected slots
+  ---
+  duration_ms: 0.125709
+  type: 'test'
+  ...
+# Subtest: approximate roster dates qualify coverage and block a confident percentage
+ok 107 - approximate roster dates qualify coverage and block a confident percentage
+  ---
+  duration_ms: 0.110291
+  type: 'test'
+  ...
+# Subtest: signed difference includes staff/home and suppresses missing dispatch percentage
+ok 108 - signed difference includes staff/home and suppresses missing dispatch percentage
+  ---
+  duration_ms: 0.372875
+  type: 'test'
+  ...
+# Subtest: explicit not-milked slots account for zero; no records never become zero
+ok 109 - explicit not-milked slots account for zero; no records never become zero
+  ---
+  duration_ms: 0.129709
+  type: 'test'
+  ...
+# Subtest: calendar validation covers leap years and Monday week boundaries
+ok 110 - calendar validation covers leap years and Monday week boundaries
+  ---
+  duration_ms: 0.693875
+  type: 'test'
+  ...
+# Subtest: stable paging sorts before slicing, clamps removed pages, rejects invalid inputs
+ok 111 - stable paging sorts before slicing, clamps removed pages, rejects invalid inputs
+  ---
+  duration_ms: 0.455917
+  type: 'test'
+  ...
+# Subtest: database report refreshes corrections; pagination never changes totals
+ok 112 - database report refreshes corrections; pagination never changes totals
+  ---
+  duration_ms: 47.2595
+  type: 'test'
+  ...
+# Subtest: HTTP exposes reports and validates query errors without opening live database
+ok 113 - HTTP exposes reports and validates query errors without opening live database
+  ---
+  duration_ms: 150.642416
+  type: 'test'
+  ...
+# Subtest: migration 8 preserves every existing populated table without seed
+ok 114 - migration 8 preserves every existing populated table without seed
+  ---
+  duration_ms: 165.546083
+  type: 'test'
+  ...
+# Subtest: unknown crop dates, measured rate, known trolley total and unknown costs survive reads
+ok 115 - unknown crop dates, measured rate, known trolley total and unknown costs survive reads
+  ---
+  duration_ms: 115.872417
+  type: 'test'
+  ...
+# Subtest: rate incompatibility, nonpositive quantities, invalid dates, blank account and missing provenance refuse
+ok 116 - rate incompatibility, nonpositive quantities, invalid dates, blank account and missing provenance refuse
+  ---
+  duration_ms: 73.916916
+  type: 'test'
+  ...
+# Subtest: unrecorded, partial and none-given are distinct
+ok 117 - unrecorded, partial and none-given are distinct
+  ---
+  duration_ms: 3.549833
+  type: 'test'
+  ...
+# Subtest: snapshots, sources, preparation and targeted purpose survive reload and correction
+ok 118 - snapshots, sources, preparation and targeted purpose survive reload and correction
+  ---
+  duration_ms: 144.7455
+  type: 'test'
+  ...
+# Subtest: stale revisions and occupied dates refuse without replacing either account
+ok 119 - stale revisions and occupied dates refuse without replacing either account
+  ---
+  duration_ms: 40.641167
+  type: 'test'
+  ...
+# Subtest: bad child insert rolls back header, lines and revision together
+ok 120 - bad child insert rolls back header, lines and revision together
+  ---
+  duration_ms: 60.571542
+  type: 'test'
+  ...
+# Subtest: linked purchase removal refuses, summary removal leaves a recoverable audit
+ok 121 - linked purchase removal refuses, summary removal leaves a recoverable audit
+  ---
+  duration_ms: 45.810583
+  type: 'test'
+  ...
+# Subtest: archived identities remain readable in historical accounts
+ok 122 - archived identities remain readable in historical accounts
+  ---
+  duration_ms: 61.418958
+  type: 'test'
+  ...
+# Subtest: source mismatch, crop on concentrate and duplicate recipients refuse
+ok 123 - source mismatch, crop on concentrate and duplicate recipients refuse
+  ---
+  duration_ms: 52.695875
+  type: 'test'
+  ...
+# Subtest: backup SQL restores feed state, relational references and all revisions
+ok 124 - backup SQL restores feed state, relational references and all revisions
+  ---
+  duration_ms: 98.378292
+  type: 'test'
+  ...
+# Subtest: HTTP writes enforce provenance, durable replay, changed-key refusal and route scoping
+ok 125 - HTTP writes enforce provenance, durable replay, changed-key refusal and route scoping
+  ---
+  duration_ms: 138.632333
+  type: 'test'
+  ...
+# Subtest: feed integrity detects relational drift without flagging unknown quantities or missing days
+ok 126 - feed integrity detects relational drift without flagging unknown quantities or missing days
+  ---
+  duration_ms: 91.27325
+  type: 'test'
+  ...
+# Subtest: v7 upgrade adds feed while preserving populated milk, animal and payroll records
+ok 127 - v7 upgrade adds feed while preserving populated milk, animal and payroll records
+  ---
+  duration_ms: 35.123084
+  type: 'test'
+  ...
+# Subtest: unlinked purchased sources count honestly; linked purchases cannot change item or move past feeding
+ok 128 - unlinked purchased sources count honestly; linked purchases cannot change item or move past feeding
+  ---
+  duration_ms: 95.050792
+  type: 'test'
+  ...
+# Subtest: health walkthrough covers records, evidence, due work and audit without duplicating on replay
+ok 129 - health walkthrough covers records, evidence, due work and audit without duplicating on replay
+  ---
+  duration_ms: 156.750875
+  type: 'test'
+  ...
+# Subtest: visit covers two animals, while cases and examinations remain individual
+ok 130 - visit covers two animals, while cases and examinations remain individual
+  ---
+  duration_ms: 10.329958
+  type: 'test'
+  ...
+# Subtest: plan is not doses; actual administration completes one task; void reopens it
+ok 131 - plan is not doses; actual administration completes one task; void reopens it
+  ---
+  duration_ms: 32.028333
+  type: 'test'
+  ...
+# Subtest: cross-animal linking is refused atomically
+ok 132 - cross-animal linking is refused atomically
+  ---
+  duration_ms: 54.528875
+  type: 'test'
+  ...
+# Subtest: stale revision conflicts, old state and correction history survive
+ok 133 - stale revision conflicts, old state and correction history survive
+  ---
+  duration_ms: 5.330459
+  type: 'test'
+  ...
+# Subtest: round saves only given doses, audits deferral, and rolls back invalid batches
+ok 134 - round saves only given doses, audits deferral, and rolls back invalid batches
+  ---
+  duration_ms: 4.377292
+  type: 'test'
+  ...
+# Subtest: durable request binding survives fresh router/store and rejects changed request
+ok 135 - durable request binding survives fresh router/store and rejects changed request
+  ---
+  duration_ms: 3.829209
+  type: 'test'
+  ...
+# Subtest: imprecise history preserves missing details and rejects invented precision
+ok 136 - imprecise history preserves missing details and rejects invented precision
+  ---
+  duration_ms: 37.288542
+  type: 'test'
+  ...
+# Subtest: due/overdue states include old tasks and use optional precise farm time
+ok 137 - due/overdue states include old tasks and use optional precise farm time
+  ---
+  duration_ms: 3.976292
+  type: 'test'
+  ...
+# Subtest: withdrawal instructions remain unresolved or active without fabricated release
+ok 138 - withdrawal instructions remain unresolved or active without fabricated release
+  ---
+  duration_ms: 3.982959
+  type: 'test'
+  ...
+# Subtest: backup restores bytes, records, audit and durable keys
+ok 139 - backup restores bytes, records, audit and durable keys
+  ---
+  duration_ms: 8.275833
+  type: 'test'
+  ...
+# Subtest: report exposes gaps, direct/shared costs separately, no invented animal profit
+ok 140 - report exposes gaps, direct/shared costs separately, no invented animal profit
+  ---
+  duration_ms: 80.729042
+  type: 'test'
+  ...
+# Subtest: follow-up result completes task and void restores pending work
+ok 141 - follow-up result completes task and void restores pending work
+  ---
+  duration_ms: 7.403875
+  type: 'test'
+  ...
+# Subtest: task terminal state cannot be forged via create/revise
+ok 142 - task terminal state cannot be forged via create/revise
+  ---
+  duration_ms: 3.757209
+  type: 'test'
+  ...
+# Subtest: HTTP health write requires key and reads/downloads return bounded contracts
+ok 143 - HTTP health write requires key and reads/downloads return bounded contracts
+  ---
+  duration_ms: 117.225375
+  type: 'test'
+  ...
+# Subtest: empty optional animal selection from a visit form stores null
+ok 144 - empty optional animal selection from a visit form stores null
+  ---
+  duration_ms: 27.8705
+  type: 'test'
+  ...
+# Subtest: completed plans retain exceptions and reopen when their dose is voided
+ok 145 - completed plans retain exceptions and reopen when their dose is voided
+  ---
+  duration_ms: 7.14875
+  type: 'test'
+  ...
+# Subtest: linked attachment bytes cannot be replaced and only unlinked staging uploads expire
+ok 146 - linked attachment bytes cannot be replaced and only unlinked staging uploads expire
+  ---
+  duration_ms: 3.566709
+  type: 'test'
+  ...
+# Subtest: backdated board does not show an administration that had not happened yet
+ok 147 - backdated board does not show an administration that had not happened yet
+  ---
+  duration_ms: 3.374667
+  type: 'test'
+  ...
+# Subtest: request replay remains durable after the database connection restarts
+ok 148 - request replay remains durable after the database connection restarts
+  ---
+  duration_ms: 11.714
+  type: 'test'
+  ...
+# Subtest: registry assistant returns real health evidence and coverage, never demo IDs
+ok 149 - registry assistant returns real health evidence and coverage, never demo IDs
+  ---
+  duration_ms: 3.905083
+  type: 'test'
+  ...
+# Subtest: unlinked staging cleanup retains all linked documents
+ok 150 - unlinked staging cleanup retains all linked documents
+  ---
+  duration_ms: 3.636333
+  type: 'test'
+  ...
+# Subtest: precise future task time is upcoming while imprecise report dates overlap filters
+ok 151 - precise future task time is upcoming while imprecise report dates overlap filters
+  ---
+  duration_ms: 3.676291
+  type: 'test'
+  ...
+# Subtest: marking historical details unknown cannot legitimize a negative known amount
+ok 152 - marking historical details unknown cannot legitimize a negative known amount
+  ---
+  duration_ms: 3.422209
+  type: 'test'
+  ...
+# [registry] migrating 0 -> 9; no records to back up yet.
+# [registry] migration 9 -> 10 pending. Backed up {"registry_health_records":0,"registry_health_revisions":0,"registry_health_requests":0,"registry_health_attachments":0,"registry_health_attachment_links":0,"registry_feed_items":0,"registry_feed_crops":0,"registry_feed_expenses":0,"registry_feed_purchases":0,"registry_feed_daily":0,"registry_feed_lines":0,"registry_feed_sources":0,"registry_feed_recipients":0,"registry_feed_revisions":0,"registry_feed_requests":0,"registry_animal_events":0,"registry_animals":1,"registry_destination_prices":0,"registry_destinations":0,"registry_dispatches":0,"registry_engagements":0,"registry_milkings":0,"registry_pay_benefits":0,"registry_pay_terms":0,"registry_payments":0,"registry_people":0,"registry_serial_counter":1,"registry_wage_payments":0,"registry_wage_periods":0} to /var/folders/lr/yqldpdv97b56g6p81r9c34p40000gn/T/dairy-backup-efKHX6/backups/dairy-2026-09-26T084557-pre-v10.db
+# Subtest: the backed-up tables are exactly the non-projection registry tables
+ok 153 - the backed-up tables are exactly the non-projection registry tables
+  ---
+  duration_ms: 0.836084
+  type: 'test'
+  ...
+# Subtest: every backed-up table exists in a migrated database
+ok 154 - every backed-up table exists in a migrated database
+  ---
+  duration_ms: 6.221875
+  type: 'test'
+  ...
+# Subtest: sqlLiteral encodes the values SQLite can actually hold
+ok 155 - sqlLiteral encodes the values SQLite can actually hold
+  ---
+  duration_ms: 0.242959
+  type: 'test'
+  ...
+# Subtest: a NUL in a stored value survives dump and restore
+ok 156 - a NUL in a stored value survives dump and restore
+  ---
+  duration_ms: 9.553917
+  type: 'test'
+  ...
+# Subtest: a dump round-trips every record table into a migrated database
+ok 157 - a dump round-trips every record table into a migrated database
+  ---
+  duration_ms: 26.592542
+  type: 'test'
+  ...
+# Subtest: a dump carries data only -- the projections come back from the rebuild
+ok 158 - a dump carries data only -- the projections come back from the rebuild
+  ---
+  duration_ms: 46.479709
+  type: 'test'
+  ...
+# Subtest: a dump defers foreign keys rather than disabling them
+ok 159 - a dump defers foreign keys rather than disabling them
+  ---
+  duration_ms: 13.98575
+  type: 'test'
+  ...
+# Subtest: a dangling reference makes the restore fail rather than load quietly
+ok 160 - a dangling reference makes the restore fail rather than load quietly
+  ---
+  duration_ms: 26.262334
+  type: 'test'
+  ...
+# Subtest: two dumps of unchanged data are byte-identical
+ok 161 - two dumps of unchanged data are byte-identical
+  ---
+  duration_ms: 6.068958
+  type: 'test'
+  ...
+# Subtest: runBackup writes a verified snapshot and a dump
+ok 162 - runBackup writes a verified snapshot and a dump
+  ---
+  duration_ms: 12.81375
+  type: 'test'
+  ...
+# Subtest: runBackup refuses to overwrite an existing backup
+ok 163 - runBackup refuses to overwrite an existing backup
+  ---
+  duration_ms: 17.3765
+  type: 'test'
+  ...
+# Subtest: --no-dump writes the snapshot alone
+ok 164 - --no-dump writes the snapshot alone
+  ---
+  duration_ms: 9.54175
+  type: 'test'
+  ...
+# Subtest: backupPaths labels both files and expandHome resolves ~
+ok 165 - backupPaths labels both files and expandHome resolves ~
+  ---
+  duration_ms: 0.100291
+  type: 'test'
+  ...
+# Subtest: preMigrationBackup skips in-memory databases
+ok 166 - preMigrationBackup skips in-memory databases
+  ---
+  duration_ms: 3.513708
+  type: 'test'
+  ...
+# Subtest: a fresh file database migrates with no backup and no error
+ok 167 - a fresh file database migrates with no backup and no error
+  ---
+  duration_ms: 9.828292
+  type: 'test'
+  ...
+# Subtest: preMigrationBackup snapshots a populated file database
+ok 168 - preMigrationBackup snapshots a populated file database
+  ---
+  duration_ms: 64.962375
+  type: 'test'
+  ...
+# Subtest: recordRowCounts omits tables that do not exist yet
+ok 169 - recordRowCounts omits tables that do not exist yet
+  ---
+  duration_ms: 10.140333
+  type: 'test'
+  ...
+# Subtest: preMigrationBackup refuses to migrate when the snapshot cannot be written
+ok 170 - preMigrationBackup refuses to migrate when the snapshot cannot be written
+  ---
+  duration_ms: 8.782375
+  type: 'test'
+  ...
+# Subtest: the pre-migration hook fires only when a migration is pending
+ok 171 - the pre-migration hook fires only when a migration is pending
+  ---
+  duration_ms: 8.597875
+  type: 'test'
+  ...
+# Subtest: a throw from beforeMigrate leaves the schema unmigrated
+ok 172 - a throw from beforeMigrate leaves the schema unmigrated
+  ---
+  duration_ms: 0.657208
+  type: 'test'
+  ...
+# Subtest: backup.ts never loads db.ts
+ok 173 - backup.ts never loads db.ts
+  ---
+  duration_ms: 0.252708
+  type: 'test'
+  ...
+# Subtest: backup.ts contains no raw control bytes
+ok 174 - backup.ts contains no raw control bytes
+  ---
+  duration_ms: 0.992875
+  type: 'test'
+  ...
+# Subtest: a calving writes the dam event, the calf, the birth event and both projections
+ok 175 - a calving writes the dam event, the calf, the birth event and both projections
+  ---
+  duration_ms: 68.94175
+  type: 'test'
+  ...
+# Subtest: the birth event carries the SAME date and precision as the calving
+ok 176 - the birth event carries the SAME date and precision as the calving
+  ---
+  duration_ms: 4.174667
+  type: 'test'
+  ...
+# Subtest: the calf gets a dam parentage edge
+ok 177 - the calf gets a dam parentage edge
+  ---
+  duration_ms: 3.914417
+  type: 'test'
+  ...
+# Subtest: a sire_ref produces a sire edge; its absence produces none
+ok 178 - a sire_ref produces a sire edge; its absence produces none
+  ---
+  duration_ms: 30.024833
+  type: 'test'
+  ...
+# Subtest: the lactation opens with the id derived from the calving event
+ok 179 - the lactation opens with the id derived from the calving event
+  ---
+  duration_ms: 7.769458
+  type: 'test'
+  ...
+# Subtest: a stillborn calf still exists, still opens the lactation, still counts
+ok 180 - a stillborn calf still exists, still opens the lactation, still counts
+  ---
+  duration_ms: 3.904792
+  type: 'test'
+  ...
+# Subtest: a died_within_24h calf still exists, still opens the lactation, still counts
+ok 181 - a died_within_24h calf still exists, still opens the lactation, still counts
+  ---
+  duration_ms: 3.667875
+  type: 'test'
+  ...
+# Subtest: a second calving with no dry_off closes the first as inferred, and is accepted
+ok 182 - a second calving with no dry_off closes the first as inferred, and is accepted
+  ---
+  duration_ms: 30.287458
+  type: 'test'
+  ...
+# Subtest: an unknown dam is rejected
+ok 183 - an unknown dam is rejected
+  ---
+  duration_ms: 28.230417
+  type: 'test'
+  ...
+# Subtest: a male "dam" is rejected
+ok 184 - a male "dam" is rejected
+  ---
+  duration_ms: 3.733208
+  type: 'test'
+  ...
+# Subtest: a calving on or after a departure is rejected
+ok 185 - a calving on or after a departure is rejected
+  ---
+  duration_ms: 3.374416
+  type: 'test'
+  ...
+# Subtest: a near-duplicate calving is refused, and requires an explicit override
+ok 186 - a near-duplicate calving is refused, and requires an explicit override
+  ---
+  duration_ms: 4.019083
+  type: 'test'
+  ...
+# Subtest: a calving outside the double-entry window needs no override
+ok 187 - a calving outside the double-entry window needs no override
+  ---
+  duration_ms: 39.386042
+  type: 'test'
+  ...
+# Subtest: a forced failure after step 1 leaves ZERO rows written
+ok 188 - a forced failure after step 1 leaves ZERO rows written
+  ---
+  duration_ms: 27.224709
+  type: 'test'
+  ...
+# Subtest: a forced failure after step 2 leaves ZERO rows written
+ok 189 - a forced failure after step 2 leaves ZERO rows written
+  ---
+  duration_ms: 20.447917
+  type: 'test'
+  ...
+# Subtest: a forced failure after step 3 leaves ZERO rows written
+ok 190 - a forced failure after step 3 leaves ZERO rows written
+  ---
+  duration_ms: 10.610416
+  type: 'test'
+  ...
+# Subtest: a forced failure after step 4 leaves ZERO rows written
+ok 191 - a forced failure after step 4 leaves ZERO rows written
+  ---
+  duration_ms: 3.498833
+  type: 'test'
+  ...
+# Subtest: a forced failure after step 5 leaves ZERO rows written
+ok 192 - a forced failure after step 5 leaves ZERO rows written
+  ---
+  duration_ms: 3.568041
+  type: 'test'
+  ...
+# Subtest: a forced failure after step 6 leaves ZERO rows written
+ok 193 - a forced failure after step 6 leaves ZERO rows written
+  ---
+  duration_ms: 49.333875
+  type: 'test'
+  ...
+# Subtest: a rolled-back calving does not burn a serial number
+ok 194 - a rolled-back calving does not burn a serial number
+  ---
+  duration_ms: 3.878167
+  type: 'test'
+  ...
+# Subtest: serials are never reused, even after the animal count changes
+ok 195 - serials are never reused, even after the animal count changes
+  ---
+  duration_ms: 4.220167
+  type: 'test'
+  ...
+# Subtest: the calving is invisible to a reader until it commits
+ok 196 - the calving is invisible to a reader until it commits
+  ---
+  duration_ms: 3.346875
+  type: 'test'
+  ...
+# Subtest: correctCalving supersedes BOTH the calving and the birth
+ok 197 - correctCalving supersedes BOTH the calving and the birth
+  ---
+  duration_ms: 45.661458
+  type: 'test'
+  ...
+# Subtest: a corrected calving leaves the registry with zero invariant violations
+ok 198 - a corrected calving leaves the registry with zero invariant violations
+  ---
+  duration_ms: 12.701791
+  type: 'test'
+  ...
+# Subtest: the correction moves the projection and does not add a second lactation
+ok 199 - the correction moves the projection and does not add a second lactation
+  ---
+  duration_ms: 86.982333
+  type: 'test'
+  ...
+# Subtest: correcting an already-superseded calving is refused and names its replacement
+ok 200 - correcting an already-superseded calving is refused and names its replacement
+  ---
+  duration_ms: 5.088042
+  type: 'test'
+  ...
+# Subtest: a correction chain of two is clean and the last one wins
+ok 201 - a correction chain of two is clean and the last one wins
+  ---
+  duration_ms: 6.710583
+  type: 'test'
+  ...
+# Subtest: correctCalving rejects a non-calving event
+ok 202 - correctCalving rejects a non-calving event
+  ---
+  duration_ms: 3.715333
+  type: 'test'
+  ...
+# Subtest: correctCalving rejects an unknown event id
+ok 203 - correctCalving rejects an unknown event id
+  ---
+  duration_ms: 3.538333
+  type: 'test'
+  ...
+# Subtest: correctCalving applies the same departure guard as recording
+ok 204 - correctCalving applies the same departure guard as recording
+  ---
+  duration_ms: 3.612167
+  type: 'test'
+  ...
+# Subtest: correctCalving applies the double-entry guard, excluding the event being corrected
+ok 205 - correctCalving applies the double-entry guard, excluding the event being corrected
+  ---
+  duration_ms: 4.290375
+  type: 'test'
+  ...
+# Subtest: correctCalving preserves assistance and notes unless explicitly changed
+ok 206 - correctCalving preserves assistance and notes unless explicitly changed
+  ---
+  duration_ms: 4.296583
+  type: 'test'
+  ...
+# Subtest: correctCalving cannot change the calf identity or the outcome
+ok 207 - correctCalving cannot change the calf identity or the outcome
+  ---
+  duration_ms: 56.730042
+  type: 'test'
+  ...
+# Subtest: correcting a STILLBIRTH date moves the calf departure too -- it is a triple
+ok 208 - correcting a STILLBIRTH date moves the calf departure too -- it is a triple
+  ---
+  duration_ms: 4.88675
+  type: 'test'
+  ...
+# Subtest: correcting a LIVE calving has no departure to move
+ok 209 - correcting a LIVE calving has no departure to move
+  ---
+  duration_ms: 3.933958
+  type: 'test'
+  ...
+# Subtest: a calf departure on a DIFFERENT date is not re-dated by a calving correction
+ok 210 - a calf departure on a DIFFERENT date is not re-dated by a calving correction
+  ---
+  duration_ms: 9.763958
+  type: 'test'
+  ...
+# Subtest: correctCalving: a forced failure after step 1 leaves ZERO rows written
+ok 211 - correctCalving: a forced failure after step 1 leaves ZERO rows written
+  ---
+  duration_ms: 4.223917
+  type: 'test'
+  ...
+# Subtest: correctCalving: a forced failure after step 2 leaves ZERO rows written
+ok 212 - correctCalving: a forced failure after step 2 leaves ZERO rows written
+  ---
+  duration_ms: 28.304291
+  type: 'test'
+  ...
+# Subtest: correctCalving: a forced failure after step 3 leaves ZERO rows written
+ok 213 - correctCalving: a forced failure after step 3 leaves ZERO rows written
+  ---
+  duration_ms: 4.126125
+  type: 'test'
+  ...
+# Subtest: correctCalving: a forced failure after step 4 leaves ZERO rows written
+ok 214 - correctCalving: a forced failure after step 4 leaves ZERO rows written
+  ---
+  duration_ms: 19.910917
+  type: 'test'
+  ...
+# Subtest: correctCalving: a forced failure after step 5 leaves ZERO rows written
+ok 215 - correctCalving: a forced failure after step 5 leaves ZERO rows written
+  ---
+  duration_ms: 9.265375
+  type: 'test'
+  ...
+# Subtest: link mode attaches to the existing animal and mints nothing
+ok 216 - link mode attaches to the existing animal and mints nothing
+  ---
+  duration_ms: 4.093625
+  type: 'test'
+  ...
+# Subtest: link mode supersedes the acquired origin with the birth event
+ok 217 - link mode supersedes the acquired origin with the birth event
+  ---
+  duration_ms: 10.977958
+  type: 'test'
+  ...
+# Subtest: link mode promotes registry_animals.origin to born_on_farm
+ok 218 - link mode promotes registry_animals.origin to born_on_farm
+  ---
+  duration_ms: 3.98225
+  type: 'test'
+  ...
+# Subtest: the projection treats the superseded acquired as GONE for origin purposes
+ok 219 - the projection treats the superseded acquired as GONE for origin purposes
+  ---
+  duration_ms: 3.870875
+  type: 'test'
+  ...
+# Subtest: invariants 3 and 7 both hold across the type-changing supersession
+ok 220 - invariants 3 and 7 both hold across the type-changing supersession
+  ---
+  duration_ms: 15.22075
+  type: 'test'
+  ...
+# Subtest: invariant 9 permits birth-supersedes-acquired but nothing else
+ok 221 - invariant 9 permits birth-supersedes-acquired but nothing else
+  ---
+  duration_ms: 11.719458
+  type: 'test'
+  ...
+# Subtest: the promoted animal survives a rebuild unchanged
+ok 222 - the promoted animal survives a rebuild unchanged
+  ---
+  duration_ms: 8.831
+  type: 'test'
+  ...
+# Subtest: invariant 3 catches registry_animals.origin drifting from the origin event
+ok 223 - invariant 3 catches registry_animals.origin drifting from the origin event
+  ---
+  duration_ms: 9.268334
+  type: 'test'
+  ...
+# Subtest: link mode refuses an animal that already has a birth event
+ok 224 - link mode refuses an animal that already has a birth event
+  ---
+  duration_ms: 21.670917
+  type: 'test'
+  ...
+# Subtest: link mode refuses an unknown animal rather than minting one
+ok 225 - link mode refuses an unknown animal rather than minting one
+  ---
+  duration_ms: 3.636792
+  type: 'test'
+  ...
+# Subtest: link mode refuses a sex disagreement
+ok 226 - link mode refuses a sex disagreement
+  ---
+  duration_ms: 5.248167
+  type: 'test'
+  ...
+# Subtest: link mode refuses an animal that is its own dam
+ok 227 - link mode refuses an animal that is its own dam
+  ---
+  duration_ms: 3.413542
+  type: 'test'
+  ...
+# Subtest: link mode refuses a non-live outcome
+ok 228 - link mode refuses a non-live outcome
+  ---
+  duration_ms: 23.379792
+  type: 'test'
+  ...
+# Subtest: link mode refuses when the calf already calved BEFORE the proposed birth date
+ok 229 - link mode refuses when the calf already calved BEFORE the proposed birth date
+  ---
+  duration_ms: 3.986042
+  type: 'test'
+  ...
+# Subtest: link mode refuses when the calf calved too soon AFTER the proposed birth date
+ok 230 - link mode refuses when the calf calved too soon AFTER the proposed birth date
+  ---
+  duration_ms: 3.88625
+  type: 'test'
+  ...
+# Subtest: link mode still links a calf whose own calvings are years later
+ok 231 - link mode still links a calf whose own calvings are years later
+  ---
+  duration_ms: 13.012166
+  type: 'test'
+  ...
+# Subtest: the gestation floor is measured from the EARLIEST date the precision admits
+ok 232 - the gestation floor is measured from the EARLIEST date the precision admits
+  ---
+  duration_ms: 0.082041
+  type: 'test'
+  ...
+# Subtest: an ESTIMATED calving is not evidence of impossibility, so it is not refused
+ok 233 - an ESTIMATED calving is not evidence of impossibility, so it is not refused
+  ---
+  duration_ms: 0.042916
+  type: 'test'
+  ...
+# Subtest: link mode still runs the dam validation
+ok 234 - link mode still runs the dam validation
+  ---
+  duration_ms: 23.550833
+  type: 'test'
+  ...
+# Subtest: link mode: a forced failure after step 1 leaves ZERO rows written
+ok 235 - link mode: a forced failure after step 1 leaves ZERO rows written
+  ---
+  duration_ms: 6.032042
+  type: 'test'
+  ...
+# Subtest: link mode: a forced failure after step 2 leaves ZERO rows written
+ok 236 - link mode: a forced failure after step 2 leaves ZERO rows written
+  ---
+  duration_ms: 3.565375
+  type: 'test'
+  ...
+# Subtest: link mode: a forced failure after step 3 leaves ZERO rows written
+ok 237 - link mode: a forced failure after step 3 leaves ZERO rows written
+  ---
+  duration_ms: 3.470042
+  type: 'test'
+  ...
+# Subtest: link mode: a forced failure after step 4 leaves ZERO rows written
+ok 238 - link mode: a forced failure after step 4 leaves ZERO rows written
+  ---
+  duration_ms: 3.518584
+  type: 'test'
+  ...
+# Subtest: link mode: a forced failure after step 5 leaves ZERO rows written
+ok 239 - link mode: a forced failure after step 5 leaves ZERO rows written
+  ---
+  duration_ms: 3.537791
+  type: 'test'
+  ...
+# Subtest: link mode: a forced failure after step 6 leaves ZERO rows written
+ok 240 - link mode: a forced failure after step 6 leaves ZERO rows written
+  ---
+  duration_ms: 3.746291
+  type: 'test'
+  ...
+# Subtest: both dates known to the day: a week either side
+ok 241 - both dates known to the day: a week either side
+  ---
+  duration_ms: 3.521833
+  type: 'test'
+  ...
+# Subtest: either date known only to the month: 45 days, because that is what a month costs
+ok 242 - either date known only to the month: 45 days, because that is what a month costs
+  ---
+  duration_ms: 0.513417
+  type: 'test'
+  ...
+# Subtest: either date known only to the year: the same calendar year, plus or minus one
+ok 243 - either date known only to the year: the same calendar year, plus or minus one
+  ---
+  duration_ms: 0.180334
+  type: 'test'
+  ...
+# Subtest: a day-precision calving still matches a year-precision birth in the same year
+ok 244 - a day-precision calving still matches a year-precision birth in the same year
+  ---
+  duration_ms: 0.224333
+  type: 'test'
+  ...
+# Subtest: an ESTIMATED date is compared at year grain, not refused outright
+ok 245 - an ESTIMATED date is compared at year grain, not refused outright
+  ---
+  duration_ms: 0.141833
+  type: 'test'
+  ...
+# Subtest: an animal with NO birth date ranks first among the eligible
+ok 246 - an animal with NO birth date ranks first among the eligible
+  ---
+  duration_ms: 21.9465
+  type: 'test'
+  ...
+# Subtest: the eligible are ordered by absolute distance, closest first
+ok 247 - the eligible are ordered by absolute distance, closest first
+  ---
+  duration_ms: 21.586875
+  type: 'test'
+  ...
+# Subtest: ineligible animals are still returned, with their reason, below the eligible
+ok 248 - ineligible animals are still returned, with their reason, below the eligible
+  ---
+  duration_ms: 6.786208
+  type: 'test'
+  ...
+# Subtest: the order is total and stable, so two calls agree
+ok 249 - the order is total and stable, so two calls agree
+  ---
+  duration_ms: 38.95075
+  type: 'test'
+  ...
+# Subtest: with no proposed date, nothing is judged and nothing is hidden
+ok 250 - with no proposed date, nothing is judged and nothing is hidden
+  ---
+  duration_ms: 88.441875
+  type: 'test'
+  ...
+# Subtest: days_apart is signed, so a UI can say "before" or "after"
+ok 251 - days_apart is signed, so a UI can say "before" or "after"
+  ---
+  duration_ms: 11.031042
+  type: 'test'
+  ...
+# Subtest: the picker greys an animal that calved too soon after the proposed birth date
+ok 252 - the picker greys an animal that calved too soon after the proposed birth date
+  ---
+  duration_ms: 4.106917
+  type: 'test'
+  ...
+# Subtest: the picker still offers a dam whose own calvings are years later
+ok 253 - the picker still offers a dam whose own calvings are years later
+  ---
+  duration_ms: 3.844625
+  type: 'test'
+  ...
+# Subtest: every animal the picker calls eligible is one recordCalving accepts
+ok 254 - every animal the picker calls eligible is one recordCalving accepts
+  ---
+  duration_ms: 360.3275
+  type: 'test'
+  ...
+# Subtest: the two agree on a herd that exercises the gestation floor
+ok 255 - the two agree on a herd that exercises the gestation floor
+  ---
+  duration_ms: 44.363916
+  type: 'test'
+  ...
+# Subtest: --flag=value parses, and splits on the FIRST = only
+ok 256 - --flag=value parses, and splits on the FIRST = only
+  ---
+  duration_ms: 1.48275
+  type: 'test'
+  ...
+# Subtest: a bare --flag parses as true (for boolean overrides)
+ok 257 - a bare --flag parses as true (for boolean overrides)
+  ---
+  duration_ms: 0.219667
+  type: 'test'
+  ...
+# Subtest: a positional argument is rejected rather than ignored
+ok 258 - a positional argument is rejected rather than ignored
+  ---
+  duration_ms: 0.4165
+  type: 'test'
+  ...
+# Subtest: an unknown flag is rejected, so a typo is not silently dropped
+ok 259 - an unknown flag is rejected, so a typo is not silently dropped
+  ---
+  duration_ms: 0.224709
+  type: 'test'
+  ...
+# Subtest: --help and -h are always allowed
+ok 260 - --help and -h are always allowed
+  ---
+  duration_ms: 0.225667
+  type: 'test'
+  ...
+# Subtest: a missing --precision is an error, NOT a default of day
+ok 261 - a missing --precision is an error, NOT a default of day
+  ---
+  duration_ms: 0.278
+  type: 'test'
+  ...
+# Subtest: --precision with no value is refused too
+ok 262 - --precision with no value is refused too
+  ---
+  duration_ms: 0.149916
+  type: 'test'
+  ...
+# Subtest: an invalid precision names the four valid values
+ok 263 - an invalid precision names the four valid values
+  ---
+  duration_ms: 0.989166
+  type: 'test'
+  ...
+# Subtest: all four precisions are accepted
+ok 264 - all four precisions are accepted
+  ---
+  duration_ms: 0.575083
+  type: 'test'
+  ...
+# Subtest: --source-form is required, not defaulted to recall
+ok 265 - --source-form is required, not defaulted to recall
+  ---
+  duration_ms: 5.086834
+  type: 'test'
+  ...
+# Subtest: --recorded-by is required, because the column is NOT NULL
+ok 266 - --recorded-by is required, because the column is NOT NULL
+  ---
+  duration_ms: 0.128291
+  type: 'test'
+  ...
+# Subtest: observed_by stays null unless given -- nobody observes a purchase record
+ok 267 - observed_by stays null unless given -- nobody observes a purchase record
+  ---
+  duration_ms: 0.053625
+  type: 'test'
+  ...
+# Subtest: an invalid source form names the five valid values
+ok 268 - an invalid source form names the five valid values
+  ---
+  duration_ms: 0.091
+  type: 'test'
+  ...
+# Subtest: dates must be YYYY-MM-DD
+ok 269 - dates must be YYYY-MM-DD
+  ---
+  duration_ms: 2.592375
+  type: 'test'
+  ...
+# Subtest: a required string with no value is refused, not read as true
+ok 270 - a required string with no value is refused, not read as true
+  ---
+  duration_ms: 0.08875
+  type: 'test'
+  ...
+# Subtest: an empty optional string reads as null, not as an empty string
+ok 271 - an empty optional string reads as null, not as an empty string
+  ---
+  duration_ms: 0.042042
+  type: 'test'
+  ...
+# Subtest: optPrecision validates when present and stays null when absent
+ok 272 - optPrecision validates when present and stays null when absent
+  ---
+  duration_ms: 4.617583
+  type: 'test'
+  ...
+# Subtest: every command documents the precision requirement in its usage
+ok 273 - every command documents the precision requirement in its usage
+  ---
+  duration_ms: 0.2965
+  type: 'test'
+  ...
+# Subtest: registry:add explains why it cannot create a farm-born animal
+ok 274 - registry:add explains why it cannot create a farm-born animal
+  ---
+  duration_ms: 0.097375
+  type: 'test'
+  ...
+# Subtest: registry:correct-calving explains the pairing in its usage
+ok 275 - registry:correct-calving explains the pairing in its usage
+  ---
+  duration_ms: 0.252125
+  type: 'test'
+  ...
+# Subtest: CLI usage imports never open the live database or seed module
+ok 276 - CLI usage imports never open the live database or seed module
+  ---
+  duration_ms: 2.884833
+  type: 'test'
+  ...
+# Subtest: normalisation folds case and collapses whitespace
+ok 277 - normalisation folds case and collapses whitespace
+  ---
+  duration_ms: 1.691
+  type: 'test'
+  ...
+# Subtest: withinOneEdit accepts one substitution, insertion or deletion
+ok 278 - withinOneEdit accepts one substitution, insertion or deletion
+  ---
+  duration_ms: 0.192917
+  type: 'test'
+  ...
+# Subtest: the prefix rule is what catches abdul / abdul_r
+ok 279 - the prefix rule is what catches abdul / abdul_r
+  ---
+  duration_ms: 0.066458
+  type: 'test'
+  ...
+# Subtest: a prefix shorter than the minimum matches nothing
+ok 280 - a prefix shorter than the minimum matches nothing
+  ---
+  duration_ms: 0.044708
+  type: 'test'
+  ...
+# Subtest: an empty query returns nothing, not the whole herd
+ok 281 - an empty query returns nothing, not the whole herd
+  ---
+  duration_ms: 9.718542
+  type: 'test'
+  ...
+# Subtest: an identical name and sex is a match
+ok 282 - an identical name and sex is a match
+  ---
+  duration_ms: 6.531333
+  type: 'test'
+  ...
+# Subtest: case and spacing differences still match -- that is the whole point
+ok 283 - case and spacing differences still match -- that is the whole point
+  ---
+  duration_ms: 3.465708
+  type: 'test'
+  ...
+# Subtest: a NAME match requires the same sex; an IDENTIFIER match does not
+ok 284 - a NAME match requires the same sex; an IDENTIFIER match does not
+  ---
+  duration_ms: 16.641042
+  type: 'test'
+  ...
+# Subtest: post no. outranks a name match, and the reason names which signal fired
+ok 285 - post no. outranks a name match, and the reason names which signal fired
+  ---
+  duration_ms: 5.078166
+  type: 'test'
+  ...
+# Subtest: a near-miss name is flagged and labelled as near, not exact
+ok 286 - a near-miss name is flagged and labelled as near, not exact
+  ---
+  duration_ms: 3.721666
+  type: 'test'
+  ...
+# Subtest: TWO GENUINELY DIFFERENT ANIMALS ARE NOT FLAGGED, and this is the point of soft
+ok 287 - TWO GENUINELY DIFFERENT ANIMALS ARE NOT FLAGGED, and this is the point of soft
+  ---
+  duration_ms: 3.769375
+  type: 'test'
+  ...
+# Subtest: an unrelated name is not flagged
+ok 288 - an unrelated name is not flagged
+  ---
+  duration_ms: 3.3745
+  type: 'test'
+  ...
+# Subtest: the excluded animal never matches itself
+ok 289 - the excluded animal never matches itself
+  ---
+  duration_ms: 3.502875
+  type: 'test'
+  ...
+# Subtest: the most recently typed match comes first within a tier
+ok 290 - the most recently typed match comes first within a tier
+  ---
+  duration_ms: 3.438417
+  type: 'test'
+  ...
+# Subtest: every match carries when it was TYPED, for the age the UI shows
+ok 291 - every match carries when it was TYPED, for the age the UI shows
+  ---
+  duration_ms: 3.361417
+  type: 'test'
+  ...
+# Subtest: no recency cutoff: an old animal is still offered
+ok 292 - no recency cutoff: an old animal is still offered
+  ---
+  duration_ms: 47.349791
+  type: 'test'
+  ...
+# Subtest: the order is total, so two calls agree
+ok 293 - the order is total, so two calls agree
+  ---
+  duration_ms: 3.751167
+  type: 'test'
+  ...
+# Subtest: adds the animal, its origin event and its projections in one call
+ok 294 - adds the animal, its origin event and its projections in one call
+  ---
+  duration_ms: 25.307875
+  type: 'test'
+  ...
+# Subtest: the acquisition date is NOT the birth date
+ok 295 - the acquisition date is NOT the birth date
+  ---
+  duration_ms: 5.161875
+  type: 'test'
+  ...
+# Subtest: an animal with no birth date has none, and cannot project as calf
+ok 296 - an animal with no birth date has none, and cannot project as calf
+  ---
+  duration_ms: 24.155417
+  type: 'test'
+  ...
+# Subtest: serials advance and are never reused
+ok 297 - serials advance and are never reused
+  ---
+  duration_ms: 3.58325
+  type: 'test'
+  ...
+# Subtest: post_no and tag_no are stored as attributes, defaulting to null
+ok 298 - post_no and tag_no are stored as attributes, defaulting to null
+  ---
+  duration_ms: 22.4395
+  type: 'test'
+  ...
+# Subtest: a clean add leaves zero invariant violations
+ok 299 - a clean add leaves zero invariant violations
+  ---
+  duration_ms: 7.131
+  type: 'test'
+  ...
+# Subtest: a birth date without its precision is refused, with the field named
+ok 300 - a birth date without its precision is refused, with the field named
+  ---
+  duration_ms: 3.89575
+  type: 'test'
+  ...
+# Subtest: a birth precision without a birth date is refused
+ok 301 - a birth precision without a birth date is refused
+  ---
+  duration_ms: 3.162084
+  type: 'test'
+  ...
+# Subtest: the birth date obeys the stored-date conventions too, not just occurred_on
+ok 302 - the birth date obeys the stored-date conventions too, not just occurred_on
+  ---
+  duration_ms: 3.478042
+  type: 'test'
+  ...
+# Subtest: an invalid sex is refused with the field named
+ok 303 - an invalid sex is refused with the field named
+  ---
+  duration_ms: 8.7495
+  type: 'test'
+  ...
+# Subtest: the acquisition date obeys the precision conventions
+ok 304 - the acquisition date obeys the precision conventions
+  ---
+  duration_ms: 3.119667
+  type: 'test'
+  ...
+# Subtest: a failed add burns no serial
+ok 305 - a failed add burns no serial
+  ---
+  duration_ms: 3.156208
+  type: 'test'
+  ...
+# Subtest: a note is written and changes nothing derived
+ok 306 - a note is written and changes nothing derived
+  ---
+  duration_ms: 20.691167
+  type: 'test'
+  ...
+# Subtest: a departure is written and the status becomes departed
+ok 307 - a departure is written and the status becomes departed
+  ---
+  duration_ms: 7.191167
+  type: 'test'
+  ...
+# Subtest: a dry_off accepts an optional reason and defaults it to null
+ok 308 - a dry_off accepts an optional reason and defaults it to null
+  ---
+  duration_ms: 5.15175
+  type: 'test'
+  ...
+# Subtest: occurred_time is accepted at day precision and rejected above it
+ok 309 - occurred_time is accepted at day precision and rejected above it
+  ---
+  duration_ms: 11.20075
+  type: 'test'
+  ...
+# Subtest: RULE: an unknown animal is refused, with the field named
+ok 310 - RULE: an unknown animal is refused, with the field named
+  ---
+  duration_ms: 3.345667
+  type: 'test'
+  ...
+# Subtest: RULE: departure is terminal -- a later dry_off is refused
+ok 311 - RULE: departure is terminal -- a later dry_off is refused
+  ---
+  duration_ms: 9.065167
+  type: 'test'
+  ...
+# Subtest: RULE: the terminal guard has an explicit override
+ok 312 - RULE: the terminal guard has an explicit override
+  ---
+  duration_ms: 20.830125
+  type: 'test'
+  ...
+# Subtest: RULE: a note after a departure needs no override
+ok 313 - RULE: a note after a departure needs no override
+  ---
+  duration_ms: 4.082375
+  type: 'test'
+  ...
+# Subtest: RULE: an animal leaves once -- a second departure is refused
+ok 314 - RULE: an animal leaves once -- a second departure is refused
+  ---
+  duration_ms: 3.746167
+  type: 'test'
+  ...
+# Subtest: RULE: a departure requires a reason
+ok 315 - RULE: a departure requires a reason
+  ---
+  duration_ms: 3.238375
+  type: 'test'
+  ...
+# Subtest: RULE: reasons are validated per event type
+ok 316 - RULE: reasons are validated per event type
+  ---
+  duration_ms: 3.233833
+  type: 'test'
+  ...
+# Subtest: RULE: a note requires text
+ok 317 - RULE: a note requires text
+  ---
+  duration_ms: 3.169916
+  type: 'test'
+  ...
+# Subtest: RULE: a non-enterable type is refused as a backstop, even from a route
+ok 318 - RULE: a non-enterable type is refused as a backstop, even from a route
+  ---
+  duration_ms: 3.180583
+  type: 'test'
+  ...
+# Subtest: a refused life event writes nothing
+ok 319 - a refused life event writes nothing
+  ---
+  duration_ms: 3.224417
+  type: 'test'
+  ...
+# Subtest: toWire() is { error, field?, message } with the prose verbatim
+ok 320 - toWire() is { error, field?, message } with the prose verbatim
+  ---
+  duration_ms: 0.067709
+  type: 'test'
+  ...
+# Subtest: a fieldless error omits `field` rather than sending null
+ok 321 - a fieldless error omits `field` rather than sending null
+  ---
+  duration_ms: 0.047041
+  type: 'test'
+  ...
+# Subtest: CalvingError is a RegistryError, so one handler covers every domain refusal
+ok 322 - CalvingError is a RegistryError, so one handler covers every domain refusal
+  ---
+  duration_ms: 0.067708
+  type: 'test'
+  ...
+# Subtest: every domain refusal carries a code and most carry a field
+ok 323 - every domain refusal carries a code and most carry a field
+  ---
+  duration_ms: 3.267084
+  type: 'test'
+  ...
+# Subtest: entry writes are reproducible by the rebuild
+ok 324 - entry writes are reproducible by the rebuild
+  ---
+  duration_ms: 3.637375
+  type: 'test'
+  ...
+# Subtest: superseding an origin event still leaves exactly one effective origin
+ok 325 - superseding an origin event still leaves exactly one effective origin
+  ---
+  duration_ms: 3.193333
+  type: 'test'
+  ...
+# Subtest: the harness and the routes never load db.ts or seed.ts
+ok 326 - the harness and the routes never load db.ts or seed.ts
+  ---
+  duration_ms: 184.084833
+  type: 'test'
+  ...
+# Subtest: no harness-reachable module names the forbidden imports at all
+ok 327 - no harness-reachable module names the forbidden imports at all
+  ---
+  duration_ms: 2.937666
+  type: 'test'
+  ...
+# Subtest: exactly the CLI entry points import ../db, and nothing else does
+ok 328 - exactly the CLI entry points import ../db, and nothing else does
+  ---
+  duration_ms: 2.495084
+  type: 'test'
+  ...
+# Subtest: the harness serves :memory: and says so
+ok 329 - the harness serves :memory: and says so
+  ---
+  duration_ms: 0.21375
+  type: 'test'
+  ...
+# Subtest: the same animal payload twice on one key mints ONE animal
+ok 330 - the same animal payload twice on one key mints ONE animal
+  ---
+  duration_ms: 143.870083
+  type: 'test'
+  ...
+# Subtest: the same animal payload on TWO keys still mints two -- the domain is unchanged
+ok 331 - the same animal payload on TWO keys still mints two -- the domain is unchanged
+  ---
+  duration_ms: 19.043
+  type: 'test'
+  ...
+# Subtest: an identical note twice on one key appends ONE event
+ok 332 - an identical note twice on one key appends ONE event
+  ---
+  duration_ms: 16.679125
+  type: 'test'
+  ...
+# Subtest: an identical dry_off twice on one key appends ONE event
+ok 333 - an identical dry_off twice on one key appends ONE event
+  ---
+  duration_ms: 15.877
+  type: 'test'
+  ...
+# Subtest: a write with no key is refused, and writes nothing
+ok 334 - a write with no key is refused, and writes nothing
+  ---
+  duration_ms: 5.881666
+  type: 'test'
+  ...
+# Subtest: a blank or whitespace key does not count as a key
+ok 335 - a blank or whitespace key does not count as a key
+  ---
+  duration_ms: 17.988208
+  type: 'test'
+  ...
+# Subtest: every event-appending route requires a key
+ok 336 - every event-appending route requires a key
+  ---
+  duration_ms: 12.717333
+  type: 'test'
+  ...
+# Subtest: /rebuild needs no key: it appends nothing and is idempotent by construction
+ok 337 - /rebuild needs no key: it appends nothing and is idempotent by construction
+  ---
+  duration_ms: 27.324417
+  type: 'test'
+  ...
+# Subtest: a refusal is NOT remembered, so a corrected retry on the same key proceeds
+ok 338 - a refusal is NOT remembered, so a corrected retry on the same key proceeds
+  ---
+  duration_ms: 10.204625
+  type: 'test'
+  ...
+# Subtest: the same key with a different body is a different write, not a conflict
+ok 339 - the same key with a different body is a different write, not a conflict
+  ---
+  duration_ms: 62.4995
+  type: 'test'
+  ...
+# Subtest: key order in the body does not defeat the replay check
+ok 340 - key order in the body does not defeat the replay check
+  ---
+  duration_ms: 8.522209
+  type: 'test'
+  ...
+# Subtest: a replay is scoped to its own router, so the harness cannot answer for dairy.db
+ok 341 - a replay is scoped to its own router, so the harness cannot answer for dairy.db
+  ---
+  duration_ms: 38.538041
+  type: 'test'
+  ...
+# Subtest: canonicalJson is stable across key order and nesting
+ok 342 - canonicalJson is stable across key order and nesting
+  ---
+  duration_ms: 0.125375
+  type: 'test'
+  ...
+# Subtest: the store distinguishes bodies and evicts least-recently-used past the cap
+ok 343 - the store distinguishes bodies and evicts least-recently-used past the cap
+  ---
+  duration_ms: 0.553084
+  type: 'test'
+  ...
+# Subtest: an empty registry offers empty lists, not an error
+ok 344 - an empty registry offers empty lists, not an error
+  ---
+  duration_ms: 6.4245
+  type: 'test'
+  ...
+# Subtest: observed_by is collected from every event type
+ok 345 - observed_by is collected from every event type
+  ---
+  duration_ms: 37.188417
+  type: 'test'
+  ...
+# Subtest: acquired_from comes from the acquired payload, sire_ref from the birth payload
+ok 346 - acquired_from comes from the acquired payload, sire_ref from the birth payload
+  ---
+  duration_ms: 6.457417
+  type: 'test'
+  ...
+# Subtest: CASE VARIANTS ARE BOTH LISTED -- collapsing them would hide the problem
+ok 347 - CASE VARIANTS ARE BOTH LISTED -- collapsing them would hide the problem
+  ---
+  duration_ms: 3.5585
+  type: 'test'
+  ...
+# Subtest: each value appears once however many events carry it
+ok 348 - each value appears once however many events carry it
+  ---
+  duration_ms: 15.585542
+  type: 'test'
+  ...
+# Subtest: a blank observed_by contributes nothing
+ok 349 - a blank observed_by contributes nothing
+  ---
+  duration_ms: 7.353417
+  type: 'test'
+  ...
+# Subtest: a name on a SUPERSEDED event is still suggested
+ok 350 - a name on a SUPERSEDED event is still suggested
+  ---
+  duration_ms: 6.308542
+  type: 'test'
+  ...
+# Subtest: the clean herd produces zero violations
+ok 351 - the clean herd produces zero violations
+  ---
+  duration_ms: 16.693667
+  type: 'test'
+  ...
+# Subtest: the clean herd exercises the cases the invariants are for
+ok 352 - the clean herd exercises the cases the invariants are for
+  ---
+  duration_ms: 8.990459
+  type: 'test'
+  ...
+# Subtest: every view-branching enum is represented in the fixture herd
+ok 353 - every view-branching enum is represented in the fixture herd
+  ---
+  duration_ms: 10.53075
+  type: 'test'
+  ...
+# Subtest: a PAIRED correction is clean, and the correction takes effect
+ok 354 - a PAIRED correction is clean, and the correction takes effect
+  ---
+  duration_ms: 4.054709
+  type: 'test'
+  ...
+# Subtest: invariant 0: rebuilding twice produces identical projection row-sets
+ok 355 - invariant 0: rebuilding twice produces identical projection row-sets
+  ---
+  duration_ms: 7.144542
+  type: 'test'
+  ...
+# Subtest: the multiset diff can actually detect a difference
+ok 356 - the multiset diff can actually detect a difference
+  ---
+  duration_ms: 0.082458
+  type: 'test'
+  ...
+# Subtest: invariant 1: a tampered stored status is caught
+ok 357 - invariant 1: a tampered stored status is caught
+  ---
+  duration_ms: 6.372083
+  type: 'test'
+  ...
+# Subtest: invariant 1: a missing stored status row is caught
+ok 358 - invariant 1: a missing stored status row is caught
+  ---
+  duration_ms: 6.324166
+  type: 'test'
+  ...
+# Subtest: invariant 1: a deleted lactation row is caught
+ok 359 - invariant 1: a deleted lactation row is caught
+  ---
+  duration_ms: 6.404084
+  type: 'test'
+  ...
+# Subtest: invariant 1 also fires on merely STALE projections -- the documented behaviour
+ok 360 - invariant 1 also fires on merely STALE projections -- the documented behaviour
+  ---
+  duration_ms: 15.875792
+  type: 'test'
+  ...
+# Subtest: invariant 2: lactation ids survive a rebuild unchanged
+ok 361 - invariant 2: lactation ids survive a rebuild unchanged
+  ---
+  duration_ms: 7.448458
+  type: 'test'
+  ...
+# Subtest: invariant 2: ids also survive a rebuild at a DIFFERENT as-of date
+ok 362 - invariant 2: ids also survive a rebuild at a DIFFERENT as-of date
+  ---
+  duration_ms: 6.433875
+  type: 'test'
+  ...
+# Subtest: invariant 8/2: a lactation id not derived from its calving is caught
+ok 363 - invariant 8/2: a lactation id not derived from its calving is caught
+  ---
+  duration_ms: 6.300792
+  type: 'test'
+  ...
+# Subtest: invariant 3: an animal with no origin event is caught
+ok 364 - invariant 3: an animal with no origin event is caught
+  ---
+  duration_ms: 6.256333
+  type: 'test'
+  ...
+# Subtest: invariant 3: an animal with two origin events is caught
+ok 365 - invariant 3: an animal with two origin events is caught
+  ---
+  duration_ms: 6.185041
+  type: 'test'
+  ...
+# Subtest: invariant 3: an event on a non-existent animal is caught
+ok 366 - invariant 3: an event on a non-existent animal is caught
+  ---
+  duration_ms: 6.141292
+  type: 'test'
+  ...
+# Subtest: invariant 4: an event before its animal origin is caught
+ok 367 - invariant 4: an event before its animal origin is caught
+  ---
+  duration_ms: 11.688208
+  type: 'test'
+  ...
+# Subtest: invariant 4 allows for precision -- a month row is not "before" a same-month day row
+ok 368 - invariant 4 allows for precision -- a month row is not "before" a same-month day row
+  ---
+  duration_ms: 0.082
+  type: 'test'
+  ...
+# Subtest: invariant 5: an event after a departure is caught
+ok 369 - invariant 5: an event after a departure is caught
+  ---
+  duration_ms: 7.090625
+  type: 'test'
+  ...
+# Subtest: a `note` is exempt from both timeline bounds
+ok 370 - a `note` is exempt from both timeline bounds
+  ---
+  duration_ms: 6.449583
+  type: 'test'
+  ...
+# Subtest: invariant 6: a HALF-APPLIED date correction is caught
+ok 371 - invariant 6: a HALF-APPLIED date correction is caught
+  ---
+  duration_ms: 3.917417
+  type: 'test'
+  ...
+# Subtest: invariant 6: a calving naming a non-existent calf is caught
+ok 372 - invariant 6: a calving naming a non-existent calf is caught
+  ---
+  duration_ms: 6.302417
+  type: 'test'
+  ...
+# Subtest: invariant 6: a birth date diverging from its calving is caught
+ok 373 - invariant 6: a birth date diverging from its calving is caught
+  ---
+  duration_ms: 99.887291
+  type: 'test'
+  ...
+# Subtest: invariant 6: a sex disagreement between the calving and the animal row is caught
+ok 374 - invariant 6: a sex disagreement between the calving and the animal row is caught
+  ---
+  duration_ms: 6.451042
+  type: 'test'
+  ...
+# Subtest: invariant 6: a calf whose origin is not born_on_farm is caught
+ok 375 - invariant 6: a calf whose origin is not born_on_farm is caught
+  ---
+  duration_ms: 11.220584
+  type: 'test'
+  ...
+# Subtest: invariant 7: a farm-born animal with no dam edge is caught
+ok 376 - invariant 7: a farm-born animal with no dam edge is caught
+  ---
+  duration_ms: 51.2725
+  type: 'test'
+  ...
+# Subtest: invariant 7: a dam edge naming a non-registry animal is caught
+ok 377 - invariant 7: a dam edge naming a non-registry animal is caught
+  ---
+  duration_ms: 6.434708
+  type: 'test'
+  ...
+# Subtest: invariant 8: two open lactations for one animal are caught
+ok 378 - invariant 8: two open lactations for one animal are caught
+  ---
+  duration_ms: 6.211459
+  type: 'test'
+  ...
+# Subtest: invariant 9: a projection derived from a superseded event is caught
+ok 379 - invariant 9: a projection derived from a superseded event is caught
+  ---
+  duration_ms: 3.97525
+  type: 'test'
+  ...
+# Subtest: invariant 9: superseding an event that does not exist is caught
+ok 380 - invariant 9: superseding an event that does not exist is caught
+  ---
+  duration_ms: 6.229417
+  type: 'test'
+  ...
+# Subtest: invariant 9: superseding an event on a different animal is caught
+ok 381 - invariant 9: superseding an event on a different animal is caught
+  ---
+  duration_ms: 6.173834
+  type: 'test'
+  ...
+# Subtest: invariant 9: superseding an event of a different type is caught
+ok 382 - invariant 9: superseding an event of a different type is caught
+  ---
+  duration_ms: 73.720041
+  type: 'test'
+  ...
+# Subtest: invariant 10: a counter that would reissue an existing serial is caught
+ok 383 - invariant 10: a counter that would reissue an existing serial is caught
+  ---
+  duration_ms: 6.64325
+  type: 'test'
+  ...
+# Subtest: invariant 10: a non-canonical serial is caught
+ok 384 - invariant 10: a non-canonical serial is caught
+  ---
+  duration_ms: 16.698958
+  type: 'test'
+  ...
+# Subtest: invariant 10: an id not using the BD- prefix is caught
+ok 385 - invariant 10: an id not using the BD- prefix is caught
+  ---
+  duration_ms: 6.429958
+  type: 'test'
+  ...
+# Subtest: invariant 11: a month-precision row dated mid-month is caught
+ok 386 - invariant 11: a month-precision row dated mid-month is caught
+  ---
+  duration_ms: 6.2565
+  type: 'test'
+  ...
+# Subtest: invariant 11: a year-precision row not dated Jan 1 is caught
+ok 387 - invariant 11: a year-precision row not dated Jan 1 is caught
+  ---
+  duration_ms: 66.71275
+  type: 'test'
+  ...
+# Subtest: invariant 11: an estimated-precision row not dated Jan 1 is caught
+ok 388 - invariant 11: an estimated-precision row not dated Jan 1 is caught
+  ---
+  duration_ms: 9.755042
+  type: 'test'
+  ...
+# Subtest: invariant 11 accepts estimated dated Jan 1
+ok 389 - invariant 11 accepts estimated dated Jan 1
+  ---
+  duration_ms: 43.590917
+  type: 'test'
+  ...
+# Subtest: invariant 12: a clock time at non-day precision is caught
+ok 390 - invariant 12: a clock time at non-day precision is caught
+  ---
+  duration_ms: 30.409375
+  type: 'test'
+  ...
+# Subtest: every invariant 1-12 has at least one test that makes it fire
+ok 391 - every invariant 1-12 has at least one test that makes it fire
+  ---
+  duration_ms: 30.0995
+  type: 'test'
+  ...
+# Subtest: a clean sales snapshot produces zero violations
+ok 392 - a clean sales snapshot produces zero violations
+  ---
+  duration_ms: 1.12625
+  type: 'test'
+  ...
+# Subtest: EVERY sales invariant is demonstrably reachable
+ok 393 - EVERY sales invariant is demonstrably reachable
+  ---
+  duration_ms: 5.358709
+  type: 'test'
+  ...
+# Subtest: a dispatch or payment naming an unknown destination is caught
+ok 394 - a dispatch or payment naming an unknown destination is caught
+  ---
+  duration_ms: 0.069416
+  type: 'test'
+  ...
+# Subtest: a billable dispatch that captured NO price is caught
+ok 395 - a billable dispatch that captured NO price is caught
+  ---
+  duration_ms: 0.043167
+  type: 'test'
+  ...
+# Subtest: an empty registry has nothing to say about sales
+ok 396 - an empty registry has nothing to say about sales
+  ---
+  duration_ms: 0.044041
+  type: 'test'
+  ...
+# Subtest: the labour fixture is clean
+ok 397 - the labour fixture is clean
+  ---
+  duration_ms: 0.156625
+  type: 'test'
+  ...
+# Subtest: an empty labour half has nothing to say
+ok 398 - an empty labour half has nothing to say
+  ---
+  duration_ms: 0.04975
+  type: 'test'
+  ...
+# Subtest: invariant 23 catches two packages effective the same day
+ok 399 - invariant 23 catches two packages effective the same day
+  ---
+  duration_ms: 0.059625
+  type: 'test'
+  ...
+# Subtest: invariant 23 catches a wage period with no agreement behind it
+ok 400 - invariant 23 catches a wage period with no agreement behind it
+  ---
+  duration_ms: 0.332959
+  type: 'test'
+  ...
+# Subtest: invariant 23 EXEMPTS a bonus, which is a decision rather than a rate
+ok 401 - invariant 23 EXEMPTS a bonus, which is a decision rather than a rate
+  ---
+  duration_ms: 0.09075
+  type: 'test'
+  ...
+# Subtest: invariant 24 catches overlapping wage periods -- the one hard rule
+ok 402 - invariant 24 catches overlapping wage periods -- the one hard rule
+  ---
+  duration_ms: 0.079208
+  type: 'test'
+  ...
+# Subtest: invariant 24 does NOT fire on adjacent periods
+ok 403 - invariant 24 does NOT fire on adjacent periods
+  ---
+  duration_ms: 0.052292
+  type: 'test'
+  ...
+# Subtest: invariant 25 catches a half-specified benefit
+ok 404 - invariant 25 catches a half-specified benefit
+  ---
+  duration_ms: 1.317583
+  type: 'test'
+  ...
+# Subtest: invariant 26 catches every dangling labour reference
+ok 405 - invariant 26 catches every dangling labour reference
+  ---
+  duration_ms: 0.377334
+  type: 'test'
+  ...
+# Subtest: invariant 27 catches a signed cash payment and an unexplained adjustment
+ok 406 - invariant 27 catches a signed cash payment and an unexplained adjustment
+  ---
+  duration_ms: 0.260625
+  type: 'test'
+  ...
+# Subtest: invariant 28 catches every way a staff destination can disagree
+ok 407 - invariant 28 catches every way a staff destination can disagree
+  ---
+  duration_ms: 30.03125
+  type: 'test'
+  ...
+# Subtest: invariant 28 catches two milk destinations for one person
+ok 408 - invariant 28 catches two milk destinations for one person
+  ---
+  duration_ms: 4.486667
+  type: 'test'
+  ...
+# Subtest: overlapping stints are a report line and NOT a violation
+ok 409 - overlapping stints are a report line and NOT a violation
+  ---
+  duration_ms: 6.557292
+  type: 'test'
+  ...
+# Subtest: a wage period after somebody left is a report line, not a violation
+ok 410 - a wage period after somebody left is a report line, not a violation
+  ---
+  duration_ms: 1.74075
+  type: 'test'
+  ...
+# Subtest: a figure differing from the agreement is reported, never refused
+ok 411 - a figure differing from the agreement is reported, never refused
+  ---
+  duration_ms: 9.88975
+  type: 'test'
+  ...
+# Subtest: an identifier on a record that matches no person is a worklist line
+ok 412 - an identifier on a record that matches no person is a worklist line
+  ---
+  duration_ms: 8.227416
+  type: 'test'
+  ...
+# Subtest: the report is silent until there is somebody on file
+ok 413 - the report is silent until there is somebody on file
+  ---
+  duration_ms: 0.1275
+  type: 'test'
+  ...
+# Subtest: structured wage contexts preserve minor units, including zero, and do not imply payment
+ok 414 - structured wage contexts preserve minor units, including zero, and do not imply payment
+  ---
+  duration_ms: 0.360208
+  type: 'test'
+  ...
+# Subtest: every labour write refuses a request with no Idempotency-Key
+ok 415 - every labour write refuses a request with no Idempotency-Key
+  ---
+  duration_ms: 240.028375
+  type: 'test'
+  ...
+# Subtest: POST /people refuses a duplicate identifier with the name that holds it
+ok 416 - POST /people refuses a duplicate identifier with the name that holds it
+  ---
+  duration_ms: 29.055334
+  type: 'test'
+  ...
+# Subtest: POST /people/:id refuses a rename over the wire
+ok 417 - POST /people/:id refuses a rename over the wire
+  ---
+  duration_ms: 46.38675
+  type: 'test'
+  ...
+# Subtest: GET /people lists everybody with a balance, and flags who is engaged
+ok 418 - GET /people lists everybody with a balance, and flags who is engaged
+  ---
+  duration_ms: 45.291875
+  type: 'test'
+  ...
+# Subtest: GET /people/:id is a 404 with a wire error, not an empty statement
+ok 419 - GET /people/:id is a 404 with a wire error, not an empty statement
+  ---
+  duration_ms: 68.072459
+  type: 'test'
+  ...
+# Subtest: GET /people/:id carries the package as well as the ledger
+ok 420 - GET /people/:id carries the package as well as the ledger
+  ---
+  duration_ms: 193.733167
+  type: 'test'
+  ...
+# Subtest: a package refuses a non-integer amount and a missing period
+ok 421 - a package refuses a non-integer amount and a missing period
+  ---
+  duration_ms: 153.07275
+  type: 'test'
+  ...
+# Subtest: a second package on the same date is refused as a typo
+ok 422 - a second package on the same date is refused as a typo
+  ---
+  duration_ms: 24.205
+  type: 'test'
+  ...
+# Subtest: a benefit array of the wrong shape is refused, not silently dropped
+ok 423 - a benefit array of the wrong shape is refused, not silently dropped
+  ---
+  duration_ms: 105.390625
+  type: 'test'
+  ...
+# Subtest: correcting a package moves the default and rewrites no history
+ok 424 - correcting a package moves the default and rewrites no history
+  ---
+  duration_ms: 124.804417
+  type: 'test'
+  ...
+# Subtest: GET /payroll/run derives who must be answered
+ok 425 - GET /payroll/run derives who must be answered
+  ---
+  duration_ms: 154.861125
+  type: 'test'
+  ...
+# Subtest: POST /payroll/run refuses a run with a salaried employee missing
+ok 426 - POST /payroll/run refuses a run with a salaried employee missing
+  ---
+  duration_ms: 58.670333
+  type: 'test'
+  ...
+# Subtest: a run saves salaried months and a dihari day together
+ok 427 - a run saves salaried months and a dihari day together
+  ---
+  duration_ms: 64.361833
+  type: 'test'
+  ...
+# Subtest: a replayed run does not double-pay
+ok 428 - a replayed run does not double-pay
+  ---
+  duration_ms: 17.3495
+  type: 'test'
+  ...
+# Subtest: POST /payroll/run/delete needs a non-empty array of ids
+ok 429 - POST /payroll/run/delete needs a non-empty array of ids
+  ---
+  duration_ms: 52.229583
+  type: 'test'
+  ...
+# Subtest: an advance is a plain payment and the balance goes negative over the wire
+ok 430 - an advance is a plain payment and the balance goes negative over the wire
+  ---
+  duration_ms: 50.688625
+  type: 'test'
+  ...
+# Subtest: a negative cash payment is refused; a signed adjustment with a note is not
+ok 431 - a negative cash payment is refused; a signed adjustment with a note is not
+  ---
+  duration_ms: 74.289333
+  type: 'test'
+  ...
+# Subtest: a payment to an unknown person is a 400 with a field, not a 500
+ok 432 - a payment to an unknown person is a 400 with a field, not a 500
+  ---
+  duration_ms: 36.772417
+  type: 'test'
+  ...
+# Subtest: GET /verification reports overlapping stints WITHOUT calling them violations
+ok 433 - GET /verification reports overlapping stints WITHOUT calling them violations
+  ---
+  duration_ms: 28.21125
+  type: 'test'
+  ...
+# Subtest: POST /destinations carries person_id through, so staff milk is creatable over HTTP
+ok 434 - POST /destinations carries person_id through, so staff milk is creatable over HTTP
+  ---
+  duration_ms: 100.313625
+  type: 'test'
+  ...
+# Subtest: a duplicate identifier is refused by name, not by a raw constraint error
+ok 435 - a duplicate identifier is refused by name, not by a raw constraint error
+  ---
+  duration_ms: 7.322958
+  type: 'test'
+  ...
+# Subtest: findPersonByIdentifier matches the way history spells it
+ok 436 - findPersonByIdentifier matches the way history spells it
+  ---
+  duration_ms: 3.4305
+  type: 'test'
+  ...
+# Subtest: an identifier cannot be renamed, and the refusal says what to do instead
+ok 437 - an identifier cannot be renamed, and the refusal says what to do instead
+  ---
+  duration_ms: 3.208625
+  type: 'test'
+  ...
+# Subtest: passing the SAME identifier is not an edit
+ok 438 - passing the SAME identifier is not an edit
+  ---
+  duration_ms: 4.19025
+  type: 'test'
+  ...
+# Subtest: engagedOn is a RANGE TEST, and the last day counts
+ok 439 - engagedOn is a RANGE TEST, and the last day counts
+  ---
+  duration_ms: 0.105584
+  type: 'test'
+  ...
+# Subtest: engagedDuring catches a stint that only touches the edge of the run
+ok 440 - engagedDuring catches a stint that only touches the edge of the run
+  ---
+  duration_ms: 0.064459
+  type: 'test'
+  ...
+# Subtest: a person may hold two open stints, and that is not an error
+ok 441 - a person may hold two open stints, and that is not an error
+  ---
+  duration_ms: 4.050666
+  type: 'test'
+  ...
+# Subtest: an end reason without an end date is refused
+ok 442 - an end reason without an end date is refused
+  ---
+  duration_ms: 3.651958
+  type: 'test'
+  ...
+# Subtest: termInForce picks the latest agreement at or before the date
+ok 443 - termInForce picks the latest agreement at or before the date
+  ---
+  duration_ms: 3.781625
+  type: 'test'
+  ...
+# Subtest: a raise does not move what was agreed in March
+ok 444 - a raise does not move what was agreed in March
+  ---
+  duration_ms: 3.790875
+  type: 'test'
+  ...
+# Subtest: the whole package is effective-dated, benefits included
+ok 445 - the whole package is effective-dated, benefits included
+  ---
+  duration_ms: 3.642708
+  type: 'test'
+  ...
+# Subtest: a benefit needs its unit and its period, and accommodation needs neither
+ok 446 - a benefit needs its unit and its period, and accommodation needs neither
+  ---
+  duration_ms: 3.612917
+  type: 'test'
+  ...
+# Subtest: a package cannot list the same benefit twice
+ok 447 - a package cannot list the same benefit twice
+  ---
+  duration_ms: 3.468583
+  type: 'test'
+  ...
+# Subtest: two 'other' lines are allowed, because the note distinguishes them
+ok 448 - two 'other' lines are allowed, because the note distinguishes them
+  ---
+  duration_ms: 3.438542
+  type: 'test'
+  ...
+# Subtest: a returning worker does NOT inherit their pre-departure salary
+ok 449 - a returning worker does NOT inherit their pre-departure salary
+  ---
+  duration_ms: 3.807709
+  type: 'test'
+  ...
+# Subtest: every permanent engagement must be answered; dihari must not
+ok 450 - every permanent engagement must be answered; dihari must not
+  ---
+  duration_ms: 3.81925
+  type: 'test'
+  ...
+# Subtest: one run holds a salaried month and a one-day dihari, in one table
+ok 451 - one run holds a salaried month and a one-day dihari, in one table
+  ---
+  duration_ms: 3.993167
+  type: 'test'
+  ...
+# Subtest: a month with leave stores what was AGREED, and nothing is computed
+ok 452 - a month with leave stores what was AGREED, and nothing is computed
+  ---
+  duration_ms: 4.039417
+  type: 'test'
+  ...
+# Subtest: overlapping wage periods are refused -- the one hard rule
+ok 453 - overlapping wage periods are refused -- the one hard rule
+  ---
+  duration_ms: 3.683083
+  type: 'test'
+  ...
+# Subtest: rangesOverlap is inclusive at both ends
+ok 454 - rangesOverlap is inclusive at both ends
+  ---
+  duration_ms: 0.093375
+  type: 'test'
+  ...
+# Subtest: re-saving the same period UPDATES rather than duplicating
+ok 455 - re-saving the same period UPDATES rather than duplicating
+  ---
+  duration_ms: 48.347041
+  type: 'test'
+  ...
+# Subtest: a bonus needs no agreement behind it
+ok 456 - a bonus needs no agreement behind it
+  ---
+  duration_ms: 13.198667
+  type: 'test'
+  ...
+# Subtest: a run entered against the wrong month is repaired by delete and re-entry
+ok 457 - a run entered against the wrong month is repaired by delete and re-entry
+  ---
+  duration_ms: 8.082792
+  type: 'test'
+  ...
+# Subtest: the balance is earned minus paid, across ALL of a person's stints
+ok 458 - the balance is earned minus paid, across ALL of a person's stints
+  ---
+  duration_ms: 4.137541
+  type: 'test'
+  ...
+# Subtest: an advance makes the balance negative, and the next period walks it back
+ok 459 - an advance makes the balance negative, and the next period walks it back
+  ---
+  duration_ms: 3.8605
+  type: 'test'
+  ...
+# Subtest: a deduction is an adjustment, and it has to say why
+ok 460 - a deduction is an adjustment, and it has to say why
+  ---
+  duration_ms: 3.622792
+  type: 'test'
+  ...
+# Subtest: wageBalanceMinor is pure and handles both signs
+ok 461 - wageBalanceMinor is pure and handles both signs
+  ---
+  duration_ms: 0.048375
+  type: 'test'
+  ...
+# Subtest: the statement groups by month with a running closing balance
+ok 462 - the statement groups by month with a running closing balance
+  ---
+  duration_ms: 3.871458
+  type: 'test'
+  ...
+# Subtest: people with no open stint are LISTED, not hidden
+ok 463 - people with no open stint are LISTED, not hidden
+  ---
+  duration_ms: 3.581333
+  type: 'test'
+  ...
+# Subtest: the run compares the milk allowance against what was actually taken
+ok 464 - the run compares the milk allowance against what was actually taken
+  ---
+  duration_ms: 4.260292
+  type: 'test'
+  ...
+# Subtest: a staff destination cannot be billable, and refuses with a sentence
+ok 465 - a staff destination cannot be billable, and refuses with a sentence
+  ---
+  duration_ms: 3.409292
+  type: 'test'
+  ...
+# Subtest: a staff destination without a person, and a person on a non-staff kind, are both refused
+ok 466 - a staff destination without a person, and a person on a non-staff kind, are both refused
+  ---
+  duration_ms: 55.273959
+  type: 'test'
+  ...
+# Subtest: staffedHerd renders the states that matter, not the settled ones
+ok 467 - staffedHerd renders the states that matter, not the settled ones
+  ---
+  duration_ms: 125.865667
+  type: 'test'
+  ...
+# Subtest: the fixture package covers a full package AND an all-cash one
+ok 468 - the fixture package covers a full package AND an all-cash one
+  ---
+  duration_ms: 143.690208
+  type: 'test'
+  ...
+# Subtest: the fixture gives /check a real deviation line to render
+ok 469 - the fixture gives /check a real deviation line to render
+  ---
+  duration_ms: 194.689125
+  type: 'test'
+  ...
+# Subtest: the fixture milk allowance has dispatch rows to compare against
+ok 470 - the fixture milk allowance has dispatch rows to compare against
+  ---
+  duration_ms: 121.427208
+  type: 'test'
+  ...
+# Subtest: a per-day allowance is clipped to today, so a running month is not a shortfall
+ok 471 - a per-day allowance is clipped to today, so a running month is not a shortfall
+  ---
+  duration_ms: 43.788458
+  type: 'test'
+  ...
+# Subtest: a MONTHLY allowance is not clipped -- 20 kg a month is not 4.6 kg by the 7th
+ok 472 - a MONTHLY allowance is not clipped -- 20 kg a month is not 4.6 kg by the 7th
+  ---
+  duration_ms: 6.78325
+  type: 'test'
+  ...
+# Subtest: an asOf before the range start clips to the start, never below it
+ok 473 - an asOf before the range start clips to the start, never below it
+  ---
+  duration_ms: 11.088792
+  type: 'test'
+  ...
+# Subtest: the day board counts a session done only when every expected row is answered
+ok 474 - the day board counts a session done only when every expected row is answered
+  ---
+  duration_ms: 125.719792
+  type: 'test'
+  ...
+# Subtest: an empty farm reads as DONE, not as outstanding work
+ok 475 - an empty farm reads as DONE, not as outstanding work
+  ---
+  duration_ms: 9.444792
+  type: 'test'
+  ...
+# Subtest: the dispatch line counts STANDING destinations only
+ok 476 - the dispatch line counts STANDING destinations only
+  ---
+  duration_ms: 8.976125
+  type: 'test'
+  ...
+# Subtest: the board flags LAST month unpaid, and stays quiet about this one
+ok 477 - the board flags LAST month unpaid, and stays quiet about this one
+  ---
+  duration_ms: 4.849125
+  type: 'test'
+  ...
+# Subtest: month bounds are farm-local arithmetic, including a leap February
+ok 478 - month bounds are farm-local arithmetic, including a leap February
+  ---
+  duration_ms: 0.1625
+  type: 'test'
+  ...
+# Subtest: FINDING 1: correcting a calving date changes its lactation id
+ok 479 - FINDING 1: correcting a calving date changes its lactation id
+  ---
+  duration_ms: 10.393792
+  type: 'test'
+  ...
+# Subtest: FINDING 2: recording a calving re-cuts the PREVIOUS lactation, with no correction at all
+ok 480 - FINDING 2: recording a calving re-cuts the PREVIOUS lactation, with no correction at all
+  ---
+  duration_ms: 6.002333
+  type: 'test'
+  ...
+# Subtest: a dry-off day is INSIDE its lactation; a next-calving day is not
+ok 481 - a dry-off day is INSIDE its lactation; a next-calving day is not
+  ---
+  duration_ms: 0.107708
+  type: 'test'
+  ...
+# Subtest: the comparable session is the SAME one, the day before
+ok 482 - the comparable session is the SAME one, the day before
+  ---
+  duration_ms: 0.373417
+  type: 'test'
+  ...
+# Subtest: 'measured' requires a number and the others refuse one
+ok 483 - 'measured' requires a number and the others refuse one
+  ---
+  duration_ms: 4.675417
+  type: 'test'
+  ...
+# Subtest: not_milked and milked_not_measured stay distinct in the report
+ok 484 - not_milked and milked_not_measured stay distinct in the report
+  ---
+  duration_ms: 8.071792
+  type: 'test'
+  ...
+# Subtest: an animal with no lactation covering the date is REFUSED
+ok 485 - an animal with no lactation covering the date is REFUSED
+  ---
+  duration_ms: 3.568916
+  type: 'test'
+  ...
+# Subtest: the session is ALL ROWS OR NONE
+ok 486 - the session is ALL ROWS OR NONE
+  ---
+  duration_ms: 10.569459
+  type: 'test'
+  ...
+# Subtest: re-saving CORRECTS in place rather than adding a row
+ok 487 - re-saving CORRECTS in place rather than adding a row
+  ---
+  duration_ms: 4.376167
+  type: 'test'
+  ...
+# Subtest: one animal twice in one session is refused
+ok 488 - one animal twice in one session is refused
+  ---
+  duration_ms: 3.931333
+  type: 'test'
+  ...
+# Subtest: an empty session is refused rather than written as nothing
+ok 489 - an empty session is refused rather than written as nothing
+  ---
+  duration_ms: 3.25325
+  type: 'test'
+  ...
+# Subtest: the row milker overrides the session milker
+ok 490 - the row milker overrides the session milker
+  ---
+  duration_ms: 4.202083
+  type: 'test'
+  ...
+# Subtest: the roster is derived from lactations, not from the status projection
+ok 491 - the roster is derived from lactations, not from the status projection
+  ---
+  duration_ms: 4.578625
+  type: 'test'
+  ...
+# Subtest: the roster carries days in milk and the previous session
+ok 492 - the roster carries days in milk and the previous session
+  ---
+  duration_ms: 3.920375
+  type: 'test'
+  ...
+# Subtest: the recent mean uses MEASURED rows only
+ok 493 - the recent mean uses MEASURED rows only
+  ---
+  duration_ms: 4.069458
+  type: 'test'
+  ...
+# Subtest: an incomplete session is reported as incomplete
+ok 494 - an incomplete session is reported as incomplete
+  ---
+  duration_ms: 25.059959
+  type: 'test'
+  ...
+# Subtest: a session entered against the wrong date can be removed
+ok 495 - a session entered against the wrong date can be removed
+  ---
+  duration_ms: 3.820084
+  type: 'test'
+  ...
+# Subtest: a clean herd with yield has no violations
+ok 496 - a clean herd with yield has no violations
+  ---
+  duration_ms: 4.716875
+  type: 'test'
+  ...
+# Subtest: invariant 14 fires when a lactation moves out from under a row
+ok 497 - invariant 14 fires when a lactation moves out from under a row
+  ---
+  duration_ms: 4.567458
+  type: 'test'
+  ...
+# Subtest: invariant 17 fires on a row whose status and yield disagree
+ok 498 - invariant 17 fires on a row whose status and yield disagree
+  ---
+  duration_ms: 4.122792
+  type: 'test'
+  ...
+# Subtest: the milker is offered by the datalist on the next session
+ok 499 - the milker is offered by the datalist on the next session
+  ---
+  duration_ms: 3.834625
+  type: 'test'
+  ...
+# Subtest: daysInMilk counts calendar days across a month boundary
+ok 500 - daysInMilk counts calendar days across a month boundary
+  ---
+  duration_ms: 0.065125
+  type: 'test'
+  ...
+# Subtest: the worked example: 12.5 L at Rs 7,000 per 40 L is Rs 2,187.50
+ok 501 - the worked example: 12.5 L at Rs 7,000 per 40 L is Rs 2,187.50
+  ---
+  duration_ms: 0.613167
+  type: 'test'
+  ...
+# Subtest: a full lot costs exactly the quoted rate
+ok 502 - a full lot costs exactly the quoted rate
+  ---
+  duration_ms: 0.0645
+  type: 'test'
+  ...
+# Subtest: THE LOT SIZE IS NOT OPTIONAL -- the same numbers per litre are 40x the price
+ok 503 - THE LOT SIZE IS NOT OPTIONAL -- the same numbers per litre are 40x the price
+  ---
+  duration_ms: 0.048167
+  type: 'test'
+  ...
+# Subtest: an odd rupee rate does not round-trip through per-litre, which is why it is stored as quoted
+ok 504 - an odd rupee rate does not round-trip through per-litre, which is why it is stored as quoted
+  ---
+  duration_ms: 0.913375
+  type: 'test'
+  ...
+# Subtest: rounding is half-up and happens exactly once
+ok 505 - rounding is half-up and happens exactly once
+  ---
+  duration_ms: 1.031459
+  type: 'test'
+  ...
+# Subtest: zero litres is free, and zero is a legitimate rate
+ok 506 - zero litres is free, and zero is a legitimate rate
+  ---
+  duration_ms: 0.261917
+  type: 'test'
+  ...
+# Subtest: nonsense arguments throw rather than producing a plausible number
+ok 507 - nonsense arguments throw rather than producing a plausible number
+  ---
+  duration_ms: 0.815542
+  type: 'test'
+  ...
+# Subtest: formatMinor always shows two decimals, so a column can be scanned
+ok 508 - formatMinor always shows two decimals, so a column can be scanned
+  ---
+  duration_ms: 0.224125
+  type: 'test'
+  ...
+# Subtest: a negative balance formats as one -- a buyer in credit is a real state
+ok 509 - a negative balance formats as one -- a buyer in credit is a real state
+  ---
+  duration_ms: 0.692583
+  type: 'test'
+  ...
+# Subtest: formatRate shows the agreement, NOT a per-litre conversion
+ok 510 - formatRate shows the agreement, NOT a per-litre conversion
+  ---
+  duration_ms: 0.708125
+  type: 'test'
+  ...
+# Subtest: MINOR_PER_UNIT is paisa per rupee
+ok 511 - MINOR_PER_UNIT is paisa per rupee
+  ---
+  duration_ms: 0.174625
+  type: 'test'
+  ...
+# Subtest: a price is BOTH halves or neither
+ok 512 - a price is BOTH halves or neither
+  ---
+  duration_ms: 10.532583
+  type: 'test'
+  ...
+# Subtest: a lot size of zero is refused -- it would divide by zero downstream
+ok 513 - a lot size of zero is refused -- it would divide by zero downstream
+  ---
+  duration_ms: 3.234375
+  type: 'test'
+  ...
+# Subtest: the three dispatch row states hold their own shape
+ok 514 - the three dispatch row states hold their own shape
+  ---
+  duration_ms: 3.267667
+  type: 'test'
+  ...
+# Subtest: one row per destination per session -- what makes completeness countable
+ok 515 - one row per destination per session -- what makes completeness countable
+  ---
+  duration_ms: 3.094334
+  type: 'test'
+  ...
+# Subtest: home is never billable, structurally
+ok 516 - home is never billable, structurally
+  ---
+  duration_ms: 3.054875
+  type: 'test'
+  ...
+# Subtest: a destination range runs forwards and carries a name
+ok 517 - a destination range runs forwards and carries a name
+  ---
+  duration_ms: 3.094208
+  type: 'test'
+  ...
+# Subtest: two prices for one destination on one date is a typo, not a price change
+ok 518 - two prices for one destination on one date is a typo, not a price change
+  ---
+  duration_ms: 3.055167
+  type: 'test'
+  ...
+# Subtest: only an adjustment may be signed, and it has to say why
+ok 519 - only an adjustment may be signed, and it has to say why
+  ---
+  duration_ms: 3.149042
+  type: 'test'
+  ...
+# Subtest: the four sales tables permit UPDATE and DELETE, unlike the event log
+ok 520 - the four sales tables permit UPDATE and DELETE, unlike the event log
+  ---
+  duration_ms: 3.157334
+  type: 'test'
+  ...
+# Subtest: formatPeriodRate prints the agreement, not a per-day conversion
+ok 521 - formatPeriodRate prints the agreement, not a per-day conversion
+  ---
+  duration_ms: 0.054292
+  type: 'test'
+  ...
+# Subtest: formatPeriodRate shows paisa and zero, like every other amount
+ok 522 - formatPeriodRate shows paisa and zero, like every other amount
+  ---
+  duration_ms: 0.035458
+  type: 'test'
+  ...
+# Subtest: a calving that trips no guard records NO override
+ok 523 - a calving that trips no guard records NO override
+  ---
+  duration_ms: 9.899875
+  type: 'test'
+  ...
+# Subtest: a calving inside the window, allowed explicitly, records WHICH check it stepped past
+ok 524 - a calving inside the window, allowed explicitly, records WHICH check it stepped past
+  ---
+  duration_ms: 4.838792
+  type: 'test'
+  ...
+# Subtest: THE FLAG ALONE DOES NOT CLAIM AN OVERRIDE -- the condition does
+ok 525 - THE FLAG ALONE DOES NOT CLAIM AN OVERRIDE -- the condition does
+  ---
+  duration_ms: 11.963667
+  type: 'test'
+  ...
+# Subtest: the guard still REFUSES without the flag -- recording it is not permitting it
+ok 526 - the guard still REFUSES without the flag -- recording it is not permitting it
+  ---
+  duration_ms: 5.861667
+  type: 'test'
+  ...
+# Subtest: a reason is optional: the flag is what is load-bearing
+ok 527 - a reason is optional: the flag is what is load-bearing
+  ---
+  duration_ms: 4.52375
+  type: 'test'
+  ...
+# Subtest: a dry_off after a departure, allowed explicitly, records the override
+ok 528 - a dry_off after a departure, allowed explicitly, records the override
+  ---
+  duration_ms: 3.755166
+  type: 'test'
+  ...
+# Subtest: an event on a NON-departed animal records nothing, flag or no flag
+ok 529 - an event on a NON-departed animal records nothing, flag or no flag
+  ---
+  duration_ms: 9.087166
+  type: 'test'
+  ...
+# Subtest: a note after a departure records no override -- there is no guard to step past
+ok 530 - a note after a departure records no override -- there is no guard to step past
+  ---
+  duration_ms: 10.135708
+  type: 'test'
+  ...
+# Subtest: a correction records its OWN override, and does not inherit the superseded one
+ok 531 - a correction records its OWN override, and does not inherit the superseded one
+  ---
+  duration_ms: 7.707167
+  type: 'test'
+  ...
+# Subtest: an override naming an unknown check is refused
+ok 532 - an override naming an unknown check is refused
+  ---
+  duration_ms: 0.3325
+  type: 'test'
+  ...
+# Subtest: an override with an unknown key is refused
+ok 533 - an override with an unknown key is refused
+  ---
+  duration_ms: 0.071791
+  type: 'test'
+  ...
+# Subtest: absent and explicit-null are the same override
+ok 534 - absent and explicit-null are the same override
+  ---
+  duration_ms: 0.038083
+  type: 'test'
+  ...
+# Subtest: THE PAYLOAD NO LONGER CARRIES AN OVERRIDE AT ALL -- migration 4
+ok 535 - THE PAYLOAD NO LONGER CARRIES AN OVERRIDE AT ALL -- migration 4
+  ---
+  duration_ms: 0.104791
+  type: 'test'
+  ...
+# Subtest: appendEvent REFUSES an override on a note, because a note has no guard
+ok 536 - appendEvent REFUSES an override on a note, because a note has no guard
+  ---
+  duration_ms: 3.340708
+  type: 'test'
+  ...
+# Subtest: the DATABASE refuses an unknown check and a reason with no check
+ok 537 - the DATABASE refuses an unknown check and a reason with no check
+  ---
+  duration_ms: 6.230083
+  type: 'test'
+  ...
+# Subtest: a recorded override survives a projection rebuild untouched
+ok 538 - a recorded override survives a projection rebuild untouched
+  ---
+  duration_ms: 23.808333
+  type: 'test'
+  ...
+# Subtest: event ids carry the prefix and a FULL uuid, not the 8-char convention
+ok 539 - event ids carry the prefix and a FULL uuid, not the 8-char convention
+  ---
+  duration_ms: 0.766542
+  type: 'test'
+  ...
+# Subtest: event ids are unique across many draws
+ok 540 - event ids are unique across many draws
+  ---
+  duration_ms: 5.666791
+  type: 'test'
+  ...
+# Subtest: lactation ids derive from the opening calving event, deterministically
+ok 541 - lactation ids derive from the opening calving event, deterministically
+  ---
+  duration_ms: 0.107208
+  type: 'test'
+  ...
+# Subtest: lactationIdFor rejects anything that is not an event id
+ok 542 - lactationIdFor rejects anything that is not an event id
+  ---
+  duration_ms: 0.19375
+  type: 'test'
+  ...
+# Subtest: serials are zero-padded so lexical order matches numeric order
+ok 543 - serials are zero-padded so lexical order matches numeric order
+  ---
+  duration_ms: 0.37925
+  type: 'test'
+  ...
+# Subtest: every reserved event type is rejected, not accepted with a loose payload
+ok 544 - every reserved event type is rejected, not accepted with a loose payload
+  ---
+  duration_ms: 0.291125
+  type: 'test'
+  ...
+# Subtest: an unknown event type is rejected
+ok 545 - an unknown event type is rejected
+  ---
+  duration_ms: 0.054084
+  type: 'test'
+  ...
+# Subtest: each live type validates its required fields
+ok 546 - each live type validates its required fields
+  ---
+  duration_ms: 0.16675
+  type: 'test'
+  ...
+# Subtest: a typo in a payload key is rejected rather than silently stored
+ok 547 - a typo in a payload key is rejected rather than silently stored
+  ---
+  duration_ms: 0.232458
+  type: 'test'
+  ...
+# Subtest: acquired: a birth date without its precision is rejected
+ok 548 - acquired: a birth date without its precision is rejected
+  ---
+  duration_ms: 0.33875
+  type: 'test'
+  ...
+# Subtest: validation normalizes optionals to explicit null so serialization is stable
+ok 549 - validation normalizes optionals to explicit null so serialization is stable
+  ---
+  duration_ms: 0.051791
+  type: 'test'
+  ...
+# Subtest: date/precision rules are enforced at the boundary with readable messages
+ok 550 - date/precision rules are enforced at the boundary with readable messages
+  ---
+  duration_ms: 0.651708
+  type: 'test'
+  ...
+# Subtest: canonical order puts untimed events before timed ones on the same day
+ok 551 - canonical order puts untimed events before timed ones on the same day
+  ---
+  duration_ms: 0.55175
+  type: 'test'
+  ...
+# Subtest: canonical order is total and stable under shuffling
+ok 552 - canonical order is total and stable under shuffling
+  ---
+  duration_ms: 0.232333
+  type: 'test'
+  ...
+# Subtest: the SQL ORDER BY agrees with compareEvents on real rows
+ok 553 - the SQL ORDER BY agrees with compareEvents on real rows
+  ---
+  duration_ms: 24.4465
+  type: 'test'
+  ...
+# Subtest: a superseded event is excluded, and chains resolve to the last event
+ok 554 - a superseded event is excluded, and chains resolve to the last event
+  ---
+  duration_ms: 0.147375
+  type: 'test'
+  ...
+# Subtest: monthsBetween counts calendar months, not 30-day blocks
+ok 555 - monthsBetween counts calendar months, not 30-day blocks
+  ---
+  duration_ms: 0.054917
+  type: 'test'
+  ...
+# Subtest: daysBetween is exact and host-timezone-independent
+ok 556 - daysBetween is exact and host-timezone-independent
+  ---
+  duration_ms: 0.067125
+  type: 'test'
+  ...
+# Subtest: a birth event dates the animal; an acquired event does NOT
+ok 557 - a birth event dates the animal; an acquired event does NOT
+  ---
+  duration_ms: 0.056417
+  type: 'test'
+  ...
+# Subtest: an acquired animal with no birth date has none -- not the acquisition date
+ok 558 - an acquired animal with no birth date has none -- not the acquisition date
+  ---
+  duration_ms: 0.088292
+  type: 'test'
+  ...
+# Subtest: a dry_off between two calvings closes the first normally
+ok 559 - a dry_off between two calvings closes the first normally
+  ---
+  duration_ms: 0.058541
+  type: 'test'
+  ...
+# Subtest: with no dry_off the previous lactation closes as inferred, and is NOT rejected
+ok 560 - with no dry_off the previous lactation closes as inferred, and is NOT rejected
+  ---
+  duration_ms: 0.048542
+  type: 'test'
+  ...
+# Subtest: lactation ids are derived from the calving, so they survive discovering an earlier one
+ok 561 - lactation ids are derived from the calving, so they survive discovering an earlier one
+  ---
+  duration_ms: 0.283
+  type: 'test'
+  ...
+# Subtest: a departure does not close an open lactation
+ok 562 - a departure does not close an open lactation
+  ---
+  duration_ms: 0.102875
+  type: 'test'
+  ...
+# Subtest: rule 1: departed is terminal and beats everything below it
+ok 563 - rule 1: departed is terminal and beats everything below it
+  ---
+  duration_ms: 1.699
+  type: 'test'
+  ...
+# Subtest: rule 4: katti below the threshold, choti at or above it
+ok 564 - rule 4: katti below the threshold, choti at or above it
+  ---
+  duration_ms: 0.25575
+  type: 'test'
+  ...
+# Subtest: PARITY BEATS AGE: an animal that has calved is never a calf
+ok 565 - PARITY BEATS AGE: an animal that has calved is never a calf
+  ---
+  duration_ms: 0.123333
+  type: 'test'
+  ...
+# Subtest: and the reverse was always right: an old maiden is a choti, not a majj
+ok 566 - and the reverse was always right: an old maiden is a choti, not a majj
+  ---
+  duration_ms: 0.095917
+  type: 'test'
+  ...
+# Subtest: an unknown birth date falls through to heifer -- the documented consequence
+ok 567 - an unknown birth date falls through to heifer -- the documented consequence
+  ---
+  duration_ms: 0.088083
+  type: 'test'
+  ...
+# Subtest: rules 3 and 4: lactating with an open lactation, dry without
+ok 568 - rules 3 and 4: lactating with an open lactation, dry without
+  ---
+  duration_ms: 0.105958
+  type: 'test'
+  ...
+# Subtest: rules 5 and 6: heifer and male at parity 0
+ok 569 - rules 5 and 6: heifer and male at parity 0
+  ---
+  duration_ms: 0.216417
+  type: 'test'
+  ...
+# Subtest: the status vocabulary uses `lactating`, matching the demo word
+ok 570 - the status vocabulary uses `lactating`, matching the demo word
+  ---
+  duration_ms: 0.167083
+  type: 'test'
+  ...
+# Subtest: a superseded calving does not count toward parity
+ok 571 - a superseded calving does not count toward parity
+  ---
+  duration_ms: 0.106042
+  type: 'test'
+  ...
+# Subtest: the projection is a pure function of (events, asOf) -- same input, same output
+ok 572 - the projection is a pure function of (events, asOf) -- same input, same output
+  ---
+  duration_ms: 0.571209
+  type: 'test'
+  ...
+# Subtest: asOf is what makes the projection reproducible -- a later date can change status
+ok 573 - asOf is what makes the projection reproducible -- a later date can change status
+  ---
+  duration_ms: 0.142541
+  type: 'test'
+  ...
+# Subtest: an interval is measured only when BOTH endpoints are day-precision
+ok 574 - an interval is measured only when BOTH endpoints are day-precision
+  ---
+  duration_ms: 0.321708
+  type: 'test'
+  ...
+# Subtest: one calving yields no interval
+ok 575 - one calving yields no interval
+  ---
+  duration_ms: 0.0965
+  type: 'test'
+  ...
+# Subtest: summarise never blends qualities
+ok 576 - summarise never blends qualities
+  ---
+  duration_ms: 0.2175
+  type: 'test'
+  ...
+# Subtest: an empty quality class reports null rather than 0, so it cannot be charted as a value
+ok 577 - an empty quality class reports null rather than 0, so it cannot be charted as a value
+  ---
+  duration_ms: 0.082125
+  type: 'test'
+  ...
+# Subtest: the report carries its own sample-size caveat
+ok 578 - the report carries its own sample-size caveat
+  ---
+  duration_ms: 0.24675
+  type: 'test'
+  ...
+# Subtest: the histogram buckets by source_form x date_precision
+ok 579 - the histogram buckets by source_form x date_precision
+  ---
+  duration_ms: 0.123833
+  type: 'test'
+  ...
+# Subtest: every date/precision refusal names the field the form must highlight
+ok 580 - every date/precision refusal names the field the form must highlight
+  ---
+  duration_ms: 0.1665
+  type: 'test'
+  ...
+# Subtest: estimated now obeys the January 1 convention like year
+ok 581 - estimated now obeys the January 1 convention like year
+  ---
+  duration_ms: 0.053833
+  type: 'test'
+  ...
+# Subtest: year and estimated store the same shape but are NOT interchangeable
+ok 582 - year and estimated store the same shape but are NOT interchangeable
+  ---
+  duration_ms: 0.088083
+  type: 'test'
+  ...
+# Subtest: GET /animals returns the herd with derived status
+ok 583 - GET /animals returns the herd with derived status
+  ---
+  duration_ms: 324.859
+  type: 'test'
+  ...
+# Subtest: GET /animals on an EMPTY registry returns an empty array, not an error
+ok 584 - GET /animals on an EMPTY registry returns an empty array, not an error
+  ---
+  duration_ms: 64.500209
+  type: 'test'
+  ...
+# Subtest: GET /animals/:id returns the animal, its status and its full event list
+ok 585 - GET /animals/:id returns the animal, its status and its full event list
+  ---
+  duration_ms: 56.165333
+  type: 'test'
+  ...
+# Subtest: GET /animals/:id for an unknown animal is a 404 in the error shape
+ok 586 - GET /animals/:id for an unknown animal is a 404 in the error shape
+  ---
+  duration_ms: 85.046625
+  type: 'test'
+  ...
+# Subtest: the event list INCLUDES superseded events, marked with what replaced them
+ok 587 - the event list INCLUDES superseded events, marked with what replaced them
+  ---
+  duration_ms: 79.244083
+  type: 'test'
+  ...
+# Subtest: GET /link-candidates includes INELIGIBLE animals with a reason
+ok 588 - GET /link-candidates includes INELIGIBLE animals with a reason
+  ---
+  duration_ms: 66.159917
+  type: 'test'
+  ...
+# Subtest: GET /dam-candidates marks a departed animal ineligible
+ok 589 - GET /dam-candidates marks a departed animal ineligible
+  ---
+  duration_ms: 63.59925
+  type: 'test'
+  ...
+# Subtest: GET /verification reports zero violations for the fixture herd
+ok 590 - GET /verification reports zero violations for the fixture herd
+  ---
+  duration_ms: 89.668083
+  type: 'test'
+  ...
+# Subtest: POST /animals creates an acquired animal and returns its detail
+ok 591 - POST /animals creates an acquired animal and returns its detail
+  ---
+  duration_ms: 45.476708
+  type: 'test'
+  ...
+# Subtest: POST /events appends a life event and returns the updated animal
+ok 592 - POST /events appends a life event and returns the updated animal
+  ---
+  duration_ms: 38.891084
+  type: 'test'
+  ...
+# Subtest: POST /calvings mints a calf and returns both animals
+ok 593 - POST /calvings mints a calf and returns both animals
+  ---
+  duration_ms: 62.220792
+  type: 'test'
+  ...
+# Subtest: POST /calvings mint mode: a new calf appears in the herd
+ok 594 - POST /calvings mint mode: a new calf appears in the herd
+  ---
+  duration_ms: 43.844792
+  type: 'test'
+  ...
+# Subtest: POST /calvings link mode attaches to an existing animal and mints nothing
+ok 595 - POST /calvings link mode attaches to an existing animal and mints nothing
+  ---
+  duration_ms: 29.1035
+  type: 'test'
+  ...
+# Subtest: POST /calvings/:id/correction writes the paired correction
+ok 596 - POST /calvings/:id/correction writes the paired correction
+  ---
+  duration_ms: 16.126917
+  type: 'test'
+  ...
+# Subtest: the registry stays consistent after a full HTTP write sequence
+ok 597 - the registry stays consistent after a full HTTP write sequence
+  ---
+  duration_ms: 43.830084
+  type: 'test'
+  ...
+# Subtest: END TO END: a bad precision over HTTP returns { error, field, message } intact
+ok 598 - END TO END: a bad precision over HTTP returns { error, field, message } intact
+  ---
+  duration_ms: 91.923708
+  type: 'test'
+  ...
+# Subtest: a missing precision is refused over HTTP, never defaulted
+ok 599 - a missing precision is refused over HTTP, never defaulted
+  ---
+  duration_ms: 25.986542
+  type: 'test'
+  ...
+# Subtest: estimated with a fabricated day is refused over HTTP
+ok 600 - estimated with a fabricated day is refused over HTTP
+  ---
+  duration_ms: 20.017167
+  type: 'test'
+  ...
+# Subtest: every domain refusal serializes with a code, and most with a field
+ok 601 - every domain refusal serializes with a code, and most with a field
+  ---
+  duration_ms: 46.881375
+  type: 'test'
+  ...
+# Subtest: provenance is required over HTTP, and observed_by is never defaulted
+ok 602 - provenance is required over HTTP, and observed_by is never defaulted
+  ---
+  duration_ms: 36.178291
+  type: 'test'
+  ...
+# Subtest: a malformed body is a 400, not a 500
+ok 603 - a malformed body is a 400, not a 500
+  ---
+  duration_ms: 30.77675
+  type: 'test'
+  ...
+# Subtest: GET /api/harness says plainly that this is not dairy.db
+ok 604 - GET /api/harness says plainly that this is not dairy.db
+  ---
+  duration_ms: 45.988292
+  type: 'test'
+  ...
+# Subtest: GET /storage names the database this router writes to
+ok 605 - GET /storage names the database this router writes to
+  ---
+  duration_ms: 25.009167
+  type: 'test'
+  ...
+# Subtest: REGISTRY.md § HTTP surface lists exactly the routes the router mounts
+ok 606 - REGISTRY.md § HTTP surface lists exactly the routes the router mounts
+  ---
+  duration_ms: 5.817417
+  type: 'test'
+  ...
+# Subtest: POST /destinations creates one, and GET lists it with its price
+ok 607 - POST /destinations creates one, and GET lists it with its price
+  ---
+  duration_ms: 360.173291
+  type: 'test'
+  ...
+# Subtest: `standing` is REQUIRED, not defaulted -- it decides whether the sheet asks
+ok 608 - `standing` is REQUIRED, not defaulted -- it decides whether the sheet asks
+  ---
+  duration_ms: 57.535708
+  type: 'test'
+  ...
+# Subtest: a price needs its lot size, and the refusal SAYS what the number means
+ok 609 - a price needs its lot size, and the refusal SAYS what the number means
+  ---
+  duration_ms: 64.578875
+  type: 'test'
+  ...
+# Subtest: POST /dispatch/session writes a session and bills it
+ok 610 - POST /dispatch/session writes a session and bills it
+  ---
+  duration_ms: 69.707375
+  type: 'test'
+  ...
+# Subtest: an unanswered STANDING destination is a 400 that names it
+ok 611 - an unanswered STANDING destination is a 400 that names it
+  ---
+  duration_ms: 58.7955
+  type: 'test'
+  ...
+# Subtest: an absent OCCASIONAL destination is fine -- the other half of the rule
+ok 612 - an absent OCCASIONAL destination is fine -- the other half of the rule
+  ---
+  duration_ms: 15.967
+  type: 'test'
+  ...
+# Subtest: GET /dispatch/sheet splits standing from occasional
+ok 613 - GET /dispatch/sheet splits standing from occasional
+  ---
+  duration_ms: 20.619375
+  type: 'test'
+  ...
+# Subtest: every sales write route REFUSES a request with no Idempotency-Key
+ok 614 - every sales write route REFUSES a request with no Idempotency-Key
+  ---
+  duration_ms: 133.081209
+  type: 'test'
+  ...
+# Subtest: a replayed session save returns the first response and writes nothing new
+ok 615 - a replayed session save returns the first response and writes nothing new
+  ---
+  duration_ms: 74.970375
+  type: 'test'
+  ...
+# Subtest: the statement comes back grouped by month with a running balance
+ok 616 - the statement comes back grouped by month with a running balance
+  ---
+  duration_ms: 32.138541
+  type: 'test'
+  ...
+# Subtest: GET /destinations/:id is a 404 for an unknown one, with the wire shape intact
+ok 617 - GET /destinations/:id is a 404 for an unknown one, with the wire shape intact
+  ---
+  duration_ms: 45.618667
+  type: 'test'
+  ...
+# Subtest: GET /balances excludes home
+ok 618 - GET /balances excludes home
+  ---
+  duration_ms: 15.799875
+  type: 'test'
+  ...
+# Subtest: a payment against home is refused with a reason, not a 500
+ok 619 - a payment against home is refused with a reason, not a 500
+  ---
+  duration_ms: 15.381917
+  type: 'test'
+  ...
+# Subtest: an adjustment with no note is refused over the wire too
+ok 620 - an adjustment with no note is refused over the wire too
+  ---
+  duration_ms: 53.604208
+  type: 'test'
+  ...
+# Subtest: a session can be deleted and re-entered on the right date
+ok 621 - a session can be deleted and re-entered on the right date
+  ---
+  duration_ms: 83.867125
+  type: 'test'
+  ...
+# Subtest: home is never billable, and asking for it is refused with a reason
+ok 622 - home is never billable, and asking for it is refused with a reason
+  ---
+  duration_ms: 12.894875
+  type: 'test'
+  ...
+# Subtest: a non-billable destination cannot be priced or paid
+ok 623 - a non-billable destination cannot be priced or paid
+  ---
+  duration_ms: 8.712458
+  type: 'test'
+  ...
+# Subtest: activeOn is a RANGE, and the closing day is inclusive
+ok 624 - activeOn is a RANGE, and the closing day is inclusive
+  ---
+  duration_ms: 0.141083
+  type: 'test'
+  ...
+# Subtest: a destination is amendable in place, but kind, billable and started_on are not
+ok 625 - a destination is amendable in place, but kind, billable and started_on are not
+  ---
+  duration_ms: 6.497416
+  type: 'test'
+  ...
+# Subtest: a closing date before the start is refused
+ok 626 - a closing date before the start is refused
+  ---
+  duration_ms: 55.786292
+  type: 'test'
+  ...
+# Subtest: priceInForce is the latest agreement at or before the date
+ok 627 - priceInForce is the latest agreement at or before the date
+  ---
+  duration_ms: 2.682125
+  type: 'test'
+  ...
+# Subtest: A PRICE CHANGE DOES NOT RE-PRICE HISTORY -- the defect the demo tables have
+ok 628 - A PRICE CHANGE DOES NOT RE-PRICE HISTORY -- the defect the demo tables have
+  ---
+  duration_ms: 57.573
+  type: 'test'
+  ...
+# Subtest: re-setting a price for the same date CORRECTS it and keeps one row
+ok 629 - re-setting a price for the same date CORRECTS it and keeps one row
+  ---
+  duration_ms: 18.115833
+  type: 'test'
+  ...
+# Subtest: a lot size is required and never assumed
+ok 630 - a lot size is required and never assumed
+  ---
+  duration_ms: 9.179917
+  type: 'test'
+  ...
+# Subtest: AN UNANSWERED STANDING DESTINATION BLOCKS THE SAVE, and names itself
+ok 631 - AN UNANSWERED STANDING DESTINATION BLOCKS THE SAVE, and names itself
+  ---
+  duration_ms: 58.233833
+  type: 'test'
+  ...
+# Subtest: AN ABSENT OCCASIONAL DESTINATION IS NOT AN ERROR -- it is their normal state
+ok 632 - AN ABSENT OCCASIONAL DESTINATION IS NOT AN ERROR -- it is their normal state
+  ---
+  duration_ms: 9.856208
+  type: 'test'
+  ...
+# Subtest: a standing destination may answer "none", which is a real recorded fact
+ok 633 - a standing destination may answer "none", which is a real recorded fact
+  ---
+  duration_ms: 11.981416
+  type: 'test'
+  ...
+# Subtest: THE PRICE AND ITS LOT SIZE ARE CAPTURED ON THE ROW
+ok 634 - THE PRICE AND ITS LOT SIZE ARE CAPTURED ON THE ROW
+  ---
+  duration_ms: 15.710875
+  type: 'test'
+  ...
+# Subtest: home takes milk but is never priced
+ok 635 - home takes milk but is never priced
+  ---
+  duration_ms: 27.605458
+  type: 'test'
+  ...
+# Subtest: a billable sale with no agreed price is REFUSED, not billed at zero
+ok 636 - a billable sale with no agreed price is REFUSED, not billed at zero
+  ---
+  duration_ms: 34.114417
+  type: 'test'
+  ...
+# Subtest: a dispatch outside the destination range is refused
+ok 637 - a dispatch outside the destination range is refused
+  ---
+  duration_ms: 13.331458
+  type: 'test'
+  ...
+# Subtest: re-saving a session CORRECTS in place rather than duplicating
+ok 638 - re-saving a session CORRECTS in place rather than duplicating
+  ---
+  duration_ms: 10.655667
+  type: 'test'
+  ...
+# Subtest: the same destination twice in one payload is refused
+ok 639 - the same destination twice in one payload is refused
+  ---
+  duration_ms: 7.309
+  type: 'test'
+  ...
+# Subtest: a whole session is deletable -- the wrong-date repair path
+ok 640 - a whole session is deletable -- the wrong-date repair path
+  ---
+  duration_ms: 4.179584
+  type: 'test'
+  ...
+# Subtest: the sheet SPLITS standing from occasional and derives both
+ok 641 - the sheet SPLITS standing from occasional and derives both
+  ---
+  duration_ms: 85.760459
+  type: 'test'
+  ...
+# Subtest: the sheet shows the SAME session yesterday, never this morning
+ok 642 - the sheet shows the SAME session yesterday, never this morning
+  ---
+  duration_ms: 20.223041
+  type: 'test'
+  ...
+# Subtest: previousSession crosses a month boundary correctly
+ok 643 - previousSession crosses a month boundary correctly
+  ---
+  duration_ms: 0.072458
+  type: 'test'
+  ...
+# Subtest: a destination closed before the date is off the sheet entirely
+ok 644 - a destination closed before the date is off the sheet entirely
+  ---
+  duration_ms: 22.972208
+  type: 'test'
+  ...
+# Subtest: sessionProduction never sums measured with not-measured
+ok 645 - sessionProduction never sums measured with not-measured
+  ---
+  duration_ms: 2.94725
+  type: 'test'
+  ...
+# Subtest: the sheet carries this session production, so the gap is visible at entry
+ok 646 - the sheet carries this session production, so the gap is visible at entry
+  ---
+  duration_ms: 29.096292
+  type: 'test'
+  ...
+# Subtest: balance is billed minus paid, and partial payment is an ordinary state
+ok 647 - balance is billed minus paid, and partial payment is an ordinary state
+  ---
+  duration_ms: 22.496792
+  type: 'test'
+  ...
+# Subtest: paying ahead puts a buyer in credit, with no special case
+ok 648 - paying ahead puts a buyer in credit, with no special case
+  ---
+  duration_ms: 21.813417
+  type: 'test'
+  ...
+# Subtest: only an adjustment may be signed, and it must say why
+ok 649 - only an adjustment may be signed, and it must say why
+  ---
+  duration_ms: 4.229541
+  type: 'test'
+  ...
+# Subtest: the statement groups by month with a running closing balance
+ok 650 - the statement groups by month with a running closing balance
+  ---
+  duration_ms: 10.114917
+  type: 'test'
+  ...
+# Subtest: the statement shows the rate as agreed, per row, and never a per-litre one
+ok 651 - the statement shows the rate as agreed, per row, and never a per-litre one
+  ---
+  duration_ms: 23.127583
+  type: 'test'
+  ...
+# Subtest: balances() excludes home rather than showing it as settled
+ok 652 - balances() excludes home rather than showing it as settled
+  ---
+  duration_ms: 12.67375
+  type: 'test'
+  ...
+# Subtest: balanceMinor is pure and takes rows, so the invariants can use it
+ok 653 - balanceMinor is pure and takes rows, so the invariants can use it
+  ---
+  duration_ms: 0.052459
+  type: 'test'
+  ...
+# Subtest: destinationList reports the price in force on the as-of date
+ok 654 - destinationList reports the price in force on the as-of date
+  ---
+  duration_ms: 17.359583
+  type: 'test'
+  ...
+# Subtest: getDestination returns null for an unknown id rather than throwing
+ok 655 - getDestination returns null for an unknown id rather than throwing
+  ---
+  duration_ms: 5.183333
+  type: 'test'
+  ...
+# Subtest: with everything measured, the gap IS a percentage
+ok 656 - with everything measured, the gap IS a percentage
+  ---
+  duration_ms: 1.066084
+  type: 'test'
+  ...
+# Subtest: ONE UNWEIGHED MILKING WITHHOLDS THE PERCENTAGE ENTIRELY
+ok 657 - ONE UNWEIGHED MILKING WITHHOLDS THE PERCENTAGE ENTIRELY
+  ---
+  duration_ms: 4.85225
+  type: 'test'
+  ...
+# Subtest: an animal in milk with no row at all also withholds it
+ok 658 - an animal in milk with no row at all also withholds it
+  ---
+  duration_ms: 0.110167
+  type: 'test'
+  ...
+# Subtest: not_milked does NOT withhold the percentage -- it is a real zero, not missing data
+ok 659 - not_milked does NOT withhold the percentage -- it is a real zero, not missing data
+  ---
+  duration_ms: 0.074125
+  type: 'test'
+  ...
+# Subtest: an off-schedule price is REPORTED, never treated as a violation
+ok 660 - an off-schedule price is REPORTED, never treated as a violation
+  ---
+  duration_ms: 0.164375
+  type: 'test'
+  ...
+# Subtest: session completeness counts STANDING destinations only
+ok 661 - session completeness counts STANDING destinations only
+  ---
+  duration_ms: 0.214833
+  type: 'test'
+  ...
+# Subtest: the interpretation travels WITH the numbers, as a field
+ok 662 - the interpretation travels WITH the numbers, as a field
+  ---
+  duration_ms: 0.057708
+  type: 'test'
+  ...
+# Subtest: a fresh database migrates to the target version
+ok 663 - a fresh database migrates to the target version
+  ---
+  duration_ms: 6.707708
+  type: 'test'
+  ...
+# Subtest: the runner is idempotent -- a second call applies nothing
+ok 664 - the runner is idempotent -- a second call applies nothing
+  ---
+  duration_ms: 19.473667
+  type: 'test'
+  ...
+# Subtest: every registry table exists after migration, and nothing else was created
+ok 665 - every registry table exists after migration, and nothing else was created
+  ---
+  duration_ms: 12.165833
+  type: 'test'
+  ...
+# Subtest: a migration failure leaves the version at the last good one
+ok 666 - a migration failure leaves the version at the last good one
+  ---
+  duration_ms: 0.352292
+  type: 'test'
+  ...
+# Subtest: the runner refuses to touch a schema newer than it knows about
+ok 667 - the runner refuses to touch a schema newer than it knows about
+  ---
+  duration_ms: 0.248416
+  type: 'test'
+  ...
+# Subtest: applying the registry schema is order-independent with FARM_SCHEMA
+ok 668 - applying the registry schema is order-independent with FARM_SCHEMA
+  ---
+  duration_ms: 15.945792
+  type: 'test'
+  ...
+# Subtest: UPDATE on the event log is rejected by trigger
+ok 669 - UPDATE on the event log is rejected by trigger
+  ---
+  duration_ms: 18.039375
+  type: 'test'
+  ...
+# Subtest: DELETE on the event log is rejected by trigger
+ok 670 - DELETE on the event log is rejected by trigger
+  ---
+  duration_ms: 95.206959
+  type: 'test'
+  ...
+# Subtest: INSERT OR REPLACE is rejected -- the pragma the triggers depend on is set
+ok 671 - INSERT OR REPLACE is rejected -- the pragma the triggers depend on is set
+  ---
+  duration_ms: 25.662416
+  type: 'test'
+  ...
+# Subtest: recursive_triggers is what makes that hold (negative control)
+ok 672 - recursive_triggers is what makes that hold (negative control)
+  ---
+  duration_ms: 65.862666
+  type: 'test'
+  ...
+# Subtest: applyRegistrySchema sets both pragmas the guarantees depend on
+ok 673 - applyRegistrySchema sets both pragmas the guarantees depend on
+  ---
+  duration_ms: 7.234666
+  type: 'test'
+  ...
+# Subtest: date_precision has NO default -- an omitted value is rejected
+ok 674 - date_precision has NO default -- an omitted value is rejected
+  ---
+  duration_ms: 4.336375
+  type: 'test'
+  ...
+# Subtest: occurred_time is rejected at non-day precision (CHECK, not just the helper)
+ok 675 - occurred_time is rejected at non-day precision (CHECK, not just the helper)
+  ---
+  duration_ms: 5.556333
+  type: 'test'
+  ...
+# Subtest: month precision must be dated the 1st (CHECK)
+ok 676 - month precision must be dated the 1st (CHECK)
+  ---
+  duration_ms: 23.321375
+  type: 'test'
+  ...
+# Subtest: year precision must be dated January 1 (CHECK)
+ok 677 - year precision must be dated January 1 (CHECK)
+  ---
+  duration_ms: 5.477584
+  type: 'test'
+  ...
+# Subtest: recorded_by and recorded_at are NOT NULL
+ok 678 - recorded_by and recorded_at are NOT NULL
+  ---
+  duration_ms: 54.217042
+  type: 'test'
+  ...
+# Subtest: the partial unique index stops two events superseding the same one
+ok 679 - the partial unique index stops two events superseding the same one
+  ---
+  duration_ms: 15.0905
+  type: 'test'
+  ...
+# Subtest: many events may have supersedes_id NULL -- the index is partial
+ok 680 - many events may have supersedes_id NULL -- the index is partial
+  ---
+  duration_ms: 4.993042
+  type: 'test'
+  ...
+# Subtest: an event cannot supersede itself
+ok 681 - an event cannot supersede itself
+  ---
+  duration_ms: 34.753417
+  type: 'test'
+  ...
+# Subtest: a second serial counter row cannot exist
+ok 682 - a second serial counter row cannot exist
+  ---
+  duration_ms: 22.310417
+  type: 'test'
+  ...
+# Subtest: invariant 13: resetSchema() drops no registry table, and SCHEMA defines none
+ok 683 - invariant 13: resetSchema() drops no registry table, and SCHEMA defines none
+  ---
+  duration_ms: 1.049125
+  type: 'test'
+  ...
+# Subtest: invariant 13 fires when a registry table is added to the DROP list
+ok 684 - invariant 13 fires when a registry table is added to the DROP list
+  ---
+  duration_ms: 0.236583
+  type: 'test'
+  ...
+# Subtest: invariant 13 fires when a registry table is added to the SCHEMA const
+ok 685 - invariant 13 fires when a registry table is added to the SCHEMA const
+  ---
+  duration_ms: 0.15425
+  type: 'test'
+  ...
+# Subtest: invariant 13 fails loudly if it can no longer find what it inspects
+ok 686 - invariant 13 fails loudly if it can no longer find what it inspects
+  ---
+  duration_ms: 0.049125
+  type: 'test'
+  ...
+# Subtest: db.ts still applies FARM_SCHEMA at module load, unchanged
+ok 687 - db.ts still applies FARM_SCHEMA at module load, unchanged
+  ---
+  duration_ms: 0.163583
+  type: 'test'
+  ...
+# Subtest: db.ts wires the pre-migration backup hook
+ok 688 - db.ts wires the pre-migration backup hook
+  ---
+  duration_ms: 0.187042
+  type: 'test'
+  ...
+# Subtest: assertRegistryPragmas passes on a handle built by applyRegistrySchema
+ok 689 - assertRegistryPragmas passes on a handle built by applyRegistrySchema
+  ---
+  duration_ms: 4.127083
+  type: 'test'
+  ...
+# Subtest: assertRegistryPragmas FAILS when recursive_triggers is off
+ok 690 - assertRegistryPragmas FAILS when recursive_triggers is off
+  ---
+  duration_ms: 3.184083
+  type: 'test'
+  ...
+# Subtest: assertRegistryPragmas FAILS when foreign_keys is off
+ok 691 - assertRegistryPragmas FAILS when foreign_keys is off
+  ---
+  duration_ms: 35.984875
+  type: 'test'
+  ...
+# Subtest: a bare handle -- the sqlite3-CLI case -- fails the assertion
+ok 692 - a bare handle -- the sqlite3-CLI case -- fails the assertion
+  ---
+  duration_ms: 0.388292
+  type: 'test'
+  ...
+# Subtest: applyRegistrySchema asserts, so a broken boot throws at import time
+ok 693 - applyRegistrySchema asserts, so a broken boot throws at import time
+  ---
+  duration_ms: 7.745542
+  type: 'test'
+  ...
+# Subtest: a fresh database lands on the current target version, now 9
+ok 694 - a fresh database lands on the current target version, now 9
+  ---
+  duration_ms: 15.871125
+  type: 'test'
+  ...
+# Subtest: migrations 2 through 9 upgrade a v1 database and PRESERVE its rows
+ok 695 - migrations 2 through 9 upgrade a v1 database and PRESERVE its rows
+  ---
+  duration_ms: 15.3105
+  type: 'test'
+  ...
+# Subtest: migration 4 MOVES a payload override into the columns, and out of the payload
+ok 696 - migration 4 MOVES a payload override into the columns, and out of the payload
+  ---
+  duration_ms: 5.403708
+  type: 'test'
+  ...
+# Subtest: migration 4 rewrites payloads with SORTED keys, like the writer does
+ok 697 - migration 4 rewrites payloads with SORTED keys, like the writer does
+  ---
+  duration_ms: 8.725583
+  type: 'test'
+  ...
+# Subtest: migration 4 restores the indexes and the append-only triggers too
+ok 698 - migration 4 restores the indexes and the append-only triggers too
+  ---
+  duration_ms: 3.115417
+  type: 'test'
+  ...
+# Subtest: the rebuild restores the indexes and the append-only triggers
+ok 699 - the rebuild restores the indexes and the append-only triggers
+  ---
+  duration_ms: 3.826167
+  type: 'test'
+  ...
+# Subtest: foreign keys are enforced again after the rebuild ran with them off
+ok 700 - foreign keys are enforced again after the rebuild ran with them off
+  ---
+  duration_ms: 48.080292
+  type: 'test'
+  ...
+# Subtest: applyRegistrySchema re-asserts the pragmas after migrating
+ok 701 - applyRegistrySchema re-asserts the pragmas after migrating
+  ---
+  duration_ms: 40.4495
+  type: 'test'
+  ...
+# Subtest: estimated precision must be dated January 1 (CHECK)
+ok 702 - estimated precision must be dated January 1 (CHECK)
+  ---
+  duration_ms: 22.281709
+  type: 'test'
+  ...
+# Subtest: estimated precision dated January 1 is accepted
+ok 703 - estimated precision dated January 1 is accepted
+  ---
+  duration_ms: 38.78
+  type: 'test'
+  ...
+# Subtest: estimated is rejected mid-year even in a month-like position
+ok 704 - estimated is rejected mid-year even in a month-like position
+  ---
+  duration_ms: 3.503334
+  type: 'test'
+  ...
+# Subtest: the other three precisions are unaffected by migration 2
+ok 705 - the other three precisions are unaffected by migration 2
+  ---
+  duration_ms: 63.870834
+  type: 'test'
+  ...
+# Subtest: a person identifier is unique CASE-INSENSITIVELY
+ok 706 - a person identifier is unique CASE-INSENSITIVELY
+  ---
+  duration_ms: 15.681708
+  type: 'test'
+  ...
+# Subtest: a person identifier cannot be blank or whitespace
+ok 707 - a person identifier cannot be blank or whitespace
+  ---
+  duration_ms: 3.194625
+  type: 'test'
+  ...
+# Subtest: a person may hold TWO OVERLAPPING engagements -- the flexibility is deliberate
+ok 708 - a person may hold TWO OVERLAPPING engagements -- the flexibility is deliberate
+  ---
+  duration_ms: 3.100833
+  type: 'test'
+  ...
+# Subtest: an engagement range must run forwards
+ok 709 - an engagement range must run forwards
+  ---
+  duration_ms: 3.033292
+  type: 'test'
+  ...
+# Subtest: a second pay term on the same effective_from is refused
+ok 710 - a second pay term on the same effective_from is refused
+  ---
+  duration_ms: 13.970458
+  type: 'test'
+  ...
+# Subtest: a term with zero cash is legal -- a package may be entirely in kind
+ok 711 - a term with zero cash is legal -- a package may be entirely in kind
+  ---
+  duration_ms: 11.337375
+  type: 'test'
+  ...
+# Subtest: benefit quantity, unit and period stand or fall together
+ok 712 - benefit quantity, unit and period stand or fall together
+  ---
+  duration_ms: 3.24425
+  type: 'test'
+  ...
+# Subtest: benefit kind 'other' must say what it is
+ok 713 - benefit kind 'other' must say what it is
+  ---
+  duration_ms: 3.112916
+  type: 'test'
+  ...
+# Subtest: 'utilities' is NOT a benefit kind -- it was removed rather than carried unused
+ok 714 - 'utilities' is NOT a benefit kind -- it was removed rather than carried unused
+  ---
+  duration_ms: 3.036375
+  type: 'test'
+  ...
+# Subtest: one wage-period table serves a salaried month and a single dihari day
+ok 715 - one wage-period table serves a salaried month and a single dihari day
+  ---
+  duration_ms: 48.048917
+  type: 'test'
+  ...
+# Subtest: a bonus is one day, and a wage period may not run backwards
+ok 716 - a bonus is one day, and a wage period may not run backwards
+  ---
+  duration_ms: 3.270792
+  type: 'test'
+  ...
+# Subtest: two wage periods with the same start are refused; OVERLAPPING ones are not
+ok 717 - two wage periods with the same start are refused; OVERLAPPING ones are not
+  ---
+  duration_ms: 6.337458
+  type: 'test'
+  ...
+# Subtest: only an adjustment wage payment may be signed, and it must explain itself
+ok 718 - only an adjustment wage payment may be signed, and it must explain itself
+  ---
+  duration_ms: 8.606083
+  type: 'test'
+  ...
+# Subtest: an advance is just a payment -- the balance is allowed to go negative
+ok 719 - an advance is just a payment -- the balance is allowed to go negative
+  ---
+  duration_ms: 16.893375
+  type: 'test'
+  ...
+# Subtest: migration 7 PRESERVES existing destinations and gives them a null person
+ok 720 - migration 7 PRESERVES existing destinations and gives them a null person
+  ---
+  duration_ms: 5.525584
+  type: 'test'
+  ...
+# Subtest: migration 7 recreates the active index and adds the partial person index
+ok 721 - migration 7 recreates the active index and adds the partial person index
+  ---
+  duration_ms: 3.19
+  type: 'test'
+  ...
+# Subtest: a staff destination names a person, and a person named means staff
+ok 722 - a staff destination names a person, and a person named means staff
+  ---
+  duration_ms: 28.698875
+  type: 'test'
+  ...
+# Subtest: a staff destination can never be billable
+ok 723 - a staff destination can never be billable
+  ---
+  duration_ms: 5.362083
+  type: 'test'
+  ...
+# Subtest: one person cannot hold two milk destinations, but many destinations have none
+ok 724 - one person cannot hold two milk destinations, but many destinations have none
+  ---
+  duration_ms: 6.46125
+  type: 'test'
+  ...
+# Subtest: a staff destination must name a person who exists
+ok 725 - a staff destination must name a person who exists
+  ---
+  duration_ms: 30.95825
+  type: 'test'
+  ...
+# Subtest: the clone carries the event log and animals but NOT the projections
+ok 726 - the clone carries the event log and animals but NOT the projections
+  ---
+  duration_ms: 199.775041
+  type: 'test'
+  ...
+# Subtest: the clone preserves superseding events despite the self-referencing FK
+ok 727 - the clone preserves superseding events despite the self-referencing FK
+  ---
+  duration_ms: 43.087292
+  type: 'test'
+  ...
+# Subtest: invariant 0 passes on real fixture content, not just on an empty database
+ok 728 - invariant 0 passes on real fixture content, not just on an empty database
+  ---
+  duration_ms: 101.273958
+  type: 'test'
+  ...
+# Subtest: invariant 1 passes when the stored projections match the log
+ok 729 - invariant 1 passes when the stored projections match the log
+  ---
+  duration_ms: 63.915625
+  type: 'test'
+  ...
+# Subtest: invariant 1 FAILS when a stored projection has drifted from the log
+ok 730 - invariant 1 FAILS when a stored projection has drifted from the log
+  ---
+  duration_ms: 38.936459
+  type: 'test'
+  ...
+# Subtest: invariant 1 FAILS when a lactation row was deleted from the projection
+ok 731 - invariant 1 FAILS when a lactation row was deleted from the projection
+  ---
+  duration_ms: 58.698208
+  type: 'test'
+  ...
+# Subtest: invariant 1 FAILS when a spurious projection row was added
+ok 732 - invariant 1 FAILS when a spurious projection row was added
+  ---
+  duration_ms: 35.587834
+  type: 'test'
+  ...
+# Subtest: invariant 2 passes on real content and can detect a shift
+ok 733 - invariant 2 passes on real content and can detect a shift
+  ---
+  duration_ms: 124.627333
+  type: 'test'
+  ...
+# Subtest: verifyAll reports zero violations for a clean herd
+ok 734 - verifyAll reports zero violations for a clean herd
+  ---
+  duration_ms: 50.66725
+  type: 'test'
+  ...
+# Subtest: verifyAll on an EMPTY registry passes -- and that is why it proves nothing
+ok 735 - verifyAll on an EMPTY registry passes -- and that is why it proves nothing
+  ---
+  duration_ms: 78.177042
+  type: 'test'
+  ...
+# Subtest: the verification never mutates the database it is verifying
+ok 736 - the verification never mutates the database it is verifying
+  ---
+  duration_ms: 75.919917
+  type: 'test'
+  ...
+# Subtest: a rebuild at a different as-of, then verified at that same as-of, is clean
+ok 737 - a rebuild at a different as-of, then verified at that same as-of, is clean
+  ---
+  duration_ms: 122.254792
+  type: 'test'
+  ...
+# Subtest: every test file is either run by `npm test` or explicitly excluded with a reason
+ok 738 - every test file is either run by `npm test` or explicitly excluded with a reason
+  ---
+  duration_ms: 3.830542
+  type: 'test'
+  ...
+# Subtest: every excluded file still exists, so the list cannot rot
+ok 739 - every excluded file still exists, so the list cannot rot
+  ---
+  duration_ms: 0.463791
+  type: 'test'
+  ...
+# Subtest: no excluded file sits in a directory `npm test` covers
+ok 740 - no excluded file sits in a directory `npm test` covers
+  ---
+  duration_ms: 0.18425
+  type: 'test'
+  ...
+# Subtest: the test script does not use an unquoted `**` glob
+ok 741 - the test script does not use an unquoted `**` glob
+  ---
+  duration_ms: 0.074083
+  type: 'test'
+  ...
+# Subtest: the regression suites are reachable through their own scripts
+ok 742 - the regression suites are reachable through their own scripts
+  ---
+  duration_ms: 0.177959
+  type: 'test'
+  ...
+# Subtest: list_registry_animals
+    # Subtest: returns the herd with precision beside every birth date
+    ok 1 - returns the herd with precision beside every birth date
+      ---
+      duration_ms: 73.074416
+      type: 'test'
+      ...
+    # Subtest: the status filter narrows, and names itself in the digest
+    ok 2 - the status filter narrows, and names itself in the digest
+      ---
+      duration_ms: 73.380834
+      type: 'test'
+      ...
+    # Subtest: an empty registry reports zero rather than failing
+    ok 3 - an empty registry reports zero rather than failing
+      ---
+      duration_ms: 22.432542
+      type: 'test'
+      ...
+    1..3
+ok 743 - list_registry_animals
+  ---
+  duration_ms: 173.088417
+  type: 'suite'
+  ...
+# Subtest: get_registry_animal
+    # Subtest: carries the whole event list with precision per event
+    ok 1 - carries the whole event list with precision per event
+      ---
+      duration_ms: 10.755333
+      type: 'test'
+      ...
+    # Subtest: an unknown serial is a structured error, not a throw
+    ok 2 - an unknown serial is a structured error, not a throw
+      ---
+      duration_ms: 38.581791
+      type: 'test'
+      ...
+    # Subtest: superseded events are present and marked
+    ok 3 - superseded events are present and marked
+      ---
+      duration_ms: 4.249791
+      type: 'test'
+      ...
+    1..3
+ok 744 - get_registry_animal
+  ---
+  duration_ms: 53.915208
+  type: 'suite'
+  ...
+# Subtest: guardSerial
+    # Subtest: accepts a serial that exists
+    ok 1 - accepts a serial that exists
+      ---
+      duration_ms: 10.217
+      type: 'test'
+      ...
+    # Subtest: rejects a serial that does not, with a structured error
+    ok 2 - rejects a serial that does not, with a structured error
+      ---
+      duration_ms: 49.649333
+      type: 'test'
+      ...
+    # Subtest: ignores args with no serial, and an empty one
+    ok 3 - ignores args with no serial, and an empty one
+      ---
+      duration_ms: 56.565625
+      type: 'test'
+      ...
+    # Subtest: a demo animal_id is not accepted as a serial
+    ok 4 - a demo animal_id is not accepted as a serial
+      ---
+      duration_ms: 21.347666
+      type: 'test'
+      ...
+    1..4
+ok 745 - guardSerial
+  ---
+  duration_ms: 138.051417
+  type: 'suite'
+  ...
+# Subtest: get_calving_intervals
+    # Subtest: splits measured from approximate and never pools them
+    ok 1 - splits measured from approximate and never pools them
+      ---
+      duration_ms: 91.892208
+      type: 'test'
+      ...
+    # Subtest: every interval states its own quality
+    ok 2 - every interval states its own quality
+      ---
+      duration_ms: 32.582041
+      type: 'test'
+      ...
+    # Subtest: a single animal keeps the same shape, and the caveat
+    ok 3 - a single animal keeps the same shape, and the caveat
+      ---
+      duration_ms: 9.648042
+      type: 'test'
+      ...
+    # Subtest: an unknown serial is a structured error
+    ok 4 - an unknown serial is a structured error
+      ---
+      duration_ms: 6.0215
+      type: 'test'
+      ...
+    # Subtest: an animal with one calving has no intervals, and says so with null
+    ok 5 - an animal with one calving has no intervals, and says so with null
+      ---
+      duration_ms: 5.983167
+      type: 'test'
+      ...
+    1..5
+ok 746 - get_calving_intervals
+  ---
+  duration_ms: 146.265167
+  type: 'suite'
+  ...
+# Subtest: all four tools are declared, and every description names the 40-litre trap or the null
+ok 747 - all four tools are declared, and every description names the 40-litre trap or the null
+  ---
+  duration_ms: 2.407709
+  type: 'test'
+  ...
+# Subtest: list_buyers reports a rate WITH its lot size, and formatted
+ok 748 - list_buyers reports a rate WITH its lot size, and formatted
+  ---
+  duration_ms: 142.938709
+  type: 'test'
+  ...
+# Subtest: list_buyers marks home unbillable, with no rate and no balance
+ok 749 - list_buyers marks home unbillable, with no rate and no balance
+  ---
+  duration_ms: 59.482166
+  type: 'test'
+  ...
+# Subtest: list_buyers distinguishes billable from on-every-sheet
+ok 750 - list_buyers distinguishes billable from on-every-sheet
+  ---
+  duration_ms: 48.813084
+  type: 'test'
+  ...
+# Subtest: get_buyer_balance carries paisa AND prose for every amount
+ok 751 - get_buyer_balance carries paisa AND prose for every amount
+  ---
+  duration_ms: 142.9155
+  type: 'test'
+  ...
+# Subtest: get_buyer_balance SAYS WHICH WAY a balance goes
+ok 752 - get_buyer_balance SAYS WHICH WAY a balance goes
+  ---
+  duration_ms: 47.457959
+  type: 'test'
+  ...
+# Subtest: get_buyer_balance refuses home with a reason rather than reporting zero
+ok 753 - get_buyer_balance refuses home with a reason rather than reporting zero
+  ---
+  duration_ms: 95.585375
+  type: 'test'
+  ...
+# Subtest: get_buyer_balance refuses an unknown id and says where ids come from
+ok 754 - get_buyer_balance refuses an unknown id and says where ids come from
+  ---
+  duration_ms: 91.599291
+  type: 'test'
+  ...
+# Subtest: the monthly closing figure RUNS rather than resetting
+ok 755 - the monthly closing figure RUNS rather than resetting
+  ---
+  duration_ms: 40.760916
+  type: 'test'
+  ...
+# Subtest: get_dispatches splits sold from kept at home
+ok 756 - get_dispatches splits sold from kept at home
+  ---
+  duration_ms: 64.573333
+  type: 'test'
+  ...
+# Subtest: get_dispatches names its rows with the rate they were billed at
+ok 757 - get_dispatches names its rows with the rate they were billed at
+  ---
+  duration_ms: 38.989083
+  type: 'test'
+  ...
+# Subtest: get_dispatches caps its enumeration but keeps the totals exact
+ok 758 - get_dispatches caps its enumeration but keeps the totals exact
+  ---
+  duration_ms: 77.069125
+  type: 'test'
+  ...
+# Subtest: get_dispatches refuses an unknown destination
+ok 759 - get_dispatches refuses an unknown destination
+  ---
+  duration_ms: 85.684875
+  type: 'test'
+  ...
+# Subtest: THE PERCENTAGE IS NULL when production is incomplete, with the reason attached
+ok 760 - THE PERCENTAGE IS NULL when production is incomplete, with the reason attached
+  ---
+  duration_ms: 54.051959
+  type: 'test'
+  ...
+# Subtest: the percentage IS reported once nothing is missing -- the null is data, not a constant
+ok 761 - the percentage IS reported once nothing is missing -- the null is data, not a constant
+  ---
+  duration_ms: 15.345792
+  type: 'test'
+  ...
+# Subtest: no production at all is ALSO a withheld percentage -- there is no denominator
+ok 762 - no production at all is ALSO a withheld percentage -- there is no denominator
+  ---
+  duration_ms: 14.116291
+  type: 'test'
+  ...
+# Subtest: reconciliation reports home as its own term, not inside the gap
+ok 763 - reconciliation reports home as its own term, not inside the gap
+  ---
+  duration_ms: 58.861625
+  type: 'test'
+  ...
+# Subtest: an off-agreement rate is counted, not hidden
+ok 764 - an off-agreement rate is counted, not hidden
+  ---
+  duration_ms: 84.25425
+  type: 'test'
+  ...
+# Subtest: coarsenInterval: day stays day within 90 days
+ok 765 - coarsenInterval: day stays day within 90 days
+  ---
+  duration_ms: 0.407209
+  type: 'test'
+  ...
+# Subtest: coarsenInterval: day -> week past 90 days
+ok 766 - coarsenInterval: day -> week past 90 days
+  ---
+  duration_ms: 0.062875
+  type: 'test'
+  ...
+# Subtest: coarsenInterval: day -> month past 365 days
+ok 767 - coarsenInterval: day -> month past 365 days
+  ---
+  duration_ms: 0.043
+  type: 'test'
+  ...
+# Subtest: shapeMilkYield: digest summarises without leaking every row
+ok 768 - shapeMilkYield: digest summarises without leaking every row
+  ---
+  duration_ms: 0.474792
+  type: 'test'
+  ...
+1..768
+# tests 779
+# suites 4
+# pass 779
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3977.822625

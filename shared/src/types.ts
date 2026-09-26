@@ -248,3 +248,5 @@ export type AnthropicMessage = {
 };
 
 export type { Coverage, MilkMetrics, AnalyticsBucket, ProductionRow, Page, AnalyticsReport } from './analytics';
+
+export type { LabourReportLine, LabourReportContext } from './labour-report';

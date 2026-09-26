@@ -276,6 +276,22 @@ test("database report refreshes corrections; pagination never changes totals", (
       });
     const query = { on, view: "month" };
     const now = new Date("2026-10-02T00:00:00Z");
+    // B4 changes presentation only: pin all nine read combinations to this
+    // measured fixture before any correction, including period coverage.
+    for (const view of ['day', 'week', 'month']) {
+      for (const session of ['all', 'morning', 'evening']) {
+        const report = analytics(db, {on, view, session}, now);
+        const sessions = session === 'all' ? 2 : 1;
+        const days = view === 'day' ? 1 : view === 'week' ? 7 : 30;
+        assert.equal(report.metrics.produced, sessions * 10, `${view}/${session} measured total`);
+        assert.equal(report.metrics.coverage.expected, sessions * days);
+        assert.equal(report.metrics.coverage.measured, sessions);
+        assert.equal(report.metrics.coverage.missing, sessions * (days - 1));
+        assert.equal(report.metrics.dispatched, null);
+        assert.equal(report.metrics.difference, null);
+        assert.equal(report.metrics.meanDailyYield, session === 'all' ? 20 : null);
+      }
+    }
     const before = analytics(db, query, now);
     assert.equal(before.metrics.produced, 20);
     assert.equal(before.metrics.coverage.expected, 60);

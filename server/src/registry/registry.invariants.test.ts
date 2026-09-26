@@ -1006,7 +1006,8 @@ test('overlapping stints are a report line and NOT a violation', () => {
   assert.deepEqual(violations(s), [], 'not a violation');
   const report = labourReport(s, '2026-09-07');
   assert.ok(report.some((l) => l.kind === 'overlapping_engagements'));
-  assert.ok(report.some((l) => l.kind === 'multiple_open_engagements'));
+  assert.deepEqual(report.find(l => l.kind === 'overlapping_engagements')?.context, {kind:'overlapping_engagements',personId:'per_imran',engagementIds:[s.engagements[0].id,'eng_imran_night']});
+  assert.deepEqual(report.find(l => l.kind === 'multiple_open_engagements')?.context, {kind:'multiple_open_engagements',personId:'per_imran',engagementIds:[s.engagements[0].id,'eng_imran_night'],asOf:'2026-09-07'});
 });
 
 test('a wage period after somebody left is a report line, not a violation', () => {
@@ -1027,7 +1028,7 @@ test('a figure differing from the agreement is reported, never refused', () => {
   s.wagePeriods[0].amount_minor = 2_200_000;
   assert.deepEqual(violations(s), []);
   const line = labourReport(s, '2026-09-07').find((l) => l.kind === 'amount_differs_from_term');
-  assert.match(line?.detail ?? '', /2200000 for 2026-09-01/);
+  assert.match(line?.detail ?? '', /has a recorded wage of Rs 22,000.00 for 2026-09-01/);
   assert.match(line?.detail ?? '', /Expected whenever there was leave/);
 });
 
@@ -1049,6 +1050,7 @@ test('an identifier on a record that matches no person is a worklist line', () =
   const unknown = report.filter((l) => l.kind === 'unknown_identifier');
   assert.equal(unknown.length, 1, "'Imran' matches 'imran' case-insensitively and is not listed");
   assert.match(unknown[0].detail, /'dr_khan' appears on 1 record/);
+  assert.deepEqual(unknown[0].context, {kind:'unknown_identifier', identifier:'dr_khan',recordCount:1});
 });
 
 test('the report is silent until there is somebody on file', () => {
@@ -1068,4 +1070,20 @@ test('the report is silent until there is somebody on file', () => {
       source_form: 'direct_entry', note: null },
   ] as never;
   assert.deepEqual(labourReport(s, '2026-09-07'), []);
+});
+
+test('structured wage contexts preserve minor units, including zero, and do not imply payment', () => {
+ const s = labourSnapshot();
+ s.engagements[0].ended_on = '2026-08-31';
+ for (const amount of [0,4500000]) {
+  s.wagePeriods[0].amount_minor = amount;
+  const report = labourReport(s,'2026-09-07');
+  const w=s.wagePeriods[0],e=s.engagements[0];
+  const base={personId:e.person_id,wageId:w.id,engagementId:e.id,fromOn:w.from_on,toOn:w.to_on};
+  assert.deepEqual(report.find(l=>l.kind==='wage_period_outside_engagement')?.context,{kind:'wage_period_outside_engagement',...base});
+  const amountLine=report.find(l=>l.kind==='amount_differs_from_term')!;
+  assert.deepEqual(amountLine.context,{kind:'amount_differs_from_term',...base,amountMinor:amount,agreementMinor:s.terms[0].cash_minor});
+  assert.ok(amountLine.detail.includes(amount === 0 ? 'Rs 0.00' : 'Rs 45,000.00'));
+  assert.ok(!amountLine.detail.includes('was paid'));
+ }
 });

@@ -1,0 +1,17 @@
+docs/UI_SYSTEM.md
+docs/implementation/B4-PROGRESS.md
+server/src/registry/analytics.test.ts
+server/src/registry/invariants.ts
+server/src/registry/registry.invariants.test.ts
+shared/src/labour-report.ts
+shared/src/types.ts
+web-angular/src/app/registry/analytics-page.ts
+web-angular/src/app/registry/analytics.spec.ts
+web-angular/src/app/registry/b4-reporting.spec.ts
+web-angular/src/app/registry/check-presentation.ts
+web-angular/src/app/registry/destination-detail.ts
+web-angular/src/app/registry/life-report-model.ts
+web-angular/src/app/registry/life-report.ts
+web-angular/src/app/registry/types.ts
+web-angular/src/app/registry/verification-panel.ts
+web-angular/src/app/ui/certainty.ts

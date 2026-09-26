@@ -143,7 +143,7 @@ describe('Owner analytics', () => {
       if (q['view'] === 'month') throw new Error('offline');
       return report();
     });
-    await TestBed.inject(Router).navigate([], {queryParams:{view:'month'}});
+    await TestBed.inject(Router).navigate([], { queryParams: { view: 'month' } });
     f.detectChanges();
     await f.whenStable();
     f.detectChanges();
@@ -159,7 +159,7 @@ describe('Owner analytics', () => {
       return r;
     });
     expect(f.componentInstance.litres(0)).toBe('0 L');
-    expect(f.componentInstance.litres(null)).toBe('No records');
+    expect(f.componentInstance.litres(null)).toBe('Not available');
     fail = true;
     f.componentInstance.refresh();
     f.detectChanges();
@@ -168,4 +168,103 @@ describe('Owner analytics', () => {
     expect(f.componentInstance.report()?.metrics.produced).toBe(0);
     expect(f.nativeElement.textContent).toContain('Previous results');
   });
+});
+
+describe('B4 analytics semantics and filter matrix', () => {
+  for (const view of ['day', 'week', 'month'])
+    for (const session of ['all', 'morning', 'evening']) {
+      it(`${view}/${session} retains query filters and unchanged supplied numbers`, async () => {
+        const api = vi.fn(async () => report());
+        const f = await mount(api);
+        await TestBed.inject(Router).navigate([], {
+          queryParams: { view, session, on: '2026-09-14' },
+        });
+        await f.whenStable();
+        f.detectChanges();
+        const q = api.mock.calls.at(-1);
+        expect(q).toBeDefined();
+        expect(f.componentInstance.q().view).toBe(view);
+        expect(f.componentInstance.q().session).toBe(session);
+        expect(f.componentInstance.report()!.metrics).toEqual(report().metrics);
+        const headings = Array.from(
+          f.nativeElement.querySelectorAll('section[aria-label="Period totals"] h2'),
+        ).map((h: any) => h.textContent.trim());
+        expect(headings).toEqual([
+          'Measured production',
+          'Recorded dispatch',
+          'Difference',
+          'Coverage',
+        ]);
+        f.componentInstance.showData.set(true);
+        f.detectChanges();
+        expect(f.nativeElement.querySelector('#analytics-chart-data table')).not.toBeNull();
+      });
+    }
+  it('distinguishes measured zero, no records, unmeasured records, unexpected records and unavailable differences', async () => {
+    const f = await mount(async () => report());
+    const c = {
+      ...report().metrics.coverage,
+      measured: 0,
+      unmeasured: 0,
+      notMilked: 0,
+      unexpected: 0,
+    };
+    const a = f.componentInstance;
+    expect(a.production(0, c)).toBe('0 L');
+    expect(a.production(null, c)).toBe('No records');
+    expect(a.production(null, { ...c, unmeasured: 1 })).toBe('No measurements');
+    expect(a.production(null, { ...c, unexpected: 1 })).toBe('No measurements');
+    expect(a.litres(-1.235)).toBe('-1.24 L');
+    expect(a.litres(null)).toBe('Not available');
+    expect(a.differenceNote(report().metrics)).toContain('Partial coverage');
+    expect(a.differenceNote({ ...report().metrics, difference: null })).toContain(
+      'Difference unavailable',
+    );
+    expect(a.differenceNote({...report().metrics, coverage: {...c, measured:4, expected:4, missing:0, pending:0, uncertain:0}, dispatchMissing:0, dispatchPending:0, unavailableReasons:[]})).toContain('Recorded coverage only');
+    expect(a.dispatch({...report().metrics,dispatched:null,dispatchRows:0})).toBe('No records');
+    expect(a.dispatch({...report().metrics,dispatched:null,dispatchRows:1})).toBe('Not available');
+    expect(a.bucketLabel(report().buckets[0])).toContain('2026-09-14');
+  });
+  it('retry retains selected filters and distinguishes an in-flight refresh from fresh data', async () => {
+    let fail = true;
+    const api = vi.fn(async () => {
+      if (fail) throw Error('offline');
+      return report();
+    });
+    const f = await mount(api);
+    await TestBed.inject(Router).navigate([], {
+      queryParams: { view: 'week', session: 'evening', on: '2026-09-14' },
+    });
+    await f.whenStable();
+    f.detectChanges();
+    fail = false;
+    const retry = Array.from(f.nativeElement.querySelectorAll('button')).find(
+      (b: any) => b.textContent.trim() === 'Retry',
+    ) as HTMLButtonElement;
+    retry.click();
+    await f.whenStable();
+    f.detectChanges();
+    expect(f.componentInstance.q().session).toBe('evening');
+    expect(f.componentInstance.q().view).toBe('week');
+    expect(f.componentInstance.error()).toBe('');
+  });
+});
+
+it('exposes No measurements rather than the generic no-record label to assistive technology', async () => {
+  const r = report();
+  r.production.items = [
+    {
+      id: 'A',
+      identifier: 'A',
+      name: null,
+      tag: null,
+      litres: null,
+      coverage: { ...r.metrics.coverage, measured: 0, unmeasured: 1 },
+      eligibleAnimalDays: 0,
+    },
+  ];
+  const f = await mount(async () => r);
+  expect(
+    f.nativeElement.querySelector('td span[aria-label="No measurements"]')?.textContent,
+  ).toContain('No measurements');
 });

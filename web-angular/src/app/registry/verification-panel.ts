@@ -1,3 +1,6 @@
+import { RouterLink } from '@angular/router';
+import { labourPresentation } from './check-presentation';
+import { ScrollRegion } from '../ui/scroll-region';
 import { LocalPagination } from '../ui/local-pagination';
 import { ShellActions } from './navigation';
 // The verification read: invariants, precision histogram, calving intervals.
@@ -50,7 +53,10 @@ import { SubHeading } from '../ui/heading';
 @Component({
   selector: 'app-verification-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LocalPagination,
+  imports: [
+    LocalPagination,
+    RouterLink,
+    ScrollRegion,
     Card,
     Cell,
     Certainty,
@@ -82,11 +88,14 @@ import { SubHeading } from '../ui/heading';
           Recheck
         </button>
       }
+      @if (loading()) {
+        <p role="status">Checking records… Previous results are not a current check.</p>
+      }
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
-      } @else if (v(); as data) {
+      } @else if (!loading() && v(); as data) {
         <section appCard>
-          <h3 appSubHeading>Invariants</h3>
+          <h3 appSubHeading>Invariant violations</h3>
           @if (data.violations.length === 0) {
             <p class="mt-2 text-sm text-content-secondary" data-role="violations-none">
               No violations across {{ data.counts.animals }} animal(s),
@@ -99,11 +108,19 @@ import { SubHeading } from '../ui/heading';
               }
             </p>
           } @else {
+            <app-local-pagination
+              label="Invariant violations"
+              #checkPages0="localPagination"
+              [total]="data.violations.length"
+            />
             <ul class="mt-2 space-y-1" data-role="violations">
-              <app-local-pagination label="Invariant violations" #checkPages0="localPagination" [total]="data.violations.length"/>
               @for (x of checkPages0.rows(data.violations); track x.detail) {
                 <li appErrorPanel>
-                  <span class="font-mono text-xs">[{{ x.invariant }}] {{ x.name }}</span>
+                  <h4 class="font-semibold">{{ humanCode(x.name) }}</h4>
+                  <details>
+                    <summary>Technical details</summary>
+                    <code>[{{ x.invariant }}] {{ x.name }}</code>
+                  </details>
                   <span class="ml-2">{{ x.detail }}</span>
                 </li>
               }
@@ -120,19 +137,37 @@ import { SubHeading } from '../ui/heading';
              learn to ignore, which costs more than the four lines are worth.
              See docs/REGISTRY_PAYROLL.md §13. -->
         <section appCard>
-          <h3 appSubHeading>People — worth a look</h3>
+          <h3 appSubHeading>Advisory worklist · People</h3>
           @if (data.labour.length === 0) {
             <p class="mt-2 text-sm text-content-secondary" data-role="labour-none">
-              Nothing to flag. These are not violations — they are things that are legitimate and
-              still worth seeing.
+              No issues found in this advisory check as of {{ data.as_of }}. Wage differences are
+              advisory and do not establish payment.
             </p>
           } @else {
+            <app-local-pagination
+              label="Labour advisories"
+              #checkPages1="localPagination"
+              [total]="data.labour.length"
+            />
             <ul class="mt-2 space-y-1" data-role="labour">
-              <app-local-pagination label="Labour advisories" #checkPages1="localPagination" [total]="data.labour.length"/>
               @for (l of checkPages1.rows(data.labour); track l.detail) {
                 <li class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong">
-                  <span class="font-mono text-xs">{{ l.kind }}</span>
-                  <span class="ml-2">{{ l.detail }}</span>
+                  @let item = labour(l);
+                  <h4 class="font-semibold">{{ item.heading }}</h4>
+                  @if (item.context) {
+                    <p>{{ item.context }}</p>
+                  }
+                  <p>{{ l.detail }}</p>
+                  @if (item.link) {
+                    <a class="underline" [routerLink]="item.link"
+                      >Review {{ l.kind === 'unknown_identifier' ? 'people' : 'person' }}</a
+                    >
+                  }
+                  <details>
+                    <summary>Technical details</summary>
+                    <code>{{ l.kind }}</code>
+                    <pre class="whitespace-pre-wrap break-words">{{ metadata(l.context) }}</pre>
+                  </details>
                 </li>
               }
             </ul>
@@ -140,7 +175,7 @@ import { SubHeading } from '../ui/heading';
         </section>
 
         <section appCard>
-          <h3 appSubHeading>How the dates were known</h3>
+          <h3 appSubHeading>Coverage · How the dates were known</h3>
           <p appHelp size="xs" class="mt-1">
             Source against precision. Nothing can detect a date that is more precise than the memory
             behind it — this is the number that shows it. A backfill coming out mostly exact-day
@@ -148,40 +183,44 @@ import { SubHeading } from '../ui/heading';
           </p>
           @if (data.histogram.length === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="histogram-empty">
-              No events yet.
+              No events in this check as of {{ data.as_of }}.
             </p>
           } @else {
-            <table class="mt-2 w-full text-left text-sm" data-role="histogram">
-              <thead class="text-xs uppercase tracking-wide text-content-muted">
-                <tr>
-                  <th appCell>Source</th>
-                  <th appCell>Precision</th>
-                  <th appCell numeric>Events</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (c of data.histogram; track c.source_form + c.date_precision) {
-                  <tr appRowDivider>
-                    <td appCell tone="heading">{{ c.source_form }}</td>
-                    <!-- THE ONE COLUMN IN THE APP WHOSE VALUES ARE THE
+            <div appScrollRegion="histogram">
+              <table class="mt-2 w-full text-left text-sm" data-role="histogram">
+                <thead class="text-xs uppercase tracking-wide text-content-muted">
+                  <tr>
+                    <th scope="col" appCell>Source</th>
+                    <th scope="col" appCell>Precision</th>
+                    <th scope="col" appCell numeric>Events</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of data.histogram; track c.source_form + c.date_precision) {
+                    <tr appRowDivider>
+                      <td appCell tone="heading">{{ c.source_form }}</td>
+                      <!-- THE ONE COLUMN IN THE APP WHOSE VALUES ARE THE
                          VOCABULARY'S OWN WORDS. "day" is a known date and
                          "month"/"year"/"estimated" are approximate ones, so the
                          word is set in the state it names. This is where the
                          vocabulary is learnable: a reader who has seen "month"
                          dotted here reads a dotted "2017-03" on /animals
                          without being told. -->
-                    <td appCell>
-                      <span
-                        [appCertainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
-                        [attr.data-certainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
-                        >{{ c.date_precision }}</span
-                      >
-                    </td>
-                    <td appCell numeric emphasis tone="primary">{{ c.count }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+                      <td appCell>
+                        <span
+                          [appCertainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
+                          [attr.data-certainty]="
+                            c.date_precision === 'day' ? 'known' : 'approximate'
+                          "
+                          >{{ c.date_precision }}</span
+                        >
+                      </td>
+                      <td appCell numeric emphasis tone="primary">{{ c.count }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
         </section>
 
@@ -189,47 +228,56 @@ import { SubHeading } from '../ui/heading';
           <h3 appSubHeading>Calving intervals</h3>
           @if (data.intervals.intervals.length === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="intervals-empty">
-              No animal has two or more calvings yet.
+              No animal has two or more calvings in this check as of {{ data.as_of }}.
             </p>
           } @else {
-            <app-local-pagination label="Calving intervals" #intervalPages="localPagination" [total]="data.intervals.intervals.length"/>
-            <table class="mt-2 w-full text-left text-sm" data-role="intervals">
-              <thead class="text-xs uppercase tracking-wide text-content-muted">
-                <tr>
-                  <th appCell>Animal</th>
-                  <th appCell>From</th>
-                  <th appCell>To</th>
-                  <th appCell numeric>Days</th>
-                  <th appCell>Quality</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (i of intervalPages.rows(data.intervals.intervals); track i.animal_id + i.ordinal) {
-                  <tr appRowDivider>
-                    <td appCell tone="heading" class="font-mono">{{ i.animal_id }}</td>
-                    <td appCell tone="secondary">{{ i.from_on }}</td>
-                    <td appCell tone="secondary">{{ i.to_on }}</td>
-                    <!-- THE INTERVAL TAKES ITS OWN QUALITY, which is the
+            <app-local-pagination
+              label="Calving intervals"
+              #intervalPages="localPagination"
+              [total]="data.intervals.intervals.length"
+            />
+            <div appScrollRegion="intervals">
+              <table class="mt-2 w-full text-left text-sm" data-role="intervals">
+                <thead class="text-xs uppercase tracking-wide text-content-muted">
+                  <tr>
+                    <th scope="col" appCell>Animal</th>
+                    <th scope="col" appCell>From</th>
+                    <th scope="col" appCell>To</th>
+                    <th scope="col" appCell numeric>Days</th>
+                    <th scope="col" appCell>Quality</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    i of intervalPages.rows(data.intervals.intervals);
+                    track i.animal_id + i.ordinal
+                  ) {
+                    <tr appRowDivider>
+                      <td appCell tone="heading" class="font-mono">{{ i.animal_id }}</td>
+                      <td appCell tone="secondary">{{ i.from_on }}</td>
+                      <td appCell tone="secondary">{{ i.to_on }}</td>
+                      <!-- THE INTERVAL TAKES ITS OWN QUALITY, which is the
                          typographic form of what intervalReport() refuses to do
                          in arithmetic: an interval computed from two approximate
                          calvings is not the same number as one computed from two
                          exact days, and until now they were set identically. -->
-                    <td appCell numeric emphasis>
-                      <span
-                        [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
-                        [attr.data-certainty]="i.quality === 'measured' ? 'known' : 'approximate'"
-                        >{{ i.days }}</span
-                      >
-                    </td>
-                    <td appCell>
-                      <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'">{{
-                        i.quality
-                      }}</span>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+                      <td appCell numeric emphasis>
+                        <span
+                          [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
+                          [attr.data-certainty]="i.quality === 'measured' ? 'known' : 'approximate'"
+                          >{{ i.days }}</span
+                        >
+                      </td>
+                      <td appCell>
+                        <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'">{{
+                          i.quality
+                        }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
             <!-- The two sets are reported separately and never blended. -->
             <div class="mt-3 grid gap-2 sm:grid-cols-2" data-role="summaries">
               @for (s of [data.intervals.measured, data.intervals.approximate]; track s.quality) {
@@ -262,7 +310,7 @@ import { SubHeading } from '../ui/heading';
         </section>
 
         <section appCard>
-          <h3 appSubHeading>How complete the milk record is</h3>
+          <h3 appSubHeading>Coverage gaps · Milk records</h3>
           <p appHelp size="xs" class="mt-1">
             A session is complete when every animal in milk has a row — not when every row carries a
             number. The two are separate on purpose: a session of all “not measured” is a complete
@@ -270,7 +318,7 @@ import { SubHeading } from '../ui/heading';
           </p>
           @if (data.milking.rows === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="milking-empty">
-              No milking recorded yet.
+              No milking records in this check as of {{ data.as_of }}.
             </p>
           } @else {
             <div class="mt-2 grid gap-2 sm:grid-cols-3" data-role="milking-summary">
@@ -305,41 +353,43 @@ import { SubHeading } from '../ui/heading';
               </div>
             </div>
 
-            <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
-              <thead class="text-xs uppercase tracking-wide text-content-muted">
-                <tr>
-                  <th appCell>Date</th>
-                  <th appCell>Session</th>
-                  <th appCell numeric>Recorded</th>
-                  <th appCell numeric>In milk</th>
-                  <th appCell numeric>Measured</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (s of data.milking.recent; track s.occurred_on + s.session) {
-                  <tr appRowDivider>
-                    <td appCell tone="secondary">{{ s.occurred_on }}</td>
-                    <td appCell tone="secondary">{{ s.session }}</td>
-                    <!-- A session with fewer rows than animals in milk has
+            <div appScrollRegion="milking sessions">
+              <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
+                <thead class="text-xs uppercase tracking-wide text-content-muted">
+                  <tr>
+                    <th scope="col" appCell>Date</th>
+                    <th scope="col" appCell>Session</th>
+                    <th scope="col" appCell numeric>Recorded</th>
+                    <th scope="col" appCell numeric>In milk</th>
+                    <th scope="col" appCell numeric>Measured</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (s of data.milking.recent; track s.occurred_on + s.session) {
+                    <tr appRowDivider>
+                      <td appCell tone="secondary">{{ s.occurred_on }}</td>
+                      <td appCell tone="secondary">{{ s.session }}</td>
+                      <!-- A session with fewer rows than animals in milk has
                          animals nobody answered for, which is §6's fifth state.
                          The colour is unchanged -- this was already amber, and
                          it is one of the nine sites PHASE5_PRECHECK.md's census
                          classifies as amber's PERMITTED first meaning. What
                          changes is that it now says so in the vocabulary
                          instead of in a ternary. -->
-                    <td appCell numeric emphasis>
-                      <span
-                        [appCertainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
-                        [attr.data-certainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
-                        >{{ s.recorded }}</span
-                      >
-                    </td>
-                    <td appCell numeric tone="secondary">{{ s.expected }}</td>
-                    <td appCell numeric tone="secondary">{{ s.measured }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+                      <td appCell numeric emphasis>
+                        <span
+                          [appCertainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
+                          [attr.data-certainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
+                          >{{ s.recorded }}</span
+                        >
+                      </td>
+                      <td appCell numeric tone="secondary">{{ s.expected }}</td>
+                      <td appCell numeric tone="secondary">{{ s.measured }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
           }
           <p appHelp size="xs" class="mt-3" data-role="milking-caveat">{{ data.milking.caveat }}</p>
         </section>
@@ -353,12 +403,20 @@ import { SubHeading } from '../ui/heading';
              fires every day for months is trained away, taking the real signal
              with it. See docs/REGISTRY_SALES.md §11.
              --------------------------------------------------------------- -->
+        @if (reconcileError()) {
+          <p appErrorPanel role="alert">Milk reconciliation unavailable: {{ reconcileError() }}</p>
+        }
         @if (reconciliation(); as r) {
           <section appCard>
             <h3 appSectionHeading>Where the milk went</h3>
             <p appHelp size="xs" class="mt-1">{{ r.from }} → {{ r.to }}</p>
 
-            @if (r.dispatched_total === 0 && r.produced_measured === 0) {
+            @if (
+              r.sessions === 0 &&
+              r.measured_rows === 0 &&
+              r.not_measured_rows === 0 &&
+              r.not_milked_rows === 0
+            ) {
               <p class="mt-2 text-sm italic text-content-subtle" data-role="reconcile-empty">
                 Nothing recorded in this period.
               </p>
@@ -415,25 +473,31 @@ import { SubHeading } from '../ui/heading';
               </p>
 
               @if (r.incomplete.length > 0) {
-                <table class="mt-2 w-full text-left text-sm" data-role="reconcile-incomplete">
-                  <thead class="text-xs uppercase tracking-wide text-content-muted">
-                    <tr>
-                      <th appCell>Session</th>
-                      <th appCell numeric>Answered</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <app-local-pagination label="Incomplete milk sessions" #checkPages2="localPagination" [total]="r.incomplete.length"/>
-              @for (s of checkPages2.rows(r.incomplete); track s.occurred_on + s.session) {
-                      <tr appRowDivider>
-                        <td appCell tone="secondary">{{ s.occurred_on }} {{ s.session }}</td>
-                        <td appCell numeric tone="secondary">
-                          {{ s.recorded_standing }} of {{ s.expected_standing }}
-                        </td>
+                <app-local-pagination
+                  label="Incomplete milk sessions"
+                  #checkPages2="localPagination"
+                  [total]="r.incomplete.length"
+                />
+                <div appScrollRegion="reconcile incomplete">
+                  <table class="mt-2 w-full text-left text-sm" data-role="reconcile-incomplete">
+                    <thead class="text-xs uppercase tracking-wide text-content-muted">
+                      <tr>
+                        <th scope="col" appCell>Session</th>
+                        <th scope="col" appCell numeric>Answered</th>
                       </tr>
-                    }
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      @for (s of checkPages2.rows(r.incomplete); track s.occurred_on + s.session) {
+                        <tr appRowDivider>
+                          <td appCell tone="secondary">{{ s.occurred_on }} {{ s.session }}</td>
+                          <td appCell numeric tone="secondary">
+                            {{ s.recorded_standing }} of {{ s.expected_standing }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
               }
 
               <!-- A LIST TO READ, never a violation: a deliberate discount and
@@ -443,9 +507,13 @@ import { SubHeading } from '../ui/heading';
                   <h4 class="text-xs font-semibold uppercase tracking-wide text-content-secondary">
                     Billed at something other than the agreed rate
                   </h4>
+                  <app-local-pagination
+                    label="Off-schedule milk records"
+                    #checkPages3="localPagination"
+                    [total]="r.off_schedule.length"
+                  />
                   <ul class="mt-1 space-y-1 text-sm text-content-secondary">
-                    <app-local-pagination label="Off-schedule milk records" #checkPages3="localPagination" [total]="r.off_schedule.length"/>
-              @for (o of checkPages3.rows(r.off_schedule); track o.dispatch_id) {
+                    @for (o of checkPages3.rows(r.off_schedule); track o.dispatch_id) {
                       <li>
                         {{ o.occurred_on }} {{ o.session }} · {{ o.name }} — billed
                         {{ rate(o.captured_minor, o.captured_unit_litres) }}, agreed
@@ -477,6 +545,17 @@ export class VerificationPanel {
 
   private readonly api = inject(RegistryApi);
 
+  protected readonly metadata = (context: unknown) =>
+    context ? JSON.stringify(context, null, 2) : 'No structured context supplied';
+  protected readonly humanCode = (code: string) =>
+    code
+      .replaceAll('_', ' ')
+      .replaceAll('-', ' ')
+      .replace(/^./, (s) => s.toUpperCase());
+  protected readonly labour = labourPresentation;
+  protected readonly loading = signal(false);
+  protected readonly reconcileError = signal('');
+  private request = 0;
   protected readonly v = signal<Verification | null>(null);
   protected readonly reconciliation = signal<Reconciliation | null>(null);
   protected readonly loadError = signal<string | null>(null);
@@ -502,21 +581,23 @@ export class VerificationPanel {
   protected readonly asOf = computed(() => this.url.value().as_of || undefined);
 
   protected async load(): Promise<void> {
-    try {
-      this.v.set(await this.api.verification(this.asOf()));
-      this.loadError.set(null);
-    } catch (e) {
-      this.loadError.set(e instanceof Error ? e.message : String(e));
-    }
-    // Loaded SEPARATELY and failing quietly: the reconciliation is a diagnostic
-    // over a different set of tables, and a farm that has not started recording
-    // sales must still be able to read its herd verification. One failing
-    // section must not take the page with it.
-    try {
-      this.reconciliation.set(await this.api.reconcile(this.rangeStart(), farmToday()));
-    } catch {
+    const request = ++this.request;
+    this.loading.set(true);
+    this.loadError.set(null);
+    this.reconcileError.set('');
+    const [verification, reconciliation] = await Promise.allSettled([
+      this.api.verification(this.asOf()),
+      this.api.reconcile(this.rangeStart(), farmToday()),
+    ]);
+    if (request !== this.request) return;
+    if (verification.status === 'fulfilled') this.v.set(verification.value);
+    else this.loadError.set(String(verification.reason));
+    if (reconciliation.status === 'fulfilled') this.reconciliation.set(reconciliation.value);
+    else {
       this.reconciliation.set(null);
+      this.reconcileError.set(String(reconciliation.reason));
     }
+    this.loading.set(false);
   }
 
   /** The trailing window the gap is reported over. */

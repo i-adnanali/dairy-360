@@ -1,3 +1,6 @@
+import { formatMinor } from './money';
+import type { LabourReportLine } from '@dairy/shared';
+export type { LabourReportLine } from '@dairy/shared';
 // Animal registry -- invariant checks, PURE (decision doc §10).
 //
 // Snapshot in, violations out. No `../db`, no clock, no filesystem, so the same
@@ -1283,19 +1286,11 @@ function checkLabour(s: RegistrySnapshot): Violation[] {
  * that /check can render them differently: a violation says something is wrong,
  * a report line says something is worth a look.
  */
-export interface LabourReportLine {
-  kind:
-    | 'unknown_identifier'
-    | 'overlapping_engagements'
-    | 'multiple_open_engagements'
-    | 'wage_period_outside_engagement'
-    | 'amount_differs_from_term';
-  detail: string;
-}
+
 
 export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLine[] {
   const out: LabourReportLine[] = [];
-  const line = (kind: LabourReportLine['kind'], detail: string) => out.push({ kind, detail });
+  const line = (kind: LabourReportLine['kind'], detail: string, context: NonNullable<LabourReportLine['context']>) => out.push({ kind, detail, context });
 
   const known = new Set(s.people.map((p) => p.identifier.toLowerCase()));
 
@@ -1321,6 +1316,7 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
         'unknown_identifier',
         `'${value}' appears on ${count} record${count === 1 ? '' : 's'} and is not a person on ` +
           `file. Either they should be, or the name is a variant of somebody who already is.`,
+        { kind: 'unknown_identifier', identifier: value, recordCount: count },
       );
     }
   }
@@ -1345,6 +1341,7 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
           'overlapping_engagements',
           `${who} has overlapping stints (${prev.started_on}..${prevEnd ?? 'open'} and ` +
             `${cur.started_on}..${cur.ended_on ?? 'open'}). Legitimate if they hold two roles.`,
+          { kind: 'overlapping_engagements', personId, engagementIds: [prev.id, cur.id] },
         );
       }
     }
@@ -1355,6 +1352,7 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
       line(
         'multiple_open_engagements',
         `${who} has ${open.length} stints open on ${asOf}. A wage period has to name which one.`,
+        { kind: 'multiple_open_engagements', personId, engagementIds: open.map(e => e.id), asOf },
       );
     }
   }
@@ -1378,6 +1376,7 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
         `${who} has a period ${w.from_on}..${w.to_on} outside the stint ` +
           `(${e.started_on}..${e.ended_on ?? 'open'}). A final settlement after leaving looks ` +
           `exactly like this and is legitimate.`,
+        { kind: 'wage_period_outside_engagement', personId: e.person_id, wageId: w.id, engagementId: e.id, fromOn: w.from_on, toOn: w.to_on },
       );
     }
 
@@ -1389,8 +1388,9 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
       if (term !== null && term.cash_minor !== w.amount_minor) {
         line(
           'amount_differs_from_term',
-          `${who} was paid ${w.amount_minor} for ${w.from_on}..${w.to_on} against an agreement ` +
-            `of ${term.cash_minor}. Expected whenever there was leave or an adjustment.`,
+          `${who} has a recorded wage of ${formatMinor(w.amount_minor)} for ${w.from_on}..${w.to_on} against an agreement ` +
+            `of ${formatMinor(term.cash_minor)}. Expected whenever there was leave or an adjustment.`,
+          { kind: 'amount_differs_from_term', personId: e.person_id, wageId: w.id, engagementId: e.id, amountMinor: w.amount_minor, agreementMinor: term.cash_minor, fromOn: w.from_on, toOn: w.to_on },
         );
       }
     }

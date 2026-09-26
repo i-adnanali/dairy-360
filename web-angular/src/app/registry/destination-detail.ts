@@ -1,3 +1,4 @@
+import { ScrollRegion } from '../ui/scroll-region';
 import { effect } from '@angular/core';
 import { writerDraft } from './writer-draft';
 import { WriteLock } from './write-lock';
@@ -53,6 +54,7 @@ import { Button } from '../ui/button';
   selector: 'app-destination-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    ScrollRegion,
     WriteLock,
     LocalPagination,
     Button,
@@ -73,274 +75,325 @@ import { Button } from '../ui/button';
   ],
   template: `
     <div data-page-layout="report">
-    <div class="mx-auto  space-y-6">
-      <a routerLink="/milk/buyers" class="text-sm text-content-muted underline">← all buyers</a>
+      <div class="mx-auto  space-y-6">
+        <a routerLink="/milk/buyers" class="text-sm text-content-muted underline">← all buyers</a>
 
-      @if (loadError(); as e) {
-        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
-      } @else if (statement(); as s) {
-        <header class="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 appPageHeading data-role="name">{{ s.name }}</h2>
-          <div class="text-right">
-            <div appSectionLabel>
-              {{ s.balance_minor < 0 ? 'In credit' : 'Owes' }}
+        @if (loadError(); as e) {
+          <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
+        } @else if (statement(); as s) {
+          <header class="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 appPageHeading data-role="name">{{ s.name }}</h2>
+            <div class="text-right">
+              <div appSectionLabel>
+                {{ s.balance_minor < 0 ? 'In credit' : 'Owes' }}
+              </div>
+              <div
+                class="text-xl font-semibold"
+                [class]="s.balance_minor > 0 ? 'text-content-primary' : 'text-success-fg'"
+                data-role="balance"
+              >
+                {{ balanceText(s) }}
+              </div>
             </div>
-            <div
-              class="text-xl font-semibold"
-              [class]="s.balance_minor > 0 ? 'text-content-primary' : 'text-success-fg'"
-              data-role="balance"
+          </header>
+
+          <p appHelp data-role="totals">
+            {{ s.litres }} L over {{ s.months.length }} month(s) · billed
+            {{ money(s.billed_minor) }} · paid {{ money(s.paid_minor) }}
+          </p>
+
+          @if (unpriced(s) > 0) {
+            <p appHelp data-role="unpriced">
+              {{ unpriced(s) }} taken deliveries have no recorded price. Billed totals and balance
+              cover priced deliveries only.
+            </p>
+          }
+          @if (s.months.length === 0) {
+            <p appCard empty data-role="empty">Nothing recorded for {{ s.name }} yet.</p>
+          }
+
+          @for (m of s.months; track m.month) {
+            <section
+              class="overflow-hidden rounded-xl border border-line bg-surface-raised"
+              [attr.data-month]="m.month"
             >
-              {{ balanceText(s) }}
-            </div>
-          </div>
-        </header>
-
-        <p appHelp data-role="totals">
-          {{ s.litres }} L over {{ s.months.length }} month(s) · billed
-          {{ money(s.billed_minor) }} · paid {{ money(s.paid_minor) }}
-        </p>
-
-        @if (s.months.length === 0) {
-          <p appCard empty data-role="empty">Nothing recorded for {{ s.name }} yet.</p>
-        }
-
-        @for (m of s.months; track m.month) {
-          <section
-            class="overflow-hidden rounded-xl border border-line bg-surface-raised"
-            [attr.data-month]="m.month"
-          >
-            <!-- THE ARTIFACT: one line per month. -->
-            <div
-              class="flex flex-wrap items-baseline justify-between gap-3 border-b border-line-subtle bg-surface-page px-4 py-2 text-sm"
-            >
-              <span class="font-semibold text-content-primary">{{ monthLabel(m.month) }}</span>
-              <span class="text-content-secondary" [attr.data-role]="'summary-' + m.month">
-                {{ m.litres }} L · billed {{ money(m.billed_minor) }} · paid
-                {{ money(m.paid_minor) }}
-                ·
-                <span class="font-medium text-content-primary">
-                  {{
-                    m.closing_minor === 0 ? 'settled' : money(m.closing_minor) + ' carried forward'
-                  }}
+              <!-- THE ARTIFACT: one line per month. -->
+              <div
+                class="flex flex-wrap items-baseline justify-between gap-3 border-b border-line-subtle bg-surface-page px-4 py-2 text-sm"
+              >
+                <span class="font-semibold text-content-primary">{{ monthLabel(m.month) }}</span>
+                <span class="text-content-secondary" [attr.data-role]="'summary-' + m.month">
+                  {{ m.litres }} L · billed {{ money(m.billed_minor) }} · paid
+                  {{ money(m.paid_minor) }}
+                  ·
+                  <span class="font-medium text-content-primary">
+                    {{
+                      m.closing_minor === 0
+                        ? 'settled'
+                        : money(m.closing_minor) + ' carried forward'
+                    }}
+                  </span>
                 </span>
-              </span>
-            </div>
+              </div>
 
-            <!-- THE EVIDENCE: the rows underneath it. -->
-            <app-local-pagination
-              label="Deliveries"
-              #dispatchPages="localPagination"
-              [total]="m.dispatches.length"
-            />
-            <app-local-pagination
-              label="Payments"
-              #paymentPages="localPagination"
-              [total]="m.payments.length"
-            />
-
-            <table class="w-full text-left text-sm">
-              <tbody>
-                @for (d of dispatchPages.rows(m.dispatches); track d.id) {
-                  <tr appRowDivider [attr.data-dispatch]="d.id">
-                    <td appCell tone="secondary">{{ d.occurred_on }} {{ d.session }}</td>
-                    <td appCell tone="secondary">
-                      <!-- "nothing taken" is §6's third state: an answer was
+              <section class="p-4" [attr.aria-label]="'Deliveries — ' + monthLabel(m.month)">
+                <h3 appSectionHeading>Deliveries</h3>
+                <app-local-pagination
+                  [label]="'Deliveries — ' + monthLabel(m.month)"
+                  #dispatchPages="localPagination"
+                  [total]="m.dispatches.length"
+                />
+                <div [appScrollRegion]="'Deliveries — ' + monthLabel(m.month)">
+                  <table class="w-full text-left text-sm">
+                    <thead>
+                      <tr>
+                        <th appCell scope="col">Date / session</th>
+                        <th appCell scope="col">Quantity / reason</th>
+                        <th appCell scope="col">Recorded rate</th>
+                        <th appCell numeric scope="col">Billed</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (d of dispatchPages.rows(m.dispatches); track d.id) {
+                        <tr appRowDivider [attr.data-dispatch]="d.id">
+                          <td appCell nowrap tone="secondary">
+                            {{ d.occurred_on }} {{ d.session }}
+                          </td>
+                          <td appCell tone="secondary">
+                            <!-- "nothing taken" is §6's third state: an answer was
                            given, so it is words and it is italic. -->
-                      <span
-                        [appCertainty]="d.status === 'taken' ? 'known' : 'absent'"
-                        [attr.data-certainty]="d.status === 'taken' ? 'known' : 'absent'"
-                        >{{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}</span
-                      >
-                      @if (d.reason) {
-                        <span class="text-content-subtle">— {{ d.reason }}</span>
-                      }
-                    </td>
-                    <!-- AN EMPTY CELL, WHICH §15 RULE 1 FORBIDS OUTRIGHT:
+                            <span
+                              [appCertainty]="d.status === 'taken' ? 'known' : 'absent'"
+                              [attr.data-certainty]="d.status === 'taken' ? 'known' : 'absent'"
+                              >{{ d.status === 'taken' ? d.litres + ' L' : 'nothing taken' }}</span
+                            >
+                            @if (d.reason) {
+                              <span class="text-content-subtle">— {{ d.reason }}</span>
+                            }
+                          </td>
+                          <!-- AN EMPTY CELL, WHICH §15 RULE 1 FORBIDS OUTRIGHT:
                          "rateText" returned '' for a dispatch with no price, so
                          the rate column simply went blank and a reader could not
                          tell a missing agreement from a rendering fault. It
                          takes the en dash now, which is what §6 reserves for
                          exactly this. -->
-                    <td appCell small tone="muted" [attr.data-role]="'rate-' + d.id">
-                      @if (rateState(d); as st) {
-                        <span [appCertainty]="st" [attr.data-certainty]="st">{{
-                          rateText(d)
-                        }}</span>
-                      } @else {
-                        {{ rateText(d) }}
+                          <td appCell small tone="muted" [attr.data-role]="'rate-' + d.id">
+                            @if (rateState(d); as st) {
+                              <span [appCertainty]="st" [attr.data-certainty]="st">{{
+                                rateText(d)
+                              }}</span>
+                            } @else {
+                              {{ rateText(d) }}
+                            }
+                          </td>
+                          <td appCell numeric tone="heading">
+                            <span
+                              [appCertainty]="amountState(d)"
+                              [attr.data-certainty]="amountState(d)"
+                              >{{ amountText(d) }}</span
+                            >
+                          </td>
+                        </tr>
                       }
-                    </td>
-                    <td appCell numeric tone="heading">
-                      <span
-                        [appCertainty]="amountState(d)"
-                        [attr.data-certainty]="amountState(d)"
-                        >{{ amountText(d) }}</span
-                      >
-                    </td>
-                  </tr>
-                }
-                @for (p of paymentPages.rows(m.payments); track p.id) {
-                  <tr
-                    class="border-t border-line-hairline bg-success-bg/40"
-                    [attr.data-payment]="p.id"
-                  >
-                    <td appCell tone="secondary">{{ p.occurred_on }}</td>
-                    <td appCell tone="secondary">
-                      {{ p.method }}
-                      @if (p.reference) {
-                        <span class="text-content-subtle">· {{ p.reference }}</span>
+                      @if (!m.dispatches.length) {
+                        <tr>
+                          <td appCell colspan="4">No deliveries recorded this month.</td>
+                        </tr>
                       }
-                      @if (p.note) {
-                        <span class="text-content-subtle">— {{ p.note }}</span>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+              <section
+                class="p-4 border-t border-line"
+                [attr.aria-label]="'Payments — ' + monthLabel(m.month)"
+              >
+                <h3 appSectionHeading>Payments</h3>
+                <app-local-pagination
+                  [label]="'Payments — ' + monthLabel(m.month)"
+                  #paymentPages="localPagination"
+                  [total]="m.payments.length"
+                />
+                <div [appScrollRegion]="'Payments — ' + monthLabel(m.month)">
+                  <table class="w-full text-left text-sm">
+                    <thead>
+                      <tr>
+                        <th appCell scope="col">Date</th>
+                        <th appCell scope="col">Method / reference / note</th>
+                        <th appCell numeric scope="col">Payment</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (p of paymentPages.rows(m.payments); track p.id) {
+                        <tr
+                          class="border-t border-line-hairline bg-success-bg/40"
+                          [attr.data-payment]="p.id"
+                        >
+                          <td appCell nowrap tone="secondary">{{ p.occurred_on }}</td>
+                          <td appCell tone="secondary">
+                            {{ p.method }}
+                            @if (p.reference) {
+                              <span class="text-content-subtle">· {{ p.reference }}</span>
+                            }
+                            @if (p.note) {
+                              <span class="text-content-subtle">— {{ p.note }}</span>
+                            }
+                          </td>
+                          <td appCell numeric emphasis tone="success">
+                            −{{ money(p.amount_minor) }}
+                          </td>
+                        </tr>
                       }
-                    </td>
-                    <td appCell></td>
-                    <td appCell numeric emphasis tone="success">−{{ money(p.amount_minor) }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </section>
-        }
+                      @if (!m.payments.length) {
+                        <tr>
+                          <td appCell colspan="3">No payments recorded this month.</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </section>
+          }
 
-        <!-- record a payment ------------------------------------------- -->
-        @if (s.billable) {
-          <form data-page-layout="entry"
-            [appWriteLock]="payState"
-            appCard
-            class="space-y-3"
-            data-role="payment-form"
-            (submit)="submitPayment($event)"
-          >
-            <h3 appSectionHeading>Record a payment</h3>
+          <!-- record a payment ------------------------------------------- -->
+          @if (s.billable) {
+            <form
+              data-page-layout="entry"
+              [appWriteLock]="payState"
+              appCard
+              class="space-y-3"
+              data-role="payment-form"
+              (submit)="submitPayment($event)"
+            >
+              <h3 appSectionHeading>Record a payment</h3>
 
-            <div class="flex flex-wrap items-end gap-3">
-              <label class="block">
-                <span appFieldLabel>Amount (Rs)</span>
-                <input
-                  data-role="pay-amount"
-                  inputmode="decimal"
-                  [value]="amount()"
-                  (input)="amount.set($any($event.target).value)"
-                  appInput
-                  class="w-32"
-                />
-              </label>
-              <label class="block">
-                <span appFieldLabel>On</span>
-                <input
-                  type="date"
-                  data-role="pay-on"
-                  [value]="occurredOn()"
-                  (change)="occurredOn.set($any($event.target).value)"
-                  appInput
-                />
-              </label>
-              <div>
-                <div appFieldLabel inline>How</div>
-                <app-chip-group
-                  name="method"
-                  label="Method"
-                  [options]="methodChips"
-                  [value]="method()"
-                  (changed)="method.set($any($event))"
-                />
+              <div class="flex flex-wrap items-end gap-3">
+                <label class="block">
+                  <span appFieldLabel>Amount (Rs)</span>
+                  <input
+                    data-role="pay-amount"
+                    inputmode="decimal"
+                    [value]="amount()"
+                    (input)="amount.set($any($event.target).value)"
+                    appInput
+                    class="w-32"
+                  />
+                </label>
+                <label class="block">
+                  <span appFieldLabel>On</span>
+                  <input
+                    type="date"
+                    data-role="pay-on"
+                    [value]="occurredOn()"
+                    (change)="occurredOn.set($any($event.target).value)"
+                    appInput
+                  />
+                </label>
+                <div>
+                  <div appFieldLabel inline>How</div>
+                  <app-chip-group
+                    name="method"
+                    label="Method"
+                    [options]="methodChips"
+                    [value]="method()"
+                    (changed)="method.set($any($event))"
+                  />
+                </div>
               </div>
-            </div>
 
-            <label class="block">
-              <span appFieldLabel>
-                Reference {{ method() === 'adjustment' ? '' : '(optional)' }}
-              </span>
-              <input
-                data-role="pay-reference"
-                [value]="reference()"
-                (input)="reference.set($any($event.target).value)"
-                placeholder="cheque no., transfer ref, khata page"
-                appInput
-                class="w-72"
-              />
-            </label>
+              <label class="block">
+                <span appFieldLabel>
+                  Reference {{ method() === 'adjustment' ? '' : '(optional)' }}
+                </span>
+                <input
+                  data-role="pay-reference"
+                  [value]="reference()"
+                  (input)="reference.set($any($event.target).value)"
+                  placeholder="cheque no., transfer ref, khata page"
+                  appInput
+                  class="w-72"
+                />
+              </label>
 
-            @if (method() === 'adjustment') {
-              <!-- An adjustment is a DECISION somebody made rather than money
+              @if (method() === 'adjustment') {
+                <!-- An adjustment is a DECISION somebody made rather than money
                    that changed hands, so the note is required and the sign is
                    allowed. A signed number with no sentence attached cannot be
                    audited a month later. -->
-              <label class="block">
-                <span appFieldLabel>Why (required)</span>
-                <input
-                  data-role="pay-note"
-                  [value]="note()"
-                  (input)="note.set($any($event.target).value)"
-                  placeholder="written off, agreed at settlement…"
-                  appInput
-                  class="w-full"
-                />
-              </label>
-              <div class="flex items-center gap-2 text-xs text-content-secondary">
-                <label class="flex items-center gap-1">
+                <label class="block">
+                  <span appFieldLabel>Why (required)</span>
                   <input
-                    type="checkbox"
-                    data-role="pay-negative"
-                    [checked]="negative()"
-                    (change)="negative.set($any($event.target).checked)"
+                    data-role="pay-note"
+                    [value]="note()"
+                    (input)="note.set($any($event.target).value)"
+                    placeholder="written off, agreed at settlement…"
+                    appInput
+                    class="w-full"
                   />
-                  reduces what they owe
                 </label>
-                <span class="text-content-subtle">
-                  — only an adjustment may be signed; cash and bank are money that arrived.
-                </span>
-              </div>
-            }
-
-            @if (payState.formError(payFields); as e) {
-              <p appErrorPanel data-role="pay-error">{{ e }}</p>
-            }
-
-            @if (session.ready()) {
-              <button
-                type="submit"
-                data-role="pay-submit"
-                [appButtonDisabled]="!canPay()"
-                appButton
-                [busy]="payState.submitting()"
-              >
-                {{ payState.submitting() ? 'Saving…' : 'Record payment' }}
-              </button>
-            } @else {
-              <app-session-required what="a payment" />
-            }
-          </form>
-        }
-
-        <!-- price history ---------------------------------------------- -->
-        @if (s.prices.length > 0) {
-          <section appCard data-role="price-history">
-            <h3 class="mb-2 text-sm font-semibold text-content-primary">Agreed rates</h3>
-            <app-local-pagination
-              label="Rates"
-              #pricePages="localPagination"
-              [total]="s.prices.length"
-            />
-            <ul class="space-y-1 text-sm text-content-secondary">
-              @for (p of pricePages.rows(s.prices); track p.id) {
-                <li>
-                  from {{ p.effective_from }} —
-                  <span class="font-medium">{{ rate(p.price_minor, p.price_unit_litres) }}</span>
-                  @if (p.note) {
-                    <span class="text-content-subtle">· {{ p.note }}</span>
-                  }
-                </li>
+                <div class="flex items-center gap-2 text-xs text-content-secondary">
+                  <label class="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      data-role="pay-negative"
+                      [checked]="negative()"
+                      (change)="negative.set($any($event.target).checked)"
+                    />
+                    reduces what they owe
+                  </label>
+                  <span class="text-content-subtle">
+                    — only an adjustment may be signed; cash and bank are money that arrived.
+                  </span>
+                </div>
               }
-            </ul>
-          </section>
-        }
-      } @else {
-        <p appHelp data-role="loading">Loading…</p>
-      }
-    </div>
 
+              @if (payState.formError(payFields); as e) {
+                <p appErrorPanel data-role="pay-error">{{ e }}</p>
+              }
+
+              @if (session.ready()) {
+                <button
+                  type="submit"
+                  data-role="pay-submit"
+                  [appButtonDisabled]="!canPay()"
+                  appButton
+                  [busy]="payState.submitting()"
+                >
+                  {{ payState.submitting() ? 'Saving…' : 'Record payment' }}
+                </button>
+              } @else {
+                <app-session-required what="a payment" />
+              }
+            </form>
+          }
+
+          <!-- price history ---------------------------------------------- -->
+          @if (s.prices.length > 0) {
+            <section appCard data-role="price-history">
+              <h3 class="mb-2 text-sm font-semibold text-content-primary">Agreed rates</h3>
+              <app-local-pagination
+                label="Rates"
+                #pricePages="localPagination"
+                [total]="s.prices.length"
+              />
+              <ul class="space-y-1 text-sm text-content-secondary">
+                @for (p of pricePages.rows(s.prices); track p.id) {
+                  <li>
+                    from {{ p.effective_from }} —
+                    <span class="font-medium">{{ rate(p.price_minor, p.price_unit_litres) }}</span>
+                    @if (p.note) {
+                      <span class="text-content-subtle">· {{ p.note }}</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        } @else {
+          <p appHelp data-role="loading">Loading…</p>
+        }
+      </div>
     </div>
   `,
 })
@@ -403,6 +456,17 @@ export class DestinationDetail {
     } catch (e) {
       this.loadError.set(e instanceof Error ? e.message : String(e));
     }
+  }
+
+  protected unpriced(s: Statement): number {
+    return s.months.reduce(
+      (count, month) =>
+        count +
+        month.dispatches.filter(
+          (d) => d.status === 'taken' && (d.price_minor === null || d.price_unit_litres === null),
+        ).length,
+      0,
+    );
   }
 
   protected money(minor: number): string {

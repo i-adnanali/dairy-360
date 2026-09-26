@@ -1,3 +1,5 @@
+import type { LabourReportLine } from '@dairy/shared';
+export type { LabourReportLine } from '@dairy/shared';
 // Registry wire types -- mirrors what server/src/registry/routes.ts returns.
 //
 // Hand-mirrored rather than imported from @dairy/shared, because the registry's
@@ -675,15 +677,7 @@ export interface WageBalanceRow {
   last_payment_on: string | null;
 }
 
-export interface LabourReportLine {
-  kind:
-    | 'unknown_identifier'
-    | 'overlapping_engagements'
-    | 'multiple_open_engagements'
-    | 'wage_period_outside_engagement'
-    | 'amount_differs_from_term';
-  detail: string;
-}
+
 
 // ---------------------------------------------------------------------------
 // The day board -- what still needs recording

@@ -64,12 +64,7 @@
 import { Directive, computed, input } from '@angular/core';
 
 /** §6's five states. `no-record` is the one with no token of its own (§4.5). */
-export type CertaintyState =
-  | 'known'
-  | 'approximate'
-  | 'absent'
-  | 'no-record'
-  | 'unanswered';
+export type CertaintyState = 'known' | 'approximate' | 'absent' | 'no-record' | 'unanswered';
 
 /**
  * The five treatments, as written in §6's table -- with ONE STATED DEVIATION.
@@ -114,9 +109,14 @@ const TREATMENT: Record<CertaintyState, string> = {
  */
 @Directive({
   selector: '[appCertainty]',
-  host: { '[class]': 'cls()', '[attr.aria-label]': 'state() === "no-record" ? "No record" : null' },
+  host: {
+    '[class]': 'cls()',
+    '[attr.aria-label]': 'certaintyLabel() ?? (state() === "no-record" ? "No record" : null)',
+  },
 })
 export class Certainty {
+  /** A domain-specific accessible value, e.g. records without measurements. */
+  readonly certaintyLabel = input<string | null>(null);
   readonly state = input.required<CertaintyState>({ alias: 'appCertainty' });
   protected readonly cls = computed(() => TREATMENT[this.state()]);
 }
