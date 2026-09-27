@@ -30,6 +30,9 @@ import type { TurnItem } from './turn-item.type';
  */
 @Injectable({ providedIn: 'root' })
 export class ChatStore {
+  readonly decisions = signal<{ card: PendingWrite; approved: boolean; reason: string }[]>([]);
+  private queuedApprovals: Approval[] = [];
+  private readonly resolvedIds = new Set<string>();
   readonly messages = signal<AnthropicMessage[]>([]);
   readonly renderLog = signal<TurnItem[]>([]);
   readonly pending = signal<PendingWrite[] | null>(null);
@@ -63,8 +66,42 @@ export class ChatStore {
   }
 
   async resolve(approvals: Approval[]): Promise<void> {
+    if (this.loading() || !this.pending()?.length) return;
+    const cards = this.pending()!;
+    const unique = new Map(approvals.map((a) => [a.toolUseId, a]));
+    const accepted = cards.filter(
+      (c) => unique.has(c.toolUseId) && !this.resolvedIds.has(c.toolUseId),
+    );
+    if (!accepted.length) return;
+    approvals = accepted.map((c) => unique.get(c.toolUseId)!);
+    for (const card of accepted) {
+      const approved = unique.get(card.toolUseId)!.approved;
+      this.resolvedIds.add(card.toolUseId);
+      this.decisions.update((rows) => [
+        ...rows,
+        {
+          card,
+          approved,
+          reason: approved
+            ? 'Approved by operator; execution result follows.'
+            : 'Rejected by operator; this operation was not authorized.',
+        },
+      ]);
+    }
     this.error.set(null);
-    this.pending.set(null);
+    const remaining = cards.filter((c) => !this.resolvedIds.has(c.toolUseId));
+    this.pending.set(remaining.length ? remaining : null);
+    this.queuedApprovals.push(...approvals);
+    // The server re-proposes the batch unless every tool ID has a decision.
+    if (remaining.length) return;
+    approvals = this.queuedApprovals;
+    for (const approval of approvals)
+      this.patchToolCall(approval.toolUseId, (c) => ({
+        ...c,
+        status: approval.approved ? 'running' : 'error',
+        reason: approval.approved ? undefined : 'Rejected by operator; operation not authorized.',
+      }));
+    this.queuedApprovals = [];
     // Resume with a fresh run: resend the unchanged history + approval decisions.
     await this.runAgent(this.messages(), approvals);
   }
@@ -86,6 +123,32 @@ export class ChatStore {
         this.error.set(e instanceof Error ? e.message : 'Something went wrong.');
       }
     } finally {
+      if (this.error()) {
+        this.renderLog.update((log) =>
+          log.map((item) =>
+            item.role === 'assistant'
+              ? {
+                  ...item,
+                  toolCalls: item.toolCalls.map((c) =>
+                    c.status === 'running'
+                      ? {
+                          ...c,
+                          status: 'error' as const,
+                          reason: 'Execution outcome is unknown. ' + this.error(),
+                        }
+                      : c,
+                  ),
+                }
+              : item,
+          ),
+        );
+        if (approvals?.some((a) => a.approved))
+          this.error.update(
+            (e) =>
+              e +
+              ' Execution may have occurred. Check records before proposing another write; approval will not be retried automatically.',
+          );
+      }
       this.loading.set(false);
     }
   }
@@ -145,7 +208,14 @@ export class ChatStore {
             if (Array.isArray(value)) this.messages.set(value as AnthropicMessage[]);
             break;
           case AGENT_PENDING_EVENT:
-            if (Array.isArray(value)) this.pending.set(value as PendingWrite[]);
+            if (Array.isArray(value)) {
+              const pending = (value as PendingWrite[]).filter(
+                (c) => !this.resolvedIds.has(c.toolUseId),
+              );
+              this.pending.set(pending.length ? pending : null);
+              for (const card of pending)
+                this.patchToolCall(card.toolUseId, (c) => ({ ...c, status: 'pending' }));
+            }
             break;
           case AGENT_SELECTION_EVENT:
             if (typeof value === 'string') {
@@ -200,7 +270,7 @@ export class ChatStore {
   private addToolCall(toolCallId: string, name: string): void {
     this.ensureAssistant();
     this.toolNames.set(toolCallId, name);
-    const call: ToolCallView = { toolUseId: toolCallId, name, status: 'done', argSummary: name };
+    const call: ToolCallView = { toolUseId: toolCallId, name, status: 'running', argSummary: name };
     this.updateCurrent((a) => ({ ...a, toolCalls: [...a.toolCalls, call] }));
   }
 
@@ -218,13 +288,18 @@ export class ChatStore {
 
   private markToolResult(toolCallId: string, content: string): void {
     let errored = false;
+    let reason: string | undefined;
     try {
       const parsed = content ? (JSON.parse(content) as Record<string, unknown>) : {};
-      errored = typeof parsed['error'] === 'string';
+      errored = typeof parsed['error'] === 'string' || parsed['declined'] === true;
+      if (errored)
+        reason =
+          [parsed['error'], parsed['message']].filter((v) => typeof v === 'string').join(': ') ||
+          'Operation declined.';
     } catch {
       /* non-JSON result - treat as success */
     }
-    if (errored) this.patchToolCall(toolCallId, (c) => ({ ...c, status: 'error' }));
+    this.patchToolCall(toolCallId, (c) => ({ ...c, status: errored ? 'error' : 'done', reason }));
   }
 
   /** Patch a tool-call chip anywhere in the log (results may land in a later

@@ -42,52 +42,39 @@ describe('AssistantPanel — §13.1', () => {
     expect(p.dim()).toBeNull();
   });
 
-  it('is 320px, docked right, and OVERLAYS rather than pushes', () => {
+  it('uses a named nonmodal region with no backdrop at desktop', () => {
     const p = render();
+    p.assistant.narrow.set(false);
     p.open();
-    const cls = p.panel()!.className;
-    expect(cls).toContain('w-80'); // 320px
-    expect(cls).toContain('right-0');
-    // `absolute` is the whole of "overlay, not push": a flex sibling of <main>
-    // would take the 320px off the content and reflow every table mid-sitting.
-    expect(cls).toContain('absolute');
+    expect(p.panel()!.getAttribute('role')).toBe('complementary');
+    expect(p.panel()!.hasAttribute('aria-modal')).toBe(false);
+    expect(p.fixture.nativeElement.id).toBe('assistant-panel');
+    expect(p.dim()).toBeNull();
   });
-
-  it('takes the full content area below 1100px, the app ONE breakpoint', () => {
+  it('changes modal semantics without replacing the panel and closes on Escape', () => {
     const p = render();
     p.open();
-    // §13.1: "This is the app's only breakpoint, and it exists because 320px
-    // plus a 1400px table does not fit a 1280px laptop." Written as an
-    // arbitrary variant rather than a named screen in tailwind.config.js -- see
-    // the component header for why that is deliberate.
-    expect(p.panel()!.className).toContain('max-[1100px]:w-full');
-    expect(p.dim()!.className).toContain('max-[1100px]:hidden');
-  });
-
-  it('dims the content WITHOUT taking its clicks', () => {
-    const p = render();
-    p.open();
-    const cls = p.dim()!.className;
-    // The line between a consultation and a modal. §13.4's case is reading a
-    // figure off the table while asking about it, so the table stays clickable,
-    // scrollable and selectable.
-    expect(cls).toContain('pointer-events-none');
-    // One step, not a blackout, and not a black scrim: the page's own ground at
-    // 60% recedes the content without making it unreadable.
-    expect(cls).toContain('bg-surface-page/60');
-    expect(p.dim()!.getAttribute('aria-hidden')).toBe('true');
-  });
-
-  it('closes from its own button, and PRINTS the chord', () => {
-    const p = render();
-    p.open();
-    // "A shortcut nobody can see is a shortcut nobody uses" -- the lesson
-    // milking-roster.ts records for its m/n accelerators, applied here.
-    expect(p.close()!.textContent).toMatch(/⌘\/|Ctrl\+\//);
-    p.close()!.click();
+    const panel = p.panel();
+    p.assistant.narrow.set(true);
     p.fixture.detectChanges();
-    expect(p.assistant.open()).toBe(false);
+    expect(p.panel()).toBe(panel);
+    expect(panel!.getAttribute('aria-modal')).toBe('true');
+    expect(panel!.getAttribute('role')).toBe('dialog');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    p.fixture.detectChanges();
     expect(p.panel()).toBeNull();
+  });
+  it('leaves Escape to a nested confirmation', () => {
+    const p = render();
+    p.open();
+    const nested = document.createElement('div');
+    nested.setAttribute('aria-modal', 'true');
+    document.body.append(nested);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(p.assistant.open()).toBe(true);
+    nested.remove();
+    p.close()!.click();
+    expect(p.assistant.open()).toBe(false);
   });
 });
 
@@ -98,7 +85,11 @@ describe('Assistant — state and the context line', () => {
   }
 
   it('starts closed', () => {
-    try { sessionStorage.clear(); } catch { /* blocked storage */ }
+    try {
+      sessionStorage.clear();
+    } catch {
+      /* blocked storage */
+    }
     expect(service().open()).toBe(false);
   });
 
@@ -128,7 +119,9 @@ describe('Assistant — state and the context line', () => {
     const real = Object.getOwnPropertyDescriptor(window, 'sessionStorage');
     Object.defineProperty(window, 'sessionStorage', {
       configurable: true,
-      get() { throw new Error('blocked'); },
+      get() {
+        throw new Error('blocked');
+      },
     });
     try {
       const a = service();

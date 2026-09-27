@@ -875,11 +875,7 @@ relevant wherever two colour utilities can coexist.
 Two sets of rules are invisible to the fourteen-screen baseline, so they must be
 verified deliberately or not at all:
 
-- **`border-line-subtle/60`** on `confirmation-card` renders only while an agent
-  write is pending approval. One of the three named opacity regression tests is
-  therefore unobservable by screenshot; check it in the compiled CSS instead.
-- **Every `.prose-chat` rule.** No fixture produces an assistant reply. §10.5 is
-  the recipe.
+- **Assistant confirmation and markdown states:** B5 now supplies a database-free AG-UI fixture and browser captures for pending/approved/rejected decisions, rich markdown and charts. See [B5 evidence](implementation/b5-evidence/README.md); the phase-5 baseline limitation is historical.
 
 ### 8.3 The backtick guard could not fire, and now can
 
@@ -986,10 +982,7 @@ panel §13.1 makes default-closed: the operator who never opens the assistant
 never downloads a charting library. Back to 555.12 kB, so the panel costs
 13.14 kB.
 
-**The `/chat` route is kept.** §13 does not ask for its removal, it is the deep
-link, and below 1100px the panel is the full content area anyway — which is the
-same thing the route renders. `ChatPanel` is mounted in two places and the
-context line is absent on the route, because there the route IS the assistant.
+**The `/chat` route is kept.** B5 now gives the route and dock one active session view/composer; §13 describes the current responsive contract. The route has no contextual reading line.
 
 **§12.6's shortcut registry was built here rather than deferred**, because §12.6
 is explicit that the first global key handler is the one that has to establish
@@ -1486,57 +1479,28 @@ Linux is worse than showing nothing.
 
 ---
 
-## 13. The assistant panel — built in phase 6b
+## 13. Dairy 360 assistant — B5
 
-Built, `d9c0057`, except §13.4. §9.2 moved the route and fixed the height; this
-is what it became.
+B5 supersedes phase 6b's overlay, dim, 320px width and 1100px breakpoint. See [B5 progress](implementation/B5-PROGRESS.md) and [reproducible synthetic evidence](implementation/b5-evidence/README.md). The historical phase sections retain their dated measurements; they are not the current assistant geometry contract.
 
-Three files:
-[core/assistant.ts](../web-angular/src/app/core/assistant.ts) for the state and
-§13.2's phrasing,
-[components/assistant-panel.ts](../web-angular/src/app/components/assistant-panel.ts)
-for the geometry, and
-[core/shortcuts.ts](../web-angular/src/app/core/shortcuts.ts) for §12.6's one
-owner. The shell gained a positioning context around `<main>` and the toggle.
+### 13.1 Geometry, focus and ownership
 
-### 13.1 Geometry
+- At widths ≥1280px, the shell content grid reserves **360px** for a nonmodal complementary panel. Main remains usable; there is no backdrop or dim.
+- Below 1280px, the same panel becomes a fixed full-viewport dialog (`100dvh`), with a visible Dairy 360 assistant title and Close action, `aria-modal`, inert shell header/context/session/main content, and a CDK focus trap.
+- The trigger always controls the stable `assistant-panel` host ID and reports its expanded state. Opening focuses the composer, including when it is read-only while busy; closing restores the trigger. Escape closes the assistant unless another modal owns it. A palette or confirmation above the assistant suspends its trap and makes the panel inert; closing that layer restores safe focus. Search cannot open from within the narrow modal.
+- Breakpoint changes reuse the existing panel/composer tree. Entering modal mode moves focus inside; returning to desktop keeps safe in-panel focus. Conversation and unsent text are root-service memory state. Closing/reopening and switching between `/chat` and the dock retain the draft; reload/crash does not.
+- `/chat` retains shell navigation, theme and recording-session controls. While the dock is open its standalone chat content yields to the dock, so only one session view and composer is active. The deferred panel keeps markdown/chart libraries lazy.
+- Open/closed posture remains sessionStorage-backed, default closed. This preference does not persist conversation, draft or provenance. Blocked storage is tolerated.
 
-- 320px, docked right, **overlaying** the content rather than pushing it, with
-  the content beneath dimmed one step.
-- Default closed. State persisted per session, not per route.
-- Toggled from the header (§12.1) and by `Cmd/Ctrl+/`.
-- Below 1100px viewport width it takes the full content area. This is the app's
-  only breakpoint, and it exists because 320px plus a 1400px table does not fit a
-  1280px laptop.
+### 13.1a Messages, tools and approval
 
-**Overlay, not push.** Pushing reflows every table mid-sitting, and a
-transcription surface should not move under the person using it. The assistant is
-a consultation.
+Composer is named **Message to Dairy 360 assistant**, uses appInput, and shows its keyboard/busy explanation. Enter sends, Shift+Enter inserts a newline, and IME composition does not submit. Send is guarded while running or awaiting decisions. Streaming announcements describe state transitions instead of every token. Auto-scroll follows the tail only while the reader is already near it.
 
-**As built**, three details the spec did not settle:
+Sanitized markdown, long tool arguments and confirmation details wrap or scroll within labelled regions; overflowing regions are keyboard reachable. Chart cards use shared Card/Button/Cell and provide Show data with the exact period, total litres and average per animal values, including zero; empty data says No data returned. Canvas is supplementary to this equivalent semantic table.
 
-- The panel is absolute against the **content region**, not the viewport. A new
-  `relative flex min-h-0 flex-1` wrapper holds `<main>` and the panel, which is
-  what keeps the storage banner, the session bar and the nav visible beneath it
-  — the three things §12.2 and §12.3 argue must never be covered. `min-h-0` goes
-  on the wrapper and not on `<main>`, for the reason §9.2 works out in reverse:
-  `<main>` does not need it because its own `overflow-y-auto` zeroes its
-  automatic minimum size, but the wrapper does not scroll.
-- **The dim carries `pointer-events-none`**, and that is the line between a
-  consultation and a modal. §13.4's case is reading a figure off the table while
-  asking about it, so the content stays clickable, scrollable and selectable.
-  One step and not a blackout: `surface-page` at 60%. §16 still holds whether
-  the dim is right at all as undecided.
-- The 1100px breakpoint is written as `max-[1100px]:`, not as a named screen in
-  `tailwind.config.js`. A named breakpoint is an invitation — the moment
-  `assistant:` exists in the config the next person reaches for it, and the app
-  has a responsive system it never decided to have.
+Tool states explicitly say Running, Awaiting approval, Success or Error. Failure/decline reasons remain visible. Pending confirmations name the operation and target with the original server-provided details/rows. Both Approve and Reject use shared actions and resolve once. Individual decisions are accumulated until every pending card has a decision; one resume carries that complete decision set and unchanged history. Resolved cards remain visible with operator decisions. Approval means permission, not proof of execution; tool results remain separate. A failed/uncertain resume retains the decision and warns that execution may have occurred. There is no automatic approval retry or replay; another proposal requires explicit approval.
 
-`sessionStorage`, not `localStorage`, for "persisted per session". §4.7 draws the
-rule for the theme — a remembered theme cannot mis-attribute a record — and this
-clears it too, but the panel is a working posture rather than a preference and
-somebody who closed it on Tuesday has said nothing about Wednesday. Every access
-is wrapped: blocked site data throws rather than returning null.
+The existing server human-approval boundary, domain execution and recording-session contracts are unchanged. Synthetic fixture transport has no database, upstream service or write executors and is never imported into the production app.
 
 ### 13.2 Context
 
@@ -1721,11 +1685,7 @@ from what the app already does:
 - **Whether `--border-selected` and `--fill-brand` should diverge in value.** They
   are separate names holding one value specifically so phase 7 *can* move one.
   Phase 7 has not decided whether to.
-- **Whether the assistant panel's dim is right at all.** Dimming a table you are
-  transcribing from is a cost; the alternative is no visual separation between an
-  overlay and the content beneath it. It is built as specified and
-  `pointer-events-none`, so the content stays usable while it is dimmed — which
-  narrows the question to whether the dim helps, rather than whether it blocks.
+- **Assistant dim decision resolved by B5 (§13):** no dim or backdrop on the desktop grid dock; narrow mode is fully modal.
 - ~~Whether `/chat` should survive.~~ **Resolved:** retain it as a deep link;
   the header panel is the normal entry point.
 
@@ -1816,3 +1776,7 @@ Life report is a reading document with focused contents anchors/counts and expli
 Check separates violations, coverage and advisories. Shared `LabourReportLine` retains `kind`/`detail` and optionally supplies a kind-discriminated context. People links come only from structured IDs; unknown/missing metadata falls back to original detail with a discoverable code. Wage amounts use the existing minor-unit formatter once and are described as recorded wages, not payments. Loading/failure cannot look clean; empty results are scoped to the check/date and reconciliation failures are shown. Validators and classifications are unchanged.
 
 All B1–B3 draft/write/date, protected-form, responsive-entry, provenance and Health contracts remain. Held borders and write-log prominence are unchanged. Native assistive-device/phone/zoom, actual print/PDF/download, representative operator and live assistant acceptance remain explicitly unverified.
+
+## 21. Batch B5 — assistant consistency, 2026-09-27
+
+Current assistant behavior is specified in §13; it supersedes phase 6b's historical overlay and dual-view behavior. [B5 progress and evidence](implementation/B5-PROGRESS.md) record 450 frontend tests, 779 server tests, both-theme responsive/keyboard checks and the isolated AG-UI fixture. Shared ScrollRegion also responds to streamed child replacement so new wide tables gain a local keyboard scroll stop. The six held borders remain unchanged; meaningful composer text no longer uses the disabled-text exemption. B1–B4 domain/draft/write contracts are preserved. B6 and the carried-forward native output, operator, assistive-device, phone, zoom and live-assistant limits remain outstanding.

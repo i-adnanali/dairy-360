@@ -53,6 +53,8 @@ describe('ConfirmationCard', () => {
     reject.click();
 
     expect(emitted[0]).toEqual([{ toolUseId: 'w1', approved: true }]);
-    expect(emitted[1]).toEqual([{ toolUseId: 'w1', approved: false }]);
+    expect(emitted).toHaveLength(1);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('approved');
   });
 });

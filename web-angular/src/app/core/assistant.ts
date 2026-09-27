@@ -44,6 +44,11 @@ function read(): boolean {
 export class Assistant {
   /** §13.1: default closed. */
   readonly open = signal(read());
+  readonly narrow = signal(
+    typeof matchMedia === 'function' ? matchMedia('(max-width: 1279px)').matches : false,
+  );
+  readonly modal = computed(() => this.open() && this.narrow());
+  readonly draft = signal('');
 
   /**
    * The route the panel is reading, as §13.2's context line.

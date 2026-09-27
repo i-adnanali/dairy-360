@@ -30,7 +30,15 @@ export class ScrollRegion implements AfterViewInit {
     const observer = new ResizeObserver(measure);
     observer.observe(this.el);
     for (const child of this.el.children) observer.observe(child);
-    this.destroy.onDestroy(() => observer.disconnect());
+    // Streaming markdown can replace children without resizing the region.
+    const mutations = new MutationObserver(() => {
+      observer.disconnect();
+      observer.observe(this.el);
+      for (const child of this.el.children) observer.observe(child);
+      measure();
+    });
+    mutations.observe(this.el, { childList: true, subtree: true, characterData: true });
+    this.destroy.onDestroy(() => { observer.disconnect(); mutations.disconnect(); });
     measure();
   }
 }

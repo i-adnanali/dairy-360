@@ -293,12 +293,12 @@ console.log(`TEXT pairs passing AA but under AAA (7:1): ${aaa.length}`);
 
 const held = new Set(['light|border-default|surface-page', 'light|border-default|surface-raised', 'light|border-default|surface-sunken', 'dark|border-default|surface-page', 'dark|border-default|surface-raised', 'dark|border-default|surface-sunken']);
 const unexpected = failures.filter(x => !held.has(`${x.mode}|${x.fg}|${x.bg}`));
-const disabledConsumers = new Set(['ui/button.ts', 'components/composer.ts', 'registry/calf-picker.ts', 'registry/precision-date.ts']);
+const disabledConsumers = new Set(['ui/button.ts', 'registry/calf-picker.ts', 'registry/precision-date.ts']);
 const invalidUses = walk(APP).filter(file => {
   const source = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
   return source.includes('text-content-disabled') && !disabledConsumers.has(relative(APP, file));
 });
 console.log(`Held resting-border failures: ${failures.length - unexpected.length}; unexpected failures: ${unexpected.length}`);
-console.log('Disabled text census: Button inactive actions, Composer disabled input, CalfPicker ineligible disabled options, PrecisionDate disabled estimated checkbox.');
+console.log('Disabled text census: Button inactive actions, CalfPicker ineligible disabled options, PrecisionDate disabled estimated checkbox.');
 if (invalidUses.length) console.error('Unreviewed disabled-text consumers:', invalidUses);
 process.exit(unexpected.length || invalidUses.length ? 1 : 0);

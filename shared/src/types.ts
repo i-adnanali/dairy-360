@@ -170,7 +170,8 @@ export type Dataset = {
 export type ToolCallView = {
   toolUseId: string;
   name: string;
-  status: 'done' | 'error';
+  status: 'running' | 'pending' | 'done' | 'error';
+  reason?: string;
   argSummary: string;
 };
 

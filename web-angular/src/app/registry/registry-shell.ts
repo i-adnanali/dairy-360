@@ -51,7 +51,10 @@ import { TextLink } from '../ui/text';
   ],
   template: `
     <div class="flex h-full flex-col bg-surface-page text-content-primary">
-      <header class="border-b border-line-subtle bg-surface-raised px-4">
+      <header
+        [inert]="assistant.modal()"
+        class="border-b border-line-subtle bg-surface-raised px-4"
+      >
         <div class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 py-3">
           <div class="flex flex-wrap items-center gap-3">
             <h1 class="text-base font-semibold tracking-tight">Dairy 360</h1>
@@ -71,7 +74,7 @@ import { TextLink } from '../ui/text';
               aria-controls="assistant-panel"
               data-role="assistant-toggle"
             >
-              Assistant
+              Dairy 360 assistant
             </button>
           </div>
         </div>
@@ -98,7 +101,11 @@ import { TextLink } from '../ui/text';
         activeSection().label === 'Today' ||
         activeSection().label === 'Check'
       ) {
-        <div class="border-b border-line-subtle bg-surface-sunken px-4" data-role="section-bar">
+        <div
+          [inert]="assistant.modal()"
+          class="border-b border-line-subtle bg-surface-sunken px-4"
+          data-role="section-bar"
+        >
           <div
             class="mx-auto flex min-h-12 max-w-[1400px] flex-wrap items-center justify-between gap-3 py-2"
           >
@@ -187,6 +194,7 @@ import { TextLink } from '../ui/text';
       @if (session.setupOpen() && (session.ready() || !writeOnlyRoute())) {
         <div
           class="max-h-[70vh] overflow-y-auto border-b border-line-subtle bg-surface-raised"
+          [inert]="assistant.modal()"
           data-role="session-setup"
         >
           <button type="button" class="m-3 text-sm underline" (click)="session.dismissSetup()">
@@ -196,24 +204,9 @@ import { TextLink } from '../ui/text';
         </div>
       }
 
-      <!-- ---------------------------------------------------------------
-           THE CONTENT REGION IS NOW A POSITIONING CONTEXT. Phase 6b, §13.1.
-           ---------------------------------------------------------------
-           The assistant panel OVERLAYS the content rather than pushing it, so
-           it needs an ancestor to be absolute against -- and that ancestor has
-           to be the content region and not the viewport, or the panel would
-           cover the header, the nav and the storage banner. Those are the three
-           things §12.2 and §12.3 argue must be permanently visible.
-
-           "relative flex-1" takes over the flex-item role <main> used to have,
-           and "min-h-0" is here rather than on <main> for the same reason §9.2
-           works out: <main> does not need it because its own "overflow-y-auto"
-           zeroes its automatic minimum size, but THIS div does not scroll, so
-           without it the region holds itself open at content height and the
-           panel's "inset-y-0" resolves against a box taller than the viewport.
-           --------------------------------------------------------------- -->
-      <div class="relative flex min-h-0 flex-1 flex-col">
-        <main class="phase7-content flex-1 overflow-y-auto px-4 py-6">
+      <!-- B5: reserve the nonmodal desktop dock in the content grid. -->
+      <div class="assistant-layout min-h-0 flex-1" [class.has-assistant]="assistant.open()">
+        <main [inert]="assistant.modal()" class="phase7-content flex-1 overflow-y-auto px-4 py-6">
           @if (writeOnlyRoute() && !session.ready()) {
             <app-session-gate />
           } @else {
@@ -319,6 +312,7 @@ export class RegistryShell {
   private headingObserver?: MutationObserver;
   private focusPageHeading(): void {
     this.headingObserver?.disconnect();
+    if (this.assistant.modal()) return;
     const main = document.querySelector('main');
     if (!main) return;
     const focus = () => {

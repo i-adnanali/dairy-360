@@ -1,0 +1,1822 @@
+[
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 40,
+      "right": 246.21875,
+      "top": 916,
+      "width": 206.21875,
+      "x": 40,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 40,
+      "right": 276.21875,
+      "top": 916,
+      "width": 236.21875,
+      "x": 40,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 65.34375,
+      "right": 628.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 65.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 193.34375,
+      "right": 756.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 193.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 320.84375,
+      "right": 884.375,
+      "top": 916,
+      "width": 563.53125,
+      "x": 320.84375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 321.34375,
+      "right": 884.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 321.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 401.34375,
+      "right": 964.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 401.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 262.21875,
+      "top": 940,
+      "width": 238.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 360
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 292.21875,
+      "top": 940,
+      "width": 268.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 390
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 670.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 768
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 152,
+      "right": 798.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 152,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1024
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 279.5,
+      "right": 925.71875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 279.5,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1279
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 945,
+      "right": 1182.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 945,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 1105,
+      "right": 1342.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 1105,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "light",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 262.21875,
+      "top": 940,
+      "width": 238.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": null,
+      "role": "complementary",
+      "top": 0,
+      "width": 360
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 292.21875,
+      "top": 940,
+      "width": 268.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 390
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 670.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 768
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 152,
+      "right": 798.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 152,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1024
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 279.5,
+      "right": 925.71875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 279.5,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1279
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 945,
+      "right": 1182.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 945,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 1105,
+      "right": 1342.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 1105,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 40,
+      "right": 246.21875,
+      "top": 916,
+      "width": 206.21875,
+      "x": 40,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 40,
+      "right": 276.21875,
+      "top": 916,
+      "width": 236.21875,
+      "x": 40,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 65.34375,
+      "right": 628.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 65.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 193.34375,
+      "right": 756.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 193.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 320.84375,
+      "right": 884.375,
+      "top": 916,
+      "width": 563.53125,
+      "x": 320.84375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 321.34375,
+      "right": 884.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 321.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 44,
+      "left": 401.34375,
+      "right": 964.875,
+      "top": 916,
+      "width": 563.53125,
+      "x": 401.34375,
+      "y": 916
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [],
+    "state": "empty",
+    "theme": "dark",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 40,
+      "right": 246.21875,
+      "top": 595.5,
+      "width": 206.21875,
+      "x": 40,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 296,
+        "name": "Assistant message",
+        "scroll": 296,
+        "tabindex": null
+      },
+      {
+        "client": 262,
+        "name": "Assistant chart data",
+        "scroll": 262,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 40,
+      "right": 276.21875,
+      "top": 595.5,
+      "width": 236.21875,
+      "x": 40,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 326,
+        "name": "Assistant message",
+        "scroll": 326,
+        "tabindex": null
+      },
+      {
+        "client": 292,
+        "name": "Assistant chart data",
+        "scroll": 292,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 65.34375,
+      "right": 628.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 65.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 193.34375,
+      "right": 756.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 193.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 320.84375,
+      "right": 884.375,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 320.84375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 321.34375,
+      "right": 884.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 321.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 401.34375,
+      "right": 964.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 401.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 262.21875,
+      "top": 940,
+      "width": 238.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 328,
+        "name": "Assistant message",
+        "scroll": 328,
+        "tabindex": null
+      },
+      {
+        "client": 294,
+        "name": "Assistant chart data",
+        "scroll": 294,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 292.21875,
+      "top": 940,
+      "width": 268.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 390
+    },
+    "regions": [
+      {
+        "client": 358,
+        "name": "Assistant message",
+        "scroll": 358,
+        "tabindex": null
+      },
+      {
+        "client": 324,
+        "name": "Assistant chart data",
+        "scroll": 324,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 670.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 768
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 736,
+        "tabindex": null
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 152,
+      "right": 798.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 152,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1024
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 736,
+        "tabindex": null
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 279.5,
+      "right": 925.71875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 279.5,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1279
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 736,
+        "tabindex": null
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 945,
+      "right": 1182.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 945,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 327,
+        "tabindex": null
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 1105,
+      "right": 1342.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 1105,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 327,
+        "tabindex": null
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "dark",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 262.21875,
+      "top": 940,
+      "width": 238.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 328,
+        "name": "Assistant message",
+        "scroll": 328,
+        "tabindex": null
+      },
+      {
+        "client": 294,
+        "name": "Assistant chart data",
+        "scroll": 294,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 292.21875,
+      "top": 940,
+      "width": 268.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 390
+    },
+    "regions": [
+      {
+        "client": 358,
+        "name": "Assistant message",
+        "scroll": 358,
+        "tabindex": null
+      },
+      {
+        "client": 324,
+        "name": "Assistant chart data",
+        "scroll": 324,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 24,
+      "right": 670.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 24,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 768
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 736,
+        "tabindex": null
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 152,
+      "right": 798.21875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 152,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1024
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 736,
+        "tabindex": null
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 279.5,
+      "right": 925.71875,
+      "top": 940,
+      "width": 646.21875,
+      "x": 279.5,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1279
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 736,
+        "tabindex": null
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 945,
+      "right": 1182.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 945,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 327,
+        "tabindex": null
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 44,
+      "left": 1105,
+      "right": 1342.21875,
+      "top": 940,
+      "width": 237.21875,
+      "x": 1105,
+      "y": 940
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "preserved B5 draft",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 327,
+        "tabindex": null
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 40,
+      "right": 246.21875,
+      "top": 595.5,
+      "width": 206.21875,
+      "x": 40,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "preserved B5 draft",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 296,
+        "name": "Assistant message",
+        "scroll": 296,
+        "tabindex": null
+      },
+      {
+        "client": 262,
+        "name": "Assistant chart data",
+        "scroll": 262,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 40,
+      "right": 276.21875,
+      "top": 595.5,
+      "width": 236.21875,
+      "x": 40,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "preserved B5 draft",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 326,
+        "name": "Assistant message",
+        "scroll": 326,
+        "tabindex": null
+      },
+      {
+        "client": 292,
+        "name": "Assistant chart data",
+        "scroll": 292,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 65.34375,
+      "right": 628.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 65.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "preserved B5 draft",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 193.34375,
+      "right": 756.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 193.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "preserved B5 draft",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 320.84375,
+      "right": 884.375,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 320.84375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "preserved B5 draft",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 321.34375,
+      "right": 884.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 321.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "preserved B5 draft",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 639.5,
+      "height": 44,
+      "left": 401.34375,
+      "right": 964.875,
+      "top": 595.5,
+      "width": 563.53125,
+      "x": 401.34375,
+      "y": 595.5
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "preserved B5 draft",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 653,
+        "tabindex": null
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "long-tools-chart-data",
+    "theme": "light",
+    "viewport": 1440,
+    "width": 1440
+  }
+]

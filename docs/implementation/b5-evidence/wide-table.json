@@ -1,0 +1,36 @@
+{
+  "backgroundInert": true,
+  "composerRect": {
+    "bottom": 828,
+    "height": 58,
+    "left": 24,
+    "right": 292.21875,
+    "top": 770,
+    "width": 268.21875,
+    "x": 24,
+    "y": 770
+  },
+  "composers": 1,
+  "document": 390,
+  "draft": "",
+  "mode": "dock",
+  "panel": {
+    "height": 844,
+    "modal": "true",
+    "role": "dialog",
+    "top": 0,
+    "width": 390
+  },
+  "regions": [
+    {
+      "client": 358,
+      "name": "Assistant message",
+      "scroll": 1120,
+      "tabindex": "0"
+    }
+  ],
+  "state": "wide-table",
+  "theme": "light",
+  "viewport": 390,
+  "width": 390
+}

@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { RegistryApi } from './api';
 import { Session } from './session';
 import { SECTIONS, ShellActions } from './navigation';
+import { Assistant } from '../core/assistant';
 import { Shortcuts } from '../core/shortcuts';
 import { TextInput } from '../ui/input';
 
@@ -166,7 +167,9 @@ export class CommandPalette {
       this.generation++;
     });
   }
+  private readonly assistant = inject(Assistant);
   async show(): Promise<void> {
+    if (this.assistant.modal()) return;
     this.query.set('');
     this.index.set(0);
     this.records.set([]);

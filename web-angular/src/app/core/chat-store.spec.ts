@@ -133,7 +133,9 @@ describe('ChatStore', () => {
   });
 
   it('resolve() clears pending and resumes with history + approvals', async () => {
-    const historyAfterInterrupt: AnthropicMessage[] = [{ role: 'assistant', content: 'need approval' }];
+    const historyAfterInterrupt: AnthropicMessage[] = [
+      { role: 'assistant', content: 'need approval' },
+    ];
     scripts = [
       [
         ev('RUN_STARTED', { threadId: 't', runId: 'r1' }),
@@ -248,5 +250,71 @@ describe('ChatStore', () => {
     expect(warned.some((m) => m.includes('dairy.messages'))).toBe(true);
     expect(warned.some((m) => m.includes('totally.unknown'))).toBe(true);
     expect(warned.some((m) => m.includes('agent.selection'))).toBe(false);
+  });
+});
+
+describe('B5 approval boundary', () => {
+  afterEach(() => vi.restoreAllMocks());
+  it('collects every decision before one resume; duplicate or unknown approvals do nothing', async () => {
+    const run = vi.spyOn(HttpAgent.prototype, 'runAgent').mockResolvedValue({} as never);
+    const store = TestBed.inject(ChatStore);
+    store.pending.set(
+      ['a', 'b'].map((toolUseId) => ({
+        toolUseId,
+        toolName: 'write',
+        summary: 'Synthetic target',
+        details: [],
+      })),
+    );
+    await store.resolve([{ toolUseId: 'unknown', approved: true }]);
+    await store.resolve([{ toolUseId: 'a', approved: true }]);
+    expect(run).not.toHaveBeenCalled();
+    expect(store.pending()?.map((c) => c.toolUseId)).toEqual(['b']);
+    await store.resolve([{ toolUseId: 'a', approved: false }]);
+    await store.resolve([{ toolUseId: 'b', approved: false }]);
+    await store.resolve([{ toolUseId: 'b', approved: true }]);
+    expect(run).toHaveBeenCalledTimes(1);
+    expect((run.mock.calls[0][0] as RunParams).forwardedProps?.approvals).toEqual([
+      { toolUseId: 'a', approved: true },
+      { toolUseId: 'b', approved: false },
+    ]);
+    expect(store.decisions().map((d) => d.approved)).toEqual([true, false]);
+  });
+  it('retains the decision and unknown outcome after failed approval; never replays it', async () => {
+    const run = vi
+      .spyOn(HttpAgent.prototype, 'runAgent')
+      .mockRejectedValue(new Error('connection lost'));
+    const store = TestBed.inject(ChatStore);
+    store.pending.set([
+      { toolUseId: 'a', toolName: 'write', summary: 'Exact target', details: [] },
+    ]);
+    await store.resolve([{ toolUseId: 'a', approved: true }]);
+    await store.resolve([{ toolUseId: 'a', approved: true }]);
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(store.decisions()[0].card.summary).toBe('Exact target');
+    expect(store.error()).toContain('Execution may have occurred');
+  });
+  it('keeps running until a result and preserves the server failure reason', async () => {
+    const store = TestBed.inject(ChatStore);
+    let deliver: (event: BaseEvent) => void = () => {};
+    let finish: () => void = () => {};
+    vi.spyOn(HttpAgent.prototype, 'runAgent').mockImplementation((_params, subscriber: any) => {
+      deliver = (event) => subscriber.onEvent({ event });
+      return new Promise((resolve) => {
+        finish = () => resolve({} as never);
+      });
+    });
+    const sending = store.send('synthetic');
+    deliver(ev('TOOL_CALL_START', { toolCallId: 't', toolCallName: 'read' }));
+    expect((store.renderLog()[1] as any).toolCalls[0].status).toBe('running');
+    deliver(
+      ev('TOOL_CALL_RESULT', { toolCallId: 't', content: '{"error":"Denied: synthetic reason"}' }),
+    );
+    expect((store.renderLog()[1] as any).toolCalls[0]).toMatchObject({
+      status: 'error',
+      reason: 'Denied: synthetic reason',
+    });
+    finish();
+    await sending;
   });
 });

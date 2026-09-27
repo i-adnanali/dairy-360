@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { Button } from '../ui/button';
 import type { ToolCallView } from '@dairy/shared';
 
 // A footnote about how an answer was produced. Phase 6b, docs/UI_SYSTEM.md §13.3.
@@ -33,8 +34,13 @@ import type { ToolCallView } from '@dairy/shared';
 @Component({
   selector: 'app-tool-call-chip',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Button],
   template: `
     <button
+      appButton
+      variant="secondary"
+      size="sm"
+      [attr.aria-expanded]="open()"
       (click)="open.set(!open())"
       class="inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1
         text-xs transition hover:brightness-95 dark:hover:brightness-110"
@@ -43,11 +49,24 @@ import type { ToolCallView } from '@dairy/shared';
     >
       <span class="h-1.5 w-1.5 rounded-full" [class]="dotClass()"></span>
       <span class="font-medium">{{ call().name }}</span>
-      <span class="opacity-70">{{ call().status }}</span>
-      @if (open()) {
-        <span class="ml-1 truncate font-mono opacity-80">{{ call().argSummary }}</span>
-      }
+      <span>{{
+        call().status === 'done'
+          ? 'Success'
+          : call().status === 'error'
+            ? 'Error'
+            : call().status === 'pending'
+              ? 'Awaiting approval'
+              : 'Running'
+      }}</span>
     </button>
+    @if (call().reason) {
+      <p class="mt-1 text-sm text-content-primary">{{ call().reason }}</p>
+    }
+    @if (open()) {
+      <pre class="mt-2 whitespace-pre-wrap text-xs text-content-primary">{{
+        call().argSummary
+      }}</pre>
+    }
   `,
 })
 export class ToolCallChip {

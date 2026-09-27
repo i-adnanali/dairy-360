@@ -72,7 +72,7 @@ describe('ChartCard', () => {
   it('reads its colours from the tokens, wrapped for Chart.js', () => {
     setTokens({
       '--fill-brand': '1 2 3',
-      '--text-disabled': '4 5 6',
+      '--text-secondary': '4 5 6',
       '--border-subtle': '7 8 9',
       '--border-default': '10 11 12',
       '--text-muted': '13 14 15',
@@ -127,5 +127,46 @@ describe('ChartCard', () => {
     fixture.componentRef.setInput('dataset', dataset);
     const internals = fixture.componentInstance as unknown as Internals;
     expect(internals.data().datasets[0].borderColor).toBe('currentColor');
+  });
+});
+
+describe('B5 chart equivalence', () => {
+  it('exposes exact values including zero in a semantic data table', () => {
+    const fixture = TestBed.createComponent(ChartCard);
+    fixture.componentRef.setInput('dataset', {
+      datasetId: 'synthetic',
+      scopeLabel: 'Synthetic herd',
+      kind: 'timeseries',
+      interval: 'day',
+      points: [
+        { periodStart: '2026-09-17', totalLitres: 0, avgPerAnimal: 0 },
+        { periodStart: '2026-09-18', totalLitres: 12, avgPerAnimal: 6 },
+      ],
+    });
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('table')).toBeNull();
+    el.querySelector('button')!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('button')!.getAttribute('aria-expanded')).toBe('true');
+    expect([...el.querySelectorAll('tbody td')].map((e) => e.textContent?.trim())).toEqual([
+      '0',
+      '0',
+      '12',
+      '6',
+    ]);
+    expect(el.querySelectorAll('th[scope="col"]')).toHaveLength(3);
+  });
+  it('names no data instead of rendering an empty chart', () => {
+    const fixture = TestBed.createComponent(ChartCard);
+    fixture.componentRef.setInput('dataset', {
+      datasetId: 'empty',
+      scopeLabel: 'Synthetic herd',
+      interval: 'day',
+      points: [],
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('No data returned');
+    expect(fixture.nativeElement.querySelector('canvas')).toBeNull();
   });
 });

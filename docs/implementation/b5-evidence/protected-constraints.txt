@@ -1,0 +1,22 @@
+UNCHANGED web-angular/src/app/registry/animal-form.ts
+UNCHANGED web-angular/src/app/registry/calving-form.ts
+UNCHANGED web-angular/src/app/registry/precision-date.ts
+UNCHANGED web-angular/src/app/registry/draft-registry.ts
+UNCHANGED web-angular/src/app/registry/writer-draft.ts
+UNCHANGED web-angular/src/app/registry/write-lock.ts
+UNCHANGED web-angular/src/app/registry/form-state.ts
+UNCHANGED web-angular/src/app/registry/after-write.ts
+UNCHANGED web-angular/src/app/registry/milking-roster.ts
+UNCHANGED web-angular/src/app/registry/dispatch-sheet.ts
+UNCHANGED web-angular/src/app/registry/payroll-run.ts
+UNCHANGED web-angular/src/app/registry/health-page.ts
+UNCHANGED web-angular/src/app/registry/destination-detail.ts
+UNCHANGED web-angular/src/app/registry/analytics-page.ts
+UNCHANGED web-angular/src/app/registry/life-report.ts
+UNCHANGED web-angular/src/app/registry/verification-panel.ts
+UNCHANGED server/src/registry/analytics.ts
+UNCHANGED server/src/agent/stream.ts
+UNCHANGED border-default token values
+UNCHANGED writelog-bg token values
+UNCHANGED writelog-fg token values
+UNCHANGED writelog-line token values

@@ -17,7 +17,7 @@ describe('ToolCallChip', () => {
     const el = fixture.nativeElement as HTMLElement;
 
     expect(el.textContent).toContain('get_milk_timeseries');
-    expect(el.textContent).toContain('done');
+    expect(el.textContent).toContain('Success');
     expect(el.textContent).not.toContain('{"group":"Kundi"}');
 
     el.querySelector('button')!.click();

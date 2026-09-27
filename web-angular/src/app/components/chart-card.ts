@@ -1,7 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import type { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import type { Dataset } from '@dairy/shared';
+import { Button } from '../ui/button';
+import { Cell } from '../ui/cell';
+import { Card } from '../ui/surface';
+import { ScrollRegion } from '../ui/scroll-region';
 import { HelpText } from '../ui/text';
 import { Theme } from '../core/theme';
 
@@ -43,9 +47,9 @@ import { Theme } from '../core/theme';
 @Component({
   selector: 'app-chart-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BaseChartDirective, HelpText],
+  imports: [BaseChartDirective, HelpText, Button, Cell, Card, ScrollRegion],
   template: `
-    <div class="rounded-xl border border-line-subtle bg-surface-raised p-4 shadow-sm">
+    <div appCard>
       <div class="mb-2 flex items-baseline justify-between">
         <h3 class="text-sm font-semibold text-content-heading">
           {{ dataset().scopeLabel }} —
@@ -60,13 +64,60 @@ import { Theme } from '../core/theme';
         </h3>
         <span appHelp size="xs" tone="subtle">{{ dataset().points.length }} points</span>
       </div>
-      <div class="h-56 w-full">
-        <canvas baseChart type="line" [data]="data()" [options]="options()"></canvas>
-      </div>
+      @if (dataset().points.length) {
+        <div class="h-56 w-full" aria-hidden="true">
+          <canvas baseChart type="line" [data]="data()" [options]="options()"></canvas>
+        </div>
+        <button
+          appButton
+          variant="secondary"
+          size="sm"
+          (click)="showData.set(!showData())"
+          [attr.aria-expanded]="showData()"
+        >
+          {{ showData() ? 'Hide data' : 'Show data'
+          }}<span class="sr-only"> for {{ dataset().scopeLabel }}</span>
+        </button>
+        @if (showData()) {
+          <div appScrollRegion="Assistant chart data">
+            <table class="w-full text-sm">
+              <caption>
+                {{
+                  dataset().scopeLabel
+                }}
+                ·
+                {{
+                  dataset().interval
+                }}
+                · equivalent chart data
+              </caption>
+              <thead>
+                <tr>
+                  <th appCell scope="col">Period</th>
+                  <th appCell numeric scope="col">Total litres</th>
+                  <th appCell numeric scope="col">Average per animal (L)</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (point of dataset().points; track $index) {
+                  <tr>
+                    <th appCell nowrap scope="row">{{ point.periodStart }}</th>
+                    <td appCell numeric>{{ point.totalLitres }}</td>
+                    <td appCell numeric>{{ point.avgPerAnimal }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else {
+        <p class="text-sm text-content-muted">No data returned for this chart.</p>
+      }
     </div>
   `,
 })
 export class ChartCard {
+  protected readonly showData = signal(false);
   readonly dataset = input.required<Dataset>();
 
   private readonly theme = inject(Theme);
@@ -93,7 +144,7 @@ export class ChartCard {
     };
     return {
       series: rgbOf('--fill-brand'),
-      seriesAlt: rgbOf('--text-disabled'),
+      seriesAlt: rgbOf('--text-secondary'),
       grid: rgbOf('--border-subtle'),
       axis: rgbOf('--border-default'),
       ticks: rgbOf('--text-muted'),
@@ -114,7 +165,7 @@ export class ChartCard {
           backgroundColor: c.series,
           borderWidth: 2,
           pointRadius: 0,
-          cubicInterpolationMode: 'monotone',
+          tension: 0,
         },
         {
           label: 'Avg / animal',
@@ -124,7 +175,7 @@ export class ChartCard {
           borderWidth: 1.5,
           borderDash: [4, 3],
           pointRadius: 0,
-          cubicInterpolationMode: 'monotone',
+          tension: 0,
         },
       ],
     };

@@ -31,7 +31,8 @@ describe('Composer', () => {
     const el = fixture.nativeElement as HTMLElement;
 
     const textarea = el.querySelector('textarea')!;
-    expect(textarea.disabled).toBe(true);
+    expect(textarea.readOnly).toBe(true);
+    expect(textarea.getAttribute('aria-disabled')).toBe('true');
     expect(textarea.placeholder).toBe('Resolve the pending action above to continue…');
   });
 });

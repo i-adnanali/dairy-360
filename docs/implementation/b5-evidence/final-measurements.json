@@ -1,0 +1,1094 @@
+[
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 24,
+      "right": 262.21875,
+      "top": 926,
+      "width": 238.21875,
+      "x": 24,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 328,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "name": "Assistant chart data",
+        "scroll": 294,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 828,
+      "height": 58,
+      "left": 24,
+      "right": 292.21875,
+      "top": 770,
+      "width": 268.21875,
+      "x": 24,
+      "y": 770
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 844,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 390
+    },
+    "regions": [
+      {
+        "client": 358,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "name": "Assistant chart data",
+        "scroll": 324,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 24,
+      "right": 670.21875,
+      "top": 926,
+      "width": 646.21875,
+      "x": 24,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 768
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 152,
+      "right": 798.21875,
+      "top": 926,
+      "width": 646.21875,
+      "x": 152,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1024
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 279.5,
+      "right": 925.71875,
+      "top": 926,
+      "width": 646.21875,
+      "x": 279.5,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1279
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 945,
+      "right": 1182.21875,
+      "top": 926,
+      "width": 237.21875,
+      "x": 945,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 1105,
+      "right": 1342.21875,
+      "top": 926,
+      "width": 237.21875,
+      "x": 1105,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 648.5,
+      "height": 58,
+      "left": 40,
+      "right": 246.21875,
+      "top": 590.5,
+      "width": 206.21875,
+      "x": 40,
+      "y": 590.5
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 296,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 262,
+        "name": "Assistant chart data",
+        "scroll": 262,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 492.5,
+      "height": 58,
+      "left": 40,
+      "right": 276.21875,
+      "top": 434.5,
+      "width": 236.21875,
+      "x": 40,
+      "y": 434.5
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 326,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 292,
+        "name": "Assistant chart data",
+        "scroll": 292,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 648.5,
+      "height": 58,
+      "left": 65.34375,
+      "right": 628.875,
+      "top": 590.5,
+      "width": 563.53125,
+      "x": 65.34375,
+      "y": 590.5
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 648.5,
+      "height": 58,
+      "left": 193.34375,
+      "right": 756.875,
+      "top": 590.5,
+      "width": 563.53125,
+      "x": 193.34375,
+      "y": 590.5
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 648.5,
+      "height": 58,
+      "left": 320.84375,
+      "right": 884.375,
+      "top": 590.5,
+      "width": 563.53125,
+      "x": 320.84375,
+      "y": 590.5
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 648.5,
+      "height": 58,
+      "left": 321.34375,
+      "right": 884.875,
+      "top": 590.5,
+      "width": 563.53125,
+      "x": 321.34375,
+      "y": 590.5
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 648.5,
+      "height": 58,
+      "left": 401.34375,
+      "right": 964.875,
+      "top": 590.5,
+      "width": 563.53125,
+      "x": 401.34375,
+      "y": 590.5
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "dark",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 58,
+      "left": 40,
+      "right": 246.21875,
+      "top": 902,
+      "width": 206.21875,
+      "x": 40,
+      "y": 902
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 296,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 262,
+        "name": "Assistant chart data",
+        "scroll": 262,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 804,
+      "height": 58,
+      "left": 40,
+      "right": 276.21875,
+      "top": 746,
+      "width": 236.21875,
+      "x": 40,
+      "y": 746
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 326,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 292,
+        "name": "Assistant chart data",
+        "scroll": 292,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 58,
+      "left": 65.34375,
+      "right": 628.875,
+      "top": 902,
+      "width": 563.53125,
+      "x": 65.34375,
+      "y": 902
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 58,
+      "left": 193.34375,
+      "right": 756.875,
+      "top": 902,
+      "width": 563.53125,
+      "x": 193.34375,
+      "y": 902
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 58,
+      "left": 320.84375,
+      "right": 884.375,
+      "top": 902,
+      "width": 563.53125,
+      "x": 320.84375,
+      "y": 902
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 58,
+      "left": 321.34375,
+      "right": 884.875,
+      "top": 902,
+      "width": 563.53125,
+      "x": 321.34375,
+      "y": 902
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 960,
+      "height": 58,
+      "left": 401.34375,
+      "right": 964.875,
+      "top": 902,
+      "width": 563.53125,
+      "x": 401.34375,
+      "y": 902
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "standalone",
+    "panel": null,
+    "regions": [
+      {
+        "client": 653,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 619,
+        "name": "Assistant chart data",
+        "scroll": 619,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1440,
+    "width": 1440
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 24,
+      "right": 262.21875,
+      "top": 926,
+      "width": 238.21875,
+      "x": 24,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 360,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 328,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "name": "Assistant chart data",
+        "scroll": 294,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 360,
+    "width": 360
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 828,
+      "height": 58,
+      "left": 24,
+      "right": 292.21875,
+      "top": 770,
+      "width": 268.21875,
+      "x": 24,
+      "y": 770
+    },
+    "composers": 1,
+    "document": 390,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 844,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 390
+    },
+    "regions": [
+      {
+        "client": 358,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "name": "Assistant chart data",
+        "scroll": 324,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 24,
+      "right": 670.21875,
+      "top": 926,
+      "width": 646.21875,
+      "x": 24,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 768,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 768
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 768,
+    "width": 768
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 152,
+      "right": 798.21875,
+      "top": 926,
+      "width": 646.21875,
+      "x": 152,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1024,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1024
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1024,
+    "width": 1024
+  },
+  {
+    "backgroundInert": true,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 279.5,
+      "right": 925.71875,
+      "top": 926,
+      "width": 646.21875,
+      "x": 279.5,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1279,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 1000,
+      "modal": "true",
+      "role": "dialog",
+      "top": 0,
+      "width": 1279
+    },
+    "regions": [
+      {
+        "client": 736,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 702,
+        "name": "Assistant chart data",
+        "scroll": 702,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1279,
+    "width": 1279
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 945,
+      "right": 1182.21875,
+      "top": 926,
+      "width": 237.21875,
+      "x": 945,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1280,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "backgroundInert": false,
+    "composerRect": {
+      "bottom": 984,
+      "height": 58,
+      "left": 1105,
+      "right": 1342.21875,
+      "top": 926,
+      "width": 237.21875,
+      "x": 1105,
+      "y": 926
+    },
+    "composers": 1,
+    "document": 1440,
+    "draft": "Final retained draft\nSecond line",
+    "mode": "dock",
+    "panel": {
+      "height": 852.3125,
+      "modal": null,
+      "role": "complementary",
+      "top": 147.6875,
+      "width": 360
+    },
+    "regions": [
+      {
+        "client": 327,
+        "name": "Assistant message",
+        "scroll": 1120,
+        "tabindex": "0"
+      },
+      {
+        "client": 293,
+        "name": "Assistant chart data",
+        "scroll": 293,
+        "tabindex": null
+      }
+    ],
+    "state": "final-wide-chart",
+    "theme": "light",
+    "viewport": 1440,
+    "width": 1440
+  }
+]

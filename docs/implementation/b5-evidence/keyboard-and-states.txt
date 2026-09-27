@@ -1,0 +1,15 @@
+Browser verification, 2026-09-26–27. Codex in-app browser; underlying version unavailable.
+Synthetic AG-UI service on 6490; production bundle on 6492. No database/upstream or real writes.
+
+Desktop opening: composer received focus; complementary region measured 360px; main retained remaining width and was interactive without a backdrop.
+Narrow opening/resizing: role=dialog, aria-modal=true, viewport-sized panel, main/header/context/session background inert. Multiline draft and conversation retained; one textarea throughout.
+Tab from Send wraps to Close; Shift+Tab from Close wraps to Send. Escape closes; settled focus returns to the Dairy 360 assistant trigger and aria-expanded=false.
+Palette open above desktop dock: Search retained focus through resize to 390px; underlying assistant was inert. Escape closed only the palette, kept assistant open and focused its composer. Cmd+K within narrow assistant did not open the inaccessible palette.
+Actual draft dialog: entered synthetic name on protected animal form with frontend synthetic session, then attempted Herd navigation while dock open. Keep editing initially focused; Tab/Shift+Tab stayed in the confirmation. Resizing to 390px left confirmation on top and assistant inert. Escape closed only confirmation, retained exact form draft and open assistant, then focused composer. Draft was explicitly discarded through the existing guard; no Add animal/save action was taken.
+Approval: synthetic SYN-001, 2026-09-17, morning, 6 L displayed before approval. After approval: retained approved card, Success tool result, no repeated buttons. Rejection: retained rejected card and visible operator-denial reason, Error tool result. Newly resolved card receives focus (regression test added after browser found focus on an earlier card).
+Chart: Show data exposed both exact rows including zero (0/0 and 12/6); column/row scopes and caption present. No-data fixture showed explicit No data returned; no fabricated zero/chart. Theme toggles update chart role colors.
+Streaming: twelve incremental synthetic segments rendered, followed by explicit tool Running/Success/Error states. Reader-away-from-tail behavior is additionally pinned by a component test; native screen-reader announcement behavior is not claimed.
+Error: terminal fixture message remained visible: Synthetic connection failure. No automatic retry. Unknown approval outcome is unit-tested to retain decision, warn about possible execution and refuse replay.
+Wide markdown: 18-column table, 1120px content in a 358px labelled Assistant message region at 390px; document remained 390px. Region tabindex=0 only while overflowing; arrow-key scrolling exercised locally. Streaming child replacement triggers overflow remeasurement without retaining removed observed nodes.
+
+Native print/PDF, actual browser JSON download completion, operator walkthrough, native screen reader, real phone/software keyboard, actual zoom and live assistant remain unverified. B4 complete Blob serialization tests remain valid. No release-readiness claim.

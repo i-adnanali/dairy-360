@@ -1,0 +1,151 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: light. Switch to dark."': light
+  - button "Dairy 360 assistant" [expanded]
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- button "Start a recording session"
+- main
+- complementary "Dairy 360 assistant":
+  - heading "Dairy 360 assistant" [level=2]
+  - button "Close Dairy 360 assistant":
+    - text: Close
+    - generic: Dairy 360 assistant
+  - generic: Answer ready.
+  - generic: long chart
+  - region "Assistant message":
+    - heading "Synthetic long response" [level=2]
+    - paragraph: synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_
+    - table:
+      - rowgroup:
+        - row "Animal Notes Value":
+          - columnheader "Animal"
+          - columnheader "Notes"
+          - columnheader "Value"
+      - rowgroup:
+        - row "SYN-001 synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_ 0 L":
+          - cell "SYN-001"
+          - cell "synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_"
+          - cell "0 L"
+    - code: "{\"reference\":\"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\"}"
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - table:
+      - rowgroup:
+        - row "Field 1 Field 2 Field 3 Field 4 Field 5 Field 6 Field 7 Field 8 Field 9 Field 10 Field 11 Field 12 Field 13 Field 14 Field 15 Field 16 Field 17 Field 18":
+          - columnheader "Field 1"
+          - columnheader "Field 2"
+          - columnheader "Field 3"
+          - columnheader "Field 4"
+          - columnheader "Field 5"
+          - columnheader "Field 6"
+          - columnheader "Field 7"
+          - columnheader "Field 8"
+          - columnheader "Field 9"
+          - columnheader "Field 10"
+          - columnheader "Field 11"
+          - columnheader "Field 12"
+          - columnheader "Field 13"
+          - columnheader "Field 14"
+          - columnheader "Field 15"
+          - columnheader "Field 16"
+          - columnheader "Field 17"
+          - columnheader "Field 18"
+      - rowgroup:
+        - row "Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic":
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+  - heading "Synthetic herd — daily yield" [level=3]
+  - generic: 2 points
+  - button "Hide data for Synthetic herd" [expanded]:
+    - text: Hide data
+    - generic: for Synthetic herd
+  - region "Assistant chart data":
+    - table "Synthetic herd · day · equivalent chart data":
+      - caption: Synthetic herd · day · equivalent chart data
+      - rowgroup:
+        - row "Period Total litres Average per animal (L)":
+          - columnheader "Period"
+          - columnheader "Total litres"
+          - columnheader "Average per animal (L)"
+      - rowgroup:
+        - row "2026-09-17 0 0":
+          - rowheader "2026-09-17"
+          - cell "0"
+          - cell "0"
+        - row "2026-09-18 12 6":
+          - rowheader "2026-09-18"
+          - cell "12"
+          - cell "6"
+  - paragraph: Enter to send · Shift+Enter for a new line
+  - textbox "Message to Dairy 360 assistant" [active]:
+    - /placeholder: Ask about the herd, or request an action…
+    - text: Final retained draft Second line
+  - button "Send"
