@@ -1,0 +1,1 @@
+Native Meta+= at a 1440px viewport left innerWidth=1440 and devicePixelRatio=1. Meta+0 sent to restore. No supported zoom capability; actual 200% reflow remains unverified, not substituted by viewport tests.

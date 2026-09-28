@@ -1,0 +1,113 @@
+ld 18":
+          - columnheader "Field 1"
+          - columnheader "Field 2"
+          - columnheader "Field 3"
+          - columnheader "Field 4"
+          - columnheader "Field 5"
+          - columnheader "Field 6"
+          - columnheader "Field 7"
+          - columnheader "Field 8"
+          - columnheader "Field 9"
+          - columnheader "Field 10"
+          - columnheader "Field 11"
+          - columnheader "Field 12"
+          - columnheader "Field 13"
+          - columnheader "Field 14"
+          - columnheader "Field 15"
+          - columnheader "Field 16"
+          - columnheader "Field 17"
+          - columnheader "Field 18"
+      - rowgroup:
+        - row "Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic":
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+  - heading "Synthetic herd — daily yield" [level=3]
+  - generic: 2 points
+  - button "Show data for Synthetic herd":
+    - text: Show data
+    - generic: for Synthetic herd
+  - button "read_animals Success":
+    - generic: read_animals
+    - generic: Success
+  - button "read_feed Error":
+    - generic: read_feed
+    - generic: Error
+  - paragraph: "Synthetic service refused the read: fixture failure."
+  - button "log_milking Error":
+    - generic: log_milking
+    - generic: Error
+  - paragraph: Rejected by operator; no synthetic operation performed.
+  - region "Assistant message":
+    - paragraph: Synthetic decision received. No farm data was modified.
+  - generic: confirm
+  - region "Assistant message":
+    - paragraph: "Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm."
+  - button "log_milking Success":
+    - generic: log_milking
+    - generic: Success
+  - region "Assistant message":
+    - paragraph: Synthetic decision received. No farm data was modified.
+  - generic: error
+  - region "Assistant message":
+    - paragraph: "Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm."
+  - generic: Confirm action
+  - generic: log_milking
+  - paragraph: Record 6 L for synthetic animal SYN-001
+  - term: Target
+  - definition: SYN-001 · Synthetic only
+  - term: Date
+  - definition: 2026-09-17
+  - term: Session
+  - definition: morning
+  - region "Proposed operation rows":
+    - table:
+      - rowgroup:
+        - row "Animal Value":
+          - columnheader "Animal"
+          - columnheader "Value"
+      - rowgroup:
+        - row "SYN-001 6 L":
+          - cell "SYN-001"
+          - cell "6 L"
+  - status: rejected · Rejected by operator; this operation was not authorized.
+  - generic: Confirm action
+  - generic: log_milking
+  - paragraph: Record 6 L for synthetic animal SYN-001
+  - term: Target
+  - definition: SYN-001 · Synthetic only
+  - term: Date
+  - definition: 2026-09-17
+  - term: Session
+  - definition: morning
+  - region "Proposed operation rows":
+    - table:
+      - rowgroup:
+        - row "Animal Value":
+          - columnheader "Animal"
+          - columnheader "Value"
+      - rowgroup:
+        - row "SYN-001 6 L":
+          - cell "SYN-001"
+          - cell "6 L"
+  - status: approved · Approved by operator; execution result follows.
+  - generic: Synthetic connection failure. No automatic retry.
+  - paragraph: Enter to send · Shift+Enter for a new line
+  - textbox "Message to Dairy 360 assistant":
+    - /placeholder: Ask about the herd, or request an action…
+  - button "Send" [disabled] [active]

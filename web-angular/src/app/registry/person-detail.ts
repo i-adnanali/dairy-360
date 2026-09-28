@@ -388,16 +388,16 @@ import { Button } from '../ui/button';
             }
           </label>
 
-          <label class="block space-y-1">
-            <span appSubHeading>Handed over by</span>
+          <div class="block space-y-1">
             <app-identifier-input
               field="observed_by"
               label="Handed over by"
+              help="Person who handed over this payment, if known. Use a stable identifier, not a display name."
               name="observed_by"
               [value]="observedBy()"
               (changed)="observedBy.set($event)"
             />
-          </label>
+          </div>
 
           @if (payState.formError(['amount_minor', 'note', 'occurred_on', 'method']); as msg) {
             <p appErrorPanel data-role="payment-error">{{ msg }}</p>

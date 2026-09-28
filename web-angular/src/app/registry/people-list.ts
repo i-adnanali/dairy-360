@@ -238,9 +238,12 @@ import { Button } from '../ui/button';
       >
         <h3 appSectionHeading>Add a person</h3>
 
-        <label class="block space-y-1">
-          <span appSubHeading>Identifier</span>
+        <div class="block space-y-1">
+          <label appSubHeading for="person-identifier">Identifier</label>
           <input
+            id="person-identifier"
+            [attr.aria-invalid]="personState.fieldError('identifier') ? 'true' : null"
+            [attr.aria-describedby]="personState.fieldError('identifier') ? 'person-identifier-help person-identifier-error' : 'person-identifier-help'"
             name="identifier"
             [value]="identifier()"
             (input)="identifier.set($any($event.target).value)"
@@ -250,17 +253,17 @@ import { Button } from '../ui/button';
             placeholder="imran"
             autocomplete="off"
           />
-          <span class="block text-xs text-content-subtle">
+          <span id="person-identifier-help" class="block text-xs text-content-subtle">
             A short, stable name — the same one you type into “observed by”. It cannot be changed
             later: every milking and dispatch that names them stores it as text, and the event log
             cannot be rewritten.
           </span>
           @if (personState.fieldError('identifier'); as msg) {
-            <span appErrorText size="xs" tone="soft" class="block" data-role="error-identifier">{{
+            <span id="person-identifier-error" appErrorText size="xs" tone="soft" class="block" data-role="error-identifier">{{
               msg
             }}</span>
           }
-        </label>
+        </div>
 
         <label class="block space-y-1">
           <span appSubHeading

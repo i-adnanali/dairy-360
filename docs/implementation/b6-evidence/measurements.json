@@ -1,0 +1,4382 @@
+[
+  {
+    "name": "milking-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Milked by (optional)",
+        "right": 327
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0001 Noori",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0012 Lali",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 322
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 326,
+        "name": "Milking quantities",
+        "scroll": 326,
+        "tabindex": null
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "milking-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Milked by (optional)",
+        "right": 357
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0001 Noori",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0012 Lali",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 352
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 356,
+        "name": "Milking quantities",
+        "scroll": 356,
+        "tabindex": null
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "milking-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 239.25,
+        "name": " Milked by (optional)",
+        "right": 727
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0001 Noori",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0012 Lali",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 545.2578125
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 718,
+        "name": "Milking quantities",
+        "scroll": 718,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "milking-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 495.25,
+        "name": " Milked by (optional)",
+        "right": 983
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0001 Noori",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0012 Lali",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 681.2421875
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 974,
+        "name": "Milking quantities",
+        "scroll": 974,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "milking-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 911.25,
+        "name": " Milked by (optional)",
+        "right": 1399
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0001 Noori",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0012 Lali",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 912.171875
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 1390,
+        "name": "Milking quantities",
+        "scroll": 1390,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "milking-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Milked by (optional)",
+        "right": 327
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0001 Noori",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0012 Lali",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 322
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 326,
+        "name": "Milking quantities",
+        "scroll": 326,
+        "tabindex": null
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "milking-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Milked by (optional)",
+        "right": 357
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0001 Noori",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0012 Lali",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 352
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 356,
+        "name": "Milking quantities",
+        "scroll": 356,
+        "tabindex": null
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "milking-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 239.25,
+        "name": " Milked by (optional)",
+        "right": 727
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0001 Noori",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0012 Lali",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 545.2578125
+      },
+      {
+        "left": 449.2578125,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 545.2578125
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 718,
+        "name": "Milking quantities",
+        "scroll": 718,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "milking-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 495.25,
+        "name": " Milked by (optional)",
+        "right": 983
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0001 Noori",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0012 Lali",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 681.2421875
+      },
+      {
+        "left": 585.2421875,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 681.2421875
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 974,
+        "name": "Milking quantities",
+        "scroll": 974,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "milking-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 911.25,
+        "name": " Milked by (optional)",
+        "right": 1399
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0001 Noori",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0002 Sohni",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0011 Bhoori",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0012 Lali",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0016 Mithi",
+        "right": 912.171875
+      },
+      {
+        "left": 816.171875,
+        "name": "Litres for BD-0022 Neeli",
+        "right": 912.171875
+      }
+    ],
+    "heading": "Record a milking",
+    "regions": [
+      {
+        "client": 1390,
+        "name": "Milking quantities",
+        "scroll": 1390,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "dispatch-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Handed over by (optional)",
+        "right": 327
+      },
+      {
+        "left": 38,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 322
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 326,
+        "name": "Standing dispatch quantities",
+        "scroll": 326,
+        "tabindex": null
+      },
+      {
+        "client": 326,
+        "name": "Occasional dispatch quantities",
+        "scroll": 326,
+        "tabindex": null
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "dispatch-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Handed over by (optional)",
+        "right": 357
+      },
+      {
+        "left": 38,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 352
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 356,
+        "name": "Standing dispatch quantities",
+        "scroll": 356,
+        "tabindex": null
+      },
+      {
+        "client": 356,
+        "name": "Occasional dispatch quantities",
+        "scroll": 356,
+        "tabindex": null
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "dispatch-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 239.078125,
+        "name": " Handed over by (optional)",
+        "right": 727
+      },
+      {
+        "left": 455.3203125,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 551.3203125
+      },
+      {
+        "left": 455.3203125,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 551.3203125
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 718,
+        "name": "Standing dispatch quantities",
+        "scroll": 729,
+        "tabindex": "0"
+      },
+      {
+        "client": 718,
+        "name": "Occasional dispatch quantities",
+        "scroll": 718,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "dispatch-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 495.078125,
+        "name": " Handed over by (optional)",
+        "right": 983
+      },
+      {
+        "left": 616.2109375,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 712.2109375
+      },
+      {
+        "left": 616.2109375,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 712.2109375
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 974,
+        "name": "Standing dispatch quantities",
+        "scroll": 974,
+        "tabindex": "0"
+      },
+      {
+        "client": 974,
+        "name": "Occasional dispatch quantities",
+        "scroll": 974,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "dispatch-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 911.078125,
+        "name": " Handed over by (optional)",
+        "right": 1399
+      },
+      {
+        "left": 863.609375,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 959.609375
+      },
+      {
+        "left": 863.609375,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 959.609375
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 1390,
+        "name": "Standing dispatch quantities",
+        "scroll": 1390,
+        "tabindex": null
+      },
+      {
+        "client": 1390,
+        "name": "Occasional dispatch quantities",
+        "scroll": 1390,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "dispatch-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Handed over by (optional)",
+        "right": 327
+      },
+      {
+        "left": 38,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 322
+      },
+      {
+        "left": 38,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 322
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 326,
+        "name": "Standing dispatch quantities",
+        "scroll": 326,
+        "tabindex": null
+      },
+      {
+        "client": 326,
+        "name": "Occasional dispatch quantities",
+        "scroll": 326,
+        "tabindex": null
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "dispatch-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 185.5
+      },
+      {
+        "left": 33,
+        "name": " Handed over by (optional)",
+        "right": 357
+      },
+      {
+        "left": 38,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 352
+      },
+      {
+        "left": 38,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 352
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 356,
+        "name": "Standing dispatch quantities",
+        "scroll": 356,
+        "tabindex": null
+      },
+      {
+        "client": 356,
+        "name": "Occasional dispatch quantities",
+        "scroll": 356,
+        "tabindex": null
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "dispatch-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 239.078125,
+        "name": " Handed over by (optional)",
+        "right": 727
+      },
+      {
+        "left": 455.3203125,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 551.3203125
+      },
+      {
+        "left": 455.3203125,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 551.3203125
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 718,
+        "name": "Standing dispatch quantities",
+        "scroll": 729,
+        "tabindex": "0"
+      },
+      {
+        "client": 718,
+        "name": "Occasional dispatch quantities",
+        "scroll": 718,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "dispatch-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 495.078125,
+        "name": " Handed over by (optional)",
+        "right": 983
+      },
+      {
+        "left": 616.2109375,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 712.2109375
+      },
+      {
+        "left": 616.2109375,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 712.2109375
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 974,
+        "name": "Standing dispatch quantities",
+        "scroll": 974,
+        "tabindex": null
+      },
+      {
+        "client": 974,
+        "name": "Occasional dispatch quantities",
+        "scroll": 974,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "dispatch-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 179
+      },
+      {
+        "left": 911.078125,
+        "name": " Handed over by (optional)",
+        "right": 1399
+      },
+      {
+        "left": 863.609375,
+        "name": "Litres for Bashir (dodhi) — 2026-09-27 morning",
+        "right": 959.609375
+      },
+      {
+        "left": 863.609375,
+        "name": "Litres for Home — 2026-09-27 morning",
+        "right": 959.609375
+      }
+    ],
+    "heading": "Where the milk went",
+    "regions": [
+      {
+        "client": 1390,
+        "name": "Standing dispatch quantities",
+        "scroll": 1390,
+        "tabindex": null
+      },
+      {
+        "client": 1390,
+        "name": "Occasional dispatch quantities",
+        "scroll": 1390,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "people-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 117.75,
+        "name": "Search records ",
+        "right": 291.75
+      },
+      {
+        "left": 33,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Display name (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Contact (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Role (optional)",
+        "right": 327
+      },
+      {
+        "left": 102.3046875,
+        "name": "Started on",
+        "right": 248.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "people-light",
+    "width": 390,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 117.75,
+        "name": "Search records ",
+        "right": 291.75
+      },
+      {
+        "left": 33,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Display name (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Contact (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Role (optional)",
+        "right": 327
+      },
+      {
+        "left": 102.3046875,
+        "name": "Started on",
+        "right": 248.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "people-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 125.75,
+        "name": "Search records ",
+        "right": 299.75
+      },
+      {
+        "left": 41,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Display name (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Contact (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Role (optional)",
+        "right": 727
+      },
+      {
+        "left": 110.3046875,
+        "name": "Started on",
+        "right": 256.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "people-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 125.75,
+        "name": "Search records ",
+        "right": 299.75
+      },
+      {
+        "left": 169,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Display name (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Contact (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Role (optional)",
+        "right": 855
+      },
+      {
+        "left": 238.3046875,
+        "name": "Started on",
+        "right": 384.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "people-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 125.75,
+        "name": "Search records ",
+        "right": 299.75
+      },
+      {
+        "left": 377,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Display name (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Contact (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Role (optional)",
+        "right": 1063
+      },
+      {
+        "left": 446.3046875,
+        "name": "Started on",
+        "right": 592.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "people-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 117.75,
+        "name": "Search records ",
+        "right": 291.75
+      },
+      {
+        "left": 33,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Display name (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Contact (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Role (optional)",
+        "right": 327
+      },
+      {
+        "left": 102.3046875,
+        "name": "Started on",
+        "right": 248.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "people-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 117.75,
+        "name": "Search records ",
+        "right": 291.75
+      },
+      {
+        "left": 33,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Display name (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Contact (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Role (optional)",
+        "right": 357
+      },
+      {
+        "left": 102.3046875,
+        "name": "Started on",
+        "right": 248.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "people-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 125.75,
+        "name": "Search records ",
+        "right": 299.75
+      },
+      {
+        "left": 41,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Display name (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Contact (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Role (optional)",
+        "right": 727
+      },
+      {
+        "left": 110.3046875,
+        "name": "Started on",
+        "right": 256.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "people-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 125.75,
+        "name": "Search records ",
+        "right": 299.75
+      },
+      {
+        "left": 169,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Display name (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Contact (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Role (optional)",
+        "right": 855
+      },
+      {
+        "left": 238.3046875,
+        "name": "Started on",
+        "right": 384.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "people-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 125.75,
+        "name": "Search records ",
+        "right": 299.75
+      },
+      {
+        "left": 377,
+        "name": "Identifier A short, stable name — the same one you type into “observed by”. It cannot be changed later: every milking and dispatch that names them stores it as text, and the event log cannot be rewritten. ",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Display name (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Contact (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "PersonChoose…abdulimranrashid",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Role (optional)",
+        "right": 1063
+      },
+      {
+        "left": 446.3046875,
+        "name": "Started on",
+        "right": 592.3046875
+      }
+    ],
+    "heading": "People",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "payroll-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 16,
+        "name": "From",
+        "right": 176.5
+      },
+      {
+        "left": 16,
+        "name": "To",
+        "right": 177
+      },
+      {
+        "left": 16,
+        "name": " Paid out by (optional)",
+        "right": 344
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for imran",
+        "right": 323
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 323
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 328,
+        "name": "Salaried wage entries",
+        "scroll": 328,
+        "tabindex": null
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "payroll-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 16,
+        "name": "From",
+        "right": 176.5
+      },
+      {
+        "left": 16,
+        "name": "To",
+        "right": 177
+      },
+      {
+        "left": 16,
+        "name": " Paid out by (optional)",
+        "right": 374
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for imran",
+        "right": 353
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 353
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 358,
+        "name": "Salaried wage entries",
+        "scroll": 358,
+        "tabindex": null
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "payroll-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 24,
+        "name": "From",
+        "right": 170
+      },
+      {
+        "left": 186,
+        "name": "To",
+        "right": 332.5
+      },
+      {
+        "left": 24,
+        "name": " Paid out by (optional)",
+        "right": 519.15625
+      },
+      {
+        "left": 295.5,
+        "name": "Wage amount (Rs) for imran",
+        "right": 423.5
+      },
+      {
+        "left": 295.5,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 423.5
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 720,
+        "name": "Salaried wage entries",
+        "scroll": 720,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "payroll-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 24,
+        "name": "From",
+        "right": 170
+      },
+      {
+        "left": 186,
+        "name": "To",
+        "right": 332.5
+      },
+      {
+        "left": 348.5,
+        "name": " Paid out by (optional)",
+        "right": 843.65625
+      },
+      {
+        "left": 398.4296875,
+        "name": "Wage amount (Rs) for imran",
+        "right": 526.4296875
+      },
+      {
+        "left": 398.4296875,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 526.4296875
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 976,
+        "name": "Salaried wage entries",
+        "scroll": 976,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "payroll-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 24,
+        "name": "From",
+        "right": 170
+      },
+      {
+        "left": 186,
+        "name": "To",
+        "right": 332.5
+      },
+      {
+        "left": 348.5,
+        "name": " Paid out by (optional)",
+        "right": 843.65625
+      },
+      {
+        "left": 553.3671875,
+        "name": "Wage amount (Rs) for imran",
+        "right": 681.3671875
+      },
+      {
+        "left": 553.3671875,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 681.3671875
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 1392,
+        "name": "Salaried wage entries",
+        "scroll": 1392,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "payroll-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 16,
+        "name": "From",
+        "right": 176.5
+      },
+      {
+        "left": 16,
+        "name": "To",
+        "right": 177
+      },
+      {
+        "left": 16,
+        "name": " Paid out by (optional)",
+        "right": 344
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for imran",
+        "right": 323
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 323
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 328,
+        "name": "Salaried wage entries",
+        "scroll": 328,
+        "tabindex": null
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "payroll-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 16,
+        "name": "From",
+        "right": 176.5
+      },
+      {
+        "left": 16,
+        "name": "To",
+        "right": 177
+      },
+      {
+        "left": 16,
+        "name": " Paid out by (optional)",
+        "right": 374
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for imran",
+        "right": 353
+      },
+      {
+        "left": 37,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 353
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 358,
+        "name": "Salaried wage entries",
+        "scroll": 358,
+        "tabindex": null
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "payroll-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 24,
+        "name": "From",
+        "right": 170
+      },
+      {
+        "left": 186,
+        "name": "To",
+        "right": 332.5
+      },
+      {
+        "left": 24,
+        "name": " Paid out by (optional)",
+        "right": 519.15625
+      },
+      {
+        "left": 295.5,
+        "name": "Wage amount (Rs) for imran",
+        "right": 423.5
+      },
+      {
+        "left": 295.5,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 423.5
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 720,
+        "name": "Salaried wage entries",
+        "scroll": 720,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "payroll-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 24,
+        "name": "From",
+        "right": 170
+      },
+      {
+        "left": 186,
+        "name": "To",
+        "right": 332.5
+      },
+      {
+        "left": 348.5,
+        "name": " Paid out by (optional)",
+        "right": 843.65625
+      },
+      {
+        "left": 398.4296875,
+        "name": "Wage amount (Rs) for imran",
+        "right": 526.4296875
+      },
+      {
+        "left": 398.4296875,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 526.4296875
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 976,
+        "name": "Salaried wage entries",
+        "scroll": 976,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "payroll-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 24,
+        "name": "From",
+        "right": 170
+      },
+      {
+        "left": 186,
+        "name": "To",
+        "right": 332.5
+      },
+      {
+        "left": 348.5,
+        "name": " Paid out by (optional)",
+        "right": 843.65625
+      },
+      {
+        "left": 553.3671875,
+        "name": "Wage amount (Rs) for imran",
+        "right": 681.3671875
+      },
+      {
+        "left": 553.3671875,
+        "name": "Wage amount (Rs) for abdul",
+        "right": 681.3671875
+      }
+    ],
+    "heading": "Payroll",
+    "regions": [
+      {
+        "client": 1392,
+        "name": "Salaried wage entries",
+        "scroll": 1392,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "feed-saved-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "feed-saved-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "feed-saved-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "feed-saved-light",
+    "width": 1024,
+    "documentWidth": 768,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "feed-saved-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "feed-saved-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "feed-saved-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "feed-saved-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "feed-saved-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "feed-saved-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Daily feeding",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "animal-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Name (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": " Acquired from (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Post no. (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Ear tag (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 344
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "animal-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Name (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": " Acquired from (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Post no. (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Ear tag (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 374
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "animal-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Name (optional)",
+        "right": 378
+      },
+      {
+        "left": 390,
+        "name": " Acquired from (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Post no. (optional)",
+        "right": 378
+      },
+      {
+        "left": 390,
+        "name": "Ear tag (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 265
+      },
+      {
+        "left": 41,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 54
+      },
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 265
+      },
+      {
+        "left": 41,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 54
+      },
+      {
+        "left": 24,
+        "name": " Observed by (optional)",
+        "right": 472
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "animal-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 169,
+        "name": "Name (optional)",
+        "right": 506
+      },
+      {
+        "left": 518,
+        "name": " Acquired from (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Post no. (optional)",
+        "right": 506
+      },
+      {
+        "left": 518,
+        "name": "Ear tag (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Date",
+        "right": 393
+      },
+      {
+        "left": 169,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 182
+      },
+      {
+        "left": 169,
+        "name": "Date",
+        "right": 393
+      },
+      {
+        "left": 169,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 182
+      },
+      {
+        "left": 152,
+        "name": " Observed by (optional)",
+        "right": 600
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "animal-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 377,
+        "name": "Name (optional)",
+        "right": 714
+      },
+      {
+        "left": 726,
+        "name": " Acquired from (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Post no. (optional)",
+        "right": 714
+      },
+      {
+        "left": 726,
+        "name": "Ear tag (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Date",
+        "right": 601
+      },
+      {
+        "left": 377,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 390
+      },
+      {
+        "left": 377,
+        "name": "Date",
+        "right": 601
+      },
+      {
+        "left": 377,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 390
+      },
+      {
+        "left": 360,
+        "name": " Observed by (optional)",
+        "right": 808
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "animal-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Name (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": " Acquired from (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Post no. (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Ear tag (optional)",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 344
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "animal-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Name (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": " Acquired from (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Post no. (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Ear tag (optional)",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 374
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "animal-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Name (optional)",
+        "right": 378
+      },
+      {
+        "left": 390,
+        "name": " Acquired from (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Post no. (optional)",
+        "right": 378
+      },
+      {
+        "left": 390,
+        "name": "Ear tag (optional)",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 265
+      },
+      {
+        "left": 41,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 54
+      },
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 265
+      },
+      {
+        "left": 41,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 54
+      },
+      {
+        "left": 24,
+        "name": " Observed by (optional)",
+        "right": 472
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "animal-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 169,
+        "name": "Name (optional)",
+        "right": 506
+      },
+      {
+        "left": 518,
+        "name": " Acquired from (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Post no. (optional)",
+        "right": 506
+      },
+      {
+        "left": 518,
+        "name": "Ear tag (optional)",
+        "right": 855
+      },
+      {
+        "left": 169,
+        "name": "Date",
+        "right": 393
+      },
+      {
+        "left": 169,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 182
+      },
+      {
+        "left": 169,
+        "name": "Date",
+        "right": 393
+      },
+      {
+        "left": 169,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 182
+      },
+      {
+        "left": 152,
+        "name": " Observed by (optional)",
+        "right": 600
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "animal-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 377,
+        "name": "Name (optional)",
+        "right": 714
+      },
+      {
+        "left": 726,
+        "name": " Acquired from (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Post no. (optional)",
+        "right": 714
+      },
+      {
+        "left": 726,
+        "name": "Ear tag (optional)",
+        "right": 1063
+      },
+      {
+        "left": 377,
+        "name": "Date",
+        "right": 601
+      },
+      {
+        "left": 377,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 390
+      },
+      {
+        "left": 377,
+        "name": "Date",
+        "right": 601
+      },
+      {
+        "left": 377,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 390
+      },
+      {
+        "left": 360,
+        "name": " Observed by (optional)",
+        "right": 808
+      }
+    ],
+    "heading": "Add an acquired animal",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "calving-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Dam",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Sire reference (optional)",
+        "right": 344
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 344
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "calving-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Dam",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Sire reference (optional)",
+        "right": 374
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 374
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "calving-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 69.2421875,
+        "name": "Dam",
+        "right": 453.2421875
+      },
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 265
+      },
+      {
+        "left": 41,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 54
+      },
+      {
+        "left": 24,
+        "name": " Sire reference (optional)",
+        "right": 472
+      },
+      {
+        "left": 24,
+        "name": " Observed by (optional)",
+        "right": 472
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "calving-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 197.2421875,
+        "name": "Dam",
+        "right": 581.2421875
+      },
+      {
+        "left": 169,
+        "name": "Date",
+        "right": 393
+      },
+      {
+        "left": 169,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 182
+      },
+      {
+        "left": 152,
+        "name": " Sire reference (optional)",
+        "right": 600
+      },
+      {
+        "left": 152,
+        "name": " Observed by (optional)",
+        "right": 600
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "calving-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 405.2421875,
+        "name": "Dam",
+        "right": 789.2421875
+      },
+      {
+        "left": 377,
+        "name": "Date",
+        "right": 601
+      },
+      {
+        "left": 377,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 390
+      },
+      {
+        "left": 360,
+        "name": " Sire reference (optional)",
+        "right": 808
+      },
+      {
+        "left": 360,
+        "name": " Observed by (optional)",
+        "right": 808
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "calving-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Dam",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Sire reference (optional)",
+        "right": 344
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 344
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "calving-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Dam",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Date",
+        "right": 257
+      },
+      {
+        "left": 33,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 46
+      },
+      {
+        "left": 16,
+        "name": " Sire reference (optional)",
+        "right": 374
+      },
+      {
+        "left": 16,
+        "name": " Observed by (optional)",
+        "right": 374
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "calving-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 69.2421875,
+        "name": "Dam",
+        "right": 453.2421875
+      },
+      {
+        "left": 41,
+        "name": "Date",
+        "right": 265
+      },
+      {
+        "left": 41,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 54
+      },
+      {
+        "left": 24,
+        "name": " Sire reference (optional)",
+        "right": 472
+      },
+      {
+        "left": 24,
+        "name": " Observed by (optional)",
+        "right": 472
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "calving-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 197.2421875,
+        "name": "Dam",
+        "right": 581.2421875
+      },
+      {
+        "left": 169,
+        "name": "Date",
+        "right": 393
+      },
+      {
+        "left": 169,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 182
+      },
+      {
+        "left": 152,
+        "name": " Sire reference (optional)",
+        "right": 600
+      },
+      {
+        "left": 152,
+        "name": " Observed by (optional)",
+        "right": 600
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "calving-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 405.2421875,
+        "name": "Dam",
+        "right": 789.2421875
+      },
+      {
+        "left": 377,
+        "name": "Date",
+        "right": 601
+      },
+      {
+        "left": 377,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 ",
+        "right": 390
+      },
+      {
+        "left": 360,
+        "name": " Sire reference (optional)",
+        "right": 808
+      },
+      {
+        "left": 360,
+        "name": " Observed by (optional)",
+        "right": 808
+      }
+    ],
+    "heading": "Record a calving",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "health-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Health board date",
+        "right": 171
+      },
+      {
+        "left": 33,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Assigned person",
+        "right": 207
+      },
+      {
+        "left": 33,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 327
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "health-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Health board date",
+        "right": 171
+      },
+      {
+        "left": 33,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Assigned person",
+        "right": 207
+      },
+      {
+        "left": 33,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 357
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "health-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Health board date",
+        "right": 179
+      },
+      {
+        "left": 41,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 376
+      },
+      {
+        "left": 392,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Assigned person",
+        "right": 215
+      },
+      {
+        "left": 41,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 727
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "health-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Health board date",
+        "right": 179
+      },
+      {
+        "left": 41,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 983
+      },
+      {
+        "left": 41,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 344.328125
+      },
+      {
+        "left": 360.328125,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 663.6640625
+      },
+      {
+        "left": 679.6640625,
+        "name": "Assigned person",
+        "right": 853.6640625
+      },
+      {
+        "left": 41,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 983
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "health-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Health board date",
+        "right": 179
+      },
+      {
+        "left": 41,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 1399
+      },
+      {
+        "left": 41,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 483
+      },
+      {
+        "left": 499,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 941
+      },
+      {
+        "left": 957,
+        "name": "Assigned person",
+        "right": 1131
+      },
+      {
+        "left": 41,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 1399
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "health-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Health board date",
+        "right": 171
+      },
+      {
+        "left": 33,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 327
+      },
+      {
+        "left": 33,
+        "name": "Assigned person",
+        "right": 207
+      },
+      {
+        "left": 33,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 327
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "health-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 33,
+        "name": "Health board date",
+        "right": 171
+      },
+      {
+        "left": 33,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 357
+      },
+      {
+        "left": 33,
+        "name": "Assigned person",
+        "right": 207
+      },
+      {
+        "left": 33,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 357
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "health-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Health board date",
+        "right": 179
+      },
+      {
+        "left": 41,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 376
+      },
+      {
+        "left": 392,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 727
+      },
+      {
+        "left": 41,
+        "name": "Assigned person",
+        "right": 215
+      },
+      {
+        "left": 41,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 727
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "health-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Health board date",
+        "right": 179
+      },
+      {
+        "left": 41,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 983
+      },
+      {
+        "left": 41,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 344.328125
+      },
+      {
+        "left": 360.328125,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 663.6640625
+      },
+      {
+        "left": 679.6640625,
+        "name": "Assigned person",
+        "right": 853.6640625
+      },
+      {
+        "left": 41,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 983
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "health-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 41,
+        "name": "Health board date",
+        "right": 179
+      },
+      {
+        "left": 41,
+        "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+        "right": 1399
+      },
+      {
+        "left": 41,
+        "name": "Task typeAll task typesDosesRechecksTests",
+        "right": 483
+      },
+      {
+        "left": 499,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+        "right": 941
+      },
+      {
+        "left": 957,
+        "name": "Assigned person",
+        "right": 1131
+      },
+      {
+        "left": 41,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+        "right": 1399
+      }
+    ],
+    "heading": "Animal health",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "analytics-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 88.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 179.171875
+      },
+      {
+        "left": 71.2265625,
+        "name": "Date ",
+        "right": 209.2265625
+      },
+      {
+        "left": 93.671875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 207.671875
+      },
+      {
+        "left": 123.4375,
+        "name": "Find animal ",
+        "right": 297.4375
+      },
+      {
+        "left": 71.6484375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 209.1484375
+      },
+      {
+        "left": 82.890625,
+        "name": "Order AscendingDescending",
+        "right": 197.890625
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 286,
+        "name": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "analytics-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 88.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 179.171875
+      },
+      {
+        "left": 71.2265625,
+        "name": "Date ",
+        "right": 209.2265625
+      },
+      {
+        "left": 93.671875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 207.671875
+      },
+      {
+        "left": 123.4375,
+        "name": "Find animal ",
+        "right": 297.4375
+      },
+      {
+        "left": 71.6484375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 209.1484375
+      },
+      {
+        "left": 82.890625,
+        "name": "Order AscendingDescending",
+        "right": 197.890625
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 316,
+        "name": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "analytics-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 96.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 187.171875
+      },
+      {
+        "left": 296.109375,
+        "name": "Date ",
+        "right": 434.109375
+      },
+      {
+        "left": 565.4921875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 679.4921875
+      },
+      {
+        "left": 549,
+        "name": "Find animal ",
+        "right": 723
+      },
+      {
+        "left": 79.6484375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 217.1484375
+      },
+      {
+        "left": 608,
+        "name": "Order AscendingDescending",
+        "right": 723
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 678,
+        "name": "Animal production details",
+        "scroll": 678,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "analytics-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 96.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 187.171875
+      },
+      {
+        "left": 296.109375,
+        "name": "Date ",
+        "right": 434.109375
+      },
+      {
+        "left": 565.4921875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 679.4921875
+      },
+      {
+        "left": 398.4609375,
+        "name": "Find animal ",
+        "right": 572.4609375
+      },
+      {
+        "left": 643.859375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 781.359375
+      },
+      {
+        "left": 864,
+        "name": "Order AscendingDescending",
+        "right": 979
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 934,
+        "name": "Animal production details",
+        "scroll": 934,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "analytics-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 96.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 187.171875
+      },
+      {
+        "left": 296.109375,
+        "name": "Date ",
+        "right": 434.109375
+      },
+      {
+        "left": 565.4921875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 679.4921875
+      },
+      {
+        "left": 537.125,
+        "name": "Find animal ",
+        "right": 711.125
+      },
+      {
+        "left": 921.1953125,
+        "name": "Sort AnimalMeasured litres",
+        "right": 1058.6953125
+      },
+      {
+        "left": 1280,
+        "name": "Order AscendingDescending",
+        "right": 1395
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 1350,
+        "name": "Animal production details",
+        "scroll": 1350,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "analytics-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [
+      {
+        "left": 88.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 179.171875
+      },
+      {
+        "left": 71.2265625,
+        "name": "Date ",
+        "right": 209.2265625
+      },
+      {
+        "left": 93.671875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 207.671875
+      },
+      {
+        "left": 123.4375,
+        "name": "Find animal ",
+        "right": 297.4375
+      },
+      {
+        "left": 71.6484375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 209.1484375
+      },
+      {
+        "left": 82.890625,
+        "name": "Order AscendingDescending",
+        "right": 197.890625
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 286,
+        "name": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "analytics-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [
+      {
+        "left": 88.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 179.171875
+      },
+      {
+        "left": 71.2265625,
+        "name": "Date ",
+        "right": 209.2265625
+      },
+      {
+        "left": 93.671875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 207.671875
+      },
+      {
+        "left": 123.4375,
+        "name": "Find animal ",
+        "right": 297.4375
+      },
+      {
+        "left": 71.6484375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 209.1484375
+      },
+      {
+        "left": 82.890625,
+        "name": "Order AscendingDescending",
+        "right": 197.890625
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 316,
+        "name": "Animal production details",
+        "scroll": 419,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "analytics-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [
+      {
+        "left": 96.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 187.171875
+      },
+      {
+        "left": 296.109375,
+        "name": "Date ",
+        "right": 434.109375
+      },
+      {
+        "left": 565.4921875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 679.4921875
+      },
+      {
+        "left": 549,
+        "name": "Find animal ",
+        "right": 723
+      },
+      {
+        "left": 79.6484375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 217.1484375
+      },
+      {
+        "left": 608,
+        "name": "Order AscendingDescending",
+        "right": 723
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 678,
+        "name": "Animal production details",
+        "scroll": 678,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "analytics-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [
+      {
+        "left": 96.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 187.171875
+      },
+      {
+        "left": 296.109375,
+        "name": "Date ",
+        "right": 434.109375
+      },
+      {
+        "left": 565.4921875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 679.4921875
+      },
+      {
+        "left": 398.4609375,
+        "name": "Find animal ",
+        "right": 572.4609375
+      },
+      {
+        "left": 643.859375,
+        "name": "Sort AnimalMeasured litres",
+        "right": 781.359375
+      },
+      {
+        "left": 864,
+        "name": "Order AscendingDescending",
+        "right": 979
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 934,
+        "name": "Animal production details",
+        "scroll": 934,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "analytics-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [
+      {
+        "left": 96.671875,
+        "name": "Review DailyWeeklyMonthly",
+        "right": 187.171875
+      },
+      {
+        "left": 296.109375,
+        "name": "Date ",
+        "right": 434.109375
+      },
+      {
+        "left": 565.4921875,
+        "name": "Session All sessionsMorningEvening",
+        "right": 679.4921875
+      },
+      {
+        "left": 537.125,
+        "name": "Find animal ",
+        "right": 711.125
+      },
+      {
+        "left": 921.1953125,
+        "name": "Sort AnimalMeasured litres",
+        "right": 1058.6953125
+      },
+      {
+        "left": 1280,
+        "name": "Order AscendingDescending",
+        "right": 1395
+      }
+    ],
+    "heading": "Measured production",
+    "regions": [
+      {
+        "client": 0,
+        "name": "Production and dispatch chart data",
+        "scroll": 0,
+        "tabindex": null
+      },
+      {
+        "client": 1350,
+        "name": "Animal production details",
+        "scroll": 1350,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "check-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 294,
+        "name": "histogram",
+        "scroll": 309,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "name": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "name": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "check-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 324,
+        "name": "histogram",
+        "scroll": 324,
+        "tabindex": null
+      },
+      {
+        "client": 324,
+        "name": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "name": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "check-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 686,
+        "name": "histogram",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "name": "intervals",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "name": "milking sessions",
+        "scroll": 686,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "check-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 942,
+        "name": "histogram",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "name": "intervals",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "name": "milking sessions",
+        "scroll": 942,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "check-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 1358,
+        "name": "histogram",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "name": "intervals",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "name": "milking sessions",
+        "scroll": 1358,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "check-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 294,
+        "name": "histogram",
+        "scroll": 309,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "name": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 294,
+        "name": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 360
+  },
+  {
+    "name": "check-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 324,
+        "name": "histogram",
+        "scroll": 324,
+        "tabindex": null
+      },
+      {
+        "client": 324,
+        "name": "intervals",
+        "scroll": 378,
+        "tabindex": "0"
+      },
+      {
+        "client": 324,
+        "name": "milking sessions",
+        "scroll": 390,
+        "tabindex": "0"
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "name": "check-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 686,
+        "name": "histogram",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "name": "intervals",
+        "scroll": 686,
+        "tabindex": null
+      },
+      {
+        "client": 686,
+        "name": "milking sessions",
+        "scroll": 686,
+        "tabindex": null
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "name": "check-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 942,
+        "name": "histogram",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "name": "intervals",
+        "scroll": 942,
+        "tabindex": null
+      },
+      {
+        "client": 942,
+        "name": "milking sessions",
+        "scroll": 942,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "name": "check-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Check the records",
+    "regions": [
+      {
+        "client": 1358,
+        "name": "histogram",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "name": "intervals",
+        "scroll": 1358,
+        "tabindex": null
+      },
+      {
+        "client": 1358,
+        "name": "milking sessions",
+        "scroll": 1358,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "life-101-light",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "life-101-light",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "life-101-light",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "life-101-light",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "life-101-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "life-101-dark",
+    "width": 360,
+    "documentWidth": 360,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 360
+  },
+  {
+    "name": "life-101-dark",
+    "width": 390,
+    "documentWidth": 390,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 390
+  },
+  {
+    "name": "life-101-dark",
+    "width": 768,
+    "documentWidth": 768,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 768
+  },
+  {
+    "name": "life-101-dark",
+    "width": 1024,
+    "documentWidth": 1024,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 1024
+  },
+  {
+    "name": "life-101-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Animal lifetime report",
+    "regions": [],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-dark",
+    "width": 360,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-dark",
+    "width": 390,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-dark",
+    "width": 768,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-dark",
+    "width": 1024,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-dark",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-light",
+    "width": 360,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-light",
+    "width": 390,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-light",
+    "width": 768,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-light",
+    "width": 1024,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "name": "statement-light",
+    "width": 1440,
+    "documentWidth": 1440,
+    "fields": [],
+    "heading": "Bashir (dodhi)",
+    "regions": [
+      {
+        "client": 1066,
+        "name": "Deliveries — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      },
+      {
+        "client": 1066,
+        "name": "Payments — September 2026",
+        "scroll": 1066,
+        "tabindex": null
+      }
+    ],
+    "viewport": 1440
+  }
+]

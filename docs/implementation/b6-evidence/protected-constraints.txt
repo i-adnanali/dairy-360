@@ -1,0 +1,17 @@
+B5 baseline 26c95c0fdce36c7a71c401ccfb91506785ed3f2b
+Byte comparisons; styles includes all resting-border/write-log token values.
+PASS web-angular/src/app/registry/animal-form.ts
+PASS web-angular/src/app/registry/calving-form.ts
+PASS web-angular/src/app/registry/precision-date.ts
+PASS web-angular/src/styles.css
+PASS web-angular/src/app/registry/draft-registry.ts
+PASS web-angular/src/app/registry/write-lock.ts
+PASS web-angular/src/app/registry/writer-draft.ts
+PASS web-angular/src/app/registry/form-state.ts
+PASS web-angular/src/app/registry/life-report.ts
+PASS web-angular/src/app/registry/milking-roster.ts
+PASS web-angular/src/app/registry/dispatch-sheet.ts
+PASS web-angular/src/app/registry/payroll-run.ts
+PASS web-angular/src/app/registry/health-page.ts
+PASS web-angular/src/app/registry/feed-daily.ts
+Server/shared source unchanged: True

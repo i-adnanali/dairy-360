@@ -1,0 +1,191 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Dairy 360 assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- button "Start a recording session"
+- main:
+  - heading "Dairy 360 assistant" [level=2]
+  - paragraph: Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances — and take actions with confirmation.
+  - generic: Answer ready.
+  - generic: long tools chart confirm
+  - region "Assistant message":
+    - heading "Synthetic long response" [level=2]
+    - paragraph: synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_
+    - table:
+      - rowgroup:
+        - row "Animal Notes Value":
+          - columnheader "Animal"
+          - columnheader "Notes"
+          - columnheader "Value"
+      - rowgroup:
+        - row "SYN-001 synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_ 0 L":
+          - cell "SYN-001"
+          - cell "synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_"
+          - cell "0 L"
+    - code: "{\"reference\":\"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\"}"
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - paragraph: Earlier content for scroll testing.
+    - table:
+      - rowgroup:
+        - row "Field 1 Field 2 Field 3 Field 4 Field 5 Field 6 Field 7 Field 8 Field 9 Field 10 Field 11 Field 12 Field 13 Field 14 Field 15 Field 16 Field 17 Field 18":
+          - columnheader "Field 1"
+          - columnheader "Field 2"
+          - columnheader "Field 3"
+          - columnheader "Field 4"
+          - columnheader "Field 5"
+          - columnheader "Field 6"
+          - columnheader "Field 7"
+          - columnheader "Field 8"
+          - columnheader "Field 9"
+          - columnheader "Field 10"
+          - columnheader "Field 11"
+          - columnheader "Field 12"
+          - columnheader "Field 13"
+          - columnheader "Field 14"
+          - columnheader "Field 15"
+          - columnheader "Field 16"
+          - columnheader "Field 17"
+          - columnheader "Field 18"
+      - rowgroup:
+        - row "Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic":
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+          - cell "Synthetic"
+  - heading "Synthetic herd — daily yield" [level=3]
+  - generic: 2 points
+  - button "Show data for Synthetic herd":
+    - text: Show data
+    - generic: for Synthetic herd
+  - button "read_animals Success":
+    - generic: read_animals
+    - generic: Success
+  - button "read_feed Error":
+    - generic: read_feed
+    - generic: Error
+  - paragraph: "Synthetic service refused the read: fixture failure."
+  - button "log_milking Error":
+    - generic: log_milking
+    - generic: Error
+  - paragraph: Rejected by operator; no synthetic operation performed.
+  - region "Assistant message":
+    - paragraph: Synthetic decision received. No farm data was modified.
+  - generic: confirm
+  - region "Assistant message":
+    - paragraph: "Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm."
+  - button "log_milking Success":
+    - generic: log_milking
+    - generic: Success
+  - region "Assistant message":
+    - paragraph: Synthetic decision received. No farm data was modified.
+  - generic: Confirm action
+  - generic: log_milking
+  - paragraph: Record 6 L for synthetic animal SYN-001
+  - term: Target
+  - definition: SYN-001 · Synthetic only
+  - term: Date
+  - definition: 2026-09-17
+  - term: Session
+  - definition: morning
+  - region "Proposed operation rows":
+    - table:
+      - rowgroup:
+        - row "Animal Value":
+          - columnheader "Animal"
+          - columnheader "Value"
+      - rowgroup:
+        - row "SYN-001 6 L":
+          - cell "SYN-001"
+          - cell "6 L"
+  - status: rejected · Rejected by operator; this operation was not authorized.
+  - generic: Confirm action
+  - generic: log_milking
+  - paragraph: Record 6 L for synthetic animal SYN-001
+  - term: Target
+  - definition: SYN-001 · Synthetic only
+  - term: Date
+  - definition: 2026-09-17
+  - term: Session
+  - definition: morning
+  - region "Proposed operation rows":
+    - table:
+      - rowgroup:
+        - row "Animal Value":
+          - columnheader "Animal"
+          - columnheader "Value"
+      - rowgroup:
+        - row "SYN-001 6 L":
+          - cell "SYN-001"
+          - cell "6 L"
+  - status [active]: approved · Approved by operator; execution result follows.
+  - paragraph: Enter to send · Shift+Enter for a new line
+  - textbox "Message to Dairy 360 assistant":
+    - /placeholder: Ask about the herd, or request an action…
+  - button "Send" [disabled]

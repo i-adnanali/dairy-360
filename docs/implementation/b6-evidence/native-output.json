@@ -1,0 +1,7 @@
+{
+  "print": "Clicked actual Print / Save as PDF; no preview, file or JS dialog exposed. No print/PDF capability advertised.",
+  "download": {
+    "event": false,
+    "error": "Error: Timed out after 5000ms waiting for download."
+  }
+}

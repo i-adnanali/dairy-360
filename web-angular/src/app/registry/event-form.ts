@@ -161,6 +161,7 @@ const FIELDS = [
         <app-identifier-input
           field="observed_by"
           label="Observed by"
+          help="Who witnessed this event, if anyone. Leave blank if unknown. Use a stable identifier, not a display name."
           [value]="observedBy()"
           [suggestions]="identifiers.values().observed_by"
           (changed)="observedBy.set($event)"

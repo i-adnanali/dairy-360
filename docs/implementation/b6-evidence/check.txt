@@ -1,0 +1,221 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "direct_entry · b6-synthetic"
+  - button "Search ⌘K"
+  - 'button "Theme: light. Switch to dark." [active]': light
+  - button "Dairy 360 assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- button "Recheck"
+- main:
+  - heading "Check the records" [level=2]
+  - paragraph: Read these; they are not assertions. Nothing in the rest of the app changes based on what is here.
+  - heading "Invariant violations" [level=3]
+  - paragraph: No violations across 31 animal(s), 70 event(s), 17 lactation(s), as of 2026-09-17.
+  - heading "Advisory worklist · People" [level=3]
+  - navigation "Labour advisories pagination":
+    - generic: 1–2 of 2
+  - list:
+    - heading "Identifier not linked to a person" [level=4]
+    - paragraph: rafiq · 10 records
+    - paragraph: "'rafiq' appears on 10 records and is not a person on file. Either they should be, or the name is a variant of somebody who already is."
+    - link "Review people":
+      - /url: /labour/people
+    - generic "Technical details"
+    - heading "Recorded wage differs from agreement" [level=4]
+    - paragraph: 2026-08-01 through 2026-08-31 · Recorded wage Rs 22,000.00 · Agreement Rs 25,000.00
+    - paragraph: imran has a recorded wage of Rs 22,000.00 for 2026-08-01..2026-08-31 against an agreement of Rs 25,000.00. Expected whenever there was leave or an adjustment.
+    - link "Review person":
+      - /url: /labour/people/per_18a46415-ddbc-449a-85a4-df057365f512
+    - generic "Technical details"
+  - heading "Coverage · How the dates were known" [level=3]
+  - paragraph: Source against precision. Nothing can detect a date that is more precise than the memory behind it — this is the number that shows it. A backfill coming out mostly exact-day recall is the signal worth acting on.
+  - region "histogram":
+    - table:
+      - rowgroup:
+        - row "Source Precision Events":
+          - columnheader "Source"
+          - columnheader "Precision"
+          - columnheader "Events"
+      - rowgroup:
+        - row "cycle_card day 8":
+          - cell "cycle_card"
+          - cell "day"
+          - cell "8"
+        - row "cycle_card month 10":
+          - cell "cycle_card"
+          - cell "month"
+          - cell "10"
+        - row "cycle_card year 3":
+          - cell "cycle_card"
+          - cell "year"
+          - cell "3"
+        - row "daily_herd_sheet day 3":
+          - cell "daily_herd_sheet"
+          - cell "day"
+          - cell "3"
+        - row "daily_herd_sheet month 1":
+          - cell "daily_herd_sheet"
+          - cell "month"
+          - cell "1"
+        - row "recall day 5":
+          - cell "recall"
+          - cell "day"
+          - cell "5"
+        - row "recall estimated 3":
+          - cell "recall"
+          - cell "estimated"
+          - cell "3"
+        - row "recall month 32":
+          - cell "recall"
+          - cell "month"
+          - cell "32"
+        - row "recall year 5":
+          - cell "recall"
+          - cell "year"
+          - cell "5"
+  - heading "Calving intervals" [level=3]
+  - navigation "Calving intervals pagination":
+    - generic: 1–7 of 7
+  - region "intervals":
+    - table:
+      - rowgroup:
+        - row "Animal From To Days Quality":
+          - columnheader "Animal"
+          - columnheader "From"
+          - columnheader "To"
+          - columnheader "Days"
+          - columnheader "Quality"
+      - rowgroup:
+        - row "BD-0001 2021-02-11 2022-07-19 523 measured":
+          - cell "BD-0001"
+          - cell "2021-02-11"
+          - cell "2022-07-19"
+          - cell "523"
+          - cell "measured"
+        - row "BD-0001 2022-07-19 2024-01-08 538 measured":
+          - cell "BD-0001"
+          - cell "2022-07-19"
+          - cell "2024-01-08"
+          - cell "538"
+          - cell "measured"
+        - row "BD-0002 2021-06-01 2022-12-01 548 approximate":
+          - cell "BD-0002"
+          - cell "2021-06-01"
+          - cell "2022-12-01"
+          - cell "548"
+          - cell "approximate"
+        - row "BD-0002 2022-12-01 2024-04-01 487 approximate":
+          - cell "BD-0002"
+          - cell "2022-12-01"
+          - cell "2024-04-01"
+          - cell "487"
+          - cell "approximate"
+        - row "BD-0003 2022-10-02 2024-02-01 487 approximate":
+          - cell "BD-0003"
+          - cell "2022-10-02"
+          - cell "2024-02-01"
+          - cell "487"
+          - cell "approximate"
+        - row "BD-0004 2018-06-01 2019-11-01 518 approximate":
+          - cell "BD-0004"
+          - cell "2018-06-01"
+          - cell "2019-11-01"
+          - cell "518"
+          - cell "approximate"
+        - row "BD-0012 2023-05-01 2024-11-01 550 approximate":
+          - cell "BD-0012"
+          - cell "2023-05-01"
+          - cell "2024-11-01"
+          - cell "550"
+          - cell "approximate"
+  - generic: measured
+  - generic: n = 2 · mean 530.5d
+  - generic: min 523d · max 538d
+  - generic: approximate
+  - generic: n = 5 · mean 518d
+  - generic: min 487d · max 550d
+  - paragraph: "2 measured and 5 approximate interval(s). These are reported separately and never averaged together: an approximate interval from two month-precision calvings carries roughly +/-60 days, larger than the difference between a good interval and a bad one. At this herd size this is a case series, not a dataset."
+  - heading "Coverage gaps · Milk records" [level=3]
+  - paragraph: "A session is complete when every animal in milk has a row — not when every row carries a number. The two are separate on purpose: a session of all “not measured” is a complete record and empty data, and one blended percentage would hide exactly that."
+  - generic: sessions
+  - generic: 4 complete of 5
+  - generic: 2026-09-15 → 2026-09-17
+  - generic: measured
+  - generic: 22 row(s)
+  - generic: carry a number
+  - generic: not measured
+  - generic: 5 row(s)
+  - generic: milked, unweighed · 1 not milked
+  - region "milking sessions":
+    - table:
+      - rowgroup:
+        - row "Date Session Recorded In milk Measured":
+          - columnheader "Date"
+          - columnheader "Session"
+          - columnheader "Recorded"
+          - columnheader "In milk"
+          - columnheader "Measured"
+      - rowgroup:
+        - row "2026-09-17 morning 6 6 5":
+          - cell "2026-09-17"
+          - cell "morning"
+          - cell "6"
+          - cell "6"
+          - cell "5"
+        - row "2026-09-16 evening 4 6 2":
+          - cell "2026-09-16"
+          - cell "evening"
+          - cell "4"
+          - cell "6"
+          - cell "2"
+        - row "2026-09-16 morning 6 6 5":
+          - cell "2026-09-16"
+          - cell "morning"
+          - cell "6"
+          - cell "6"
+          - cell "5"
+        - row "2026-09-15 evening 6 6 4":
+          - cell "2026-09-15"
+          - cell "evening"
+          - cell "6"
+          - cell "6"
+          - cell "4"
+        - row "2026-09-15 morning 6 6 6":
+          - cell "2026-09-15"
+          - cell "morning"
+          - cell "6"
+          - cell "6"
+          - cell "6"
+  - paragraph: "A complete session means every animal in milk has a row, not that every row carries a number. The two are reported separately and never blended: a session of all milked_not_measured is a complete record and empty data. Morning and evening are also never pooled -- the interval between milkings is unknown, so the two are not comparable."
+  - heading "Where the milk went" [level=3]
+  - paragraph: 2026-08-29 → 2026-09-27
+  - generic: Measured
+  - generic: 135.2 L
+  - generic: from 22 row(s)
+  - generic: Sold
+  - generic: 107.5 L
+  - generic: Rs 20,262.50
+  - generic: Kept at home
+  - generic: 16.5 L
+  - generic: its own term, not the gap
+  - generic: Gap
+  - generic: 11.2 L
+  - generic: no percentage
+  - paragraph: No percentage, on purpose — 5 milking(s) were taken but not weighed and 2 animal-session(s) have no row at all, so production is a lower bound and a percentage of it would be false in a direction nobody would guess.
+  - paragraph: 5 of 5 dispatch session(s) had every standing destination answered.
+  - paragraph: "The gap is produced minus dispatched, and it mixes two unknowns that pull in opposite directions: milk that was taken but never weighed makes it negative, and a sale nobody recorded makes it positive. A NEGATIVE GAP IS NORMAL while any milking is unweighed -- the milk existed, nobody measured it -- and it is not an alert. Occasional buyers have no row when they take nothing, so this gap is the only place an unrecorded household sale ever surfaces. Read it with the counts beside it, never on its own."

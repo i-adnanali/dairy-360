@@ -1,0 +1,6 @@
+
+> dairy-360@1.0.0 check:templates
+> node scripts/check-templates.mjs
+
+component templates: 86 files, no stray backticks
+component hosts: 28 non-routed, all with display:block; 21 routed

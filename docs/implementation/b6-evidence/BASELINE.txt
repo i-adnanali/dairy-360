@@ -1,0 +1,12 @@
+Baseline and current HEAD: 26c95c0fdce36c7a71c401ccfb91506785ed3f2b
+Uncommitted B6 working tree; no commit or push.
+ M docs/UI_SYSTEM.md
+ M web-angular/src/app/components/chat-panel.spec.ts
+ M web-angular/src/app/registry/event-form.ts
+ M web-angular/src/app/registry/event-list.ts
+ M web-angular/src/app/registry/people-list.ts
+ M web-angular/src/app/registry/person-detail.ts
+ M web-angular/src/app/registry/registry-shell.ts
+?? docs/implementation/B6-PROGRESS.md
+?? docs/implementation/b6-evidence/
+?? docs/reviews/

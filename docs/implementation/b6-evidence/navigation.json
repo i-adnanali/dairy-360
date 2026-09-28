@@ -1,0 +1,57 @@
+[
+  {
+    "case": "raw same-context Keep",
+    "value": null,
+    "dom": "12."
+  },
+  {
+    "case": "palette Keep",
+    "value": "12.",
+    "url": "http://localhost:6502/milk/milking"
+  },
+  {
+    "case": "Back Keep",
+    "value": "12.",
+    "url": "http://localhost:6502/milk/milking"
+  },
+  {
+    "case": "Payroll recorder Keep",
+    "value": "123.",
+    "oldSession": 1
+  },
+  {
+    "case": "Feed review Keep",
+    "retained": true
+  },
+  {
+    "case": "animal Keep",
+    "value": "B6 raw animal"
+  },
+  {
+    "case": "Health Close Keep",
+    "value": "B6 incomplete visit"
+  },
+  {
+    "case": "inline event replacement Keep",
+    "value": "B6 event raw"
+  },
+  {
+    "case": "People Keep final",
+    "value": "b6-person-draft",
+    "evidence": "Read DOM input person-identifier after Keep; locator evaluate timed out, whole DOM read succeeded."
+  },
+  {
+    "case": "buyer payment Keep",
+    "value": "B6 buyer draft"
+  },
+  {
+    "case": "person payment Keep",
+    "value": "B6 person payment"
+  },
+  {
+    "case": "pristine browser Back/Forward",
+    "back": "http://localhost:6502/labour/people",
+    "forward": "http://localhost:6502/labour/people/per_18a46415-ddbc-449a-85a4-df057365f512",
+    "dialogCount": 0
+  }
+]

@@ -1645,10 +1645,9 @@ from what the app already does:
 
 **Unverified**
 
-- **30 contrast failures remain**, including light `--certainty-absent` on all
-  three surfaces and the certainty rule below 3:1. Light approximate now clears
-  AA on all three surfaces (§4.5). The remaining failures render
-  quieter than the standard asks for, on a screen somebody reads all day.
+- **Six exact resting-border contrast exceptions remain.** B1 repaired meaningful
+  absent/no-record/subtle text and certainty rules; B6 rechecked the gated matrix
+  with no unexpected failures. The older 30-failure counts are historical.
 - **The categorical agent ramp** has not been checked for distinguishability
   under common colour-vision deficiencies, in either mode — and phase 6b widened
   its reach to the tool-call chip, so it now carries more weight than when this
@@ -1675,7 +1674,7 @@ from what the app already does:
 - ~~Whether `--certainty-approx` and `--certainty-absent` should hold different
   light values.~~ **Resolved:** approximate is `#6C6A64`, absent remains
   `#82807A`. The three surface ratios and the choice are recorded in §4.5;
-  both themes now give approximate greater text contrast than absent.
+  this historical distinction was superseded by B1: absent and approximate now use readable text values.
 - ~~Where `Recheck` lives.~~ **Resolved:** the Check section bar; the standalone
   verification component keeps its own top action when used without the shell.
 - **Whether the storage chip's neutral state is enough.** A real registry showing
@@ -1693,7 +1692,7 @@ from what the app already does:
 
 Feed adds one section between Milk and Labour, its contextual views/actions and command-palette entries. Existing cards, inputs, buttons, date parsing, recording setup and write announcements are reused. Daily entry and new crop/purchase routes use the shell’s compact form layout. Saved daily lines collapse for correction; review spells out sources, snapshots, preparation and unknown quantities. Partial and absent accounts use words, not colour alone.
 
-Desktop light/dark and 390px checks are in the [feed gallery](images/feed/README.md); the Phase 7 gallery remains historical. The five-animal farm trial is still outstanding. No resting border or other colour tokens changed; the current contrast report has 30 token failures. [Feed semantics and verification](REGISTRY_FEED.md).
+Desktop light/dark and 390px checks are in the [feed gallery](images/feed/README.md); the Phase 7 gallery remains historical. The five-animal farm trial is still outstanding. No resting border or other colour tokens changed; that historical contrast report had 30 token failures; B1 reduced the current held set to six. [Feed semantics and verification](REGISTRY_FEED.md).
 
 ## 18. Health extension — 2026-09-15
 
@@ -1777,6 +1776,17 @@ Check separates violations, coverage and advisories. Shared `LabourReportLine` r
 
 All B1–B3 draft/write/date, protected-form, responsive-entry, provenance and Health contracts remain. Held borders and write-log prominence are unchanged. Native assistive-device/phone/zoom, actual print/PDF/download, representative operator and live assistant acceptance remain explicitly unverified.
 
-## 21. Batch B5 — assistant consistency, 2026-09-27
+## 24. Batch B5 — assistant consistency, 2026-09-27
 
 Current assistant behavior is specified in §13; it supersedes phase 6b's historical overlay and dual-view behavior. [B5 progress and evidence](implementation/B5-PROGRESS.md) record 450 frontend tests, 779 server tests, both-theme responsive/keyboard checks and the isolated AG-UI fixture. Shared ScrollRegion also responds to streamed child replacement so new wide tables gain a local keyboard scroll stop. The six held borders remain unchanged; meaningful composer text no longer uses the disabled-text exemption. B1–B4 domain/draft/write contracts are preserved. B6 and the carried-forward native output, operator, assistive-device, phone, zoom and live-assistant limits remain outstanding.
+
+
+## 25. Batch B6 — release verification, 2026-09-28
+
+[B6 progress](implementation/B6-PROGRESS.md) and its [acceptance matrix](implementation/b6-evidence/ACCEPTANCE.md) distinguish fresh checks, prior evidence, held exceptions and unverified cases. B1–B5 are implemented; earlier statements that later batches have not started describe their historical batch boundary. B6 does not declare release readiness while required acceptance remains open.
+
+B6 separates the People identifier's concise label from its help and validation error with `aria-describedby` and `aria-invalid`. Route navigation focuses the first main `h1` or `h2`, including Analytics' page title. Animal event history retains internal record/replacement IDs inside a keyboard-operable Technical event details disclosure; summaries, provenance and superseded badges remain visible. The inline event observer help refers to witnessing that event. Person-payment Handed over by has one label and payment-specific help. Protected animal/calving forms, precision-date defaults, write-log styling and financial/clinical calculations are unchanged.
+
+Fresh checks include the full 450-test frontend suite, 779 server tests, production build, typecheck, template/contrast gates and browser geometry/navigation evidence. A ChatPanel test isolation defect was repaired by setting its standalone fixture's dock state explicitly. Browser fixtures are synthetic and memory-only; synthetic assistant approvals execute no farm writes.
+
+Actual native PDF/print, completed JSON download, 200% native browser zoom, screen-reader/real-phone acceptance and operator walkthrough remain unverified. The output buttons were exercised, but the available browser returned no inspectable PDF or downloaded file. Viewport resizing and complete Blob/print-DOM tests do not close those gates. See the matrix for additional browser state combinations still covered only by component/server tests or prior evidence. Six exact resting-border exceptions remain held; memory-only drafts still have no crash recovery.

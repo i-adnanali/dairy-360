@@ -92,21 +92,22 @@ import type { PrecisionParts } from './precision-display';
                 <span appBadge tone="ended" data-role="superseded-badge">superseded</span>
               }
 
-              <span class="ml-auto font-mono text-xs text-content-subtle" data-role="id">{{
-                e.id
-              }}</span>
             </div>
 
-            @if (!e.effective && e.superseded_by_id) {
-              <p class="mt-1 text-xs text-content-secondary" data-role="replaced-by">
-                replaced by <span class="font-mono">{{ e.superseded_by_id }}</span>
-              </p>
-            }
-            @if (e.supersedes_id) {
-              <p class="mt-1 text-xs text-content-secondary" data-role="replaces">
-                replaces <span class="font-mono">{{ e.supersedes_id }}</span>
-              </p>
-            }
+            <details class="mt-1 text-xs text-content-subtle">
+              <summary>Technical event details</summary>
+              <p class="break-all font-mono" data-role="id">{{ e.id }}</p>
+              @if (!e.effective && e.superseded_by_id) {
+                <p class="break-all" data-role="replaced-by">
+                  replaced by <span class="font-mono">{{ e.superseded_by_id }}</span>
+                </p>
+              }
+              @if (e.supersedes_id) {
+                <p class="break-all" data-role="replaces">
+                  replaces <span class="font-mono">{{ e.supersedes_id }}</span>
+                </p>
+              }
+            </details>
 
             @if (summary(e); as s) {
               <p

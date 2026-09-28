@@ -1,0 +1,56 @@
+[
+  {
+    "review": "Daily",
+    "session": "All sessions",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=day&session=all",
+    "snapshot": "Measured production\n\n29.7 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n24 L\n\nSold 21.5 L · Non-sale 2.5 L\n\nDifference\n\n5.7 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; production not yet recorded; standing dispatch not yet recorded; no dispatch records; no measurements.\n\nCoverage\n\n5 / 12\n\nExpected animal sessions · 1 unmeasured · 0 not milked · 0 missing · 6 pending · 8 approximate roster slots"
+  },
+  {
+    "review": "Daily",
+    "session": "Morning",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=day&session=morning",
+    "snapshot": "Measured production\n\n29.7 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n24 L\n\nSold 21.5 L · Non-sale 2.5 L\n\nDifference\n\n5.7 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates.\n\nCoverage\n\n5 / 6\n\nExpected animal sessions · 1 unmeasured · 0 not milked · 0 missing · 0 pending · 4 approximate roster slots"
+  },
+  {
+    "review": "Daily",
+    "session": "Evening",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=day&session=evening",
+    "snapshot": "Measured production\n\nNo records\n\nNo measurements recorded\n\nRecorded dispatch\n\nNo records\n\nSold 0 L · Non-sale 0 L\n\nDifference\n\nNot available\n\nMeasured minus dispatched; not a wastage measure. Difference unavailable: production not yet recorded; approximate roster dates; standing dispatch not yet recorded; no dispatch records; no measurements.\n\nCoverage\n\n0 / 6\n\nExpected animal sessions · 0 unmeasured · 0 not milked · 0 missing · 6 pending · 4 approximate roster slots"
+  },
+  {
+    "review": "Weekly",
+    "session": "All sessions",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=week&session=all",
+    "snapshot": "Measured production\n\n135.2 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n124 L\n\nSold 107.5 L · Non-sale 16.5 L\n\nDifference\n\n11.2 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; standing dispatch records missing; no dispatch records; no measurements; production not yet recorded; standing dispatch not yet recorded.\n\nCoverage\n\n22 / 48\n\nExpected animal sessions · 5 unmeasured · 1 not milked · 14 missing · 6 pending · 32 approximate roster slots"
+  },
+  {
+    "review": "Weekly",
+    "session": "Morning",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=week&session=morning",
+    "snapshot": "Measured production\n\n99.5 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n81.5 L\n\nSold 73 L · Non-sale 8.5 L\n\nDifference\n\n18 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; standing dispatch records missing; no dispatch records; no measurements.\n\nCoverage\n\n16 / 24\n\nExpected animal sessions · 1 unmeasured · 1 not milked · 6 missing · 0 pending · 16 approximate roster slots"
+  },
+  {
+    "review": "Weekly",
+    "session": "Evening",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=week&session=evening",
+    "snapshot": "Measured production\n\n35.7 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n42.5 L\n\nSold 34.5 L · Non-sale 8 L\n\nDifference\n\n-6.8 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; standing dispatch records missing; no dispatch records; no measurements; production not yet recorded; standing dispatch not yet recorded.\n\nCoverage\n\n6 / 24\n\nExpected animal sessions · 4 unmeasured · 0 not milked · 8 missing · 6 pending · 16 approximate roster slots"
+  },
+  {
+    "review": "Monthly",
+    "session": "All sessions",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=month&session=all",
+    "snapshot": "Measured production\n\n135.2 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n124 L\n\nSold 107.5 L · Non-sale 16.5 L\n\nDifference\n\n11.2 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; standing dispatch records missing; no dispatch records; no measurements; production not yet recorded; standing dispatch not yet recorded.\n\nCoverage\n\n22 / 204\n\nExpected animal sessions · 5 unmeasured · 1 not milked · 170 missing · 6 pending · 136 approximate roster slots"
+  },
+  {
+    "review": "Monthly",
+    "session": "Morning",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=month&session=morning",
+    "snapshot": "Measured production\n\n99.5 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n81.5 L\n\nSold 73 L · Non-sale 8.5 L\n\nDifference\n\n18 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; standing dispatch records missing; no dispatch records; no measurements.\n\nCoverage\n\n16 / 102\n\nExpected animal sessions · 1 unmeasured · 1 not milked · 84 missing · 0 pending · 68 approximate roster slots"
+  },
+  {
+    "review": "Monthly",
+    "session": "Evening",
+    "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=&view=month&session=evening",
+    "snapshot": "Measured production\n\n35.7 L\n\nPartial or qualified measured total\n\nRecorded dispatch\n\n42.5 L\n\nSold 34.5 L · Non-sale 8 L\n\nDifference\n\n-6.8 L\n\nMeasured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; standing dispatch records missing; no dispatch records; no measurements; production not yet recorded; standing dispatch not yet recorded.\n\nCoverage\n\n6 / 102\n\nExpected animal sessions · 4 unmeasured · 0 not milked · 86 missing · 6 pending · 68 approximate roster slots"
+  }
+]

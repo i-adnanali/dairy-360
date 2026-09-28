@@ -316,7 +316,7 @@ export class RegistryShell {
     const main = document.querySelector('main');
     if (!main) return;
     const focus = () => {
-      const heading = main.querySelector<HTMLElement>('h2');
+      const heading = main.querySelector<HTMLElement>('h1, h2');
       if (!heading) return false;
       heading.setAttribute('tabindex', '-1');
       heading.focus({ preventScroll: true });

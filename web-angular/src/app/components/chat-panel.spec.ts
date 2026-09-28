@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import type { PendingWrite } from '@dairy/shared';
 import { ChatStore } from '../core/chat-store';
 import { ChatPanel } from './chat-panel';
+import { Assistant } from '../core/assistant';
 
 describe('ChatPanel', () => {
   let store: ChatStore;
@@ -14,6 +15,8 @@ describe('ChatPanel', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
+    // Standalone fixtures must not inherit the persisted dock preference from other suites.
+    TestBed.inject(Assistant).open.set(false);
     store = TestBed.inject(ChatStore);
   });
 

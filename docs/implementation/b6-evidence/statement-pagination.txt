@@ -1,0 +1,333 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: light. Switch to dark."': light
+  - button "Dairy 360 assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Milking":
+    - /url: /milk/milking
+  - link "Dispatch":
+    - /url: /milk/dispatch
+  - link "Buyers":
+    - /url: /milk/buyers
+- button "Start a recording session"
+- main:
+  - link "← all buyers":
+    - /url: /milk/buyers
+  - heading "Bashir (dodhi)" [level=2]
+  - generic: Owes
+  - generic: Rs 98,400.00
+  - paragraph: 1010 L over 1 month(s) · billed Rs 101,000.00 · paid Rs 2,600.00
+  - generic: September 2026
+  - generic: 1010 L · billed Rs 101,000.00 · paid Rs 2,600.00 · Rs 98,400.00 carried forward
+  - region "Deliveries — September 2026":
+    - heading "Deliveries" [level=3]
+    - navigation "Deliveries — September 2026 pagination":
+      - text: Rows per page
+      - combobox "Deliveries — September 2026 rows per page":
+        - option "25" [selected]
+        - option "50"
+        - option "100"
+      - generic: 26–50 of 101
+      - button "Previous"
+      - generic: Page 2 of 5
+      - button "Next" [active]
+    - region "Deliveries — September 2026":
+      - table:
+        - rowgroup:
+          - row "Date / session Quantity / reason Recorded rate Billed":
+            - columnheader "Date / session"
+            - columnheader "Quantity / reason"
+            - columnheader "Recorded rate"
+            - columnheader "Billed"
+        - rowgroup:
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+          - row "2026-09-15 morning 10 L Rs 100.00 / 1 L Rs 1,000.00":
+            - cell "2026-09-15 morning"
+            - cell "10 L"
+            - cell "Rs 100.00 / 1 L"
+            - cell "Rs 1,000.00"
+  - region "Payments — September 2026":
+    - heading "Payments" [level=3]
+    - navigation "Payments — September 2026 pagination":
+      - text: Rows per page
+      - combobox "Payments — September 2026 rows per page":
+        - option "25" [selected]
+        - option "50"
+        - option "100"
+      - generic: 1–25 of 26
+      - button "Previous" [disabled]
+      - generic: Page 1 of 2
+      - button "Next"
+    - region "Payments — September 2026":
+      - table:
+        - rowgroup:
+          - row "Date Method / reference / note Payment":
+            - columnheader "Date"
+            - columnheader "Method / reference / note"
+            - columnheader "Payment"
+        - rowgroup:
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+          - row "2026-09-16 cash · khata p.14 −Rs 100.00":
+            - cell "2026-09-16"
+            - cell "cash · khata p.14"
+            - cell "−Rs 100.00"
+  - heading "Record a payment" [level=3]
+  - generic: Amount (Rs)
+  - textbox "Amount (Rs)"
+  - generic: "On"
+  - textbox "On": 2026-09-28
+  - generic: How
+  - radiogroup "Method":
+    - radio "Cash" [checked]:
+      - generic: "1"
+      - generic: Cash
+    - radio "Bank":
+      - generic: "2"
+      - generic: Bank
+    - radio "Adjustment":
+      - generic: "3"
+      - generic: Adjustment
+  - generic: Reference (optional)
+  - textbox "Reference (optional)":
+    - /placeholder: cheque no., transfer ref, khata page
+  - generic: Recording is off, so a payment cannot be saved yet.
+  - button "Start recording"
+  - heading "Agreed rates" [level=3]
+  - navigation "Rates pagination":
+    - generic: 1–1 of 1
+  - list:
+    - listitem: from 2026-05-20 — Rs 7,000.00 / 40 L

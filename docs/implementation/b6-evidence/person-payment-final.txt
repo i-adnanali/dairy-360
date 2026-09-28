@@ -1,0 +1,76 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: light. Switch to dark."': light
+  - button "Dairy 360 assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "People":
+    - /url: /labour/people
+  - link "Payroll":
+    - /url: /labour/payroll
+- button "Start a recording session"
+- main:
+  - link "← People":
+    - /url: /labour/people
+  - heading "Imran imran" [active] [level=2]
+  - paragraph: Rs 7,000.00 owed.
+  - heading "Stints" [level=3]
+  - list:
+    - generic: Salaried· milker
+    - generic: 2026-05-20 → open
+    - paragraph: Rs 25,000.00 / month · accommodation · 20 kg flour / month · 2 L milk / day
+    - button "Close this stint"
+  - heading "Statement" [level=3]
+  - generic: 2026-08
+  - generic: earned Rs 22,000.00 · paid Rs 15,000.00 · closing Rs 7,000.00
+  - list:
+    - generic: Wage 2026-08-01 → 2026-08-31· four days leave
+    - generic: Rs 22,000.00
+    - generic: Paid 2026-08-31 cash
+    - generic: − Rs 15,000.00
+  - heading "Record a payment" [level=3]
+  - text: Method
+  - radiogroup "Payment method":
+    - radio "Cash" [checked]:
+      - generic: "1"
+      - generic: Cash
+    - radio "Bank":
+      - generic: "2"
+      - generic: Bank
+    - radio "Adjustment":
+      - generic: "3"
+      - generic: Adjustment
+      - generic: signed, must say why
+  - generic: Amount (Rs)
+  - textbox "Amount (Rs)"
+  - generic: "On"
+  - textbox "On": 2026-09-28
+  - generic: Reference (optional)
+  - textbox "Reference (optional)":
+    - /placeholder: peshgi
+  - generic: Note (optional)
+  - textbox "Note (optional)"
+  - generic: Handed over by (optional)
+  - combobox "Handed over by (optional)"
+  - generic: Person who handed over this payment, if known. Use a stable identifier, not a display name.
+  - generic: Recording is off, so a payment cannot be saved yet.
+  - button "Start recording"

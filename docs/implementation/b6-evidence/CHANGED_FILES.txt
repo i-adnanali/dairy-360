@@ -1,0 +1,9 @@
+docs/UI_SYSTEM.md
+web-angular/src/app/components/chat-panel.spec.ts
+web-angular/src/app/registry/event-form.ts
+web-angular/src/app/registry/event-list.ts
+web-angular/src/app/registry/people-list.ts
+web-angular/src/app/registry/person-detail.ts
+web-angular/src/app/registry/registry-shell.ts
+docs/implementation/B6-PROGRESS.md
+docs/implementation/b6-evidence/ (new evidence directory)

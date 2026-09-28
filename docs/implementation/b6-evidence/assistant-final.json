@@ -1,0 +1,114 @@
+[
+  {
+    "theme": "light",
+    "width": 360,
+    "composers": 1,
+    "documentWidth": 360,
+    "heading": "Dairy 360 assistant",
+    "viewport": 360
+  },
+  {
+    "theme": "light",
+    "width": 390,
+    "composers": 1,
+    "documentWidth": 390,
+    "heading": "Dairy 360 assistant",
+    "viewport": 390
+  },
+  {
+    "theme": "light",
+    "width": 768,
+    "composers": 1,
+    "documentWidth": 768,
+    "heading": "Dairy 360 assistant",
+    "viewport": 768
+  },
+  {
+    "theme": "light",
+    "width": 1024,
+    "composers": 1,
+    "documentWidth": 1024,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1024
+  },
+  {
+    "theme": "light",
+    "width": 1279,
+    "composers": 1,
+    "documentWidth": 1279,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1279
+  },
+  {
+    "theme": "light",
+    "width": 1280,
+    "composers": 1,
+    "documentWidth": 1280,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1280
+  },
+  {
+    "theme": "light",
+    "width": 1440,
+    "composers": 1,
+    "documentWidth": 1440,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1440
+  },
+  {
+    "theme": "dark",
+    "width": 360,
+    "composers": 1,
+    "documentWidth": 360,
+    "heading": "Dairy 360 assistant",
+    "viewport": 360
+  },
+  {
+    "theme": "dark",
+    "width": 390,
+    "composers": 1,
+    "documentWidth": 390,
+    "heading": "Dairy 360 assistant",
+    "viewport": 390
+  },
+  {
+    "theme": "dark",
+    "width": 768,
+    "composers": 1,
+    "documentWidth": 768,
+    "heading": "Dairy 360 assistant",
+    "viewport": 768
+  },
+  {
+    "theme": "dark",
+    "width": 1024,
+    "composers": 1,
+    "documentWidth": 1024,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1024
+  },
+  {
+    "theme": "dark",
+    "width": 1279,
+    "composers": 1,
+    "documentWidth": 1279,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1279
+  },
+  {
+    "theme": "dark",
+    "width": 1280,
+    "composers": 1,
+    "documentWidth": 1280,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1280
+  },
+  {
+    "theme": "dark",
+    "width": 1440,
+    "composers": 1,
+    "documentWidth": 1440,
+    "heading": "Dairy 360 assistant",
+    "viewport": 1440
+  }
+]
