@@ -299,7 +299,8 @@ export class ChatStore {
     } catch {
       /* non-JSON result - treat as success */
     }
-    this.patchToolCall(toolCallId, (c) => ({ ...c, status: errored ? 'error' : 'done', reason }));
+    const rejected = this.decisions().some(d => d.card.toolUseId === toolCallId && !d.approved);
+    this.patchToolCall(toolCallId, (c) => ({ ...c, status: errored || rejected ? 'error' : 'done', reason: rejected ? 'Rejected by operator; operation not authorized.' : reason }));
   }
 
   /** Patch a tool-call chip anywhere in the log (results may land in a later

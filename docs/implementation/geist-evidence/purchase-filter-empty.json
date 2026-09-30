@@ -1,0 +1,174 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Menu · Feed\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Feed purchases\" [active] [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - link \"Record feeding\":\n    - /url: /feed/daily/2026-09-30\n  - button \"Feed catalogue\"\n  - generic: Item filter\n  - combobox \"Item filter\":\n    - option \"All items\"\n    - option \"Silage\"\n    - option \"Khall\" [selected]\n    - option \"Fresh fodder\"\n  - generic: From\n  - textbox \"From\"\n  - generic: Through\n  - textbox \"Through\": 2026-09-30\n  - paragraph: No purchases match these filters.\n  - button \"Clear filters\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "browsing — nothing is being recorded",
+      "rect": {
+        "height": 44,
+        "width": 69.3046875,
+        "x": 243.3984375,
+        "y": 12
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Feed",
+      "rect": {
+        "height": 44,
+        "width": 114.8359375,
+        "x": 16,
+        "y": 68
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.8359375,
+        "y": 68
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.8046875,
+        "y": 68
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.8984375,
+        "y": 68
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Feed catalogue",
+      "rect": {
+        "height": 44,
+        "width": 135.3359375,
+        "x": 156.2734375,
+        "y": 342
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Item filterAll itemsSilageKhallFresh fodder",
+      "rect": {
+        "height": 44,
+        "width": 130.5,
+        "x": 16,
+        "y": 426
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "From",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 158.5,
+        "y": 426
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Through",
+      "rect": {
+        "height": 44,
+        "width": 153,
+        "x": 16,
+        "y": 502
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Clear filters",
+      "rect": {
+        "height": 44,
+        "width": 110.375,
+        "x": 33,
+        "y": 623
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Feed purchases"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed/purchases",
+  "width": 390
+}

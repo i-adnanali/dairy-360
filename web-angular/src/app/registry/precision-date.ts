@@ -153,7 +153,7 @@ export function dateBlocker(
       @switch (entry().status) {
         @case ('complete') {
           <p class="mt-3 text-sm" data-role="reading">
-            <span class="text-content-muted">Reading this as</span>
+
             <span class="ml-1 font-medium text-content-primary">{{ readingText() }}</span>
           </p>
           <p appHelp size="xs" tone="subtle" class="mt-1" data-role="reading-escape">

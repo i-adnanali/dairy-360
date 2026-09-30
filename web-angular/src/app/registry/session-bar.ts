@@ -63,7 +63,7 @@ import { Target } from './target';
             data-role="change-session"
             (click)="session.requestSetup()"
           >
-            {{ session.sourceForm() }} · {{ session.recordedBy() }}
+            Recording as {{ session.recordedBy() }} · {{ sourceLabel() }}
           </button>
         </span>
       } @else {
@@ -82,6 +82,9 @@ import { Target } from './target';
   `,
 })
 export class SessionBar implements OnInit {
+  protected sourceLabel() {
+    return ({ direct_entry: 'Direct entry', recall: 'Recall', daily_herd_sheet: 'Daily herd sheet', cycle_card: 'Cycle card', import: 'Import' } as Record<string, string>)[this.session.sourceForm() ?? ''] ?? this.session.sourceForm();
+  }
   readonly mode = input<'storage' | 'session' | 'both'>('both');
   protected readonly session = inject(Session);
   protected readonly target = inject(Target);

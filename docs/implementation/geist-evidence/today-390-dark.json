@@ -1,0 +1,115 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Today\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- button \"Change recording session\"\n- main:\n  - heading \"Today\" [level=2]\n  - paragraph: Tuesday 29 September 2026\n  - heading \"Animal health\" [level=3]\n  - link \"5 overdue · 0 due today · 5 withdrawal instructions to review\":\n    - /url: /animals/health\n  - heading \"Milking\" [level=3]\n  - link \"morning 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-29&session=morning\n    - generic: morning\n    - generic: 0 of 6 recorded\n  - link \"evening 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-29&session=evening\n    - generic: evening\n    - generic: 0 of 6 recorded\n  - heading \"Dispatch\" [level=3]\n  - link \"morning 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-29&session=morning\n    - generic: morning\n    - generic: 0 of 2 recorded\n  - link \"evening 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-29&session=evening\n    - generic: evening\n    - generic: 0 of 2 recorded\n  - heading \"Feed\" [level=3]\n  - link \"Not recorded Record feeding\":\n    - /url: /feed/daily/2026-09-29\n    - generic: Not recorded\n    - generic: Record feeding\n  - heading \"Payroll\" [level=3]\n  - link \"September 2026 2 of 2 still to enter\":\n    - /url: /labour/payroll?from=2026-09-01&to=2026-09-30\n    - generic: September 2026\n    - generic: 2 of 2 still to enter",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Today",
+      "rect": {
+        "height": 44,
+        "width": 121.859375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 149.859375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 235.828125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 290.921875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change recording session",
+      "rect": {
+        "height": 44,
+        "width": 205.5234375,
+        "x": 16,
+        "y": 171.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Today",
+    "Animal health",
+    "Milking",
+    "Dispatch",
+    "Feed",
+    "Payroll"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/",
+  "width": 390
+}

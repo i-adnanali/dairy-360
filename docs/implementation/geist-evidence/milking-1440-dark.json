@@ -1,0 +1,469 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Milking\":\n    - /url: /milk/milking\n  - link \"Dispatch\":\n    - /url: /milk/dispatch\n  - link \"Buyers\":\n    - /url: /milk/buyers\n- main:\n  - heading \"Record a milking\" [level=2]\n  - paragraph: Answer every animal. Enter litres, or choose Not measured / Not milked.\n  - paragraph: \"In a quantity field: Enter moves to the next animal; m = Not measured; n = Not milked.\"\n  - generic \"About this roster\"\n  - text: Every animal in milk on this date needs an answer. Not measured records milking without a measurement; Not milked records that no milk was taken. Select an active alternative again to clear it.\n  - generic: Date\n  - textbox \"Date\": 2026-09-29\n  - generic: Session\n  - radiogroup \"Session\":\n    - radio \"Morning\" [checked]:\n      - generic: \"1\"\n      - generic: Morning\n    - radio \"Evening\":\n      - generic: \"2\"\n      - generic: Evening\n  - generic: Milked by (optional)\n  - combobox \"Milked by (optional)\"\n  - generic: Person who milked these animals, if known. Use a stable identifier, not a display name.\n  - paragraph: Defaults to today and this session — the one place a date is defaulted, because today is a fact rather than a guess. Change it to enter a session you missed.\n  - region \"Milking quantities\":\n    - table:\n      - rowgroup:\n        - row \"Animal Days in milk Yesterday morning Recent morning mean Litres — or m / n\":\n          - columnheader \"Animal\"\n          - columnheader \"Days in milk\"\n          - columnheader \"Yesterday morning\"\n          - columnheader \"Recent morning mean\"\n          - columnheader \"Litres — or m / n\"\n      - rowgroup:\n        - row \"BD-0001Noori 995 No record ~5 BD-0001 · Meat withdrawal · 2 instruction(s) needing attention Needs clarification — 2 instruction(s) have no known end. Not measured for BD-0001 Not milked for BD-0001\":\n          - cell \"BD-0001Noori\"\n          - cell \"995\"\n          - cell \"No record\": –\n          - cell \"~5\"\n          - cell \"BD-0001 · Meat withdrawal · 2 instruction(s) needing attention Needs clarification — 2 instruction(s) have no known end. Not measured for BD-0001 Not milked for BD-0001\":\n            - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention\n            - paragraph: Needs clarification — 2 instruction(s) have no known end.\n            - generic \"Original instructions and sources\"\n            - textbox \"Litres for BD-0001 Noori\"\n            - generic: L\n            - button \"Not measured for BD-0001\": not measured\n            - button \"Not milked for BD-0001\": not milked\n        - row \"BD-0002Sohni 911 No record ~6 BD-0002 · Meat withdrawal · 1 instruction(s) needing attention Needs clarification — 1 instruction(s) have no known end. Not measured for BD-0002 Not milked for BD-0002\":\n          - cell \"BD-0002Sohni\"\n          - cell \"911\"\n          - cell \"No record\": –\n          - cell \"~6\"\n          - cell \"BD-0002 · Meat withdrawal · 1 instruction(s) needing attention Needs clarification — 1 instruction(s) have no known end. Not measured for BD-0002 Not milked for BD-0002\":\n            - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention\n            - paragraph: Needs clarification — 1 instruction(s) have no known end.\n            - generic \"Original instructions and sources\"\n            - textbox \"Litres for BD-0002 Sohni\"\n            - generic: L\n            - button \"Not measured for BD-0002\": not measured\n            - button \"Not milked for BD-0002\": not milked\n        - row \"BD-0011Bhoori 90 No record ~9.7 Not measured for BD-0011 Not milked for BD-0011\":\n          - cell \"BD-0011Bhoori\"\n          - cell \"90\"\n          - cell \"No record\": –\n          - cell \"~9.7\"\n          - cell \"Not measured for BD-0011 Not milked for BD-0011\":\n            - textbox \"Litres for BD-0011 Bhoori\"\n            - generic: L\n            - button \"Not measured for BD-0011\": not measured\n            - button \"Not milked for BD-0011\": not milked\n        - row \"BD-0012Lali 697 No record ~4 Not measured for BD-0012 Not milked for BD-0012\":\n          - cell \"BD-0012Lali\"\n          - cell \"697\"\n          - cell \"No record\": –\n          - cell \"~4\"\n          - cell \"Not measured for BD-0012 Not milked for BD-0012\":\n            - textbox \"Litres for BD-0012 Lali\"\n            - generic: L\n            - button \"Not measured for BD-0012\": not measured\n            - button \"Not milked for BD-0012\": not milked\n        - row \"BD-0016Mithi 472 No record ~5 Not measured for BD-0016 Not milked for BD-0016\":\n          - cell \"BD-0016Mithi\"\n          - cell \"472\"\n          - cell \"No record\": –\n          - cell \"~5\"\n          - cell \"Not measured for BD-0016 Not milked for BD-0016\":\n            - textbox \"Litres for BD-0016 Mithi\"\n            - generic: L\n            - button \"Not measured for BD-0016\": not measured\n            - button \"Not milked for BD-0016\": not milked\n        - row \"BD-0022Neeli 151 No record ~7.7 Not measured for BD-0022 Not milked for BD-0022\":\n          - cell \"BD-0022Neeli\"\n          - cell \"151\"\n          - cell \"No record\": –\n          - cell \"~7.7\"\n          - cell \"Not measured for BD-0022 Not milked for BD-0022\":\n            - textbox \"Litres for BD-0022 Neeli\"\n            - generic: L\n            - button \"Not measured for BD-0022\": not measured\n            - button \"Not milked for BD-0022\": not milked\n    - navigation \"Milking animals pagination\":\n      - generic: 1–6 of 6\n  - paragraph: – means No record.\n  - generic: Measured total 0 L · 0 measured\n  - button \"Go to first unanswered animal\"\n  - text: \"Still to answer: Noori, Sohni, Bhoori and 3 more.\"\n  - generic: 0 of 6 answered\n  - button \"Save session\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 36,
+        "width": 138,
+        "x": 41,
+        "y": 326.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Morning",
+      "rect": {
+        "height": 34,
+        "width": 92.484375,
+        "x": 195,
+        "y": 328.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Evening",
+      "rect": {
+        "height": 34,
+        "width": 90.15625,
+        "x": 295.484375,
+        "y": 328.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-observed_by-2-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Milked by (optional)",
+      "rect": {
+        "height": 36,
+        "width": 487.75,
+        "x": 911.25,
+        "y": 306.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Litres for BD-0001 Noori",
+      "rect": {
+        "height": 36,
+        "width": 96,
+        "x": 816.171875,
+        "y": 562.1875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not measured for BD-0001",
+      "rect": {
+        "height": 26,
+        "width": 95.6484375,
+        "x": 952.9765625,
+        "y": 567.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not milked for BD-0001",
+      "rect": {
+        "height": 26,
+        "width": 76.71875,
+        "x": 1056.625,
+        "y": 567.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Litres for BD-0002 Sohni",
+      "rect": {
+        "height": 36,
+        "width": 96,
+        "x": 816.171875,
+        "y": 713.1875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not measured for BD-0002",
+      "rect": {
+        "height": 26,
+        "width": 95.6484375,
+        "x": 952.9765625,
+        "y": 718.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not milked for BD-0002",
+      "rect": {
+        "height": 26,
+        "width": 76.71875,
+        "x": 1056.625,
+        "y": 718.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Litres for BD-0011 Bhoori",
+      "rect": {
+        "height": 36,
+        "width": 96,
+        "x": 816.171875,
+        "y": 762.1875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not measured for BD-0011",
+      "rect": {
+        "height": 26,
+        "width": 95.6484375,
+        "x": 952.9765625,
+        "y": 767.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not milked for BD-0011",
+      "rect": {
+        "height": 26,
+        "width": 76.71875,
+        "x": 1056.625,
+        "y": 767.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Litres for BD-0012 Lali",
+      "rect": {
+        "height": 36,
+        "width": 96,
+        "x": 816.171875,
+        "y": 811.1875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not measured for BD-0012",
+      "rect": {
+        "height": 26,
+        "width": 95.6484375,
+        "x": 952.9765625,
+        "y": 816.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not milked for BD-0012",
+      "rect": {
+        "height": 26,
+        "width": 76.71875,
+        "x": 1056.625,
+        "y": 816.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Litres for BD-0016 Mithi",
+      "rect": {
+        "height": 36,
+        "width": 96,
+        "x": 816.171875,
+        "y": 860.1875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not measured for BD-0016",
+      "rect": {
+        "height": 26,
+        "width": 95.6484375,
+        "x": 952.9765625,
+        "y": 865.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not milked for BD-0016",
+      "rect": {
+        "height": 26,
+        "width": 76.71875,
+        "x": 1056.625,
+        "y": 865.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Litres for BD-0022 Neeli",
+      "rect": {
+        "height": 36,
+        "width": 96,
+        "x": 816.171875,
+        "y": 909.1875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not measured for BD-0022",
+      "rect": {
+        "height": 26,
+        "width": 95.6484375,
+        "x": 952.9765625,
+        "y": 914.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Not milked for BD-0022",
+      "rect": {
+        "height": 26,
+        "width": 76.71875,
+        "x": 1056.625,
+        "y": 914.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(48, 47, 46)",
+      "border": "rgb(71, 70, 64)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Go to first unanswered animal",
+      "rect": {
+        "height": 38,
+        "width": 230.375,
+        "x": 24,
+        "y": 1114.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(53, 52, 50)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": "milking-submit-reason",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Save session",
+      "rect": {
+        "height": 36,
+        "width": 117.375,
+        "x": 1281.625,
+        "y": 927
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Record a milking"
+  ],
+  "height": 1000,
+  "regions": [
+    {
+      "label": "Milking quantities",
+      "scrollWidth": 1390,
+      "tabindex": null,
+      "width": 1390
+    }
+  ],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6502/milk/milking",
+  "width": 1440
+}

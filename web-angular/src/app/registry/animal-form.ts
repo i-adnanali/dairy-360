@@ -181,7 +181,7 @@ const FIELDS = ['sex', 'occurred_on', 'date_precision', 'birth_on', 'birth_preci
             reason="animal-submit-reason"
             [busy]="state.submitting()"
           >
-            {{ state.submitting() ? 'Saving…' : 'Add animal' }}
+            Add animal
           </button>
           @if (blockedReason(); as r) {
             <span appHelp data-role="blocked" id="animal-submit-reason">{{ r }}</span>

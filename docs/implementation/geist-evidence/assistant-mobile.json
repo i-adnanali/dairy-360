@@ -1,0 +1,211 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Today\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\" [expanded]\n- button \"Change recording session\"\n- main:\n  - heading \"Today\" [level=2]\n  - paragraph: Wednesday 30 September 2026\n  - heading \"Animal health\" [level=3]\n  - link \"5 overdue · 0 due today · 5 withdrawal instructions to review\":\n    - /url: /animals/health\n  - heading \"Milking\" [level=3]\n  - link \"morning 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-30&session=morning\n    - generic: morning\n    - generic: 0 of 6 recorded\n  - link \"evening 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-30&session=evening\n    - generic: evening\n    - generic: 0 of 6 recorded\n  - heading \"Dispatch\" [level=3]\n  - link \"morning 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-30&session=morning\n    - generic: morning\n    - generic: 0 of 2 recorded\n  - link \"evening 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-30&session=evening\n    - generic: evening\n    - generic: 0 of 2 recorded\n  - heading \"Feed\" [level=3]\n  - link \"Not recorded Record feeding\":\n    - /url: /feed/daily/2026-09-30\n    - generic: Not recorded\n    - generic: Record feeding\n  - heading \"Payroll\" [level=3]\n  - link \"September 2026 2 of 2 still to enter\":\n    - /url: /labour/payroll?from=2026-09-01&to=2026-09-30\n    - generic: September 2026\n    - generic: 2 of 2 still to enter\n- dialog \"Dairy 360 assistant\":\n  - banner:\n    - heading \"Dairy 360 assistant\" [level=2]\n    - button \"Close Dairy 360 assistant\":\n      - text: Close\n      - generic: Dairy 360 assistant\n  - generic: 🐃\n  - heading \"How can I help?\" [level=3]\n  - paragraph: I can read your records to answer questions, and propose record changes that you approve before anything is written.\n  - button \"How did the Kundi group's milk yield trend over the last 30 days?\"\n  - button \"Which animals have a health event due in the next two weeks?\"\n  - button \"Log this morning's milking for the Kundi group.\"\n  - paragraph: Enter to send · Shift+Enter for a new line\n  - textbox \"Message to Dairy 360 assistant\" [active]:\n    - /placeholder: Ask about the herd, or request an action…\n  - button \"Send\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Today",
+      "rect": {
+        "height": 44,
+        "width": 121.859375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 149.859375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 235.828125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 290.921875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change recording session",
+      "rect": {
+        "height": 44,
+        "width": 205.5234375,
+        "x": 16,
+        "y": 171.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Close Dairy 360 assistant",
+      "rect": {
+        "height": 44,
+        "width": 63.1953125,
+        "x": 314.8046875,
+        "y": 12
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "How did the Kundi group's milk yield trend over the last 30 days?",
+      "rect": {
+        "height": 66,
+        "width": 324,
+        "x": 33,
+        "y": 266
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Which animals have a health event due in the next two weeks?",
+      "rect": {
+        "height": 66,
+        "width": 324,
+        "x": 33,
+        "y": 340
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Log this morning's milking for the Kundi group.",
+      "rect": {
+        "height": 66,
+        "width": 324,
+        "x": 33,
+        "y": 414
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": "assistant-composer-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Message to Dairy 360 assistant",
+      "rect": {
+        "height": 58,
+        "width": 268.21875,
+        "x": 24,
+        "y": 770
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Send",
+      "rect": {
+        "height": 44,
+        "width": 65.78125,
+        "x": 300.21875,
+        "y": 784
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Today",
+    "Animal health",
+    "Milking",
+    "Dispatch",
+    "Feed",
+    "Payroll"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/",
+  "width": 390
+}

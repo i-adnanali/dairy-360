@@ -1,0 +1,199 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"People\":\n    - /url: /labour/people\n  - link \"Payroll\":\n    - /url: /labour/payroll\n- main:\n  - heading \"Payroll\" [level=2]\n  - generic: From\n  - textbox \"From\": 2026-09-01\n  - generic: To\n  - textbox \"To\": 2026-09-30\n  - generic: Paid out by (optional)\n  - combobox \"Paid out by (optional)\"\n  - generic: Person associated with this record, if known. Use a stable identifier, not a display name.\n  - heading \"Salaried — every row needs a figure\" [level=3]\n  - region \"Salaried wage entries\":\n    - table:\n      - rowgroup:\n        - row \"Person / period Agreement Wage amount (Rs) Package context\":\n          - columnheader \"Person / period\"\n          - columnheader \"Agreement\"\n          - columnheader \"Wage amount (Rs)\"\n          - columnheader \"Package context\"\n      - rowgroup:\n        - row \"abdulgeneral 2026-09-01 – 2026-09-30 agreed Rs 20,000.00 / month 20000\":\n          - cell \"abdulgeneral 2026-09-01 – 2026-09-30\":\n            - text: abdulgeneral\n            - paragraph: 2026-09-01 – 2026-09-30\n          - cell \"agreed Rs 20,000.00 / month\":\n            - generic: agreed Rs 20,000.00 / month\n          - cell \"20000\":\n            - textbox \"Wage amount (Rs) for abdul\": \"20000\"\n            - generic: Rs\n          - cell\n        - row \"imranmilker 2026-09-01 – 2026-09-30 agreed Rs 25,000.00 / month 25000 milk allowance 34 L due to date, 0 L taken (through 2026-09-17) accommodation · 20 kg flour / month\":\n          - cell \"imranmilker 2026-09-01 – 2026-09-30\":\n            - text: imranmilker\n            - paragraph: 2026-09-01 – 2026-09-30\n          - cell \"agreed Rs 25,000.00 / month\":\n            - generic: agreed Rs 25,000.00 / month\n          - cell \"25000\":\n            - textbox \"Wage amount (Rs) for imran\": \"25000\"\n            - generic: Rs\n          - cell \"milk allowance 34 L due to date, 0 L taken (through 2026-09-17) accommodation · 20 kg flour / month\":\n            - paragraph: milk allowance 34 L due to date, 0 L taken (through 2026-09-17)\n            - paragraph: accommodation · 20 kg flour / month\n  - navigation \"Salaried wages pagination\":\n    - generic: 1–2 of 2\n  - separator\n  - heading \"Dihari — only the days somebody worked\" [level=3]\n  - button \"Add a day\"\n  - generic: Rs 45,000.00\n  - text: 2 of 2 answered\n  - generic: salaried wages\n  - button \"Save run\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "From",
+      "rect": {
+        "height": 40,
+        "width": 146,
+        "x": 24,
+        "y": 245.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "To",
+      "rect": {
+        "height": 40,
+        "width": 146.5,
+        "x": 186,
+        "y": 245.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-observed_by-1-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Paid out by (optional)",
+      "rect": {
+        "height": 36,
+        "width": 495.15625,
+        "x": 348.5,
+        "y": 229.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Wage amount (Rs) for abdul",
+      "rect": {
+        "height": 38,
+        "width": 128,
+        "x": 553.3671875,
+        "y": 402.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Wage amount (Rs) for imran",
+      "rect": {
+        "height": 38,
+        "width": 128,
+        "x": 553.3671875,
+        "y": 465.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Add a day",
+      "rect": {
+        "height": 34,
+        "width": 90.125,
+        "x": 24,
+        "y": 671.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(196, 127, 83)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Save run",
+      "rect": {
+        "height": 36,
+        "width": 89.3046875,
+        "x": 1309.6953125,
+        "y": 774.1875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Payroll",
+    "Salaried — every row needs a figure",
+    "Dihari — only the days somebody worked"
+  ],
+  "height": 1000,
+  "regions": [
+    {
+      "label": "Salaried wage entries",
+      "scrollWidth": 1392,
+      "tabindex": null,
+      "width": 1392
+    }
+  ],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6502/labour/payroll",
+  "width": 1440
+}

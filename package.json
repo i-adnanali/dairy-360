@@ -20,7 +20,7 @@
     "build:angular": "npm run build:shared && npm run build -w web-angular",
     "typecheck": "npm run build:shared && npm run typecheck -w server",
     "check:templates": "node scripts/check-templates.mjs",
-    "_verify_note": "check:contrast gates unexpected failures and unreviewed disabled-text consumers; the six exact resting-border exceptions remain reported. PHASE5_PRECHECK.md preserves historical measurements. `shots` needs a running harness or production build behind serve-built.mjs; see UI_SYSTEM.md section 10.6.",
+    "_verify_note": "check:contrast gates unexpected failures and unreviewed disabled-text consumers; necessary control boundaries are graded separately from decorative borders, with no held exceptions. PHASE5_PRECHECK.md preserves historical measurements. `shots` needs a running harness or production build behind serve-built.mjs; see UI_SYSTEM.md section 10.6.",
     "check:contrast": "node scripts/check-contrast.mjs",
     "shots": "node scripts/shoot-screens.mjs",
     "_harness_note": "The one command for seeing the app work without a real database. `harness:app` starts the in-memory registry harness on 6400 (the port proxy.conf.json targets, so it is mutually exclusive with `dev` -- that is the point), seeds a readable herd into it, and starts Angular. NOT the same dummy data as `npm run seed`: that one recreates the six DEMO tables the agent chat reads, in dairy.db. These two are deliberately separate systems -- see docs/DEVELOPMENT.md section 6.",

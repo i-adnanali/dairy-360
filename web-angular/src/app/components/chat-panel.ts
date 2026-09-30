@@ -99,7 +99,8 @@ import { Button } from '../ui/button';
             <app-confirmation-card
               [card]="decision.card"
               [decision]="decision.approved ? 'approved' : 'rejected'"
-              [reason]="decision.reason"
+              [reason]="receiptReason(decision)"
+              [outcome]="receiptOutcome(decision.card.toolUseId)"
             />
           }
           @if (store.error(); as error) {
@@ -141,6 +142,22 @@ import { Button } from '../ui/button';
   `,
 })
 export class ChatPanel {
+  protected receiptOutcome(id: string): 'awaiting' | 'recorded' | 'refused' | 'unknown' {
+    const calls = this.store.renderLog().flatMap(item => item.role === 'assistant' ? item.toolCalls : []);
+    const call = calls.find(c => c.toolUseId === id);
+    if (call?.reason?.includes('outcome is unknown')) return 'unknown';
+    if (call?.status === 'done') return 'recorded';
+    if (call?.status === 'error') return 'refused';
+    return 'awaiting';
+  }
+  protected receiptReason(decision: {card: PendingWrite; approved: boolean; reason: string}) {
+    if (!decision.approved) return decision.reason;
+    const outcome = this.receiptOutcome(decision.card.toolUseId);
+    return outcome === 'recorded' ? 'The operation returned a successful result.'
+      : outcome === 'unknown' ? 'Check the record before requesting another action. Approval is not proof of execution.'
+      : outcome === 'refused' ? 'The operation did not return a successful result. Review the response for details.'
+      : decision.reason;
+  }
   readonly docked = input(false);
   private followTail = true;
   private readonly element: HTMLElement = inject(ElementRef).nativeElement;

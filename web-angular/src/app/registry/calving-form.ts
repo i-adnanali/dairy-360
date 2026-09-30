@@ -108,8 +108,13 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             >, and it will be here when you come back.
           </p>
         } @else {
+          <label class="block mb-2 text-sm" for="dam-search">Find dam by serial or name</label>
+          <input appInput id="dam-search" type="search" class="w-full max-w-sm mb-3" [value]="damSearch()" (input)="damSearch.set($any($event.target).value)" aria-describedby="dam-search-help" />
+          <p id="dam-search-help" class="text-sm text-content-muted mb-2">Search narrows the list. Ineligible dams remain visible with their reason.</p>
           <select
             id="calving-dam"
+            [attr.aria-invalid]="state.fieldError('dam_id') ? true : null"
+            [attr.aria-describedby]="state.fieldError('dam_id') ? 'calving-dam-error' : null"
             #firstField
             data-role="dam"
             [value]="damId()"
@@ -118,7 +123,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
             class="w-full max-w-sm"
           >
             <option value="">Choose a dam…</option>
-            @for (d of dams(); track d.id) {
+            @for (d of filteredDams(); track d.id) {
               <option [value]="d.id" [disabled]="!d.eligible">
                 {{ d.id }}{{ d.name ? ' — ' + d.name : ''
                 }}{{ d.eligible ? '' : ' (' + d.ineligible_reason + ')' }}
@@ -127,7 +132,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
           </select>
         }
         @if (state.fieldError('dam_id'); as e) {
-          <p appErrorText class="mt-2" data-role="error-dam">{{ e }}</p>
+          <p appErrorText class="mt-2" id="calving-dam-error" data-role="error-dam">{{ e }}</p>
         }
       </div>
 
@@ -245,7 +250,7 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
           reason="calving-submit-reason"
           [busy]="state.submitting()"
         >
-          {{ state.submitting() ? 'Saving…' : 'Record calving' }}
+          Record calving
         </button>
         @if (blockedReason(); as r) {
           <span appHelp data-role="blocked" id="calving-submit-reason">{{ r }}</span>
@@ -280,6 +285,11 @@ const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', '
   `,
 })
 export class CalvingForm {
+  protected readonly damSearch = signal('');
+  protected readonly filteredDams = computed(() => {
+    const query = this.damSearch().trim().toLowerCase();
+    return this.dams().filter(d => d.id === this.damId() || (d.id + ' ' + (d.name ?? '')).toLowerCase().includes(query));
+  });
   protected writer!: ReturnType<typeof writerDraft>;
   /**
    * The NATIVE submit event, not FormsModule's `ngSubmit`.

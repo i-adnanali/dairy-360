@@ -1,0 +1,351 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Feed\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Fodder crops\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - link \"Record feeding\":\n    - /url: /feed/daily/2026-09-29\n  - button \"Feed catalogue\"\n  - heading \"Add crop\" [level=3]\n  - generic: Name\n  - textbox \"Name\"\n  - heading \"Plot and lifecycle\" [level=4]\n  - generic: Plot (optional)\n  - textbox \"Plot (optional)\"\n  - generic: Acres (optional)\n  - spinbutton \"Acres (optional)\"\n  - generic: Status\n  - combobox \"Status\":\n    - option \"Growing\" [selected]\n    - option \"Cutting\"\n    - option \"Finished\"\n  - group \"sowing date (optional)\":\n    - generic: sowing date (optional)\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - group \"cutting start date (optional)\":\n    - generic: cutting start date (optional)\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - group \"cutting end date (optional)\":\n    - generic: cutting end date (optional)\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - paragraph: Unknown dates and acreage are valid. Finishing does not invent a last cutting date.\n  - checkbox \"Archived — keep historical references\"\n  - text: Archived — keep historical references\n  - generic: Notes (optional)\n  - textbox \"Notes (optional)\"\n  - generic: Source reference (optional)\n  - textbox \"Source reference (optional)\"\n  - paragraph: This entry will be recorded by geist-synthetic · direct_entry\n  - button \"Save crop\"\n  - button \"Cancel\"\n  - navigation \"Feed records pagination\":\n    - generic: 1–2 of 2\n  - link \"Previous crop cycle\":\n    - /url: /feed/crops/feed_0718643b-52b8-4da5-8a9a-c37562d1bd2d\n  - paragraph: finished · unknown acres\n  - link \"Seasonal maize\":\n    - /url: /feed/crops/feed_d165911f-2e5d-4043-a061-c0f0f29d75c6\n  - paragraph: cutting · 2 acres",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Feed",
+      "rect": {
+        "height": 44,
+        "width": 114.8359375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.8359375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.8046875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.8984375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Feed catalogue",
+      "rect": {
+        "height": 44,
+        "width": 135.3359375,
+        "x": 156.2734375,
+        "y": 380.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Name",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 529.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Plot (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 653.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Acres (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 737.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "StatusGrowingCuttingFinished",
+      "rect": {
+        "height": 44,
+        "width": 99,
+        "x": 33,
+        "y": 821.5
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 44,
+        "width": 224,
+        "x": 50,
+        "y": 941.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(87, 86, 79)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 50,
+        "y": 999.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 44,
+        "width": 224,
+        "x": 50,
+        "y": 1210.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(87, 86, 79)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 50,
+        "y": 1268.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 44,
+        "width": 224,
+        "x": 50,
+        "y": 1479.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(87, 86, 79)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 50,
+        "y": 1537.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Archived — keep historical references",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 1736.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Notes (optional)",
+      "rect": {
+        "height": 54,
+        "width": 324,
+        "x": 33,
+        "y": 1822.5
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Source reference (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 1916.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Save crop",
+      "rect": {
+        "height": 44,
+        "width": 97.3046875,
+        "x": 33,
+        "y": 2024.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Cancel",
+      "rect": {
+        "height": 44,
+        "width": 79.3515625,
+        "x": 130.3046875,
+        "y": 2024.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Fodder crops",
+    "Add crop"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed/crops/new",
+  "width": 390
+}

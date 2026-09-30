@@ -1,0 +1,237 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Start a recording session\"\n- main:\n  - heading \"Dairy 360 assistant\" [level=2]\n  - paragraph: Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances — and take actions with confirmation.\n  - generic: One change is waiting for your approval.\n  - generic: long chart tools confirm\n  - region \"Assistant message\":\n    - heading \"Synthetic long response\" [level=2]\n    - paragraph: synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\n    - table:\n      - rowgroup:\n        - row \"Animal Notes Value\":\n          - columnheader \"Animal\"\n          - columnheader \"Notes\"\n          - columnheader \"Value\"\n      - rowgroup:\n        - row \"SYN-001 synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_ 0 L\":\n          - cell \"SYN-001\"\n          - cell \"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\"\n          - cell \"0 L\"\n    - code: \"{\\\"reference\\\":\\\"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\\\"}\"\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - table:\n      - rowgroup:\n        - row \"Field 1 Field 2 Field 3 Field 4 Field 5 Field 6 Field 7 Field 8 Field 9 Field 10 Field 11 Field 12 Field 13 Field 14 Field 15 Field 16 Field 17 Field 18\":\n          - columnheader \"Field 1\"\n          - columnheader \"Field 2\"\n          - columnheader \"Field 3\"\n          - columnheader \"Field 4\"\n          - columnheader \"Field 5\"\n          - columnheader \"Field 6\"\n          - columnheader \"Field 7\"\n          - columnheader \"Field 8\"\n          - columnheader \"Field 9\"\n          - columnheader \"Field 10\"\n          - columnheader \"Field 11\"\n          - columnheader \"Field 12\"\n          - columnheader \"Field 13\"\n          - columnheader \"Field 14\"\n          - columnheader \"Field 15\"\n          - columnheader \"Field 16\"\n          - columnheader \"Field 17\"\n          - columnheader \"Field 18\"\n      - rowgroup:\n        - row \"Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic\":\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n  - heading \"Synthetic herd — daily yield\" [level=3]\n  - generic: 2 points\n  - button \"Show data for Synthetic herd\":\n    - text: Show data\n    - generic: for Synthetic herd\n  - button \"read_animals Success\":\n    - generic: read_animals\n    - generic: Success\n  - button \"read_feed Error\":\n    - generic: read_feed\n    - generic: Error\n  - paragraph: \"Synthetic service refused the read: fixture failure.\"\n  - button \"log_milking Awaiting approval\":\n    - generic: log_milking\n    - generic: Awaiting approval\n  - generic: Approval requested\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Review proposed changes\"\n  - term: Target\n  - definition: SYN-001 · Synthetic only\n  - term: Date\n  - definition: 2026-09-17\n  - term: Session\n  - definition: morning\n  - region \"Proposed operation rows\":\n    - table:\n      - rowgroup:\n        - row \"Animal Value\":\n          - columnheader \"Animal\"\n          - columnheader \"Value\"\n      - rowgroup:\n        - row \"SYN-001 6 L\":\n          - cell \"SYN-001\"\n          - cell \"6 L\"\n  - paragraph:\n    - text: \"Technical operation:\"\n    - code: log_milking\n  - button \"Approve\"\n  - button \"Reject\"\n  - paragraph: Assistant busy or awaiting approval; sending is unavailable.\n  - textbox \"Message to Dairy 360 assistant\" [disabled]:\n    - /placeholder: Resolve the pending action above to continue…\n  - button \"Send\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "browsing — nothing is being recorded",
+      "rect": {
+        "height": 26,
+        "width": 69.3046875,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Start a recording session",
+      "rect": {
+        "height": 38,
+        "width": 198.78125,
+        "x": 20,
+        "y": 100.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Show data for Synthetic herd",
+      "rect": {
+        "height": 34,
+        "width": 95.21875,
+        "x": 410.34375,
+        "y": 354.78125
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "read_animalsSuccess",
+      "rect": {
+        "height": 30,
+        "width": 169.53125,
+        "x": 393.34375,
+        "y": 413.78125
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "read_feedError",
+      "rect": {
+        "height": 30,
+        "width": 131.5234375,
+        "x": 568.875,
+        "y": 413.78125
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "log_milkingAwaiting approval",
+      "rect": {
+        "height": 30,
+        "width": 213.0390625,
+        "x": 393.34375,
+        "y": 473.78125
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Approve",
+      "rect": {
+        "height": 34,
+        "width": 79.234375,
+        "x": 411.34375,
+        "y": 807.28125
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Reject",
+      "rect": {
+        "height": 34,
+        "width": 67.53125,
+        "x": 498.578125,
+        "y": 807.28125
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "assistant-composer-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Message to Dairy 360 assistant",
+      "rect": {
+        "height": 44,
+        "width": 563.53125,
+        "x": 401.34375,
+        "y": 916
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Send",
+      "rect": {
+        "height": 36,
+        "width": 65.78125,
+        "x": 972.875,
+        "y": 924
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Dairy 360 assistant",
+    "Synthetic long response",
+    "Synthetic herd — daily yield"
+  ],
+  "height": 1000,
+  "regions": [
+    {
+      "label": "Assistant message",
+      "scrollWidth": 1120,
+      "tabindex": "0",
+      "width": 653
+    },
+    {
+      "label": "Proposed operation rows",
+      "scrollWidth": 617,
+      "tabindex": null,
+      "width": 617
+    }
+  ],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6506/chat",
+  "width": 1440
+}

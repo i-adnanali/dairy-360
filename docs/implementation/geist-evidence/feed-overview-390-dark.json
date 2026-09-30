@@ -1,0 +1,165 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Feed\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Feed overview\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - link \"Record feeding\":\n    - /url: /feed/daily/2026-09-29\n  - button \"Feed catalogue\"\n  - generic: From\n  - textbox \"From\": 2026-09-16\n  - generic: Through\n  - textbox \"Through\": 2026-09-29\n  - button \"Show range\"\n  - paragraph: Default coverage begins at the first saved summary. A missing day means not recorded, never not fed.\n  - heading \"Daily coverage\" [level=3]\n  - paragraph: 1 recorded · 1 partial · 12 unrecorded\n  - heading \"Recorded purchase costs\" [level=3]\n  - paragraph: Rs 28,600.00\n  - paragraph: 0 unknown totals excluded\n  - heading \"Recorded crop expenses\" [level=3]\n  - paragraph: Rs 1,500.00\n  - heading \"Fresh-fodder supply\" [level=3]\n  - paragraph:\n    - text: \"enough: 1\"\n    - link \"2026-09-17\":\n      - /url: /feed/daily/2026-09-17\n  - paragraph: \"short: 0\"\n  - paragraph: \"surplus: 0\"\n  - paragraph:\n    - text: \"unknown: 1\"\n    - link \"2026-09-16\":\n      - /url: /feed/daily/2026-09-16\n  - paragraph: \"not applicable: 0\"\n  - paragraph: Own-source days 1 · purchased-source days 1 · mixed-source days 1. Counts overlap; do not add them.\n  - heading \"Purchase quantities by original unit\" [level=3]\n  - paragraph: \"Silage: 400 kg measured · 0 unmeasured purchases excluded\"\n  - paragraph: \"Fresh fodder: No measured quantity · 1 unmeasured purchases excluded\"\n  - heading \"Crop cycles — currently recorded lifecycle\" [level=3]\n  - paragraph: Status is the latest recorded state, not a reconstructed range history. Dates may be unknown or approximate.\n  - paragraph:\n    - link \"Previous crop cycle\":\n      - /url: /feed/crops/feed_0718643b-52b8-4da5-8a9a-c37562d1bd2d\n    - text: · finished · unknown acres · Rs 0.00 expenses to date · 0 distinct recorded supply dates\n  - paragraph:\n    - link \"Seasonal maize\":\n      - /url: /feed/crops/feed_d165911f-2e5d-4043-a061-c0f0f29d75c6\n    - text: · cutting · 2 acres · Rs 1,500.00 expenses to date · 1 distinct recorded supply dates\n  - heading \"Recorded days\" [level=3]\n  - navigation \"Feeding days pagination\":\n    - generic: 1–14 of 14\n  - link \"2026-09-16\":\n    - /url: /feed/daily/2026-09-16\n  - generic: Partially recorded\n  - link \"2026-09-17\":\n    - /url: /feed/daily/2026-09-17\n  - generic: Recorded\n  - link \"2026-09-18\":\n    - /url: /feed/daily/2026-09-18\n  - generic: Not recorded\n  - link \"2026-09-19\":\n    - /url: /feed/daily/2026-09-19\n  - generic: Not recorded\n  - link \"2026-09-20\":\n    - /url: /feed/daily/2026-09-20\n  - generic: Not recorded\n  - link \"2026-09-21\":\n    - /url: /feed/daily/2026-09-21\n  - generic: Not recorded\n  - link \"2026-09-22\":\n    - /url: /feed/daily/2026-09-22\n  - generic: Not recorded\n  - link \"2026-09-23\":\n    - /url: /feed/daily/2026-09-23\n  - generic: Not recorded\n  - link \"2026-09-24\":\n    - /url: /feed/daily/2026-09-24\n  - generic: Not recorded\n  - link \"2026-09-25\":\n    - /url: /feed/daily/2026-09-25\n  - generic: Not recorded\n  - link \"2026-09-26\":\n    - /url: /feed/daily/2026-09-26\n  - generic: Not recorded\n  - link \"2026-09-27\":\n    - /url: /feed/daily/2026-09-27\n  - generic: Not recorded\n  - link \"2026-09-28\":\n    - /url: /feed/daily/2026-09-28\n  - generic: Not recorded\n  - link \"2026-09-29\":\n    - /url: /feed/daily/2026-09-29\n  - generic: Not recorded",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Feed",
+      "rect": {
+        "height": 44,
+        "width": 114.8359375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.8359375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.8046875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.8984375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Feed catalogue",
+      "rect": {
+        "height": 44,
+        "width": 135.3359375,
+        "x": 156.2734375,
+        "y": 380.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "From",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 16,
+        "y": 468.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Through",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 180.5,
+        "y": 468.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Show range",
+      "rect": {
+        "height": 44,
+        "width": 111.828125,
+        "x": 16,
+        "y": 524.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Feed overview",
+    "Daily coverage",
+    "Recorded purchase costs",
+    "Recorded crop expenses",
+    "Fresh-fodder supply",
+    "Purchase quantities by original unit",
+    "Crop cycles — currently recorded lifecycle",
+    "Recorded days"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed",
+  "width": 390
+}

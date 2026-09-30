@@ -1,3 +1,4 @@
+import { Field } from '../ui/field';
 import { JsonPipe } from '@angular/common';
 import { ElementRef, untracked } from '@angular/core';
 import { writerDraft } from './writer-draft';
@@ -21,7 +22,7 @@ import { formatMinor, rupeesToMinor } from './money';
 @Component({
   selector: 'app-feed-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Field,
     JsonPipe,
     WriteLock,
     PrecisionDateControl,
@@ -66,7 +67,7 @@ import { formatMinor, rupeesToMinor } from './money';
           </button>
         </section>
       }
-      <h3 class="font-medium">{{ record()?.id ? 'Correct' : 'Add' }} {{ noun() }}</h3>
+      <h3 class="text-lg font-semibold">{{ record()?.id ? 'Correct' : 'Add' }} {{ noun() }}</h3>
       @if (entity() === 'items' || entity() === 'crops') {
         <label class="block"
           ><span appFieldLabel>Name</span
@@ -85,6 +86,7 @@ import { formatMinor, rupeesToMinor } from './money';
         >
       }
       @if (entity() === 'crops') {
+        <h4 class="font-medium">Plot and lifecycle</h4>
         <div class="grid gap-4 sm:grid-cols-2">
           <label
             ><span appFieldLabel>Plot (optional)</span
@@ -132,6 +134,7 @@ import { formatMinor, rupeesToMinor } from './money';
         </p>
       }
       @if (entity() === 'purchases') {
+        <h4 class="font-medium">Item and delivery</h4>
         <label class="block"
           ><span appFieldLabel>Feed item</span
           ><select appInput name="item_id" [(ngModel)]="draft.item_id">
@@ -182,14 +185,14 @@ import { formatMinor, rupeesToMinor } from './money';
           <div class="grid gap-4 sm:grid-cols-3">
             <label
               ><span appFieldLabel>Price (Rs)</span
-              ><input
+              ><span class="input-group"><input
                 appInput
                 type="number"
                 step="0.01"
                 name="rate"
                 [(ngModel)]="rate"
                 class="w-full"
-            /></label>
+            /><span class="input-unit" aria-hidden="true">Rs</span></span></label>
             <label
               ><span appFieldLabel>Per quantity</span
               ><input
@@ -214,30 +217,30 @@ import { formatMinor, rupeesToMinor } from './money';
         @if (draft.pricing === 'total') {
           <label class="block"
             ><span appFieldLabel>Goods total (Rs)</span
-            ><input appInput type="number" step="0.01" name="goods" [(ngModel)]="goods"
-          /></label>
+            ><span class="input-group"><input appInput type="number" step="0.01" name="goods" [(ngModel)]="goods"
+          /><span class="input-unit" aria-hidden="true">Rs</span></span></label>
         }
         <div class="grid gap-4 sm:grid-cols-2">
           <label
             ><span appFieldLabel>Transport (Rs)</span
-            ><input
+            ><span class="input-group"><input
               appInput
               type="number"
               step="0.01"
               name="transport"
               [(ngModel)]="transport"
               class="w-full"
-          /></label>
+          /><span class="input-unit" aria-hidden="true">Rs</span></span></label>
           <label
             ><span appFieldLabel>Other charges (Rs)</span
-            ><input
+            ><span class="input-group"><input
               appInput
               type="number"
               step="0.01"
               name="other"
               [(ngModel)]="other"
               class="w-full"
-          /></label>
+          /><span class="input-unit" aria-hidden="true">Rs</span></span></label>
         </div>
         <p appHelp>
           Recorded acquisition cost; this does not record a payment or assert that the feed was
@@ -256,8 +259,8 @@ import { formatMinor, rupeesToMinor } from './money';
         >
         <label class="block"
           ><span appFieldLabel>Amount incurred (Rs)</span
-          ><input appInput type="number" step="0.01" name="amount" [(ngModel)]="amount"
-        /></label>
+          ><span class="input-group"><input appInput type="number" step="0.01" name="amount" [(ngModel)]="amount"
+        /><span class="input-unit" aria-hidden="true">Rs</span></span></label>
         <p appHelp>
           Do not enter salaries already recorded in payroll again. Only separately incurred labour
           belongs here; allocation is deferred.
@@ -269,10 +272,7 @@ import { formatMinor, rupeesToMinor } from './money';
           historical references</label
         >
       }
-      <label class="block"
-        ><span appFieldLabel>Notes (optional)</span
-        ><textarea appInput name="notes" [(ngModel)]="draft.notes" class="w-full"></textarea>
-      </label>
+      <app-field label="Notes (optional)"><textarea appInput name="notes" [(ngModel)]="draft.notes" class="w-full"></textarea></app-field>
       <label class="block"
         ><span appFieldLabel>Source reference (optional)</span
         ><input appInput name="source_ref" [(ngModel)]="draft.source_ref" class="w-full"
@@ -294,7 +294,7 @@ import { formatMinor, rupeesToMinor } from './money';
           [appButtonDisabled]="state.submitting() || (!!record() && !writer.meaningful())"
           [busy]="state.submitting()"
         >
-          {{ state.submitting() ? 'Saving…' : 'Save ' + noun() }}
+          Save {{ noun() }}
         </button>
       } @else {
         <app-session-required [what]="noun()" />

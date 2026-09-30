@@ -1,0 +1,175 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Start a recording session\"\n- main:\n  - heading \"Dairy 360 assistant\" [level=2]\n  - paragraph: Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances — and take actions with confirmation.\n  - generic: 🐃\n  - heading \"How can I help?\" [level=3]\n  - paragraph: I can read your records to answer questions, and propose record changes that you approve before anything is written.\n  - button \"How did the Kundi group's milk yield trend over the last 30 days?\"\n  - button \"Which animals have a health event due in the next two weeks?\"\n  - button \"Log this morning's milking for the Kundi group.\"\n  - paragraph: Enter to send · Shift+Enter for a new line\n  - textbox \"Message to Dairy 360 assistant\":\n    - /placeholder: Ask about the herd, or request an action…\n  - button \"Send\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "browsing — nothing is being recorded",
+      "rect": {
+        "height": 26,
+        "width": 69.3046875,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1160.765625,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 24,
+        "width": 94.8203125,
+        "x": 1246.734375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Start a recording session",
+      "rect": {
+        "height": 38,
+        "width": 198.78125,
+        "x": 20,
+        "y": 100.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(227, 226, 222)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "How did the Kundi group's milk yield trend over the last 30 days?",
+      "rect": {
+        "height": 66,
+        "width": 448,
+        "x": 496,
+        "y": 441.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(227, 226, 222)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Which animals have a health event due in the next two weeks?",
+      "rect": {
+        "height": 46,
+        "width": 448,
+        "x": 496,
+        "y": 515.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(227, 226, 222)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Log this morning's milking for the Kundi group.",
+      "rect": {
+        "height": 46,
+        "width": 448,
+        "x": 496,
+        "y": 569.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": "assistant-composer-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Message to Dairy 360 assistant",
+      "rect": {
+        "height": 44,
+        "width": 563.53125,
+        "x": 401.34375,
+        "y": 916
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Send",
+      "rect": {
+        "height": 36,
+        "width": 65.78125,
+        "x": 972.875,
+        "y": 924
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Dairy 360 assistant",
+    "How can I help?"
+  ],
+  "height": 1000,
+  "regions": [],
+  "rootWidth": 1440,
+  "theme": "light",
+  "url": "http://localhost:6502/chat",
+  "width": 1440
+}

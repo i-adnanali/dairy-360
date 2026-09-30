@@ -1,0 +1,227 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Change recording session\"\n- button \"Cancel session setup\"\n- heading \"Before entering anything\" [level=2]\n- paragraph: Both of these go on every record you write in this session. They are asked once rather than on each form, and they are not defaulted — a mislabelled source reads exactly like a correct one.\n- generic: Where is this coming from?\n- radiogroup \"Where is this coming from?\":\n  - radio \"Recall\":\n    - generic: \"1\"\n    - generic: Recall\n    - generic: reconstructed from memory\n  - radio \"Daily herd sheet\":\n    - generic: \"2\"\n    - generic: Daily herd sheet\n    - generic: the signed paper round\n  - radio \"Cycle card\":\n    - generic: \"3\"\n    - generic: Cycle card\n    - generic: an animal's own card\n  - radio \"Direct entry\" [checked]:\n    - generic: \"4\"\n    - generic: Direct entry\n    - generic: seen and typed now\n  - radio \"Import\":\n    - generic: \"5\"\n    - generic: Import\n    - generic: from another system\n- generic: Who is typing?\n- textbox \"Who is typing?\":\n  - /placeholder: a stable identifier, not a display name\n  - text: geist-synthetic\n- generic: Recorded on every event as recorded_by. Whoever remembered it, if this is recall.\n- paragraph:\n  - text: Whether someone actually\n  - emphasis: saw\n  - text: a thing is asked per record, and left blank by default. Nobody observed a purchase record.\n- generic: Where is this going?\n- paragraph: Harness — :memory:. Fixture data, discarded when that process exits. Nothing you enter here is kept.\n- button \"Update recording session\"\n- main:\n  - heading \"Today\" [level=2]\n  - paragraph: Tuesday 29 September 2026\n  - heading \"Animal health\" [level=3]\n  - link \"5 overdue · 0 due today · 5 withdrawal instructions to review\":\n    - /url: /animals/health\n  - heading \"Milking\" [level=3]\n  - link \"morning 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-29&session=morning\n    - generic: morning\n    - generic: 0 of 6 recorded\n  - link \"evening 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-29&session=evening\n    - generic: evening\n    - generic: 0 of 6 recorded\n  - heading \"Dispatch\" [level=3]\n  - link \"morning 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-29&session=morning\n    - generic: morning\n    - generic: 0 of 2 recorded\n  - link \"evening 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-29&session=evening\n    - generic: evening\n    - generic: 0 of 2 recorded\n  - heading \"Feed\" [level=3]\n  - link \"Not recorded Record feeding\":\n    - /url: /feed/daily/2026-09-29\n    - generic: Not recorded\n    - generic: Record feeding\n  - heading \"Payroll\" [level=3]\n  - link \"September 2026 2 of 2 still to enter\":\n    - /url: /labour/payroll?from=2026-09-01&to=2026-09-30\n    - generic: September 2026\n    - generic: 2 of 2 still to enter",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change recording session",
+      "rect": {
+        "height": 38,
+        "width": 205.5234375,
+        "x": 20,
+        "y": 100.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Cancel session setup",
+      "rect": {
+        "height": 20,
+        "width": 137.03125,
+        "x": 12,
+        "y": 159.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": "source-form-hint-0",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Recall",
+      "rect": {
+        "height": 34,
+        "width": 670,
+        "x": 385,
+        "y": 340.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": "source-form-hint-1",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Daily herd sheet",
+      "rect": {
+        "height": 34,
+        "width": 670,
+        "x": 385,
+        "y": 378.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": "source-form-hint-2",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Cycle card",
+      "rect": {
+        "height": 34,
+        "width": 670,
+        "x": 385,
+        "y": 416.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": "source-form-hint-3",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Direct entry",
+      "rect": {
+        "height": 34,
+        "width": 670,
+        "x": 385,
+        "y": 454.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": "source-form-hint-4",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Import",
+      "rect": {
+        "height": 34,
+        "width": 670,
+        "x": 385,
+        "y": 492.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "session-recorder-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Who is typing?",
+      "rect": {
+        "height": 38,
+        "width": 670,
+        "x": 385,
+        "y": 566.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Update recording session",
+      "rect": {
+        "height": 36,
+        "width": 670,
+        "x": 385,
+        "y": 786.1875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Today",
+    "Animal health",
+    "Milking",
+    "Dispatch",
+    "Feed",
+    "Payroll"
+  ],
+  "height": 1000,
+  "regions": [],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6502/",
+  "width": 1440
+}

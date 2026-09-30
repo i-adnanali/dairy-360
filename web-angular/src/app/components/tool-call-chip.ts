@@ -50,7 +50,7 @@ import type { ToolCallView } from '@dairy/shared';
       <span class="h-1.5 w-1.5 rounded-full" [class]="dotClass()"></span>
       <span class="font-medium">{{ call().name }}</span>
       <span>{{
-        call().status === 'done'
+        rejected() ? 'Rejected' : call().status === 'done'
           ? 'Success'
           : call().status === 'error'
             ? 'Error'
@@ -82,7 +82,8 @@ export class ToolCallChip {
   readonly agent = input<string | null>(null);
 
   protected readonly open = signal(false);
-  protected readonly isError = computed(() => this.call().status === 'error');
+  protected readonly rejected = computed(() => /rejected by operator|operation not authorized/i.test(this.call().reason ?? ''));
+  protected readonly isError = computed(() => this.call().status === 'error' && !this.rejected());
 
   protected readonly chipClass = computed(() => {
     if (this.isError()) return 'border-danger-line bg-danger-bg text-danger-soft';

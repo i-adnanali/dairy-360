@@ -1,0 +1,16 @@
+
+> dairy-360@1.0.0 typecheck
+> npm run build:shared && npm run typecheck -w server
+
+
+> dairy-360@1.0.0 build:shared
+> npm run build -w shared
+
+
+> @dairy/shared@1.0.0 build
+> tsc -p tsconfig.json
+
+
+> @dairy/server@1.0.0 typecheck
+> tsc -p tsconfig.json --noEmit
+

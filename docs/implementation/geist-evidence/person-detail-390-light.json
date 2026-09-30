@@ -1,0 +1,257 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Labour\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"People\":\n    - /url: /labour/people\n  - link \"Payroll\":\n    - /url: /labour/payroll\n- main:\n  - link \"← People\":\n    - /url: /labour/people\n  - heading \"Imran imran\" [level=2]\n  - paragraph: Rs 7,000.00 owed.\n  - heading \"Stints\" [level=3]\n  - list:\n    - generic: Salaried· milker\n    - generic: 2026-05-20 → open\n    - paragraph: Rs 25,000.00 / month · accommodation · 20 kg flour / month · 2 L milk / day\n    - button \"Close this stint\"\n  - heading \"Statement\" [level=3]\n  - generic: 2026-08\n  - generic: earned Rs 22,000.00 · paid Rs 15,000.00 · closing Rs 7,000.00\n  - list:\n    - generic: Wage 2026-08-01 → 2026-08-31· four days leave\n    - generic: Rs 22,000.00\n    - generic: Paid 2026-08-31 cash\n    - generic: − Rs 15,000.00\n  - heading \"Record a payment\" [level=3]\n  - text: Method\n  - radiogroup \"Payment method\":\n    - radio \"Cash\" [checked]:\n      - generic: \"1\"\n      - generic: Cash\n    - radio \"Bank\":\n      - generic: \"2\"\n      - generic: Bank\n    - radio \"Adjustment\":\n      - generic: \"3\"\n      - generic: Adjustment\n      - generic: signed, must say why\n  - generic: Amount (Rs)\n  - textbox \"Amount (Rs)\"\n  - generic: Rs\n  - generic: \"On\"\n  - textbox \"On\": 2026-09-29\n  - generic: Reference (optional)\n  - textbox \"Reference (optional)\":\n    - /placeholder: peshgi\n  - generic: Note (optional)\n  - textbox \"Note (optional)\"\n  - generic: Handed over by (optional)\n  - combobox \"Handed over by (optional)\"\n  - generic: Person who handed over this payment, if known. Use a stable identifier, not a display name.\n  - button \"Record payment\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(168, 166, 158)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(34, 33, 32)",
+      "border": "rgb(62, 61, 56)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Labour",
+      "rect": {
+        "height": 44,
+        "width": 128.484375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 156.484375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 44,
+        "width": 94.8203125,
+        "x": 242.453125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 16,
+        "y": 162.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Close this stint",
+      "rect": {
+        "height": 44,
+        "width": 84.1796875,
+        "x": 29,
+        "y": 541.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(169, 96, 60)",
+      "border": "rgb(169, 96, 60)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Cash",
+      "rect": {
+        "height": 44,
+        "width": 71.9375,
+        "x": 33,
+        "y": 947
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Bank",
+      "rect": {
+        "height": 44,
+        "width": 71.328125,
+        "x": 112.9375,
+        "y": 947
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": "method-hint-2",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Adjustment",
+      "rect": {
+        "height": 44,
+        "width": 247.171875,
+        "x": 33,
+        "y": 999
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Amount (Rs)Rs",
+      "rect": {
+        "height": 44,
+        "width": 144,
+        "x": 33,
+        "y": 1083
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "On",
+      "rect": {
+        "height": 44,
+        "width": 160.5,
+        "x": 33,
+        "y": 1167
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Reference (optional)",
+      "rect": {
+        "height": 44,
+        "width": 203,
+        "x": 33,
+        "y": 1251
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Note (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 1339
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": "identifier-list-observed_by-0-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Handed over by (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 1419
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(41, 40, 38)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record payment",
+      "rect": {
+        "height": 44,
+        "width": 140.03125,
+        "x": 33,
+        "y": 1515
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Imran imran",
+    "Stints",
+    "Statement",
+    "Record a payment"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "light",
+  "url": "http://localhost:6502/labour/people/per_824db74f-de35-4df9-8d69-6bd924cae410",
+  "width": 390
+}

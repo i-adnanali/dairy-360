@@ -1,0 +1,99 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Change recording session\"\n- main:\n  - heading \"Today\" [level=2]\n  - paragraph: Tuesday 29 September 2026\n  - heading \"Animal health\" [level=3]\n  - link \"5 overdue · 0 due today · 5 withdrawal instructions to review\":\n    - /url: /animals/health\n  - heading \"Milking\" [level=3]\n  - link \"morning 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-29&session=morning\n    - generic: morning\n    - generic: 0 of 6 recorded\n  - link \"evening 0 of 6 recorded\":\n    - /url: /milk/milking?on=2026-09-29&session=evening\n    - generic: evening\n    - generic: 0 of 6 recorded\n  - heading \"Dispatch\" [level=3]\n  - link \"morning 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-29&session=morning\n    - generic: morning\n    - generic: 0 of 2 recorded\n  - link \"evening 0 of 2 recorded\":\n    - /url: /milk/dispatch?on=2026-09-29&session=evening\n    - generic: evening\n    - generic: 0 of 2 recorded\n  - heading \"Feed\" [level=3]\n  - link \"Not recorded Record feeding\":\n    - /url: /feed/daily/2026-09-29\n    - generic: Not recorded\n    - generic: Record feeding\n  - heading \"Payroll\" [level=3]\n  - link \"September 2026 2 of 2 still to enter\":\n    - /url: /labour/payroll?from=2026-09-01&to=2026-09-30\n    - generic: September 2026\n    - generic: 2 of 2 still to enter",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(168, 166, 158)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1160.765625,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 24,
+        "width": 94.8203125,
+        "x": 1246.734375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change recording session",
+      "rect": {
+        "height": 38,
+        "width": 205.5234375,
+        "x": 20,
+        "y": 100.6875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Today",
+    "Animal health",
+    "Milking",
+    "Dispatch",
+    "Feed",
+    "Payroll"
+  ],
+  "height": 1000,
+  "regions": [],
+  "rootWidth": 1440,
+  "theme": "light",
+  "url": "http://localhost:6502/",
+  "width": 1440
+}

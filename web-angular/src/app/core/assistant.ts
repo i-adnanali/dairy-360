@@ -48,6 +48,7 @@ export class Assistant {
     typeof matchMedia === 'function' ? matchMedia('(max-width: 1279px)').matches : false,
   );
   readonly modal = computed(() => this.open() && this.narrow());
+  readonly expanded = signal(false);
   readonly draft = signal('');
 
   /**

@@ -1,3 +1,4 @@
+import { Field } from '../ui/field';
 import { writerDraft } from './writer-draft';
 import { WriteLock } from './write-lock';
 import { pagedList } from './paged-list';
@@ -64,7 +65,7 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-people-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Field,
     WriteLock,
     Pagination,
     StatusBadge,
@@ -88,15 +89,6 @@ import { Button } from '../ui/button';
   ],
   template: `
     <div data-page-layout="review">
-    <label class="mb-3 block text-sm text-content-secondary"
-      >Search records
-      <input
-        type="search"
-        maxlength="100"
-        class="rounded border border-line bg-surface-page p-2"
-        [value]="paging.url.value().search"
-        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
-    /></label>
     @if (paging.loading()) {
       <p role="status" class="text-sm text-content-muted">Loading records…</p>
     }
@@ -105,11 +97,19 @@ import { Button } from '../ui/button';
       <header>
         <div class="page-header"><h2 appPageHeading>People</h2><a appButton href="#add-person" (click)="focusAdd($event)">Add person</a></div>
         <p appHelp class="mt-1">
-          Everyone the farm employs, and what is owed to them. Also anyone whose name appears on a
-          record — the vet, whoever sold you an animal — so “everything Imran milked” has somebody
-          to point at.
+          People, employment stints and balances. Add a person first, then open a stint if they work here.
         </p>
       </header>
+    <label class="mb-3 block text-sm text-content-secondary"
+      >Search records
+      <input
+        appInput type="search"
+        maxlength="100"
+        class="rounded border border-line bg-surface-page p-2"
+        [value]="paging.url.value().search"
+        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
+    /></label>
+
 
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
@@ -118,11 +118,12 @@ import { Button } from '../ui/button';
       @if (rows(); as list) {
         @if (list.length === 0) {
           <p appCard empty data-role="empty">
+            @if (paging.url.value().search) { No matching people. <button appButton variant="link" (click)="paging.url.set({search: '', page: '1'})">Clear search</button> } @else {
             Nobody on file yet. Add the people who work here — then open a stint for each, and
-            record what they are on.
+            record what they are on. }
           </p>
         } @else {
-          <table
+          <div appScrollRegion="People and balances"><table
             class="w-full overflow-hidden rounded-xl border border-line-subtle bg-surface-raised text-sm"
             data-role="people-table"
           >
@@ -130,8 +131,7 @@ import { Button } from '../ui/button';
               class="bg-surface-sunken text-left text-xs uppercase tracking-wide text-content-muted"
             >
               <tr>
-                <th appCell>Identifier</th>
-                <th appCell>Name</th>
+                <th appCell>Person</th>
                 <th appCell numeric>Owed</th>
                 <th appCell>Last paid</th>
               </tr>
@@ -156,17 +156,18 @@ import { Button } from '../ui/button';
                     <a [routerLink]="['/labour/people', p.person_id]" appIdentifier>{{
                       p.identifier
                     }}</a>
+                  <span class="block font-sans text-sm">
+                    <span [appCertainty]="p.name ? 'known' : 'no-record'">{{
+                      p.name ?? noRecord
+                    }}</span>
+                  </span>
                     @if (!p.engaged) {
                       <span appBadge tone="ended" class="ml-2" data-role="not-engaged"
                         >no open stint</span
                       >
                     }
                   </td>
-                  <td appCell>
-                    <span [appCertainty]="p.name ? 'known' : 'no-record'">{{
-                      p.name ?? noRecord
-                    }}</span>
-                  </td>
+
                   <!-- THE ZERO BRANCH IS THE ONE THAT MOVED, and it moved
                        because it was the inverse of §15's rule rather than an
                        instance of it. "owed()" returned a bare "—" for a
@@ -207,7 +208,7 @@ import { Button } from '../ui/button';
                 </tr>
               }
             </tbody>
-          </table>
+          </table></div>
           @if (paging.result(); as pg) {
             <app-pagination
               label="People"
@@ -254,9 +255,7 @@ import { Button } from '../ui/button';
             autocomplete="off"
           />
           <span id="person-identifier-help" class="block text-xs text-content-subtle">
-            A short, stable name — the same one you type into “observed by”. It cannot be changed
-            later: every milking and dispatch that names them stores it as text, and the event log
-            cannot be rewritten.
+            A permanent identifier used on records and in “observed by”. It cannot be changed later; the event log cannot be rewritten.
           </span>
           @if (personState.fieldError('identifier'); as msg) {
             <span id="person-identifier-error" appErrorText size="xs" tone="soft" class="block" data-role="error-identifier">{{
@@ -265,32 +264,12 @@ import { Button } from '../ui/button';
           }
         </div>
 
-        <label class="block space-y-1">
-          <span appSubHeading
-            >Display name <span class="text-content-subtle">(optional)</span></span
-          >
-          <input
-            name="name"
-            [value]="name()"
-            (input)="name.set($any($event.target).value)"
-            appInput
-            density="comfortable"
-            class="w-full"
-            placeholder="Imran"
-          />
-        </label>
-
-        <label class="block space-y-1">
-          <span appSubHeading>Contact <span class="text-content-subtle">(optional)</span></span>
-          <input
-            name="contact"
-            [value]="contact()"
-            (input)="contact.set($any($event.target).value)"
-            appInput
-            density="comfortable"
-            class="w-full"
-          />
-        </label>
+        <app-field label="Display name (optional)">
+          <input name="name" [value]="name()" (input)="name.set($any($event.target).value)" appInput density="comfortable" class="w-full" placeholder="Imran" />
+        </app-field>
+        <app-field label="Contact (optional)">
+          <input name="contact" [value]="contact()" (input)="contact.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
+        </app-field>
 
         @if (personState.formError(['identifier']); as msg) {
           <p appErrorPanel data-role="person-form-error">{{ msg }}</p>
@@ -303,7 +282,7 @@ import { Button } from '../ui/button';
             appButton
             [busy]="personState.submitting()"
           >
-            {{ personState.submitting() ? 'Saving…' : 'Add person' }}
+            Add person
           </button>
         } @else {
           <app-session-required what="a person" />
@@ -328,6 +307,9 @@ import { Button } from '../ui/button';
               fine too, for somebody holding two roles.
             </p>
 
+            <label class="block text-sm">Find person by identifier or name
+              <input appInput type="search" [value]="personSearch()" (input)="personSearch.set($any($event.target).value)" />
+            </label>
             <label class="block space-y-1">
               <span appSubHeading>Person</span>
               <select
@@ -339,7 +321,7 @@ import { Button } from '../ui/button';
                 class="w-full"
               >
                 <option value="">Choose…</option>
-                @for (p of list; track p.person_id) {
+                @for (p of matchingPeople(list); track p.person_id) {
                   <option [value]="p.person_id">{{ p.identifier }}</option>
                 }
               </select>
@@ -406,7 +388,7 @@ import { Button } from '../ui/button';
                 appButton
                 [busy]="engageState.submitting()"
               >
-                {{ engageState.submitting() ? 'Saving…' : 'Open stint' }}
+                Open stint
               </button>
             } @else {
               <app-session-required what="a stint" />
@@ -420,6 +402,11 @@ import { Button } from '../ui/button';
   `,
 })
 export class PeopleList {
+  protected readonly personSearch = signal('');
+  protected matchingPeople<T extends {person_id: string; identifier: string; name: string | null}>(list: T[]) {
+    const query = this.personSearch().trim().toLowerCase();
+    return list.filter(p => p.person_id === this.engagePerson() || (p.identifier + ' ' + (p.name ?? '')).toLowerCase().includes(query));
+  }
   protected focusAdd(event: Event) { event.preventDefault(); const field = document.querySelector<HTMLInputElement>('#add-person input'); field?.focus(); field?.scrollIntoView({ block: 'center' }); }
   protected personDraft!: ReturnType<typeof writerDraft>;
   protected engageDraft!: ReturnType<typeof writerDraft>;

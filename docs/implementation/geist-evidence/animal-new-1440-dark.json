@@ -1,0 +1,270 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Animals\":\n    - /url: /animals\n  - link \"Calvings\":\n    - /url: /animals/calvings\n  - link \"Health\":\n    - /url: /animals/health\n- main:\n  - heading \"Add an acquired animal\" [level=2]\n  - paragraph: Only animals that arrived from elsewhere. A farm-born animal is created by its dam's calving — record the calving instead, and it appears as a consequence.\n  - generic: Sex\n  - radiogroup \"Sex\":\n    - radio \"female\" [checked]:\n      - generic: \"1\"\n      - generic: female\n    - radio \"male\":\n      - generic: \"2\"\n      - generic: male\n  - generic: Name (optional)\n  - textbox \"Name (optional)\"\n  - generic: Acquired from (optional)\n  - combobox \"Acquired from (optional)\"\n  - generic: Who it came from. A stable identifier, not a display name.\n  - generic: Post no. (optional)\n  - textbox \"Post no. (optional)\"\n  - generic: Ear tag (optional)\n  - textbox \"Ear tag (optional)\"\n  - paragraph: Post number and ear tag are attributes, not identity — both change over an animal's life.\n  - group \"When did it arrive on the farm?\":\n    - generic: When did it arrive on the farm?\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - group \"Birth date — optional, but not its precision\":\n    - generic: Birth date — optional, but not its precision\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back.\n  - paragraph: \"Leave the birth date blank if you do not know it. Without one the animal shows as heifer or male even if it is visibly a calf — the age rule has no date to test. An estimated year is the fix: type the year and tick the guess box.\"\n  - generic: Observed by (optional)\n  - combobox \"Observed by (optional)\"\n  - generic: Who actually saw it. Leave blank unless someone did — nobody observed a purchase record. A stable identifier, not a display name.\n  - button \"Add animal\" [disabled]\n  - generic: Enter the arrival date.\n  - paragraph: Cmd/Ctrl+Enter saves from a field when the record is ready.",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "female",
+      "rect": {
+        "height": 34,
+        "width": 85.78125,
+        "x": 377,
+        "y": 286.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "male",
+      "rect": {
+        "height": 34,
+        "width": 70.125,
+        "x": 470.78125,
+        "y": 286.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Name (optional)",
+      "rect": {
+        "height": 36,
+        "width": 337,
+        "x": 377,
+        "y": 360.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-acquired_from-4-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Acquired from (optional)",
+      "rect": {
+        "height": 36,
+        "width": 337,
+        "x": 726,
+        "y": 356.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Post no. (optional)",
+      "rect": {
+        "height": 36,
+        "width": 337,
+        "x": 377,
+        "y": 448.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Ear tag (optional)",
+      "rect": {
+        "height": 36,
+        "width": 337,
+        "x": 726,
+        "y": 448.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 36,
+        "width": 224,
+        "x": 377,
+        "y": 601.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(87, 86, 79)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 377,
+        "y": 651.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 36,
+        "width": 224,
+        "x": 377,
+        "y": 806.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(87, 86, 79)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 377,
+        "y": 856.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-observed_by-5-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Observed by (optional)",
+      "rect": {
+        "height": 36,
+        "width": 720,
+        "x": 360,
+        "y": 1003.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(58, 57, 55)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": "animal-submit-reason",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Add animal",
+      "rect": {
+        "height": 36,
+        "width": 105.1953125,
+        "x": 360,
+        "y": 1091.6875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Add an acquired animal"
+  ],
+  "height": 1000,
+  "regions": [],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6502/animals/new",
+  "width": 1440
+}

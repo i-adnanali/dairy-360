@@ -1,0 +1,300 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- main:\n  - paragraph: Farm review\n  - heading \"Milk analytics\" [level=1]\n  - paragraph: Production, recording coverage and where the milk went.\n  - button \"Refresh\"\n  - region \"Review filters\":\n    - text: Review\n    - combobox \"Review\":\n      - option \"Daily\" [selected]\n      - option \"Weekly\"\n      - option \"Monthly\"\n    - button \"Previous period\": ←\n    - text: Date\n    - textbox \"Date\": 2026-09-17\n    - button \"Next period\": →\n    - text: Session\n    - combobox \"Session\":\n      - option \"All sessions\" [selected]\n      - option \"Morning\"\n      - option \"Evening\"\n  - paragraph: 2026-09-17 – 2026-09-17 · Asia/Karachi · In progress\n  - paragraph: Updated 17-Sept-2026, 5:00 pm\n  - region \"Period totals\":\n    - article:\n      - heading \"Measured production\" [level=2]\n      - paragraph: 29.7 L\n      - paragraph: Partial or qualified measured total\n    - article:\n      - heading \"Recorded dispatch\" [level=2]\n      - paragraph: 24 L\n      - paragraph: Sold 21.5 L · Non-sale 2.5 L\n    - article:\n      - heading \"Difference\" [level=2]\n      - paragraph: 5.7 L\n      - paragraph: Measured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. incomplete production; approximate roster dates; production not yet recorded; standing dispatch not yet recorded; no dispatch records; no measurements.\n    - article:\n      - heading \"Coverage\" [level=2]\n      - paragraph: 5 / 12\n      - paragraph: Expected animal sessions · 1 unmeasured · 0 not milked · 0 missing · 6 pending · 8 approximate roster slots\n  - heading \"Production and dispatch\" [level=2]\n  - paragraph: Litres by session. Gaps mean no measurements; larger points mark incomplete production. Select a point to inspect its date; the table provides the same information.\n  - img \"Measured production and recorded dispatch in litres\"\n  - text: Inspect date / session\n  - combobox \"Inspect date / session\":\n    - option \"Choose a date…\" [selected]\n    - option \"2026-09-17 · morning\"\n    - option \"2026-09-17 · evening\"\n  - button \"Show data · Production and dispatch\"\n  - heading \"Production comparison\" [level=2]\n  - paragraph: Comparison requires complete, exact production records.\n  - paragraph: 2026-09-17–2026-09-17 compared with 2026-09-16–2026-09-16. 1 vs 1 days; daily averages 29.7 L vs 43.4 L.\n  - paragraph: \"Mean daily yield: Not available per fully measured animal-day · 0 eligible, 6 excluded. No eligible fully measured animal-days.\"\n  - region \"Recording review\":\n    - heading \"Records to review\" [level=2]\n    - paragraph: 50% of expected animal sessions have a recorded answer.\n    - paragraph: 1 unmeasured · 0 not milked · 0 missing · 6 pending · 8 approximate roster slots · 0 standing dispatch answers missing · 2 not yet recorded.\n    - paragraph: Historical gaps mean no records in the selected period; recording obligations before adoption are unknown. Occasional dispatches and retained milk may not be fully recorded.\n    - paragraph: \"Difference percentage unavailable: incomplete production; approximate roster dates; production not yet recorded; standing dispatch not yet recorded; no dispatch records; no measurements.\"\n  - button \"By animal\"\n  - button \"Reconciliation\"\n  - text: Find animal\n  - searchbox \"Find animal\"\n  - text: Sort\n  - combobox \"Sort\":\n    - option \"Animal\" [selected]\n    - option \"Measured litres\"\n  - text: Order\n  - combobox \"Order\":\n    - option \"Ascending\" [selected]\n    - option \"Descending\"\n  - region \"Animal production details\":\n    - table \"Animal production details\":\n      - caption: Animal production details\n      - rowgroup:\n        - row \"Animal Measured milk Coverage Complete animal-days\":\n          - columnheader \"Animal\"\n          - columnheader \"Measured milk\"\n          - columnheader \"Coverage\"\n          - columnheader \"Complete animal-days\"\n      - rowgroup:\n        - row \"BD-0001 Noori · PK-4412 5 L 1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending 0\":\n          - cell \"BD-0001 Noori · PK-4412\":\n            - link \"BD-0001\":\n              - /url: /animals/BD-0001\n            - text: Noori · PK-4412\n          - cell \"5 L\"\n          - cell \"1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending\":\n            - text: 1/2 measured\n            - text: 0 unmeasured · 0 not milked · 0 missing · 1 pending\n          - cell \"0\"\n        - row \"BD-0002 Sohni · PK-4418 6 L 1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots 0\":\n          - cell \"BD-0002 Sohni · PK-4418\":\n            - link \"BD-0002\":\n              - /url: /animals/BD-0002\n            - text: Sohni · PK-4418\n          - cell \"6 L\"\n          - cell \"1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\":\n            - text: 1/2 measured\n            - text: 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\n          - cell \"0\"\n        - row \"BD-0011 Bhoori · PK-4460 9.7 L 1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots 0\":\n          - cell \"BD-0011 Bhoori · PK-4460\":\n            - link \"BD-0011\":\n              - /url: /animals/BD-0011\n            - text: Bhoori · PK-4460\n          - cell \"9.7 L\"\n          - cell \"1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\":\n            - text: 1/2 measured\n            - text: 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\n          - cell \"0\"\n        - row \"BD-0012 Lali · PK-4465 4 L 1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots 0\":\n          - cell \"BD-0012 Lali · PK-4465\":\n            - link \"BD-0012\":\n              - /url: /animals/BD-0012\n            - text: Lali · PK-4465\n          - cell \"4 L\"\n          - cell \"1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\":\n            - text: 1/2 measured\n            - text: 0 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\n          - cell \"0\"\n        - row \"BD-0016 Mithi 5 L 1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending 0\":\n          - cell \"BD-0016 Mithi\":\n            - link \"BD-0016\":\n              - /url: /animals/BD-0016\n            - text: Mithi\n          - cell \"5 L\"\n          - cell \"1/2 measured 0 unmeasured · 0 not milked · 0 missing · 1 pending\":\n            - text: 1/2 measured\n            - text: 0 unmeasured · 0 not milked · 0 missing · 1 pending\n          - cell \"0\"\n        - row \"BD-0022 Neeli No measurements 0/2 measured 1 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots 0\":\n          - cell \"BD-0022 Neeli\":\n            - link \"BD-0022\":\n              - /url: /animals/BD-0022\n            - text: Neeli\n          - cell \"No measurements\"\n          - cell \"0/2 measured 1 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\":\n            - text: 0/2 measured\n            - text: 1 unmeasured · 0 not milked · 0 missing · 1 pending · 2 approximate roster slots\n          - cell \"0\"\n  - navigation \"Analytics details pagination\":\n    - generic: 1–6 of 6\n  - paragraph: Cards and charts cover the full period. Pagination and animal search affect only this detail table.",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(168, 166, 158)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1160.765625,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 24,
+        "width": 94.8203125,
+        "x": 1246.734375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Refresh",
+      "rect": {
+        "height": 38,
+        "width": 84.984375,
+        "x": 1331.015625,
+        "y": 116.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Review DailyWeeklyMonthly",
+      "rect": {
+        "height": 36,
+        "width": 90.5,
+        "x": 96.671875,
+        "y": 234.6875
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Previous period",
+      "rect": {
+        "height": 38,
+        "width": 46.7109375,
+        "x": 199.171875,
+        "y": 233.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 36,
+        "width": 138,
+        "x": 296.109375,
+        "y": 234.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Next period",
+      "rect": {
+        "height": 38,
+        "width": 46.7109375,
+        "x": 446.109375,
+        "y": 233.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Session All sessionsMorningEvening",
+      "rect": {
+        "height": 36,
+        "width": 114,
+        "x": 565.4921875,
+        "y": 234.6875
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Inspect date / session Choose a date…2026-09-17 · morning2026-09-17 · evening",
+      "rect": {
+        "height": 36,
+        "width": 181.5,
+        "x": 197.453125,
+        "y": 984.1875
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Show data · Production and dispatch",
+      "rect": {
+        "height": 38,
+        "width": 276.1015625,
+        "x": 45,
+        "y": 1032.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(169, 96, 60)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "By animal",
+      "rect": {
+        "height": 38,
+        "width": 95.734375,
+        "x": 45,
+        "y": 1508.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Reconciliation",
+      "rect": {
+        "height": 38,
+        "width": 126.5390625,
+        "x": 148.734375,
+        "y": 1508.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Find animal",
+      "rect": {
+        "height": 36,
+        "width": 174,
+        "x": 537.125,
+        "y": 1509.1875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Sort AnimalMeasured litres",
+      "rect": {
+        "height": 36,
+        "width": 137.5,
+        "x": 921.1953125,
+        "y": 1509.1875
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Order AscendingDescending",
+      "rect": {
+        "height": 36,
+        "width": 115,
+        "x": 1280,
+        "y": 1509.1875
+      },
+      "tag": "SELECT"
+    }
+  ],
+  "headings": [
+    "Milk analytics",
+    "Measured production",
+    "Recorded dispatch",
+    "Difference",
+    "Coverage",
+    "Production and dispatch",
+    "Production comparison",
+    "Records to review"
+  ],
+  "height": 1000,
+  "regions": [
+    {
+      "label": "Production and dispatch chart data",
+      "scrollWidth": 0,
+      "tabindex": null,
+      "width": 0
+    }
+  ],
+  "rootWidth": 1440,
+  "theme": "light",
+  "url": "http://localhost:6502/analytics?on=2026-09-17&page=1&detailOn=&detailSession=",
+  "width": 1440
+}

@@ -1,0 +1,315 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Milk\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Milking\":\n    - /url: /milk/milking\n  - link \"Dispatch\":\n    - /url: /milk/dispatch\n  - link \"Buyers\":\n    - /url: /milk/buyers\n- main:\n  - heading \"Where the milk went\" [level=2]\n  - paragraph: One session, and everything that left the bulk in it — sold and kept. The dodhi and the house are on every sheet; a neighbour appears only when they took something.\n  - generic: Date\n  - textbox \"Date\": 2026-09-29\n  - generic: Session\n  - radiogroup \"Session\":\n    - radio \"Morning\" [checked]:\n      - generic: \"1\"\n      - generic: Morning\n    - radio \"Evening\":\n      - generic: \"2\"\n      - generic: Evening\n  - generic: Handed over by (optional)\n  - combobox \"Handed over by (optional)\"\n  - generic: Person who handed over the milk, if known. Use a stable identifier, not a display name.\n  - paragraph: Defaults to today and this session — the one place a date is defaulted, because today is a fact rather than a guess. Change it to enter a session you missed.\n  - region \"Standing dispatch quantities\":\n    - generic: Every session — leave none of these unanswered\n    - table:\n      - rowgroup:\n        - 'row \"Not answered Bashir (dodhi) Yesterday morning: No record Rate: Rs 7,000.00 / 40 L Litres for Bashir (dodhi) Nothing taken by Bashir (dodhi) Amount: No record\"':\n          - cell \"Not answered Bashir (dodhi)\":\n            - generic: Not answered\n            - text: Bashir (dodhi)\n          - 'cell \"Yesterday morning: No record\"': \"Yesterday morning: –\"\n          - 'cell \"Rate: Rs 7,000.00 / 40 L\"'\n          - cell \"Litres for Bashir (dodhi) Nothing taken by Bashir (dodhi)\":\n            - generic: Litres for Bashir (dodhi)\n            - textbox \"Litres for Bashir (dodhi) — 2026-09-29 morning\"\n            - generic: L\n            - button \"Nothing taken by Bashir (dodhi)\": nothing taken\n          - 'cell \"Amount: No record\"': \"Amount: –\"\n        - 'row \"Not answered Homekept, not sold Yesterday morning: No record Rate: not billed Litres for Home Nothing taken by Home Amount: No record\"':\n          - cell \"Not answered Homekept, not sold\":\n            - generic: Not answered\n            - text: Homekept, not sold\n          - 'cell \"Yesterday morning: No record\"': \"Yesterday morning: –\"\n          - 'cell \"Rate: not billed\"'\n          - cell \"Litres for Home Nothing taken by Home\":\n            - generic: Litres for Home\n            - textbox \"Litres for Home — 2026-09-29 morning\"\n            - generic: L\n            - button \"Nothing taken by Home\": nothing taken\n          - 'cell \"Amount: No record\"': \"Amount: –\"\n    - navigation \"Standing destinations pagination\":\n      - generic: 1–2 of 2\n  - region \"Occasional dispatch quantities\":\n    - generic: Only if they came — nothing to answer here\n    - navigation \"Occasional destinations pagination\":\n      - generic: 1–3 of 3\n    - table:\n      - rowgroup:\n        - row \"Ali (next door) Rs 9,000.00 / 40 L Record milk taken by Ali (next door)\":\n          - cell \"Ali (next door) Rs 9,000.00 / 40 L\"\n          - cell \"Record milk taken by Ali (next door)\":\n            - button \"Record milk taken by Ali (next door)\": they took some\n        - row \"Bibi (corner house) Rs 9,000.00 / 40 L Record milk taken by Bibi (corner house)\":\n          - cell \"Bibi (corner house) Rs 9,000.00 / 40 L\"\n          - cell \"Record milk taken by Bibi (corner house)\":\n            - button \"Record milk taken by Bibi (corner house)\": they took some\n        - row \"Imran (milk allowance) not billed Record milk taken by Imran (milk allowance)\":\n          - cell \"Imran (milk allowance) not billed\"\n          - cell \"Record milk taken by Imran (milk allowance)\":\n            - button \"Record milk taken by Imran (milk allowance)\": they took some\n  - generic: Out 0 L · billed Rs 0.00\n  - generic: Measured this session 0 L\n  - paragraph: Production this session is a lower bound — 6 in milk with no row yet. Milk going out can exceed it, and that is the missing measurement rather than missing milk.\n  - button \"Go to first unanswered destination\"\n  - text: \"Still to answer: Bashir (dodhi), Home.\"\n  - text: 0 of 2\n  - text: answered\n  - generic: required destinations\n  - button \"Save session\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(46, 45, 44)",
+      "border": "rgb(70, 69, 63)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Milk",
+      "rect": {
+        "height": 44,
+        "width": 109.3125,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 137.3125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 223.28125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 278.375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 33,
+        "y": 389.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Morning",
+      "rect": {
+        "height": 44,
+        "width": 92.484375,
+        "x": 33,
+        "y": 469.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Evening",
+      "rect": {
+        "height": 44,
+        "width": 90.15625,
+        "x": 133.484375,
+        "y": 469.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-observed_by-3-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Handed over by (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 549.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Litres for Bashir (dodhi) — 2026-09-29 morning",
+      "rect": {
+        "height": 44,
+        "width": 216.5,
+        "x": 38,
+        "y": 911.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Nothing taken by Bashir (dodhi)",
+      "rect": {
+        "height": 44,
+        "width": 95.2265625,
+        "x": 38,
+        "y": 963.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Litres for Home — 2026-09-29 morning",
+      "rect": {
+        "height": 44,
+        "width": 216.5,
+        "x": 38,
+        "y": 1171.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Nothing taken by Home",
+      "rect": {
+        "height": 44,
+        "width": 95.2265625,
+        "x": 38,
+        "y": 1223.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Record milk taken by Ali (next door)",
+      "rect": {
+        "height": 44,
+        "width": 105.0625,
+        "x": 38,
+        "y": 1516.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Record milk taken by Bibi (corner house)",
+      "rect": {
+        "height": 44,
+        "width": 105.0625,
+        "x": 38,
+        "y": 1626.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Record milk taken by Imran (milk allowance)",
+      "rect": {
+        "height": 44,
+        "width": 105.0625,
+        "x": 38,
+        "y": 1736.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(46, 45, 44)",
+      "border": "rgb(70, 69, 63)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Go to first unanswered destination",
+      "rect": {
+        "height": 44,
+        "width": 260.953125,
+        "x": 16,
+        "y": 1996.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(51, 50, 48)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": "dispatch-submit-reason",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Save session",
+      "rect": {
+        "height": 44,
+        "width": 117.375,
+        "x": 239.625,
+        "y": 763
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Where the milk went"
+  ],
+  "height": 844,
+  "regions": [
+    {
+      "label": "Standing dispatch quantities",
+      "scrollWidth": 356,
+      "tabindex": null,
+      "width": 356
+    },
+    {
+      "label": "Occasional dispatch quantities",
+      "scrollWidth": 356,
+      "tabindex": null,
+      "width": 356
+    }
+  ],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/milk/dispatch",
+  "width": 390
+}

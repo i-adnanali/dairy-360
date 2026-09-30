@@ -174,37 +174,6 @@ import { PageHeading } from '../ui/heading';
               </p>
             </article>
           </section>
-          <section class="rounded-xl border border-line bg-surface-raised p-5 space-y-2">
-            <h2 class="font-semibold">Production comparison</h2>
-            @if (r.comparison.percent !== null) {
-              <p>
-                {{ r.comparison.percent | number: '1.0-2' }}% ·
-                {{ litres(r.comparison.current) }} vs
-                {{ litres(r.comparison.previous) }}
-              </p>
-            } @else {
-              <p class="text-content-muted">{{ r.comparison.reason }}</p>
-            }
-            @if (r.comparison.from) {
-              <p class="text-sm text-content-muted">
-                {{ r.comparison.from }}–{{ r.comparison.to }} compared with
-                {{ r.comparison.previousFrom }}–{{ r.comparison.previousTo }}.
-                {{ r.comparison.currentDays }} vs {{ r.comparison.previousDays }} days; daily
-                averages {{ litres(r.comparison.currentDailyAverage) }} vs
-                {{ litres(r.comparison.previousDailyAverage) }}.
-              </p>
-            }
-            @if (q().session === 'all') {
-              <p class="text-sm">
-                Mean daily yield: {{ litres(r.metrics.meanDailyYield) }} per fully measured
-                animal-day · {{ r.metrics.eligibleAnimalDays }} eligible,
-                {{ r.metrics.excludedAnimalDays }} excluded.
-                @if (r.metrics.meanDailyYield === null) {
-                  No eligible fully measured animal-days.
-                }
-              </p>
-            }
-          </section>
           <section class="rounded-xl border border-line bg-surface-raised p-5">
             <h2 class="font-semibold">Production and dispatch</h2>
             <p class="mb-4 text-sm text-content-muted">
@@ -223,18 +192,14 @@ import { PageHeading } from '../ui/heading';
                 role="img"
               ></canvas>
             </div>
-            <div class="mt-3 flex flex-wrap gap-2" aria-label="Inspect chart dates">
-              @for (b of r.buckets; track b.key) {
-                <button
-                  appButton
-                  variant="link"
-                  [attr.aria-label]="bucketLabel(b)"
-                  (click)="change({ detailOn: b.on, detailSession: b.session }, false)"
-                >
-                  {{ b.session === 'all' ? b.on : b.session }}
-                </button>
-              }
-            </div>
+            <label class="my-3 block text-sm">Inspect date / session
+              <select appInput class="ml-2" [value]="q().detailOn + '|' + q().detailSession" (change)="inspectBucket($any($event.target).value)">
+                <option value="|">Choose a date…</option>
+                @for (b of r.buckets; track b.key) {
+                  <option [value]="b.on + '|' + b.session">{{ b.on }} · {{ b.session }}</option>
+                }
+              </select>
+            </label>
             <button
               appButton
               variant="secondary"
@@ -284,6 +249,37 @@ import { PageHeading } from '../ui/heading';
                 </tbody>
               </table>
             </div>
+          </section>
+          <section class="rounded-xl border border-line bg-surface-raised p-5 space-y-2">
+            <h2 class="font-semibold">Production comparison</h2>
+            @if (r.comparison.percent !== null) {
+              <p>
+                {{ r.comparison.percent | number: '1.0-2' }}% ·
+                {{ litres(r.comparison.current) }} vs
+                {{ litres(r.comparison.previous) }}
+              </p>
+            } @else {
+              <p class="text-content-muted">{{ r.comparison.reason }}</p>
+            }
+            @if (r.comparison.from) {
+              <p class="text-sm text-content-muted">
+                {{ r.comparison.from }}–{{ r.comparison.to }} compared with
+                {{ r.comparison.previousFrom }}–{{ r.comparison.previousTo }}.
+                {{ r.comparison.currentDays }} vs {{ r.comparison.previousDays }} days; daily
+                averages {{ litres(r.comparison.currentDailyAverage) }} vs
+                {{ litres(r.comparison.previousDailyAverage) }}.
+              </p>
+            }
+            @if (q().session === 'all') {
+              <p class="text-sm">
+                Mean daily yield: {{ litres(r.metrics.meanDailyYield) }} per fully measured
+                animal-day · {{ r.metrics.eligibleAnimalDays }} eligible,
+                {{ r.metrics.excludedAnimalDays }} excluded.
+                @if (r.metrics.meanDailyYield === null) {
+                  No eligible fully measured animal-days.
+                }
+              </p>
+            }
           </section>
           <section
             class="rounded-xl border border-line p-4 space-y-2"
@@ -339,6 +335,7 @@ import { PageHeading } from '../ui/heading';
                     (change)="change({ search: $any($event.target).value }, false)"
                 /></label>
               }
+              @if (q().search) { <button appButton variant="link" (click)="change({ search: '' }, false)">Clear animal filter</button> }
               <label
                 >Sort
                 <select
@@ -532,6 +529,11 @@ import { PageHeading } from '../ui/heading';
   ],
 })
 export class AnalyticsPage {
+  protected inspectBucket(value: string) {
+    const [detailOn, detailSession] = value.split('|');
+    this.change({ detailOn, detailSession: (detailSession || 'all') as any }, false);
+  }
+
   private readonly api = inject(RegistryApi);
   private readonly writes = inject(WriteLog);
   private readonly theme = inject(Theme);

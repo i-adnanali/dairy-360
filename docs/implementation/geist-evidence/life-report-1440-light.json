@@ -1,0 +1,189 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Animals\":\n    - /url: /animals\n  - link \"Calvings\":\n    - /url: /animals/calvings\n  - link \"Health\":\n    - /url: /animals/health\n- main:\n  - heading \"Animal lifetime report\" [level=2]\n  - paragraph: Recorded history with evidence, uncertainty and coverage gaps.\n  - text: From\n  - textbox \"From\"\n  - text: Through\n  - textbox \"Through\"\n  - checkbox \"Include corrections\"\n  - text: Include corrections\n  - button \"Apply\"\n  - link \"Animal profile\":\n    - /url: /animals/BD-0001\n  - link \"Manage health\":\n    - /url: /animals/health\n  - button \"Print / Save as PDF\"\n  - button \"Export complete JSON\"\n  - navigation \"Report contents\":\n    - link \"Identity and provenance (3)\":\n      - /url: \"#report-identity\"\n    - link \"Timeline (21)\":\n      - /url: \"#report-timeline\"\n    - link \"Calvings and reproduction (5)\":\n      - /url: \"#report-calvings\"\n    - link \"Milk (5)\":\n      - /url: \"#report-milk\"\n    - link \"Lactations (3)\":\n      - /url: \"#report-lactations\"\n    - link \"Health records (14)\":\n      - /url: \"#report-health\"\n    - link \"Veterinary visits (1)\":\n      - /url: \"#report-visits\"\n    - link \"Feed (1)\":\n      - /url: \"#report-feed\"\n    - link \"Direct health costs (0)\":\n      - /url: \"#report-financial\"\n    - link \"Shared visit costs (1)\":\n      - /url: \"#report-shared_visit_costs\"\n    - link \"Technical audit · complete response\":\n      - /url: \"#report-audit\"\n  - heading \"Identity and provenance · BD-0001 · Noori\" [level=3]\n  - paragraph: \"Tag: PK-4412 · female · buffalo\"\n  - paragraph: \"Status: lactating · Origin: acquired\"\n  - paragraph: \"Generated 2026-09-17T12:00:00.000Z. Coverage: all recorded life through latest record. Corrections excluded. Vaccination card and current identity cover all recorded history.\"\n  - heading \"Vaccination card · all recorded history\" [level=3]\n  - paragraph: Only administered vaccines appear below. Absence is not evidence of no prior vaccination.\n  - article:\n    - paragraph: Demonstration vaccine (not a clinical protocol) · 15 Sept 2026\n    - paragraph: 1 fixture unit · recorded fixture route · Batch DEMO-LOT-002\n    - paragraph: Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness health card\n    - paragraph: Record 2dc7145f-ee78-4b5d-a681-fb0b2c8c63b3\n  - article:\n    - paragraph: Demonstration round vaccine · 15 Sept 2026\n    - paragraph: 1 fixture unit · recorded fixture route · Batch DEMO-LOT-001\n    - paragraph: Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness health card\n    - paragraph: Record 5c726020-afbc-47cf-a198-54f44293b5d6\n  - heading \"Outstanding instructions\" [level=4]\n  - paragraph: Fixture overdue · due 16 Sept 2026\n  - paragraph: Fixture due · due 17 Sept 2026\n  - paragraph: Fixture recheck · due 17 Sept 2026\n  - paragraph: Fixture upcoming · due 20 Sept 2026\n  - heading \"Withdrawal instructions requiring attention\" [level=4]\n  - paragraph: meat · Demonstration vaccine (not a clinical protocol) · Instruction unknown · End needs clarification\n  - paragraph: meat · Demonstration round vaccine · Instruction unknown · End needs clarification\n  - heading \"Recorded production totals\" [level=3]\n  - paragraph: 20 measured litres · 4 measured sessions · 0 milked but unmeasured · 1 not milked\n  - paragraph: Absent sessions are not zero; these totals describe entered records.\n  - heading \"Identity and provenance · 3 records\" [level=3]\n  - paragraph: Current identity above; recorded parentage below. Identity events appear in Timeline.\n  - navigation \"Identity and provenance pagination\":\n    - generic: 1–3 of 3\n  - article:\n    - paragraph: Parentage\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0018\"\n    - paragraph: \"Parent: BD-0001\"\n    - paragraph: \"Relationship: dam\"\n    - paragraph: \"Confidence: known\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Parentage\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0017\"\n    - paragraph: \"Parent: BD-0001\"\n    - paragraph: \"Relationship: dam\"\n    - paragraph: \"Confidence: known\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Parentage\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0016\"\n    - paragraph: \"Parent: BD-0001\"\n    - paragraph: \"Relationship: dam\"\n    - paragraph: \"Confidence: known\"\n    - generic \"Source and linked records\"\n  - heading \"Timeline · 21 records\" [level=3]\n  - paragraph: Effective life events in chronological order; corrected originals are available in the appendix.\n  - navigation \"Timeline pagination\":\n    - generic: 1–21 of 21\n  - article:\n    - paragraph: acquired\n    - paragraph: \"Date: 2019 (year known)\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Acquired from: Chak 42 dairy\"\n    - paragraph: \"Birth date: Mar 2017 (month known)\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: calving\n    - paragraph: \"Date: 11 Feb 2021\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Calf: BD-0016\"\n    - paragraph: \"Calf sex: female\"\n    - paragraph: \"Outcome: live\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: dry off\n    - paragraph: \"Date: 6 Nov 2021\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Reason: scheduled\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: calving\n    - paragraph: \"Date: 19 Jul 2022\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Calf: BD-0017\"\n    - paragraph: \"Calf sex: female\"\n    - paragraph: \"Outcome: live\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: dry off\n    - paragraph: \"Date: 2 Apr 2023\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Reason: scheduled\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: calving\n    - paragraph: \"Date: 8 Jan 2024\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Calf: BD-0018\"\n    - paragraph: \"Calf sex: male\"\n    - paragraph: \"Outcome: live\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: note\n    - paragraph: \"Date: 14 Feb 2026\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Note: off feed two days after the morning round, back to normal by the 16th\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Examination\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Findings: Synthetic observation for workflow practice\"\n    - paragraph: \"Diagnosis: Fixture finding\"\n    - paragraph: \"Certainty: suspected\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Administration\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: vaccine\"\n    - paragraph: \"Product: Demonstration vaccine (not a clinical protocol)\"\n    - paragraph: \"Route: recorded fixture route\"\n    - paragraph: \"Batch: DEMO-LOT-002\"\n    - paragraph: \"Administered by: Dr Fixture\"\n    - paragraph: \"Amount: 1 fixture unit\"\n    - paragraph: \"milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture\"\n    - paragraph: \"meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: completed\"\n    - paragraph: \"Instructions: Fixture given\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 15 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Administration\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: vaccine\"\n    - paragraph: \"Product: Demonstration round vaccine\"\n    - paragraph: \"Route: recorded fixture route\"\n    - paragraph: \"Batch: DEMO-LOT-001\"\n    - paragraph: \"Administered by: Dr Fixture\"\n    - paragraph: \"Amount: 1 fixture unit\"\n    - paragraph: \"milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture\"\n    - paragraph: \"meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Result\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: test\"\n    - paragraph: \"Result: Synthetic test result; no clinical interpretation\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health case\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Subject: Observation requiring follow-up\"\n    - paragraph: \"Status: open\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 16 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: test\"\n    - paragraph: \"Status: completed\"\n    - paragraph: \"Instructions: Fixture test\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 16 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 16 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: missed\"\n    - paragraph: \"Instructions: Fixture missed\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 16 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 16 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture overdue\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 16 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Care plan\n    - paragraph: \"Recorded date: 17 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: vaccination\"\n    - paragraph: \"Status: active\"\n    - paragraph: \"Instructions: Demonstration course; dates are fixture data, not clinical advice\"\n    - paragraph: \"Prescriber: Dr Fixture\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 17 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture due\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 17 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 17 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: recheck\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture recheck\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 17 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 18 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: cancelled\"\n    - paragraph: \"Instructions: Fixture cancelled\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 18 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Scheduled date: 20 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture upcoming\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 20 Sept 2026\"\n    - generic \"Source and linked records\"\n  - heading \"Calvings and reproduction · 5 records\" [level=3]\n  - paragraph: Breeding and pregnancy-check capture is not yet supported.\n  - navigation \"Calvings and reproduction pagination\":\n    - generic: 1–5 of 5\n  - article:\n    - paragraph: calving\n    - paragraph: \"Date: 11 Feb 2021\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Calf: BD-0016\"\n    - paragraph: \"Calf sex: female\"\n    - paragraph: \"Outcome: live\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: dry off\n    - paragraph: \"Date: 6 Nov 2021\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Reason: scheduled\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: calving\n    - paragraph: \"Date: 19 Jul 2022\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Calf: BD-0017\"\n    - paragraph: \"Calf sex: female\"\n    - paragraph: \"Outcome: live\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: dry off\n    - paragraph: \"Date: 2 Apr 2023\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Reason: scheduled\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: calving\n    - paragraph: \"Date: 8 Jan 2024\"\n    - paragraph: \"Record state: Effective\"\n    - paragraph: \"Calf: BD-0018\"\n    - paragraph: \"Calf sex: male\"\n    - paragraph: \"Outcome: live\"\n    - generic \"Source and linked records\"\n  - heading \"Milk · 5 records\" [level=3]\n  - paragraph: Only recorded measured milkings contribute litres. Missing and unmeasured sessions are not zero.\n  - navigation \"Milk pagination\":\n    - generic: 1–5 of 5\n  - article:\n    - paragraph: Milking\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Session: evening\"\n    - paragraph: \"Measurement: 5 L\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Milking\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Session: morning\"\n    - paragraph: \"Measurement: 5 L\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Milking\n    - paragraph: \"Date: 16 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Session: evening\"\n    - paragraph: \"Measurement: 5 L\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Milking\n    - paragraph: \"Date: 16 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Session: morning\"\n    - paragraph: \"Measurement: Not milked\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Milking\n    - paragraph: \"Date: 17 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Session: morning\"\n    - paragraph: \"Measurement: 5 L\"\n    - generic \"Source and linked records\"\n  - heading \"Lactations · 3 records\" [level=3]\n  - paragraph\n  - navigation \"Lactations pagination\":\n    - generic: 1–3 of 3\n  - article:\n    - paragraph: Lactation\n    - paragraph: \"Date: 11 Feb 2021\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Ended: 6 Nov 2021\"\n    - paragraph: \"Start precision: day\"\n    - paragraph: \"End reason: dry off\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Lactation\n    - paragraph: \"Date: 19 Jul 2022\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Ended: 2 Apr 2023\"\n    - paragraph: \"Start precision: day\"\n    - paragraph: \"End reason: dry off\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Lactation\n    - paragraph: \"Date: 8 Jan 2024\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Ended: No end recorded\"\n    - paragraph: \"Start precision: day\"\n    - generic \"Source and linked records\"\n  - heading \"Health records · 14 records\" [level=3]\n  - paragraph\n  - navigation \"Health records pagination\":\n    - generic: 1–14 of 14\n  - article:\n    - paragraph: Examination\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Findings: Synthetic observation for workflow practice\"\n    - paragraph: \"Diagnosis: Fixture finding\"\n    - paragraph: \"Certainty: suspected\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Administration\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: vaccine\"\n    - paragraph: \"Product: Demonstration vaccine (not a clinical protocol)\"\n    - paragraph: \"Route: recorded fixture route\"\n    - paragraph: \"Batch: DEMO-LOT-002\"\n    - paragraph: \"Administered by: Dr Fixture\"\n    - paragraph: \"Amount: 1 fixture unit\"\n    - paragraph: \"milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture\"\n    - paragraph: \"meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: completed\"\n    - paragraph: \"Instructions: Fixture given\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 15 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Administration\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: vaccine\"\n    - paragraph: \"Product: Demonstration round vaccine\"\n    - paragraph: \"Route: recorded fixture route\"\n    - paragraph: \"Batch: DEMO-LOT-001\"\n    - paragraph: \"Administered by: Dr Fixture\"\n    - paragraph: \"Amount: 1 fixture unit\"\n    - paragraph: \"milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture\"\n    - paragraph: \"meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Result\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: test\"\n    - paragraph: \"Result: Synthetic test result; no clinical interpretation\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health case\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Subject: Observation requiring follow-up\"\n    - paragraph: \"Status: open\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: test\"\n    - paragraph: \"Status: completed\"\n    - paragraph: \"Instructions: Fixture test\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 16 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: missed\"\n    - paragraph: \"Instructions: Fixture missed\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 16 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture overdue\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 16 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture due\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 17 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: recheck\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture recheck\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 17 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Care plan\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: vaccination\"\n    - paragraph: \"Status: active\"\n    - paragraph: \"Instructions: Demonstration course; dates are fixture data, not clinical advice\"\n    - paragraph: \"Prescriber: Dr Fixture\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: cancelled\"\n    - paragraph: \"Instructions: Fixture cancelled\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 18 Sept 2026\"\n    - generic \"Source and linked records\"\n  - article:\n    - paragraph: Health task\n    - paragraph: \"Date: Date not recorded\"\n    - paragraph: \"Subject: BD-0001\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Type: administration\"\n    - paragraph: \"Status: pending\"\n    - paragraph: \"Instructions: Fixture upcoming\"\n    - paragraph: \"Assigned to: Dr Fixture\"\n    - paragraph: \"Due: 20 Sept 2026\"\n    - generic \"Source and linked records\"\n  - heading \"Veterinary visits · 1 records\" [level=3]\n  - paragraph\n  - navigation \"Veterinary visits pagination\":\n    - generic: 1–1 of 1\n  - article:\n    - paragraph: Veterinary visit\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Status: closed\"\n    - paragraph: \"Veterinarian: Dr Fixture\"\n    - paragraph: \"Purpose / reason: Demonstration vaccination and treatment round\"\n    - generic \"Source and linked records\"\n    - link \"Attached document\":\n      - /url: /api/registry/health/attachments/4b57a6f0-dbcf-47ee-bfa6-f451c0083ed6\n  - heading \"Feed · 1 records\" [level=3]\n  - paragraph: Confirmed participation in shared feeding; individual intake and cost are not measured.\n  - navigation \"Feed pagination\":\n    - generic: 1–1 of 1\n  - article:\n    - paragraph: Shared feeding\n    - paragraph: \"Date: 17 Sept 2026\"\n    - paragraph: \"Item: Khall\"\n    - paragraph: \"Quantity: Unknown quantity\"\n    - paragraph: \"Recipients: BD-0001, BD-0002, BD-0011, BD-0012, BD-0016, BD-0022\"\n    - paragraph: \"Recipient group: milking\"\n    - paragraph: Shared feed quantity; individual intake is not measured.\n    - generic \"Source and linked records\"\n  - heading \"Direct health costs · 0 records\" [level=3]\n  - paragraph: Direct health costs only; not lifetime profit. Shared visit charges are listed separately.\n  - paragraph: No records available in this section.\n  - heading \"Shared visit costs · 1 records\" [level=3]\n  - paragraph: Unallocated; excluded from animal cost totals.\n  - navigation \"Shared visit costs pagination\":\n    - generic: 1–1 of 1\n  - article:\n    - paragraph: Recorded cost\n    - paragraph: \"Date: 15 Sept 2026\"\n    - paragraph: \"Record state: Current revision\"\n    - paragraph: \"Recorded cost: Rs 2,000.00\"\n    - generic \"Source and linked records\"\n  - heading \"Coverage notes\" [level=3]\n  - paragraph: No records means no evidence entered, not that an event never happened.\n  - paragraph: This is recorded history as known at generation, not a reconstruction of an earlier database.\n  - paragraph: Structured breed, weight, movement, breeding and discarded-milk capture are deferred.\n  - paragraph: Bulk sales and shared feed/payroll costs are not attributable animal profit.\n  - heading \"Technical audit · complete response\" [level=3]\n  - paragraph: Original fields, unsupported domains, unknown record types and requested corrections are retained below and in the JSON export. Main sections preserve API record order.\n  - generic \"Complete original report, including source records and corrections\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(168, 166, 158)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1160.765625,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 24,
+        "width": 94.8203125,
+        "x": 1246.734375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "From",
+      "rect": {
+        "height": 36,
+        "width": 138,
+        "x": 207.140625,
+        "y": 237.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Through",
+      "rect": {
+        "height": 36,
+        "width": 138,
+        "x": 418.3203125,
+        "y": 237.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(26, 25, 23)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Include corrections",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 568.3203125,
+        "y": 254.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Apply",
+      "rect": {
+        "height": 38,
+        "width": 71.984375,
+        "x": 736.6875,
+        "y": 235.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(169, 96, 60)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Print / Save as PDF",
+      "rect": {
+        "height": 38,
+        "width": 156.09375,
+        "x": 442.1328125,
+        "y": 293.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Export complete JSON",
+      "rect": {
+        "height": 38,
+        "width": 184,
+        "x": 606.2265625,
+        "y": 293.6875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Animal lifetime report",
+    "Identity and provenance · BD-0001 · Noori",
+    "Vaccination card · all recorded history",
+    "Recorded production totals",
+    "Identity and provenance · 3 records",
+    "Timeline · 21 records",
+    "Calvings and reproduction · 5 records",
+    "Milk · 5 records",
+    "Lactations · 3 records",
+    "Health records · 14 records",
+    "Veterinary visits · 1 records",
+    "Feed · 1 records",
+    "Direct health costs · 0 records",
+    "Shared visit costs · 1 records",
+    "Coverage notes",
+    "Technical audit · complete response"
+  ],
+  "height": 1000,
+  "regions": [],
+  "rootWidth": 1440,
+  "theme": "light",
+  "url": "http://localhost:6502/animals/BD-0001/report",
+  "width": 1440
+}

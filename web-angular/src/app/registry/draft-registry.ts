@@ -21,7 +21,7 @@ export interface DraftParticipant {
   selector: 'app-draft-dialog',
   imports: [Button],
   template: `<section
-    class="rounded-xl border border-line bg-surface-raised p-6 text-content-primary shadow-xl space-y-4"
+    class="dialog-surface rounded-xl border border-line bg-surface-raised p-6 text-content-primary shadow-xl space-y-4"
   >
     <h2 id="draft-title" class="text-lg font-semibold">
       {{
@@ -33,7 +33,12 @@ export interface DraftParticipant {
               : 'Discard unsaved changes?')
       }}
     </h2>
-    <p id="draft-description">{{ data.description }}</p>
+    <div id="draft-description" class="space-y-2">
+      <p>{{ data.description }}</p>
+      @if (!data.title) {
+        <p>{{ data.unresolved ? 'The save may have reached the server. Resolve its outcome before leaving.' : data.pending ? 'Wait for the save result before changing context.' : 'Leaving discards this draft. Keep editing to retain your entries.' }}</p>
+      }
+    </div>
     <div class="flex flex-wrap gap-3">
       <button appButton variant="secondary" data-role="keep-editing" (click)="ref.close(false)">
         {{ data.cancelLabel || 'Keep editing' }}

@@ -1790,3 +1790,22 @@ B6 separates the People identifier's concise label from its help and validation 
 Fresh checks include the full 450-test frontend suite, 779 server tests, production build, typecheck, template/contrast gates and browser geometry/navigation evidence. A ChatPanel test isolation defect was repaired by setting its standalone fixture's dock state explicitly. Browser fixtures are synthetic and memory-only; synthetic assistant approvals execute no farm writes.
 
 Actual native PDF/print, completed JSON download, 200% native browser zoom, screen-reader/real-phone acceptance and operator walkthrough remain unverified. The output buttons were exercised, but the available browser returned no inspectable PDF or downloaded file. Viewport resizing and complete Blob/print-DOM tests do not close those gates. See the matrix for additional browser state combinations still covered only by component/server tests or prior evidence. Six exact resting-border exceptions remain held; memory-only drafts still have no crash recovery.
+
+
+## 26. Audit implementation — 30 September 2026
+
+[Implementation and route checklist](implementation/GEIST-IMPLEMENTATION.md) and [fresh acceptance evidence](implementation/geist-evidence/ACCEPTANCE.md) supersede the held visual baselines in §§23–25. Historical evidence remains historical. This revision was explicitly authorized; the warm palette, native controls, field meanings and all domain/write safeguards remain.
+
+Necessary native input boundaries use `border-control`, distinct from decorative `border-default`. The control role passes 3:1 against page, raised and sunken surfaces in both themes; the six held border failures are no longer accepted exceptions. Invalid and focus states retain semantic danger/focus roles. Readonly/disabled fields use a sunken surface; busy actions retain their identity with a reduced-motion-aware progress mark.
+
+The spacing scale remains 4/8/12/16/24/32/48px. Field groups own a 6px label/control/help gap; sections own 16px field gaps and 24px separation. Entry forms use 720px maximum width, review pages retain 1400px and reports 1100px. Page headings use 24/32px, section headings 18/24px; body 16/24, compact support 14/20, metadata 12/16. Existing dense financial/operational tables remain deliberate exceptions to prose sizing. Do not shrink primary input text to fit a mobile row: editable controls use 16px and at least 44px height below 768px; checkbox/radio labels provide the effective target.
+
+`Field` projects the existing native `appInput` and associates a persistent label, help and error with generated IDs. Existing correctly associated fields need not be replaced. `WriteLock` focuses a refused field or error summary while retaining the draft and exact-request retry contract. Attached L/Rs units sit outside the editable value; native select semantics remain, with adjacent search for long entity lists. Selected/ineligible identities retain their context. Never infer a value from an empty input.
+
+Ordinary Feed editors are constrained; People identity and balance are adjacent; named local scroll regions own wide-table overflow. Health opens its ordinary editor above the board, with heading focus, dose groups and filtered rounds that keep selected animals visible. Animal/calving presentation shares the new control contract and searchable Dam field; precision parsing, field order and clinical meaning are unchanged.
+
+Mobile navigation exposes the full hierarchy through a labeled Menu, with Escape and focus return. Utilities use one row, with the keyboard shortcut hidden on mobile; below 381px the menu's current-section suffix stays in its accessible name. Session identity and source remain visible. Analytics puts the trend before comparison and uses a date/session inspector plus equivalent data table. Metrics keep missing/partial qualification and unchanged calculations.
+
+Assistant receipts distinguish approval requested, approved awaiting result, rejected, recorded, refused and unknown outcome. Settled technical details remain available in disclosure; expansion keeps the same composer. Draft dialogs explain the consequence and retain safe initial focus. No redesign change authorizes automatic replay of an uncertain write, reconstructs saved recipients, or turns approval into execution.
+
+Validation is scoped in the linked acceptance evidence. Real-device, screen-reader, native zoom, print/export, operator and live-executor acceptance are not implied by unit tests or viewport screenshots.

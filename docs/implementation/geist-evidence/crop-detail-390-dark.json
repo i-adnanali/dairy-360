@@ -1,0 +1,209 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Feed\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Fodder crops\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - link \"Record feeding\":\n    - /url: /feed/daily/2026-09-30\n  - button \"Feed catalogue\"\n  - heading \"Seasonal maize\" [level=3]\n  - paragraph: Revision 1 · direct_entry · adnan · harness fixture · 2026-09-17T12:00:00.000Z\n  - paragraph: cutting · East plot · 2 acres\n  - paragraph: \"sowing: Unknown\"\n  - paragraph: \"cutting start: Unknown\"\n  - paragraph: \"cutting end: Unknown\"\n  - paragraph\n  - button \"Correct / finish / archive\"\n  - button \"Correction history\"\n  - heading \"Expenses recorded so far — Rs 1,500.00\" [level=3]\n  - paragraph: Do not duplicate existing payroll salaries.\n  - button \"Add expense\"\n  - navigation \"Expenses pagination\":\n    - generic: 1–1 of 1\n  - generic: 2026-09-17 · seed · Rs 1,500.00 ·\n  - button \"Correct expense\"\n  - button \"Remove expense\"\n  - button \"Expense history\"\n  - heading \"Recorded supply days\" [level=3]\n  - link \"2026-09-17\":\n    - /url: /feed/daily/2026-09-17",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Feed",
+      "rect": {
+        "height": 44,
+        "width": 114.8359375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.8359375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.8046875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.8984375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Feed catalogue",
+      "rect": {
+        "height": 44,
+        "width": 135.3359375,
+        "x": 156.2734375,
+        "y": 380.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Correct / finish / archive",
+      "rect": {
+        "height": 44,
+        "width": 191.265625,
+        "x": 33,
+        "y": 697.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Correction history",
+      "rect": {
+        "height": 44,
+        "width": 153.4453125,
+        "x": 33,
+        "y": 753.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Add expense",
+      "rect": {
+        "height": 44,
+        "width": 119.3515625,
+        "x": 33,
+        "y": 915.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Correct expense",
+      "rect": {
+        "height": 44,
+        "width": 143.078125,
+        "x": 33,
+        "y": 1071.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Remove expense",
+      "rect": {
+        "height": 44,
+        "width": 145.5390625,
+        "x": 188.078125,
+        "y": 1071.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Expense history",
+      "rect": {
+        "height": 44,
+        "width": 139.25,
+        "x": 33,
+        "y": 1127.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Fodder crops",
+    "Seasonal maize",
+    "Expenses recorded so far — Rs 1,500.00",
+    "Recorded supply days"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed/crops/feed_d165911f-2e5d-4043-a061-c0f0f29d75c6",
+  "width": 390
+}

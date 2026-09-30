@@ -152,7 +152,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
             appButton
             [busy]="state.submitting()"
           >
-            {{ state.submitting() ? 'Correcting…' : 'Apply correction' }}
+            Apply correction
           </button>
         } @else {
           <app-session-required what="a correction" />

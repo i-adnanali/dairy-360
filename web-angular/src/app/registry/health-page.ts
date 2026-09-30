@@ -124,6 +124,257 @@ import { FieldLabel, HelpText } from '../ui/text';
       @if (notice()) {
         <p role="status" appHelp>{{ notice() }}</p>
       }
+      @if (editorOpen && (session.ready() || savedView)) {
+        <section appCard class="space-y-4" data-page-layout="entry" id="health-editor">
+          <h3 class="text-lg font-semibold" tabindex="-1">
+            {{ savedView ? 'Saved record' : editing ? 'Correct' : 'Record' }}
+            {{ editEntity === 'administrations' ? 'dose' : entityLabel(editEntity, true) }}
+          </h3>
+          @if (!savedView) {
+            <p appHelp>
+              The recorder and source come from your recording session. Enter the actual vet or
+              administrator separately.
+            </p>
+          }
+          @if (editing) {
+            <p appHelp>
+              Saved · revision {{ editing.revision }} · recorded by {{ editing.recorded_by }} ·
+              {{ editing['source_form'] }} · {{ editing['source_ref'] || 'no source reference' }}
+            </p>
+          }
+          @if (savedView) {
+            @for (line of recordLines(editing!); track $index) {
+              <p>{{ line }}</p>
+            }
+            @for (entry of recordObjects(editing!); track entry.key) {
+              <details>
+                <summary>{{ words(entry.key) }}</summary>
+                <pre class="whitespace-pre-wrap break-all text-xs">{{ entry.value }}</pre>
+              </details>
+            }
+            <button appButton (click)="beginCorrection()">Correct record</button>
+            <button appButton variant="secondary" (click)="closeEditor()">Close</button>
+          } @else {
+            <p appHelp>
+              {{
+                editing ? 'This correction will be recorded by' : 'This entry will be recorded by'
+              }}
+              {{ session.recordedBy() }} · {{ session.sourceForm() }}
+            </p>
+            <form class="space-y-4" (ngSubmit)="save()">
+              <fieldset [disabled]="locked()" class="space-y-4">
+                <div class="rows">
+                  @for (f of fields[editEntity]; track f.key) {
+                    @if (editEntity === 'administrations' && f.key === 'dose_label') { <h4 class="health-editor-section font-semibold">Identity and date</h4> }
+                    @if (editEntity === 'administrations' && f.key === 'product_id') { <h4 class="health-editor-section font-semibold">Administration</h4> }
+                    @if (f.key === 'date_precision') {
+                      <app-precision-date
+                        label="Record date"
+                        [initialValue]="initialDate"
+                        [resetKey]="dateGeneration"
+                        (changed)="dateChanged($event)"
+                      />
+                    } @else if (f.key !== 'occurred_on' && f.key !== 'occurred_time') {
+                      <div class="field-group">
+                        <label appFieldLabel [for]="'health-' + f.key">{{ f.label }}</label>
+                        @if (f.reference && options(f.reference).length > 10) {
+                          <label class="text-sm" [for]="'health-search-' + f.key">Find {{ f.label.toLowerCase() }}</label>
+                          <input appInput type="search" [id]="'health-search-' + f.key" [name]="'search-' + f.key" [(ngModel)]="referenceSearch[f.key]" />
+                        }
+                        @if (f.reference) {
+                          <select
+                            appInput
+                            [id]="'health-' + f.key"
+                            [name]="f.key"
+                            [attr.name]="f.key"
+                            [attr.aria-invalid]="writeState.fieldError(f.key) ? true : null"
+                            [attr.aria-describedby]="writeState.fieldError(f.key) ? 'health-error-' + f.key : null"
+                            [(ngModel)]="form[f.key]"
+                            [required]="!!f.required"
+                            (change)="referenceChanged(f.key)"
+                          >
+                            <option value="">Unknown / not linked</option>
+                            @for (r of filteredOptions(f.reference, f.key); track r.id) {
+                              <option [value]="r.id">{{ label(r) }}</option>
+                            }
+                          </select>
+                        } @else if (f.type === 'select') {
+                          <select
+                            appInput
+                            [id]="'health-' + f.key"
+                            [name]="f.key"
+                            [attr.name]="f.key"
+                            [attr.aria-invalid]="writeState.fieldError(f.key) ? true : null"
+                            [attr.aria-describedby]="writeState.fieldError(f.key) ? 'health-error-' + f.key : null"
+                            [(ngModel)]="form[f.key]"
+                            [required]="!!f.required"
+                          >
+                            <option value="">Choose</option>
+                            @for (v of f.options; track v) {
+                              <option [value]="v">{{ words(v) }}</option>
+                            }
+                          </select>
+                        } @else if (f.type === 'textarea') {
+                          <textarea
+                            appInput
+                            [id]="'health-' + f.key"
+                            [name]="f.key"
+                            [attr.name]="f.key"
+                            [attr.aria-invalid]="writeState.fieldError(f.key) ? true : null"
+                            [attr.aria-describedby]="writeState.fieldError(f.key) ? 'health-error-' + f.key : null"
+                            [(ngModel)]="form[f.key]"
+                            [required]="!!f.required"
+                          ></textarea>
+                        } @else if (f.type === 'checkbox') {
+                          <input
+                            type="checkbox"
+                            [id]="'health-' + f.key"
+                            [name]="f.key"
+                            [attr.name]="f.key"
+                            [attr.aria-invalid]="writeState.fieldError(f.key) ? true : null"
+                            [attr.aria-describedby]="writeState.fieldError(f.key) ? 'health-error-' + f.key : null"
+                            [(ngModel)]="form[f.key]"
+                          />
+                        } @else {
+                          <input
+                            appInput
+                            [type]="f.type || 'text'"
+                            [id]="'health-' + f.key"
+                            [name]="f.key"
+                            [attr.name]="f.key"
+                            [attr.aria-invalid]="writeState.fieldError(f.key) ? true : null"
+                            [attr.aria-describedby]="writeState.fieldError(f.key) ? 'health-error-' + f.key : null"
+                            [(ngModel)]="form[f.key]"
+                            [required]="!!f.required"
+                            step="any"
+                          />
+                        }
+                        @if (writeState.fieldError(f.key); as message) { <p class="text-sm text-danger-fg" role="status" [id]="'health-error-' + f.key">{{ message }}</p> }
+                      </div>
+                    }
+                  }
+                </div>
+                @if (editEntity === 'administrations') {
+                  <h4 class="font-semibold">Withdrawal instructions</h4>
+                  @for (target of targets; track target) {
+                    <fieldset class="space-y-2">
+                      <legend class="font-medium">{{ target }} withdrawal instruction</legend>
+                      <label
+                        >Recorded state<select
+                          appInput
+                          [name]="target + 'State'"
+                          [(ngModel)]="form[target + '_withdrawal'].state"
+                        >
+                          <option value="unknown">Unknown</option>
+                          <option value="none">Explicitly none per instruction</option>
+                          <option value="specified">Specified by veterinarian</option>
+                        </select></label
+                      >
+                      @if (form[target + '_withdrawal'].state !== 'unknown') {
+                        <label
+                          >Instruction<input
+                            appInput
+                            [name]="target + 'Instruction'"
+                            [(ngModel)]="form[target + '_withdrawal'].instruction"
+                            required /></label
+                        ><label
+                          >Issuer<input
+                            appInput
+                            [name]="target + 'Issuer'"
+                            [(ngModel)]="form[target + '_withdrawal'].issuer"
+                            required
+                        /></label>
+                        @if (form[target + '_withdrawal'].state === 'specified') {
+                          <label
+                            >Exact end timestamp with timezone, if given<input
+                              appInput
+                              [name]="target + 'Until'"
+                              [(ngModel)]="form[target + '_withdrawal'].until"
+                              placeholder="YYYY-MM-DDTHH:MM:SS+05:00"
+                          /></label>
+                          <p appHelp>
+                            Leave blank if the end needs clarification. The app does not invent
+                            release times.
+                          </p>
+                        }
+                      }
+                    </fieldset>
+                  }
+                }
+                <label
+                  ><span appFieldLabel>Source reference / prescription number</span
+                  ><input appInput name="source_ref" [(ngModel)]="form.source_ref"
+                /></label>
+                <label
+                  ><span appFieldLabel
+                    >Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)</span
+                  ><input
+                    type="file"
+                    accept="image/jpeg,image/png,application/pdf"
+                    (change)="upload($event)"
+                    [disabled]="busy()"
+                    [attr.aria-busy]="busy() || null"
+                /></label>
+                @if (uploadStatus) {
+                  <p role="status" appHelp>{{ uploadStatus }}</p>
+                }
+                @if (uploadStatus.startsWith('Upload failed') && !writeState.uncertain()) {
+                  <button appButton variant="secondary" type="button" (click)="uploadSelected()">
+                    Retry failed upload
+                  </button>
+                }
+                @for (id of form.attachment_ids || []; track id) {
+                  <p>
+                    <a
+                      [href]="'/api/registry/health/attachments/' + id"
+                      target="_blank"
+                      rel="noopener"
+                      >Download attached document</a
+                    >
+                  </p>
+                }
+                @if (editing) {
+                  <label
+                    ><span appFieldLabel>Reason for correction / status change</span
+                    ><input
+                      appInput
+                      name="correction_reason"
+                      [(ngModel)]="form.correction_reason"
+                      required
+                  /></label>
+                }
+              </fieldset>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  appButton
+                  type="submit"
+                  [disabled]="
+                    busy() || !session.ready() || (!meaningfulChange() && !writeState.uncertain())
+                  "
+                  [busy]="busy()"
+                >
+                  Save record</button
+                ><button appButton variant="secondary" type="button" (click)="closeEditor()">
+                  Close
+                </button>
+                @if (editing && editEntity !== 'tasks') {
+                  <button
+                    appButton
+                    variant="secondary"
+                    type="button"
+                    [disabled]="busy()"
+                    [attr.aria-busy]="busy() || null"
+                    intent="danger"
+                    (click)="voidRecord()"
+                  >
+                    Void record with reason
+                  </button>
+                }
+              </div>
+            </form>
+          }
+        </section>
+      }
       @if (board(); as b) {
         <section appCard class="space-y-3">
           <div class="flex flex-wrap gap-3 items-end">
@@ -404,234 +655,6 @@ import { FieldLabel, HelpText } from '../ui/text';
       @if (((editorOpen && !savedView) || roundOpen || actionTask) && !session.ready()) {
         <app-session-required what="health records" />
       }
-      @if (editorOpen && (session.ready() || savedView)) {
-        <section appCard class="space-y-4" data-page-layout="entry" id="health-editor">
-          <h3 class="font-medium">
-            {{ savedView ? 'Saved record' : editing ? 'Correct' : 'Record' }}
-            {{ entityLabel(editEntity, true) }}
-          </h3>
-          @if (!savedView) {
-            <p appHelp>
-              The recorder and source come from your recording session. Enter the actual vet or
-              administrator separately.
-            </p>
-          }
-          @if (editing) {
-            <p appHelp>
-              Saved · revision {{ editing.revision }} · recorded by {{ editing.recorded_by }} ·
-              {{ editing['source_form'] }} · {{ editing['source_ref'] || 'no source reference' }}
-            </p>
-          }
-          @if (savedView) {
-            @for (line of recordLines(editing!); track $index) {
-              <p>{{ line }}</p>
-            }
-            @for (entry of recordObjects(editing!); track entry.key) {
-              <details>
-                <summary>{{ words(entry.key) }}</summary>
-                <pre class="whitespace-pre-wrap break-all text-xs">{{ entry.value }}</pre>
-              </details>
-            }
-            <button appButton (click)="beginCorrection()">Correct record</button>
-            <button appButton variant="secondary" (click)="closeEditor()">Close</button>
-          } @else {
-            <p appHelp>
-              {{
-                editing ? 'This correction will be recorded by' : 'This entry will be recorded by'
-              }}
-              {{ session.recordedBy() }} · {{ session.sourceForm() }}
-            </p>
-            <form class="space-y-4" (ngSubmit)="save()">
-              <fieldset [disabled]="locked()" class="space-y-4">
-                <div class="rows">
-                  @for (f of fields[editEntity]; track f.key) {
-                    @if (f.key === 'date_precision') {
-                      <app-precision-date
-                        label="Record date"
-                        [initialValue]="initialDate"
-                        [resetKey]="dateGeneration"
-                        (changed)="dateChanged($event)"
-                      />
-                    } @else if (f.key !== 'occurred_on' && f.key !== 'occurred_time') {
-                      <label
-                        ><span appFieldLabel>{{ f.label }}</span>
-                        @if (f.reference) {
-                          <select
-                            appInput
-                            [name]="f.key"
-                            [attr.name]="f.key"
-                            [(ngModel)]="form[f.key]"
-                            [required]="!!f.required"
-                            (change)="referenceChanged(f.key)"
-                          >
-                            <option value="">Unknown / not linked</option>
-                            @for (r of options(f.reference); track r.id) {
-                              <option [value]="r.id">{{ label(r) }}</option>
-                            }
-                          </select>
-                        } @else if (f.type === 'select') {
-                          <select
-                            appInput
-                            [name]="f.key"
-                            [attr.name]="f.key"
-                            [(ngModel)]="form[f.key]"
-                            [required]="!!f.required"
-                          >
-                            <option value="">Choose</option>
-                            @for (v of f.options; track v) {
-                              <option [value]="v">{{ words(v) }}</option>
-                            }
-                          </select>
-                        } @else if (f.type === 'textarea') {
-                          <textarea
-                            appInput
-                            [name]="f.key"
-                            [attr.name]="f.key"
-                            [(ngModel)]="form[f.key]"
-                            [required]="!!f.required"
-                          ></textarea>
-                        } @else if (f.type === 'checkbox') {
-                          <input
-                            type="checkbox"
-                            [name]="f.key"
-                            [attr.name]="f.key"
-                            [(ngModel)]="form[f.key]"
-                          />
-                        } @else {
-                          <input
-                            appInput
-                            [type]="f.type || 'text'"
-                            [name]="f.key"
-                            [attr.name]="f.key"
-                            [(ngModel)]="form[f.key]"
-                            [required]="!!f.required"
-                            step="any"
-                          />
-                        }
-                      </label>
-                    }
-                  }
-                </div>
-                @if (editEntity === 'administrations') {
-                  @for (target of targets; track target) {
-                    <fieldset class="space-y-2">
-                      <legend class="font-medium">{{ target }} withdrawal instruction</legend>
-                      <label
-                        >Recorded state<select
-                          appInput
-                          [name]="target + 'State'"
-                          [(ngModel)]="form[target + '_withdrawal'].state"
-                        >
-                          <option value="unknown">Unknown</option>
-                          <option value="none">Explicitly none per instruction</option>
-                          <option value="specified">Specified by veterinarian</option>
-                        </select></label
-                      >
-                      @if (form[target + '_withdrawal'].state !== 'unknown') {
-                        <label
-                          >Instruction<input
-                            appInput
-                            [name]="target + 'Instruction'"
-                            [(ngModel)]="form[target + '_withdrawal'].instruction"
-                            required /></label
-                        ><label
-                          >Issuer<input
-                            appInput
-                            [name]="target + 'Issuer'"
-                            [(ngModel)]="form[target + '_withdrawal'].issuer"
-                            required
-                        /></label>
-                        @if (form[target + '_withdrawal'].state === 'specified') {
-                          <label
-                            >Exact end timestamp with timezone, if given<input
-                              appInput
-                              [name]="target + 'Until'"
-                              [(ngModel)]="form[target + '_withdrawal'].until"
-                              placeholder="YYYY-MM-DDTHH:MM:SS+05:00"
-                          /></label>
-                          <p appHelp>
-                            Leave blank if the end needs clarification. The app does not invent
-                            release times.
-                          </p>
-                        }
-                      }
-                    </fieldset>
-                  }
-                }
-                <label
-                  ><span appFieldLabel>Source reference / prescription number</span
-                  ><input appInput name="source_ref" [(ngModel)]="form.source_ref"
-                /></label>
-                <label
-                  ><span appFieldLabel
-                    >Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)</span
-                  ><input
-                    type="file"
-                    accept="image/jpeg,image/png,application/pdf"
-                    (change)="upload($event)"
-                    [disabled]="busy()"
-                    [attr.aria-busy]="busy() || null"
-                /></label>
-                @if (uploadStatus) {
-                  <p role="status" appHelp>{{ uploadStatus }}</p>
-                }
-                @if (uploadStatus.startsWith('Upload failed') && !writeState.uncertain()) {
-                  <button appButton variant="secondary" type="button" (click)="uploadSelected()">
-                    Retry failed upload
-                  </button>
-                }
-                @for (id of form.attachment_ids || []; track id) {
-                  <p>
-                    <a
-                      [href]="'/api/registry/health/attachments/' + id"
-                      target="_blank"
-                      rel="noopener"
-                      >Download attached document</a
-                    >
-                  </p>
-                }
-                @if (editing) {
-                  <label
-                    ><span appFieldLabel>Reason for correction / status change</span
-                    ><input
-                      appInput
-                      name="correction_reason"
-                      [(ngModel)]="form.correction_reason"
-                      required
-                  /></label>
-                }
-              </fieldset>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  appButton
-                  type="submit"
-                  [disabled]="
-                    busy() || !session.ready() || (!meaningfulChange() && !writeState.uncertain())
-                  "
-                  [busy]="busy()"
-                >
-                  {{ busy() ? 'Saving…' : 'Save record' }}</button
-                ><button appButton variant="secondary" type="button" (click)="closeEditor()">
-                  Close
-                </button>
-                @if (editing && editEntity !== 'tasks') {
-                  <button
-                    appButton
-                    variant="secondary"
-                    type="button"
-                    [disabled]="busy()"
-                    [attr.aria-busy]="busy() || null"
-                    intent="danger"
-                    (click)="voidRecord()"
-                  >
-                    Void record with reason
-                  </button>
-                }
-              </div>
-            </form>
-          }
-        </section>
-      }
       @if (roundOpen && session.ready()) {
         <section appCard class="space-y-3">
           <h3 class="font-medium">Vaccination round</h3>
@@ -689,8 +712,12 @@ import { FieldLabel, HelpText } from '../ui/text';
                     required
                 /></label>
               </div>
+              <label class="block">Find animal in round
+                <input appInput type="search" name="roundSearch" [(ngModel)]="roundSearch" />
+              </label>
+              <p role="status">{{ selectedRoundCount() }} animals selected. Search keeps selected rows visible.</p>
               @for (a of animals(); track a.id) {
-                <div class="rows border-t border-line py-2">
+                <div class="rows border-t border-line py-2" [hidden]="!roundMatches(a)">
                   <label
                     >{{ a.id }} · {{ a.name
                     }}<select
@@ -765,6 +792,16 @@ export class HealthPage {
   protected form: any = {};
   protected editing: HealthRecord | null = null;
   protected editorOpen = false;
+  protected referenceSearch: Record<string, string> = {};
+  protected filteredOptions(reference: string, key: string) {
+    const search = (this.referenceSearch[key] ?? '').trim().toLowerCase();
+    return this.options(reference).filter(r => r.id === this.form[key] || this.label(r).toLowerCase().includes(search));
+  }
+  protected roundSearch = '';
+  protected selectedRoundCount() { return Object.values(this.roundRows).filter((r: any) => !!r.disposition).length; }
+  protected roundMatches(a: {id: string; name?: string | null}) {
+    return !!this.roundRows[a.id]?.disposition || (a.id + ' ' + (a.name ?? '')).toLowerCase().includes(this.roundSearch.trim().toLowerCase());
+  }
   protected on = farmToday();
   protected animalFilter = '';
   protected taskFilter = '';
@@ -1021,6 +1058,7 @@ export class HealthPage {
     };
     this.setDate();
     this.draftBaseline = JSON.stringify(this.form);
+    this.referenceSearch = {};
     this.editorOpen = true;
     this.changeDetector.markForCheck();
 
@@ -1039,6 +1077,7 @@ export class HealthPage {
     this.form.correction_reason = '';
     this.setDate();
     this.draftBaseline = JSON.stringify(this.form);
+    this.referenceSearch = {};
     this.editorOpen = true;
     this.changeDetector.markForCheck();
 
@@ -1084,8 +1123,8 @@ export class HealthPage {
     const editor = document.getElementById('health-editor');
     editor?.scrollIntoView?.({ block: 'nearest' });
     const target =
-      editor?.querySelector<HTMLElement>('input, select, textarea') ??
-      editor?.querySelector<HTMLElement>('h3');
+      editor?.querySelector<HTMLElement>('h3') ??
+      editor?.querySelector<HTMLElement>('input, select, textarea');
     if (target) {
       if (target.tagName === 'H3') target.tabIndex = -1;
       target.focus();

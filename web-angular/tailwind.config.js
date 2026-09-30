@@ -76,6 +76,7 @@ module.exports = {
           onFill: token('text-on-fill'),
         },
         line: {
+          control: token('border-control'),
           hairline: token('border-hairline'),
           subtle: token('border-subtle'),
           DEFAULT: token('border-default'),

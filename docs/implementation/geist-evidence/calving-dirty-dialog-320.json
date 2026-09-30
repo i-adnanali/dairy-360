@@ -1,0 +1,318 @@
+{
+  "snapshot": "- banner:\n  - heading [level=1]: Dairy 360\n  - generic: harness · in memory\n  - button: Recording as geist-synthetic · Direct entry\n  - button: Menu · Herd\n  - button: Search ⌘K\n  - button: dark\n  - button: Assistant\n- navigation:\n  - link:\n    - /url: /animals\n    - text: Animals\n  - link:\n    - /url: /animals/calvings\n    - text: Calvings\n  - link:\n    - /url: /animals/health\n    - text: Health\n- main:\n  - heading [level=2]: Record a calving\n  - paragraph: Enter calvings oldest first. Each one creates its calf, so in order means a farm-born animal exists before anything refers to it.\n  - text: Dam\n  - generic: Find dam by serial or name\n  - searchbox: Noori\n  - paragraph: Search narrows the list. Ineligible dams remain visible with their reason.\n  - combobox\n  - generic: When did she calve?\n  - generic: Date\n  - textbox:\n    - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - text: 06/07/2023\n  - checkbox [disabled]\n  - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n  - paragraph: Ambiguous — 06/07/2023 could be June or July, and guessing wrong produces a date nothing can detect as wrong. Type the month as a word (6 Jul 2023) or use 2023-07-06.\n  - generic: Calf sex\n  - radiogroup:\n    - radio:\n      - generic: \"1\"\n      - generic: female\n    - radio:\n      - generic: \"2\"\n      - generic: male\n  - generic: Outcome\n  - radiogroup:\n    - radio [checked]:\n      - generic: \"1\"\n      - generic: Live\n    - radio:\n      - generic: \"2\"\n      - generic: Stillborn\n    - radio:\n      - generic: \"3\"\n      - generic: Died within 24h\n  - paragraph: A calf that did not live is still recorded as an animal, still opens the lactation, and still counts toward parity and the calving interval.\n  - generic: Which calf is this?\n  - paragraph: \"Choose the dam, the calving date and the calf's sex first — which animals can be linked depends on all three: an animal's birth cannot postdate its own history, and one recorded as the other sex is not this calf.\"\n  - generic: Sire reference (optional)\n  - combobox\n  - generic: Free text. A stable identifier, not a display name.\n  - generic: Observed by (optional)\n  - combobox\n  - generic: Who actually saw it. Leave blank unless someone did — nobody observed a purchase record. A stable identifier, not a display name.\n  - button [disabled]: Record calving\n  - generic: The calving date is not understood yet — finish it or clear it.\n  - paragraph: Cmd/Ctrl+Enter saves from a field when the record is ready.\n- dialog \"Discard unsaved changes?\":\n  - heading \"Discard unsaved changes?\" [level=2]\n  - paragraph: \"Calving: your changes have not been saved. Discarding removes these changes.\"\n  - paragraph: Leaving discards this draft. Keep editing to retain your entries.\n  - button \"Keep editing\" [active]\n  - button \"Discard changes\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Herd",
+      "rect": {
+        "height": 44,
+        "width": 114.546875,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.546875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.515625,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 16,
+        "y": 162.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "dam-search-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Find dam by serial or name",
+      "rect": {
+        "height": 44,
+        "width": 254,
+        "x": 33,
+        "y": 277
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Dam",
+      "rect": {
+        "height": 44,
+        "width": 254,
+        "x": 33,
+        "y": 381
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(244, 169, 160)",
+      "describedby": "precision-error-3-incomplete",
+      "disabled": false,
+      "font": "16px",
+      "invalid": "true",
+      "name": "Date",
+      "rect": {
+        "height": 44,
+        "width": 224,
+        "x": 33,
+        "y": 518
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(87, 86, 79)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 33,
+        "y": 576
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "female",
+      "rect": {
+        "height": 44,
+        "width": 85.78125,
+        "x": 33,
+        "y": 852
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "male",
+      "rect": {
+        "height": 44,
+        "width": 70.125,
+        "x": 126.78125,
+        "y": 852
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Live",
+      "rect": {
+        "height": 44,
+        "width": 65.3515625,
+        "x": 33,
+        "y": 932
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Stillborn",
+      "rect": {
+        "height": 44,
+        "width": 92.9296875,
+        "x": 106.3515625,
+        "y": 932
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Died within 24h",
+      "rect": {
+        "height": 44,
+        "width": 142.53125,
+        "x": 33,
+        "y": 984
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-sire_ref-6-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Sire reference (optional)",
+      "rect": {
+        "height": 44,
+        "width": 288,
+        "x": 16,
+        "y": 1301
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-observed_by-7-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Observed by (optional)",
+      "rect": {
+        "height": 44,
+        "width": 288,
+        "x": 16,
+        "y": 1401
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": "calving-submit-reason",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record calving",
+      "rect": {
+        "height": 56,
+        "width": 86.9296875,
+        "x": 16,
+        "y": 1513
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Keep editing",
+      "rect": {
+        "height": 44,
+        "width": 116.5,
+        "x": 33,
+        "y": 444
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(42, 20, 20)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Discard changes",
+      "rect": {
+        "height": 44,
+        "width": 142.0859375,
+        "x": 33,
+        "y": 500
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Record a calving"
+  ],
+  "height": 800,
+  "regions": [],
+  "rootWidth": 320,
+  "theme": "dark",
+  "url": "http://localhost:6502/animals/calvings/new",
+  "width": 320
+}

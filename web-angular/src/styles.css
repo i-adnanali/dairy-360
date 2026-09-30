@@ -61,6 +61,7 @@
   /* --- lines ---------------------------------------------------------- */
   --border-hairline: 239 238 235;  /* #EFEEEB */
   --border-subtle: 227 226 222;  /* #E3E2DE */
+  --border-control: 128 122 111; /* necessary control boundary */
   --border-default: 203 201 195;  /* #CBC9C3 */
   --border-strong: 168 166 158;  /* #A8A69E */
   /*
@@ -237,6 +238,7 @@
   /* --- lines --- */
   --border-hairline: 35 34 32;    /* #232220 */
   --border-subtle: 44 43 40;      /* #2C2B28 */
+  --border-control: 139 133 121; /* necessary control boundary */
   --border-default: 58 57 52;     /* #3A3934 */
   --border-strong: 74 72 68;      /* #4A4844 */
   --border-selected: 200 131 86;  /* #C88356 */
@@ -410,6 +412,7 @@ app-session-required,
  * because "it happens not to matter today" is exactly the reasoning that left
  * app-session-required off the list for its whole life.
  */
+app-field,
 app-command-palette,
 app-assistant-panel,
 app-pagination,
@@ -798,3 +801,80 @@ app-assistant-panel.assistant-visible { display: block; }
   .assistant-panel { position: fixed; inset: 0; height: 100dvh; z-index: 40; border: 0; }
   .assistant-chat textarea { font-size: 16px; }
 }
+
+/* Current field contract: loaded after utilities; native controls keep their semantics. */
+input[appInput], select[appInput], textarea[appInput] {
+  border-color: rgb(var(--border-control));
+  min-height: 36px;
+  max-width: 100%;
+  color: rgb(var(--text-primary));
+  background-color: rgb(var(--surface-raised));
+}
+[appInput][aria-invalid="true"] { border-color: rgb(var(--danger-fg)); }
+[appInput]:focus { border-color: rgb(var(--focus-ring)); }
+[appInput]:disabled { cursor: not-allowed; background-color: rgb(var(--surface-sunken)); }
+[appInput][readonly] { background-color: rgb(var(--surface-sunken)); }
+[appPageHeading] { font-size: 24px; line-height: 32px; overflow-wrap: anywhere; }
+[appSectionHeading] { font-size: 18px; line-height: 24px; }
+.field-group { display: grid; gap: 6px; min-width: 0; }
+.form-section { display: grid; gap: 16px; margin-block: 24px; }
+.input-group { display: flex; align-items: stretch; min-width: 0; }
+.input-group > [appInput] { min-width: 0; flex: 1; border-start-end-radius: 0; border-end-end-radius: 0; }
+.input-group > .input-unit { display: flex; align-items: center; padding-inline: 12px; border: 1px solid rgb(var(--border-control)); border-inline-start: 0; border-radius: 0 8px 8px 0; background: rgb(var(--surface-sunken)); white-space: nowrap; }
+.dialog-surface { max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; padding: 24px; }
+button, a, summary { touch-action: manipulation; }
+:focus-visible { scroll-margin-block: 24px; }
+@media (max-width: 767px) {
+  input[appInput], select[appInput], textarea[appInput], input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; min-height: 44px; max-width: 100%; }
+  button, summary, a[appButton], .phase7-nav a { min-height: 44px; }
+  .dialog-surface { padding: 16px; }
+}
+
+app-feed-editor { display: block; width: 100%; max-width: 720px; margin-inline: auto; min-width: 0; }
+form label:not(.flex) > [appInput] { margin-block-start: 4px; }
+
+.mobile-menu-toggle { display: none !important; }
+@media (max-width: 767px) {
+  .mobile-menu-toggle { display: inline-flex !important; margin-bottom: 0; }
+  .phase7-nav { display: none; }
+  .phase7-nav.menu-open { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; padding-bottom: 12px; overflow: visible; }
+  .phase7-nav a { margin-left: 0 !important; padding: 10px 8px; white-space: normal; }
+  [data-role="people-table"] th, [data-role="people-table"] td { padding-inline: 8px; }
+}
+
+@media (min-width: 1280px) { app-assistant-panel.assistant-expanded { width: min(720px, 55vw); flex-basis: min(720px, 55vw); } app-assistant-panel.assistant-expanded .assistant-panel { width: 100%; } }
+
+@media (min-width: 1280px) { .assistant-layout.has-assistant:has(.assistant-expanded) { grid-template-columns: minmax(0, 1fr) min(720px, 55vw); } }
+
+[appButton][aria-busy="true"]::before { content: ''; display: inline-block; width: 12px; height: 12px; margin-inline-end: 8px; border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: 50%; animation: action-progress 1s linear infinite; }
+@keyframes action-progress { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { [appButton][aria-busy="true"]::before { animation: none; } }
+/* Long names and notes may grow; they must never push balances off the page. */
+app-person-detail li { flex-wrap: wrap; gap: 8px; overflow-wrap: anywhere; }
+app-person-detail li > span { min-width: 0; }
+
+app-animal-form [appCard], app-calving-form [appCard], app-animal-form app-precision-date > div, app-calving-form app-precision-date > div { box-shadow: none; }
+app-animal-form form > .space-y-4, app-calving-form form { row-gap: 24px; }
+.health-editor-section { grid-column: 1 / -1; border-block-start: 1px solid rgb(var(--border-subtle)); padding-block-start: 16px; }
+
+.navigation-group { display: contents; }
+.mobile-section-links { display: none; }
+@media (max-width: 767px) {
+  .navigation-group { display: flex; flex-direction: column; min-width: 0; }
+  .mobile-section-links { display: flex; flex-direction: column; padding-inline-start: 8px; }
+  .mobile-section-links a { font-size: 14px; border-bottom: 0; }
+  .phase7-nav.menu-open { max-height: 60dvh; overflow-y: auto; }
+}
+app-health-page .rows[hidden] { display: none; }
+
+@media (max-width: 767px) { label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) { min-height: 44px; align-content: center; } }
+
+@media (max-width: 767px) { [data-role="section-bar"] nav a { display: inline-flex; align-items: center; min-height: 44px; } }
+
+/* Keep utilities on one mobile row; section names remain in the accessible menu label. */
+@media (max-width: 767px) {
+  .shell-utilities { width: 100%; flex-wrap: nowrap; justify-content: space-between; gap: 4px; }
+  .shell-utilities [data-role="search-toggle"] kbd { display: none; }
+  .shell-utilities > button { padding-inline: 6px; }
+}
+@media (max-width: 380px) { .menu-current-section { display: none; } }

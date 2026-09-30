@@ -1,3 +1,5 @@
+import { ScrollRegion } from '../ui/scroll-region';
+import { TextInput } from '../ui/input';
 import { pagedList } from './paged-list';
 import { Pagination } from '../ui/pagination';
 import { ShellActions } from './navigation';
@@ -29,7 +31,7 @@ import { StatusBadge } from '../ui/surface';
 @Component({
   selector: 'app-herd-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Pagination,
+  imports: [ScrollRegion,TextInput,Pagination,
     IdentifierLink,
     RowLink,
     Button,
@@ -44,7 +46,8 @@ import { StatusBadge } from '../ui/surface';
   ],
   template: `
     <div data-page-layout="review">
-    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
+    <h2 appPageHeading class="mb-4">Herd</h2>
+    <label class="mb-3 block text-sm text-content-secondary">Search records <input appInput type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
     @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
 
     <div class="mx-auto ">
@@ -53,7 +56,7 @@ import { StatusBadge } from '../ui/surface';
       } @else if (rows() === null) {
         <p appHelp data-role="loading">Loading…</p>
       } @else if (rows()!.length === 0 && paging.url.value().search) {
-        <p>No matching animals. Clear the search to see the herd.</p>
+        <p>No matching animals. <button appButton variant="link" (click)="paging.url.set({search: '', page: '1'})">Clear search</button></p>
       } @else if (rows()!.length === 0) {
         <!-- THE EMPTY STATE. What the first hour looks like before any row
              exists: one thing to do, and no furniture pretending there is data. -->
@@ -73,9 +76,9 @@ import { StatusBadge } from '../ui/surface';
         </div>
       } @else {
         <div class="mb-3 flex items-baseline justify-between">
-          <h2 appPageHeading>
+          <p class="text-sm text-content-muted">
             {{ paging.result()?.totalItems }} {{ paging.result()?.totalItems === 1 ? 'animal' : 'animals' }}
-          </h2>
+          </p>
           @if (true) {
             <a
               routerLink="/animals/new"
@@ -98,7 +101,7 @@ import { StatusBadge } from '../ui/surface';
           </p>
         }
 
-        <div class="overflow-x-auto rounded-xl border border-line bg-surface-raised">
+        <div appScrollRegion="Herd records" class="rounded-xl border border-line bg-surface-raised">
           <table class="w-full text-left text-sm" data-role="table">
             <thead
               class="border-b border-line-subtle bg-surface-page text-xs uppercase tracking-wide text-content-muted"

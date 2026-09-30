@@ -1,0 +1,295 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Labour\" [expanded] [active]: Menu\n  - button \"Search\"\n  - 'button \"Theme: system. Switch to light.\"': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Animals\":\n      - /url: /animals\n    - link \"Calvings\":\n      - /url: /animals/calvings\n    - link \"Health\":\n      - /url: /animals/health\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Milking\":\n      - /url: /milk/milking\n    - link \"Dispatch\":\n      - /url: /milk/dispatch\n    - link \"Buyers\":\n      - /url: /milk/buyers\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Overview\":\n      - /url: /feed\n    - link \"Crops\":\n      - /url: /feed/crops\n    - link \"Purchases\":\n      - /url: /feed/purchases\n    - link \"Daily history\":\n      - /url: /feed/daily\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"People\":\n      - /url: /labour/people\n    - link \"Payroll\":\n      - /url: /labour/payroll\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"People\":\n    - /url: /labour/people\n  - link \"Payroll\":\n    - /url: /labour/payroll\n- main:\n  - heading \"People\" [level=2]\n  - link \"Add person\":\n    - /url: \"#add-person\"\n  - paragraph: People, employment stints and balances. Add a person first, then open a stint if they work here.\n  - text: Search records\n  - searchbox \"Search records\"\n  - table:\n    - rowgroup:\n      - row \"Person Owed Last paid\":\n        - columnheader \"Person\"\n        - columnheader \"Owed\"\n        - columnheader \"Last paid\"\n    - rowgroup:\n      - row \"abdul Abdul settled 2026-08-31\":\n        - cell \"abdul Abdul\":\n          - link \"abdul\":\n            - /url: /labour/people/per_0f0188b3-fced-4139-9555-3ccf0d050b36\n          - generic: Abdul\n        - cell \"settled\"\n        - cell \"2026-08-31\"\n      - row \"geist-synthetic-person Synthetic long display name for layout verification only no open stint settled No record\":\n        - cell \"geist-synthetic-person Synthetic long display name for layout verification only no open stint\":\n          - link \"geist-synthetic-person\":\n            - /url: /labour/people/per_2fe84f37-1a14-4724-a379-76d67cafb578\n          - generic: Synthetic long display name for layout verification only\n          - text: no open stint\n        - cell \"settled\"\n        - cell \"No record\": –\n      - row \"imran Imran Rs 7,000.00 2026-08-31\":\n        - cell \"imran Imran\":\n          - link \"imran\":\n            - /url: /labour/people/per_824db74f-de35-4df9-8d69-6bd924cae410\n          - generic: Imran\n        - cell \"Rs 7,000.00\"\n        - cell \"2026-08-31\"\n      - row \"rashid Rashid Rs 2,400.00 in advance 2026-08-01\":\n        - cell \"rashid Rashid\":\n          - link \"rashid\":\n            - /url: /labour/people/per_1a22581c-3c99-45b6-9371-17f26534ddb1\n          - generic: Rashid\n        - cell \"Rs 2,400.00 in advance\"\n        - cell \"2026-08-01\"\n  - navigation \"People pagination\":\n    - generic: 1–4 of 4\n  - heading \"Add a person\" [level=3]\n  - text: Identifier\n  - textbox \"Identifier\":\n    - /placeholder: imran\n  - generic: A permanent identifier used on records and in “observed by”. It cannot be changed later; the event log cannot be rewritten.\n  - generic: Display name (optional)\n  - textbox \"Display name (optional)\":\n    - /placeholder: Imran\n  - generic: Contact (optional)\n  - textbox \"Contact (optional)\"\n  - button \"Add person\" [disabled]\n  - heading \"Open a stint\" [level=3]\n  - paragraph: Somebody who left and came back gets a second stint, not an edited first one — which is what stops their old salary quietly applying to the new one. Two stints at once is fine too, for somebody holding two roles.\n  - text: Find person by identifier or name\n  - searchbox \"Find person by identifier or name\"\n  - text: Person\n  - combobox \"Person\":\n    - option \"Choose…\" [selected]\n    - option \"abdul\"\n    - option \"geist-synthetic-person\"\n    - option \"imran\"\n    - option \"rashid\"\n  - text: Kind\n  - radiogroup \"Engagement kind\":\n    - radio \"Salaried\" [checked]:\n      - generic: \"1\"\n      - generic: Salaried\n      - generic: on every monthly run\n    - radio \"Dihari\":\n      - generic: \"2\"\n      - generic: Dihari\n      - generic: per day, when hired\n  - generic: Salaried people are on every monthly run and must be answered. Dihari are not a row until they worked a day.\n  - generic: Role (optional)\n  - textbox \"Role (optional)\":\n    - /placeholder: milker\n  - text: Started on\n  - textbox \"Started on\": 2026-09-30\n  - button \"Open stint\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(168, 166, 158)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Labour",
+      "rect": {
+        "height": 44,
+        "width": 50.671875,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 62.515625,
+        "x": 70.671875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 44,
+        "width": 84.3671875,
+        "x": 137.1875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 78.4453125,
+        "x": 225.5546875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search records",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 16,
+        "y": 896.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": "person-identifier-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Identifier",
+      "rect": {
+        "height": 44,
+        "width": 254,
+        "x": 33,
+        "y": 1593.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Display name (optional)",
+      "rect": {
+        "height": 44,
+        "width": 254,
+        "x": 33,
+        "y": 1731.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Contact (optional)",
+      "rect": {
+        "height": 44,
+        "width": 254,
+        "x": 33,
+        "y": 1817.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Add person",
+      "rect": {
+        "height": 44,
+        "width": 107.765625,
+        "x": 33,
+        "y": 1877.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Find person by identifier or name",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 33,
+        "y": 2139.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "PersonChoose…abdulgeist-synthetic-personimranrashid",
+      "rect": {
+        "height": 44,
+        "width": 254,
+        "x": 33,
+        "y": 2227.5
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(169, 96, 60)",
+      "border": "rgb(169, 96, 60)",
+      "describedby": "kind-hint-0",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Salaried",
+      "rect": {
+        "height": 44,
+        "width": 224.53125,
+        "x": 33,
+        "y": 2315.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": "kind-hint-1",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Dihari",
+      "rect": {
+        "height": 44,
+        "width": 201.0390625,
+        "x": 33,
+        "y": 2367.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Role (optional)",
+      "rect": {
+        "height": 44,
+        "width": 254,
+        "x": 33,
+        "y": 2507.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Started on",
+      "rect": {
+        "height": 44,
+        "width": 161,
+        "x": 102.3046875,
+        "y": 2571.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Open stint",
+      "rect": {
+        "height": 44,
+        "width": 100.546875,
+        "x": 33,
+        "y": 2631.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "People",
+    "Add a person",
+    "Open a stint"
+  ],
+  "height": 800,
+  "regions": [
+    {
+      "label": null,
+      "scrollWidth": 379,
+      "tabindex": null,
+      "width": 288
+    }
+  ],
+  "rootWidth": 320,
+  "theme": "light",
+  "url": "http://localhost:6502/labour/people",
+  "width": 320
+}

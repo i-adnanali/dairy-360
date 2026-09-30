@@ -54,3 +54,8 @@ All named suites below ran in the fresh complete frontend run; server contracts 
 ## Release decision
 
 **Not release-ready.** B6 fixes and available automated/browser checks are documented, but the specification's all-consumer acceptance is not completely established. Native output, human/device gates and the explicit unverified browser state combinations above remain open. No exception or ship-without-operator decision was requested or recorded. The only held contrast exceptions are the exact six D03 pairs; they do not waive other gates.
+
+
+## Subsequent authorized audit implementation
+
+The 30 September [audit implementation acceptance](../geist-evidence/ACCEPTANCE.md) supersedes B6's six held resting-control borders and its protected visual baseline for animal/calving presentation. B6 results above remain historical evidence. Domain semantics, draft/write safeguards and the OPEN native/device/operator gates remain in force; consult the newer matrix for actual browser execution rather than treating this addendum as a blanket pass.

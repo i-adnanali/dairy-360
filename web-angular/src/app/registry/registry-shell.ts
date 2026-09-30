@@ -59,9 +59,10 @@ import { TextLink } from '../ui/text';
           <div class="flex flex-wrap items-center gap-3">
             <h1 class="text-base font-semibold tracking-tight">Dairy 360</h1>
             <app-session-bar mode="storage" />
-          </div>
-          <div class="flex flex-wrap items-center gap-3">
             <app-session-bar mode="session" />
+          </div>
+          <div class="shell-utilities flex flex-wrap items-center gap-3">
+        <button appButton variant="secondary" class="mobile-menu-toggle" [attr.aria-label]="'Menu · ' + activeSection().label" [attr.aria-expanded]="menuOpen()" aria-controls="section-navigation" (keydown.escape)="closeMenu($event)" (click)="menuOpen.set(!menuOpen())">Menu<span class="menu-current-section"> · {{ activeSection().label }}</span></button>
             <button type="button" appTextLink (click)="palette.show()" data-role="search-toggle">
               Search <kbd>{{ palette.chordLabel }}</kbd>
             </button>
@@ -74,30 +75,38 @@ import { TextLink } from '../ui/text';
               aria-controls="assistant-panel"
               data-role="assistant-toggle"
             >
-              Dairy 360 assistant
+              Assistant
             </button>
           </div>
         </div>
         <nav
+          id="section-navigation"
+          [class.menu-open]="menuOpen()"
+          (keydown.escape)="closeMenu($event)"
           class="phase7-nav mx-auto flex max-w-[1400px] gap-5 overflow-x-auto text-sm"
           data-role="nav"
           aria-label="Sections"
         >
           @for (section of sections; track section.label) {
+            <div class="navigation-group">
             <a
               [routerLink]="section.path"
               [class.ml-auto]="section.label === 'Check'"
               [class.active]="activeSection().label === section.label"
               [attr.aria-current]="activeSection().label === section.label ? 'page' : null"
               [attr.data-role]="section.label === 'Today' ? 'nav-today' : null"
-              >{{ section.label }}</a
-            >
+              >{{ section.label }}</a>
+            @if (menuOpen()) {
+              <div class="mobile-section-links">
+                @for (view of section.views; track view.path) { <a [routerLink]="view.path" routerLinkActive="font-semibold" [routerLinkActiveOptions]="{exact: true}">{{ view.label }}</a> }
+              </div>
+            }
+            </div>
           }
         </nav>
       </header>
       @if (
         activeSection().views.length ||
-        !session.ready() ||
         activeSection().label === 'Today' ||
         activeSection().label === 'Check'
       ) {
@@ -133,7 +142,7 @@ import { TextLink } from '../ui/text';
                 >
                   Recheck
                 </button>
-              } @else if (!session.ready() || activeSection().label === 'Today') {
+              } @else if (activeSection().label === 'Today') {
                 <button
                   type="button"
                   appButton
@@ -220,6 +229,12 @@ import { TextLink } from '../ui/text';
   `,
 })
 export class RegistryShell {
+  protected readonly menuOpen = signal(false);
+  protected closeMenu(event: Event) {
+    event.preventDefault();
+    this.menuOpen.set(false);
+    document.querySelector<HTMLElement>('.mobile-menu-toggle')?.focus();
+  }
   protected readonly session = inject(Session);
   protected readonly writeLog = inject(WriteLog);
   protected readonly assistant = inject(Assistant);
@@ -283,6 +298,7 @@ export class RegistryShell {
           { injector: this.injector },
         );
         this.writeOnlyRoute.set(this.declaresWrites());
+        this.menuOpen.set(false);
         this.assistant.context.set(this.contextFor());
       });
     this.assistant.context.set(this.contextFor());

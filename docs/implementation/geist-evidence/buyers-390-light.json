@@ -1,0 +1,326 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Milk\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Milking\":\n    - /url: /milk/milking\n  - link \"Dispatch\":\n    - /url: /milk/dispatch\n  - link \"Buyers\":\n    - /url: /milk/buyers\n- main:\n  - heading \"Buyers\" [level=2]\n  - paragraph: Everyone milk goes to, and what they pay for it. The house is here too — milk kept at home is a disposition, not a sale, so it has no price and never appears in a balance.\n  - text: Search records\n  - searchbox \"Search records\"\n  - region \"Buyers and rates\":\n    - table:\n      - rowgroup:\n        - row \"Name Kind On every sheet Rate today\":\n          - columnheader \"Name\"\n          - columnheader \"Kind\"\n          - columnheader \"On every sheet\"\n          - columnheader \"Rate today\"\n          - columnheader\n      - rowgroup:\n        - row \"Ali (next door) household only when they come Rs 9,000.00 / 40 L (Rs 225.00 per litre) Change rate for Ali (next door)\":\n          - cell \"Ali (next door)\":\n            - link \"Ali (next door)\":\n              - /url: /milk/buyers/dst_fcf160a1-78e4-4635-beba-d9fe0acd5dd5\n          - cell \"household\"\n          - cell \"only when they come\"\n          - cell \"Rs 9,000.00 / 40 L (Rs 225.00 per litre)\"\n          - cell \"Change rate for Ali (next door)\":\n            - button \"Change rate for Ali (next door)\": change rate\n        - row \"Bashir (dodhi) dodhi yes — must be answered Rs 7,000.00 / 40 L (Rs 175.00 per litre) Change rate for Bashir (dodhi)\":\n          - cell \"Bashir (dodhi)\":\n            - link \"Bashir (dodhi)\":\n              - /url: /milk/buyers/dst_f0bdb2d1-8096-4f05-8654-e31f4b51cd7d\n          - cell \"dodhi\"\n          - cell \"yes — must be answered\"\n          - cell \"Rs 7,000.00 / 40 L (Rs 175.00 per litre)\"\n          - cell \"Change rate for Bashir (dodhi)\":\n            - button \"Change rate for Bashir (dodhi)\": change rate\n        - row \"Bibi (corner house) household only when they come Rs 9,000.00 / 40 L (Rs 225.00 per litre) Change rate for Bibi (corner house)\":\n          - cell \"Bibi (corner house)\":\n            - link \"Bibi (corner house)\":\n              - /url: /milk/buyers/dst_da1b15f8-4b1e-4b2c-8a90-5c5ee2f7a31f\n          - cell \"household\"\n          - cell \"only when they come\"\n          - cell \"Rs 9,000.00 / 40 L (Rs 225.00 per litre)\"\n          - cell \"Change rate for Bibi (corner house)\":\n            - button \"Change rate for Bibi (corner house)\": change rate\n        - row \"Home home yes — must be answered not billed\":\n          - cell \"Home\"\n          - cell \"home\"\n          - cell \"yes — must be answered\"\n          - cell \"not billed\"\n          - cell\n        - row \"Imran (milk allowance) staff only when they come not billed\":\n          - cell \"Imran (milk allowance)\"\n          - cell \"staff\"\n          - cell \"only when they come\"\n          - cell \"not billed\"\n          - cell\n    - navigation \"Buyers pagination\":\n      - generic: 1–5 of 5\n  - heading \"Add a destination\" [level=3]\n  - generic: Name\n  - textbox \"Name\"\n  - generic: Kind\n  - radiogroup \"Kind\":\n    - radio \"Dodhi\" [checked]:\n      - generic: \"1\"\n      - generic: Dodhi\n    - radio \"Household\":\n      - generic: \"2\"\n      - generic: Household\n    - radio \"Shop\":\n      - generic: \"3\"\n      - generic: Shop\n    - radio \"Home (kept)\":\n      - generic: \"4\"\n      - generic: Home (kept)\n    - radio \"Other\":\n      - generic: \"5\"\n      - generic: Other\n  - generic: Buying since\n  - textbox \"Buying since\": 2026-09-29\n  - generic: On every sheet?\n  - radiogroup \"On every sheet\":\n    - radio \"Every session\" [checked]:\n      - generic: \"1\"\n      - generic: Every session\n    - radio \"Only when they come\":\n      - generic: \"2\"\n      - generic: Only when they come\n  - paragraph:\n    - strong: Every session\n    - text: for someone who is always accounted for — the dodhi, the house.\n    - strong: Only when they come\n    - text: \"for a neighbour who takes surplus: they will never be marked absent, so nothing trains anyone to click past the sheet.\"\n  - button \"Add destination\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(168, 166, 158)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(29, 28, 27)",
+      "border": "rgb(59, 58, 53)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Milk",
+      "rect": {
+        "height": 44,
+        "width": 109.3125,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 137.3125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 44,
+        "width": 94.8203125,
+        "x": 223.28125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 16,
+        "y": 162.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search records",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 117.75,
+        "y": 412.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Change rate for Ali (next door)",
+      "rect": {
+        "height": 44,
+        "width": 97.4765625,
+        "x": 381.34375,
+        "y": 592.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Change rate for Bashir (dodhi)",
+      "rect": {
+        "height": 44,
+        "width": 97.4765625,
+        "x": 381.34375,
+        "y": 729.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Change rate for Bibi (corner house)",
+      "rect": {
+        "height": 44,
+        "width": 97.4765625,
+        "x": 381.34375,
+        "y": 866.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Name",
+      "rect": {
+        "height": 44,
+        "width": 224,
+        "x": 33,
+        "y": 1284.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(169, 96, 60)",
+      "border": "rgb(169, 96, 60)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Dodhi",
+      "rect": {
+        "height": 44,
+        "width": 77.21875,
+        "x": 33,
+        "y": 1360.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Household",
+      "rect": {
+        "height": 44,
+        "width": 108.6796875,
+        "x": 118.21875,
+        "y": 1360.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Shop",
+      "rect": {
+        "height": 44,
+        "width": 72.6015625,
+        "x": 234.8984375,
+        "y": 1360.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Home (kept)",
+      "rect": {
+        "height": 44,
+        "width": 121.3515625,
+        "x": 33,
+        "y": 1412.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Other",
+      "rect": {
+        "height": 44,
+        "width": 75.9296875,
+        "x": 162.3515625,
+        "y": 1412.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(128, 122, 111)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Buying since",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 33,
+        "y": 1492.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(169, 96, 60)",
+      "border": "rgb(169, 96, 60)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Every session",
+      "rect": {
+        "height": 44,
+        "width": 129.203125,
+        "x": 33,
+        "y": 1568.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Only when they come",
+      "rect": {
+        "height": 44,
+        "width": 187.296875,
+        "x": 33,
+        "y": 1620.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(36, 35, 33)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Add destination",
+      "rect": {
+        "height": 44,
+        "width": 135.7734375,
+        "x": 33,
+        "y": 1744.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Buyers",
+    "Add a destination"
+  ],
+  "height": 844,
+  "regions": [
+    {
+      "label": "Buyers and rates",
+      "scrollWidth": 474,
+      "tabindex": "0",
+      "width": 356
+    }
+  ],
+  "rootWidth": 390,
+  "theme": "light",
+  "url": "http://localhost:6502/milk/buyers",
+  "width": 390
+}

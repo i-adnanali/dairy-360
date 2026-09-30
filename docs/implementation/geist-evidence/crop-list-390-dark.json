@@ -1,0 +1,110 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Feed\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Fodder crops\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - link \"Record feeding\":\n    - /url: /feed/daily/2026-09-29\n  - button \"Feed catalogue\"\n  - navigation \"Feed records pagination\":\n    - generic: 1–2 of 2\n  - link \"Previous crop cycle\":\n    - /url: /feed/crops/feed_0718643b-52b8-4da5-8a9a-c37562d1bd2d\n  - paragraph: finished · unknown acres\n  - link \"Seasonal maize\":\n    - /url: /feed/crops/feed_d165911f-2e5d-4043-a061-c0f0f29d75c6\n  - paragraph: cutting · 2 acres",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Feed",
+      "rect": {
+        "height": 44,
+        "width": 114.8359375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.8359375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.8046875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.8984375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Feed catalogue",
+      "rect": {
+        "height": 44,
+        "width": 135.3359375,
+        "x": 156.2734375,
+        "y": 380.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Fodder crops"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed/crops",
+  "width": 390
+}

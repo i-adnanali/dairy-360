@@ -1,0 +1,142 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Herd\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Animals\":\n    - /url: /animals\n  - link \"Calvings\":\n    - /url: /animals/calvings\n  - link \"Health\":\n    - /url: /animals/health\n- main:\n  - heading \"BD-0001\" [level=2]\n  - generic: Noori\n  - generic \"stored as lactating\": majj · in milk\n  - term: Sex\n  - definition: female\n  - term: Origin\n  - definition: acquired\n  - term: Born\n  - definition: 2017-03month\n  - term: Parity\n  - definition: \"3\"\n  - term: Post\n  - definition: \"1\"\n  - term: Tag\n  - definition: PK-4412\n  - navigation:\n    - button \"Record\"\n    - button \"Add an event\"\n    - button \"Correct a calving\"\n  - link \"Life report / vaccination card\":\n    - /url: /animals/BD-0001/report\n  - link \"Manage health\":\n    - /url: /animals/health\n  - list:\n    - generic: Acquired\n    - generic: 2019 year\n    - generic \"Technical event details\"\n    - paragraph: from Chak 42 dairy · born 2017-03-01 (month)\n    - paragraph: cycle_card · card-01 · recorded by adnan · observed by abdul\n    - generic: Calved\n    - generic: 2021-02-11 05:40\n    - generic \"Technical event details\"\n    - paragraph: calf BD-0016 · female · live\n    - paragraph: cycle_card · card-01 · recorded by adnan · observed by abdul\n    - generic: Dried off\n    - generic: 2021-11-06\n    - generic \"Technical event details\"\n    - paragraph: \"reason: scheduled\"\n    - paragraph: cycle_card · card-01 · recorded by adnan · no witness recorded\n    - generic: Calved\n    - generic: 2022-07-19\n    - generic \"Technical event details\"\n    - paragraph: calf BD-0017 · female · live\n    - paragraph: cycle_card · card-01 · recorded by adnan · observed by abdul\n    - generic: Dried off\n    - generic: 2023-04-02\n    - generic \"Technical event details\"\n    - paragraph: \"reason: scheduled\"\n    - paragraph: cycle_card · card-01 · recorded by adnan · no witness recorded\n    - generic: Calved\n    - generic: 2024-01-08\n    - generic \"Technical event details\"\n    - paragraph: calf BD-0018 · male · live\n    - paragraph: cycle_card · card-01 · recorded by adnan · no witness recorded\n    - generic: Note\n    - generic: 2026-02-14\n    - generic \"Technical event details\"\n    - paragraph: off feed two days after the morning round, back to normal by the 16th\n    - paragraph: daily_herd_sheet · 2026-02-14 · recorded by adnan · observed by abdul",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Herd",
+      "rect": {
+        "height": 44,
+        "width": 114.546875,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.546875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.515625,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.609375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record",
+      "rect": {
+        "height": 44,
+        "width": 70.890625,
+        "x": 16,
+        "y": 484
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgba(0, 0, 0, 0)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Add an event",
+      "rect": {
+        "height": 44,
+        "width": 108.6171875,
+        "x": 94.890625,
+        "y": 484
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgba(0, 0, 0, 0)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Correct a calving",
+      "rect": {
+        "height": 44,
+        "width": 133.8359375,
+        "x": 211.5078125,
+        "y": 484
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "BD-0001"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/animals/BD-0001",
+  "width": 390
+}

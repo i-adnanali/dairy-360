@@ -1,0 +1,270 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Animals\":\n    - /url: /animals\n  - link \"Calvings\":\n    - /url: /animals/calvings\n  - link \"Health\":\n    - /url: /animals/health\n- main:\n  - heading \"Record a calving\" [level=2]\n  - paragraph: Enter calvings oldest first. Each one creates its calf, so in order means a farm-born animal exists before anything refers to it.\n  - text: Dam\n  - generic: Find dam by serial or name\n  - searchbox \"Find dam by serial or name\"\n  - paragraph: Search narrows the list. Ineligible dams remain visible with their reason.\n  - combobox \"Dam\":\n    - option \"Choose a dam…\" [selected]\n    - option \"BD-0001 — Noori\"\n    - option \"BD-0002 — Sohni\"\n    - option \"BD-0003 — Kali\"\n    - option \"BD-0004 — Bholi\"\n    - option \"BD-0005 — Rani\"\n    - option \"BD-0006 — Chandni\"\n    - option \"BD-0008 — Zeba (departed -- a calving on or after a departure is refused)\" [disabled]\n    - option \"BD-0009 — Guddi\"\n    - option \"BD-0010 — Pari\"\n    - option \"BD-0011 — Bhoori\"\n    - option \"BD-0012 — Lali\"\n    - option \"BD-0013 — Kalo\"\n    - option \"BD-0014 — Reshma\"\n    - option \"BD-0015 — Sadqa\"\n    - option \"BD-0016 — Mithi\"\n    - option \"BD-0017 (departed -- a calving on or after a departure is refused)\" [disabled]\n    - option \"BD-0019 — Chitti\"\n    - option \"BD-0021 (departed -- a calving on or after a departure is refused)\" [disabled]\n    - option \"BD-0022 — Neeli\"\n    - option \"BD-0023\"\n    - option \"BD-0024 (departed -- a calving on or after a departure is refused)\" [disabled]\n    - option \"BD-0026 (departed -- a calving on or after a departure is refused)\" [disabled]\n    - option \"BD-0027 (departed -- a calving on or after a departure is refused)\" [disabled]\n    - option \"BD-0028\"\n    - option \"BD-0029 (departed -- a calving on or after a departure is refused)\" [disabled]\n    - option \"BD-0030\"\n  - group \"When did she calve?\":\n    - generic: When did she calve?\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - generic: Calf sex\n  - radiogroup \"Calf sex\":\n    - radio \"female\":\n      - generic: \"1\"\n      - generic: female\n    - radio \"male\":\n      - generic: \"2\"\n      - generic: male\n  - generic: Outcome\n  - radiogroup \"Outcome\":\n    - radio \"Live\" [checked]:\n      - generic: \"1\"\n      - generic: Live\n    - radio \"Stillborn\":\n      - generic: \"2\"\n      - generic: Stillborn\n    - radio \"Died within 24h\":\n      - generic: \"3\"\n      - generic: Died within 24h\n  - paragraph: A calf that did not live is still recorded as an animal, still opens the lactation, and still counts toward parity and the calving interval.\n  - generic: Which calf is this?\n  - paragraph: \"Choose the dam, the calving date and the calf's sex first — which animals can be linked depends on all three: an animal's birth cannot postdate its own history, and one recorded as the other sex is not this calf.\"\n  - generic: Sire reference (optional)\n  - combobox \"Sire reference (optional)\"\n  - generic: Free text. A stable identifier, not a display name.\n  - generic: Observed by (optional)\n  - combobox \"Observed by (optional)\"\n  - generic: Who actually saw it. Leave blank unless someone did — nobody observed a purchase record. A stable identifier, not a display name.\n  - button \"Record calving\" [disabled]\n  - generic: Choose a dam.\n  - paragraph: Cmd/Ctrl+Enter saves from a field when the record is ready.",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "dam-search-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Find dam by serial or name",
+      "rect": {
+        "height": 36,
+        "width": 686,
+        "x": 377,
+        "y": 318.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Dam",
+      "rect": {
+        "height": 36,
+        "width": 686,
+        "x": 377,
+        "y": 394.6875
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 36,
+        "width": 224,
+        "x": 377,
+        "y": 523.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(87, 86, 79)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1",
+      "rect": {
+        "height": 13,
+        "width": 13,
+        "x": 377,
+        "y": 573.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "female",
+      "rect": {
+        "height": 34,
+        "width": 85.78125,
+        "x": 377,
+        "y": 705.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "male",
+      "rect": {
+        "height": 34,
+        "width": 70.125,
+        "x": 470.78125,
+        "y": 705.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Live",
+      "rect": {
+        "height": 34,
+        "width": 65.3515625,
+        "x": 377,
+        "y": 775.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Stillborn",
+      "rect": {
+        "height": 34,
+        "width": 92.9296875,
+        "x": 450.3515625,
+        "y": 775.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Died within 24h",
+      "rect": {
+        "height": 34,
+        "width": 142.53125,
+        "x": 551.28125,
+        "y": 775.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-sire_ref-6-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Sire reference (optional)",
+      "rect": {
+        "height": 36,
+        "width": 720,
+        "x": 360,
+        "y": 1018.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "identifier-list-observed_by-7-help",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Observed by (optional)",
+      "rect": {
+        "height": 36,
+        "width": 720,
+        "x": 360,
+        "y": 1110.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(59, 58, 56)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": "calving-submit-reason",
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record calving",
+      "rect": {
+        "height": 36,
+        "width": 129.6171875,
+        "x": 360,
+        "y": 1198.6875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Record a calving"
+  ],
+  "height": 1000,
+  "regions": [],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6502/animals/calvings/new",
+  "width": 1440
+}

@@ -360,7 +360,7 @@ import { Button } from '../ui/button';
                   appButton
                   [busy]="payState.submitting()"
                 >
-                  {{ payState.submitting() ? 'Saving…' : 'Record payment' }}
+                  Record payment
                 </button>
               } @else {
                 <app-session-required what="a payment" />

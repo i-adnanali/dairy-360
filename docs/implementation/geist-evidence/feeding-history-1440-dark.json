@@ -1,0 +1,143 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Feeding history\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - link \"Record feeding\":\n    - /url: /feed/daily/2026-09-30\n  - button \"Feed catalogue\"\n  - generic: From\n  - textbox \"From\": 2026-09-16\n  - generic: Through\n  - textbox \"Through\": 2026-09-30\n  - button \"Show range\"\n  - paragraph: Default coverage begins at the first saved summary. A missing day means not recorded, never not fed.\n  - heading \"Recorded days\" [level=3]\n  - navigation \"Feeding days pagination\":\n    - generic: 1–15 of 15\n  - link \"2026-09-16\":\n    - /url: /feed/daily/2026-09-16\n  - generic: Partially recorded\n  - link \"2026-09-17\":\n    - /url: /feed/daily/2026-09-17\n  - generic: Recorded\n  - link \"2026-09-18\":\n    - /url: /feed/daily/2026-09-18\n  - generic: Not recorded\n  - link \"2026-09-19\":\n    - /url: /feed/daily/2026-09-19\n  - generic: Not recorded\n  - link \"2026-09-20\":\n    - /url: /feed/daily/2026-09-20\n  - generic: Not recorded\n  - link \"2026-09-21\":\n    - /url: /feed/daily/2026-09-21\n  - generic: Not recorded\n  - link \"2026-09-22\":\n    - /url: /feed/daily/2026-09-22\n  - generic: Not recorded\n  - link \"2026-09-23\":\n    - /url: /feed/daily/2026-09-23\n  - generic: Not recorded\n  - link \"2026-09-24\":\n    - /url: /feed/daily/2026-09-24\n  - generic: Not recorded\n  - link \"2026-09-25\":\n    - /url: /feed/daily/2026-09-25\n  - generic: Not recorded\n  - link \"2026-09-26\":\n    - /url: /feed/daily/2026-09-26\n  - generic: Not recorded\n  - link \"2026-09-27\":\n    - /url: /feed/daily/2026-09-27\n  - generic: Not recorded\n  - link \"2026-09-28\":\n    - /url: /feed/daily/2026-09-28\n  - generic: Not recorded\n  - link \"2026-09-29\":\n    - /url: /feed/daily/2026-09-29\n  - generic: Not recorded\n  - link \"2026-09-30\":\n    - /url: /feed/daily/2026-09-30\n  - generic: Not recorded",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Feed catalogue",
+      "rect": {
+        "height": 38,
+        "width": 135.3359375,
+        "x": 420.0390625,
+        "y": 229.6875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "From",
+      "rect": {
+        "height": 36,
+        "width": 138,
+        "x": 24,
+        "y": 311.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Through",
+      "rect": {
+        "height": 36,
+        "width": 138.5,
+        "x": 174,
+        "y": 311.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Show range",
+      "rect": {
+        "height": 38,
+        "width": 111.828125,
+        "x": 324.5,
+        "y": 309.6875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Feeding history",
+    "Recorded days"
+  ],
+  "height": 1000,
+  "regions": [],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed/daily",
+  "width": 1440
+}

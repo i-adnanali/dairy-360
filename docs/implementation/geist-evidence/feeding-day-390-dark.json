@@ -1,0 +1,143 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Feed\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Daily feeding\" [level=2]\n  - paragraph: One account for the day. Unknown quantity and unspecified recipients are valid.\n  - paragraph: Saved · revision 1 · recorded by adnan. direct_entry · harness fixture. Editing keeps confirmed recipients unless refreshed.\n  - heading \"Review 2026-09-17\" [level=3]\n  - paragraph: \"Fresh fodder: given · supply enough. Additional feed: given.\"\n  - paragraph: Recorded feeding account\n  - strong: Fresh fodder\n  - paragraph: \"Own crop: Seasonal maize; Purchase: 2026-09-17\"\n  - paragraph: Unmeasured · unknown\n  - paragraph: Recipients not specified\n  - paragraph\n  - strong: Khall\n  - paragraph: unknown source\n  - paragraph: Unmeasured · water mixed\n  - paragraph: \"milking: BD-0001 Noori, BD-0002 Sohni, BD-0011 Bhoori, BD-0012 Lali, BD-0016 Mithi, BD-0022 Neeli\"\n  - paragraph\n  - paragraph\n  - paragraph: \"Saved record: adnan · direct_entry · harness fixture.\"\n  - button \"Edit account\"\n  - link \"Cancel daily entry\":\n    - /url: /\n  - button \"Correction history\"\n  - button \"Remove summary\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Feed",
+      "rect": {
+        "height": 44,
+        "width": 114.8359375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.8359375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.8046875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.8984375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Edit account",
+      "rect": {
+        "height": 44,
+        "width": 116.5234375,
+        "x": 16,
+        "y": 900.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Correction history",
+      "rect": {
+        "height": 44,
+        "width": 153.4453125,
+        "x": 16,
+        "y": 964.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Remove summary",
+      "rect": {
+        "height": 44,
+        "width": 151.4765625,
+        "x": 169.4453125,
+        "y": 964.5
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Daily feeding",
+    "Review 2026-09-17"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed/daily/2026-09-17",
+  "width": 390
+}

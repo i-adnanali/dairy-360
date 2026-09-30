@@ -1,0 +1,897 @@
+{
+  "snapshot": "- banner:\n  - heading [level=1]: Dairy 360\n  - generic: harness · in memory\n  - button: Recording as geist-synthetic · Direct entry\n  - button: Menu · Herd\n  - button: Search ⌘K\n  - button: dark\n  - button: Assistant\n- navigation:\n  - link:\n    - /url: /animals\n    - text: Animals\n  - link:\n    - /url: /animals/calvings\n    - text: Calvings\n  - link:\n    - /url: /animals/health\n    - text: Health\n- main:\n  - heading [level=2]: Animal health\n  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.\n  - button: Start vet visit\n  - button: Record dose\n  - button: Vaccination round\n  - generic: Health board date\n  - textbox: 2026-09-29\n  - button: 5 Overdue\n  - button: 0 Due today\n  - button: 0 Upcoming\n  - generic: Filter animal\n  - combobox\n  - generic: Task type\n  - combobox\n  - generic: Due status\n  - combobox\n  - generic: Assigned person\n  - textbox:\n    - /placeholder: Filter by name\n  - heading [level=3]: Outstanding tasks\n  - navigation:\n    - generic: 1–5 of 5\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noori\n    - generic: Overdue\n    - heading [level=4]: Fixture overdue\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-09-16\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noori\n    - generic: Overdue\n    - heading [level=4]: Fixture due\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-09-17\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noori\n    - generic: Overdue\n    - heading [level=4]: Fixture recheck\n    - paragraph:\n      - text: Recheck · Due\n      - time: 2026-09-17\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noori\n    - generic: Overdue\n    - heading [level=4]: Fixture upcoming\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-09-20\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0002\n      - text: BD-0002 Sohni\n    - generic: Overdue\n    - heading [level=4]: Demonstration round vaccine\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-09-21\n    - button: Record completion\n    - button: Change status\n  - region:\n    - heading [level=3]: Withdrawal instructions needing attention (5)\n    - paragraph: BD-0003 · Milk withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: BD-0003 · Meat withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Demonstration medicine · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention\n    - paragraph: Needs clarification — 2 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Demonstration vaccine (not a clinical protocol) · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: Demonstration round vaccine · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n  - generic: Open cases (1)\n  - generic: Records\n  - combobox\n  - navigation:\n    - generic: 1–1 of 1\n  - article:\n    - paragraph: Demonstration vaccination and treatment round · 2026-09-15\n    - paragraph: closed · day · revision 2 · recorded by health_fixture\n    - button: View / edit\n    - button: History\n    - button: Examine animal\n    - button: Record dose\n  - heading [level=3]: Vaccination round\n  - paragraph: Confirm each animal separately. This batch saves all rows together.\n  - text: Visit\n  - combobox\n  - text: Date\n  - textbox\n  - text: Vaccine name\n  - textbox\n  - text: Batch\n  - textbox\n  - text: Amount\n  - spinbutton\n  - text: Unit\n  - textbox\n  - text: Route\n  - textbox\n  - text: Administered by\n  - textbox\n  - text: Find animal in round\n  - searchbox: Sohni\n  - status: 1 animals selected. Search keeps selected rows visible.\n  - text: BD-0001 · Noori\n  - combobox\n  - text: Reason\n  - textbox\n  - text: New due date\n  - textbox\n  - text: BD-0002 · Sohni\n  - combobox\n  - checkbox\n  - text: I checked the selected animals and their individual outcomes.\n  - button: Save vaccination round\n  - button: Close round\n- dialog \"Discard unsaved changes?\":\n  - heading \"Discard unsaved changes?\" [level=2]\n  - paragraph: Health · administrations\n  - paragraph: Leaving discards this draft. Keep editing to retain your entries.\n  - button \"Keep editing\" [active]\n  - button \"Discard changes\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Herd",
+      "rect": {
+        "height": 44,
+        "width": 114.546875,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.546875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.515625,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.609375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Start vet visit",
+      "rect": {
+        "height": 44,
+        "width": 119.6328125,
+        "x": 16,
+        "y": -4392.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record dose",
+      "rect": {
+        "height": 44,
+        "width": 116.8046875,
+        "x": 143.6328125,
+        "y": -4392.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Vaccination round",
+      "rect": {
+        "height": 44,
+        "width": 153,
+        "x": 16,
+        "y": -4340.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Health board date",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 33,
+        "y": -4239.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "5 Overdue",
+      "rect": {
+        "height": 44,
+        "width": 102.515625,
+        "x": 33,
+        "y": -4183.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "0 Due today",
+      "rect": {
+        "height": 44,
+        "width": 113.7734375,
+        "x": 143.515625,
+        "y": -4183.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "0 Upcoming",
+      "rect": {
+        "height": 44,
+        "width": 114.109375,
+        "x": 33,
+        "y": -4131.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Filter animalAll animalsBD-0001 · NooriBD-0002 · SohniBD-0003 · KaliBD-0004 · BholiBD-0005 · RaniBD-0006 · ChandniBD-0007 · HeeraBD-0008 · ZebaBD-0009 · GuddiBD-0010 · PariBD-0011 · BhooriBD-0012 · LaliBD-0013 · KaloBD-0014 · ReshmaBD-0015 · SadqaBD-0016 · MithiBD-0017 · UnnamedBD-0018 · UnnamedBD-0019 · ChittiBD-0020 · UnnamedBD-0021 · UnnamedBD-0022 · NeeliBD-0023 · UnnamedBD-0024 · UnnamedBD-0025 · UnnamedBD-0026 · UnnamedBD-0027 · UnnamedBD-0028 · UnnamedBD-0029 · UnnamedBD-0030 · UnnamedBD-0031 · Unnamed",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": -4055.5
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Task typeAll task typesDosesRechecksTests",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": -3979.5
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": -3899.5
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assigned person",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 33,
+        "y": -3819.5
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record completion for BD-0001: Fixture overdue",
+      "rect": {
+        "height": 44,
+        "width": 158.2421875,
+        "x": 49,
+        "y": -3486
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change status for BD-0001: Fixture overdue",
+      "rect": {
+        "height": 44,
+        "width": 129.4765625,
+        "x": 49,
+        "y": -3434
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record completion for BD-0001: Fixture due",
+      "rect": {
+        "height": 44,
+        "width": 158.2421875,
+        "x": 49,
+        "y": -3187.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change status for BD-0001: Fixture due",
+      "rect": {
+        "height": 44,
+        "width": 129.4765625,
+        "x": 49,
+        "y": -3135.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record completion for BD-0001: Fixture recheck",
+      "rect": {
+        "height": 44,
+        "width": 158.2421875,
+        "x": 49,
+        "y": -2889
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change status for BD-0001: Fixture recheck",
+      "rect": {
+        "height": 44,
+        "width": 129.4765625,
+        "x": 49,
+        "y": -2837
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record completion for BD-0001: Fixture upcoming",
+      "rect": {
+        "height": 44,
+        "width": 158.2421875,
+        "x": 49,
+        "y": -2590.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change status for BD-0001: Fixture upcoming",
+      "rect": {
+        "height": 44,
+        "width": 129.4765625,
+        "x": 49,
+        "y": -2538.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record completion for BD-0002: Demonstration round vaccine",
+      "rect": {
+        "height": 44,
+        "width": 158.2421875,
+        "x": 49,
+        "y": -2324
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Change status for BD-0002: Demonstration round vaccine",
+      "rect": {
+        "height": 44,
+        "width": 129.4765625,
+        "x": 49,
+        "y": -2272
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Source recorded dose for BD-0003 · milk · Historical vaccine, details incomplete",
+      "rect": {
+        "height": 44,
+        "width": 142.9453125,
+        "x": 46,
+        "y": -1933
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Source recorded dose for BD-0003 · meat · Historical vaccine, details incomplete",
+      "rect": {
+        "height": 44,
+        "width": 142.9453125,
+        "x": 46,
+        "y": -1654
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Source recorded dose for BD-0002 · meat · Demonstration medicine",
+      "rect": {
+        "height": 44,
+        "width": 142.9453125,
+        "x": 46,
+        "y": -1375
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Source recorded dose for BD-0001 · meat · Demonstration vaccine (not a clinical protocol)",
+      "rect": {
+        "height": 44,
+        "width": 142.9453125,
+        "x": 46,
+        "y": -1096
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Source recorded dose for BD-0001 · meat · Demonstration round vaccine",
+      "rect": {
+        "height": 44,
+        "width": 142.9453125,
+        "x": 46,
+        "y": -975
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Review case",
+      "rect": {
+        "height": 44,
+        "width": 115.5,
+        "x": 126.3125,
+        "y": -786
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": -788
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "View / edit",
+      "rect": {
+        "height": 44,
+        "width": 102.84375,
+        "x": 33,
+        "y": -575
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "History",
+      "rect": {
+        "height": 44,
+        "width": 81.8203125,
+        "x": 143.84375,
+        "y": -575
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Examine animal",
+      "rect": {
+        "height": 44,
+        "width": 136.3125,
+        "x": 33,
+        "y": -523
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record dose",
+      "rect": {
+        "height": 44,
+        "width": 116.8046875,
+        "x": 177.3125,
+        "y": -523
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "VisitNo visit linkedDemonstration vaccination and treatment round · 2026-09-15",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": -305
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 67.0390625,
+        "y": -241
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Vaccine name",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 134.140625,
+        "y": -177
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Batch",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 74.84375,
+        "y": -113
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Amount",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 89.765625,
+        "y": -49
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Unit",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 62.6484375,
+        "y": 15
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Route",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 75.28125,
+        "y": 79
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Administered by",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 150.28125,
+        "y": 143
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Find animal in round",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 33,
+        "y": 227
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "BD-0001 · NooriNot selectedGivenDeferredNot given",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 380
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Reason",
+      "rect": {
+        "height": 44,
+        "width": 195,
+        "x": 86.4765625,
+        "y": 444
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "New due date",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 133.453125,
+        "y": 508
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "BD-0002 · SohniNot selectedGivenDeferredNot given",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 609
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "I checked the selected animals and their individual outcomes.",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 673
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Save vaccination round",
+      "rect": {
+        "height": 44,
+        "width": 185.0234375,
+        "x": 33,
+        "y": 759
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Close round",
+      "rect": {
+        "height": 44,
+        "width": 113.4453125,
+        "x": 218.0234375,
+        "y": 759
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Keep editing",
+      "rect": {
+        "height": 44,
+        "width": 116.5,
+        "x": 33,
+        "y": 470
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(42, 20, 20)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Discard changes",
+      "rect": {
+        "height": 44,
+        "width": 142.0859375,
+        "x": 161.5,
+        "y": 470
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Animal health",
+    "Outstanding tasks",
+    "Withdrawal instructions needing attention (5)",
+    "Vaccination round"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/animals/health",
+  "width": 390
+}

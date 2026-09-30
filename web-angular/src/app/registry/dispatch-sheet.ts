@@ -275,7 +275,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                         >Litres for {{ row.name }}</label
                       >
                       <div class="flex flex-wrap items-center gap-2">
-                        <input
+                        <span class="input-group"><input
                           #cell
                           appInput
                           [id]="'quantity-' + row.destination_id"
@@ -288,7 +288,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                           (input)="typeLitres(row.destination_id, $any($event.target).value)"
                           (keydown)="onKey($event, i + tableOffset())"
                           class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
-                        />
+                        /><span class="input-unit" aria-hidden="true">L</span></span>
                         <button
                           type="button"
                           [attr.aria-label]="'Nothing taken by ' + row.name"
@@ -413,7 +413,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                             >Litres for {{ row.name }}</label
                           >
                           <div class="flex items-center gap-2">
-                            <input
+                            <span class="input-group"><input
                               appInput
                               [id]="'quantity-' + row.destination_id"
                               [attr.aria-label]="
@@ -424,7 +424,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
                               [value]="draft(row.destination_id).litres"
                               (input)="typeLitres(row.destination_id, $any($event.target).value)"
                               class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm"
-                            />
+                            /><span class="input-unit" aria-hidden="true">L</span></span>
                             <span
                               class="text-sm"
                               [appCertainty]="amountState(row)"
@@ -521,7 +521,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
             reason="dispatch-submit-reason"
             [busy]="state.submitting()"
           >
-            {{ state.submitting() ? 'Saving…' : 'Save session' }}
+            Save session
           </button>
         } @else {
           <app-session-required what="this session" />

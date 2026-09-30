@@ -1,0 +1,210 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Menu · Milk\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Milking\":\n    - /url: /milk/milking\n  - link \"Dispatch\":\n    - /url: /milk/dispatch\n  - link \"Buyers\":\n    - /url: /milk/buyers\n- main:\n  - link \"← all buyers\":\n    - /url: /milk/buyers\n  - heading \"Bashir (dodhi)\" [level=2]\n  - generic: Owes\n  - generic: Rs 8,737.50\n  - paragraph: 78.5 L over 1 month(s) · billed Rs 13,737.50 · paid Rs 5,000.00\n  - generic: September 2026\n  - generic: 78.5 L · billed Rs 13,737.50 · paid Rs 5,000.00 · Rs 8,737.50 carried forward\n  - region \"Deliveries — September 2026\":\n    - heading \"Deliveries\" [level=3]\n    - navigation \"Deliveries — September 2026 pagination\":\n      - generic: 1–5 of 5\n    - region \"Deliveries — September 2026\":\n      - table:\n        - rowgroup:\n          - row \"Date / session Quantity / reason Recorded rate Billed\":\n            - columnheader \"Date / session\"\n            - columnheader \"Quantity / reason\"\n            - columnheader \"Recorded rate\"\n            - columnheader \"Billed\"\n        - rowgroup:\n          - row \"2026-09-15 morning 21 L Rs 7,000.00 / 40 L Rs 3,675.00\":\n            - cell \"2026-09-15 morning\"\n            - cell \"21 L\"\n            - cell \"Rs 7,000.00 / 40 L\"\n            - cell \"Rs 3,675.00\"\n          - row \"2026-09-15 evening 18.5 L Rs 7,000.00 / 40 L Rs 3,237.50\":\n            - cell \"2026-09-15 evening\"\n            - cell \"18.5 L\"\n            - cell \"Rs 7,000.00 / 40 L\"\n            - cell \"Rs 3,237.50\"\n          - row \"2026-09-16 morning 20 L Rs 7,000.00 / 40 L Rs 3,500.00\":\n            - cell \"2026-09-16 morning\"\n            - cell \"20 L\"\n            - cell \"Rs 7,000.00 / 40 L\"\n            - cell \"Rs 3,500.00\"\n          - row \"2026-09-16 evening nothing taken— did not come No record No record\":\n            - cell \"2026-09-16 evening\"\n            - cell \"nothing taken— did not come\"\n            - cell \"No record\": –\n            - cell \"No record\": –\n          - row \"2026-09-17 morning 19 L Rs 7,000.00 / 40 L Rs 3,325.00\":\n            - cell \"2026-09-17 morning\"\n            - cell \"19 L\"\n            - cell \"Rs 7,000.00 / 40 L\"\n            - cell \"Rs 3,325.00\"\n  - region \"Payments — September 2026\":\n    - heading \"Payments\" [level=3]\n    - navigation \"Payments — September 2026 pagination\":\n      - generic: 1–1 of 1\n    - region \"Payments — September 2026\":\n      - table:\n        - rowgroup:\n          - row \"Date Method / reference / note Payment\":\n            - columnheader \"Date\"\n            - columnheader \"Method / reference / note\"\n            - columnheader \"Payment\"\n        - rowgroup:\n          - row \"2026-09-16 cash · khata p.14 −Rs 5,000.00\":\n            - cell \"2026-09-16\"\n            - cell \"cash · khata p.14\"\n            - cell \"−Rs 5,000.00\"\n  - heading \"Record a payment\" [level=3]\n  - generic: Amount (Rs)\n  - textbox \"Amount (Rs)\"\n  - generic: \"On\"\n  - textbox \"On\": 2026-09-29\n  - generic: How\n  - radiogroup \"Method\":\n    - radio \"Cash\" [checked]:\n      - generic: \"1\"\n      - generic: Cash\n    - radio \"Bank\":\n      - generic: \"2\"\n      - generic: Bank\n    - radio \"Adjustment\":\n      - generic: \"3\"\n      - generic: Adjustment\n  - generic: Reference (optional)\n  - textbox \"Reference (optional)\":\n    - /placeholder: cheque no., transfer ref, khata page\n  - button \"Record payment\" [disabled]\n  - heading \"Agreed rates\" [level=3]\n  - navigation \"Rates pagination\":\n    - generic: 1–1 of 1\n  - list:\n    - listitem: from 2026-05-20 — Rs 7,000.00 / 40 L",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(54, 54, 53)",
+      "border": "rgb(75, 74, 69)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Milk",
+      "rect": {
+        "height": 44,
+        "width": 109.3125,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 137.3125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 223.28125,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 278.375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Amount (Rs)",
+      "rect": {
+        "height": 44,
+        "width": 128,
+        "x": 33,
+        "y": 1372
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "On",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 173,
+        "y": 1372
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(200, 131, 86)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Cash",
+      "rect": {
+        "height": 44,
+        "width": 71.9375,
+        "x": 33,
+        "y": 1448
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Bank",
+      "rect": {
+        "height": 44,
+        "width": 71.328125,
+        "x": 112.9375,
+        "y": 1448
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Adjustment",
+      "rect": {
+        "height": 44,
+        "width": 112.75,
+        "x": 192.265625,
+        "y": 1448
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Reference (optional)",
+      "rect": {
+        "height": 44,
+        "width": 288,
+        "x": 33,
+        "y": 1528
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(59, 58, 56)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record payment",
+      "rect": {
+        "height": 44,
+        "width": 140.03125,
+        "x": 33,
+        "y": 1584
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Bashir (dodhi)",
+    "Deliveries",
+    "Payments",
+    "Record a payment",
+    "Agreed rates"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/milk/buyers/dst_f0bdb2d1-8096-4f05-8654-e31f4b51cd7d",
+  "width": 390
+}

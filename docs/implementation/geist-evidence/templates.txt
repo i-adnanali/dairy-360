@@ -1,0 +1,2 @@
+component templates: 87 files, no stray backticks
+component hosts: 29 non-routed, all with display:block; 21 routed

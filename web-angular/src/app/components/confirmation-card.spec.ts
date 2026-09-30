@@ -55,6 +55,25 @@ describe('ConfirmationCard', () => {
     expect(emitted[0]).toEqual([{ toolUseId: 'w1', approved: true }]);
     expect(emitted).toHaveLength(1);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('approved');
+    expect(fixture.nativeElement.textContent).toContain('Approved · awaiting result');
   });
+  it('keeps approval distinct from execution and collapses settled details', () => {
+    const f = mount(cardWithRows);
+    f.componentRef.setInput('decision', 'approved');
+    f.detectChanges();
+    expect(f.nativeElement.textContent).toContain('Approved · awaiting result');
+    expect(f.nativeElement.querySelector('details').open).toBe(false);
+    expect(f.nativeElement.querySelector('button')).toBeNull();
+    f.componentRef.setInput('outcome', 'unknown');
+    f.detectChanges();
+    expect(f.nativeElement.textContent).toContain('Outcome unknown');
+    f.componentRef.setInput('outcome', 'recorded');
+    f.detectChanges();
+    expect(f.nativeElement.textContent).toContain('Recorded');
+    f.componentRef.setInput('decision', 'rejected');
+    f.detectChanges();
+    expect(f.nativeElement.textContent).toContain('Rejected');
+    expect(f.nativeElement.textContent).not.toContain('awaiting result');
+  });
+
 });

@@ -1,0 +1,119 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Recheck\"\n- main:\n  - heading \"Check the records\" [level=2]\n  - paragraph: Read these; they are not assertions. Nothing in the rest of the app changes based on what is here.\n  - heading \"Invariant violations\" [level=3]\n  - paragraph: No violations across 31 animal(s), 70 event(s), 17 lactation(s), as of 2026-09-17.\n  - heading \"Advisory worklist · People\" [level=3]\n  - navigation \"Labour advisories pagination\":\n    - generic: 1–2 of 2\n  - list:\n    - heading \"Identifier not linked to a person\" [level=4]\n    - paragraph: rafiq · 10 records\n    - paragraph: \"'rafiq' appears on 10 records and is not a person on file. Either they should be, or the name is a variant of somebody who already is.\"\n    - link \"Review people\":\n      - /url: /labour/people\n    - generic \"Technical details\"\n    - heading \"Recorded wage differs from agreement\" [level=4]\n    - paragraph: 2026-08-01 through 2026-08-31 · Recorded wage Rs 22,000.00 · Agreement Rs 25,000.00\n    - paragraph: imran has a recorded wage of Rs 22,000.00 for 2026-08-01..2026-08-31 against an agreement of Rs 25,000.00. Expected whenever there was leave or an adjustment.\n    - link \"Review person\":\n      - /url: /labour/people/per_824db74f-de35-4df9-8d69-6bd924cae410\n    - generic \"Technical details\"\n  - heading \"Coverage · How the dates were known\" [level=3]\n  - paragraph: Source against precision. Nothing can detect a date that is more precise than the memory behind it — this is the number that shows it. A backfill coming out mostly exact-day recall is the signal worth acting on.\n  - region \"histogram\":\n    - table:\n      - rowgroup:\n        - row \"Source Precision Events\":\n          - columnheader \"Source\"\n          - columnheader \"Precision\"\n          - columnheader \"Events\"\n      - rowgroup:\n        - row \"cycle_card day 8\":\n          - cell \"cycle_card\"\n          - cell \"day\"\n          - cell \"8\"\n        - row \"cycle_card month 10\":\n          - cell \"cycle_card\"\n          - cell \"month\"\n          - cell \"10\"\n        - row \"cycle_card year 3\":\n          - cell \"cycle_card\"\n          - cell \"year\"\n          - cell \"3\"\n        - row \"daily_herd_sheet day 3\":\n          - cell \"daily_herd_sheet\"\n          - cell \"day\"\n          - cell \"3\"\n        - row \"daily_herd_sheet month 1\":\n          - cell \"daily_herd_sheet\"\n          - cell \"month\"\n          - cell \"1\"\n        - row \"recall day 5\":\n          - cell \"recall\"\n          - cell \"day\"\n          - cell \"5\"\n        - row \"recall estimated 3\":\n          - cell \"recall\"\n          - cell \"estimated\"\n          - cell \"3\"\n        - row \"recall month 32\":\n          - cell \"recall\"\n          - cell \"month\"\n          - cell \"32\"\n        - row \"recall year 5\":\n          - cell \"recall\"\n          - cell \"year\"\n          - cell \"5\"\n  - heading \"Calving intervals\" [level=3]\n  - navigation \"Calving intervals pagination\":\n    - generic: 1–7 of 7\n  - region \"intervals\":\n    - table:\n      - rowgroup:\n        - row \"Animal From To Days Quality\":\n          - columnheader \"Animal\"\n          - columnheader \"From\"\n          - columnheader \"To\"\n          - columnheader \"Days\"\n          - columnheader \"Quality\"\n      - rowgroup:\n        - row \"BD-0001 2021-02-11 2022-07-19 523 measured\":\n          - cell \"BD-0001\"\n          - cell \"2021-02-11\"\n          - cell \"2022-07-19\"\n          - cell \"523\"\n          - cell \"measured\"\n        - row \"BD-0001 2022-07-19 2024-01-08 538 measured\":\n          - cell \"BD-0001\"\n          - cell \"2022-07-19\"\n          - cell \"2024-01-08\"\n          - cell \"538\"\n          - cell \"measured\"\n        - row \"BD-0002 2021-06-01 2022-12-01 548 approximate\":\n          - cell \"BD-0002\"\n          - cell \"2021-06-01\"\n          - cell \"2022-12-01\"\n          - cell \"548\"\n          - cell \"approximate\"\n        - row \"BD-0002 2022-12-01 2024-04-01 487 approximate\":\n          - cell \"BD-0002\"\n          - cell \"2022-12-01\"\n          - cell \"2024-04-01\"\n          - cell \"487\"\n          - cell \"approximate\"\n        - row \"BD-0003 2022-10-02 2024-02-01 487 approximate\":\n          - cell \"BD-0003\"\n          - cell \"2022-10-02\"\n          - cell \"2024-02-01\"\n          - cell \"487\"\n          - cell \"approximate\"\n        - row \"BD-0004 2018-06-01 2019-11-01 518 approximate\":\n          - cell \"BD-0004\"\n          - cell \"2018-06-01\"\n          - cell \"2019-11-01\"\n          - cell \"518\"\n          - cell \"approximate\"\n        - row \"BD-0012 2023-05-01 2024-11-01 550 approximate\":\n          - cell \"BD-0012\"\n          - cell \"2023-05-01\"\n          - cell \"2024-11-01\"\n          - cell \"550\"\n          - cell \"approximate\"\n  - generic: measured\n  - generic: n = 2 · mean 530.5d\n  - generic: min 523d · max 538d\n  - generic: approximate\n  - generic: n = 5 · mean 518d\n  - generic: min 487d · max 550d\n  - paragraph: \"2 measured and 5 approximate interval(s). These are reported separately and never averaged together: an approximate interval from two month-precision calvings carries roughly +/-60 days, larger than the difference between a good interval and a bad one. At this herd size this is a case series, not a dataset.\"\n  - heading \"Coverage gaps · Milk records\" [level=3]\n  - paragraph: \"A session is complete when every animal in milk has a row — not when every row carries a number. The two are separate on purpose: a session of all “not measured” is a complete record and empty data, and one blended percentage would hide exactly that.\"\n  - generic: sessions\n  - generic: 4 complete of 5\n  - generic: 2026-09-15 → 2026-09-17\n  - generic: measured\n  - generic: 22 row(s)\n  - generic: carry a number\n  - generic: not measured\n  - generic: 5 row(s)\n  - generic: milked, unweighed · 1 not milked\n  - region \"milking sessions\":\n    - table:\n      - rowgroup:\n        - row \"Date Session Recorded In milk Measured\":\n          - columnheader \"Date\"\n          - columnheader \"Session\"\n          - columnheader \"Recorded\"\n          - columnheader \"In milk\"\n          - columnheader \"Measured\"\n      - rowgroup:\n        - row \"2026-09-17 morning 6 6 5\":\n          - cell \"2026-09-17\"\n          - cell \"morning\"\n          - cell \"6\"\n          - cell \"6\"\n          - cell \"5\"\n        - row \"2026-09-16 evening 4 6 2\":\n          - cell \"2026-09-16\"\n          - cell \"evening\"\n          - cell \"4\"\n          - cell \"6\"\n          - cell \"2\"\n        - row \"2026-09-16 morning 6 6 5\":\n          - cell \"2026-09-16\"\n          - cell \"morning\"\n          - cell \"6\"\n          - cell \"6\"\n          - cell \"5\"\n        - row \"2026-09-15 evening 6 6 4\":\n          - cell \"2026-09-15\"\n          - cell \"evening\"\n          - cell \"6\"\n          - cell \"6\"\n          - cell \"4\"\n        - row \"2026-09-15 morning 6 6 6\":\n          - cell \"2026-09-15\"\n          - cell \"morning\"\n          - cell \"6\"\n          - cell \"6\"\n          - cell \"6\"\n  - paragraph: \"A complete session means every animal in milk has a row, not that every row carries a number. The two are reported separately and never blended: a session of all milked_not_measured is a complete record and empty data. Morning and evening are also never pooled -- the interval between milkings is unknown, so the two are not comparable.\"\n  - heading \"Where the milk went\" [level=3]\n  - paragraph: 2026-08-31 → 2026-09-29\n  - generic: Measured\n  - generic: 135.2 L\n  - generic: from 22 row(s)\n  - generic: Sold\n  - generic: 107.5 L\n  - generic: Rs 20,262.50\n  - generic: Kept at home\n  - generic: 16.5 L\n  - generic: its own term, not the gap\n  - generic: Gap\n  - generic: 11.2 L\n  - generic: no percentage\n  - paragraph: No percentage, on purpose — 5 milking(s) were taken but not weighed and 2 animal-session(s) have no row at all, so production is a lower bound and a percentage of it would be false in a direction nobody would guess.\n  - paragraph: 5 of 5 dispatch session(s) had every standing destination answered.\n  - paragraph: \"The gap is produced minus dispatched, and it mixes two unknowns that pull in opposite directions: milk that was taken but never weighed makes it negative, and a sale nobody recorded makes it positive. A NEGATIVE GAP IS NORMAL while any milking is unweighed -- the milk existed, nobody measured it -- and it is not an alert. Occasional buyers have no row when they take nothing, so this gap is the only place an unrecorded household sale ever surfaces. Read it with the counts beside it, never on its own.\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(168, 166, 158)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1160.765625,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(239, 238, 235)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: system. Switch to light.",
+      "rect": {
+        "height": 24,
+        "width": 94.8203125,
+        "x": 1246.734375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 201, 195)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Recheck",
+      "rect": {
+        "height": 38,
+        "width": 90.5859375,
+        "x": 20,
+        "y": 100.6875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Check the records",
+    "Invariant violations",
+    "Advisory worklist · People",
+    "Coverage · How the dates were known",
+    "Calving intervals",
+    "Coverage gaps · Milk records",
+    "Where the milk went"
+  ],
+  "height": 1000,
+  "regions": [
+    {
+      "label": "histogram",
+      "scrollWidth": 1358,
+      "tabindex": null,
+      "width": 1358
+    },
+    {
+      "label": "intervals",
+      "scrollWidth": 1358,
+      "tabindex": null,
+      "width": 1358
+    },
+    {
+      "label": "milking sessions",
+      "scrollWidth": 1358,
+      "tabindex": null,
+      "width": 1358
+    }
+  ],
+  "rootWidth": 1440,
+  "theme": "light",
+  "url": "http://localhost:6502/check",
+  "width": 1440
+}

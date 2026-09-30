@@ -18,11 +18,9 @@
  * thresholds are now mapped to the success criterion that actually applies:
  *
  *   TEXT      SC 1.4.3, 4.5:1. A foreground that carries words, on every
- *             background it can land on. NOTHING in this app qualifies for the
- *             large-text exemption: the biggest type is PageHeading's
- *             `text-lg font-semibold` = 18px/600 = 13.5pt bold, and the
- *             exemption starts at 14pt bold. So 4.5 applies everywhere, which
- *             is a simplification worth stating rather than rediscovering.
+ *             background it can land on. Apply the normal-text 4.5:1 threshold
+ *             to shared tokens even when a particular heading qualifies for
+ *             the large-text exemption; those tokens also serve smaller text.
  *
  *   FOCUS     SC 1.4.11 / 2.4.11, 3:1. The focus ring against what it is drawn
  *             over.
@@ -117,7 +115,8 @@ function declaredPairs() {
     add('certainty-rule', bg, MARK, 'the dotted rule -- carries "approximate" in greyscale');
     add('focus-ring', bg, FOCUS, 'the focus ring');
     add('border-selected', bg, MARK, 'the selected chip/card/tab boundary');
-    add('border-default', bg, MARK, "an input's own border");
+    add('border-control', bg, MARK, "an input's own border");
+    add('border-default', bg, INFO, "decorative surface divider");
     // INFO, not MARK, and the code is why: chat-panel.ts:72 puts this dot
     // immediately beside the literal word "Thinking...", so the state is
     // available in text and 1.4.11 does not reach the dot.
@@ -291,8 +290,7 @@ if (process.argv.includes('--all')) {
 const aaa = graded.filter((x) => x.tier === 'TEXT' && x.pass && x.r < 7);
 console.log(`TEXT pairs passing AA but under AAA (7:1): ${aaa.length}`);
 
-const held = new Set(['light|border-default|surface-page', 'light|border-default|surface-raised', 'light|border-default|surface-sunken', 'dark|border-default|surface-page', 'dark|border-default|surface-raised', 'dark|border-default|surface-sunken']);
-const unexpected = failures.filter(x => !held.has(`${x.mode}|${x.fg}|${x.bg}`));
+const unexpected = failures;
 const disabledConsumers = new Set(['ui/button.ts', 'registry/calf-picker.ts', 'registry/precision-date.ts']);
 const invalidUses = walk(APP).filter(file => {
   const source = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');

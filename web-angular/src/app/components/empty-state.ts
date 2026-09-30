@@ -1,6 +1,7 @@
+import { Assistant } from '../core/assistant';
 import { Button } from '../ui/button';
 import { Card } from '../ui/surface';
-import { ChangeDetectionStrategy, Component, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output } from '@angular/core';
 
 const STARTERS = [
   "How did the Kundi group's milk yield trend over the last 30 days?",
@@ -16,13 +17,13 @@ const STARTERS = [
   template: `
     <div appCard empty class="flex h-full flex-col items-center justify-center text-center">
       <div class="mb-2 text-4xl">🐃</div>
-      <h3 class="text-lg font-semibold text-content-heading">Dairy 360 assistant</h3>
+      <h3 class="text-lg font-semibold text-content-heading">How can I help?</h3>
       <p class="mb-6 mt-1 max-w-md text-sm text-content-muted">
         I can read your records to answer questions, and propose record changes that you approve
         before anything is written.
       </p>
       <div class="grid w-full max-w-md gap-2">
-        @for (s of starters; track s) {
+        @for (s of starters(); track s) {
           <button
             appButton
             variant="secondary"
@@ -38,5 +39,10 @@ const STARTERS = [
 })
 export class EmptyState {
   readonly pick = output<string>();
-  protected readonly starters = STARTERS;
+  private readonly assistant = inject(Assistant);
+  protected readonly starters = computed(() => {
+    const context = this.assistant.context();
+    if (!context) return STARTERS;
+    return [`Review ${context} and explain what is missing.`, `Summarize the recorded facts for ${context}.`, `What should I check before recording changes for ${context}?`];
+  });
 }

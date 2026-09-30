@@ -1,3 +1,5 @@
+import { ScrollRegion } from '../ui/scroll-region';
+import { TextInput } from '../ui/input';
 import { Button } from '../ui/button';
 import { computed } from '@angular/core';
 import { pagedList } from './paged-list';
@@ -18,7 +20,7 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
 @Component({
   selector: 'app-calvings-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button,Pagination,
+  imports: [ScrollRegion,TextInput,Button,Pagination,
     RouterLink,
     Certainty,
     Qualifier,
@@ -31,11 +33,12 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
   ],
   template: `
     <div data-page-layout="review">
-    <label class="mb-3 block text-sm text-content-secondary">Search records <input type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
     @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
 
     <div class="space-y-4">
       <header class="page-header"><h2 appPageHeading>Calvings</h2><a routerLink="/animals/calvings/new" appButton>Record calving</a></header>
+    <label class="mb-3 block text-sm text-content-secondary">Search records <input appInput type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
+
       <p class="max-w-[68ch] text-sm text-content-muted">
         Recorded calvings across the herd. Open the animal to inspect or correct its history.
         Approximate dates keep their recorded precision.
@@ -44,7 +47,7 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
         <p appErrorPanel>{{ error() }}</p>
         <button type="button" (click)="load()">Retry</button>
       } @else if (rows(); as records) {
-        <div class="overflow-x-auto rounded-xl border border-line bg-surface-raised">
+        <div appScrollRegion="Calvings records" class="rounded-xl border border-line bg-surface-raised">
           <table class="w-full text-left text-sm" data-role="calvings-table">
             <thead>
               <tr>
@@ -79,7 +82,8 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
                 </tr>
               } @empty {
                 <tr>
-                  <td appCell colspan="4">No calvings recorded.</td>
+                  <td appCell colspan="4">{{ paging.url.value().search ? 'No matching calvings.' : 'No calvings recorded.' }}
+                    @if (paging.url.value().search) { <button appButton variant="link" (click)="paging.url.set({search: '', page: '1'})">Clear search</button> }</td>
                 </tr>
               }
             </tbody>

@@ -1,0 +1,149 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as geist-synthetic · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Animals\":\n    - /url: /animals\n  - link \"Calvings\":\n    - /url: /animals/calvings\n  - link \"Health\":\n    - /url: /animals/health\n- main:\n  - heading \"Herd\" [level=2]\n  - text: Search records\n  - searchbox \"Search records\"\n  - paragraph: 31 animals\n  - link \"Add animal\":\n    - /url: /animals/new\n  - region \"Herd records\":\n    - table:\n      - rowgroup:\n        - row \"Serial Name Sex Status Parity Born Origin Events\":\n          - columnheader \"Serial\"\n          - columnheader \"Name\"\n          - columnheader \"Sex\"\n          - columnheader \"Status\"\n          - columnheader \"Parity\"\n          - columnheader \"Born\"\n          - columnheader \"Origin\"\n          - columnheader \"Events\"\n      - rowgroup:\n        - row \"BD-0001 Noori female majj · in milk 3 2017-03month acquired 7\":\n          - cell \"BD-0001\":\n            - link \"BD-0001\":\n              - /url: /animals/BD-0001\n          - cell \"Noori\"\n          - cell \"female\"\n          - cell \"majj · in milk\"\n          - cell \"3\"\n          - cell \"2017-03month\"\n          - cell \"acquired\"\n          - cell \"7\"\n        - row \"BD-0002 Sohni female majj · in milk 3 2016year acquired 4\":\n          - cell \"BD-0002\":\n            - link \"BD-0002\":\n              - /url: /animals/BD-0002\n          - cell \"Sohni\"\n          - cell \"female\"\n          - cell \"majj · in milk\"\n          - cell \"3\"\n          - cell \"2016year\"\n          - cell \"acquired\"\n          - cell \"4\"\n        - row \"BD-0003 Kali female majj · dry 2 ~2018est acquired 4\":\n          - cell \"BD-0003\":\n            - link \"BD-0003\":\n              - /url: /animals/BD-0003\n          - cell \"Kali\"\n          - cell \"female\"\n          - cell \"majj · dry\"\n          - cell \"2\"\n          - cell \"~2018est\"\n          - cell \"acquired\"\n          - cell \"4\"\n        - row \"BD-0004 Bholi female majj · dry 2 ~2012est acquired 4\":\n          - cell \"BD-0004\":\n            - link \"BD-0004\":\n              - /url: /animals/BD-0004\n          - cell \"Bholi\"\n          - cell \"female\"\n          - cell \"majj · dry\"\n          - cell \"2\"\n          - cell \"~2012est\"\n          - cell \"acquired\"\n          - cell \"4\"\n        - row \"BD-0005 Rani female majj · dry 1 2019-07month acquired 3\":\n          - cell \"BD-0005\":\n            - link \"BD-0005\":\n              - /url: /animals/BD-0005\n          - cell \"Rani\"\n          - cell \"female\"\n          - cell \"majj · dry\"\n          - cell \"1\"\n          - cell \"2019-07month\"\n          - cell \"acquired\"\n          - cell \"3\"\n        - row \"BD-0006 Chandni female choti 0 No record acquired 1\":\n          - cell \"BD-0006\":\n            - link \"BD-0006\":\n              - /url: /animals/BD-0006\n          - cell \"Chandni\"\n          - cell \"female\"\n          - cell \"choti\"\n          - cell \"0\"\n          - cell \"No record\": unknown\n          - cell \"acquired\"\n          - cell \"1\"\n        - row \"BD-0007 Heera male male 0 2023-06month acquired 1\":\n          - cell \"BD-0007\":\n            - link \"BD-0007\":\n              - /url: /animals/BD-0007\n          - cell \"Heera\"\n          - cell \"male\"\n          - cell \"male\"\n          - cell \"0\"\n          - cell \"2023-06month\"\n          - cell \"acquired\"\n          - cell \"1\"\n        - row \"BD-0008 Zeba female departed 1 2018year acquired 5\":\n          - cell \"BD-0008\":\n            - link \"BD-0008\":\n              - /url: /animals/BD-0008\n          - cell \"Zeba\"\n          - cell \"female\"\n          - cell \"departed\"\n          - cell \"1\"\n          - cell \"2018year\"\n          - cell \"acquired\"\n          - cell \"5\"\n        - row \"BD-0009 Guddi female choti 0 ~2018est acquired 1\":\n          - cell \"BD-0009\":\n            - link \"BD-0009\":\n              - /url: /animals/BD-0009\n          - cell \"Guddi\"\n          - cell \"female\"\n          - cell \"choti\"\n          - cell \"0\"\n          - cell \"~2018est\"\n          - cell \"acquired\"\n          - cell \"1\"\n        - row \"BD-0010 Pari female katti 0 2025-04month acquired 1\":\n          - cell \"BD-0010\":\n            - link \"BD-0010\":\n              - /url: /animals/BD-0010\n          - cell \"Pari\"\n          - cell \"female\"\n          - cell \"katti\"\n          - cell \"0\"\n          - cell \"2025-04month\"\n          - cell \"acquired\"\n          - cell \"1\"\n        - row \"BD-0011 Bhoori female majj · in milk 1 2025-06month acquired 2\":\n          - cell \"BD-0011\":\n            - link \"BD-0011\":\n              - /url: /animals/BD-0011\n          - cell \"Bhoori\"\n          - cell \"female\"\n          - cell \"majj · in milk\"\n          - cell \"1\"\n          - cell \"2025-06month\"\n          - cell \"acquired\"\n          - cell \"2\"\n        - row \"BD-0012 Lali female majj · in milk 2 ~2018est acquired 4\":\n          - cell \"BD-0012\":\n            - link \"BD-0012\":\n              - /url: /animals/BD-0012\n          - cell \"Lali\"\n          - cell \"female\"\n          - cell \"majj · in milk\"\n          - cell \"2\"\n          - cell \"~2018est\"\n          - cell \"acquired\"\n          - cell \"4\"\n        - row \"BD-0013 Kalo female choti 0 ~2019est acquired 1\":\n          - cell \"BD-0013\":\n            - link \"BD-0013\":\n              - /url: /animals/BD-0013\n          - cell \"Kalo\"\n          - cell \"female\"\n          - cell \"choti\"\n          - cell \"0\"\n          - cell \"~2019est\"\n          - cell \"acquired\"\n          - cell \"1\"\n        - row \"BD-0014 Reshma female choti 0 2018-06month born_on_farm 1\":\n          - cell \"BD-0014\":\n            - link \"BD-0014\":\n              - /url: /animals/BD-0014\n          - cell \"Reshma\"\n          - cell \"female\"\n          - cell \"choti\"\n          - cell \"0\"\n          - cell \"2018-06month\"\n          - cell \"born_on_farm\"\n          - cell \"1\"\n        - row \"BD-0015 Sadqa female katti 0 2026-02month acquired 1\":\n          - cell \"BD-0015\":\n            - link \"BD-0015\":\n              - /url: /animals/BD-0015\n          - cell \"Sadqa\"\n          - cell \"female\"\n          - cell \"katti\"\n          - cell \"0\"\n          - cell \"2026-02month\"\n          - cell \"acquired\"\n          - cell \"1\"\n        - row \"BD-0016 Mithi female majj · in milk 1 2021-02-11 born_on_farm 2\":\n          - cell \"BD-0016\":\n            - link \"BD-0016\":\n              - /url: /animals/BD-0016\n          - cell \"Mithi\"\n          - cell \"female\"\n          - cell \"majj · in milk\"\n          - cell \"1\"\n          - cell \"2021-02-11\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n        - row \"BD-0017 No record female departed 0 2022-07-19 born_on_farm 2\":\n          - cell \"BD-0017\":\n            - link \"BD-0017\":\n              - /url: /animals/BD-0017\n          - cell \"No record\": –\n          - cell \"female\"\n          - cell \"departed\"\n          - cell \"0\"\n          - cell \"2022-07-19\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n        - row \"BD-0018 No record male departed 0 2024-01-08 born_on_farm 2\":\n          - cell \"BD-0018\":\n            - link \"BD-0018\":\n              - /url: /animals/BD-0018\n          - cell \"No record\": –\n          - cell \"male\"\n          - cell \"departed\"\n          - cell \"0\"\n          - cell \"2024-01-08\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n        - row \"BD-0019 Chitti female choti 0 2022-12month born_on_farm 1\":\n          - cell \"BD-0019\":\n            - link \"BD-0019\":\n              - /url: /animals/BD-0019\n          - cell \"Chitti\"\n          - cell \"female\"\n          - cell \"choti\"\n          - cell \"0\"\n          - cell \"2022-12month\"\n          - cell \"born_on_farm\"\n          - cell \"1\"\n        - row \"BD-0020 No record male departed 0 2024-04month born_on_farm 2\":\n          - cell \"BD-0020\":\n            - link \"BD-0020\":\n              - /url: /animals/BD-0020\n          - cell \"No record\": –\n          - cell \"male\"\n          - cell \"departed\"\n          - cell \"0\"\n          - cell \"2024-04month\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n        - row \"BD-0021 No record female departed 0 2021-06month born_on_farm 2\":\n          - cell \"BD-0021\":\n            - link \"BD-0021\":\n              - /url: /animals/BD-0021\n          - cell \"No record\": –\n          - cell \"female\"\n          - cell \"departed\"\n          - cell \"0\"\n          - cell \"2021-06month\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n        - row \"BD-0022 Neeli female majj · in milk 1 2022-10-02 born_on_farm 2\":\n          - cell \"BD-0022\":\n            - link \"BD-0022\":\n              - /url: /animals/BD-0022\n          - cell \"Neeli\"\n          - cell \"female\"\n          - cell \"majj · in milk\"\n          - cell \"1\"\n          - cell \"2022-10-02\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n        - row \"BD-0023 No record female choti 0 2024-02month born_on_farm 1\":\n          - cell \"BD-0023\":\n            - link \"BD-0023\":\n              - /url: /animals/BD-0023\n          - cell \"No record\": –\n          - cell \"female\"\n          - cell \"choti\"\n          - cell \"0\"\n          - cell \"2024-02month\"\n          - cell \"born_on_farm\"\n          - cell \"1\"\n        - row \"BD-0024 No record female departed 0 2019-11month born_on_farm 2\":\n          - cell \"BD-0024\":\n            - link \"BD-0024\":\n              - /url: /animals/BD-0024\n          - cell \"No record\": –\n          - cell \"female\"\n          - cell \"departed\"\n          - cell \"0\"\n          - cell \"2019-11month\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n        - row \"BD-0025 No record male departed 0 2023-10month born_on_farm 2\":\n          - cell \"BD-0025\":\n            - link \"BD-0025\":\n              - /url: /animals/BD-0025\n          - cell \"No record\": –\n          - cell \"male\"\n          - cell \"departed\"\n          - cell \"0\"\n          - cell \"2023-10month\"\n          - cell \"born_on_farm\"\n          - cell \"2\"\n    - navigation \"Animals pagination\":\n      - text: Rows per page\n      - combobox \"Animals rows per page\":\n        - option \"25\" [selected]\n        - option \"50\"\n        - option \"100\"\n      - generic: 1–25 of 31\n      - button \"Previous\" [disabled]\n      - generic: Page 1 of 2\n      - button \"Next\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 26,
+        "width": 257.2734375,
+        "x": 247.3984375,
+        "y": 12.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 24.5,
+        "width": 73.96875,
+        "x": 1212.4921875,
+        "y": 13
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 24,
+        "width": 43.09375,
+        "x": 1298.4609375,
+        "y": 14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 24,
+        "width": 66.4453125,
+        "x": 1353.5546875,
+        "y": 13.25
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Search records",
+      "rect": {
+        "height": 36,
+        "width": 174,
+        "x": 125.75,
+        "y": 213.6875
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Animals rows per page",
+      "rect": {
+        "height": 36,
+        "width": 62,
+        "x": 124.2890625,
+        "y": 1281.1875
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": true,
+      "font": "14px",
+      "invalid": null,
+      "name": "Previous",
+      "rect": {
+        "height": 38,
+        "width": 90.96875,
+        "x": 1164.03125,
+        "y": 1280.1875
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Next",
+      "rect": {
+        "height": 38,
+        "width": 64.6875,
+        "x": 1350.3125,
+        "y": 1280.1875
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Herd"
+  ],
+  "height": 1000,
+  "regions": [
+    {
+      "label": "Herd records",
+      "scrollWidth": 1390,
+      "tabindex": null,
+      "width": 1390
+    }
+  ],
+  "rootWidth": 1440,
+  "theme": "dark",
+  "url": "http://localhost:6502/animals",
+  "width": 1440
+}

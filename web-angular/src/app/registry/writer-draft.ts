@@ -36,7 +36,11 @@ export function writerDraft(options: {
     {
       owner,
       context: path,
-      description: options.description ?? (() => options.name + ' · ' + path()),
+      description: options.description ?? (() => options.states.some((s) => s.uncertain())
+        ? options.name + ': the save outcome is unknown. Retry the original request before leaving.'
+        : options.states.some((s) => s.locked())
+          ? options.name + ': saving is in progress. Wait for the result.'
+          : options.name + ': your changes have not been saved. Discarding removes these changes.'),
       snapshot: () => JSON.stringify(snapshot()),
       baseline: () => baseline,
       dirty,

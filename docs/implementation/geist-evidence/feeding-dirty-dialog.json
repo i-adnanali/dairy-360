@@ -1,0 +1,752 @@
+{
+  "snapshot": "- banner:\n  - heading [level=1]: Dairy 360\n  - generic: harness · in memory\n  - button: Recording as geist-synthetic · Direct entry\n  - button: Menu · Feed\n  - button: Search ⌘K\n  - button: dark\n  - button: Assistant\n- navigation:\n  - link:\n    - /url: /feed\n    - text: Overview\n  - link:\n    - /url: /feed/crops\n    - text: Crops\n  - link:\n    - /url: /feed/purchases\n    - text: Purchases\n  - link:\n    - /url: /feed/daily\n    - text: Daily history\n- main:\n  - heading [level=2]: Daily feeding\n  - paragraph: One account for the day. Unknown quantity and unspecified recipients are valid.\n  - paragraph: Saved · revision 1 · recorded by adnan. direct_entry · harness fixture. Editing keeps confirmed recipients unless refreshed.\n  - generic: Date\n  - textbox: 2026-09-17\n  - heading [level=3]: Fresh fodder\n  - generic: Fresh fodder account\n  - combobox\n  - generic: Fresh-fodder supply assessment\n  - combobox\n  - paragraph: Your assessment of fresh-fodder supply; no nutritional adequacy is calculated.\n  - heading [level=3]: Additional feed\n  - generic: Additional-feed account\n  - combobox\n  - generic: Fresh fodder · unmeasured · unspecified\n  - generic: Khall · unmeasured · milking\n  - button: Add feed line\n  - button: Create feed item\n  - button: Record purchase\n  - paragraph: Common items such as wanda, khall and silage are choices, not presumed feeding.\n  - generic: Day notes (optional)\n  - textbox: Synthetic retained draft\n  - generic: Source reference (optional)\n  - textbox: harness fixture\n  - button: Review feeding summary\n  - link:\n    - /url: /\n    - text: Cancel daily entry\n  - button: Correction history\n  - button: Remove summary\n- dialog \"Discard unsaved changes?\":\n  - heading \"Discard unsaved changes?\" [level=2]\n  - paragraph: Daily feeding · 2026-09-17\n  - paragraph: Leaving discards this draft. Keep editing to retain your entries.\n  - button \"Keep editing\" [active]\n  - button \"Discard changes\"",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(74, 72, 68)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Recording as geist-synthetic · Direct entry",
+      "rect": {
+        "height": 44,
+        "width": 257.2734375,
+        "x": 16,
+        "y": 50.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Feed",
+      "rect": {
+        "height": 44,
+        "width": 114.8359375,
+        "x": 16,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 142.8359375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 228.8046875,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 283.8984375,
+        "y": 106.5
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Date",
+      "rect": {
+        "height": 44,
+        "width": 152.5,
+        "x": 16,
+        "y": -364
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Fresh fodder accountChoose an answerGiven — add source line belowNone givenUnknown",
+      "rect": {
+        "height": 44,
+        "width": 259,
+        "x": 33,
+        "y": -219
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Fresh-fodder supply assessmentChoose assessmentenoughshortsurplusunknownnot applicable",
+      "rect": {
+        "height": 44,
+        "width": 184,
+        "x": 33,
+        "y": -135
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Additional-feed accountChoose an answerGiven — add lines belowNone givenUnknown",
+      "rect": {
+        "height": 44,
+        "width": 213.5,
+        "x": 33,
+        "y": 75
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "ItemChoose item Silage  Khall  Fresh fodder",
+      "rect": {
+        "height": 44,
+        "width": 130.5,
+        "x": 33,
+        "y": 257
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Previous crop cycle · finished",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 345
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Seasonal maize · cutting",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 397
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Purchase 2026-09-17 · supplier unspecified",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 449
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Purchased stock (no linked invoice)",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 501
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Other source",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 553
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Unknown source",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 605
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Quantity (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 689
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Unit",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 773
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "RecipientsUnspecifiedMilking groupWhole herdSelected animals",
+      "rect": {
+        "height": 44,
+        "width": 161.5,
+        "x": 33,
+        "y": 889
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Preparationunknowndrywater mixedother",
+      "rect": {
+        "height": 44,
+        "width": 126,
+        "x": 33,
+        "y": 973
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Stated purpose (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 1057
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Notes / exceptions (optional)",
+      "rect": {
+        "height": 54,
+        "width": 324,
+        "x": 33,
+        "y": 1141
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Remove line",
+      "rect": {
+        "height": 44,
+        "width": 113.546875,
+        "x": 33,
+        "y": 1217
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "ItemChoose item Silage  Khall  Fresh fodder",
+      "rect": {
+        "height": 44,
+        "width": 130.5,
+        "x": 33,
+        "y": 355
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Purchased stock (no linked invoice)",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 443
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Other source",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 495
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Unknown source",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 547
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Quantity (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 631
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Unit",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 715
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "RecipientsUnspecifiedMilking groupWhole herdSelected animals",
+      "rect": {
+        "height": 44,
+        "width": 161.5,
+        "x": 33,
+        "y": 831
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Refresh from this date",
+      "rect": {
+        "height": 44,
+        "width": 180.7421875,
+        "x": 33,
+        "y": 955
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(240, 239, 234)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "I confirm these recipients",
+      "rect": {
+        "height": 44,
+        "width": 13,
+        "x": 33,
+        "y": 1015
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Preparationunknowndrywater mixedother",
+      "rect": {
+        "height": 44,
+        "width": 126,
+        "x": 33,
+        "y": 1099
+      },
+      "tag": "SELECT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Stated purpose (optional)",
+      "rect": {
+        "height": 44,
+        "width": 324,
+        "x": 33,
+        "y": 1183
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Notes / exceptions (optional)",
+      "rect": {
+        "height": 54,
+        "width": 324,
+        "x": 33,
+        "y": 1267
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Remove line",
+      "rect": {
+        "height": 44,
+        "width": 113.546875,
+        "x": 33,
+        "y": 1343
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Add feed line",
+      "rect": {
+        "height": 44,
+        "width": 120.46875,
+        "x": 16,
+        "y": 352
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Create feed item",
+      "rect": {
+        "height": 44,
+        "width": 143.703125,
+        "x": 144.46875,
+        "y": 352
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Record purchase",
+      "rect": {
+        "height": 44,
+        "width": 145.8203125,
+        "x": 16,
+        "y": 404
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Day notes (optional)",
+      "rect": {
+        "height": 54,
+        "width": 358,
+        "x": 16,
+        "y": 544
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Source reference (optional)",
+      "rect": {
+        "height": 44,
+        "width": 358,
+        "x": 16,
+        "y": 648
+      },
+      "tag": "INPUT"
+    },
+    {
+      "background": "rgb(200, 131, 86)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Review feeding summary",
+      "rect": {
+        "height": 44,
+        "width": 197.171875,
+        "x": 16,
+        "y": 712
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Correction history",
+      "rect": {
+        "height": 44,
+        "width": 153.4453125,
+        "x": 16,
+        "y": 776
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Remove summary",
+      "rect": {
+        "height": 44,
+        "width": 151.4765625,
+        "x": 169.4453125,
+        "y": 776
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Keep editing",
+      "rect": {
+        "height": 44,
+        "width": 116.5,
+        "x": 33,
+        "y": 470
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(42, 20, 20)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Discard changes",
+      "rect": {
+        "height": 44,
+        "width": 142.0859375,
+        "x": 161.5,
+        "y": 470
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Daily feeding",
+    "Fresh fodder",
+    "Additional feed"
+  ],
+  "height": 844,
+  "regions": [],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6502/feed/daily/2026-09-17",
+  "width": 390
+}

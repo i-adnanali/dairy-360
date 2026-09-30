@@ -166,7 +166,7 @@ import { PageHeading } from '../ui/heading';
             </section>
           }
           <section appCard>
-            <h3 class="font-medium">Feeding history</h3>
+            <h3 class="font-medium">Recorded days</h3>
             <app-local-pagination
               label="Feeding days"
               #pages0="localPagination"
@@ -244,9 +244,12 @@ import { PageHeading } from '../ui/heading';
                 }
               </div>
             } @empty {
-              <p appHelp>
-                No {{ mode }} in this view. Use the actions above to record the first one.
-              </p>
+              @if (mode === 'purchases' && records().length) {
+                <p appHelp>No purchases match these filters.</p>
+                <button appButton variant="secondary" (click)="itemFilter = ''; from = ''; to = ''">Clear filters</button>
+              } @else {
+                <p appHelp>No {{ mode }} recorded. Use the actions above to record the first one.</p>
+              }
             }
           </section>
         } @else {

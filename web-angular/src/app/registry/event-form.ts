@@ -220,7 +220,7 @@ const FIELDS = [
               reason="event-submit-reason"
               [busy]="state.submitting()"
             >
-              {{ state.submitting() ? 'Saving…' : 'Record ' + t }}
+              {{ 'Record ' + t }}
             </button>
           } @else {
             <app-session-required what="an event" />

@@ -129,11 +129,27 @@ describe('Phase 7 shell', () => {
     const h = await shell();
     const el = h.fixture.nativeElement as HTMLElement;
     expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(7);
-    expect(el.querySelector('[data-role="section-start-session"]')).toBeTruthy();
+    expect(el.querySelector('[data-role="section-start-session"]')).toBeNull();
+    expect(el.querySelector('[data-role="start-session"]')).toBeTruthy();
     expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeNull();
     TestBed.inject(Session).set('recall', 'Adnan');
     h.detectChanges();
     expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeNull();
+  });
+  it('closes mobile navigation with Escape from its trigger as well as its links', async () => {
+    const h = await shell();
+    const el = h.fixture.nativeElement as HTMLElement;
+    const trigger = el.querySelector<HTMLButtonElement>('.mobile-menu-toggle')!;
+    for (const fromLink of [false, true]) {
+      trigger.click();
+      h.detectChanges();
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      const target = fromLink ? el.querySelector<HTMLElement>('#section-navigation a')! : trigger;
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      h.detectChanges();
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(document.activeElement).toBe(trigger);
+    }
   });
   it('submits the focused form through its native handler with the platform chord', async () => {
     const h = await shell();

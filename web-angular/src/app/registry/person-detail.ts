@@ -177,8 +177,7 @@ import { Button } from '../ui/button';
           >
             <h3 appSectionHeading>Close the stint</h3>
             <p appHelp size="xs" tone="subtle">
-              A final settlement dated after this is fine and is not an error — /check reports it so
-              it is visible, and nothing refuses it.
+              This closes the selected stint on {{ endedOn() || 'the last day you enter' }}. Earlier wages and payments remain in the statement. A later settlement is allowed and appears in Checks.
             </p>
             <label class="block space-y-1">
               <span appSubHeading>Last day</span>
@@ -213,7 +212,7 @@ import { Button } from '../ui/button';
             <div class="flex gap-2">
               @if (session.ready()) {
                 <button type="submit" appButton [busy]="closeState.submitting()">
-                  {{ closeState.submitting() ? 'Saving…' : 'Close stint' }}
+                  Close stint
                 </button>
               } @else {
                 <app-session-required what="the closing date" />
@@ -322,7 +321,7 @@ import { Button } from '../ui/button';
           <div class="flex flex-wrap gap-4">
             <label class="space-y-1">
               <span class="block text-sm font-medium text-content-heading">Amount (Rs)</span>
-              <input
+              <span class="input-group"><input
                 name="amount_minor"
                 type="text"
                 inputmode="decimal"
@@ -331,7 +330,7 @@ import { Button } from '../ui/button';
                 appInput
                 density="comfortable"
                 class="w-36 text-right font-mono tabular-nums"
-              />
+              /><span class="input-unit" aria-hidden="true">Rs</span></span>
               @if (payState.fieldError('amount_minor'); as msg) {
                 <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{
                   msg
@@ -410,7 +409,7 @@ import { Button } from '../ui/button';
               appButton
               [busy]="payState.submitting()"
             >
-              {{ payState.submitting() ? 'Saving…' : 'Record payment' }}
+              Record payment
             </button>
           } @else {
             <app-session-required what="a payment" />

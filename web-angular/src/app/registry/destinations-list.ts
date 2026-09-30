@@ -1,3 +1,4 @@
+import { ScrollRegion } from '../ui/scroll-region';
 import { writerDraft } from './writer-draft';
 import { WriteLock } from './write-lock';
 import { pagedList } from './paged-list';
@@ -58,7 +59,7 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-destinations-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [ScrollRegion,
     WriteLock,
     Pagination,
     RowLink,
@@ -81,15 +82,6 @@ import { Button } from '../ui/button';
   ],
   template: `
     <div data-page-layout="review">
-    <label class="mb-3 block text-sm text-content-secondary"
-      >Search records
-      <input
-        type="search"
-        maxlength="100"
-        class="rounded border border-line bg-surface-page p-2"
-        [value]="paging.url.value().search"
-        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
-    /></label>
     @if (paging.loading()) {
       <p role="status" class="text-sm text-content-muted">Loading records…</p>
     }
@@ -102,6 +94,16 @@ import { Button } from '../ui/button';
           is a disposition, not a sale, so it has no price and never appears in a balance.
         </p>
       </header>
+    <label class="mb-3 block text-sm text-content-secondary"
+      >Search records
+      <input
+        appInput type="search"
+        maxlength="100"
+        class="rounded border border-line bg-surface-page p-2"
+        [value]="paging.url.value().search"
+        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
+    /></label>
+
 
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
@@ -115,7 +117,7 @@ import { Button } from '../ui/button';
             into the reconciliation gap instead of being recorded.
           </p>
         } @else {
-          <div class="overflow-hidden rounded-xl border border-line bg-surface-raised">
+          <div appScrollRegion="Buyers and rates" class="rounded-xl border border-line bg-surface-raised">
             <table class="w-full text-left text-sm">
               <thead
                 class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
@@ -184,6 +186,7 @@ import { Button } from '../ui/button';
                         <button
                           type="button"
                           [attr.data-role]="'price-' + d.id"
+                          [attr.aria-label]="'Change rate for ' + d.name"
                           (click)="openPrice(d)"
                           class="rounded-lg border border-line px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
                         >
@@ -288,7 +291,7 @@ import { Button } from '../ui/button';
                 appButton
                 [busy]="priceState.submitting()"
               >
-                {{ priceState.submitting() ? 'Saving…' : 'Agree this rate' }}
+                Agree this rate
               </button>
             } @else {
               <app-session-required what="a rate" />
@@ -389,7 +392,7 @@ import { Button } from '../ui/button';
             appButton
             [busy]="addState.submitting()"
           >
-            {{ addState.submitting() ? 'Saving…' : 'Add destination' }}
+            Add destination
           </button>
         } @else {
           <app-session-required what="a destination" />

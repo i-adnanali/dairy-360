@@ -1,0 +1,267 @@
+{
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Menu · Today\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- button \"Start a recording session\"\n- main:\n  - heading \"Dairy 360 assistant\" [level=2]\n  - paragraph: Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances — and take actions with confirmation.\n  - generic: Answer ready.\n  - generic: long chart tools confirm\n  - region \"Assistant message\":\n    - heading \"Synthetic long response\" [level=2]\n    - paragraph: synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\n    - table:\n      - rowgroup:\n        - row \"Animal Notes Value\":\n          - columnheader \"Animal\"\n          - columnheader \"Notes\"\n          - columnheader \"Value\"\n      - rowgroup:\n        - row \"SYN-001 synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_ 0 L\":\n          - cell \"SYN-001\"\n          - cell \"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\"\n          - cell \"0 L\"\n    - code: \"{\\\"reference\\\":\\\"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\\\"}\"\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - table:\n      - rowgroup:\n        - row \"Field 1 Field 2 Field 3 Field 4 Field 5 Field 6 Field 7 Field 8 Field 9 Field 10 Field 11 Field 12 Field 13 Field 14 Field 15 Field 16 Field 17 Field 18\":\n          - columnheader \"Field 1\"\n          - columnheader \"Field 2\"\n          - columnheader \"Field 3\"\n          - columnheader \"Field 4\"\n          - columnheader \"Field 5\"\n          - columnheader \"Field 6\"\n          - columnheader \"Field 7\"\n          - columnheader \"Field 8\"\n          - columnheader \"Field 9\"\n          - columnheader \"Field 10\"\n          - columnheader \"Field 11\"\n          - columnheader \"Field 12\"\n          - columnheader \"Field 13\"\n          - columnheader \"Field 14\"\n          - columnheader \"Field 15\"\n          - columnheader \"Field 16\"\n          - columnheader \"Field 17\"\n          - columnheader \"Field 18\"\n      - rowgroup:\n        - row \"Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic\":\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n  - heading \"Synthetic herd — daily yield\" [level=3]\n  - generic: 2 points\n  - button \"Hide data for Synthetic herd\" [expanded]:\n    - text: Hide data\n    - generic: for Synthetic herd\n  - region \"Assistant chart data\":\n    - table \"Synthetic herd · day · equivalent chart data\":\n      - caption: Synthetic herd · day · equivalent chart data\n      - rowgroup:\n        - row \"Period Total litres Average per animal (L)\":\n          - columnheader \"Period\"\n          - columnheader \"Total litres\"\n          - columnheader \"Average per animal (L)\"\n      - rowgroup:\n        - row \"2026-09-17 0 0\":\n          - rowheader \"2026-09-17\"\n          - cell \"0\"\n          - cell \"0\"\n        - row \"2026-09-18 12 6\":\n          - rowheader \"2026-09-18\"\n          - cell \"12\"\n          - cell \"6\"\n  - button \"read_animals Success\":\n    - generic: read_animals\n    - generic: Success\n  - button \"read_feed Error\":\n    - generic: read_feed\n    - generic: Error\n  - paragraph: \"Synthetic service refused the read: fixture failure.\"\n  - button \"log_milking Rejected\":\n    - generic: log_milking\n    - generic: Rejected\n  - paragraph: Rejected by operator; operation not authorized.\n  - region \"Assistant message\":\n    - paragraph: Synthetic decision received. No farm data was modified.\n  - generic: confirm\n  - region \"Assistant message\":\n    - paragraph: \"Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm.\"\n  - button \"log_milking Success\":\n    - generic: log_milking\n    - generic: Success\n  - region \"Assistant message\":\n    - paragraph: Synthetic decision received. No farm data was modified.\n  - generic: Rejected\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Action details\"\n  - status: Rejected · Rejected by operator; this operation was not authorized.\n  - generic: Recorded\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Action details\"\n  - status [active]: Recorded · The operation returned a successful result.\n  - paragraph: Enter to send · Shift+Enter for a new line\n  - textbox \"Message to Dairy 360 assistant\":\n    - /placeholder: Ask about the herd, or request an action…\n  - button \"Send\" [disabled]",
+  "controls": [
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "browsing — nothing is being recorded",
+      "rect": {
+        "height": 44,
+        "width": 69.3046875,
+        "x": 243.3984375,
+        "y": -70
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Menu · Today",
+      "rect": {
+        "height": 44,
+        "width": 121.859375,
+        "x": 16,
+        "y": -14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Search ⌘K",
+      "rect": {
+        "height": 44,
+        "width": 73.96875,
+        "x": 149.859375,
+        "y": -14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "Theme: dark. Switch to system.",
+      "rect": {
+        "height": 44,
+        "width": 43.09375,
+        "x": 235.828125,
+        "y": -14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgba(0, 0, 0, 0)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Assistant",
+      "rect": {
+        "height": 44,
+        "width": 66.4453125,
+        "x": 290.921875,
+        "y": -14
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Start a recording session",
+      "rect": {
+        "height": 44,
+        "width": 198.78125,
+        "x": 16,
+        "y": 51
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Hide data for Synthetic herd",
+      "rect": {
+        "height": 44,
+        "width": 89.5,
+        "x": 49,
+        "y": -468.15625
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "read_animalsSuccess",
+      "rect": {
+        "height": 44,
+        "width": 169.53125,
+        "x": 32,
+        "y": -251.15625
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(58, 57, 52)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "read_feedError",
+      "rect": {
+        "height": 44,
+        "width": 131.5234375,
+        "x": 32,
+        "y": -201.15625
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "log_milkingRejected",
+      "rect": {
+        "height": 44,
+        "width": 161.6796875,
+        "x": 32,
+        "y": -127.15625
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(44, 43, 40)",
+      "describedby": null,
+      "disabled": false,
+      "font": "12px",
+      "invalid": null,
+      "name": "log_milkingSuccess",
+      "rect": {
+        "height": 44,
+        "width": 159.28125,
+        "x": 32,
+        "y": 126.84375
+      },
+      "tag": "BUTTON"
+    },
+    {
+      "background": "rgb(28, 27, 26)",
+      "border": "rgb(139, 133, 121)",
+      "describedby": "assistant-composer-help",
+      "disabled": false,
+      "font": "16px",
+      "invalid": null,
+      "name": "Message to Dairy 360 assistant",
+      "rect": {
+        "height": 58,
+        "width": 236.21875,
+        "x": 40,
+        "y": 664
+      },
+      "tag": "TEXTAREA"
+    },
+    {
+      "background": "rgb(35, 34, 32)",
+      "border": "rgb(229, 231, 235)",
+      "describedby": null,
+      "disabled": false,
+      "font": "14px",
+      "invalid": null,
+      "name": "Send",
+      "rect": {
+        "height": 44,
+        "width": 65.78125,
+        "x": 284.21875,
+        "y": 678
+      },
+      "tag": "BUTTON"
+    }
+  ],
+  "headings": [
+    "Dairy 360 assistant",
+    "Synthetic long response",
+    "Synthetic herd — daily yield"
+  ],
+  "height": 844,
+  "regions": [
+    {
+      "label": "Assistant message",
+      "scrollWidth": 1120,
+      "tabindex": "0",
+      "width": 326
+    },
+    {
+      "label": "Assistant chart data",
+      "scrollWidth": 292,
+      "tabindex": null,
+      "width": 292
+    },
+    {
+      "label": "Assistant message",
+      "scrollWidth": 326,
+      "tabindex": null,
+      "width": 326
+    },
+    {
+      "label": "Assistant message",
+      "scrollWidth": 326,
+      "tabindex": null,
+      "width": 326
+    },
+    {
+      "label": "Assistant message",
+      "scrollWidth": 326,
+      "tabindex": null,
+      "width": 326
+    },
+    {
+      "label": "Proposed operation rows",
+      "scrollWidth": 290,
+      "tabindex": null,
+      "width": 290
+    },
+    {
+      "label": "Proposed operation rows",
+      "scrollWidth": 290,
+      "tabindex": null,
+      "width": 290
+    }
+  ],
+  "rootWidth": 390,
+  "theme": "dark",
+  "url": "http://localhost:6506/chat",
+  "width": 390
+}

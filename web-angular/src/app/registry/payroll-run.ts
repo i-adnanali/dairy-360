@@ -218,7 +218,7 @@ interface DihariDraft {
                           <span class="mobile-entry-label"
                             >Wage amount (Rs) for {{ row.person.identifier }}</span
                           >
-                          <input
+                          <span class="input-group"><input
                             type="text"
                             inputmode="decimal"
                             [attr.aria-label]="'Wage amount (Rs) for ' + row.person.identifier"
@@ -229,7 +229,7 @@ interface DihariDraft {
                             density="comfortable"
                             class="w-32 text-right font-mono tabular-nums disabled:bg-surface-page"
                             [attr.data-role]="'amount-' + row.person.identifier"
-                          />
+                          /><span class="input-unit" aria-hidden="true">Rs</span></span>
                         </label>
                         @if (row.existing) {
                           <span appHelp size="xs" tone="subtle" data-role="already-saved">
@@ -421,7 +421,7 @@ interface DihariDraft {
                 data-role="save"
                 reason="payroll-save-reason"
               >
-                {{ state.submitting() ? 'Saving…' : 'Save run' }}
+                Save run
               </button>
             } @else {
               <app-session-required what="this run" />

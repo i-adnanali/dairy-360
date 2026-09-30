@@ -20,7 +20,7 @@ export function isApplePlatform(): boolean {
   selector: 'app-assistant-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ChatPanel, A11yModule, Button],
-  host: { id: 'assistant-panel', '[class.assistant-visible]': 'assistant.open()' },
+  host: { id: 'assistant-panel', '[class.assistant-visible]': 'assistant.open()', '[class.assistant-expanded]': 'assistant.expanded()' },
   template: `
     @if (assistant.open()) {
       <aside
@@ -35,6 +35,9 @@ export function isApplePlatform(): boolean {
       >
         <header class="flex items-center justify-between gap-2 border-b border-line-subtle p-3">
           <h2 id="assistant-title" class="text-sm font-semibold">Dairy 360 assistant</h2>
+          @if (!assistant.narrow()) {
+            <button appButton variant="secondary" size="sm" [attr.aria-expanded]="assistant.expanded()" (click)="assistant.expanded.set(!assistant.expanded())">{{ assistant.expanded() ? 'Compact' : 'Expand' }}</button>
+          }
           <button
             appButton
             variant="secondary"

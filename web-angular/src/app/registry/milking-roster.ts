@@ -323,7 +323,7 @@ export const OUT_OF_BAND = 0.5;
                         >Litres for {{ row.animal_id }} {{ row.name }}</label
                       >
                       <div class="flex flex-wrap items-center gap-2">
-                        <input
+                        <span class="input-group"><input
                           #cell
                           [id]="'quantity-' + row.animal_id"
                           [attr.aria-label]="'Litres for ' + row.animal_id + ' ' + (row.name || '')"
@@ -339,7 +339,7 @@ export const OUT_OF_BAND = 0.5;
                           (input)="typeLitres(row.animal_id, $any($event.target).value)"
                           (keydown)="onKey($event, i + tableOffset())"
                           class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
-                        />
+                        /><span class="input-unit" aria-hidden="true">L</span></span>
                         <button
                           type="button"
                           [attr.aria-label]="'Not measured for ' + row.animal_id"
@@ -469,7 +469,7 @@ export const OUT_OF_BAND = 0.5;
             reason="milking-submit-reason"
             [busy]="state.submitting()"
           >
-            {{ state.submitting() ? 'Saving…' : 'Save session' }}
+            Save session
           </button>
         } @else {
           <app-session-required what="this session" />
