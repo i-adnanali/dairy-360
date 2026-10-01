@@ -1,0 +1,21 @@
+{
+  "url": "http://localhost:6516/chat",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Menu · Today\":\n    - text: Menu\n    - generic: · Today\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- button \"Start a recording session\"\n- main:\n  - heading \"Assistant\" [level=2]\n  - paragraph: Ask about records or review a proposed action before authorizing it.\n  - generic: 🐃\n  - heading \"How can I help?\" [level=3]\n  - paragraph: I can read your records to answer questions, and propose record changes that you approve before anything is written.\n  - button \"How did the Kundi group's milk yield trend over the last 30 days?\"\n  - button \"Which animals have a health event due in the next two weeks?\"\n  - button \"Log this morning's milking for the Kundi group.\"\n  - paragraph: Enter to send · Shift+Enter for a new line\n  - textbox \"Message to Dairy 360 assistant\":\n    - /placeholder: Ask about the herd, or request an action…\n  - button \"Send\" [disabled]",
+  "geometry": {
+    "controls": [
+      {
+        "description": "assistant-composer-help",
+        "font": "16px",
+        "height": 58,
+        "invalid": null,
+        "name": "Message to Dairy 360 assistant"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: dark. Switch to system.\"><span data-role=\"theme-mode\" class=\"capitalize\">dark</span><!----></button>",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

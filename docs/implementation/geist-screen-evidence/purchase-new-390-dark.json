@@ -1,0 +1,105 @@
+{
+  "url": "http://localhost:6512/feed/purchases/new",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Feed\":\n    - text: Menu\n    - generic: · Feed\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- main:\n  - heading \"Feed purchases\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - button \"Feed catalogue\"\n  - heading \"Add purchase\" [level=3]\n  - generic: Delivery date\n  - textbox \"Delivery date\"\n  - paragraph: Use an exact date. Defer uncertain historical invoices rather than assign today.\n  - heading \"Item and delivery\" [level=4]\n  - generic: Feed item\n  - combobox \"Feed item\":\n    - option \"Choose item\" [selected]\n    - option \"Ginger\"\n    - option \"Silage\"\n    - option \"Khall\"\n    - option \"Wanda\"\n    - option \"Fresh fodder\"\n  - button \"Create feed item\"\n  - generic: Supplier (optional)\n  - textbox \"Supplier (optional)\"\n  - heading \"Quantity and original unit\" [level=4]\n  - generic: Quantity (optional)\n  - spinbutton \"Quantity (optional)\"\n  - generic: Original unit\n  - textbox \"Original unit\":\n    - /placeholder: kg, trolley, bundle, bag…\n  - paragraph: Blank quantity means unmeasured. A bag or container has no inferred weight.\n  - heading \"Price agreement\" [level=4]\n  - generic: Pricing\n  - combobox \"Pricing\":\n    - option \"Total cost unknown\" [selected]\n    - option \"Known goods total\"\n    - option \"Quantity × agreed rate\"\n  - heading \"Additional charges\" [level=4]\n  - generic: Transport (Rs)\n  - spinbutton \"Transport (Rs)\": \"0\"\n  - generic: Rs\n  - generic: Other charges (Rs)\n  - spinbutton \"Other charges (Rs)\": \"0\"\n  - generic: Rs\n  - paragraph: Recorded acquisition cost; this does not record a payment or assert that the feed was given.\n  - generic: Notes (optional)\n  - textbox \"Notes (optional)\"\n  - generic: Source reference (optional)\n  - textbox \"Source reference (optional)\"\n  - paragraph: This entry will be recorded by synthetic-audit · direct_entry\n  - button \"Save purchase\"\n  - button \"Cancel\"\n  - generic: Item filter\n  - combobox \"Item filter\":\n    - option \"All items\" [selected]\n    - option \"Ginger\"\n    - option \"Silage\"\n    - option \"Khall\"\n    - option \"Wanda\"\n    - option \"Fresh fodder\"\n  - generic: From\n  - textbox \"From\"\n  - generic: Through\n  - textbox \"Through\": 2026-10-01\n  - navigation \"Feed records pagination\":\n    - generic: 1–4 of 4\n  - link \"Wanda · 2026-10-01\":\n    - /url: /feed/purchases/feed_f03dc9bf-4701-4926-9446-a9101c99318f\n  - paragraph: Unmeasured · Cost unknown\n  - paragraph: Total unknown; excluded from recorded cost totals\n  - link \"Khall · 2026-10-01\":\n    - /url: /feed/purchases/feed_4937c6ae-b9e7-49b7-959d-b1e4bf0cc096\n  - paragraph: 80 kg · Rs 6,000.00\n  - paragraph: Rs 3,000.00 per 40 kg\n  - link \"Silage · 2026-10-01\":\n    - /url: /feed/purchases/feed_b9db9393-a979-40e9-8532-783b7db50e42\n  - paragraph: 400 kg · Rs 20,100.00\n  - paragraph: Rs 2,000.00 per 40 kg\n  - link \"Fresh fodder · 2026-10-01\":\n    - /url: /feed/purchases/feed_4d9e54fb-0666-41ca-9015-cbec476ef465\n  - paragraph: Unmeasured · Rs 9,000.00\n  - paragraph: Known goods total; no weight inferred",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Delivery date"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Feed itemChoose itemGingerSilageKhallWandaFresh fodder"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Supplier (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Quantity (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Original unit"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "PricingTotal cost unknownKnown goods totalQuantity × agreed rate"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Transport (Rs)Rs"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Other charges (Rs)Rs"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 54,
+        "invalid": null,
+        "name": "Notes (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Source reference (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Item filterAll itemsGingerSilageKhallWandaFresh fodder"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "From"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Through"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: dark. Switch to system.\"><span data-role=\"theme-mode\" class=\"capitalize\">dark</span><!----></button>",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

@@ -30,6 +30,13 @@ function render(events: TimelineEvent[]) {
 }
 
 describe('EventList — the correction window', () => {
+  it('shows acquired birth dates at their precision and retains stored source values', () => {
+    const el = render([ev({id: 'acquired', type: 'acquired', payload: {estimated_birth_on: '2018-01-01', estimated_birth_precision: 'year'}})]);
+    expect(el.querySelector('details')?.textContent).toContain('Stored birth date: 2018-01-01');
+    expect(el.textContent).toContain('born 2018 (year)');
+    expect(el.textContent).not.toContain('born 2018-01-01');
+  });
+
   it('does not invent an override when the wire omits optional override fields', () => {
     const event = ev({ id: 'aevt_plain', type: 'note' });
     delete (event as Partial<TimelineEvent>).override_check;

@@ -452,8 +452,8 @@ describe('PeopleList', () => {
     api.peopleRows = [balance({})];
     const { el } = await render(PeopleList, api);
     const form = el.querySelector('[data-role="add-person"]')!;
-    expect(form.textContent).toContain('cannot be changed later');
-    expect(form.textContent).toContain('event log cannot be rewritten');
+    expect(form.textContent?.toLowerCase()).toContain('cannot be changed later');
+    expect(form.textContent).toContain('Permanent and unique');
   });
 
   it('trims the identifier and omits an empty display name', async () => {

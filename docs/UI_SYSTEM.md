@@ -1,5 +1,7 @@
 # UI system — the design system
 
+Current concise reference: [UI-CURRENT.md](UI-CURRENT.md). Screen-specific reconciliation: [implementation checklist](implementation/GEIST-IMPLEMENTATION.md). Historical phase boxes do not prove every screen recommendation is complete.
+
 *Status: **phases 0–7 built**. Phase 7 was explicitly authorized before the
 five-animal trial; that trial has not run. The original phase-0–6 measurements
 below are historical, tied to their named commits. Phase 7's implementation and

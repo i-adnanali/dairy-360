@@ -97,6 +97,8 @@ import type { PrecisionParts } from './precision-display';
             <details class="mt-1 text-xs text-content-subtle">
               <summary>Technical event details</summary>
               <p class="break-all font-mono" data-role="id">{{ e.id }}</p>
+              @if (e.payload['calving_event_id']) { <p class="break-all">Linked calving event: {{ e.payload['calving_event_id'] }}</p> }
+              @if (e.payload['estimated_birth_on']) { <p>Stored birth date: {{ e.payload['estimated_birth_on'] }} · {{ e.payload['estimated_birth_precision'] ?? 'precision unknown' }}</p> }
               @if (!e.effective && e.superseded_by_id) {
                 <p class="break-all" data-role="replaced-by">
                   replaced by <span class="font-mono">{{ e.superseded_by_id }}</span>
@@ -205,7 +207,7 @@ export class EventList {
         const bits = [`dam ${s('dam_id') ?? '?'}`];
         const sire = s('sire_ref');
         if (sire) bits.push(`sire ${sire}`);
-        bits.push(`calving ${s('calving_event_id') ?? '?'}`);
+
         return bits.join(' · ');
       }
       case 'acquired': {
@@ -213,7 +215,12 @@ export class EventList {
         const from = s('from');
         if (from) bits.push(`from ${from}`);
         const bOn = s('estimated_birth_on');
-        if (bOn) bits.push(`born ${bOn} (${s('estimated_birth_precision') ?? '?'})`);
+        if (bOn) {
+          const rawPrecision = s('estimated_birth_precision');
+          const precision = rawPrecision && ['day', 'month', 'year', 'estimated'].includes(rawPrecision) ? rawPrecision as TimelineEvent['date_precision'] : null;
+          const birth = precisionParts(bOn, precision);
+          bits.push(`born ${birth.figure}${birth.qualifier ? ' (' + birth.qualifier + ')' : precision ? '' : ' (precision unknown)'}`);
+        }
         else bits.push('no birth date given');
         const n = s('notes');
         if (n) bits.push(n);

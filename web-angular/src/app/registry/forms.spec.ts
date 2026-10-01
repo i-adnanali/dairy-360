@@ -1017,6 +1017,9 @@ describe('CorrectionForm', () => {
     click(el, '[data-calving="aevt_target"]');
     fixture.detectChanges();
     enterDate(fixture, el, 'May 2023');
+    expect(el.querySelector('[aria-label="Correction comparison"]')?.textContent).toContain('Current: 2023-04 month');
+    expect(el.querySelector('[aria-label="Correction comparison"]')?.textContent).toContain('Proposed: 2023-05 month');
+    expect(el.querySelector('[aria-label="Correction comparison"]')?.textContent).not.toContain('2023-05-01');
     click(el, '[data-role="submit"]');
 
     const req = http.expectOne(`${BASE}/calvings/aevt_target/correction`);

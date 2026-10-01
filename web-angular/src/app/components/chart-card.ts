@@ -1,12 +1,11 @@
+import { ChartPanel, CoverageNotice, ChartDataTable } from '../ui/reporting';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import type { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import type { Dataset } from '@dairy/shared';
 import { Button } from '../ui/button';
 import { Cell } from '../ui/cell';
-import { Card } from '../ui/surface';
 import { ScrollRegion } from '../ui/scroll-region';
-import { HelpText } from '../ui/text';
 import { Theme } from '../core/theme';
 
 // Port of web-react/src/components/ChartCard.tsx (Recharts -> Chart.js via ng2-charts).
@@ -47,9 +46,9 @@ import { Theme } from '../core/theme';
 @Component({
   selector: 'app-chart-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BaseChartDirective, HelpText, Button, Cell, Card, ScrollRegion],
+  imports: [ChartPanel, CoverageNotice, ChartDataTable,BaseChartDirective, Button, Cell, ScrollRegion],
   template: `
-    <div appCard>
+    <div appChartPanel>
       <div class="mb-2 flex items-baseline justify-between">
         <h3 class="text-sm font-semibold text-content-heading">
           {{ dataset().scopeLabel }} —
@@ -62,7 +61,7 @@ import { Theme } from '../core/theme';
           }}
           yield
         </h3>
-        <span appHelp size="xs" tone="subtle">{{ dataset().points.length }} points</span>
+        <span appCoverageNotice>{{ dataset().points.length }} points</span>
       </div>
       @if (dataset().points.length) {
         <div class="h-56 w-full" aria-hidden="true">
@@ -80,7 +79,7 @@ import { Theme } from '../core/theme';
         </button>
         @if (showData()) {
           <div appScrollRegion="Assistant chart data">
-            <table class="w-full text-sm">
+            <table appChartDataTable>
               <caption>
                 {{
                   dataset().scopeLabel

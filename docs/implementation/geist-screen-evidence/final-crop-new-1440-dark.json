@@ -1,0 +1,105 @@
+{
+  "url": "http://localhost:6512/feed/crops/new",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- main:\n  - heading \"Fodder crops\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - button \"Feed catalogue\"\n  - heading \"Add crop\" [level=3]\n  - generic: Name\n  - textbox \"Name\"\n  - heading \"Plot and lifecycle\" [level=4]\n  - generic: Plot (optional)\n  - textbox \"Plot (optional)\"\n  - generic: Acres (optional)\n  - spinbutton \"Acres (optional)\"\n  - generic: Status\n  - combobox \"Status\":\n    - option \"Growing\" [selected]\n    - option \"Cutting\"\n    - option \"Finished\"\n  - group \"sowing date (optional)\":\n    - generic: sowing date (optional)\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - group \"cutting start date (optional)\":\n    - generic: cutting start date (optional)\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - group \"cutting end date (optional)\":\n    - generic: cutting end date (optional)\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - paragraph: Unknown dates and acreage are valid. Finishing does not invent a last cutting date.\n  - checkbox \"Archived — keep historical references\"\n  - text: Archived — keep historical references\n  - generic: Notes (optional)\n  - textbox \"Notes (optional)\"\n  - generic: Source reference (optional)\n  - textbox \"Source reference (optional)\"\n  - paragraph: This entry will be recorded by synthetic-audit · direct_entry\n  - button \"Save crop\"\n  - button \"Cancel\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Name"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Plot (optional)"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Acres (optional)"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "StatusGrowingCuttingFinished"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 13,
+        "invalid": null,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 "
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 13,
+        "invalid": null,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 "
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 13,
+        "invalid": null,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 "
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 20,
+        "invalid": null,
+        "name": "Archived — keep historical references"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 54,
+        "invalid": null,
+        "name": "Notes (optional)"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Source reference (optional)"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: dark. Switch to system.\"><span data-role=\"theme-mode\" class=\"capitalize\">dark</span><!----></button>",
+    "height": 1000,
+    "regions": [],
+    "width": 1440
+  }
+}

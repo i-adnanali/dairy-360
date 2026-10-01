@@ -107,10 +107,9 @@ import { StatusBadge } from '../ui/surface';
               class="border-b border-line-subtle bg-surface-page text-xs uppercase tracking-wide text-content-muted"
             >
               <tr>
-                <th appCell>Serial</th>
-                <th appCell>Name</th>
-                <th appCell>Sex</th>
+                <th appCell>Animal</th>
                 <th appCell>Status</th>
+                <th appCell>Sex</th>
                 <th appCell numeric>Parity</th>
                 <th appCell>Born</th>
                 <th appCell>Origin</th>
@@ -125,14 +124,12 @@ import { StatusBadge } from '../ui/surface';
                   [attr.data-row]="r.id"
                 >
                   <td appCell>
-                    <a [routerLink]="['/animals', r.id]" appIdentifier>{{ r.id }}</a>
-                  </td>
-                  <td appCell tone="heading">
-                    <span [appCertainty]="r.name ? 'known' : 'no-record'">{{
+                    <a [routerLink]="['/animals', r.id]" appIdentifier class="whitespace-nowrap">{{ r.id }}</a>
+
+                    <span class="block" [appCertainty]="r.name ? 'known' : 'no-record'">{{
                       r.name ?? noRecord
                     }}</span>
                   </td>
-                  <td appCell tone="secondary">{{ r.sex }}</td>
                   <!-- The local term, with what the enum actually holds on hover:
                        the screen shows the farm's word and never hides the
                        stored value from anyone debugging it. -->
@@ -141,6 +138,7 @@ import { StatusBadge } from '../ui/surface';
                       {{ r.status ? stage(r) : 'no projection' }}
                     </span>
                   </td>
+                  <td appCell tone="secondary">{{ r.sex }}</td>
                   <td appCell numeric tone="heading">
                     <span [appCertainty]="r.parity === null ? 'no-record' : 'known'">{{
                       r.parity ?? noRecord

@@ -1,0 +1,70 @@
+{
+  "url": "http://localhost:6516/chat",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Menu · Today\": Menu\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n- button \"Start a recording session\"\n- main:\n  - heading \"Assistant\" [level=2]\n  - paragraph: Ask about records or review a proposed action before authorizing it.\n  - generic: Answer ready.\n  - generic: chart confirm\n  - region \"Assistant message\":\n    - paragraph: \"Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm.\"\n  - heading \"Synthetic herd — daily yield\" [level=3]\n  - generic: 2 points\n  - button \"Hide data for Synthetic herd\" [expanded]:\n    - text: Hide data\n    - generic: for Synthetic herd\n  - region \"Assistant chart data\":\n    - table \"Synthetic herd · day · equivalent chart data\":\n      - caption: Synthetic herd · day · equivalent chart data\n      - rowgroup:\n        - row \"Period Total litres Average per animal (L)\":\n          - columnheader \"Period\"\n          - columnheader \"Total litres\"\n          - columnheader \"Average per animal (L)\"\n      - rowgroup:\n        - row \"2026-09-17 0 0\":\n          - rowheader \"2026-09-17\"\n          - cell \"0\"\n          - cell \"0\"\n        - row \"2026-09-18 12 6\":\n          - rowheader \"2026-09-18\"\n          - cell \"12\"\n          - cell \"6\"\n  - button \"log_milking Rejected\":\n    - generic: log_milking\n    - generic: Rejected\n  - paragraph: Rejected by operator; operation not authorized.\n  - region \"Assistant message\":\n    - paragraph: Synthetic decision received. No farm data was modified.\n  - generic: confirm\n  - region \"Assistant message\":\n    - paragraph: \"Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm.\"\n  - button \"log_milking Success\":\n    - generic: log_milking\n    - generic: Success\n  - region \"Assistant message\":\n    - paragraph: Synthetic decision received. No farm data was modified.\n  - generic: long\n  - region \"Assistant message\":\n    - heading \"Synthetic long response\" [level=2]\n    - paragraph: synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\n    - table:\n      - rowgroup:\n        - row \"Animal Notes Value\":\n          - columnheader \"Animal\"\n          - columnheader \"Notes\"\n          - columnheader \"Value\"\n      - rowgroup:\n        - row \"SYN-001 synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_ 0 L\":\n          - cell \"SYN-001\"\n          - cell \"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\"\n          - cell \"0 L\"\n    - code: \"{\\\"reference\\\":\\\"synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_synthetic_reference_\\\"}\"\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - paragraph: Earlier content for scroll testing.\n    - table:\n      - rowgroup:\n        - row \"Field 1 Field 2 Field 3 Field 4 Field 5 Field 6 Field 7 Field 8 Field 9 Field 10 Field 11 Field 12 Field 13 Field 14 Field 15 Field 16 Field 17 Field 18\":\n          - columnheader \"Field 1\"\n          - columnheader \"Field 2\"\n          - columnheader \"Field 3\"\n          - columnheader \"Field 4\"\n          - columnheader \"Field 5\"\n          - columnheader \"Field 6\"\n          - columnheader \"Field 7\"\n          - columnheader \"Field 8\"\n          - columnheader \"Field 9\"\n          - columnheader \"Field 10\"\n          - columnheader \"Field 11\"\n          - columnheader \"Field 12\"\n          - columnheader \"Field 13\"\n          - columnheader \"Field 14\"\n          - columnheader \"Field 15\"\n          - columnheader \"Field 16\"\n          - columnheader \"Field 17\"\n          - columnheader \"Field 18\"\n      - rowgroup:\n        - row \"Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic Synthetic\":\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n          - cell \"Synthetic\"\n  - generic: Rejected\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Action details\"\n  - status: Rejected · Rejected by operator; this operation was not authorized.\n  - generic: Recorded\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Action details\"\n  - status: Recorded · The operation returned a successful result.\n  - paragraph: Enter to send · Shift+Enter for a new line\n  - textbox \"Message to Dairy 360 assistant\":\n    - /placeholder: Ask about the herd, or request an action…\n  - button \"Send\" [disabled]",
+  "geometry": {
+    "controls": [
+      {
+        "description": "assistant-composer-help",
+        "font": "16px",
+        "height": 78,
+        "invalid": null,
+        "name": "Message to Dairy 360 assistant"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 320,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: dark. Switch to system.\"><span data-role=\"theme-mode\" class=\"capitalize\">dark</span><!----></button>",
+    "height": 844,
+    "regions": [
+      {
+        "label": "Assistant message",
+        "scrollWidth": 256,
+        "tabindex": null,
+        "width": 256
+      },
+      {
+        "label": "Assistant chart data",
+        "scrollWidth": 222,
+        "tabindex": null,
+        "width": 222
+      },
+      {
+        "label": "Assistant message",
+        "scrollWidth": 256,
+        "tabindex": null,
+        "width": 256
+      },
+      {
+        "label": "Assistant message",
+        "scrollWidth": 256,
+        "tabindex": null,
+        "width": 256
+      },
+      {
+        "label": "Assistant message",
+        "scrollWidth": 256,
+        "tabindex": null,
+        "width": 256
+      },
+      {
+        "label": "Assistant message",
+        "scrollWidth": 1120,
+        "tabindex": "0",
+        "width": 256
+      },
+      {
+        "label": "Proposed operation rows",
+        "scrollWidth": 220,
+        "tabindex": null,
+        "width": 220
+      },
+      {
+        "label": "Proposed operation rows",
+        "scrollWidth": 220,
+        "tabindex": null,
+        "width": 220
+      }
+    ],
+    "width": 320
+  }
+}

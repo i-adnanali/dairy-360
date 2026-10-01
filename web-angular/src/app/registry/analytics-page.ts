@@ -1,3 +1,4 @@
+import { Metric, CoverageNotice, ChartPanel, ChartDataTable, RecordDrilldown } from '../ui/reporting';
 import { TextInput } from '../ui/input';
 import { Cell } from '../ui/cell';
 import { Certainty } from '../ui/certainty';
@@ -28,7 +29,7 @@ import { PageHeading } from '../ui/heading';
 @Component({
   selector: 'app-analytics-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Metric, CoverageNotice, ChartPanel, ChartDataTable, RecordDrilldown,
     TextInput,
     Cell,
     Certainty,
@@ -123,7 +124,7 @@ import { PageHeading } from '../ui/heading';
             <p>Updated {{ updated(r.generatedAt) }}</p>
           </div>
           <section class="analytics-summary" aria-label="Period totals">
-            <article class="rounded-xl border border-line bg-surface-raised p-5">
+            <article appMetric class="rounded-xl border border-line bg-surface-raised p-5">
               <h2 class="text-sm text-content-secondary">Measured production</h2>
               <p class="mt-2 text-3xl font-semibold tabular-nums">
                 <span
@@ -136,7 +137,7 @@ import { PageHeading } from '../ui/heading';
                 {{ productionNote(r.metrics.coverage, r.metrics.produced) }}
               </p>
             </article>
-            <article class="rounded-xl border border-line bg-surface-raised p-5">
+            <article appMetric class="rounded-xl border border-line bg-surface-raised p-5">
               <h2 class="text-sm text-content-secondary">Recorded dispatch</h2>
               <p class="mt-2 text-3xl font-semibold tabular-nums">
                 <span
@@ -150,7 +151,7 @@ import { PageHeading } from '../ui/heading';
                 {{ r.metrics.nonSale | number: '1.0-2' }} L
               </p>
             </article>
-            <article class="rounded-xl border border-line bg-surface-raised p-5">
+            <article appMetric class="rounded-xl border border-line bg-surface-raised p-5">
               <h2 class="text-sm text-content-secondary">Difference</h2>
               <p class="mt-2 text-3xl font-semibold tabular-nums">
                 <span [appCertainty]="r.metrics.difference === null ? 'absent' : 'known'">{{
@@ -164,7 +165,7 @@ import { PageHeading } from '../ui/heading';
                 Measured minus dispatched; not a wastage measure. {{ differenceNote(r.metrics) }}
               </p>
             </article>
-            <article class="rounded-xl border border-line bg-surface-raised p-5">
+            <article appMetric class="rounded-xl border border-line bg-surface-raised p-5">
               <h2 class="text-sm text-content-secondary">Coverage</h2>
               <p class="mt-2 text-3xl font-semibold tabular-nums">
                 {{ r.metrics.coverage.measured }} / {{ r.metrics.coverage.expected }}
@@ -174,9 +175,9 @@ import { PageHeading } from '../ui/heading';
               </p>
             </article>
           </section>
-          <section class="rounded-xl border border-line bg-surface-raised p-5">
+          <section appChartPanel>
             <h2 class="font-semibold">Production and dispatch</h2>
-            <p class="mb-4 text-sm text-content-muted">
+            <p appCoverageNotice class="mb-4">
               Litres by {{ q().view === 'day' ? 'session' : 'day' }}. Gaps mean no measurements;
               larger points mark incomplete production. Select a point to inspect its date; the
               table provides the same information.
@@ -192,14 +193,18 @@ import { PageHeading } from '../ui/heading';
                 role="img"
               ></canvas>
             </div>
-            <label class="my-3 block text-sm">Inspect date / session
-              <select appInput class="ml-2" [value]="q().detailOn + '|' + q().detailSession" (change)="inspectBucket($any($event.target).value)">
-                <option value="|">Choose a date…</option>
+            <div class="my-3 flex flex-wrap items-end gap-2">
+            <label class="block text-sm">Inspect date / session
+              <select appInput class="ml-2" (change)="inspectBucket($any($event.target).value)">
+                <option value="|" [selected]="bucketIndex() < 0">Choose a date…</option>
                 @for (b of r.buckets; track b.key) {
-                  <option [value]="b.on + '|' + b.session">{{ b.on }} · {{ b.session }}</option>
+                  <option [value]="b.on + '|' + b.session" [selected]="b.on === q().detailOn && b.session === q().detailSession">{{ b.on }} · {{ b.session }}</option>
                 }
               </select>
             </label>
+            <button appButton variant="secondary" [disabled]="bucketIndex() <= 0" (click)="moveBucket(-1)">Previous date / session</button>
+            <button appButton variant="secondary" [disabled]="bucketIndex() >= r.buckets.length - 1" (click)="moveBucket(1)">Next date / session</button>
+            </div>
             <button
               appButton
               variant="secondary"
@@ -214,7 +219,7 @@ import { PageHeading } from '../ui/heading';
               [hidden]="!showData()"
               appScrollRegion="Production and dispatch chart data"
             >
-              <table class="w-full text-sm">
+              <table appChartDataTable class="w-full text-sm">
                 <caption class="sr-only">
                   Production and dispatch by date and session
                 </caption>
@@ -250,8 +255,9 @@ import { PageHeading } from '../ui/heading';
               </table>
             </div>
           </section>
-          <section class="rounded-xl border border-line bg-surface-raised p-5 space-y-2">
-            <h2 class="font-semibold">Production comparison</h2>
+          @if (r.comparison.percent === null) { <p class="text-sm text-content-muted">Comparison unavailable: {{ r.comparison.reason }}</p> }
+          <details class="rounded-xl border border-line bg-surface-raised p-4 space-y-2" [open]="r.comparison.percent !== null">
+            <summary class="font-semibold">Production comparison{{ r.comparison.percent === null ? " · unavailable" : "" }}</summary>
             @if (r.comparison.percent !== null) {
               <p>
                 {{ r.comparison.percent | number: '1.0-2' }}% ·
@@ -280,10 +286,10 @@ import { PageHeading } from '../ui/heading';
                 }
               </p>
             }
-          </section>
+          </details>
           <section
             class="rounded-xl border border-line p-4 space-y-2"
-            aria-label="Recording review"
+            appRecordDrilldown aria-label="Recording review"
           >
             <h2 class="font-semibold">Records to review</h2>
             @if (r.metrics.coverage.recordingPct !== null) {
@@ -529,6 +535,14 @@ import { PageHeading } from '../ui/heading';
   ],
 })
 export class AnalyticsPage {
+  protected bucketIndex() {
+    return this.report()?.buckets.findIndex(b => b.on === this.q().detailOn && b.session === this.q().detailSession) ?? -1;
+  }
+  protected moveBucket(delta: number) {
+    const buckets = this.report()?.buckets ?? [];
+    const next = buckets[this.bucketIndex() + delta];
+    if (next) this.inspectBucket(next.on + '|' + next.session);
+  }
   protected inspectBucket(value: string) {
     const [detailOn, detailSession] = value.split('|');
     this.change({ detailOn, detailSession: (detailSession || 'all') as any }, false);

@@ -1,0 +1,13 @@
+{
+  "url": "http://localhost:6512/synthetic-missing-page",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Start a recording session\"\n- main:\n  - heading \"Page not found\" [level=2]\n  - paragraph: This address does not match a Dairy 360 page. Use the menu or return to Today to find the record.\n  - link \"Go to Today\":\n    - /url: /\n  - link \"Find an animal\":\n    - /url: /animals",
+  "geometry": {
+    "controls": [],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: system. Switch to light.\"><span data-role=\"theme-mode\" class=\"capitalize\">system</span><span data-role=\"theme-resolved\" class=\"text-content-subtle\"> · light </span><!----></button>",
+    "height": 1000,
+    "regions": [],
+    "width": 1440
+  }
+}

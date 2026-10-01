@@ -65,14 +65,16 @@ import { PageHeading } from '../ui/heading';
         @if (allClear()) {
           <p class="rounded-xl border border-success-lineSoft bg-success-bg px-4 py-3 text-sm text-success-strong"
             data-role="all-clear">
-            Nothing outstanding. Milk, dispatch and feeding are recorded, and the payroll is
-            settled.
+            Nothing outstanding in the recording checklist. Milk, dispatch and feeding are recorded; no prior payroll entries are outstanding. This does not mean wages have been paid.
           </p>
         }
 
         <section class="space-y-2" data-role="milking">
           <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Milking</h3>
-          @for (s of b.milking; track s.session) {
+          @for (complete of [false, true]; track complete) {
+            @if (hasSessions(b.milking, complete)) {
+            <h4 class="text-sm font-medium">{{ complete ? "Recorded · review" : "Outstanding answers" }}</h4>
+            @for (s of b.milking; track s.session) { @if (s.complete === complete) {
             <a [routerLink]="['/milk/milking']" [queryParams]="{ on: b.on, session: s.session }"
               class="flex items-baseline justify-between rounded-xl border bg-surface-raised px-4 py-3 text-sm"
               [class]="s.complete ? 'border-line-subtle' : 'border-warning-line'"
@@ -82,12 +84,15 @@ import { PageHeading } from '../ui/heading';
                 {{ standing(s) }}
               </span>
             </a>
-          }
+          } } } }
         </section>
 
         <section class="space-y-2" data-role="dispatch">
           <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Dispatch</h3>
-          @for (s of b.dispatch; track s.session) {
+          @for (complete of [false, true]; track complete) {
+            @if (hasSessions(b.dispatch, complete)) {
+            <h4 class="text-sm font-medium">{{ complete ? "Recorded · review" : "Outstanding answers" }}</h4>
+            @for (s of b.dispatch; track s.session) { @if (s.complete === complete) {
             <a [routerLink]="['/milk/dispatch']" [queryParams]="{ on: b.on, session: s.session }"
               class="flex items-baseline justify-between rounded-xl border bg-surface-raised px-4 py-3 text-sm"
               [class]="s.complete ? 'border-line-subtle' : 'border-warning-line'"
@@ -97,7 +102,7 @@ import { PageHeading } from '../ui/heading';
                 {{ standing(s) }}
               </span>
             </a>
-          }
+          } } } }
         </section>
 
         <section class="space-y-2" data-role="feed">
@@ -107,7 +112,8 @@ import { PageHeading } from '../ui/heading';
           </a>
         </section>
         <section class="space-y-2" data-role="payroll">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Payroll</h3>
+          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Payroll · period recording</h3>
+          <p appHelp>Earlier unanswered periods are separate from today’s work. Recorded wages are not payments.</p>
           @if (b.payroll_previous; as prev) {
             <a [routerLink]="['/labour/payroll']"
               [queryParams]="{ from: prev.from_on, to: prev.to_on }"
@@ -143,6 +149,7 @@ import { PageHeading } from '../ui/heading';
   `,
 })
 export class TodayBoard {
+  protected hasSessions(rows: {complete: boolean}[], complete: boolean) { return rows.some(row => row.complete === complete); }
   private readonly api = inject(RegistryApi);
 
   protected readonly board = signal<DayBoard | null>(null);

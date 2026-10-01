@@ -1,0 +1,35 @@
+{
+  "url": "http://localhost:6512/animals/BD-0001",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Animals\":\n    - /url: /animals\n  - link \"Calvings\":\n    - /url: /animals/calvings\n  - link \"Health\":\n    - /url: /animals/health\n- main:\n  - heading \"BD-0001\" [level=2]\n  - generic: Noor\n  - generic \"stored as lactating\": majj · in milk\n  - term: Sex\n  - definition: female\n  - term: Origin\n  - definition: acquired\n  - term: Born\n  - definition: 2018year\n  - term: Parity\n  - definition: \"2\"\n  - navigation:\n    - button \"Record\"\n    - button \"Add an event\"\n    - button \"Correct a calving\"\n  - generic: Which calving is the date wrong on?\n  - button \"Calving · 2023-03-14\" [pressed]:\n    - generic: Calving · 2023-03-14\n  - button \"Calving · 2024-06-02\":\n    - generic: Calving · 2024-06-02\n  - region \"Correction comparison\":\n    - heading \"Review the date change\" [level=3]\n    - paragraph: \"Current: 2023-03-14\"\n    - paragraph: \"Proposed: 2023-05 month\"\n    - generic \"Source event\"\n  - group \"What is the date actually?\":\n    - generic: What is the date actually?\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n      - text: May 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: reading as month only — 2023-05, stored as the 1st\n    - paragraph: Not what you meant? Type it more precisely — Mar 2019 for a month, 6 Jul 2023 for a day. Nothing here can claim a day you did not type.\n  - generic: \"Both halves are written together: a superseding calving on the dam and a superseding birth on the calf. If the calf did not live, its departure moves too — the three are the same physical fact. The old events stay in the log, marked superseded.\"\n  - generic: Why the change? (optional note)\n  - textbox \"Why the change? (optional note)\":\n    - /placeholder: e.g. remembered again on a second telling\n  - button \"Apply correction\"\n  - heading \"The record as it stands — check the correction reads the way you meant\" [level=3]\n  - list:\n    - generic: Acquired\n    - generic: 2019 year\n    - generic \"Technical event details\"\n    - paragraph: born 2018-01-01 (year)\n    - paragraph: daily_herd_sheet · 2026-01-04 · recorded by fixture_operator · observed by keeper_1\n    - generic: Calved\n    - generic: 2023-03-14 05:30\n    - generic \"Technical event details\"\n    - paragraph: calf BD-0007 · female · live\n    - paragraph: recall · fixture · recorded by fixture_operator · no witness recorded\n    - generic: Dried off\n    - generic: 2024-01-10\n    - generic \"Technical event details\"\n    - paragraph: \"reason: scheduled\"\n    - paragraph: recall · fixture · recorded by fixture_operator · no witness recorded\n    - generic: Calved\n    - generic: 2024-06-02\n    - generic \"Technical event details\"\n    - paragraph: calf BD-0008 · female · live\n    - paragraph: recall · fixture · recorded by fixture_operator · no witness recorded\n    - generic: Note\n    - generic: 2026-02-01\n    - generic \"Technical event details\"\n    - paragraph: limping on the near hind, watch her\n    - paragraph: daily_herd_sheet · 2026-01-04 · recorded by fixture_operator · observed by keeper_1",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 13,
+        "invalid": null,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 "
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Why the change? (optional note)"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: system. Switch to light.\"><span data-role=\"theme-mode\" class=\"capitalize\">system</span><span data-role=\"theme-resolved\" class=\"text-content-subtle\"> · light </span><!----></button>",
+    "height": 1000,
+    "regions": [],
+    "width": 1440
+  }
+}

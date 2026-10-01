@@ -1,0 +1,49 @@
+{
+  "url": "http://localhost:6512/ui-specimen.html?revision=2",
+  "snapshot": "- main:\n  - heading \"Current UI state specimen\" [level=1]\n  - paragraph: Synthetic presentation examples using the compiled Dairy 360 stylesheet. No backend or saves.\n  - button \"Toggle light / dark\" [active]\n  - generic: Normal field\n  - textbox \"Normal field\": Synthetic long name with several words for narrow layout review\n  - paragraph: Persistent help stays next to its control.\n  - generic: Invalid field\n  - textbox \"Invalid field\": Raw value retained\n  - paragraph: This synthetic identifier is already in use. Choose another identifier.\n  - generic: Readonly\n  - textbox \"Readonly\": Saved revision 3\n  - generic: Disabled while resolving a write\n  - textbox \"Disabled while resolving a write\" [disabled]: Request locked\n  - button \"Record payment\" [disabled]\n  - paragraph: \"Busy: keep the action label. This specimen performs no operation.\"\n  - heading \"Empty search\" [level=2]\n  - paragraph: No matching crops.\n  - button \"Clear filters\"\n  - alert: Could not refresh. Previous results may be stale. Your draft remains available.\n  - heading \"Numbers and uncertainty\" [level=2]\n  - region \"Synthetic quantity comparisons\":\n    - table \"Recorded values retain their different meanings\":\n      - caption: Recorded values retain their different meanings\n      - rowgroup:\n        - row \"Animal Milk Date Qualification\":\n          - columnheader \"Animal\"\n          - columnheader \"Milk\"\n          - columnheader \"Date\"\n          - columnheader \"Qualification\"\n      - rowgroup:\n        - row \"SYN-001 0 L 2026-09-30 Measured zero\":\n          - cell \"SYN-001\"\n          - cell \"0 L\"\n          - cell \"2026-09-30\"\n          - cell \"Measured zero\"\n        - row \"SYN-002 Not measured 2026-09 Month only\":\n          - cell \"SYN-002\"\n          - cell \"Not measured\"\n          - cell \"2026-09\"\n          - cell \"Month only\"\n        - row \"SYN-003 No record Unknown No inferred absence\":\n          - cell \"SYN-003\"\n          - cell \"No record\"\n          - cell \"Unknown\"\n          - cell \"No inferred absence\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Normal field"
+      },
+      {
+        "description": "error",
+        "font": "16px",
+        "height": 44,
+        "invalid": "true",
+        "name": "Invalid field"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Readonly"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Disabled while resolving a write"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 320,
+    "focus": "<button class=\"rounded-lg border border-line px-4 py-2\" onclick=\"document.documentElement.classList.toggle('dark')\">Toggle light / dark</button>",
+    "height": 844,
+    "regions": [
+      {
+        "label": "Synthetic quantity comparisons",
+        "scrollWidth": 560,
+        "tabindex": "0",
+        "width": 272
+      }
+    ],
+    "width": 320
+  }
+}

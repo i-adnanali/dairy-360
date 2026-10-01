@@ -47,10 +47,11 @@ import { PageHeading } from '../ui/heading';
           recorded costs are not cash paid or feed consumed cost.
         </p>
       <div class="flex flex-wrap gap-2">
+        @if (!id && (mode === 'overview' || mode === 'crops')) {
         <a appButton variant="secondary" routerLink="/feed/crops/new">Add crop</a
-        ><a appButton variant="secondary" routerLink="/feed/purchases/new">Record purchase</a
-        ><a appButton [routerLink]="['/feed/daily', today]">Record feeding</a
-        ><button appButton variant="secondary" (click)="catalogue = !catalogue">
+        > } @if (!id && (mode === 'overview' || mode === 'purchases')) { <a appButton variant="secondary" routerLink="/feed/purchases/new">Record purchase</a
+        > } @if (mode === 'overview' || mode === 'daily') { <a appButton [routerLink]="['/feed/daily', today]">Record feeding</a
+        > } <button appButton variant="secondary" [attr.aria-expanded]="catalogue" (click)="catalogue = !catalogue">
           Feed catalogue
         </button>
       </div>
@@ -108,14 +109,16 @@ import { PageHeading } from '../ui/heading';
                 <h3 class="font-medium">Recorded purchase costs</h3>
                 <p>{{ money(o.purchase_cost_minor) }}</p>
                 <p appHelp>{{ o.unknown_costs }} unknown totals excluded</p>
+                <a class="underline" routerLink="/feed/purchases" [queryParams]="{from: from, to: to}">Review purchases in this range</a>
               </section>
               <section appCard>
                 <h3 class="font-medium">Recorded crop expenses</h3>
+                <a class="underline" routerLink="/feed/crops">Review crops and expenses</a>
                 <p>{{ money(o.expense_cost_minor) }}</p>
               </section>
             </div>
-            <section appCard class="space-y-3">
-              <h3 class="font-medium">Fresh-fodder supply</h3>
+            <details appCard class="space-y-3">
+              <summary class="font-medium cursor-pointer">Fresh-fodder supply</summary>
               @for (a of assessmentKeys; track a) {
                 <p>
                   {{ words(a) }}: {{ o.assessments[a].length }}
@@ -128,9 +131,9 @@ import { PageHeading } from '../ui/heading';
                 Own-source days {{ o.own_days }} · purchased-source days {{ o.purchased_days }} ·
                 mixed-source days {{ o.mixed_days }}. Counts overlap; do not add them.
               </p>
-            </section>
-            <section appCard>
-              <h3 class="font-medium">Purchase quantities by original unit</h3>
+            </details>
+            <details appCard>
+              <summary class="font-medium cursor-pointer">Purchase quantities by original unit</summary>
               @for (q of o.quantities; track q.item_id + q.unit) {
                 <p>
                   {{ itemName(q.item_id) }}:
@@ -144,9 +147,9 @@ import { PageHeading } from '../ui/heading';
               } @empty {
                 <p appHelp>No purchases in this range.</p>
               }
-            </section>
-            <section appCard class="space-y-3">
-              <h3 class="font-medium">Crop cycles — currently recorded lifecycle</h3>
+            </details>
+            <details appCard class="space-y-3">
+              <summary class="font-medium cursor-pointer">Crop cycles — currently recorded lifecycle</summary>
               <p appHelp>
                 Status is the latest recorded state, not a reconstructed range history. Dates may be
                 unknown or approximate.
@@ -163,7 +166,7 @@ import { PageHeading } from '../ui/heading';
                   No crops recorded. Add a growing or already-cutting crop; unknown dates are valid.
                 </p>
               }
-            </section>
+            </details>
           }
           <section appCard>
             <h3 class="font-medium">Recorded days</h3>
@@ -199,6 +202,14 @@ import { PageHeading } from '../ui/heading';
                 (cancelled)="cancelEditor()"
                 (addItem)="openEditor('item', null)"
               />
+            </div>
+          }
+          @if (!id) {
+          @if (mode === 'crops') {
+            <div class="flex flex-wrap gap-3">
+              <label><span appFieldLabel>Find crop</span><input appInput type="search" [(ngModel)]="cropSearch" /></label>
+              <label><span appFieldLabel>Lifecycle</span><select appInput [(ngModel)]="cropStatus"><option value="">All statuses</option><option value="growing">Growing</option><option value="cutting">Cutting</option><option value="finished">Finished</option><option value="archived">Archived</option></select></label>
+              @if ((cropSearch || cropStatus) && filtered().length) { <button appButton variant="secondary" (click)="cropSearch = ''; cropStatus = ''">Clear filters</button> }
             </div>
           }
           @if (mode === 'purchases') {
@@ -244,14 +255,15 @@ import { PageHeading } from '../ui/heading';
                 }
               </div>
             } @empty {
-              @if (mode === 'purchases' && records().length) {
-                <p appHelp>No purchases match these filters.</p>
-                <button appButton variant="secondary" (click)="itemFilter = ''; from = ''; to = ''">Clear filters</button>
+              @if (records().length) {
+                <p appHelp>No {{ mode }} match these filters.</p>
+                <button appButton variant="secondary" (click)="itemFilter = ''; from = ''; to = ''; cropSearch = ''; cropStatus = ''">Clear filters</button>
               } @else {
                 <p appHelp>No {{ mode }} recorded. Use the actions above to record the first one.</p>
               }
             }
           </section>
+          }
         } @else {
           @if (detail(); as d) {
             <section appCard class="space-y-3">
@@ -261,6 +273,7 @@ import { PageHeading } from '../ui/heading';
                 {{ d.source_ref || 'no source reference' }} · {{ d.recorded_at }}
               </p>
               @if (mode === 'crops') {
+                <p appHelp>Current recorded lifecycle; expenses and supply dates below retain their history.</p>
                 <p>
                   {{ d.status }}{{ d.archived ? ' · archived' : '' }} ·
                   {{ d.plot || 'plot unspecified' }} · {{ d.acreage ?? 'unknown' }} acres
@@ -452,6 +465,8 @@ export class FeedPage {
   from = '';
   to = farmToday();
   itemFilter = '';
+  cropSearch = '';
+  cropStatus = '';
   catalogue = false;
   itemOpen = false;
   itemEdit: FeedRecord | null = null;
@@ -505,6 +520,8 @@ export class FeedPage {
       this.detail.set(null);
       this.mode = this.route.snapshot.data['feedMode'] ?? 'overview';
       this.id = this.route.snapshot.paramMap.get('id') ?? '';
+      this.from = this.route.snapshot.queryParamMap.get('from') ?? '';
+      this.to = this.route.snapshot.queryParamMap.get('to') ?? this.today;
       void this.load();
     });
   }
@@ -550,7 +567,8 @@ export class FeedPage {
   filtered() {
     return this.records().filter(
       (r) =>
-        this.mode !== 'purchases' ||
+        this.mode === 'crops' ?
+        ((!this.cropSearch || (r.label + ' ' + (r.plot ?? '')).toLowerCase().includes(this.cropSearch.toLowerCase())) && (!this.cropStatus || (this.cropStatus === 'archived' ? r.archived : r.status === this.cropStatus && !r.archived))) :
         ((!this.itemFilter || r.item_id === this.itemFilter) &&
           (!this.from || r.on >= this.from) &&
           (!this.to || r.on <= this.to)),

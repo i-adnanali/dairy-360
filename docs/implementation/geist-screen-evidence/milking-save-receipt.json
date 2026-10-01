@@ -1,0 +1,56 @@
+{
+  "url": "http://localhost:6512/milk/milking",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Milk\":\n    - text: Menu\n    - generic: · Milk\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Milking\":\n    - /url: /milk/milking\n  - link \"Dispatch\":\n    - /url: /milk/dispatch\n  - link \"Buyers\":\n    - /url: /milk/buyers\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- main:\n  - heading \"Record a milking\" [level=2]\n  - paragraph: Answer every animal. Enter litres, or choose Not measured / Not milked.\n  - paragraph: \"In a quantity field: Enter moves to the next animal; m = Not measured; n = Not milked.\"\n  - generic \"About this roster\"\n  - text: Every animal in milk on this date needs an answer. Not measured records milking without a measurement; Not milked records that no milk was taken. Select an active alternative again to clear it.\n  - status:\n    - text: Saved morning · 2026-10-01.\n    - link \"Continue to dispatch\":\n      - /url: /milk/dispatch?on=2026-10-01&session=morning\n  - generic: Date\n  - textbox \"Date\" [active]: 2026-10-01\n  - generic: Session\n  - radiogroup \"Session\":\n    - radio \"Morning\" [checked]:\n      - generic: \"1\"\n      - generic: Morning\n    - radio \"Evening\":\n      - generic: \"2\"\n      - generic: Evening\n  - generic: Milked by (optional)\n  - combobox \"Milked by (optional)\"\n  - generic: Person who milked these animals, if known. Use a stable identifier, not a display name.\n  - paragraph: Defaults to today and this session — the one place a date is defaulted, because today is a fact rather than a guess. Change it to enter a session you missed.\n  - region \"Milking quantities\":\n    - table:\n      - rowgroup:\n        - 'row \"BD-0001Noor Days in milk: 851 Yesterday morning: 8.1 Recent morning mean: ~8.11 BD-0001 · Meat withdrawal · 2 instruction(s) needing attention Needs clarification — 2 instruction(s) have no known end. Litres for BD-0001 Noor 6.4 Not measured for BD-0001 Not milked for BD-0001 already saved\"':\n          - cell \"BD-0001Noor\"\n          - 'cell \"Days in milk: 851\"'\n          - 'cell \"Yesterday morning: 8.1\"'\n          - 'cell \"Recent morning mean: ~8.11\"'\n          - cell \"BD-0001 · Meat withdrawal · 2 instruction(s) needing attention Needs clarification — 2 instruction(s) have no known end. Litres for BD-0001 Noor 6.4 Not measured for BD-0001 Not milked for BD-0001 already saved\":\n            - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention\n            - paragraph: Needs clarification — 2 instruction(s) have no known end.\n            - generic \"Original instructions and sources\"\n            - generic: Litres for BD-0001 Noor\n            - textbox \"Litres for BD-0001 Noor\": \"6.4\"\n            - generic: L\n            - button \"Not measured for BD-0001\": not measured\n            - button \"Not milked for BD-0001\": not milked\n            - generic: already saved\n        - 'row \"BD-0002No record Days in milk: 822 Yesterday morning: 7.8 Recent morning mean: ~7.54 BD-0002 · Milk withdrawal · 1 instruction(s) needing attention Recorded end: 2026-10-03 18:00:00+05:00 BD-0002 · Meat withdrawal · 1 instruction(s) needing attention Needs clarification — 1 instruction(s) have no known end. Litres for BD-0002 6 Not measured for BD-0002 Not milked for BD-0002 already saved\"':\n          - cell \"BD-0002No record\": BD-0002–\n          - 'cell \"Days in milk: 822\"'\n          - 'cell \"Yesterday morning: 7.8\"'\n          - 'cell \"Recent morning mean: ~7.54\"'\n          - 'cell \"BD-0002 · Milk withdrawal · 1 instruction(s) needing attention Recorded end: 2026-10-03 18:00:00+05:00 BD-0002 · Meat withdrawal · 1 instruction(s) needing attention Needs clarification — 1 instruction(s) have no known end. Litres for BD-0002 6 Not measured for BD-0002 Not milked for BD-0002 already saved\"':\n            - paragraph: BD-0002 · Milk withdrawal · 1 instruction(s) needing attention\n            - paragraph:\n              - text: \"Recorded end:\"\n              - time: 2026-10-03 18:00:00+05:00\n            - generic \"Original instructions and sources\"\n            - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention\n            - paragraph: Needs clarification — 1 instruction(s) have no known end.\n            - generic \"Original instructions and sources\"\n            - generic: Litres for BD-0002\n            - textbox \"Litres for BD-0002\": \"6\"\n            - generic: L\n            - button \"Not measured for BD-0002\": not measured\n            - button \"Not milked for BD-0002\": not milked\n            - generic: already saved\n        - 'row \"BD-0005No record Days in milk: 121 Yesterday morning: 7.5 Recent morning mean: ~8.13 Litres for BD-0005 9.7 Not measured for BD-0005 Not milked for BD-0005 already saved\"':\n          - cell \"BD-0005No record\": BD-0005–\n          - 'cell \"Days in milk: 121\"'\n          - 'cell \"Yesterday morning: 7.5\"'\n          - 'cell \"Recent morning mean: ~8.13\"'\n          - cell \"Litres for BD-0005 9.7 Not measured for BD-0005 Not milked for BD-0005 already saved\":\n            - generic: Litres for BD-0005\n            - textbox \"Litres for BD-0005\": \"9.7\"\n            - generic: L\n            - button \"Not measured for BD-0005\": not measured\n            - button \"Not milked for BD-0005\": not milked\n            - generic: already saved\n    - navigation \"Milking animals pagination\":\n      - generic: 1–3 of 3\n  - paragraph: – means No record.\n  - generic: Measured total 22.1 L · 3 measured\n  - generic: 3 of 3 answered\n  - button \"Save session\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": "identifier-list-observed_by-0-help",
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Milked by (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Litres for BD-0001 Noor"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Litres for BD-0002 "
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Litres for BD-0005 "
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<input type=\"date\" data-role=\"on\" appinput=\"\" class=\"aria-[invalid=true]:border-danger-fg border border-line-control focus:border-focus focus:outline-none focus:shadow-[0_0_0_1px_rgb(var(--focus-ring))] px-2 py-1.5 rounded-lg text-sm\">",
+    "height": 844,
+    "regions": [
+      {
+        "label": "Milking quantities",
+        "scrollWidth": 356,
+        "tabindex": null,
+        "width": 356
+      }
+    ],
+    "width": 390
+  }
+}

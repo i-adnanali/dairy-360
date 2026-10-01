@@ -1,0 +1,28 @@
+{
+  "url": "http://localhost:6512/feed",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: dark. Switch to system.\" [active]': dark\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- main:\n  - heading \"Feed overview\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - link \"Record purchase\":\n    - /url: /feed/purchases/new\n  - link \"Record feeding\":\n    - /url: /feed/daily/2026-10-01\n  - button \"Feed catalogue\"\n  - generic: From\n  - textbox \"From\": 2026-09-30\n  - generic: Through\n  - textbox \"Through\": 2026-10-01\n  - button \"Show range\"\n  - paragraph: Default coverage begins at the first saved summary. A missing day means not recorded, never not fed.\n  - heading \"Daily coverage\" [level=3]\n  - paragraph: 1 recorded · 1 partial · 0 unrecorded\n  - heading \"Recorded purchase costs\" [level=3]\n  - paragraph: Rs 35,100.00\n  - paragraph: 1 unknown totals excluded\n  - link \"Review purchases in this range\":\n    - /url: /feed/purchases?from=2026-09-30&to=2026-10-01\n  - heading \"Recorded crop expenses\" [level=3]\n  - link \"Review crops and expenses\":\n    - /url: /feed/crops\n  - paragraph: Rs 1,500.00\n  - generic \"Fresh-fodder supply\"\n  - generic \"Purchase quantities by original unit\"\n  - generic \"Crop cycles — currently recorded lifecycle\"\n  - heading \"Recorded days\" [level=3]\n  - navigation \"Feeding days pagination\":\n    - generic: 1–2 of 2\n  - link \"2026-09-30\":\n    - /url: /feed/daily/2026-09-30\n  - generic: Partially recorded\n  - link \"2026-10-01\":\n    - /url: /feed/daily/2026-10-01\n  - generic: Recorded",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "From"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Through"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: dark. Switch to system.\"><span data-role=\"theme-mode\" class=\"capitalize\">dark</span><!----></button>",
+    "height": 1000,
+    "regions": [],
+    "width": 1440
+  }
+}

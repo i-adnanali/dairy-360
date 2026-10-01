@@ -1,0 +1,21 @@
+{
+  "url": "http://localhost:6516/chat",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\"': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Start a recording session\"\n- main:\n  - heading \"Assistant\" [active] [level=2]\n  - paragraph: Ask about records or review a proposed action before authorizing it.\n  - generic: 🐃\n  - heading \"How can I help?\" [level=3]\n  - paragraph: I can read your records to answer questions, and propose record changes that you approve before anything is written.\n  - button \"How did the Kundi group's milk yield trend over the last 30 days?\"\n  - button \"Which animals have a health event due in the next two weeks?\"\n  - button \"Log this morning's milking for the Kundi group.\"\n  - paragraph: Enter to send · Shift+Enter for a new line\n  - textbox \"Message to Dairy 360 assistant\":\n    - /placeholder: Ask about the herd, or request an action…\n  - button \"Send\" [disabled]",
+  "geometry": {
+    "controls": [
+      {
+        "description": "assistant-composer-help",
+        "font": "14px",
+        "height": 44,
+        "invalid": null,
+        "name": "Message to Dairy 360 assistant"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<h2 class=\"text-lg font-semibold tracking-tight\" tabindex=\"-1\">Assistant</h2>",
+    "height": 1000,
+    "regions": [],
+    "width": 1440
+  }
+}

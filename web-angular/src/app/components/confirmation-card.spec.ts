@@ -70,6 +70,11 @@ describe('ConfirmationCard', () => {
     f.componentRef.setInput('outcome', 'recorded');
     f.detectChanges();
     expect(f.nativeElement.textContent).toContain('Recorded');
+    expect(f.nativeElement.textContent).toContain('Execution reported success.');
+    expect(f.nativeElement.textContent).not.toContain('waiting for an execution result');
+    f.componentRef.setInput('outcome', 'refused');
+    f.detectChanges();
+    expect(f.nativeElement.textContent).toContain('Execution was refused');
     f.componentRef.setInput('decision', 'rejected');
     f.detectChanges();
     expect(f.nativeElement.textContent).toContain('Rejected');

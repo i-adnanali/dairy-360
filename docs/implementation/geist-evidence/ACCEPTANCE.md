@@ -1,3 +1,5 @@
+> Historical foundation evidence. For the remaining screen-specific work after `a70aa1e`, use the [1 October acceptance ledger](../geist-screen-evidence/ACCEPTANCE.md) and [reconciled checklist](../GEIST-IMPLEMENTATION.md). The earlier route matrix does not establish full screen completion.
+
 # Audit implementation acceptance — 30 September 2026
 
 Implementation source began at `a1dd2a7` with no tracked changes. The pre-existing untracked `docs/reviews/` tree was preserved. Final uncommitted source is identified by [SOURCE_SHA256.txt](SOURCE_SHA256.txt). See the [implementation checklist](../GEIST-IMPLEMENTATION.md) for every route and finding, and [UI_SYSTEM §26](../../UI_SYSTEM.md#26-audit-implementation--30-september-2026) for the revised contract.

@@ -1,0 +1,28 @@
+{
+  "url": "http://localhost:6512/feed/crops",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- main:\n  - heading \"Fodder crops\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - button \"Feed catalogue\"\n  - generic: Find crop\n  - searchbox \"Find crop\"\n  - generic: Lifecycle\n  - combobox \"Lifecycle\":\n    - option \"All statuses\" [selected]\n    - option \"Growing\"\n    - option \"Cutting\"\n    - option \"Finished\"\n    - option \"Archived\"\n  - navigation \"Feed records pagination\":\n    - generic: 1–2 of 2\n  - link \"Previous fodder cycle\":\n    - /url: /feed/crops/feed_58be37de-7ca9-4b3c-9f03-99bbeffdfdaf\n  - paragraph: finished · unknown acres\n  - link \"Seasonal maize\":\n    - /url: /feed/crops/feed_c1cb729f-ef7b-413c-b365-063f21bc7594\n  - paragraph: cutting · 2 acres",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Find crop"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "LifecycleAll statusesGrowingCuttingFinishedArchived"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: system. Switch to light.\"><span data-role=\"theme-mode\" class=\"capitalize\">system</span><span data-role=\"theme-resolved\" class=\"text-content-subtle\"> · light </span><!----></button>",
+    "height": 1000,
+    "regions": [],
+    "width": 1440
+  }
+}

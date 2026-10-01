@@ -207,11 +207,11 @@ export const routes: Routes = [
         path: 'chat',
         loadComponent: () => import('./components/chat-panel').then((m) => m.ChatPanel),
       },
+      { path: '**', loadComponent: () => import('./registry/not-found').then(m => m.NotFound) },
     ].map((route) => ({
       ...route,
       canDeactivate: [draftDeactivate],
       runGuardsAndResolvers: 'always' as const,
     })),
   },
-  { path: '**', redirectTo: '' },
 ];

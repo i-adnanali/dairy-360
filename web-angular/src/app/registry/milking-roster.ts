@@ -153,6 +153,11 @@ export const OUT_OF_BAND = 0.5;
         </details>
       </header>
 
+      @if (savedContext(); as saved) {
+        <p role="status" class="my-3 text-sm">Saved {{ saved.session }} · {{ saved.on }}.
+          <a appButton variant="secondary" routerLink="/milk/dispatch" [queryParams]="saved">Continue to dispatch</a>
+        </p>
+      }
       <!-- when -->
       <div appCard>
         <div class="entry-context flex flex-wrap items-end gap-4">
@@ -488,6 +493,7 @@ export class MilkingRosterScreen {
   }
   private readonly api = inject(RegistryApi);
   protected readonly session_ = inject(Session);
+  protected readonly savedContext = signal<{on: string; session: string} | null>(null);
   private readonly writeLog = inject(WriteLog);
   protected readonly identifiers = inject(Identifiers);
 
@@ -902,6 +908,7 @@ export class MilkingRosterScreen {
         0,
       );
     if (saved) {
+      this.savedContext.set({on: r.occurred_on, session: r.session});
       this.acceptBaseline();
       void this.identifiers.refresh();
       this.writeLog.announce(

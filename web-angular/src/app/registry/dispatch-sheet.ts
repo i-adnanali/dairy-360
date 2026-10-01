@@ -118,6 +118,7 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
           One session, and everything that left the bulk in it — sold and kept. The dodhi and the
           house are on every sheet; a neighbour appears only when they took something.
         </p>
+        <p appHelp><a appButton variant="link" routerLink="/milk/buyers" target="_blank" rel="noopener">Manage buyers and rates (new tab)</a>. This sheet stays open with its draft; reload only after saving it.</p>
       </header>
 
       <!-- when -->

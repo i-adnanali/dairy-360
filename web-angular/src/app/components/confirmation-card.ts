@@ -50,7 +50,7 @@ import { StatusBadge } from '../ui/surface';
         </div>
       }
 
-      <p class="text-xs text-content-muted">Technical operation: <code>{{ card().toolName }}</code></p>
+      <details><summary class="text-xs text-content-muted">Technical operation</summary><code class="text-xs break-all">{{ card().toolName }}</code></details>
       </details>
       @if (decision() || resolved()) {
         <p
@@ -61,11 +61,11 @@ import { StatusBadge } from '../ui/surface';
           class="text-sm"
         >
           {{ statusLabel() }} ·
-          {{ reason() || ((decision() || resolved()) === 'rejected' ? 'Not authorized; no execution requested.' : 'Approval is recorded; waiting for an execution result.') }}
+          {{ reason() || outcomeDescription() }}
         </p>
       } @else {
         <div class="flex gap-2">
-          <button appButton size="sm" (click)="approve()">Approve</button>
+          <button appButton size="sm" (click)="approve()">Approve proposed action</button>
           <button appButton variant="secondary" size="sm" (click)="reject()">Reject</button>
         </div>
       }
@@ -82,6 +82,10 @@ export class ConfirmationCard {
     if (decision === 'rejected') return 'Rejected';
     if (!decision) return 'Approval requested';
     return { awaiting: 'Approved · awaiting result', recorded: 'Recorded', refused: 'Not recorded', unknown: 'Outcome unknown' }[this.outcome()];
+  });
+  protected readonly outcomeDescription = computed(() => {
+    if ((this.decision() || this.resolved()) === 'rejected') return 'Not authorized; no execution requested.';
+    return { awaiting: 'Approval is recorded; waiting for an execution result.', recorded: 'Execution reported success.', refused: 'Execution was refused; no successful result was reported.', unknown: 'No definite execution result. Check the record before attempting another write.' }[this.outcome()];
   });
   protected readonly resolved = signal<'approved' | 'rejected' | null>(null);
   readonly resolve = output<Approval[]>();

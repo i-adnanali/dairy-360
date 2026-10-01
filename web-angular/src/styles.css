@@ -816,7 +816,7 @@ input[appInput], select[appInput], textarea[appInput] {
 [appInput][readonly] { background-color: rgb(var(--surface-sunken)); }
 [appPageHeading] { font-size: 24px; line-height: 32px; overflow-wrap: anywhere; }
 [appSectionHeading] { font-size: 18px; line-height: 24px; }
-.field-group { display: grid; gap: 6px; min-width: 0; }
+.field-group { display: grid; align-content: start; gap: 6px; min-width: 0; }
 .form-section { display: grid; gap: 16px; margin-block: 24px; }
 .input-group { display: flex; align-items: stretch; min-width: 0; }
 .input-group > [appInput] { min-width: 0; flex: 1; border-start-end-radius: 0; border-end-end-radius: 0; }
@@ -878,3 +878,14 @@ app-health-page .rows[hidden] { display: none; }
   .shell-utilities > button { padding-inline: 6px; }
 }
 @media (max-width: 380px) { .menu-current-section { display: none; } }
+
+/* A hidden exception keeps its native model without remaining in the layout. */
+.field-group[hidden] { display: none; }
+
+/* Desktop entry sheets keep column context while their rows scroll.
+   Mobile keeps the existing single-tree card layout and page scrolling. */
+@media (min-width: 768px) {
+  .entry-sheet [appScrollRegion] { max-height: 65vh; overflow: auto; scroll-padding-block-start: 64px; }
+  .entry-sheet thead { position: sticky; top: 0; z-index: 2; background: rgb(var(--surface-sunken)); }
+  .entry-sheet [appScrollRegion] :is(input, select, button, a) { scroll-margin-block-start: 64px; }
+}

@@ -105,7 +105,139 @@ import { Button } from '../ui/button';
           >
             {{ balanceLabel(s) }}
           </p>
+          <p appHelp>{{ openStints(s) }} open employment stint(s)</p>
+          <a appButton variant="secondary" href="#person-payment" (click)="focusPayment($event)">Record payment or adjustment</a>
         </header>
+
+        <!-- Record a payment. -->
+        <form data-page-layout="entry"
+          [appWriteLock]="payState"
+          class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
+          (submit)="submitPayment($event)"
+          data-role="payment-form" id="person-payment"
+        >
+          <h3 appSectionHeading>Record a payment</h3>
+          <p appHelp>Payments settle the balance; wages earned are recorded in Payroll. Adjustments change the balance without recording a payment.</p>
+          <fieldset class="space-y-4"><legend appSubHeading>Amount, date and method</legend>
+
+          <div class="space-y-1">
+            <span appSubHeading>Method</span>
+            <app-chip-group
+              label="Payment method"
+              name="method"
+              [options]="methodChips"
+              [value]="method()"
+              (changed)="setMethod($any($event))"
+            />
+            @if (method() === 'adjustment') {
+              <span class="block text-xs text-content-subtle" data-role="adjustment-hint">
+                The only signed kind, and it must say why. This is also how a deduction is recorded
+                — damage, or milk taken above the allowance — because those reduce what the farm
+                owes. A positive figure reduces the balance.
+              </span>
+            }
+          </div>
+
+          <div class="flex flex-wrap gap-4">
+            <label class="space-y-1">
+              <span class="block text-sm font-medium text-content-heading">Amount (Rs)</span>
+              <span class="input-group"><input
+                name="amount_minor"
+                type="text"
+                inputmode="decimal"
+                [value]="amount()"
+                (input)="amount.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                class="w-36 text-right font-mono tabular-nums"
+              /><span class="input-unit" aria-hidden="true">Rs</span></span>
+              @if (payState.fieldError('amount_minor'); as msg) {
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{
+                  msg
+                }}</span>
+              }
+            </label>
+            <label class="space-y-1">
+              <span class="block text-sm font-medium text-content-heading">On</span>
+              <input
+                name="occurred_on"
+                type="date"
+                [value]="paidOn()"
+                (input)="paidOn.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+              />
+            </label>
+            <label class="space-y-1">
+              <span class="block text-sm font-medium text-content-heading">
+                Reference <span class="text-content-subtle">(optional)</span>
+              </span>
+              <input
+                name="reference"
+                [value]="reference()"
+                (input)="reference.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                placeholder="peshgi"
+              />
+            </label>
+          </div>
+
+          </fieldset>
+          <fieldset class="space-y-4"><legend appSubHeading>Reason and recorder</legend>
+          <label class="block space-y-1">
+            <span appSubHeading>
+              Note
+              @if (method() === 'adjustment') {
+                <span class="text-danger-soft">(required)</span>
+              } @else {
+                <span class="text-content-subtle">(optional)</span>
+              }
+            </span>
+            <input
+              name="note"
+              [value]="note()"
+              (input)="note.set($any($event.target).value)"
+              appInput
+              density="comfortable"
+              class="w-full"
+            />
+            @if (payState.fieldError('note'); as msg) {
+              <span appErrorText size="xs" tone="soft" class="block" data-role="error-note">{{
+                msg
+              }}</span>
+            }
+          </label>
+
+          <div class="block space-y-1">
+            <app-identifier-input
+              field="observed_by"
+              label="Handed over by"
+              help="Person who handed over this payment, if known. Use a stable identifier, not a display name."
+              name="observed_by"
+              [value]="observedBy()"
+              (changed)="observedBy.set($event)"
+            />
+          </div>
+
+          </fieldset>
+          @if (payState.formError(['amount_minor', 'note', 'occurred_on', 'method']); as msg) {
+            <p appErrorPanel data-role="payment-error">{{ msg }}</p>
+          }
+
+          @if (session.ready()) {
+            <button
+              type="submit"
+              [appButtonDisabled]="!canPay()"
+              appButton
+              [busy]="payState.submitting()"
+            >
+              Record payment
+            </button>
+          } @else {
+            <app-session-required what="a payment" />
+          }
+        </form>
 
         <!-- Stints. Overlapping and multiple-open are LEGITIMATE and are
              rendered plainly -- the screen must not mark them as a problem. -->
@@ -252,7 +384,7 @@ import { Button } from '../ui/button';
                 </div>
                 <ul class="divide-y divide-divider text-sm">
                   @for (w of m.periods; track w.id) {
-                    <li class="flex items-baseline justify-between px-3 py-1.5">
+                    <li class="flex flex-wrap gap-2 items-baseline justify-between px-3 py-1.5">
                       <span>
                         {{ w.kind === 'bonus' ? 'Bonus' : 'Wage' }}
                         {{ w.from_on }}
@@ -268,10 +400,10 @@ import { Button } from '../ui/button';
                   }
                   @for (p of m.payments; track p.id) {
                     <li
-                      class="flex items-baseline justify-between px-3 py-1.5 text-content-secondary"
+                      class="flex flex-wrap gap-2 items-baseline justify-between px-3 py-1.5 text-content-secondary"
                     >
                       <span>
-                        Paid {{ p.occurred_on }}
+                        {{ p.method === 'adjustment' ? 'Adjustment' : 'Paid' }} {{ p.occurred_on }}
                         <span appHelp size="xs" tone="subtle">{{ p.method }}</span>
                         @if (p.reference) {
                           <span appHelp size="xs" tone="subtle">· {{ p.reference }}</span>
@@ -291,130 +423,7 @@ import { Button } from '../ui/button';
           }
         </section>
 
-        <!-- Record a payment. -->
-        <form data-page-layout="entry"
-          [appWriteLock]="payState"
-          class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
-          (submit)="submitPayment($event)"
-          data-role="payment-form"
-        >
-          <h3 appSectionHeading>Record a payment</h3>
 
-          <div class="space-y-1">
-            <span appSubHeading>Method</span>
-            <app-chip-group
-              label="Payment method"
-              name="method"
-              [options]="methodChips"
-              [value]="method()"
-              (changed)="setMethod($any($event))"
-            />
-            @if (method() === 'adjustment') {
-              <span class="block text-xs text-content-subtle" data-role="adjustment-hint">
-                The only signed kind, and it must say why. This is also how a deduction is recorded
-                — damage, or milk taken above the allowance — because those reduce what the farm
-                owes. A positive figure reduces the balance.
-              </span>
-            }
-          </div>
-
-          <div class="flex flex-wrap gap-4">
-            <label class="space-y-1">
-              <span class="block text-sm font-medium text-content-heading">Amount (Rs)</span>
-              <span class="input-group"><input
-                name="amount_minor"
-                type="text"
-                inputmode="decimal"
-                [value]="amount()"
-                (input)="amount.set($any($event.target).value)"
-                appInput
-                density="comfortable"
-                class="w-36 text-right font-mono tabular-nums"
-              /><span class="input-unit" aria-hidden="true">Rs</span></span>
-              @if (payState.fieldError('amount_minor'); as msg) {
-                <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{
-                  msg
-                }}</span>
-              }
-            </label>
-            <label class="space-y-1">
-              <span class="block text-sm font-medium text-content-heading">On</span>
-              <input
-                name="occurred_on"
-                type="date"
-                [value]="paidOn()"
-                (input)="paidOn.set($any($event.target).value)"
-                appInput
-                density="comfortable"
-              />
-            </label>
-            <label class="space-y-1">
-              <span class="block text-sm font-medium text-content-heading">
-                Reference <span class="text-content-subtle">(optional)</span>
-              </span>
-              <input
-                name="reference"
-                [value]="reference()"
-                (input)="reference.set($any($event.target).value)"
-                appInput
-                density="comfortable"
-                placeholder="peshgi"
-              />
-            </label>
-          </div>
-
-          <label class="block space-y-1">
-            <span appSubHeading>
-              Note
-              @if (method() === 'adjustment') {
-                <span class="text-danger-soft">(required)</span>
-              } @else {
-                <span class="text-content-subtle">(optional)</span>
-              }
-            </span>
-            <input
-              name="note"
-              [value]="note()"
-              (input)="note.set($any($event.target).value)"
-              appInput
-              density="comfortable"
-              class="w-full"
-            />
-            @if (payState.fieldError('note'); as msg) {
-              <span appErrorText size="xs" tone="soft" class="block" data-role="error-note">{{
-                msg
-              }}</span>
-            }
-          </label>
-
-          <div class="block space-y-1">
-            <app-identifier-input
-              field="observed_by"
-              label="Handed over by"
-              help="Person who handed over this payment, if known. Use a stable identifier, not a display name."
-              name="observed_by"
-              [value]="observedBy()"
-              (changed)="observedBy.set($event)"
-            />
-          </div>
-
-          @if (payState.formError(['amount_minor', 'note', 'occurred_on', 'method']); as msg) {
-            <p appErrorPanel data-role="payment-error">{{ msg }}</p>
-          }
-
-          @if (session.ready()) {
-            <button
-              type="submit"
-              [appButtonDisabled]="!canPay()"
-              appButton
-              [busy]="payState.submitting()"
-            >
-              Record payment
-            </button>
-          } @else {
-            <app-session-required what="a payment" />
-          }
-        </form>
       } @else {
         @if (!loadError()) {
           <p appHelp tone="subtle">Loading…</p>
@@ -426,6 +435,9 @@ import { Button } from '../ui/button';
   `,
 })
 export class PersonDetail {
+  protected openStints(s: { engagements: { ended_on: string | null }[] }) { return s.engagements.filter(e => e.ended_on === null).length; }
+  protected focusPayment(event: Event) { event.preventDefault(); document.querySelector<HTMLInputElement>('#person-payment input[name="amount_minor"]')?.focus(); }
+
   protected closeInline() {
     return this.closeDraft.transition(() => this.closing.set(null));
   }

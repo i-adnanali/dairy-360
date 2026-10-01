@@ -1,0 +1,231 @@
+{
+  "url": "http://localhost:6512/animals/health",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Herd\":\n    - text: Menu\n    - generic: · Herd\n  - button \"Search\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Animals\":\n    - /url: /animals\n  - link \"Calvings\":\n    - /url: /animals/calvings\n  - link \"Health\":\n    - /url: /animals/health\n- main:\n  - heading \"Animal health\" [level=2]\n  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.\n  - button \"Start vet visit\"\n  - button \"Record dose\"\n  - button \"Vaccination round\"\n  - heading \"Record dose\" [level=3]\n  - paragraph: The recorder and source come from your recording session. Enter the actual vet or administrator separately.\n  - paragraph: This entry will be recorded by synthetic-audit · direct_entry\n  - paragraph: Return to the task board using Close; unsaved changes remain protected.\n  - heading \"Identity and date\" [level=4]\n  - generic: Dose / booster label (optional)\n  - textbox \"Dose / booster label (optional)\"\n  - generic: Animal\n  - generic: Find animal\n  - searchbox \"Find animal\"\n  - combobox \"Animal\":\n    - option \"Unknown / not linked\" [selected]\n    - option \"BD-0001 · Noor\"\n    - option \"BD-0002 · Unnamed\"\n    - option \"BD-0003 · Unnamed\"\n    - option \"BD-0004 · Unnamed\"\n    - option \"BD-0005 · Unnamed\"\n    - option \"BD-0006 · Unnamed\"\n    - option \"BD-0007 · Unnamed\"\n    - option \"BD-0008 · Unnamed\"\n    - option \"BD-0009 · Unnamed\"\n    - option \"BD-0010 · Unnamed\"\n    - option \"BD-0011 · Unnamed\"\n    - option \"BD-0013 · Unnamed\"\n    - option \"BD-0014 · Unnamed\"\n  - group \"Record date\":\n    - generic: Record date\n    - generic: Date\n    - textbox \"Date\":\n      - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n    - checkbox \"Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\" [disabled]\n    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - generic: Veterinary visit\n  - combobox \"Veterinary visit\":\n    - option \"Unknown / not linked\"\n    - option \"Demonstration vaccination and treatment round · 2026-09-29\"\n  - generic: Examination\n  - combobox \"Examination\":\n    - option \"Unknown / not linked\"\n    - option \"BD-0002 · Synthetic observation for workflow practice · 2026-09-29\"\n    - option \"BD-0003 · Synthetic observation for workflow practice · 2026-09-29\"\n    - option \"BD-0001 · Synthetic observation for workflow practice · 2026-09-29\"\n  - generic: Health case\n  - combobox \"Health case\":\n    - option \"Unknown / not linked\"\n    - option \"BD-0003 · Resolved demonstration episode · 2026-09-29\"\n    - option \"BD-0001 · Observation requiring follow-up · 2026-09-29\"\n  - generic: Treatment / vaccination plan\n  - combobox \"Treatment / vaccination plan\":\n    - option \"Unknown / not linked\"\n    - option \"BD-0001 · Demonstration course; dates are fixture data, not clinical advice\"\n    - option \"BD-0002 · Synthetic treatment instruction\"\n    - option \"BD-0003 · Synthetic veterinary review\"\n    - option \"BD-0003 · Completed historical demonstration course\"\n  - generic: Complete a planned dose\n  - generic: Find complete a planned dose\n  - searchbox \"Find complete a planned dose\"\n  - combobox \"Complete a planned dose\":\n    - option \"Unknown / not linked\"\n    - option \"BD-0001 · Fixture given · 2026-09-29\"\n    - option \"BD-0003 · Demonstration round vaccine · 2026-09-29\"\n    - option \"BD-0001 · Fixture overdue · 2026-09-30\"\n    - option \"BD-0003 · Completed synthetic follow-up · 2026-09-30\"\n    - option \"BD-0001 · Fixture missed · 2026-09-30\"\n    - option \"BD-0001 · Fixture test · 2026-09-30\"\n    - option \"BD-0001 · Fixture due · 2026-10-01\"\n    - option \"BD-0001 · Fixture recheck · 2026-10-01\"\n    - option \"BD-0001 · Fixture cancelled · 2026-10-02\"\n    - option \"BD-0001 · Fixture upcoming · 2026-10-04\"\n    - option \"BD-0002 · Demonstration round vaccine · 2026-10-05\"\n  - heading \"Administration\" [level=4]\n  - generic: Product from catalog (optional)\n  - combobox \"Product from catalog (optional)\":\n    - option \"Unknown / not linked\"\n    - option \"Demonstration vaccine (not a clinical protocol)\"\n  - generic: Product name as administered\n  - textbox \"Product name as administered\"\n  - generic: Product type\n  - combobox \"Product type\":\n    - option \"Choose\"\n    - option \"vaccine\"\n    - option \"medicine\"\n    - option \"other\"\n  - generic: Amount administered\n  - spinbutton \"Amount administered\"\n  - generic: Unit (for example mL)\n  - textbox \"Unit (for example mL)\"\n  - generic: Administration route\n  - textbox \"Administration route\"\n  - generic: Administered by\n  - textbox \"Administered by\"\n  - generic: Batch / lot\n  - textbox \"Batch / lot\"\n  - generic: Product expiry, if known\n  - textbox \"Product expiry, if known\"\n  - heading \"Historical details and exceptions\" [level=4]\n  - button \"Add outside-ownership or duplicate-dose explanation\"\n  - generic: Historical details are incomplete\n  - checkbox \"Historical details are incomplete\"\n  - heading \"Withdrawal instructions\" [level=4]\n  - group \"milk withdrawal instruction\":\n    - generic: milk withdrawal instruction\n    - text: Recorded state\n    - combobox \"Recorded state\":\n      - option \"Unknown\" [selected]\n      - option \"Explicitly none per instruction\"\n      - option \"Specified by veterinarian\"\n  - group \"meat withdrawal instruction\":\n    - generic: meat withdrawal instruction\n    - text: Recorded state\n    - combobox \"Recorded state\":\n      - option \"Unknown\" [selected]\n      - option \"Explicitly none per instruction\"\n      - option \"Specified by veterinarian\"\n  - heading \"Evidence\" [level=4]\n  - generic: Source reference / prescription number\n  - textbox \"Source reference / prescription number\"\n  - generic: Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)\n  - button \"Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)\"\n  - button \"Save record\" [disabled]\n  - button \"Close\"\n  - generic: Health board date\n  - textbox \"Health board date\": 2026-10-01\n  - generic \"Task status summary\":\n    - button \"1 Overdue\"\n    - button \"2 Due today\"\n    - button \"2 Upcoming\"\n  - generic: Filter animal\n  - combobox \"Filter animal\":\n    - option \"All animals\" [selected]\n    - option \"BD-0001 · Noor\"\n    - option \"BD-0002 · Unnamed\"\n    - option \"BD-0003 · Unnamed\"\n    - option \"BD-0004 · Unnamed\"\n    - option \"BD-0005 · Unnamed\"\n    - option \"BD-0006 · Unnamed\"\n    - option \"BD-0007 · Unnamed\"\n    - option \"BD-0008 · Unnamed\"\n    - option \"BD-0009 · Unnamed\"\n    - option \"BD-0010 · Unnamed\"\n    - option \"BD-0011 · Unnamed\"\n    - option \"BD-0013 · Unnamed\"\n    - option \"BD-0014 · Unnamed\"\n  - generic: Task type\n  - combobox \"Task type\":\n    - option \"All task types\" [selected]\n    - option \"Doses\"\n    - option \"Rechecks\"\n    - option \"Tests\"\n  - generic: Due status\n  - combobox \"Due status\":\n    - option \"All outstanding\" [selected]\n    - option \"Overdue\"\n    - option \"Due today\"\n    - option \"Upcoming\"\n    - option \"Completed\"\n    - option \"Cancelled\"\n    - option \"Missed\"\n    - option \"Deferred\"\n  - generic: Assigned person\n  - textbox \"Assigned person\":\n    - /placeholder: Filter by name\n  - heading \"Outstanding tasks\" [level=3]\n  - navigation \"Health tasks pagination\":\n    - generic: 1–5 of 5\n  - article:\n    - link \"BD-0001 Noor\":\n      - /url: /animals/BD-0001\n    - generic: Overdue\n    - heading \"Fixture overdue\" [level=4]\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-09-30\n    - paragraph: Assigned to Dr Fixture\n    - 'button \"Record completion for BD-0001: Fixture overdue\"': Record completion\n    - 'button \"Change status for BD-0001: Fixture overdue\"': Change status\n  - article:\n    - link \"BD-0001 Noor\":\n      - /url: /animals/BD-0001\n    - generic: Due today\n    - heading \"Fixture due\" [level=4]\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-10-01\n    - paragraph: Assigned to Dr Fixture\n    - 'button \"Record completion for BD-0001: Fixture due\"': Record completion\n    - 'button \"Change status for BD-0001: Fixture due\"': Change status\n  - article:\n    - link \"BD-0001 Noor\":\n      - /url: /animals/BD-0001\n    - generic: Due today\n    - heading \"Fixture recheck\" [level=4]\n    - paragraph:\n      - text: Recheck · Due\n      - time: 2026-10-01\n    - paragraph: Assigned to Dr Fixture\n    - 'button \"Record completion for BD-0001: Fixture recheck\"': Record completion\n    - 'button \"Change status for BD-0001: Fixture recheck\"': Change status\n  - article:\n    - link \"BD-0001 Noor\":\n      - /url: /animals/BD-0001\n    - generic: Upcoming\n    - heading \"Fixture upcoming\" [level=4]\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-10-04\n    - paragraph: Assigned to Dr Fixture\n    - 'button \"Record completion for BD-0001: Fixture upcoming\"': Record completion\n    - 'button \"Change status for BD-0001: Fixture upcoming\"': Change status\n  - article:\n    - link \"BD-0002\":\n      - /url: /animals/BD-0002\n    - generic: Upcoming\n    - heading \"Demonstration round vaccine\" [level=4]\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-10-05\n    - 'button \"Record completion for BD-0002: Demonstration round vaccine\"': Record completion\n    - 'button \"Change status for BD-0002: Demonstration round vaccine\"': Change status\n  - region \"Withdrawal instructions needing attention (6)\":\n    - heading \"Withdrawal instructions needing attention (6)\" [level=3]\n    - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention\n    - paragraph: Needs clarification — 2 instruction(s) have no known end.\n    - generic \"Original instructions and sources\"\n    - paragraph: Demonstration round vaccine · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button \"Source recorded dose for BD-0001 · meat · Demonstration round vaccine\": Source recorded dose\n    - paragraph: Demonstration vaccine (not a clinical protocol) · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button \"Source recorded dose for BD-0001 · meat · Demonstration vaccine (not a clinical protocol)\": Source recorded dose\n    - paragraph: BD-0002 · Milk withdrawal · 1 instruction(s) needing attention\n    - paragraph:\n      - text: \"Recorded end:\"\n      - time: 2026-10-03 18:00:00+05:00\n    - generic \"Original instructions and sources\"\n    - paragraph: Demonstration medicine · Synthetic withdrawal instruction for UI demonstration\n    - paragraph: Issued by Dr Fixture\n    - paragraph: \"Recorded end: 2026-10-03T18:00:00+05:00\"\n    - button \"Source recorded dose for BD-0002 · milk · Demonstration medicine\": Source recorded dose\n    - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic \"Original instructions and sources\"\n    - paragraph: Demonstration medicine · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button \"Source recorded dose for BD-0002 · meat · Demonstration medicine\": Source recorded dose\n    - paragraph: BD-0003 · Milk withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic \"Original instructions and sources\"\n    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button \"Source recorded dose for BD-0003 · milk · Historical vaccine, details incomplete\": Source recorded dose\n    - paragraph: BD-0003 · Meat withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic \"Original instructions and sources\"\n    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button \"Source recorded dose for BD-0003 · meat · Historical vaccine, details incomplete\": Source recorded dose\n  - generic \"Open cases (1)\"\n  - generic: Records\n  - combobox \"Records\":\n    - option \"Veterinary visits\" [selected]\n    - option \"Examinations\"\n    - option \"Health cases\"\n    - option \"Medicines and vaccines\"\n    - option \"Treatment and vaccination plans\"\n    - option \"Scheduled tasks\"\n    - option \"Recorded doses\"\n    - option \"Test results\"\n    - option \"Health costs\"\n  - navigation \"Health records pagination\":\n    - generic: 1–1 of 1\n  - article:\n    - paragraph: Demonstration vaccination and treatment round · 2026-09-29\n    - paragraph: closed · day · revision 2 · recorded by health_fixture\n    - button \"View / edit\"\n    - button \"History\"\n    - button \"Examine animal\"\n    - button \"Record dose\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Dose / booster label (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find animal"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Animal"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 "
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Veterinary visit"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Examination"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Health case"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Treatment / vaccination plan"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find complete a planned dose"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Complete a planned dose"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product from catalog (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product name as administered"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product type"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Amount administered"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Unit (for example mL)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Administration route"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Administered by"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Batch / lot"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product expiry, if known"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Historical details are incomplete"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Recorded stateUnknownExplicitly none per instructionSpecified by veterinarian"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Recorded stateUnknownExplicitly none per instructionSpecified by veterinarian"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Source reference / prescription number"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Health board date"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Filter animalAll animalsBD-0001 · NoorBD-0002 · UnnamedBD-0003 · UnnamedBD-0004 · UnnamedBD-0005 · UnnamedBD-0006 · UnnamedBD-0007 · UnnamedBD-0008 · UnnamedBD-0009 · UnnamedBD-0010 · UnnamedBD-0011 · UnnamedBD-0013 · UnnamedBD-0014 · Unnamed"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Task typeAll task typesDosesRechecksTests"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Assigned person"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 390,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: system. Switch to light.\"><span data-role=\"theme-mode\" class=\"capitalize\">system</span><span data-role=\"theme-resolved\" class=\"text-content-subtle\"> · light </span><!----></button>",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

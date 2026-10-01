@@ -1,0 +1,231 @@
+{
+  "url": "http://localhost:6512/animals/health",
+  "snapshot": "- banner:\n  - heading [level=1]: Dairy 360\n  - generic: harness · in memory\n  - button: Recording as synthetic-audit · Direct entry\n  - button:\n    - text: Menu\n    - generic: · Herd\n  - button: Search\n  - button: dark\n  - button: Assistant\n- navigation:\n  - link:\n    - /url: /animals\n    - text: Animals\n  - link:\n    - /url: /animals/calvings\n    - text: Calvings\n  - link:\n    - /url: /animals/health\n    - text: Health\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- main:\n  - heading [level=2]: Animal health\n  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.\n  - button: Start vet visit\n  - button: Record dose\n  - button: Vaccination round\n  - heading [level=3]: Record dose\n  - paragraph: The recorder and source come from your recording session. Enter the actual vet or administrator separately.\n  - paragraph: This entry will be recorded by synthetic-audit · direct_entry\n  - paragraph: Return to the task board using Close; unsaved changes remain protected.\n  - heading [level=4]: Identity and date\n  - generic: Dose / booster label (optional)\n  - textbox: Synthetic unsaved dose\n  - generic: Animal\n  - generic: Find animal\n  - searchbox\n  - combobox\n  - generic: Record date\n  - generic: Date\n  - textbox:\n    - /placeholder: 2019, Mar 2019, or 6 Jul 2023\n  - checkbox [disabled]\n  - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1\n  - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.\n  - generic: Veterinary visit\n  - combobox\n  - generic: Examination\n  - combobox\n  - generic: Health case\n  - combobox\n  - generic: Treatment / vaccination plan\n  - combobox\n  - generic: Complete a planned dose\n  - generic: Find complete a planned dose\n  - searchbox\n  - combobox\n  - heading [level=4]: Administration\n  - generic: Product from catalog (optional)\n  - combobox\n  - generic: Product name as administered\n  - textbox\n  - generic: Product type\n  - combobox\n  - generic: Amount administered\n  - spinbutton\n  - generic: Unit (for example mL)\n  - textbox\n  - generic: Administration route\n  - textbox\n  - generic: Administered by\n  - textbox\n  - generic: Batch / lot\n  - textbox\n  - generic: Product expiry, if known\n  - textbox\n  - heading [level=4]: Historical details and exceptions\n  - button: Add outside-ownership or duplicate-dose explanation\n  - generic: Historical details are incomplete\n  - checkbox\n  - heading [level=4]: Withdrawal instructions\n  - generic: milk withdrawal instruction\n  - text: Recorded state\n  - combobox\n  - generic: meat withdrawal instruction\n  - text: Recorded state\n  - combobox\n  - heading [level=4]: Evidence\n  - generic: Source reference / prescription number\n  - textbox\n  - generic: Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)\n  - button\n  - button: Save record\n  - button: Close\n  - generic: Health board date\n  - textbox: 2026-10-01\n  - button: 1 Overdue\n  - button: 2 Due today\n  - button: 2 Upcoming\n  - generic: Filter animal\n  - combobox\n  - generic: Task type\n  - combobox\n  - generic: Due status\n  - combobox\n  - generic: Assigned person\n  - textbox:\n    - /placeholder: Filter by name\n  - heading [level=3]: Outstanding tasks\n  - navigation:\n    - generic: 1–5 of 5\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noor\n    - generic: Overdue\n    - heading [level=4]: Fixture overdue\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-09-30\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noor\n    - generic: Due today\n    - heading [level=4]: Fixture due\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-10-01\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noor\n    - generic: Due today\n    - heading [level=4]: Fixture recheck\n    - paragraph:\n      - text: Recheck · Due\n      - time: 2026-10-01\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0001\n      - text: BD-0001 Noor\n    - generic: Upcoming\n    - heading [level=4]: Fixture upcoming\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-10-04\n    - paragraph: Assigned to Dr Fixture\n    - button: Record completion\n    - button: Change status\n  - article:\n    - link:\n      - /url: /animals/BD-0002\n      - text: BD-0002\n    - generic: Upcoming\n    - heading [level=4]: Demonstration round vaccine\n    - paragraph:\n      - text: Dose · Due\n      - time: 2026-10-05\n    - button: Record completion\n    - button: Change status\n  - region:\n    - heading [level=3]: Withdrawal instructions needing attention (6)\n    - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention\n    - paragraph: Needs clarification — 2 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Demonstration round vaccine · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: Demonstration vaccine (not a clinical protocol) · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: BD-0002 · Milk withdrawal · 1 instruction(s) needing attention\n    - paragraph:\n      - text: \"Recorded end:\"\n      - time: 2026-10-03 18:00:00+05:00\n    - generic: Original instructions and sources\n    - paragraph: Demonstration medicine · Synthetic withdrawal instruction for UI demonstration\n    - paragraph: Issued by Dr Fixture\n    - paragraph: \"Recorded end: 2026-10-03T18:00:00+05:00\"\n    - button: Source recorded dose\n    - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Demonstration medicine · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: BD-0003 · Milk withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n    - paragraph: BD-0003 · Meat withdrawal · 1 instruction(s) needing attention\n    - paragraph: Needs clarification — 1 instruction(s) have no known end.\n    - generic: Original instructions and sources\n    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification\n    - paragraph: Needs clarification — no known end\n    - button: Source recorded dose\n  - generic: Open cases (1)\n  - generic: Records\n  - combobox\n  - navigation:\n    - generic: 1–1 of 1\n  - article:\n    - paragraph: Demonstration vaccination and treatment round · 2026-09-29\n    - paragraph: closed · day · revision 2 · recorded by health_fixture\n    - button: View / edit\n    - button: History\n    - button: Examine animal\n    - button: Record dose\n- dialog \"Discard unsaved changes?\":\n  - heading \"Discard unsaved changes?\" [level=2]\n  - paragraph: \"Dose record: these changes have not been saved.\"\n  - paragraph: Leaving discards this draft. Keep editing to retain your entries.\n  - button \"Keep editing\" [active]\n  - button \"Discard changes\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Dose / booster label (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find animal"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Animal"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Even the year is a guess  — only applies to a bare year, since an estimate is stored as January 1 "
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Veterinary visit"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Examination"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Health case"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Treatment / vaccination plan"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find complete a planned dose"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Complete a planned dose"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product from catalog (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product name as administered"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product type"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Amount administered"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Unit (for example mL)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Administration route"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Administered by"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Batch / lot"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Product expiry, if known"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Historical details are incomplete"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Recorded stateUnknownExplicitly none per instructionSpecified by veterinarian"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Recorded stateUnknownExplicitly none per instructionSpecified by veterinarian"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Source reference / prescription number"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Health board date"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Filter animalAll animalsBD-0001 · NoorBD-0002 · UnnamedBD-0003 · UnnamedBD-0004 · UnnamedBD-0005 · UnnamedBD-0006 · UnnamedBD-0007 · UnnamedBD-0008 · UnnamedBD-0009 · UnnamedBD-0010 · UnnamedBD-0011 · UnnamedBD-0013 · UnnamedBD-0014 · Unnamed"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Task typeAll task typesDosesRechecksTests"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Due statusAll outstandingOverdueDue todayUpcomingCompletedCancelledMissedDeferred"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Assigned person"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "RecordsVeterinary visitsExaminationsHealth casesMedicines and vaccinesTreatment and vaccination plansScheduled tasksRecorded dosesTest resultsHealth costs"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<button appbutton=\"\" variant=\"secondary\" data-role=\"keep-editing\" class=\"bg-surface-raised border border-line disabled:!bg-surface-sunken disabled:!text-content-disabled disabled:cursor-not-allowed disabled:hover:!bg-surface-sunken focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page focus:outline-none font-medium hover:bg-surface-sunken px-4 py-2 rounded-lg text-content-heading text-sm transition-colors\"> Keep editing </button>",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

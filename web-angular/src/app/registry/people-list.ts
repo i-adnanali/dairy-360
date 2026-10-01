@@ -1,3 +1,4 @@
+import { ScrollRegion } from '../ui/scroll-region';
 import { Field } from '../ui/field';
 import { writerDraft } from './writer-draft';
 import { WriteLock } from './write-lock';
@@ -65,7 +66,7 @@ import { Button } from '../ui/button';
 @Component({
   selector: 'app-people-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Field,
+  imports: [ScrollRegion, Field,
     WriteLock,
     Pagination,
     StatusBadge,
@@ -95,7 +96,7 @@ import { Button } from '../ui/button';
 
     <div class="mx-auto  space-y-6">
       <header>
-        <div class="page-header"><h2 appPageHeading>People</h2><a appButton href="#add-person" (click)="focusAdd($event)">Add person</a></div>
+        <div class="page-header"><h2 appPageHeading>People</h2><a appButton href="#add-person" (click)="focusAdd($event)">Add person</a>@if (rows()?.length) { <a appButton variant="secondary" href="#open-stint" (click)="focusStint($event)">Open stint</a> }</div>
         <p appHelp class="mt-1">
           People, employment stints and balances. Add a person first, then open a stint if they work here.
         </p>
@@ -198,7 +199,7 @@ import { Button } from '../ui/button';
                       {{ owed(p) }}
                     }
                   </td>
-                  <td appCell tone="muted">
+                  <td appCell tone="muted" class="whitespace-nowrap">
                     <span
                       [appCertainty]="p.last_payment_on ? 'known' : 'no-record'"
                       [attr.data-certainty]="p.last_payment_on ? 'known' : 'no-record'"
@@ -255,7 +256,7 @@ import { Button } from '../ui/button';
             autocomplete="off"
           />
           <span id="person-identifier-help" class="block text-xs text-content-subtle">
-            A permanent identifier used on records and in “observed by”. It cannot be changed later; the event log cannot be rewritten.
+            Permanent and unique; used on records and in “observed by”. Cannot be changed later.
           </span>
           @if (personState.fieldError('identifier'); as msg) {
             <span id="person-identifier-error" appErrorText size="xs" tone="soft" class="block" data-role="error-identifier">{{
@@ -298,13 +299,11 @@ import { Button } from '../ui/button';
             [appWriteLock]="engageState"
             class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
             (submit)="submitEngagement($event)"
-            data-role="add-engagement"
+            data-role="add-engagement" id="open-stint"
           >
             <h3 appSectionHeading>Open a stint</h3>
             <p appHelp size="xs" tone="subtle">
-              Somebody who left and came back gets a second stint, not an edited first one — which
-              is what stops their old salary quietly applying to the new one. Two stints at once is
-              fine too, for somebody holding two roles.
+              For rehire, open a new stint to keep earlier pay terms separate. Concurrent stints are allowed for different roles.
             </p>
 
             <label class="block text-sm">Find person by identifier or name
@@ -322,7 +321,7 @@ import { Button } from '../ui/button';
               >
                 <option value="">Choose…</option>
                 @for (p of matchingPeople(list); track p.person_id) {
-                  <option [value]="p.person_id">{{ p.identifier }}</option>
+                  <option [value]="p.person_id">{{ p.identifier }}{{ p.name ? " · " + p.name : "" }}</option>
                 }
               </select>
             </label>
@@ -408,6 +407,7 @@ export class PeopleList {
     return list.filter(p => p.person_id === this.engagePerson() || (p.identifier + ' ' + (p.name ?? '')).toLowerCase().includes(query));
   }
   protected focusAdd(event: Event) { event.preventDefault(); const field = document.querySelector<HTMLInputElement>('#add-person input'); field?.focus(); field?.scrollIntoView({ block: 'center' }); }
+  protected focusStint(event: Event) { event.preventDefault(); document.querySelector<HTMLInputElement>('#open-stint input')?.focus(); }
   protected personDraft!: ReturnType<typeof writerDraft>;
   protected engageDraft!: ReturnType<typeof writerDraft>;
   protected readonly paging = pagedList<WageBalanceRow>('people');

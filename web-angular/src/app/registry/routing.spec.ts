@@ -42,6 +42,13 @@ describe('routes', () => {
     expect(paths).toContain('check');
   });
 
+  it('keeps an unknown address in the guarded shell with a recovery component', () => {
+    const fallback = routes[0].children!.find(r => r.path === '**')!;
+    expect(fallback.loadComponent).toBeDefined();
+    expect(fallback.redirectTo).toBeUndefined();
+    expect(fallback.canDeactivate?.length).toBeGreaterThan(0);
+  });
+
   it('lands on the day board, not on a subsystem', () => {
     const root = routes[0].children!.find((r) => r.path === '');
     expect(root!.redirectTo).toBeUndefined();
@@ -186,9 +193,9 @@ describe('TodayBoard', () => {
   it('flags only the sessions that are actually outstanding', async () => {
     const el = await render(new BoardApi());
     const milking = el.querySelectorAll('[data-role="milking"] [data-session]');
-    expect(milking[0].getAttribute('data-complete')).toBe('true');
-    expect(milking[1].getAttribute('data-complete')).toBe('false');
-    expect(milking[1].textContent).toContain('0 of 3 recorded');
+    expect(milking[0].getAttribute('data-complete')).toBe('false');
+    expect(milking[1].getAttribute('data-complete')).toBe('true');
+    expect(milking[0].textContent).toContain('0 of 3 recorded');
   });
 
   it('links each line to the exact session that clears it', async () => {

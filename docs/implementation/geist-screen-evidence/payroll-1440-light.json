@@ -1,0 +1,56 @@
+{
+  "url": "http://localhost:6512/labour/payroll",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"People\":\n    - /url: /labour/people\n  - link \"Payroll\":\n    - /url: /labour/payroll\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- main:\n  - heading \"Payroll\" [level=2]\n  - generic: From\n  - textbox \"From\": 2026-10-01\n  - generic: To\n  - textbox \"To\": 2026-10-31\n  - generic: Paid out by (optional)\n  - combobox \"Paid out by (optional)\"\n  - generic: Person associated with this record, if known. Use a stable identifier, not a display name.\n  - heading \"Salaried — every row needs a figure\" [level=3]\n  - region \"Salaried wage entries\":\n    - table:\n      - rowgroup:\n        - row \"Person / period Agreement Wage amount (Rs) Package context\":\n          - columnheader \"Person / period\"\n          - columnheader \"Agreement\"\n          - columnheader \"Wage amount (Rs)\"\n          - columnheader \"Package context\"\n      - rowgroup:\n        - row \"abdulgeneral 2026-10-01 – 2026-10-31 agreed Rs 20,000.00 / month 20000\":\n          - cell \"abdulgeneral 2026-10-01 – 2026-10-31\":\n            - text: abdulgeneral\n            - paragraph: 2026-10-01 – 2026-10-31\n          - cell \"agreed Rs 20,000.00 / month\":\n            - generic: agreed Rs 20,000.00 / month\n          - cell \"20000\":\n            - textbox \"Wage amount (Rs) for abdul\": \"20000\"\n            - generic: Rs\n          - cell\n        - row \"imranmilker 2026-10-01 – 2026-10-31 agreed Rs 25,000.00 / month 25000 milk allowance 2 L due to date, 2 L taken (through 2026-10-01) accommodation · 20 kg flour / month\":\n          - cell \"imranmilker 2026-10-01 – 2026-10-31\":\n            - text: imranmilker\n            - paragraph: 2026-10-01 – 2026-10-31\n          - cell \"agreed Rs 25,000.00 / month\":\n            - generic: agreed Rs 25,000.00 / month\n          - cell \"25000\":\n            - textbox \"Wage amount (Rs) for imran\": \"25000\"\n            - generic: Rs\n          - cell \"milk allowance 2 L due to date, 2 L taken (through 2026-10-01) accommodation · 20 kg flour / month\":\n            - paragraph: milk allowance 2 L due to date, 2 L taken (through 2026-10-01)\n            - paragraph: accommodation · 20 kg flour / month\n  - navigation \"Salaried wages pagination\":\n    - generic: 1–2 of 2\n  - separator\n  - heading \"Dihari — only the days somebody worked\" [level=3]\n  - button \"Add a day\"\n  - generic: Rs 45,000.00\n  - text: 2 of 2 answered\n  - generic: salaried wages\n  - button \"Save run\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "14px",
+        "height": 40,
+        "invalid": null,
+        "name": "From"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 40,
+        "invalid": null,
+        "name": "To"
+      },
+      {
+        "description": "identifier-list-observed_by-2-help",
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": " Paid out by (optional)"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 38,
+        "invalid": null,
+        "name": "Wage amount (Rs) for abdul"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 38,
+        "invalid": null,
+        "name": "Wage amount (Rs) for imran"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: system. Switch to light.\"><span data-role=\"theme-mode\" class=\"capitalize\">system</span><span data-role=\"theme-resolved\" class=\"text-content-subtle\"> · light </span><!----></button>",
+    "height": 1000,
+    "regions": [
+      {
+        "label": "Salaried wage entries",
+        "scrollWidth": 1392,
+        "tabindex": null,
+        "width": 1392
+      }
+    ],
+    "width": 1440
+  }
+}

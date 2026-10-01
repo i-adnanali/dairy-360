@@ -1,0 +1,76 @@
+{
+  "url": "http://localhost:6512/milk/dispatch?on=2026-10-01&session=morning",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Search ⌘K\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- navigation \"Section views\":\n  - link \"Milking\":\n    - /url: /milk/milking\n  - link \"Dispatch\":\n    - /url: /milk/dispatch\n  - link \"Buyers\":\n    - /url: /milk/buyers\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- generic: Saved morning of 2026-10-01 — 3 animal(s), 3 measured, 3 corrected.\n- main:\n  - heading \"Where the milk went\" [level=2]\n  - paragraph: One session, and everything that left the bulk in it — sold and kept. The dodhi and the house are on every sheet; a neighbour appears only when they took something.\n  - paragraph:\n    - link \"Manage buyers and rates (new tab)\":\n      - /url: /milk/buyers\n    - text: . This sheet stays open with its draft; reload only after saving it.\n  - generic: Date\n  - textbox \"Date\": 2026-10-01\n  - generic: Session\n  - radiogroup \"Session\":\n    - radio \"Morning\" [checked]:\n      - generic: \"1\"\n      - generic: Morning\n    - radio \"Evening\":\n      - generic: \"2\"\n      - generic: Evening\n  - generic: Handed over by (optional)\n  - combobox \"Handed over by (optional)\"\n  - generic: Person who handed over the milk, if known. Use a stable identifier, not a display name.\n  - paragraph: Defaults to today and this session — the one place a date is defaulted, because today is a fact rather than a guess. Change it to enter a session you missed.\n  - region \"Standing dispatch quantities\":\n    - generic: Every session — leave none of these unanswered\n    - table:\n      - rowgroup:\n        - row \"Goes to Yesterday morning Rate Litres Amount\":\n          - columnheader \"Goes to\"\n          - columnheader \"Yesterday morning\"\n          - columnheader \"Rate\"\n          - columnheader \"Litres\"\n          - columnheader \"Amount\"\n      - rowgroup:\n        - row \"Bashir (dodhi) 17 Rs 7,000.00 / 40 L Nothing taken by Bashir (dodhi) did not come already saved No record\":\n          - cell \"Bashir (dodhi)\"\n          - cell \"17\"\n          - cell \"Rs 7,000.00 / 40 L\"\n          - cell \"Nothing taken by Bashir (dodhi) did not come already saved\":\n            - textbox \"Litres for Bashir (dodhi) — 2026-10-01 morning\"\n            - generic: L\n            - button \"Nothing taken by Bashir (dodhi)\" [pressed]: nothing taken\n            - textbox \"Reason nothing taken by Bashir (dodhi)\":\n              - /placeholder: why (optional)\n              - text: did not come\n            - generic: already saved\n          - cell \"No record\": –\n        - row \"Homekept, not sold 3 not billed 2 Nothing taken by Home already saved not billed\":\n          - cell \"Homekept, not sold\"\n          - cell \"3\"\n          - cell \"not billed\"\n          - cell \"2 Nothing taken by Home already saved\":\n            - textbox \"Litres for Home — 2026-10-01 morning\": \"2\"\n            - generic: L\n            - button \"Nothing taken by Home\": nothing taken\n            - generic: already saved\n          - cell \"not billed\"\n        - row \"Imran (milk allowance)kept, not sold 2 not billed 2 Nothing taken by Imran (milk allowance) already saved not billed\":\n          - cell \"Imran (milk allowance)kept, not sold\"\n          - cell \"2\"\n          - cell \"not billed\"\n          - cell \"2 Nothing taken by Imran (milk allowance) already saved\":\n            - textbox \"Litres for Imran (milk allowance) — 2026-10-01 morning\": \"2\"\n            - generic: L\n            - button \"Nothing taken by Imran (milk allowance)\": nothing taken\n            - generic: already saved\n          - cell \"not billed\"\n    - navigation \"Standing destinations pagination\":\n      - generic: 1–3 of 3\n  - region \"Occasional dispatch quantities\":\n    - generic: Only if they came — nothing to answer here\n    - navigation \"Occasional destinations pagination\":\n      - generic: 1–2 of 2\n    - table:\n      - rowgroup:\n        - 'row \"Ali (next door) Rs 9,000.00 / 40 L 4 Rs 900.00 Did not come: Ali (next door)\"':\n          - cell \"Ali (next door) Rs 9,000.00 / 40 L\"\n          - 'cell \"4 Rs 900.00 Did not come: Ali (next door)\"':\n            - textbox \"Litres for Ali (next door) — 2026-10-01 morning\": \"4\"\n            - generic: L\n            - generic: Rs 900.00\n            - 'button \"Did not come: Ali (next door)\"': didn't come\n        - row \"Bibi (corner house) Rs 9,000.00 / 40 L Record milk taken by Bibi (corner house)\":\n          - cell \"Bibi (corner house) Rs 9,000.00 / 40 L\"\n          - cell \"Record milk taken by Bibi (corner house)\":\n            - button \"Record milk taken by Bibi (corner house)\": they took some\n  - generic: Out 8 L · billed Rs 900.00\n  - generic: Measured this session 22.1 L\n  - text: 3 of 3\n  - text: answered\n  - generic: required destinations\n  - button \"Save session\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Date"
+      },
+      {
+        "description": "identifier-list-observed_by-1-help",
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": " Handed over by (optional)"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Litres for Bashir (dodhi) — 2026-10-01 morning"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 30,
+        "invalid": null,
+        "name": "Reason nothing taken by Bashir (dodhi)"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Litres for Home — 2026-10-01 morning"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Litres for Imran (milk allowance) — 2026-10-01 morning"
+      },
+      {
+        "description": null,
+        "font": "14px",
+        "height": 36,
+        "invalid": null,
+        "name": "Litres for Ali (next door) — 2026-10-01 morning"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: system. Switch to light.\"><span data-role=\"theme-mode\" class=\"capitalize\">system</span><span data-role=\"theme-resolved\" class=\"text-content-subtle\"> · light </span><!----></button>",
+    "height": 1000,
+    "regions": [
+      {
+        "label": "Standing dispatch quantities",
+        "scrollWidth": 1390,
+        "tabindex": null,
+        "width": 1390
+      },
+      {
+        "label": "Occasional dispatch quantities",
+        "scrollWidth": 1390,
+        "tabindex": null,
+        "width": 1390
+      }
+    ],
+    "width": 1440
+  }
+}

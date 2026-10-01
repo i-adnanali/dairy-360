@@ -1,0 +1,76 @@
+{
+  "url": "http://localhost:6512/analytics?view=month&page=1&detailOn=2026-10-01&detailSession=all",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Analytics\":\n    - text: Menu\n    - generic: · Analytics\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- main:\n  - paragraph: Farm review\n  - heading \"Milk analytics\" [level=1]\n  - paragraph: Production, recording coverage and where the milk went.\n  - button \"Refresh\"\n  - region \"Review filters\":\n    - text: Review\n    - combobox \"Review\":\n      - option \"Daily\"\n      - option \"Weekly\"\n      - option \"Monthly\" [selected]\n    - button \"Previous period\": ←\n    - text: Date\n    - textbox \"Date\": 2026-10-01\n    - button \"Next period\": →\n    - text: Session\n    - combobox \"Session\":\n      - option \"All sessions\" [selected]\n      - option \"Morning\"\n      - option \"Evening\"\n  - paragraph: 2026-10-01 – 2026-10-31 · Asia/Karachi · In progress\n  - paragraph: Updated 01-Oct-2026, 12:23 pm\n  - region \"Period totals\":\n    - article:\n      - heading \"Measured production\" [level=2]\n      - paragraph: 40.5 L\n      - paragraph: Partial or qualified measured total\n    - article:\n      - heading \"Recorded dispatch\" [level=2]\n      - paragraph: 26.4 L\n      - paragraph: Sold 19.4 L · Non-sale 7 L\n    - article:\n      - heading \"Difference\" [level=2]\n      - paragraph: 14.1 L\n      - paragraph: Measured minus dispatched; not a wastage measure. Partial coverage; not evidence of loss or surplus. approximate roster dates; incomplete production.\n    - article:\n      - heading \"Coverage\" [level=2]\n      - paragraph: 5 / 6\n      - paragraph: Expected animal sessions · 1 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots\n  - heading \"Production and dispatch\" [level=2]\n  - paragraph: Litres by day. Gaps mean no measurements; larger points mark incomplete production. Select a point to inspect its date; the table provides the same information.\n  - img \"Measured production and recorded dispatch in litres\"\n  - text: Inspect date / session\n  - combobox \"Inspect date / session\":\n    - option \"Choose a date…\" [selected]\n    - option \"2026-10-01 · all\"\n  - button \"Previous date / session\" [disabled]\n  - button \"Next date / session\" [disabled]\n  - button \"Hide data · Production and dispatch\" [expanded]\n  - region \"Production and dispatch chart data\":\n    - table \"Production and dispatch by date and session\":\n      - caption: Production and dispatch by date and session\n      - rowgroup:\n        - row \"Date / session Measured production Recorded dispatch Difference Coverage\":\n          - columnheader \"Date / session\"\n          - columnheader \"Measured production\"\n          - columnheader \"Recorded dispatch\"\n          - columnheader \"Difference\"\n          - columnheader \"Coverage\"\n      - rowgroup:\n        - 'row \"2026-10-01, all: measured 40.5 L, dispatch 26.4 L, difference 14.1 L. Partial coverage; not evidence of loss or surplus. approximate roster dates; incomplete production. 1 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots 40.5 L 26.4 L 14.1 L Partial coverage; not evidence of loss or surplus. approximate roster dates; incomplete production. 1 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots\"':\n          - 'cell \"2026-10-01, all: measured 40.5 L, dispatch 26.4 L, difference 14.1 L. Partial coverage; not evidence of loss or surplus. approximate roster dates; incomplete production. 1 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots\"':\n            - 'button \"2026-10-01, all: measured 40.5 L, dispatch 26.4 L, difference 14.1 L. Partial coverage; not evidence of loss or surplus. approximate roster dates; incomplete production. 1 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots\"': 2026-10-01 · all\n          - cell \"40.5 L\"\n          - cell \"26.4 L\"\n          - cell \"14.1 L\"\n          - cell \"Partial coverage; not evidence of loss or surplus. approximate roster dates; incomplete production. 1 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots\"\n  - paragraph: \"Comparison unavailable: No completed days to compare.\"\n  - generic \"Production comparison · unavailable\"\n  - region \"Recording review\":\n    - heading \"Records to review\" [level=2]\n    - paragraph: 100% of expected animal sessions have a recorded answer.\n    - paragraph: 1 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots · 0 standing dispatch answers missing · 0 not yet recorded.\n    - paragraph: Historical gaps mean no records in the selected period; recording obligations before adoption are unknown. Occasional dispatches and retained milk may not be fully recorded.\n    - paragraph: \"Difference percentage unavailable: approximate roster dates; incomplete production.\"\n  - button \"By animal\"\n  - button \"Reconciliation\"\n  - text: Find animal\n  - searchbox \"Find animal\": no-synthetic-match\n  - text: Sort\n  - combobox \"Sort\" [active]:\n    - option \"Animal\" [selected]\n    - option \"Measured litres\"\n  - text: Order\n  - combobox \"Order\":\n    - option \"Ascending\" [selected]\n    - option \"Descending\"\n  - paragraph:\n    - text: \"Detail date: 2026-10-01 all\"\n    - button \"Clear\"\n  - region \"Animal production details\":\n    - table \"Animal production details\":\n      - caption: Animal production details\n      - rowgroup:\n        - row \"Animal Measured milk Coverage Complete animal-days\":\n          - columnheader \"Animal\"\n          - columnheader \"Measured milk\"\n          - columnheader \"Coverage\"\n          - columnheader \"Complete animal-days\"\n      - rowgroup:\n        - row \"BD-0001 Noor 15.7 L 2/2 measured 0 unmeasured · 0 not milked · 0 missing · 0 pending 1\":\n          - cell \"BD-0001 Noor\":\n            - link \"BD-0001\":\n              - /url: /animals/BD-0001\n            - text: Noor\n          - cell \"15.7 L\"\n          - cell \"2/2 measured 0 unmeasured · 0 not milked · 0 missing · 0 pending\":\n            - text: 2/2 measured\n            - text: 0 unmeasured · 0 not milked · 0 missing · 0 pending\n          - cell \"1\"\n        - row \"BD-0002 15.1 L 2/2 measured 0 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots 1\":\n          - cell \"BD-0002\":\n            - link \"BD-0002\":\n              - /url: /animals/BD-0002\n          - cell \"15.1 L\"\n          - cell \"2/2 measured 0 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots\":\n            - text: 2/2 measured\n            - text: 0 unmeasured · 0 not milked · 0 missing · 0 pending · 2 approximate roster slots\n          - cell \"1\"\n        - row \"BD-0005 9.7 L 1/2 measured 1 unmeasured · 0 not milked · 0 missing · 0 pending 0\":\n          - cell \"BD-0005\":\n            - link \"BD-0005\":\n              - /url: /animals/BD-0005\n          - cell \"9.7 L\"\n          - cell \"1/2 measured 1 unmeasured · 0 not milked · 0 missing · 0 pending\":\n            - text: 1/2 measured\n            - text: 1 unmeasured · 0 not milked · 0 missing · 0 pending\n          - cell \"0\"\n  - navigation \"Analytics details pagination\":\n    - generic: 1–3 of 3\n  - paragraph: Cards and charts cover the full period. Pagination and animal search affect only this detail table.",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Review DailyWeeklyMonthly"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Date "
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Session All sessionsMorningEvening"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Inspect date / session Choose a date…2026-10-01 · all"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find animal "
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Sort AnimalMeasured litres"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Order AscendingDescending"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<select _ngcontent-ng-c2555259002=\"\" appinput=\"\" class=\"aria-[invalid=true]:border-danger-fg border border-line-control focus:border-focus focus:outline-none focus:shadow-[0_0_0_1px_rgb(var(--focus-ring))] px-2 py-1.5 rounded-lg text-sm\"><option _ngcontent-ng-c2555259002=\"\" value=\"identifier\">Animal</option><option _ngcontent-ng-c2555259002=\"\" value=\"litres\">Measured litres</option><!----><!----></select>",
+    "height": 844,
+    "regions": [
+      {
+        "label": "Production and dispatch chart data",
+        "scrollWidth": 488,
+        "tabindex": "0",
+        "width": 324
+      },
+      {
+        "label": "Animal production details",
+        "scrollWidth": 361,
+        "tabindex": "0",
+        "width": 316
+      }
+    ],
+    "width": 390
+  }
+}

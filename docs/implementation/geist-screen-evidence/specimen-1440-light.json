@@ -1,0 +1,49 @@
+{
+  "url": "http://localhost:6512/ui-specimen.html?revision=2",
+  "snapshot": "- main:\n  - heading \"Current UI state specimen\" [level=1]\n  - paragraph: Synthetic presentation examples using the compiled Dairy 360 stylesheet. No backend or saves.\n  - button \"Toggle light / dark\"\n  - generic: Normal field\n  - textbox \"Normal field\": Synthetic long name with several words for narrow layout review\n  - paragraph: Persistent help stays next to its control.\n  - generic: Invalid field\n  - textbox \"Invalid field\": Raw value retained\n  - paragraph: This synthetic identifier is already in use. Choose another identifier.\n  - generic: Readonly\n  - textbox \"Readonly\": Saved revision 3\n  - generic: Disabled while resolving a write\n  - textbox \"Disabled while resolving a write\" [disabled]: Request locked\n  - button \"Record payment\" [disabled]\n  - paragraph: \"Busy: keep the action label. This specimen performs no operation.\"\n  - heading \"Empty search\" [level=2]\n  - paragraph: No matching crops.\n  - button \"Clear filters\"\n  - alert: Could not refresh. Previous results may be stale. Your draft remains available.\n  - heading \"Numbers and uncertainty\" [level=2]\n  - region \"Synthetic quantity comparisons\":\n    - table \"Recorded values retain their different meanings\":\n      - caption: Recorded values retain their different meanings\n      - rowgroup:\n        - row \"Animal Milk Date Qualification\":\n          - columnheader \"Animal\"\n          - columnheader \"Milk\"\n          - columnheader \"Date\"\n          - columnheader \"Qualification\"\n      - rowgroup:\n        - row \"SYN-001 0 L 2026-09-30 Measured zero\":\n          - cell \"SYN-001\"\n          - cell \"0 L\"\n          - cell \"2026-09-30\"\n          - cell \"Measured zero\"\n        - row \"SYN-002 Not measured 2026-09 Month only\":\n          - cell \"SYN-002\"\n          - cell \"Not measured\"\n          - cell \"2026-09\"\n          - cell \"Month only\"\n        - row \"SYN-003 No record Unknown No inferred absence\":\n          - cell \"SYN-003\"\n          - cell \"No record\"\n          - cell \"Unknown\"\n          - cell \"No inferred absence\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 42,
+        "invalid": null,
+        "name": "Normal field"
+      },
+      {
+        "description": "error",
+        "font": "16px",
+        "height": 42,
+        "invalid": "true",
+        "name": "Invalid field"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 42,
+        "invalid": null,
+        "name": "Readonly"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 42,
+        "invalid": null,
+        "name": "Disabled while resolving a write"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<body class=\"bg-surface-page text-content-primary\"><main style=\"max-width:720px;margin:auto;padding:24px;display:grid;gap:24px\"><header><h1 style=\"font-size:24px;line-height:32px;font-weight:600\">Current UI state specimen</h1><p>Synthetic presentation examples using the compiled Dairy 360 stylesheet. No backend or saves.</p><button class=\"rounded-lg border border-line px-4 py-2\" onclick=\"document.documentElement.classList.toggle('dark')\">Toggle light / dark</button></header><section class=\"field-group\"><label for=\"normal\">Normal field</label><input id=\"normal\" class=\"border border-control bg-surface-raised rounded-lg px-3 py-2\" value=\"Synthetic long name with several words for narrow layout review\"><p class=\"text-sm text-content-muted\">Persistent help stays next to its control.</p></section><section class=\"field-group\"><label for=\"invalid\">Invalid field</label><input id=\"invalid\" aria-invalid=\"true\" aria-describedby=\"error\" class=\"border border-control bg-surface-raised rounded-lg px-3 py-2\" value=\"Raw value retained\"><p id=\"error\" class=\"text-sm text-danger-fg\">This synthetic identifier is already in use. Choose another identifier.</p></section><section class=\"field-group\"><label for=\"readonly\">Readonly</label><input id=\"readonly\" readonly=\"\" value=\"Saved revision 3\" class=\"border border-control bg-surface-raised rounded-lg px-3 py-2\"><label for=\"disabled\">Disabled while resolving a write</label><input id=\"disabled\" disabled=\"\" value=\"Request locked\" class=\"border border-control bg-surface-sunken rounded-lg px-3 py-2\"></section><section><button aria-busy=\"true\" aria-disabled=\"true\" class=\"rounded-lg bg-surface-sunken text-content-disabled px-4 py-2\">Record payment</button><p class=\"text-sm text-content-muted\">Busy: keep the action label. This specimen performs no operation.</p></section><section class=\"rounded-xl border border-line p-4\"><h2 style=\"font-size:18px;line-height:24px\">Empty search</h2><p>No matching crops.</p><button class=\"underline\" onclick=\"this.nextElementSibling.hidden=false\">Clear filters</button><p hidden=\"\">Filters cleared in this specimen.</p></section><section role=\"alert\" class=\"rounded-xl border border-danger-line bg-danger-bg text-danger-fg p-4\">Could not refresh. Previous results may be stale. Your draft remains available.</section><section><h2 style=\"font-size:18px;line-height:24px\">Numbers and uncertainty</h2><div role=\"region\" aria-label=\"Synthetic quantity comparisons\" tabindex=\"0\" style=\"overflow:auto\"><table style=\"min-width:560px;width:100%;text-align:left\"><caption>Recorded values retain their different meanings</caption><thead><tr><th>Animal</th><th>Milk</th><th>Date</th><th>Qualification</th></tr></thead><tbody><tr><td>SYN-001</td><td class=\"font-mono tabular-nums\">0 L</td><td>2026-09-30</td><td>Measured zero</td></tr><tr><td>SYN-002</td><td>Not measured</td><td>2026-09</td><td>Month only</td></tr><tr><td>SYN-003</td><td>No record</td><td>Unknown</td><td>No inferred absence</td></tr></tbody></table></div></section></main></body>",
+    "height": 1000,
+    "regions": [
+      {
+        "label": "Synthetic quantity comparisons",
+        "scrollWidth": 672,
+        "tabindex": "0",
+        "width": 672
+      }
+    ],
+    "width": 1440
+  }
+}

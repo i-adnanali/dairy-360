@@ -1,0 +1,49 @@
+{
+  "url": "http://localhost:6512/labour/people/per_6cf610e9-a065-4460-89b3-381db5be898f",
+  "snapshot": "- banner:\n  - heading [level=1]: Dairy 360\n  - generic: harness · in memory\n  - button: Recording as synthetic-audit · Direct entry\n  - button [expanded]:\n    - text: Menu\n    - generic: · Labour\n  - button: Search\n  - button: dark\n  - button: Assistant\n  - navigation:\n    - link:\n      - /url: /\n      - text: Today\n    - link:\n      - /url: /analytics\n      - text: Analytics\n    - link:\n      - /url: /animals\n      - text: Herd\n    - link:\n      - /url: /animals\n      - text: Animals\n    - link:\n      - /url: /animals/calvings\n      - text: Calvings\n    - link:\n      - /url: /animals/health\n      - text: Health\n    - link:\n      - /url: /milk/milking\n      - text: Milk\n    - link:\n      - /url: /milk/milking\n      - text: Milking\n    - link:\n      - /url: /milk/dispatch\n      - text: Dispatch\n    - link:\n      - /url: /milk/buyers\n      - text: Buyers\n    - link:\n      - /url: /feed\n      - text: Feed\n    - link:\n      - /url: /feed\n      - text: Overview\n    - link:\n      - /url: /feed/crops\n      - text: Crops\n    - link:\n      - /url: /feed/purchases\n      - text: Purchases\n    - link:\n      - /url: /feed/daily\n      - text: Daily history\n    - link:\n      - /url: /labour/people\n      - text: Labour\n    - link:\n      - /url: /labour/people\n      - text: People\n    - link:\n      - /url: /labour/payroll\n      - text: Payroll\n    - link:\n      - /url: /check\n      - text: Check\n- navigation:\n  - link:\n    - /url: /labour/people\n    - text: People\n  - link:\n    - /url: /labour/payroll\n    - text: Payroll\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- main:\n  - link:\n    - /url: /labour/people\n    - text: ← People\n  - heading [level=2]: Imran imran\n  - paragraph: Rs 7,000.00 owed.\n  - paragraph: 1 open employment stint(s)\n  - link:\n    - /url: \"#person-payment\"\n    - text: Record payment or adjustment\n  - heading [level=3]: Record a payment\n  - paragraph: Payments settle the balance; wages earned are recorded in Payroll. Adjustments change the balance without recording a payment.\n  - generic: Amount, date and method\n  - text: Method\n  - radiogroup:\n    - radio:\n      - generic: \"1\"\n      - generic: Cash\n    - radio:\n      - generic: \"2\"\n      - generic: Bank\n    - radio [checked]:\n      - generic: \"3\"\n      - generic: Adjustment\n      - generic: signed, must say why\n  - generic: The only signed kind, and it must say why. This is also how a deduction is recorded — damage, or milk taken above the allowance — because those reduce what the farm owes. A positive figure reduces the balance.\n  - generic: Amount (Rs)\n  - textbox: \"-12.\"\n  - generic: Rs\n  - generic: \"On\"\n  - textbox: 2026-10-01\n  - generic: Reference (optional)\n  - textbox:\n    - /placeholder: peshgi\n  - generic: Reason and recorder\n  - generic: Note (required)\n  - textbox: Synthetic long adjustment explanation retained during navigation recovery\n  - generic: Handed over by (optional)\n  - combobox\n  - generic: Person who handed over this payment, if known. Use a stable identifier, not a display name.\n  - button [disabled]: Record payment\n  - heading [level=3]: Stints\n  - list:\n    - generic: Salaried· milker\n    - generic: 2026-01-01 → open\n    - paragraph: Rs 25,000.00 / month · accommodation · 20 kg flour / month · 2 L milk / day\n    - button: Close this stint\n  - heading [level=3]: Statement\n  - generic: 2026-09\n  - generic: earned Rs 22,000.00 · paid Rs 0.00 · closing Rs 22,000.00\n  - list:\n    - generic: Wage 2026-09-01 → 2026-09-30· four days leave\n    - generic: Rs 22,000.00\n  - generic: 2026-10\n  - generic: earned Rs 0.00 · paid Rs 15,000.00 · closing Rs 7,000.00\n  - list:\n    - generic: Paid 2026-10-01 cash\n    - generic: − Rs 15,000.00\n- dialog \"Discard unsaved changes?\":\n  - heading \"Discard unsaved changes?\" [level=2]\n  - paragraph: \"Person payment: your changes have not been saved. Discarding removes these changes.\"\n  - paragraph: Leaving discards this draft. Keep editing to retain your entries.\n  - button \"Keep editing\" [active]\n  - button \"Discard changes\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Amount (Rs)Rs"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "On"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Reference (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Note (required)"
+      },
+      {
+        "description": "identifier-list-observed_by-0-help",
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Handed over by (optional)"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<button appbutton=\"\" variant=\"secondary\" data-role=\"keep-editing\" class=\"bg-surface-raised border border-line disabled:!bg-surface-sunken disabled:!text-content-disabled disabled:cursor-not-allowed disabled:hover:!bg-surface-sunken focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page focus:outline-none font-medium hover:bg-surface-sunken px-4 py-2 rounded-lg text-content-heading text-sm transition-colors\"> Keep editing </button>",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

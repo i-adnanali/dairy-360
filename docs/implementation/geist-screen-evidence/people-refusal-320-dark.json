@@ -1,0 +1,77 @@
+{
+  "url": "http://localhost:6512/labour/people",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Labour\": Menu\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"People\":\n    - /url: /labour/people\n  - link \"Payroll\":\n    - /url: /labour/payroll\n- main:\n  - heading \"People\" [level=2]\n  - link \"Add person\":\n    - /url: \"#add-person\"\n  - link \"Open stint\":\n    - /url: \"#open-stint\"\n  - paragraph: People, employment stints and balances. Add a person first, then open a stint if they work here.\n  - text: Search records\n  - searchbox \"Search records\"\n  - region \"People and balances\":\n    - table:\n      - rowgroup:\n        - row \"Person Owed Last paid\":\n          - columnheader \"Person\"\n          - columnheader \"Owed\"\n          - columnheader \"Last paid\"\n      - rowgroup:\n        - row \"abdul Abdul settled 2026-10-01\":\n          - cell \"abdul Abdul\":\n            - link \"abdul\":\n              - /url: /labour/people/per_cfd249a9-216f-41b7-af9a-ac4a6eab6549\n            - generic: Abdul\n          - cell \"settled\"\n          - cell \"2026-10-01\"\n        - row \"imran Imran Rs 7,000.00 2026-10-01\":\n          - cell \"imran Imran\":\n            - link \"imran\":\n              - /url: /labour/people/per_6cf610e9-a065-4460-89b3-381db5be898f\n            - generic: Imran\n          - cell \"Rs 7,000.00\"\n          - cell \"2026-10-01\"\n        - row \"rashid Rashid Rs 1,200.00 in advance 2026-09-01\":\n          - cell \"rashid Rashid\":\n            - link \"rashid\":\n              - /url: /labour/people/per_135c4257-b019-48b5-81e4-8e56ae03b657\n            - generic: Rashid\n          - cell \"Rs 1,200.00 in advance\"\n          - cell \"2026-09-01\"\n  - navigation \"People pagination\":\n    - generic: 1–3 of 3\n  - heading \"Add a person\" [level=3]\n  - text: Identifier\n  - textbox \"Identifier\" [active]:\n    - /placeholder: imran\n    - text: imran\n  - generic: Permanent and unique; used on records and in “observed by”. Cannot be changed later.\n  - generic: \"'imran' is already Imran. Identifiers are matched without regard to case, so 'imran' and 'imran' would be the same person.\"\n  - generic: Display name (optional)\n  - textbox \"Display name (optional)\":\n    - /placeholder: Imran\n  - generic: Contact (optional)\n  - textbox \"Contact (optional)\"\n  - button \"Add person\"\n  - heading \"Open a stint\" [level=3]\n  - paragraph: For rehire, open a new stint to keep earlier pay terms separate. Concurrent stints are allowed for different roles.\n  - text: Find person by identifier or name\n  - searchbox \"Find person by identifier or name\"\n  - text: Person\n  - combobox \"Person\":\n    - option \"Choose…\" [selected]\n    - option \"abdul · Abdul\"\n    - option \"imran · Imran\"\n    - option \"rashid · Rashid\"\n  - text: Kind\n  - radiogroup \"Engagement kind\":\n    - radio \"Salaried\" [checked]:\n      - generic: \"1\"\n      - generic: Salaried\n      - generic: on every monthly run\n    - radio \"Dihari\":\n      - generic: \"2\"\n      - generic: Dihari\n      - generic: per day, when hired\n  - generic: Salaried people are on every monthly run and must be answered. Dihari are not a row until they worked a day.\n  - generic: Role (optional)\n  - textbox \"Role (optional)\":\n    - /placeholder: milker\n  - text: Started on\n  - textbox \"Started on\": 2026-10-01\n  - button \"Open stint\" [disabled]",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Search records "
+      },
+      {
+        "description": "person-identifier-help person-identifier-error",
+        "font": "16px",
+        "height": 44,
+        "invalid": "true",
+        "name": "Identifier"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Display name (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Contact (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find person by identifier or name "
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "PersonChoose…abdul · Abdulimran · Imranrashid · Rashid"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Role (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Started on"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 320,
+    "focus": "<input id=\"person-identifier\" name=\"identifier\" appinput=\"\" density=\"comfortable\" placeholder=\"imran\" autocomplete=\"off\" class=\"w-full font-mono aria-[invalid=true]:border-danger-fg border border-line-control focus:border-focus focus:outline-none focus:shadow-[0_0_0_1px_rgb(var(--focus-ring))] px-3 py-2 rounded-lg text-sm\" aria-describedby=\"person-identifier-help person-identifier-error\" aria-invalid=\"true\">",
+    "height": 800,
+    "regions": [
+      {
+        "label": "People and balances",
+        "scrollWidth": 330,
+        "tabindex": "0",
+        "width": 288
+      }
+    ],
+    "width": 320
+  }
+}

@@ -125,6 +125,7 @@ import { formatMinor, rupeesToMinor } from './money';
         </p>
       }
       @if (entity() === 'purchases' || entity() === 'expenses') {
+        <h4 class="font-medium">{{ entity() === 'purchases' ? 'Item and delivery' : 'Expense date' }}</h4>
         <label class="block"
           ><span appFieldLabel>{{ entity() === 'purchases' ? 'Delivery' : 'Expense' }} date</span
           ><input appInput type="date" name="on" [(ngModel)]="draft.on" required
@@ -134,7 +135,6 @@ import { formatMinor, rupeesToMinor } from './money';
         </p>
       }
       @if (entity() === 'purchases') {
-        <h4 class="font-medium">Item and delivery</h4>
         <label class="block"
           ><span appFieldLabel>Feed item</span
           ><select appInput name="item_id" [(ngModel)]="draft.item_id">
@@ -151,6 +151,7 @@ import { formatMinor, rupeesToMinor } from './money';
           ><span appFieldLabel>Supplier (optional)</span
           ><input appInput name="supplier" [(ngModel)]="draft.supplier" class="w-full"
         /></label>
+        <h4 class="font-medium">Quantity and original unit</h4>
         <div class="grid gap-4 sm:grid-cols-2">
           <label
             ><span appFieldLabel>Quantity (optional)</span
@@ -173,6 +174,7 @@ import { formatMinor, rupeesToMinor } from './money';
           /></label>
         </div>
         <p appHelp>Blank quantity means unmeasured. A bag or container has no inferred weight.</p>
+        <h4 class="font-medium">Price agreement</h4>
         <label class="block"
           ><span appFieldLabel>Pricing</span
           ><select appInput name="pricing" [(ngModel)]="draft.pricing">
@@ -220,6 +222,7 @@ import { formatMinor, rupeesToMinor } from './money';
             ><span class="input-group"><input appInput type="number" step="0.01" name="goods" [(ngModel)]="goods"
           /><span class="input-unit" aria-hidden="true">Rs</span></span></label>
         }
+        <h4 class="font-medium">Additional charges</h4>
         <div class="grid gap-4 sm:grid-cols-2">
           <label
             ><span appFieldLabel>Transport (Rs)</span

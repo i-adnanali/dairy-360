@@ -1,0 +1,28 @@
+{
+  "url": "http://localhost:6512/feed/crops",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Feed\":\n    - text: Menu\n    - generic: · Feed\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- main:\n  - heading \"Fodder crops\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - button \"Feed catalogue\"\n  - generic: Find crop\n  - searchbox \"Find crop\"\n  - generic: Lifecycle\n  - combobox \"Lifecycle\":\n    - option \"All statuses\"\n    - option \"Growing\"\n    - option \"Cutting\"\n    - option \"Finished\"\n    - option \"Archived\" [selected]\n  - button \"Clear filters\" [active]\n  - paragraph: No crops match these filters.\n  - button \"Clear filters\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find crop"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "LifecycleAll statusesGrowingCuttingFinishedArchived"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<button appbutton=\"\" variant=\"secondary\" class=\"bg-surface-raised border border-line disabled:!bg-surface-sunken disabled:!text-content-disabled disabled:cursor-not-allowed disabled:hover:!bg-surface-sunken focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page focus:outline-none font-medium hover:bg-surface-sunken px-4 py-2 rounded-lg text-content-heading text-sm transition-colors\">Clear filters</button>",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

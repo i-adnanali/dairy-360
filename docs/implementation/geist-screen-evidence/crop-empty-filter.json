@@ -1,0 +1,28 @@
+{
+  "url": "http://localhost:6512/feed/crops",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Feed\":\n    - text: Menu\n    - generic: · Feed\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"Overview\":\n    - /url: /feed\n  - link \"Crops\":\n    - /url: /feed/crops\n  - link \"Purchases\":\n    - /url: /feed/purchases\n  - link \"Daily history\":\n    - /url: /feed/daily\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- main:\n  - heading \"Fodder crops\" [level=2]\n  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.\n  - link \"Add crop\":\n    - /url: /feed/crops/new\n  - button \"Feed catalogue\"\n  - generic: Find crop\n  - searchbox \"Find crop\" [active]: no-synthetic-match\n  - generic: Lifecycle\n  - combobox \"Lifecycle\":\n    - option \"All statuses\" [selected]\n    - option \"Growing\"\n    - option \"Cutting\"\n    - option \"Finished\"\n    - option \"Archived\"\n  - button \"Clear filters\"\n  - paragraph: No crops match these filters.\n  - button \"Clear filters\"",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Find crop"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "LifecycleAll statusesGrowingCuttingFinishedArchived"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<input appinput=\"\" type=\"search\" class=\"ng-untouched ng-valid aria-[invalid=true]:border-danger-fg border border-line-control focus:border-focus focus:outline-none focus:shadow-[0_0_0_1px_rgb(var(--focus-ring))] px-2 py-1.5 rounded-lg text-sm ng-dirty\">",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

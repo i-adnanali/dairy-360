@@ -1,0 +1,64 @@
+{
+  "url": "http://localhost:6516/chat",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Menu · Today\":\n    - text: Menu\n    - generic: · Today\n  - button \"Search\"\n  - 'button \"Theme: dark. Switch to system.\"': dark\n  - button \"Assistant\"\n- button \"Start a recording session\"\n- main:\n  - heading \"Assistant\" [level=2]\n  - paragraph: Ask about records or review a proposed action before authorizing it.\n  - generic: Answer ready.\n  - generic: chart confirm\n  - region \"Assistant message\":\n    - paragraph: \"Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm.\"\n  - heading \"Synthetic herd — daily yield\" [level=3]\n  - generic: 2 points\n  - button \"Hide data for Synthetic herd\" [expanded]:\n    - text: Hide data\n    - generic: for Synthetic herd\n  - region \"Assistant chart data\":\n    - table \"Synthetic herd · day · equivalent chart data\":\n      - caption: Synthetic herd · day · equivalent chart data\n      - rowgroup:\n        - row \"Period Total litres Average per animal (L)\":\n          - columnheader \"Period\"\n          - columnheader \"Total litres\"\n          - columnheader \"Average per animal (L)\"\n      - rowgroup:\n        - row \"2026-09-17 0 0\":\n          - rowheader \"2026-09-17\"\n          - cell \"0\"\n          - cell \"0\"\n        - row \"2026-09-18 12 6\":\n          - rowheader \"2026-09-18\"\n          - cell \"12\"\n          - cell \"6\"\n  - button \"log_milking Rejected\":\n    - generic: log_milking\n    - generic: Rejected\n  - paragraph: Rejected by operator; operation not authorized.\n  - region \"Assistant message\":\n    - paragraph: Synthetic decision received. No farm data was modified.\n  - generic: confirm\n  - region \"Assistant message\":\n    - paragraph: \"Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm.\"\n  - button \"log_milking Success\":\n    - generic: log_milking\n    - generic: Success\n  - region \"Assistant message\":\n    - paragraph: Synthetic decision received. No farm data was modified.\n  - generic: Rejected\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Action details\"\n  - status: Rejected · Rejected by operator; this operation was not authorized.\n  - generic: Recorded\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Action details\"\n  - status [active]: Recorded · The operation returned a successful result.\n  - paragraph: Enter to send · Shift+Enter for a new line\n  - textbox \"Message to Dairy 360 assistant\":\n    - /placeholder: Ask about the herd, or request an action…\n  - button \"Send\" [disabled]",
+  "geometry": {
+    "controls": [
+      {
+        "description": "assistant-composer-help",
+        "font": "16px",
+        "height": 58,
+        "invalid": null,
+        "name": "Message to Dairy 360 assistant"
+      }
+    ],
+    "dark": true,
+    "documentWidth": 390,
+    "focus": "<p role=\"status\" tabindex=\"-1\" data-role=\"decision-status\" class=\"text-sm\" data-tool-use-id=\"fixture-3-write\"> Recorded · The operation returned a successful result. </p>",
+    "height": 844,
+    "regions": [
+      {
+        "label": "Assistant message",
+        "scrollWidth": 326,
+        "tabindex": null,
+        "width": 326
+      },
+      {
+        "label": "Assistant chart data",
+        "scrollWidth": 292,
+        "tabindex": null,
+        "width": 292
+      },
+      {
+        "label": "Assistant message",
+        "scrollWidth": 326,
+        "tabindex": null,
+        "width": 326
+      },
+      {
+        "label": "Assistant message",
+        "scrollWidth": 326,
+        "tabindex": null,
+        "width": 326
+      },
+      {
+        "label": "Assistant message",
+        "scrollWidth": 326,
+        "tabindex": null,
+        "width": 326
+      },
+      {
+        "label": "Proposed operation rows",
+        "scrollWidth": 290,
+        "tabindex": null,
+        "width": 290
+      },
+      {
+        "label": "Proposed operation rows",
+        "scrollWidth": 290,
+        "tabindex": null,
+        "width": 290
+      }
+    ],
+    "width": 390
+  }
+}

@@ -1,3 +1,4 @@
+import { precisionParts } from './precision-display';
 import { writerDraft } from './writer-draft';
 import { WriteLock } from './write-lock';
 // Correct a calving's date. The paired (or triple) correction.
@@ -62,6 +63,7 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
               <button
                 type="button"
                 [attr.data-calving]="c.id"
+                [attr.aria-pressed]="target() === c.id"
                 (click)="target.set(c.id)"
                 class="flex w-full items-baseline gap-3 rounded-lg border px-3 py-2 text-left text-sm"
                 [class]="
@@ -70,9 +72,8 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
                     : 'border-line bg-surface-raised hover:border-line-strong'
                 "
               >
-                <span class="font-medium">{{ c.occurred_on }}</span>
-                <span appHelp size="xs">({{ c.date_precision }})</span>
-                <span class="ml-auto font-mono text-xs text-content-subtle">{{ c.id }}</span>
+                <span class="font-medium">Calving · {{ dateLabel(c.occurred_on, c.date_precision) }}</span>
+
               </button>
             }
           </div>
@@ -83,6 +84,15 @@ const FIELDS = ['calving_event_id', 'occurred_on', 'date_precision'] as const;
       </div>
 
       @if (target()) {
+        @if (selected(); as selected) {
+          <section appCard aria-label="Correction comparison" class="space-y-2">
+            <h3 class="font-medium">Review the date change</h3>
+            <p>Current: {{ dateLabel(selected.occurred_on, selected.date_precision) }}</p>
+            <p>Proposed: {{ proposedDate() }}</p>
+            <details><summary>Source event</summary><p class="break-all font-mono text-xs">{{ selected.id }}</p></details>
+          </section>
+        }
+
         <app-precision-date
           label="What is the date actually?"
           [error]="state.fieldError('occurred_on') ?? state.fieldError('date_precision')"
@@ -241,6 +251,15 @@ export class CorrectionForm {
   }>();
 
   protected readonly target = signal('');
+  protected readonly selected = computed(() => this.correctable().find(c => c.id === this.target()));
+  protected dateLabel(on: string | null, precision: TimelineEvent['date_precision']) {
+    const date = precisionParts(on, precision);
+    return [date.figure, date.qualifier].filter(Boolean).join(' ');
+  }
+  protected proposedDate() {
+    const entry = this.when();
+    return entry.status === 'complete' ? this.dateLabel(entry.value.occurred_on, entry.value.date_precision) : 'Enter a complete corrected date';
+  }
   protected readonly when = signal<DateEntry>({ status: 'empty' });
   protected readonly notes = signal('');
   protected readonly allowDuplicate = signal(false);

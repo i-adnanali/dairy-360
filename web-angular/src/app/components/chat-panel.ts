@@ -42,10 +42,9 @@ import { Button } from '../ui/button';
              The <h2> is a heading level down as well. The shell's <h1> is
              "Animal registry"; two <h1>s on one document is an outline with two
              roots, and a screen reader reads it as two pages. -->
-            <h2 class="text-lg font-semibold tracking-tight">Dairy 360 assistant</h2>
+            <h2 class="text-lg font-semibold tracking-tight">Assistant</h2>
             <p appHelp>
-              Ask about your herd, milk, feed, and health, or your vendors, deliveries, and balances
-              — and take actions with confirmation.
+              Ask about records or review a proposed action before authorizing it.
             </p>
           </header>
         }

@@ -1,0 +1,49 @@
+{
+  "url": "http://localhost:6512/labour/people/per_6cf610e9-a065-4460-89b3-381db5be898f",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"Recording as synthetic-audit · Direct entry\"\n  - button \"Menu · Labour\":\n    - text: Menu\n    - generic: · Labour\n  - button \"Search\"\n  - 'button \"Theme: system. Switch to light.\" [active]': system · light\n  - button \"Assistant\"\n- navigation \"Section views\":\n  - link \"People\":\n    - /url: /labour/people\n  - link \"Payroll\":\n    - /url: /labour/payroll\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- generic: synthetic-long-audit added — open a stint and record what they are on\n- main:\n  - link \"← People\":\n    - /url: /labour/people\n  - heading \"Imran imran\" [level=2]\n  - paragraph: Rs 7,000.00 owed.\n  - paragraph: 1 open employment stint(s)\n  - link \"Record payment or adjustment\":\n    - /url: \"#person-payment\"\n  - heading \"Record a payment\" [level=3]\n  - paragraph: Payments settle the balance; wages earned are recorded in Payroll. Adjustments change the balance without recording a payment.\n  - group \"Amount, date and method\":\n    - generic: Amount, date and method\n    - text: Method\n    - radiogroup \"Payment method\":\n      - radio \"Cash\" [checked]:\n        - generic: \"1\"\n        - generic: Cash\n      - radio \"Bank\":\n        - generic: \"2\"\n        - generic: Bank\n      - radio \"Adjustment\":\n        - generic: \"3\"\n        - generic: Adjustment\n        - generic: signed, must say why\n    - generic: Amount (Rs)\n    - textbox \"Amount (Rs)\"\n    - generic: Rs\n    - generic: \"On\"\n    - textbox \"On\": 2026-10-01\n    - generic: Reference (optional)\n    - textbox \"Reference (optional)\":\n      - /placeholder: peshgi\n  - group \"Reason and recorder\":\n    - generic: Reason and recorder\n    - generic: Note (optional)\n    - textbox \"Note (optional)\"\n    - generic: Handed over by (optional)\n    - combobox \"Handed over by (optional)\"\n    - generic: Person who handed over this payment, if known. Use a stable identifier, not a display name.\n  - button \"Record payment\" [disabled]\n  - heading \"Stints\" [level=3]\n  - list:\n    - generic: Salaried· milker\n    - generic: 2026-01-01 → open\n    - paragraph: Rs 25,000.00 / month · accommodation · 20 kg flour / month · 2 L milk / day\n    - button \"Close this stint\"\n  - heading \"Statement\" [level=3]\n  - generic: 2026-09\n  - generic: earned Rs 22,000.00 · paid Rs 0.00 · closing Rs 22,000.00\n  - list:\n    - generic: Wage 2026-09-01 → 2026-09-30· four days leave\n    - generic: Rs 22,000.00\n  - generic: 2026-10\n  - generic: earned Rs 0.00 · paid Rs 15,000.00 · closing Rs 7,000.00\n  - list:\n    - generic: Paid 2026-10-01 cash\n    - generic: − Rs 15,000.00",
+  "geometry": {
+    "controls": [
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "Amount (Rs)Rs"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": "On"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Reference (optional)"
+      },
+      {
+        "description": null,
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Note (optional)"
+      },
+      {
+        "description": "identifier-list-observed_by-0-help",
+        "font": "16px",
+        "height": 44,
+        "invalid": null,
+        "name": " Handed over by (optional)"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 390,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: system. Switch to light.\"><span data-role=\"theme-mode\" class=\"capitalize\">system</span><span data-role=\"theme-resolved\" class=\"text-content-subtle\"> · light </span><!----></button>",
+    "height": 844,
+    "regions": [],
+    "width": 390
+  }
+}

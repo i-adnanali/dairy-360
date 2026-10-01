@@ -120,6 +120,24 @@ describe('Owner analytics', () => {
     expect(f.componentInstance.chartData().datasets[0].data[1]).toBeNull();
     expect(el.querySelector('app-pagination')?.textContent).toContain('1–25 of 63');
   });
+  it('moves the date inspector without losing the period and search context', async () => {
+    const f = await mount(async () => report());
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { view: 'month', on: '2026-09-14', search: 'Noor', detailOn: '2026-09-14', detailSession: 'morning' } });
+    await f.whenStable();
+    (f.componentInstance as any).moveBucket(1);
+    await f.whenStable();
+    expect(router.url).toContain('detailSession=evening');
+    expect(router.url).toContain('view=month');
+    expect(router.url).toContain('search=Noor');
+    f.detectChanges();
+    const inspector = Array.from(f.nativeElement.querySelectorAll('select') as NodeListOf<HTMLSelectElement>)
+      .find(select => select.closest('label')?.textContent?.includes('Inspect date'))!;
+    expect(inspector.value).toBe('2026-09-14|evening');
+    (f.componentInstance as any).moveBucket(1);
+    await f.whenStable();
+    expect(router.url).toContain('detailSession=evening');
+  });
   it('pages through the API and resets page when a filter changes', async () => {
     const api = vi.fn(async (q: Record<string, string>) => {
       const r = report();

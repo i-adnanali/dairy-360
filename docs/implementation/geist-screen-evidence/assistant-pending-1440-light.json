@@ -1,0 +1,34 @@
+{
+  "url": "http://localhost:6516/chat",
+  "snapshot": "- banner:\n  - heading \"Dairy 360\" [level=1]\n  - generic: harness · in memory\n  - button \"browsing — nothing is being recorded\":\n    - text: browsing\n    - generic: — nothing is being recorded\n  - button \"Search ⌘K\"\n  - 'button \"Theme: light. Switch to dark.\" [active]': light\n  - button \"Assistant\"\n  - navigation \"Sections\":\n    - link \"Today\":\n      - /url: /\n    - link \"Analytics\":\n      - /url: /analytics\n    - link \"Herd\":\n      - /url: /animals\n    - link \"Milk\":\n      - /url: /milk/milking\n    - link \"Feed\":\n      - /url: /feed\n    - link \"Labour\":\n      - /url: /labour/people\n    - link \"Check\":\n      - /url: /check\n- button \"Start a recording session\"\n- main:\n  - heading \"Assistant\" [level=2]\n  - paragraph: Ask about records or review a proposed action before authorizing it.\n  - generic: One change is waiting for your approval.\n  - generic: chart confirm\n  - region \"Assistant message\":\n    - paragraph: \"Synthetic assistant fixture. Try: long, streaming, error, tools, chart, no data, confirm.\"\n  - heading \"Synthetic herd — daily yield\" [level=3]\n  - generic: 2 points\n  - button \"Show data for Synthetic herd\":\n    - text: Show data\n    - generic: for Synthetic herd\n  - button \"log_milking Awaiting approval\":\n    - generic: log_milking\n    - generic: Awaiting approval\n  - generic: Approval requested\n  - paragraph: Record 6 L for synthetic animal SYN-001\n  - generic \"Review proposed changes\"\n  - term: Target\n  - definition: SYN-001 · Synthetic only\n  - term: Date\n  - definition: 2026-09-17\n  - term: Session\n  - definition: morning\n  - region \"Proposed operation rows\":\n    - table:\n      - rowgroup:\n        - row \"Animal Value\":\n          - columnheader \"Animal\"\n          - columnheader \"Value\"\n      - rowgroup:\n        - row \"SYN-001 6 L\":\n          - cell \"SYN-001\"\n          - cell \"6 L\"\n  - generic \"Technical operation\"\n  - button \"Approve proposed action\"\n  - button \"Reject\"\n  - paragraph: Assistant busy or awaiting approval; sending is unavailable.\n  - textbox \"Message to Dairy 360 assistant\" [disabled]:\n    - /placeholder: Resolve the pending action above to continue…\n  - button \"Send\" [disabled]",
+  "geometry": {
+    "controls": [
+      {
+        "description": "assistant-composer-help",
+        "font": "14px",
+        "height": 44,
+        "invalid": null,
+        "name": "Message to Dairy 360 assistant"
+      }
+    ],
+    "dark": false,
+    "documentWidth": 1440,
+    "focus": "<button type=\"button\" data-role=\"theme-toggle\" class=\"rounded-lg px-2 py-1 text-xs font-medium text-content-muted hover:bg-surface-sunken hover:text-content-heading focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page\" aria-label=\"Theme: light. Switch to dark.\"><span data-role=\"theme-mode\" class=\"capitalize\">light</span><!----></button>",
+    "height": 1000,
+    "regions": [
+      {
+        "label": "Assistant message",
+        "scrollWidth": 540,
+        "tabindex": null,
+        "width": 540
+      },
+      {
+        "label": "Proposed operation rows",
+        "scrollWidth": 617,
+        "tabindex": null,
+        "width": 617
+      }
+    ],
+    "width": 1440
+  }
+}

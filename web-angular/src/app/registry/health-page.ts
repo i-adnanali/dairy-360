@@ -161,10 +161,15 @@ import { FieldLabel, HelpText } from '../ui/text';
               }}
               {{ session.recordedBy() }} · {{ session.sourceForm() }}
             </p>
+            <p appHelp>Return to the task board using Close; unsaved changes remain protected.</p>
             <form class="space-y-4" (ngSubmit)="save()">
               <fieldset [disabled]="locked()" class="space-y-4">
                 <div class="rows">
                   @for (f of fields[editEntity]; track f.key) {
+                    @if (editEntity === 'administrations' && f.key === 'details_unknown') {
+                      <h4 class="health-editor-section font-semibold">Historical details and exceptions</h4>
+                      <div class="health-editor-section"><button appButton variant="secondary" type="button" [attr.aria-expanded]="showDoseExceptions" (click)="showDoseExceptions = !showDoseExceptions">{{ showDoseExceptions ? 'Hide blank exception fields' : 'Add outside-ownership or duplicate-dose explanation' }}</button></div>
+                    }
                     @if (editEntity === 'administrations' && f.key === 'dose_label') { <h4 class="health-editor-section font-semibold">Identity and date</h4> }
                     @if (editEntity === 'administrations' && f.key === 'product_id') { <h4 class="health-editor-section font-semibold">Administration</h4> }
                     @if (f.key === 'date_precision') {
@@ -175,7 +180,7 @@ import { FieldLabel, HelpText } from '../ui/text';
                         (changed)="dateChanged($event)"
                       />
                     } @else if (f.key !== 'occurred_on' && f.key !== 'occurred_time') {
-                      <div class="field-group">
+                      <div class="field-group" [hidden]="!showField(f.key)">
                         <label appFieldLabel [for]="'health-' + f.key">{{ f.label }}</label>
                         @if (f.reference && options(f.reference).length > 10) {
                           <label class="text-sm" [for]="'health-search-' + f.key">Find {{ f.label.toLowerCase() }}</label>
@@ -301,6 +306,7 @@ import { FieldLabel, HelpText } from '../ui/text';
                     </fieldset>
                   }
                 }
+                <h4 class="font-semibold">Evidence</h4>
                 <label
                   ><span appFieldLabel>Source reference / prescription number</span
                   ><input appInput name="source_ref" [(ngModel)]="form.source_ref"
@@ -786,6 +792,14 @@ export class HealthPage {
   protected busy = signal(false);
   protected revisions = signal<any[]>([]);
   protected fields = HEALTH_FIELDS;
+  protected showDoseExceptions = false;
+  protected showField(key: string) {
+    if (this.editEntity !== 'administrations') return true;
+    if (this.form[key] || this.writeState.fieldError(key)) return true;
+    if (key === 'unknown_reason') return !!this.form.details_unknown;
+    if (key === 'external_history_reason' || key === 'duplicate_reason') return this.showDoseExceptions;
+    return true;
+  }
   protected entities = Object.keys(HEALTH_FIELDS);
   protected entity = 'visits';
   protected editEntity = 'visits';
@@ -903,7 +917,7 @@ export class HealthPage {
         owner: 'health',
         context: () => this.editEntity + '/' + (this.editing?.id ?? 'new'),
         description: () =>
-          'Health · ' + this.editEntity + (this.form.animal_id ? ' · ' + this.form.animal_id : ''),
+          this.writeState.uncertain() ? 'The health save outcome is unknown. Resolve it before leaving.' : this.locked() ? 'The health record is being saved. Wait for its result.' : (this.roundOpen ? 'Vaccination round' : this.actionTask ? 'Health task change' : this.editEntity === 'administrations' ? 'Dose record' : this.entityLabel(this.editEntity, true)) + (this.form.animal_id ? ' for ' + this.form.animal_id : '') + ': these changes have not been saved.',
         snapshot: () =>
           JSON.stringify([
             this.form,
@@ -1045,6 +1059,7 @@ export class HealthPage {
   protected async create(entity: string, initial: Record<string, any> = {}) {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
+    this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = entity;
     this.editing = null;
@@ -1069,6 +1084,7 @@ export class HealthPage {
   protected async edit(r: HealthRecord) {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
+    this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = r.entity;
     this.editing = structuredClone(r);
@@ -1133,6 +1149,7 @@ export class HealthPage {
   protected async closeDrafts() {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
+    this.showDoseExceptions = false;
     this.editorOrigin?.focus();
   }
   protected closeEditor() {
@@ -1141,6 +1158,7 @@ export class HealthPage {
   protected async openRound() {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
+    this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.roundOpen = true;
     setTimeout(() => document.querySelector<HTMLElement>('#health-round select')?.focus());
@@ -1148,6 +1166,7 @@ export class HealthPage {
   protected async openAction(t: HealthRecord) {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
+    this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.actionTask = t;
     setTimeout(() => document.querySelector<HTMLElement>('#health-action select')?.focus());

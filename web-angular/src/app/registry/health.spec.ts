@@ -50,6 +50,32 @@ describe('health management', () => {
     expect(c.visibleTasks().map((t: any) => t.id)).toEqual(['cancelled']);
   });
 
+  it('reveals dose exceptions without erasing entered historical explanations', async () => {
+    const f = TestBed.createComponent(HealthPage), c = f.componentInstance as any;
+    await f.whenStable();
+    TestBed.inject(Session).set('direct_entry', 'operator');
+    await c.create('administrations');
+    await f.whenStable();
+    f.detectChanges();
+    const control = (key: string) => f.nativeElement.querySelector('#health-' + key) as HTMLInputElement;
+    const field = (key: string) => control(key).closest('.field-group') as HTMLElement;
+    expect(field('unknown_reason').hidden).toBe(true);
+    control('details_unknown').click();
+    await f.whenStable();
+    expect(field('unknown_reason').hidden).toBe(false);
+    control('unknown_reason').value = 'Original record lacks the batch';
+    control('unknown_reason').dispatchEvent(new Event('input'));
+    await f.whenStable();
+    control('details_unknown').click();
+    await f.whenStable();
+    expect(field('unknown_reason').hidden).toBe(false);
+    expect(c.form.unknown_reason).toBe('Original record lacks the batch');
+    expect(field('duplicate_reason').hidden).toBe(true);
+    Array.from(f.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>).find(b => b.textContent?.includes('Add outside-ownership'))!.click();
+    await f.whenStable();
+    expect(field('duplicate_reason').hidden).toBe(false);
+  });
+
   it('gates forms and submissions until provenance is set, preserving the draft', async () => {
     const f = TestBed.createComponent(HealthPage),
       c = f.componentInstance as any;
