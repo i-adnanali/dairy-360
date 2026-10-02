@@ -35,3 +35,18 @@ test('Image manifest catches hash, dimensions and snapshot drift', () => {
     assert.equal(checkManifest(root,'manifest.json').length,3);
   } finally {rmSync(root,{recursive:true,force:true});}
 });
+
+test('Local-only targets fail identically in local and clean checkouts', () => {
+  const root = mkdtempSync(join(tmpdir(), 'dairy-doc-scope-'));
+  try {
+    writeFileSync(join(root, 'a.md'), '[local](private.md#review) [published](b.md#target)');
+    writeFileSync(join(root, 'private.md'), '# Review');
+    writeFileSync(join(root, 'b.md'), '# Target');
+    const files = new Set(['a.md', 'b.md']);
+    const withLocalFile = checkMarkdown(root, ['a.md'], files);
+    assert.equal(withLocalFile.errors.length, 1);
+    assert.match(withLocalFile.errors[0], /missing repository target private.md/);
+    rmSync(join(root, 'private.md'));
+    assert.deepEqual(checkMarkdown(root, ['a.md'], files), withLocalFile);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

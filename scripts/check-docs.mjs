@@ -27,7 +27,7 @@ export function markdownInfo(source) {
   });
   return { links, anchors };
 }
-export function checkMarkdown(root, names) {
+export function checkMarkdown(root, names, repositoryFiles) {
   const errors = [], cache = new Map(); let count = 0;
   const info = path => {
     if (!cache.has(path)) cache.set(path, markdownInfo(readFileSync(path, 'utf8')));
@@ -44,7 +44,10 @@ export function checkMarkdown(root, names) {
       catch { errors.push(`${name}: malformed URL ${url}`); continue; }
       const target = path ? resolve(dirname(file), path) : file;
       count++;
-      if (!existsSync(target)) errors.push(`${name}: missing ${url}`);
+      const repositoryPath = relative(root, target).split('\\').join('/');
+      const included = !repositoryFiles || repositoryFiles.has(repositoryPath) ||
+        [...repositoryFiles].some(name => name.startsWith(`${repositoryPath}/`));
+      if (!existsSync(target) || !included) errors.push(`${name}: missing repository target ${url}`);
       else if (fragment && extname(target).toLowerCase() === '.md' && statSync(target).isFile() && !info(target).anchors.has(fragment)) errors.push(`${name}: missing anchor ${url}`);
     }
   }
@@ -99,7 +102,7 @@ export function main(root = resolve(dirname(fileURLToPath(import.meta.url)), '..
   const names = [...new Set(execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {cwd:root,encoding:'utf8'}).split('\0').filter(Boolean))]
     .filter(n => !n.startsWith('docs/reviews/') && existsSync(resolve(root,n)));
   const docs = names.filter(n => /\.md$/i.test(n));
-  const result = checkMarkdown(root, docs);
+  const result = checkMarkdown(root, docs, new Set(names));
   const errors = [...result.errors, ...checkCitations(root,names), ...checkManifest(root)];
   for (const error of errors) console.error(error);
   console.log(`Documentation: ${docs.length} Markdown files, ${result.count} local links; ${errors.length} errors.`);

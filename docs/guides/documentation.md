@@ -16,7 +16,7 @@ Keep historical proposals and delivery measurements in `records/` or existing im
 4. Add a records/decision index entry when preserving an important historical decision. Do not invent approval dates or decision IDs for old work.
 5. Run `npm run check:docs` and `git diff --check`. Run tests for any executable consumers you change.
 
-The checker validates local paths/anchors and image manifest data; it does not prove prose accuracy or external service availability. Link line fragments into source only when useful; prefer a stable source file/function over a line number that will drift.
+The checker validates local paths/anchors against the repository file inventory, excluding local-only review artifacts, and checks image manifest data. Describe intentionally unpublished records as local-only paths rather than checkout links. It does not prove prose accuracy or external service availability. Link line fragments into source only when useful; prefer a stable source file/function over a line number that will drift.
 
 ## Screenshots and validation
 

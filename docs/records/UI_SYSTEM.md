@@ -1731,7 +1731,7 @@ See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) for validation and remaining limitati
 
 ## 20. Design improvements — Batch B1, 2026-09-21
 
-Implemented against `f3c2373` under [implementation specification v1.1](../reviews/design-spec-2026-09-17/IMPLEMENTATION_SPEC.md). [Progress and verification](../implementation/B1-PROGRESS.md) records the historical B1 boundary and remaining acceptance work. See §21 for B2.
+Implemented against `f3c2373` under implementation specification v1.1 (local-only record: `docs/reviews/design-spec-2026-09-17/IMPLEMENTATION_SPEC.md`; intentionally not included in repository checkouts). [Progress and verification](../implementation/B1-PROGRESS.md) records the historical B1 boundary and remaining acceptance work. See §21 for B2.
 
 - Meaningful subtle/absent/no-record text now meets 4.5:1 across page, raised and sunken surfaces in both themes; certainty rules meet 3:1. Superseded event content uses readable subtle text. The contrast command now fails for unexpected failures or unreviewed disabled-text consumers, allowing only six exact held resting-border pairs. Write-log values and border-default are unchanged.
 - Shared Button retains variants and sizes, adds orthogonal danger intent and busy semantics, and gives native disabled controls the same muted treatment. Capture-phase activation blocking prevents custom-disabled/busy buttons and anchors reaching template click handlers. Callers retain save/shortcut guards; this does not replace domain validation.
