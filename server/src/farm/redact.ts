@@ -1,5 +1,5 @@
 // Biometric redaction for the Double Take capture (Cycle 7 FU-3; see
-// docs/Cycle7-fu3-double-take-validation.md finding 6, layer (a)).
+// docs/records/Cycle7-fu3-double-take-validation.md finding 6, layer (a)).
 //
 // Deliberately PURE: no fs, no network, no db -- same discipline as ingest.ts,
 // classify.ts and payloadShape.ts, so redact.test.ts exercises every rule under

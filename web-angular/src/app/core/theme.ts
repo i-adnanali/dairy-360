@@ -1,4 +1,4 @@
-// Light, dark, or whatever the OS says. Phase 3 of docs/UI_SYSTEM.md.
+// Light, dark, or whatever the OS says. Phase 3 of docs/records/UI_SYSTEM.md.
 //
 // ---------------------------------------------------------------------------
 // THREE STATES, NOT TWO, AND `system` IS THE DEFAULT

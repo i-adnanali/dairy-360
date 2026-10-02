@@ -78,7 +78,7 @@ Usage:
                    READ-ONLY and never migrated -- this is how a backup taken by
                    \`npm run registry:backup -w server\` gets checked.
 
-Checks invariants 0-28 from docs/REGISTRY.md against server/dairy.db, then
+Checks invariants 0-28 from docs/records/REGISTRY.md against server/dairy.db, then
 prints the precision histogram and the calving-interval report. Needs no
 running server.
 `.trim();

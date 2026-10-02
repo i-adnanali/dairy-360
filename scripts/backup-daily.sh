@@ -5,7 +5,7 @@
 #   scripts/backup-daily.sh [destination-repo]
 #
 # Run by the launchd agent com.dairy-360.registry-backup (see
-# docs/DEVELOPMENT.md § 8), and safe to run by hand at any time.
+# docs/records/DEVELOPMENT.md § 8), and safe to run by hand at any time.
 #
 # WHAT IT DOES, and why in this order:
 #
@@ -88,7 +88,7 @@ fi
 log "node $(node -v) at $(command -v node)"
 
 if [ ! -d "$DEST/.git" ]; then
-  log "FATAL: $DEST is not a git repository. Create it first — see docs/DEVELOPMENT.md § 8."
+  log "FATAL: $DEST is not a git repository. Create it first — see docs/records/DEVELOPMENT.md § 8."
   exit 1
 fi
 

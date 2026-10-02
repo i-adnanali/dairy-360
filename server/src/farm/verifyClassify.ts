@@ -1,4 +1,4 @@
-// Farm event CLASSIFICATION verification (Cycle 5; see docs/FARM_MONITOR.md).
+// Farm event CLASSIFICATION verification (Cycle 5; see docs/records/FARM_MONITOR.md).
 //
 //   npm run verify:classify -w server            # all scenarios
 //   npm run verify:classify -w server -- --scenario=camera-dropout
@@ -18,7 +18,7 @@
 // Scoping is resetFarmEvents() per scenario. That is not a convenience here,
 // it is REQUIRED: UNKNOWN_CLUSTER_A1 appears in two scenarios, so a shared
 // table gives that cluster four sightings in one lookback window and corrupts
-// every occurrence number (FARM_MONITOR.md Decision 2, standing rule).
+// every occurrence number (docs/records/FARM_MONITOR.md Decision 2, standing rule).
 
 import { farmEventsInRange, resetFarmEvents } from '../db';
 import type { FarmEvent } from '@dairy/shared';

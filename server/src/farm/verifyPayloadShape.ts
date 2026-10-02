@@ -1,5 +1,5 @@
 // Real-vs-documented Frigate payload shape verification (Cycle 7 step 1; see
-// docs/cycle-7-live-camera-validation.md).
+// docs/records/cycle-7-live-camera-validation.md).
 //
 //   npm run verify:payload -w server -- --capture=captures/frigate-events-....jsonl
 //
@@ -50,7 +50,7 @@ import type { AggregateShape, PathDelta } from './payloadShape';
 import { SCENARIOS } from './scenarios';
 import type { CaptureRecord } from './captureMqtt';
 
-const DOC_PATH = path.join(__dirname, '..', '..', '..', 'docs', 'FARM_EVENTS.md');
+const DOC_PATH = path.join(__dirname, '..', '..', '..', 'docs', 'records', 'FARM_EVENTS.md');
 
 /** The camera name confirmed in open decision 2. Per finding 5 this is the ONLY
  * thing separating this capture from real farm data, so the DoD asserts it. */
@@ -75,7 +75,7 @@ const MAX_CLOCK_SKEW_MS = 60_000;
 // --- baselines --------------------------------------------------------------
 
 /**
- * The documented Frigate envelope, parsed out of FARM_EVENTS.md itself rather
+ * The documented Frigate envelope, parsed out of docs/records/FARM_EVENTS.md itself rather
  * than copied into this file.
  *
  * Parsing the doc is deliberate: the doc is the normative artifact this slice
@@ -85,7 +85,7 @@ const MAX_CLOCK_SKEW_MS = 60_000;
 export function documentedFrigateShape(markdown: string): unknown {
   const heading = /^###\s+Frigate\b.*$/m.exec(markdown);
   if (!heading) {
-    throw new Error('could not find the "### Frigate ..." heading in FARM_EVENTS.md');
+    throw new Error('could not find the "### Frigate ..." heading in docs/records/FARM_EVENTS.md');
   }
   const after = markdown.slice(heading.index);
   const fence = /```json\s*\n([\s\S]*?)\n```/.exec(after);
@@ -411,8 +411,8 @@ function main(): void {
   envelopeSummary(real, documented);
 
   // Scoped to `after`: the only branch the normalizer reads, and the only one
-  // FARM_EVENTS.md documents in full (it elides `before` as a placeholder).
-  printDeltas('Baseline A — FARM_EVENTS.md § "Frigate — frigate/events envelope"  [after.*]',
+  // docs/records/FARM_EVENTS.md documents in full (it elides `before` as a placeholder).
+  printDeltas('Baseline A — docs/records/FARM_EVENTS.md § "Frigate — frigate/events envelope"  [after.*]',
     diffShapes(real, documented, 'after'));
   printDeltas('Baseline B — synthetic generator (scenarios.ts normal-weekday)  [after.*]',
     diffShapes(real, generator, 'after'));

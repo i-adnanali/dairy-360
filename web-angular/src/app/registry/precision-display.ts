@@ -13,7 +13,7 @@
 // blind to the fabricated day beside it. Showing both is not honest; it is two
 // contradictory claims in one cell.
 //
-// So the figure is TRUNCATED to its precision, per UI_SYSTEM.md §6.1's own
+// So the figure is TRUNCATED to its precision, per docs/records/UI_SYSTEM.md §6.1's own
 // examples: `2017-03 month`, `2016 year`, `~2018 est`.
 //
 // This file is domain knowledge -- it knows what a DatePrecision means -- and

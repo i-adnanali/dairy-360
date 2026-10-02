@@ -26,4 +26,4 @@ Captured 2026-09-10 from the production build on port 4310, backed by the isolat
 - Narrow review and purchase forms report document width 390px at a 390px viewport. Source and recipient text wraps; quantity uncertainty and coverage use words.
 - The existing compact shell form width is applied to new feed entry routes and daily review. No new colour/border tokens were introduced.
 
-The [implementation record](../../REGISTRY_FEED.md) lists automated validation, limitations, and the legacy CLI-import incident discovered during database preservation checks.
+The [implementation record](../../records/REGISTRY_FEED.md) lists automated validation, limitations, and the legacy CLI-import incident discovered during database preservation checks.

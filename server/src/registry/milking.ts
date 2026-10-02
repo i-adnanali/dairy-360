@@ -1,4 +1,4 @@
-// Animal registry -- per-animal milk yield (step 4; docs/REGISTRY_MILKING.md).
+// Animal registry -- per-animal milk yield (step 4; docs/records/REGISTRY_MILKING.md).
 //
 // One module for the whole feature: the pure rules, the transactional write, and
 // the roster read model. Cohesive rather than split across events/entry/reads,
@@ -67,7 +67,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
  * recording a calving re-cuts the PREVIOUS lactation's `ended_on`, so yield
  * already written into the overlap silently belongs to a different lactation
  * while a stored key would still name the old one. Both are demonstrated by
- * execution in docs/REGISTRY_MILKING.md §2.
+ * execution in docs/records/REGISTRY_MILKING.md §2.
  *
  * Derived by date range, the attribution is always current and nothing dangles.
  *

@@ -1,5 +1,5 @@
 // Farm event ingestion -- validation + normalization (Cycle 4; see
-// docs/FARM_EVENTS.md).
+// docs/records/FARM_EVENTS.md).
 //
 // Deliberately PURE: no Express, no SQLite. Everything here is a function from
 // a parsed request body to either rows, a documented skip, or a structured

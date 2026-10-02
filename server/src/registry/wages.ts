@@ -1,4 +1,4 @@
-// Animal registry -- the wage ledger (docs/REGISTRY_PAYROLL.md §4.7, §12.2).
+// Animal registry -- the wage ledger (docs/records/REGISTRY_PAYROLL.md §4.7, §12.2).
 //
 // What is owed to somebody, and the statement that says why.
 //

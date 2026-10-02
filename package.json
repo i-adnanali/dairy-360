@@ -20,16 +20,17 @@
     "build:angular": "npm run build:shared && npm run build -w web-angular",
     "typecheck": "npm run build:shared && npm run typecheck -w server",
     "check:templates": "node scripts/check-templates.mjs",
-    "_verify_note": "check:contrast gates unexpected failures and unreviewed disabled-text consumers; necessary control boundaries are graded separately from decorative borders, with no held exceptions. PHASE5_PRECHECK.md preserves historical measurements. `shots` needs a running harness or production build behind serve-built.mjs; see UI_SYSTEM.md section 10.6.",
+    "_verify_note": "Template and contrast gates are documented in docs/guides/testing.md. Screenshots require a current production build and memory harness; see docs/guides/development.md.",
     "check:contrast": "node scripts/check-contrast.mjs",
     "shots": "node scripts/shoot-screens.mjs",
-    "_harness_note": "The one command for seeing the app work without a real database. `harness:app` starts the in-memory registry harness on 6400 (the port proxy.conf.json targets, so it is mutually exclusive with `dev` -- that is the point), seeds a readable herd into it, and starts Angular. NOT the same dummy data as `npm run seed`: that one recreates the six DEMO tables the agent chat reads, in dairy.db. These two are deliberately separate systems -- see docs/DEVELOPMENT.md section 6.",
+    "_harness_note": "harness:app uses synthetic memory-only registry data, not the persistent server or demo seed. See docs/guides/development.md.",
     "preharness:app": "npm run clean:web-deps-cache",
     "harness:app": "npm run build:shared && concurrently -n harness,seed,angular -c blue,green,red \"npm run registry:harness -w server -- --port=6400 --empty\" \"node scripts/harness-seed.mjs --wait=90\" \"npm run start -w web-angular\"",
     "harness:seed": "node scripts/harness-seed.mjs",
     "harness:serve": "node scripts/serve-built.mjs",
     "preharness:analytics": "npm run clean:web-deps-cache",
-    "harness:analytics": "npm run build:shared && concurrently -n harness,angular -c blue,red \"npm run registry:harness -w server -- --port=6400 --analytics\" \"npm run start -w web-angular\""
+    "harness:analytics": "npm run build:shared && concurrently -n harness,angular -c blue,red \"npm run registry:harness -w server -- --port=6400 --analytics\" \"npm run start -w web-angular\"",
+    "check:docs": "node --test scripts/check-docs.test.mjs && node scripts/check-docs.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

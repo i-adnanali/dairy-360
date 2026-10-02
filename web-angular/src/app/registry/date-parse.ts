@@ -164,7 +164,7 @@ function match(text: string): Parts | 'ambiguous' | null {
  * thing the text cannot say, because "I am guessing" is a claim about the
  * operator's knowledge rather than about the characters. It is legal only where
  * the parse yielded a year, which keeps the January-1 storage convention intact
- * and needs no migration -- see docs/REGISTRY.md on why `estimated` and `year`
+ * and needs no migration -- see docs/records/REGISTRY.md on why `estimated` and `year`
  * store identically and must not be merged.
  */
 export function parseDateEntry(

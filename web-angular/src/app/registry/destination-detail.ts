@@ -3,7 +3,7 @@ import { effect } from '@angular/core';
 import { writerDraft } from './writer-draft';
 import { WriteLock } from './write-lock';
 import { LocalPagination } from '../ui/local-pagination';
-// `/buyers/:id` -- the statement (docs/REGISTRY_SALES.md §12.3).
+// `/buyers/:id` -- the statement (docs/records/REGISTRY_SALES.md §12.3).
 //
 // The screen you hand to a dodhi.
 //

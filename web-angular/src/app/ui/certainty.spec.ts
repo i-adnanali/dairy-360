@@ -5,7 +5,7 @@ import type { CertaintyState } from './certainty';
 import { RowDivider } from './surface';
 
 // ---------------------------------------------------------------------------
-// THE CERTAINTY VOCABULARY. Phase 5, docs/UI_SYSTEM.md §6.
+// THE CERTAINTY VOCABULARY. Phase 5, docs/records/UI_SYSTEM.md §6.
 // ---------------------------------------------------------------------------
 //
 // Two jobs, and the second is the one that would otherwise never be checked:

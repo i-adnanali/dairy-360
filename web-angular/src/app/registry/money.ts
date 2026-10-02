@@ -98,7 +98,7 @@ export function minorToRupees(minor: number): string {
  *
  * The sibling of formatRate, and never converted to a per-day figure. Nobody is
  * paid "Rs 833.33 a day", and the statement is a document shown to the person
- * it is about. See docs/REGISTRY_PAYROLL.md §5.
+ * it is about. See docs/records/REGISTRY_PAYROLL.md §5.
  */
 export function formatPeriodRate(cashMinor: number, period: 'month' | 'day'): string {
   return `${formatMinor(cashMinor)} / ${period}`;

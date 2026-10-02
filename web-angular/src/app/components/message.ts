@@ -4,7 +4,7 @@ import { ChartCard } from './chart-card';
 import { MarkdownView } from './markdown-view';
 import { ToolCallChip } from './tool-call-chip';
 
-// One turn. Phase 6b of docs/UI_SYSTEM.md, spec in §13.3.
+// One turn. Phase 6b of docs/records/UI_SYSTEM.md, spec in §13.3.
 //
 // ---------------------------------------------------------------------------
 // THE PERSON'S TURN IS QUIET AND THE ANSWER IS NOT A CARD

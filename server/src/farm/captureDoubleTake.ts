@@ -1,5 +1,5 @@
 // Live Double Take MQTT capture (Cycle 7 FU-3; see
-// docs/Cycle7-fu3-double-take-validation.md).
+// docs/records/Cycle7-fu3-double-take-validation.md).
 //
 //   npm run capture:doubletake -w server -- --minutes=20
 //   npm run capture:doubletake -w server -- --topic='double-take/#' --minutes=5

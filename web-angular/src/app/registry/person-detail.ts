@@ -1,7 +1,7 @@
 import { writerDraft } from './writer-draft';
 import { WriteLock } from './write-lock';
 import { StatusBadge } from '../ui/surface';
-// `/people/:id` -- the statement (docs/REGISTRY_PAYROLL.md §12.2).
+// `/people/:id` -- the statement (docs/records/REGISTRY_PAYROLL.md §12.2).
 //
 // Stints as a timeline, the package as it stands, wage periods, payments and a
 // running balance. This is the screen you show somebody when they ask what they

@@ -9,10 +9,10 @@
 // the same subject in two places and mean nothing to anyone receiving it.
 //
 // The three prefixes are the three axes the design documents already argue for
-// and are not invented here: the animal record (REGISTRY.md), milk and its
-// counterparties (REGISTRY_SALES.md, "a different axis ... the first registry
+// and are not invented here: the animal record (docs/records/REGISTRY.md), milk and its
+// counterparties (docs/records/REGISTRY_SALES.md, "a different axis ... the first registry
 // tables with no animal_id"), and the people the farm employs
-// (REGISTRY_PAYROLL.md §1, "a third axis"). Step 5's breeding events, feed and
+// (docs/records/REGISTRY_PAYROLL.md §1, "a third axis"). Step 5's breeding events, feed and
 // treatment land under /animals; quality pricing lands under /milk; absences
 // land under /labour. That is the whole reason for the depth -- a flat space
 // was fine at five screens and would need this restructure again at fifteen.
@@ -101,7 +101,7 @@ export const routes: Routes = [
       //
       // Milking and dispatch sit under ONE prefix deliberately. They are the
       // same motion by the same person minutes apart, they reconcile against
-      // each other, and REGISTRY_SALES.md §15 asks whether they should become
+      // each other, and docs/records/REGISTRY_SALES.md §15 asks whether they should become
       // one screen. Splitting them across two prefixes -- production under
       // /animals because registry_milkings has an animal_id, disposition under
       // /buyers because registry_dispatches has a destination_id -- would file
@@ -188,7 +188,7 @@ export const routes: Routes = [
       },
 
       // -----------------------------------------------------------------------
-      // THE ASSISTANT, MOVED IN FROM THE TOP LEVEL. Phase 6a, UI_SYSTEM.md §9.2.
+      // THE ASSISTANT, MOVED IN FROM THE TOP LEVEL. Phase 6a, docs/records/UI_SYSTEM.md §9.2.
       // -----------------------------------------------------------------------
       // This was a SIBLING of the shell rather than a child of it, which is why
       // the panel rendered with no banner, no session bar and no nav -- and why

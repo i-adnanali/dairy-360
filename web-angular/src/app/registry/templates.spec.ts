@@ -10,7 +10,7 @@
 // and TypeScript then reports three or four syntax errors pointing at lines
 // nowhere near the cause.
 //
-// REGISTRY_SALES.md §17.4 recorded it twice, REGISTRY_PAYROLL.md §16.3 a third
+// docs/records/REGISTRY_SALES.md §17.4 recorded it twice, docs/records/REGISTRY_PAYROLL.md §16.3 a third
 // time and said "noting it here so the next occurrence is the one that builds
 // it". This is that. OPEN.md carried it as a standing item.
 //
@@ -146,7 +146,7 @@ describe('write controls', () => {
 // THE `display: block` GUARD IS NOT HERE, AND §9.2 EXPECTED IT TO BE
 // ---------------------------------------------------------------------------
 //
-// UI_SYSTEM.md §9.2 says to add it to this file, and gives the mechanism:
+// docs/records/UI_SYSTEM.md §9.2 says to add it to this file, and gives the mechanism:
 //
 //   "Reading `styles.css` as raw text works -- `'../../styles.css?raw'`, and
 //    `?raw` bypasses the Tailwind pipeline to give the hand-maintained source."

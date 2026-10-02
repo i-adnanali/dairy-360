@@ -1,5 +1,5 @@
 // Unit tests for the pure classification core (Cycle 5; see
-// docs/FARM_MONITOR.md). Runs under plain `npm test -w server`: node:test via
+// docs/records/FARM_MONITOR.md). Runs under plain `npm test -w server`: node:test via
 // tsx, no database, no API key, no running server -- the same bar ingest.test.ts
 // meets, and the reason classify.ts holds no `../db` import.
 //

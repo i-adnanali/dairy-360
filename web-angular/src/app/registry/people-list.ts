@@ -7,7 +7,7 @@ import { Pagination } from '../ui/pagination';
 import { StatusBadge } from '../ui/surface';
 import { IdentifierLink, RowLink } from '../ui/navigation';
 // `/people` -- who works here, and what they are owed
-// (docs/REGISTRY_PAYROLL.md §12.2).
+// (docs/records/REGISTRY_PAYROLL.md §12.2).
 //
 // ---------------------------------------------------------------------------
 // PEOPLE WITH NO OPEN STINT ARE SHOWN, DIMMED -- NOT HIDDEN
@@ -34,7 +34,7 @@ import { IdentifierLink, RowLink } from '../ui/navigation';
 // Somebody paid ahead is an ordinary state that needs no special case in the
 // ledger, but a bare "-Rs 8,000.00" in a column headed "owed" reads as a defect
 // rather than a peshgi. The wording question is open for buyers too
-// (REGISTRY_SALES.md §15); this screen answers it one way so there is something
+// (docs/records/REGISTRY_SALES.md §15); this screen answers it one way so there is something
 // concrete to disagree with.
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';

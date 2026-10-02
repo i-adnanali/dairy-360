@@ -1,5 +1,5 @@
 // Unit tests for the pure payload-shape differ (Cycle 7 step 1; see
-// docs/cycle-7-live-camera-validation.md). node:test via `tsx --test`, the same
+// docs/records/cycle-7-live-camera-validation.md). node:test via `tsx --test`, the same
 // runner as ingest.test.ts -- no database, no MQTT broker, no camera, so these
 // run in the plain `npm test -w server` CI step.
 //
@@ -102,7 +102,7 @@ test('aggregateShapes: counts presence and unions types across payloads', () => 
 
 test('diffShapes: a documented field the real payload omits is only_in_documented', () => {
   // THE case this slice exists to catch: Frigate reporting score under
-  // after.data while FARM_EVENTS.md documents after.top_score. Ingestion
+  // after.data while docs/records/FARM_EVENTS.md documents after.top_score. Ingestion
   // accepts this with a 201 and a NULL confidence, so this differ is the only
   // thing that will say so.
   const real = shapeOf({ after: { id: 'x', data: { top_score: 0.83 } } });
@@ -163,7 +163,7 @@ test('diffShapes: a field in some but not all captured payloads is sometimes_pre
 });
 
 test('diffShapes: `only` scopes the comparison to one subtree', () => {
-  // FARM_EVENTS.md elides `before` as {"...": "previous state"}, so an
+  // docs/records/FARM_EVENTS.md elides `before` as {"...": "previous state"}, so an
   // unscoped diff would bury the real findings under before.* noise.
   const real = shapeOf({ type: 'new', before: { id: 'x', score: 0.1 }, after: { id: 'x' } });
   const documented = shapeOf({ type: 'new', before: { '...': 'previous state' }, after: { id: 'x' } });

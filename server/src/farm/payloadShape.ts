@@ -1,5 +1,5 @@
 // Payload-shape extraction and diffing -- the PURE core (Cycle 7 step 1; see
-// docs/cycle-7-live-camera-validation.md).
+// docs/records/cycle-7-live-camera-validation.md).
 //
 // Deliberately DB-free, fs-free and network-free, exactly like ingest.ts and
 // classify.ts: functions from a parsed payload to a set of shape paths, and from
@@ -8,7 +8,7 @@
 // with no database, no MQTT broker, no camera and no API key.
 //
 // The impure shell -- subscribing to MQTT, reading the captured JSONL, parsing
-// the documented shape out of FARM_EVENTS.md -- lives in captureMqtt.ts and
+// the documented shape out of docs/records/FARM_EVENTS.md -- lives in captureMqtt.ts and
 // verifyPayloadShape.ts.
 //
 // WHY SHAPE PATHS AND NOT A JSON DIFF: the question this slice asks is "does the
@@ -216,7 +216,7 @@ function sameTypes(a: NodeType[], b: NodeType[]): boolean {
  * Diff captured payloads against a baseline.
  *
  * `only` restricts the comparison to one subtree (`'after'` for Frigate, since
- * that is the only branch the normalizer reads and the only one FARM_EVENTS.md
+ * that is the only branch the normalizer reads and the only one docs/records/FARM_EVENTS.md
  * documents in full -- the doc elides `before` as `{"...": "previous state"}`,
  * which would otherwise produce a wall of meaningless deltas).
  */

@@ -1,4 +1,4 @@
-// Animal registry -- types (see docs/REGISTRY.md).
+// Animal registry -- types (see docs/records/REGISTRY.md).
 //
 // DELIBERATELY SEPARATE FROM shared/src/types.ts. The registry is a different
 // domain from the demo tables, and `AnimalStatus` there is
@@ -159,7 +159,7 @@ export const OVERRIDDEN_CHECKS: readonly OverriddenCheck[] = [
  * ---------------------------------------------------------------------------
  * It lived in the event payload first, for one reason only: a column cost a
  * migration, and the entry-UX build order's standing claim was that everything
- * above its cut line landed without one. REGISTRY_ENTRY_UX.md §11 recorded the
+ * above its cut line landed without one. docs/records/REGISTRY_ENTRY_UX.md §11 recorded the
  * debt -- "do not migrate for this alone, bundle it into whichever migration
  * lands next" -- and migration 4 is where it was paid.
  *
@@ -298,7 +298,7 @@ export interface RegistryEvent extends Omit<RegistryEventRow, 'payload'> {
 }
 
 // ---------------------------------------------------------------------------
-// Milk yield (step 4 -- see docs/REGISTRY_MILKING.md)
+// Milk yield (step 4 -- see docs/records/REGISTRY_MILKING.md)
 // ---------------------------------------------------------------------------
 
 /**
@@ -353,7 +353,7 @@ export const MILKING_STATUSES: readonly MilkingStatus[] = [
  *
  * NOTE WHAT IS ABSENT: there is no `lactation_id`. The lactation is DERIVED at
  * read time by date range, because a lactation id is not a stable key -- see
- * events.ts's lactationIdFor and docs/REGISTRY_MILKING.md §2. The general rule
+ * events.ts's lactationIdFor and docs/records/REGISTRY_MILKING.md §2. The general rule
  * is that registry_lactations is a projection the rebuild drops and recreates,
  * so a permanent record must never carry a foreign key into it.
  */
@@ -426,7 +426,7 @@ export interface AnimalProjection {
 }
 
 // ---------------------------------------------------------------------------
-// Milk sales, home use and the buyer ledger (docs/REGISTRY_SALES.md)
+// Milk sales, home use and the buyer ledger (docs/records/REGISTRY_SALES.md)
 // ---------------------------------------------------------------------------
 
 /**
@@ -445,7 +445,7 @@ export const DESTINATION_KINDS = [
   // Added by migration 7: milk allocated to a staff member as part of a salary
   // arrangement, ONE DESTINATION PER PERSON -- the dispatch key is one row per
   // destination per session, so a shared row could not say whose milk it was.
-  // See docs/REGISTRY_PAYROLL.md §4.6a.
+  // See docs/records/REGISTRY_PAYROLL.md §4.6a.
   'staff',
   'other',
 ] as const;
@@ -464,7 +464,7 @@ export type DestinationKind = (typeof DESTINATION_KINDS)[number];
  *   - `standing` -- must the daily sheet account for this destination in EVERY
  *     session (the dodhi, home), or is it only a row when it took something
  *     (the households, who take surplus and whose pattern varies with the
- *     season)? See REGISTRY_SALES.md §4.1a for why this exists instead of the
+ *     season)? See docs/records/REGISTRY_SALES.md §4.1a for why this exists instead of the
  *     morning/evening column it replaced.
  *
  * `started_on` / `ended_on` are an ACTIVE RANGE rather than a status flag, so
@@ -489,7 +489,7 @@ export interface DestinationRow {
    * a staff destination names a person and a destination naming a person is
    * staff milk. One destination PER PERSON, because the dispatch key is one row
    * per destination per session, so a shared row could not say whose milk it
-   * was. See REGISTRY_PAYROLL.md §4.6a.
+   * was. See docs/records/REGISTRY_PAYROLL.md §4.6a.
    */
   person_id: string | null;
 }
@@ -584,12 +584,12 @@ export interface PaymentRow {
  */
 // ---------------------------------------------------------------------------
 // Labour -- people, engagements, packages and the wage ledger
-// (docs/REGISTRY_PAYROLL.md §4)
+// (docs/records/REGISTRY_PAYROLL.md §4)
 // ---------------------------------------------------------------------------
 
 /**
  * A person the farm knows. NOT necessarily an employee -- see
- * REGISTRY_PAYROLL.md §3 for why this is not `registry_employees`.
+ * docs/records/REGISTRY_PAYROLL.md §3 for why this is not `registry_employees`.
  *
  * `identifier` is the load-bearing column: the stable string that ALSO appears
  * in `observed_by` and `recorded_by` across four record tables. The link is BY
@@ -651,7 +651,7 @@ export interface EngagementRow {
  *
  * AN ENUM, where `price_unit_litres` is a number, and the divergence is
  * deliberate: a month is not a fixed quantity of days, so "per 30 days" would
- * assert something the agreement does not say. See REGISTRY_PAYROLL.md §4.4.
+ * assert something the agreement does not say. See docs/records/REGISTRY_PAYROLL.md §4.4.
  */
 export const CASH_PERIODS = ['month', 'day'] as const;
 
@@ -685,7 +685,7 @@ export interface PayTermRow {
  *
  * THE FARM'S OWN LIST: milk, flour or wheat, accommodation. `utilities` was in
  * the draft and was removed rather than carried unused -- see
- * REGISTRY_PAYROLL.md §4.5. Anything else is `other` WITH a note.
+ * docs/records/REGISTRY_PAYROLL.md §4.5. Anything else is `other` WITH a note.
  */
 export const BENEFIT_KINDS = ['milk', 'flour', 'accommodation', 'other'] as const;
 

@@ -1,7 +1,7 @@
-// Sales read tools (docs/REGISTRY_SALES.md §14 item 9).
+// Sales read tools (docs/records/REGISTRY_SALES.md §14 item 9).
 //
 // Four tools over the destinations, the ledger and the reconciliation. Reads
-// only, following REGISTRY_TOOLS.md Decision 1 -- writes are a later cycle, and
+// only, following docs/records/REGISTRY_TOOLS.md Decision 1 -- writes are a later cycle, and
 // a second entry path competing with a screen under measurement contaminates
 // the reading of that screen.
 //

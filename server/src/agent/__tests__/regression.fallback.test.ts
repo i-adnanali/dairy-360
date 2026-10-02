@@ -1,4 +1,4 @@
-// Regression suite -- model fallback path (Cycle 3; see docs/REGRESSION.md).
+// Regression suite -- model fallback path (Cycle 3; see docs/records/REGRESSION.md).
 //
 // Reused Cycle 1 Phase 5 case. DEFAULT_MODEL is read once at stream.ts module
 // load, so this runs in its own process with ANTHROPIC_MODEL set to a

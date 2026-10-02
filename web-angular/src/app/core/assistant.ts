@@ -1,6 +1,6 @@
 // Is the assistant panel open, and what is it looking at.
 //
-// docs/UI_SYSTEM.md §13.1 and §13.2. Phase 6b.
+// docs/records/UI_SYSTEM.md §13.1 and §13.2. Phase 6b.
 //
 // ---------------------------------------------------------------------------
 // PERSISTED PER SESSION, NOT PER ROUTE, AND NOT FOREVER

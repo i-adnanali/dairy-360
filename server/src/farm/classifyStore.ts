@@ -1,5 +1,5 @@
 // Farm event classification -- the impure shell (Cycle 5; see
-// docs/FARM_MONITOR.md Decision 5).
+// docs/records/FARM_MONITOR.md Decision 5).
 //
 // Everything here touches SQLite. The scoring rules themselves live in
 // classify.ts, which stays DB-free so classify.test.ts can exercise them with

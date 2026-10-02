@@ -43,7 +43,7 @@ npm run dev:angular
 
 The persistent server uses `server/dairy.db`; the registry and the assistant's demo tables are separate. `seed` resets the demo tables used by chat, preserves registry records, and is **not** a registry fixture loader. Registry agent tools are read-only; proposed agent writes target the demo domains, not registry records.
 
-Read [setup and data boundaries](docs/DEVELOPMENT.md) before using persistent data. Browsing requires no recording session; registry writes require an explicit recorder and source. A root `.env` is needed only for optional camera Compose configuration. Langfuse is optional.
+Read [setup and data boundaries](docs/guides/development.md) before using persistent data. Browsing requires no recording session; registry writes require an explicit recorder and source. A root `.env` is needed only for optional camera Compose configuration. Langfuse is optional.
 
 ## Features
 
@@ -88,7 +88,7 @@ These are fresh captures of the current application, not design mockups. Desktop
 
 </details>
 
-[Current gallery and capture details](docs/images/current/README.md) · [Current UI reference](docs/UI-CURRENT.md)
+[Current gallery and capture details](docs/images/current/README.md) · [Current UI reference](docs/reference/ui/design-system.md)
 
 ## Architecture
 
@@ -103,7 +103,7 @@ dairy-360/
 
 The Angular app uses `/api/registry` for operational records and `/api/agent/run` for AG-UI streaming over SSE. The optional assistant routes each turn to dairy, vendor/sales, or both agents in one server process. Read tools run automatically; proposed writes pause for approval. Model-facing digests remain separate from chart datasets.
 
-Camera-event ingestion/classification and self-hosted Langfuse tracing are optional integrations. See [architecture](docs/PROJECT_OVERVIEW.md), [agent internals](docs/TECHNICAL.md) and [integration operations](docs/OPERATIONS.md).
+Camera-event ingestion/classification and self-hosted Langfuse tracing are optional integrations. See [architecture](docs/architecture/system.md), [agent internals](docs/architecture/assistant.md) and [integration operations](docs/guides/camera-operations.md).
 
 ## Development
 
@@ -114,6 +114,7 @@ npm run build:shared
 npm run typecheck
 npm test -w server
 npm test -w web-angular -- --watch=false
+npm run check:docs
 npm run check:templates
 npm run check:contrast
 npm run build:angular
@@ -123,20 +124,20 @@ The frontend build is written to `web-angular/dist/web-angular/browser`. To serv
 
 **Latest recorded validation (1 October 2026):** 458 frontend tests across 44 files, 779 server tests, production build and typecheck passed. The contrast gate passed 122 graded checks with no held or unexpected failures. Existing bundle-size and shared CommonJS warnings remain. [Logs and browser evidence](docs/implementation/geist-screen-evidence/ACCEPTANCE.md).
 
-Unit suites need no API key or farm database. Live-model regression tests are separate, require credentials, and can spend API tokens; a skipped live run is not a pass. See [testing](docs/DEVELOPMENT.md#5-test).
+Unit suites need no API key or farm database. Live-model regression tests are separate, require credentials, and can spend API tokens; a skipped live run is not a pass. See [testing](docs/guides/testing.md).
 
 ## Documentation
 
 | Need | Guide |
 |---|---|
 | Documentation map | [Docs index](docs/README.md) |
-| Setup, troubleshooting, CLI and backups | [Development](docs/DEVELOPMENT.md) |
-| Current UI contracts | [UI reference](docs/UI-CURRENT.md), [detailed system/history](docs/UI_SYSTEM.md) |
-| Animals and corrections | [Registry](docs/REGISTRY.md) |
-| Milk recording and sales | [Milking](docs/REGISTRY_MILKING.md), [sales](docs/REGISTRY_SALES.md) |
-| Feed, health and labour | [Feed](docs/REGISTRY_FEED.md), [health](docs/REGISTRY_HEALTH.md), [payroll](docs/REGISTRY_PAYROLL.md) |
-| Metrics and uncertainty | [Analytics specification](docs/ANALYTICS_SPEC.md) |
-| Optional camera/tracing integrations | [Operations](docs/OPERATIONS.md) |
+| Setup, troubleshooting, CLI and backups | [Development](docs/guides/development.md), [CLI](docs/guides/registry-cli.md), [backup/restore](docs/guides/backup-restore.md) |
+| Current UI contracts | [UI reference](docs/reference/ui/design-system.md), [interaction contracts](docs/reference/ui/application-interactions.md) |
+| Animals and corrections | [Registry](docs/reference/registry/animals.md) |
+| Milk recording and sales | [Milking](docs/reference/registry/milking.md), [sales](docs/reference/registry/sales.md) |
+| Feed, health and labour | [Feed](docs/reference/registry/feed.md), [health](docs/reference/registry/health.md), [payroll](docs/reference/registry/payroll.md) |
+| Metrics and uncertainty | [Analytics specification](docs/reference/registry/analytics.md) |
+| Optional integrations | [Camera operations](docs/guides/camera-operations.md), [tracing](docs/guides/observability.md) |
 | Remaining work | [Open items](docs/OPEN.md), [acceptance limits](docs/implementation/geist-screen-evidence/ACCEPTANCE.md#remaining-acceptance--explicitly-open) |
 
 ## Status and limitations
@@ -147,7 +148,7 @@ Screen-specific implementation is complete; comprehensive acceptance remains ope
 
 ## Contributing
 
-Open an issue with a reproducible problem or proposed scope, then submit a focused pull request. Use synthetic data, retain domain uncertainty and write protections, run the relevant checks above, and update the owning reference guide. Never commit database files, uploads, credentials or real farm records. See [development conventions](docs/DEVELOPMENT.md) and [UI contracts](docs/UI-CURRENT.md).
+Open an issue with a reproducible problem or proposed scope, then submit a focused pull request. Use synthetic data, retain domain uncertainty and write protections, run the relevant checks above, and update the owning reference guide. Never commit database files, uploads, credentials or real farm records. See [development conventions](docs/guides/development.md) and [UI contracts](docs/reference/ui/design-system.md).
 
 ## License
 

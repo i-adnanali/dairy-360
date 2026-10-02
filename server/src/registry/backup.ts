@@ -24,7 +24,7 @@
 //
 //   - It is NOT in WAL mode (measured: the output reports `delete`). A backup is
 //     one self-contained file with no sidecars, so the `immutable=1`-not-
-//     `-readonly` trap documented in DEVELOPMENT.md § 6 does not apply to
+//     `-readonly` trap documented in docs/records/DEVELOPMENT.md § 6 does not apply to
 //     backups -- a plain read-only open works.
 //   - It REFUSES to overwrite an existing file ("output file already exists").
 //     That is a feature and is not worked around here: a backup must never
@@ -508,7 +508,7 @@ export function runBackup(db: Db, opts: BackupOptions): BackupResult {
  *
  * Same-disk, so this alone protects against a bad migration and a mistaken
  * DELETE but NOT against losing the machine. Getting the directory off the
- * machine is a deployment decision, documented in DEVELOPMENT.md § 8 rather
+ * machine is a deployment decision, documented in docs/records/DEVELOPMENT.md § 8 rather
  * than assumed here. */
 export const DEFAULT_BACKUP_DIR = path.join(__dirname, '..', '..', 'backups');
 

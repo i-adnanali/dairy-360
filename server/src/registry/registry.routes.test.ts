@@ -572,9 +572,9 @@ test('REGISTRY.md § HTTP surface lists exactly the routes the router mounts', (
   // A route table in prose beside a route table in code is a second copy, and
   // this repo has already paid for one: routes.ts carried a prose enumeration of
   // its keyed writes that went stale three times before it was deleted
-  // (REGISTRY_PAYROLL.md §16.4).
+  // (docs/records/REGISTRY_PAYROLL.md §16.4).
   //
-  // The table in REGISTRY.md is worth keeping -- it is the only place a reader
+  // The table in docs/reference/registry/http-api.md is worth keeping -- it is the only place a reader
   // can see the whole surface at once, with a sentence on each route -- so it is
   // CHECKED instead of trusted. Adding a route now fails this test until the
   // table names it, which is the cheapest possible moment to write the sentence.
@@ -582,7 +582,7 @@ test('REGISTRY.md § HTTP surface lists exactly the routes the router mounts', (
   // Source text, not a live server, for invariant 13's reason: it must fail in
   // CI with no database and no port.
   const doc = readFileSync(
-    path.join(__dirname, '..', '..', '..', 'docs', 'REGISTRY.md'),
+    path.join(__dirname, '..', '..', '..', 'docs', 'reference', 'registry', 'http-api.md'),
     'utf8',
   );
   const src = readFileSync(path.join(__dirname, 'routes.ts'), 'utf8');
@@ -606,7 +606,7 @@ test('REGISTRY.md § HTTP surface lists exactly the routes the router mounts', (
   assert.deepEqual(
     undocumented,
     [],
-    'these routes are mounted and absent from REGISTRY.md § HTTP surface',
+    'these routes are mounted and absent from docs/records/REGISTRY.md § HTTP surface',
   );
   assert.deepEqual(
     phantom,

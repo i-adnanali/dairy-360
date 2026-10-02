@@ -51,7 +51,7 @@ export interface RegistryCatalog {
  * Inlined in full with no threshold, unlike buildCatalog's 300-animal cutoff:
  * this is an actual smallholder herd of roughly twenty animals, and there is no
  * `search_registry_animals` to fall back to (deliberately -- see
- * REGISTRY_TOOLS.md § Open items). Resolving "Noor" to BD-0001 without a tool
+ * docs/records/REGISTRY_TOOLS.md § Open items). Resolving "Noor" to BD-0001 without a tool
  * call is the whole value of a catalog block.
  *
  * AN EMPTY REGISTRY IS THE NORMAL CASE, not an error, and stays so until the
@@ -62,7 +62,7 @@ export interface RegistryCatalog {
  * `handle` defaults to the singleton and is passed explicitly by the precision
  * eval, which must compose the REAL prompt over a fixture herd: the live
  * registry holds no animals until the trial runs, so an eval bound to the
- * singleton could only ever test the empty case. See REGISTRY_TOOLS.md § "The
+ * singleton could only ever test the empty case. See docs/records/REGISTRY_TOOLS.md § "The
  * eval that matters".
  *
  * READS THE TWO TABLES IT NEEDS, NOT herd(). The obvious implementation was

@@ -2,7 +2,7 @@
 /*
  * The fourteen screens, in both themes, over CDP.
  *
- * docs/UI_SYSTEM.md §10.5 has carried this as a RECIPE since phase 0 and every
+ * docs/records/UI_SYSTEM.md §10.5 has carried this as a RECIPE since phase 0 and every
  * phase re-implemented it by hand. §16 listed "Phase 5's greyscale acceptance
  * has never been tested", and a recipe is why: the acceptance for §6 is that
  * the five certainty states are distinguishable IN GREYSCALE, and that is not

@@ -1,5 +1,5 @@
 // Runtime preconditions for the Cycle 7 FU-3 Double Take capture.
-// See docs/Cycle7-fu3-double-take-validation.md, finding 6 layers (b) and (c).
+// See docs/records/Cycle7-fu3-double-take-validation.md, finding 6 layers (b) and (c).
 //
 // PURE, so guards.test.ts exercises them with nothing running -- same
 // discipline as ingest.ts, payloadShape.ts and redact.ts. The impure callers

@@ -8,7 +8,7 @@ import { readFile } from 'node:fs/promises';
 //
 //   1. It cannot touch dairy.db. It imports nothing from server/, opens no
 //      database, and reaches the registry only through the same four POST
-//      routes the entry forms use. The isolation rule in REGISTRY.md
+//      routes the entry forms use. The isolation rule in docs/records/REGISTRY.md
 //      ("nothing synthetic ever touches registry_animals in dairy.db") is
 //      therefore enforced by this file having no way to break it, rather than
 //      by a test asserting an absence -- plus the guard below.
@@ -312,7 +312,7 @@ const ACQUIRED = [
 // ---------------------------------------------------------------------------
 //
 // Buffalo-plausible: Nili-Ravi intervals here run 487-550 days, all inside the
-// 380-700 "normal" band from REGISTRY_ENTRY_UX.md 7.2, and none inside the
+// 380-700 "normal" band from docs/records/REGISTRY_ENTRY_UX.md 7.2, and none inside the
 // 60-day double-entry window.
 
 const STEPS = [
@@ -630,7 +630,7 @@ async function seedMilkings() {
 }
 
 // ---------------------------------------------------------------------------
-// Milk sales, home use and the ledger (docs/REGISTRY_SALES.md)
+// Milk sales, home use and the ledger (docs/records/REGISTRY_SALES.md)
 // ---------------------------------------------------------------------------
 
 /**
@@ -695,7 +695,7 @@ async function seedDispatches() {
   // dodhi taking 12-15 leaves a 40% gap that is an artefact of the fixture and
   // nothing else -- and a reconciliation panel opening on a 40% gap reads as
   // broken software. The same mistake was made once already in
-  // `tradingHerd()`; see REGISTRY_SALES.md §17.1.
+  // `tradingHerd()`; see docs/records/REGISTRY_SALES.md §17.1.
   //
   // The evening the dodhi does not come is the interesting row: the milk still
   // exists, so the neighbours take far more than usual. That is the households
@@ -749,7 +749,7 @@ async function seedDispatches() {
 }
 
 /**
- * The people who work the herd (docs/REGISTRY_PAYROLL.md).
+ * The people who work the herd (docs/records/REGISTRY_PAYROLL.md).
  *
  * SYNTHETIC, AND MORE STRICTLY SO THAN ANYTHING ELSE IN THIS FILE. The names and
  * the figures below are invented. Real people and real salaries go into the live
@@ -849,14 +849,14 @@ async function seedStaff() {
 
   // ONE DESTINATION PER STAFF MEMBER on an allowance. The dispatch key is one
   // row per destination per session, so a shared 'staff' row could not say
-  // whose milk it was -- see REGISTRY_PAYROLL.md §4.6a.
+  // whose milk it was -- see docs/records/REGISTRY_PAYROLL.md §4.6a.
   //
   // NOT `standing`, and this is the one place the seed deliberately diverges
   // from what the farm should do. A standing destination must be answered in
   // every session, and the dispatch rows above were already written without it
   // -- so seeding it standing would leave every one of those sessions showing
   // an untouched row with no figure, which is the fixture-looks-broken failure
-  // REGISTRY_PAYROLL.md §16.1 hit from the other direction. Entered through the
+  // docs/records/REGISTRY_PAYROLL.md §16.1 hit from the other direction. Entered through the
   // screen on a live farm it should be standing.
   const imran = people.get('imran');
   await post('/destinations', 'destination:imran-milk', {

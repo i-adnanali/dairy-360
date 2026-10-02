@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 // DIRECTIVES, NOT COMPONENTS, AND THE REASON IS THE SPEC SUITE
 // ---------------------------------------------------------------------------
-// UI_SYSTEM.md section 6 describes these as components. They are directives
+// docs/records/UI_SYSTEM.md section 6 describes these as components. They are directives
 // instead, and the same choice is made for every primitive in this directory.
 //
 // 115 `data-role` hooks are reached by 340 querySelector calls, and 86 of those
@@ -47,7 +47,7 @@ export type TextTone = 'muted' | 'subtle';
  * Explanatory prose beside a control.
  *
  * ---------------------------------------------------------------------------
- * DEMOTED. Phase 5, UI_SYSTEM.md §5 and §9.1.
+ * DEMOTED. Phase 5, docs/records/UI_SYSTEM.md §5 and §9.1.
  * ---------------------------------------------------------------------------
  * The original spec wanted `text-xs` in `--text-muted` with a bounded measure,
  * on the grounds that help text is "nearly as loud as the labels it explains".

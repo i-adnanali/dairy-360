@@ -1,4 +1,4 @@
-// Farm event pipeline verification (Cycle 4; see docs/FARM_EVENTS.md).
+// Farm event pipeline verification (Cycle 4; see docs/records/FARM_EVENTS.md).
 //
 //   npm run verify:farm -w server            # all scenarios
 //   npm run verify:farm -w server -- --scenario=camera-dropout

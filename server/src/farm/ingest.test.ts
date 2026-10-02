@@ -1,5 +1,5 @@
 // Unit tests for the pure ingestion normalizers (Cycle 4; see
-// docs/FARM_EVENTS.md). node:test via `tsx --test`, the same runner as
+// docs/records/FARM_EVENTS.md). node:test via `tsx --test`, the same runner as
 // src/tools/shaper.test.ts -- no database, no API key, so these run in the
 // plain `npm test -w server` CI step.
 

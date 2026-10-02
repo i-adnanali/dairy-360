@@ -6,7 +6,7 @@ export type { LabourReportLine } from '@dairy/shared';
 // own types deliberately do NOT live there: `RegistryAnimalStatus` is separate
 // from the demo `AnimalStatus`, and putting registry vocabulary into the shared
 // package would put it in front of the demo UI for no reason. See
-// docs/REGISTRY.md, Decision 10.
+// docs/records/REGISTRY.md, Decision 10.
 //
 // If these drift from the server, the route tests will not catch it -- they
 // assert the server's shape, not this file's. What catches it is that every
@@ -124,7 +124,7 @@ export interface IntervalSummary {
 }
 
 // ---------------------------------------------------------------------------
-// Milk yield (step 4 -- docs/REGISTRY_MILKING.md)
+// Milk yield (step 4 -- docs/records/REGISTRY_MILKING.md)
 // ---------------------------------------------------------------------------
 
 export type MilkingSession = 'morning' | 'evening';
@@ -284,11 +284,11 @@ export interface DuplicateCandidate {
 }
 
 // ---------------------------------------------------------------------------
-// Milk sales, home use and the buyer ledger (docs/REGISTRY_SALES.md)
+// Milk sales, home use and the buyer ledger (docs/records/REGISTRY_SALES.md)
 // ---------------------------------------------------------------------------
 
 /** `staff` was added by migration 7: milk allocated as part of a salary
- *  arrangement, ONE DESTINATION PER PERSON. See docs/REGISTRY_PAYROLL.md §4.6a. */
+ *  arrangement, ONE DESTINATION PER PERSON. See docs/records/REGISTRY_PAYROLL.md §4.6a. */
 export type DestinationKind = 'dodhi' | 'household' | 'shop' | 'home' | 'staff' | 'other';
 export type DispatchStatus = 'taken' | 'none';
 export type PaymentMethod = 'cash' | 'bank' | 'adjustment';
@@ -481,7 +481,7 @@ export interface Reconciliation {
 
 // ---------------------------------------------------------------------------
 // Labour: people, engagements, packages, the run and the wage ledger
-// (docs/REGISTRY_PAYROLL.md)
+// (docs/records/REGISTRY_PAYROLL.md)
 // ---------------------------------------------------------------------------
 
 export type EngagementKind = 'permanent' | 'daily';
@@ -533,7 +533,7 @@ export interface Engagement {
  *
  * Two values, never one: `cash_minor` is paisa and `cash_period` is what it
  * covers. Rs 25,000 a month is `(2500000, 'month')`. Never render it as a
- * per-day conversion -- see money.ts, and REGISTRY_PAYROLL.md §5.
+ * per-day conversion -- see money.ts, and docs/records/REGISTRY_PAYROLL.md §5.
  */
 export interface PayTerm {
   id: string;

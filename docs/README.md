@@ -1,145 +1,30 @@
-# Documentation index
+# Documentation
 
-Two kinds of document live here, and they have opposite lifecycles.
+Start with the task you need to complete. Current guides and references describe delivered behavior; dated records preserve decisions and evidence without acting as instructions to rebuild old plans.
 
-- **Reference** describes what is true *now*. If it disagrees with the code, the
-  code is right and the document is stale — fix the document.
-- **Record** describes what was decided *then*, and why. Each one is dated and tied to a commit, tag or explicit source manifest. Do not edit a closed record to reflect later changes; the
-  later change gets its own record, and the older one gets a banner pointing at it.
-
-Everything in [`archive/`](archive/) is superseded and kept only for its reasoning.
-Those documents are not current specifications; some of their proposals were later implemented with changes.
-
----
-
-## Start here
-
-| If you want to… | Read |
+| Task | Start here |
 |---|---|
-| Run it locally, or fix a broken setup | [DEVELOPMENT.md](DEVELOPMENT.md) |
-| Understand how the system fits together | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) |
-| Understand the agent loop, guardrails, tool contracts | [TECHNICAL.md](TECHNICAL.md) |
-| Work on veterinary visits, treatments, vaccinations and life reports | [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) |
-| Work on the real-animal records | [REGISTRY.md](REGISTRY.md) |
-| Work on milk sales, home use, buyer balances | [REGISTRY_SALES.md](REGISTRY_SALES.md) |
-| Work on employees, packages and wages | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) |
-| Work on crops, expenses, purchases and daily feeding | [REGISTRY_FEED.md](REGISTRY_FEED.md) |
-| Work on owner milk analytics and table pagination | [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) |
-| Work on the frontend | [UI-CURRENT.md](UI-CURRENT.md), [UI_SYSTEM.md](UI_SYSTEM.md), then [ANGULAR_PORT.md](ANGULAR_PORT.md) for the chat state model |
-| See current screenshots | [Current gallery](images/current/README.md) |
-| Run optional camera/tracing integrations | [OPERATIONS.md](OPERATIONS.md) |
-| Review recent delivery and validation | [Screen implementation](implementation/GEIST-IMPLEMENTATION.md), [acceptance](implementation/geist-screen-evidence/ACCEPTANCE.md) |
-| Find out why a URL looks the way it does, or what `/` shows | [REGISTRY_PAYROLL.md §12.3–§12.6](REGISTRY_PAYROLL.md#123-navigation-and-url-structure--the-change-that-forced-both-decisions) |
-| Change the wire protocol | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) |
-| Know what is still unfinished | [OPEN.md](OPEN.md) |
-
----
-
-## Reference — keep these current
-
-| Doc | Covers | Depth |
-|---|---|---|
-| [DEVELOPMENT.md](DEVELOPMENT.md) | Prereqs, configuration, build, test, harness/persistent data, backups and common failures | Commands checked against source; execution dates and unverified claims are explicit |
-| [OPERATIONS.md](OPERATIONS.md) | Optional camera simulation/classification and Langfuse commands | Integration runbook; no new live-service acceptance implied |
-| [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | Architecture, the agentic workflow end to end, read/write split, digest-vs-dataset, guardrails, data model, wire contract | Medium — the layer between the root [README](../README.md) and TECHNICAL.md |
-| [TECHNICAL.md](TECHNICAL.md) | The loop internals, the eight guardrails, tool contracts, constants | Deep. Highest signal-per-line here |
-| [ANGULAR_PORT.md](ANGULAR_PORT.md) | Angular 22 state service, component tree, the deliberate omissions | Deep |
-| [AGUI_MIGRATION.md](AGUI_MIGRATION.md) | The AG-UI/SSE protocol, custom event channels, the interrupt/resume boundary, the React archival decision | Deep |
-| [REGISTRY.md](REGISTRY.md) | Real-animal records: schema, migrations, append-only guarantee, calving transaction, projections, CLI, HTTP surface, entry UI, invariants | Deep. The single most load-bearing document in the repo |
-| [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | The entry surface — screens, the change list with build status, the defaults rule, the five-animal trial | Deep |
-| [UI-CURRENT.md](UI-CURRENT.md) | Current UI roles, native controls, uncertainty and state specimen | Concise entry point |
-| [UI_SYSTEM.md](UI_SYSTEM.md) | Detailed UI contracts and dated implementation history through the screen-specific audit | §26–27 and UI-CURRENT supersede earlier presentation claims; older counts and trial predictions remain historical |
-| [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) | Owner daily/weekly/monthly production and reconciliation, metric semantics, pagination and disposable analytics harness | Implemented first release; refinements and limitations in §11 |
-| [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milk/milking` roster | Deep |
-| [REGISTRY_SALES.md](REGISTRY_SALES.md) | Milk sales, home use and the buyer ledger: destinations, effective-dated prices in 40-litre lots, the daily dispatch sheet, the reconciliation, migrations 4–5 | Deep |
-| [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) | Labour: people and engagements, effective-dated packages with in-kind benefits, dihari, the monthly run, the wage ledger, migrations 6–7. Also §12.3–§12.6: the URL structure, the day board at `/`, and why reads need no recording session | Deep |
-| [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) | Veterinary visits, examinations, cases, plans, doses, tasks, attachment audit, vaccination cards and lifetime reporting; migration 9 | Current implementation and remaining capture gaps |
-| [REGISTRY_FEED.md](REGISTRY_FEED.md) | Feed implementation: migration 8, crop costs, original-unit purchases, daily accounts, snapshots, audit/replay, Today and verification | Current implementation; [FEED_SPEC.md](FEED_SPEC.md) preserves the original requirements |
-| [FARM_EVENTS.md](FARM_EVENTS.md) | Camera-event ingestion: the real Frigate and Double Take payload shapes, normalization, the `farm_events` model | Deep. Cited from `payloadShape.ts`, `db.ts`, `shared/types.ts` |
-
-`FARM_EVENTS.md` is also a Cycle 4 record. It is listed here because its payload
-contract is still the live specification, not history.
-
----
-
-## Record — closed, one per cycle
-
-Tags or baseline commits identify their historical scope. Some domain documents also carry current reference sections; read their status banners first.
-
-| Cycle | Doc | Tag | Subject |
-|---|---|---|---|
-| 1 | [OBSERVABILITY.md](OBSERVABILITY.md) | `v0.4.0` | Langfuse tracing over the agent loop |
-| 2 | [MULTI_AGENT.md](MULTI_AGENT.md) | `v0.5.0` | Two agents, one process, a keyword dispatcher, reconciliation |
-| 3 | [REGRESSION.md](REGRESSION.md) | `v0.6.0` | Live-model eval suite, 12 scenarios, CI wiring |
-| 4 | [FARM_EVENTS.md](FARM_EVENTS.md) | `v0.7.0` | Ingestion, real payload shapes, the scenario generator |
-| 5 | [FARM_MONITOR.md](FARM_MONITOR.md) | `v0.8.0` | Deterministic classification, thresholds, `FARM_TZ` |
-| 6 | *(no document)* | — | Live-model tool-selection testing; never written up |
-| 7 · step 1 | [cycle-7-live-camera-validation.md](cycle-7-live-camera-validation.md) | `v0.9.0` | Live Frigate camera, payload deltas measured against Cycle 4's assumptions |
-| 7 · FU-3 | [Cycle7-fu3-double-take-validation.md](Cycle7-fu3-double-take-validation.md) | `v0.10.0` | Double Take + DeepStack on arm64, three blocking issues resolved |
-| 8 | [REGISTRY.md](REGISTRY.md) | `v0.11.0`, `v0.11.1` | The animal registry: schema, calving transaction, HTTP surface (also reference — see above) |
-| 8 · entry | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | `v0.12.0`…`v0.15.0` | The entry surface, built in three passes. Items 7, 8 and 6b remain open; item 9 is partly built |
-| 8 · yield | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | untagged (`46d29c7`) | Per-animal milk yield, migration 3 |
-| 9 | [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) | untagged (`f3262d7`) | Registry read tools for the agent, and the six evals that matter |
-| — · sales | [REGISTRY_SALES.md](REGISTRY_SALES.md) | untagged | Milk sales, home use and the buyer ledger, migrations 4–5 (also reference — see above) |
-| — · labour | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) | untagged | People, packages, dihari and the wage ledger, migrations 6–7 (also reference — see above) |
-
-**Neither [REGISTRY_SALES.md](REGISTRY_SALES.md) nor
-[REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) has a cycle number, on purpose.** The registry's step
-numbering is about the animal record. The sales tables were the first with no `animal_id` in them;
-the labour tables hang off neither an animal nor a counterparty but off a person the farm employs.
-These domain axes do not use animal-record step numbering. Feed now adds a fourth
-domain, documented in [REGISTRY_FEED.md](REGISTRY_FEED.md). The last section of each is the part worth
-reading twice — seven things building sales changed about its plan, six for labour, and in both
-cases the most expensive one was a fixture that looked right on screen and was wrong in the data.
-
-[cycle-7-followups.md](cycle-7-followups.md) sits deliberately outside the table.
-It holds the six findings (FU-1…FU-6) that came out of Cycle 7 and were *not*
-fixed in the slice that found them. It is open work, not a closed record — which
-is why it is a separate file from the two Cycle 7 validation documents, both of
-which are closed.
-
----
-
-## Handoffs and implementation records
-
-- [ANIMAL_HEALTH_SPEC.md](ANIMAL_HEALTH_SPEC.md): original codebase-validated requirements for health management and lifetime reports; implementation and refinements are in [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md).
-- [FEED_SPEC.md](FEED_SPEC.md): confirmed farm practices and original implementation specification; implemented, with current behavior in [REGISTRY_FEED.md](REGISTRY_FEED.md).
-- [AUTH_HANDOFF.md](AUTH_HANDOFF.md): historical, unapproved authentication brainstorm; later decisions deferred that work. It is not an active implementation requirement.
-- [Current gallery](images/current/README.md): README images from `a56400a`, captured 1 October 2026. The [Feed](images/feed/README.md), [Phase 7](images/phase7/README.md) and [analytics](images/analytics/README.md) galleries retain their older, dated baselines.
-- [Screen-specific implementation](implementation/GEIST-IMPLEMENTATION.md) and [acceptance ledger](implementation/geist-screen-evidence/ACCEPTANCE.md): completed audit recommendations, 458 frontend / 779 server tests, representative browser evidence, and separate outstanding acceptance.
-
-## Archive — superseded, do not implement from
-
-| Doc | Superseded by |
-|---|---|
-| [archive/ANIMAL_REGISTRY_DECISION_DOCUMENT.md](archive/ANIMAL_REGISTRY_DECISION_DOCUMENT.md) | Revision 2 in full; never implemented |
-| [archive/ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md](archive/ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md) | [REGISTRY.md](REGISTRY.md), which records what was actually built |
-| [archive/REGISTRY_UI_REFINEMENT.md](archive/REGISTRY_UI_REFINEMENT.md) | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) §11, "Pre-trial amendment" |
-
----
-
-## Documentation audit
-
-[Markdown audits](DOC_AUDIT.md) records the 1–2 October refresh and earlier sweeps, including corrected stale claims, source checks and the distinction between current references and historical evidence.
+| Install, run or troubleshoot | [Local development](guides/development.md) |
+| Validate a change or prepare evidence | [Testing](guides/testing.md) |
+| Back up or restore records | [Backup and restore](guides/backup-restore.md) |
+| Use registry command-line tools | [Registry CLI](guides/registry-cli.md) |
+| Understand application boundaries | [System architecture](architecture/system.md) |
+| Work on frontend or assistant | [Frontend](architecture/frontend.md), [assistant](architecture/assistant.md), [protocol](architecture/protocol.md) |
+| Change domain behavior or calculations | [Registry references](reference/registry/README.md) |
+| Change presentation or navigation | [UI design system](reference/ui/design-system.md), [application interactions](reference/ui/application-interactions.md) |
+| Operate optional integrations | [Camera operations](guides/camera-operations.md), [capture](guides/camera-capture.md), [tracing](guides/observability.md) |
+| Look up integration contracts | [Integration references](reference/integrations/README.md) |
+| See current appearance | [Screenshot gallery](images/current/README.md) |
+| Find remaining work | [Open items](OPEN.md) |
+| Review completed work and acceptance limits | [Implementation ledger](implementation/GEIST-IMPLEMENTATION.md), [screen evidence](implementation/geist-screen-evidence/ACCEPTANCE.md) |
+| Understand earlier decisions | [Decision index](decisions/README.md), [historical records](records/README.md) |
 
 ## Conventions
 
-**Filenames are load-bearing.** Roughly 130 code comments cite documents by path
-(`// see docs/FARM_EVENTS.md`) and another ~170 by bare name, across ~40 source
-files. Renaming or moving a document means updating those citations in the same
-commit, or the reference goes dead silently. That is why the names here are
-inconsistent (`SCREAMING_SNAKE`, `cycle-7-...`, `Cycle7-fu3-...`) and why they
-have been left that way.
+- Each maintained page owns a clear topic. Link to its contract rather than copying evolving test counts or complete procedures.
+- Guides explain prerequisites, steps, expected outcomes and recovery. References state current behavior, invariants, interfaces, examples and limitations. Architecture pages explain boundaries and reasoning.
+- Original proposals, migrations and verification logs stay in records with their baselines. Do not rewrite old evidence to claim later acceptance.
+- [Documentation maintenance](guides/documentation.md) describes link checking, source citations and screenshot refresh requirements.
+- `UI_SYSTEM.md` is a compatibility pointer for an untouched local review link, not another current specification. Local untracked reviews remain preserved.
 
-**Decision and implementation documents should state their status near the top** —
-complete with a baseline, partially built with remaining work named, or superseded
-with a pointer. Reference guides and indexes should state their scope instead.
-
-**Records get banners, not edits.** When a later cycle changes something a closed
-record describes, the record gets a pointer at the top ("Extended by Cycle 5…")
-and keeps its original text. See the top of [FARM_EVENTS.md](FARM_EVENTS.md) for
-the pattern.
-
-[Analytics screen gallery](images/analytics/README.md): daily, weekly and monthly reviews,
-light/dark themes, production pagination, reconciliation and mobile captures
-from the dedicated fixture harness (2026-09-16).
+The root [README](../README.md) owns the product introduction and quick start. This index routes readers to deeper material without repeating them.

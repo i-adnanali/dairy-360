@@ -583,7 +583,7 @@ export function registryRouter(db: Db): express.Router {
         milking: milkingReport(snap.milkings, snap.lactations),
         // A REPORT, not violations -- every line fires on rows the farm asked to
         // be able to write, so /check must render them differently or people
-        // learn to ignore the page. See REGISTRY_PAYROLL.md §13.
+        // learn to ignore the page. See docs/records/REGISTRY_PAYROLL.md §13.
         labour: labourReport(snap, asOf),
       });
     }),
@@ -752,7 +752,7 @@ export function registryRouter(db: Db): express.Router {
 
   // --- destinations, prices, dispatch and the ledger -----------------------
   //
-  // docs/REGISTRY_SALES.md. Note that NONE of these touches an animal: they are
+  // docs/records/REGISTRY_SALES.md. Note that NONE of these touches an animal: they are
   // the first registry routes that do not, which is why the sales half works
   // against an empty herd.
 
@@ -993,7 +993,7 @@ export function registryRouter(db: Db): express.Router {
 
   // -------------------------------------------------------------------------
   // Labour: people, engagements, packages, the run and the wage ledger
-  // (docs/REGISTRY_PAYROLL.md §10)
+  // (docs/records/REGISTRY_PAYROLL.md §10)
   // -------------------------------------------------------------------------
 
   /** Everybody on file, with their balance. People with no open stint are

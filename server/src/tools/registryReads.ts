@@ -1,11 +1,11 @@
 import { animalHealth, healthBoard, lifeReport } from '../registry/health-reads';
 import { HealthError } from '../registry/health';
-// Registry read tools (Cycle 9; see docs/REGISTRY_TOOLS.md).
+// Registry read tools (Cycle 9; see docs/records/REGISTRY_TOOLS.md).
 //
 // The first tools in this repo that read a `registry_*` table -- facts about
 // actual animals rather than the seeded demo herd. Reads only, and unrestricted:
-// REGISTRY.md's deferral says "reads unrestricted, writes confirmation-gated",
-// and the writes are a later cycle for the reasons in REGISTRY_TOOLS.md §"What
+// docs/records/REGISTRY.md's deferral says "reads unrestricted, writes confirmation-gated",
+// and the writes are a later cycle for the reasons in docs/records/REGISTRY_TOOLS.md §"What
 // we're NOT doing".
 //
 // ---------------------------------------------------------------------------
@@ -24,7 +24,7 @@ import { HealthError } from '../registry/health';
 //
 // It is also the rule registry.harness.test.ts states positively: reaching the
 // singleton is a TRANSPORT decision, made in one place per transport. See
-// REGISTRY_TOOLS.md §4.
+// docs/records/REGISTRY_TOOLS.md §4.
 //
 // ---------------------------------------------------------------------------
 // PRECISION IS THE PRODUCT
@@ -54,7 +54,7 @@ type Args = Record<string, unknown>;
  * `error` as its wire key, and ToolError is `{ error: string, ... }`. So there
  * is no adapter and no second error vocabulary: the model gets the stable
  * `code` to reason about plus the prose that was written to teach an operator
- * what to do. See REGISTRY_TOOLS.md §9.
+ * what to do. See docs/records/REGISTRY_TOOLS.md §9.
  *
  * The spread is not decoration. `WireError` is a declared interface, and only
  * fresh object literals get TypeScript's implicit index signature, so
@@ -90,7 +90,7 @@ function serialOf(args: Args): string {
  * NO CAP AND NO `tooMany` FLAG, unlike search_animals (8) and get_farm_events
  * (50). The registry holds a real herd of roughly twenty animals, and returning
  * all of them is both cheaper and more honest than paginating a list the farmer
- * thinks of as one page. REGISTRY_TOOLS.md § Open items records that this is a
+ * thinks of as one page. docs/records/REGISTRY_TOOLS.md § Open items records that this is a
  * decision rather than an oversight, and what would trigger revisiting it.
  */
 export function listRegistryAnimals(db: Db, args: Args): ReadToolResult {
@@ -229,7 +229,7 @@ export function getCalvingIntervals(db: Db, args: Args): ReadToolResult {
 // before every tool call and checks `animal_id` against the DEMO animals table,
 // so a registry tool declaring that name would be rejected with
 // `unknown_animal` before its executor ran. Two id spaces, two parameter names,
-// and guardIds guards both. See REGISTRY_TOOLS.md §6.
+// and guardIds guards both. See docs/records/REGISTRY_TOOLS.md §6.
 
 export const REGISTRY_READ_TOOLS: ToolSchema[] = [
   ...[
@@ -313,7 +313,7 @@ export function registryReadExecutors(
  * `animals` table, so a registry tool declaring that name would be rejected
  * with `unknown_animal` for a serial that exists, before its executor ran.
  * Renaming alone would have left registry ids unguarded, so both halves ship
- * together. See REGISTRY_TOOLS.md §6.
+ * together. See docs/records/REGISTRY_TOOLS.md §6.
  */
 export function guardSerial(db: Db, args: Args): ToolError | null {
   if (typeof args.serial === 'string' && args.serial) {

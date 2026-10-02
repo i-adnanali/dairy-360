@@ -477,7 +477,7 @@ async function runAgentStreamTraced({
       // the pause via CUSTOM keeps the client's interrupt state machine out of
       // the loop. (Phase-0 Decision 2 assumed the interrupt outcome was free
       // belt-and-suspenders; in practice it fights the client - see
-      // docs/AGUI_MIGRATION.md.)
+      // docs/records/AGUI_MIGRATION.md.)
       emitHistory(emit, msgs);
       emit({ type: EventType.CUSTOM, name: AGENT_PENDING_EVENT, value: cards } as BaseEvent);
       finalize('awaiting_approval', { pendingWrites: cards.length });

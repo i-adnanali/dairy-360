@@ -1,12 +1,12 @@
-// Registry read tools (Cycle 9; see docs/REGISTRY_TOOLS.md).
+// Registry read tools (Cycle 9; see docs/records/REGISTRY_TOOLS.md).
 //
 // Every test drives the FACTORY with a `cleanHerd()` handle on `:memory:`, so
 // nothing here reads dairy.db to find out what a digest looks like. That is the
-// whole reason registryReadExecutors takes a handle -- REGISTRY_TOOLS.md §4.
+// whole reason registryReadExecutors takes a handle -- docs/records/REGISTRY_TOOLS.md §4.
 //
 // These assert the DIGEST SHAPE: that precision, quality and supersession
 // actually reach the model. They cannot assert that the model then uses them
-// correctly -- that is the live eval in REGISTRY_TOOLS.md § "The eval that
+// correctly -- that is the live eval in docs/records/REGISTRY_TOOLS.md § "The eval that
 // matters", and the distinction is deliberate. A green suite here means the
 // information is present, not that the answer is honest.
 
@@ -72,7 +72,7 @@ describe('list_registry_animals', () => {
   });
 
   test('an empty registry reports zero rather than failing', () => {
-    // The NORMAL state before the herd is transcribed, and REGISTRY.md treats
+    // The NORMAL state before the herd is transcribed, and docs/records/REGISTRY.md treats
     // it as first-class. A tool that threw here would make "we have no records
     // yet" unanswerable.
     const d = digest(registryReadExecutors(freshDb()).list_registry_animals({}));

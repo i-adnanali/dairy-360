@@ -138,7 +138,7 @@ test('every view-branching enum is represented in the fixture herd', () => {
   //     takes the identical code path (recordCalving branches on `!== 'live'`)
   //     and is covered directly in registry.calving.test.ts.
   //   ParentCertainty -- only `known` is reachable in this cycle; nothing
-  //     writes `unknown` yet. Recorded as a fidelity gap in REGISTRY.md.
+  //     writes `unknown` yet. Recorded as a fidelity gap in docs/records/REGISTRY.md.
   const forms = new Set(s.events.map((e) => e.source_form));
   assert.ok(forms.has('recall') && forms.has('daily_herd_sheet'), 'both realistic forms');
   db.close();

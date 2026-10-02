@@ -132,7 +132,7 @@ export function checkRebuildFidelity(live: Db, asOf: string): Violation[] {
  * step 4's yield rows would carry these ids as foreign keys. They do not: a
  * correction supersedes the opening calving and legitimately produces a new id,
  * which this check does not and should not flag. See events.ts's lactationIdFor
- * and docs/REGISTRY_MILKING.md §2.
+ * and docs/records/REGISTRY_MILKING.md §2.
  */
 export function checkLactationIdStability(live: Db, asOf: string): Violation[] {
   const before = allLactations(live)

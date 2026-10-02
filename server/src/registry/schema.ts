@@ -1,6 +1,6 @@
 import { HEALTH_SCHEMA, HEALTH_TABLES } from './health-schema';
 // Animal registry -- schema and the repo's first migration runner
-// (see docs/REGISTRY.md; decision doc §2.4, §4).
+// (see docs/records/REGISTRY.md; decision doc §2.4, §4).
 //
 // TWO THINGS LIVE HERE, and they are separable on purpose:
 //
@@ -16,7 +16,7 @@ import { HEALTH_SCHEMA, HEALTH_TABLES } from './health-schema';
 // WHY A RUNNER AT ALL, when FARM_SCHEMA gets by with IF NOT EXISTS: because
 // `CREATE TABLE IF NOT EXISTS` does nothing to a database that already has the
 // table, which is why Cycle 5's four nullable columns required every developer
-// to drop a live table by hand (FARM_MONITOR.md § "The schema gap"). The
+// to drop a live table by hand (docs/records/FARM_MONITOR.md § "The schema gap"). The
 // registry schema is expected to change at steps 3, 4 and 5, on the one set of
 // tables holding data that cannot be recovered from software.
 //
@@ -308,7 +308,7 @@ END;
 `;
 
 // ---------------------------------------------------------------------------
-// Migration 3 -- per-animal milk yield (step 4; docs/REGISTRY_MILKING.md)
+// Migration 3 -- per-animal milk yield (step 4; docs/records/REGISTRY_MILKING.md)
 // ---------------------------------------------------------------------------
 
 /**
@@ -320,7 +320,7 @@ END;
  *
  *   1. The demo `milkings` table has a foreign key to the demo `animals`, which
  *      `resetSchema()` drops on every seed, so real yield can never go there.
- *      Decided in REGISTRY.md long before this landed.
+ *      Decided in docs/records/REGISTRY.md long before this landed.
  *   2. VOLUME. `herd()` loads every event into JavaScript on every render and
  *      `checkSnapshot` runs over a whole-registry snapshot. The herd is 31
  *      animals and 70 events; two sessions a day is thousands of rows a year,
@@ -410,12 +410,12 @@ CREATE INDEX idx_registry_milkings_date   ON registry_milkings(occurred_on, sess
 // ---------------------------------------------------------------------------
 
 /**
- * REGISTRY_ENTRY_UX.md §11 carried a standing instruction: the override record
+ * docs/records/REGISTRY_ENTRY_UX.md §11 carried a standing instruction: the override record
  * belongs in a column rather than the payload, "do not migrate for this alone --
  * bundle it into whichever migration lands next". This is that moment, and it
  * goes as its OWN migration rather than riding with the sales tables, because
  * this one rebuilds a table with foreign keys off and those are plain CREATEs.
- * Putting both behind one review is what REGISTRY.md refused at migration 3.
+ * Putting both behind one review is what docs/records/REGISTRY.md refused at migration 3.
  *
  * WHY A COLUMN IS THE BETTER SHAPE (the reasoning that was in types.ts):
  * uniform across event types, queryable without json_extract, and sitting beside
@@ -590,7 +590,7 @@ function migration4(db: Db): void {
 
 // ---------------------------------------------------------------------------
 // Migration 5 -- milk sales, home use and the buyer ledger
-// (docs/REGISTRY_SALES.md §9)
+// (docs/records/REGISTRY_SALES.md §9)
 // ---------------------------------------------------------------------------
 
 /**
@@ -638,7 +638,7 @@ CREATE TABLE registry_destinations (
   name        TEXT NOT NULL,
   kind        TEXT NOT NULL CHECK (kind IN ('dodhi','household','shop','home','other')),
 
-  -- billable is its OWN column, not a filter on kind. REGISTRY.md records the
+  -- billable is its OWN column, not a filter on kind. docs/records/REGISTRY.md records the
   -- farm_events.is_synthetic failure -- a discriminator that exists and that
   -- nothing filters on, whose correctness has therefore never been exercised.
   -- The defence here is structural instead: a non-billable destination has no
@@ -824,7 +824,7 @@ CREATE INDEX idx_registry_payments_dest ON registry_payments(destination_id, occ
 
 // ---------------------------------------------------------------------------
 // Migration 6 -- people, engagements, packages and the wage ledger
-// (docs/REGISTRY_PAYROLL.md §9)
+// (docs/records/REGISTRY_PAYROLL.md §9)
 // ---------------------------------------------------------------------------
 
 /**
@@ -837,12 +837,12 @@ CREATE INDEX idx_registry_payments_dest ON registry_payments(destination_id, occ
  *
  * THE THIRD AXIS. Migration 1 hangs off an animal; migration 5 hangs off a
  * counterparty; these hang off a person the farm employs. That is why this is
- * not a "step" either -- see docs/REGISTRY_PAYROLL.md §1.
+ * not a "step" either -- see docs/records/REGISTRY_PAYROLL.md §1.
  *
  * A PLAIN SET OF CREATEs. Migration 7 immediately below is the expensive half,
  * and it is kept separate for the reason migration 4 was kept separate from
  * migration 5: putting a rebuild and a set of CREATEs behind one review is what
- * REGISTRY.md refused at migration 3.
+ * docs/records/REGISTRY.md refused at migration 3.
  *
  * ---------------------------------------------------------------------------
  * WHY registry_people AND NOT registry_employees
@@ -867,7 +867,7 @@ CREATE INDEX idx_registry_payments_dest ON registry_payments(destination_id, occ
  *
  * So identifier holds the same string that goes in observed_by, and an
  * identifier matching no person is a /check REPORT LINE rather than a
- * violation. See docs/REGISTRY_PAYROLL.md §2.
+ * violation. See docs/records/REGISTRY_PAYROLL.md §2.
  */
 const MIGRATION_6_LABOUR = `
 -- Identity, and nothing else. NO DATES ON THIS TABLE: every date lives on an
@@ -1127,7 +1127,7 @@ CREATE INDEX idx_registry_wage_payments_person
 
 // ---------------------------------------------------------------------------
 // Migration 7 -- `staff` destinations, alone
-// (docs/REGISTRY_PAYROLL.md §4.6a)
+// (docs/records/REGISTRY_PAYROLL.md §4.6a)
 // ---------------------------------------------------------------------------
 
 /**
@@ -1278,10 +1278,10 @@ export const MIGRATIONS: readonly Migration[] = [
   // rewrites every payload to drop the key they replace. Same self-referencing
   // foreign key as migration 2, so the same relaxation.
   { up: migration4, rebuildsTables: true },
-  // Four plain CREATEs (docs/REGISTRY_SALES.md). Nothing existing is touched,
+  // Four plain CREATEs (docs/records/REGISTRY_SALES.md). Nothing existing is touched,
   // so no `rebuildsTables` and no foreign_keys relaxation.
   { up: (db) => db.exec(MIGRATION_5_SALES) },
-  // Six plain CREATEs (docs/REGISTRY_PAYROLL.md). Same cheap shape as 3 and 5.
+  // Six plain CREATEs (docs/records/REGISTRY_PAYROLL.md). Same cheap shape as 3 and 5.
   { up: (db) => db.exec(MIGRATION_6_LABOUR) },
   // Rebuilds registry_destinations to widen the `kind` enum and add person_id.
   // Kept apart from 6 for the reason 4 was kept apart from 5: a rebuild and a
@@ -1435,7 +1435,7 @@ export function assertRegistryPragmas(db: Db): void {
       throw new Error(
         `registry: PRAGMA ${p.name} is ${JSON.stringify(actual)}, expected ${p.expected}.\n` +
           `  ${p.because}.\n` +
-          '  Pragmas are PER-CONNECTION -- see docs/REGISTRY.md, Decision 7. Every handle\n' +
+          '  Pragmas are PER-CONNECTION -- see docs/records/REGISTRY.md, Decision 7. Every handle\n' +
           '  that touches registry tables must go through applyRegistrySchema().',
       );
     }

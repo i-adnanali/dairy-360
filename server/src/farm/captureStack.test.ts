@@ -1,5 +1,5 @@
 // Guard for the Cycle 7 capture stack's docker-compose project isolation.
-// See docs/cycle-7-live-camera-validation.md.
+// See docs/records/cycle-7-live-camera-validation.md.
 //
 // WHY THIS TEST EXISTS
 // --------------------

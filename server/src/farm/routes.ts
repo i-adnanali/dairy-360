@@ -1,4 +1,4 @@
-// Farm event ingestion routes (Cycle 4; see docs/FARM_EVENTS.md).
+// Farm event ingestion routes (Cycle 4; see docs/records/FARM_EVENTS.md).
 //
 // An express.Router() rather than more inline handlers in index.ts: that file
 // holds two routes today, and a new domain adding several more follows Cycle

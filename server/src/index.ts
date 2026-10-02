@@ -25,12 +25,12 @@ app.use(express.json({ limit: '2mb' }));
 const SEED_HINT =
   'The database has not been seeded yet. Run `npm run seed -w server` first.';
 
-// Camera event ingestion (Cycle 4; see docs/FARM_EVENTS.md). Deliberately not
+// Camera event ingestion (Cycle 4; see docs/records/FARM_EVENTS.md). Deliberately not
 // behind the isSeeded() guard: farm_events lives outside the dairy seed
 // lifecycle, so ingestion works against an unseeded database.
 app.use('/api/webhooks', farmRouter);
 
-// Animal registry (see docs/REGISTRY.md). Also outside the isSeeded() guard:
+// Animal registry (see docs/records/REGISTRY.md). Also outside the isSeeded() guard:
 // the registry has nothing to do with the demo seed, and an unseeded database
 // is the normal state for a machine that only enters herd records.
 //

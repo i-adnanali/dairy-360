@@ -4,7 +4,7 @@ import { writerDraft, replacesContext } from './writer-draft';
 import { WriteLock } from './write-lock';
 import { Pagination } from '../ui/pagination';
 import { StatusBadge } from '../ui/surface';
-// `/dispatch` -- where the milk went (docs/REGISTRY_SALES.md §12.1).
+// `/dispatch` -- where the milk went (docs/records/REGISTRY_SALES.md §12.1).
 //
 // A sibling of milking-roster.ts, and it should feel like the same motion,
 // because it is done by the same person minutes later.

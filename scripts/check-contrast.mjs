@@ -2,7 +2,7 @@
 /*
  * WCAG contrast over the token layer, both modes.
  *
- * docs/UI_SYSTEM.md §9.6 recorded this as debt: "Contrast ratios have not been
+ * docs/records/UI_SYSTEM.md §9.6 recorded this as debt: "Contrast ratios have not been
  * computed for any pair. Spot-checked only ... This is a script, not a
  * judgement call: 60-odd pairs, the WCAG formula, failures printed."
  *

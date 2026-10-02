@@ -140,7 +140,7 @@ export class RowDivider {
 
 // ---------------------------------------------------------------------------
 // StatusBadge: state labels share geometry, while ended records retain a
-// dashed outline and warning/brand have explicit roles. UI_SYSTEM.md §14.1.
+// dashed outline and warning/brand have explicit roles. docs/records/UI_SYSTEM.md §14.1.
 export type BadgeTone = 'neutral' | 'default' | 'ended' | 'warning' | 'brand';
 
 @Directive({

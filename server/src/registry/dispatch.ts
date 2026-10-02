@@ -1,4 +1,4 @@
-// Animal registry -- milk leaving the bulk (docs/REGISTRY_SALES.md §4.3, §11, §12.1).
+// Animal registry -- milk leaving the bulk (docs/records/REGISTRY_SALES.md §4.3, §11, §12.1).
 //
 // The daily sheet: who took milk, in which session, and what it was priced at.
 // One module for the whole feature -- the pure rules, the transactional write,
@@ -636,7 +636,7 @@ export function dispatchesFor(db: Db, destinationId: string): DispatchRow[] {
 
 // ---------------------------------------------------------------------------
 // Reconciliation -- the number this feature exists to make honest
-// (docs/REGISTRY_SALES.md §11)
+// (docs/records/REGISTRY_SALES.md §11)
 // ---------------------------------------------------------------------------
 
 export interface OffSchedule {

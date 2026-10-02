@@ -51,7 +51,7 @@ import { SCENARIOS } from './scenarios';
 import { REDACTED } from './redact';
 import type { CaptureRecord } from './captureDoubleTake';
 
-const DOC_PATH = path.join(__dirname, '..', '..', '..', 'docs', 'FARM_EVENTS.md');
+const DOC_PATH = path.join(__dirname, '..', '..', '..', 'docs', 'records', 'FARM_EVENTS.md');
 
 /** Confirmed in FU-1's open decision 2 and unchanged here: this is the only
  * thing separating the capture from real farm data. */
@@ -74,12 +74,12 @@ const FACE_SINGULARS = ['match', 'unknown'] as const;
 
 // --- baselines --------------------------------------------------------------
 
-/** The documented Double Take payload, parsed out of FARM_EVENTS.md itself
+/** The documented Double Take payload, parsed out of docs/records/FARM_EVENTS.md itself
  * rather than copied here -- a hand-copied duplicate could drift from the
  * normative doc and quietly make the diff meaningless. */
 export function documentedDoubleTakeShape(markdown: string): unknown {
   const heading = /^###\s+Double Take\b.*$/m.exec(markdown);
-  if (!heading) throw new Error('could not find the "### Double Take ..." heading in FARM_EVENTS.md');
+  if (!heading) throw new Error('could not find the "### Double Take ..." heading in docs/records/FARM_EVENTS.md');
   const after = markdown.slice(heading.index);
   const fence = /```json\s*\n([\s\S]*?)\n```/.exec(after);
   if (!fence) throw new Error('could not find a ```json block under the Double Take heading');
@@ -497,7 +497,7 @@ function main(): void {
   console.log('\n\nENVELOPE  (face-object internals excluded — diffed separately below)');
   console.log('====================================================================');
   printDeltas(
-    'Baseline A — FARM_EVENTS.md § "Double Take — camera event payload"',
+    'Baseline A — docs/records/FARM_EVENTS.md § "Double Take — camera event payload"',
     diffShapes(envelopeOnly(realFull), envelopeOnly(aggregateShapes([documented]))),
   );
   printDeltas(

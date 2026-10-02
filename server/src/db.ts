@@ -61,7 +61,7 @@ CREATE TABLE health_events (
   next_due_date TEXT
 );
 
--- Vendor / sales domain (Cycle 2 multi-agent; see docs/MULTI_AGENT.md).
+-- Vendor / sales domain (Cycle 2 multi-agent; see docs/records/MULTI_AGENT.md).
 -- deliveries and milkings are deliberately NOT linked by a foreign key: they
 -- belong to different agents' domains and are only ever joined read-only, by
 -- the reconciliation tool get_yield_vs_deliveries.
@@ -86,7 +86,7 @@ CREATE INDEX idx_deliveries_vendor ON deliveries(vendor_id);
 `;
 
 // ---------------------------------------------------------------------------
-// Farm event ingestion (Cycle 4; see docs/FARM_EVENTS.md).
+// Farm event ingestion (Cycle 4; see docs/records/FARM_EVENTS.md).
 //
 // Deliberately NOT part of SCHEMA and NOT in resetSchema()'s DROP list. Two
 // reasons: `npm run seed -w server` would otherwise wipe every ingested event,
@@ -117,13 +117,13 @@ CREATE TABLE IF NOT EXISTS farm_events (
   ingested_at     TEXT NOT NULL,
   snapshot_ref    TEXT,
   raw_payload     TEXT NOT NULL,
-  -- Classification (Cycle 5; see docs/FARM_MONITOR.md). Additive and all
+  -- Classification (Cycle 5; see docs/records/FARM_MONITOR.md). Additive and all
   -- nullable/defaulted, so an ingested row is valid with none of them set.
   -- NOTE: because this table is CREATE TABLE IF NOT EXISTS, adding columns
   -- here does NOT alter a dairy.db that already has the table -- the local
-  -- table must be dropped so this runs fresh (FARM_MONITOR.md Decision 2).
+  -- table must be dropped so this runs fresh (docs/records/FARM_MONITOR.md Decision 2).
   -- flag_severity is 'notable' | 'urgent', enforced by TypeScript types and the
-  -- flag_anomaly input_schema enum rather than a CHECK: per FARM_EVENTS.md
+  -- flag_anomaly input_schema enum rather than a CHECK: per docs/records/FARM_EVENTS.md
   -- Decision 3, CHECKs here are reserved for webhook bodies arriving from
   -- outside the process. These values come from our own classifier or from a
   -- model already constrained by a tool schema.
@@ -143,7 +143,7 @@ CREATE INDEX IF NOT EXISTS idx_farm_events_source_ref  ON farm_events(source_eve
 db.exec(FARM_SCHEMA);
 
 // ---------------------------------------------------------------------------
-// Animal registry (see docs/REGISTRY.md). Migration-managed via
+// Animal registry (see docs/records/REGISTRY.md). Migration-managed via
 // `PRAGMA user_version`, unlike the two consts above -- registry tables hold
 // real, unrecoverable records and are expected to change at steps 3, 4 and 5,
 // which is exactly what `CREATE TABLE IF NOT EXISTS` cannot express.
@@ -431,10 +431,10 @@ export function countFarmEvents(): number {
 }
 
 /** Delete every farm event. How verify.ts scopes itself to one scenario at a
- * time against the shared dev DB (Decision 6 in docs/FARM_EVENTS.md) -- there
+ * time against the shared dev DB (Decision 6 in docs/records/FARM_EVENTS.md) -- there
  * is no separate test database file.
  *
- * Cycle 5 makes this load-bearing beyond verification: per FARM_MONITOR.md
+ * Cycle 5 makes this load-bearing beyond verification: per docs/records/FARM_MONITOR.md
  * Decision 2, ANY classification-aware population calls this before each
  * scenario, because UNKNOWN_CLUSTER_A1 appears in two scenarios and a shared
  * table corrupts every recurrence count. */
@@ -443,7 +443,7 @@ export function resetFarmEvents(): void {
 }
 
 // ---------------------------------------------------------------------------
-// Farm event classification (Cycle 5; see docs/FARM_MONITOR.md).
+// Farm event classification (Cycle 5; see docs/records/FARM_MONITOR.md).
 // ---------------------------------------------------------------------------
 
 /** Id-integrity check for flag_anomaly's event_id, mirroring animalExists() /
@@ -496,7 +496,7 @@ export function farmEventsInRange(scope: {
  * How many times this identity was already seen, in the same `event_type`,
  * strictly BEFORE the given instant and no earlier than `windowStartIso`.
  *
- * The window is event-relative, not now-relative (FARM_MONITOR.md Decision 3):
+ * The window is event-relative, not now-relative (docs/records/FARM_MONITOR.md Decision 3):
  * the caller derives windowStartIso from the event's own occurred_at, which is
  * what makes a classification pass reproducible whenever it runs.
  *
@@ -534,7 +534,7 @@ export function countPriorSightings(scope: {
  * The single write path for a classification verdict -- no approval card, no
  * PendingWrite. classifyEvent() calls this directly for automatic flags, and
  * flag_anomaly's WRITE_EXECUTOR calls it for the human-approved manual
- * override (FARM_MONITOR.md Decision 6).
+ * override (docs/records/FARM_MONITOR.md Decision 6).
  *
  * Last-write-wins: there is deliberately no flag history and no unflagging
  * path in this cycle. A routine verdict clears the flag columns but still

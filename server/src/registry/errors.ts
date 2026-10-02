@@ -56,7 +56,7 @@ export type RegistryErrorCode =
   // rather than by insisting.
   | 'no_open_lactation'
   | 'empty_session'
-  // --- sales, home use and the ledger (docs/REGISTRY_SALES.md) ---
+  // --- sales, home use and the ledger (docs/records/REGISTRY_SALES.md) ---
   | 'unknown_destination'
   // Milk kept for the house is a DISPOSITION, not a sale. Pricing it, or paying
   // for it, would put the farm's own milk in somebody's balance.
@@ -69,7 +69,7 @@ export type RegistryErrorCode =
   // date, or a buyer whose range needs correcting first.
   | 'destination_not_active'
   | 'untouched_standing_destination'
-  // --- labour: people, engagements, packages, wages (docs/REGISTRY_PAYROLL.md) ---
+  // --- labour: people, engagements, packages, wages (docs/records/REGISTRY_PAYROLL.md) ---
   | 'unknown_person'
   | 'unknown_engagement'
   // An identifier already belongs to somebody. Case-insensitive, because the

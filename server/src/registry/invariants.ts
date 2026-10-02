@@ -582,7 +582,7 @@ function checkPrecision(s: RegistrySnapshot): Violation[] {
 }
 
 // ---------------------------------------------------------------------------
-// 14-17. Milk yield (step 4; docs/REGISTRY_MILKING.md §10)
+// 14-17. Milk yield (step 4; docs/records/REGISTRY_MILKING.md §10)
 // ---------------------------------------------------------------------------
 
 /**
@@ -790,7 +790,7 @@ export function checkDbSourceIsolation(dbSource: string): Violation[] {
 
 // ---------------------------------------------------------------------------
 // 18-22. Milk sales, home use and the ledger
-// (docs/REGISTRY_SALES.md §13)
+// (docs/records/REGISTRY_SALES.md §13)
 // ---------------------------------------------------------------------------
 
 /**
@@ -1019,7 +1019,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
  */
 // ---------------------------------------------------------------------------
 // 23-28. People, engagements, packages and the wage ledger
-// (docs/REGISTRY_PAYROLL.md §13)
+// (docs/records/REGISTRY_PAYROLL.md §13)
 // ---------------------------------------------------------------------------
 
 /**

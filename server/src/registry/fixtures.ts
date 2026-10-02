@@ -511,7 +511,7 @@ export function addSalesDestinations(db: Db): SalesFixture {
  *
  * ALL THREE STATUSES APPEAR, and that is the point rather than decoration:
  * fixtures.ts had ZERO milking rows before this, which is why
- * REGISTRY_TOOLS.md had to defer `get_milking_record` -- the three-status split
+ * docs/records/REGISTRY_TOOLS.md had to defer `get_milking_record` -- the three-status split
  * had no fixture behind it, so the one thing worth testing about milk yield was
  * untestable. A fixture of all-measured rows would have reintroduced exactly
  * that gap while looking like coverage.
@@ -682,7 +682,7 @@ export function tradingHerd(lastOn: string = AS_OF): { db: Db; sales: SalesFixtu
 }
 
 // ---------------------------------------------------------------------------
-// Labour fixtures (docs/REGISTRY_PAYROLL.md §14, item 8)
+// Labour fixtures (docs/records/REGISTRY_PAYROLL.md §14, item 8)
 // ---------------------------------------------------------------------------
 
 /**

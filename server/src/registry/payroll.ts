@@ -1,4 +1,4 @@
-// Animal registry -- packages and the payroll run (docs/REGISTRY_PAYROLL.md §4.4-§4.6, §12.1).
+// Animal registry -- packages and the payroll run (docs/records/REGISTRY_PAYROLL.md §4.4-§4.6, §12.1).
 //
 // What somebody is on, and what they were actually paid for a stretch of time.
 //
@@ -616,7 +616,7 @@ export function deleteWagePeriods(db: Db, ids: readonly string[]): number {
 }
 
 // ---------------------------------------------------------------------------
-// The run read model (docs/REGISTRY_PAYROLL.md §12.1)
+// The run read model (docs/records/REGISTRY_PAYROLL.md §12.1)
 // ---------------------------------------------------------------------------
 
 /**

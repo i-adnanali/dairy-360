@@ -2,7 +2,7 @@
 //
 //   npm run enroll:synthetic -w server
 //
-// See docs/Cycle7-fu3-double-take-validation.md § open decision 1 and
+// See docs/records/Cycle7-fu3-double-take-validation.md § open decision 1 and
 // double-take/enroll/README.md.
 //
 // ---------------------------------------------------------------------------

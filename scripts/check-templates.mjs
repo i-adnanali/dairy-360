@@ -12,14 +12,14 @@
 // style -- `Herd`, `@if (session.ready())` -- inside a template, which is
 // itself a template literal. The backtick closes the string and TypeScript
 // reports three or four syntax errors pointing at lines nowhere near the cause.
-// REGISTRY_SALES.md §17.4 recorded it twice, REGISTRY_PAYROLL.md §16.3 a third
+// docs/records/REGISTRY_SALES.md §17.4 recorded it twice, docs/records/REGISTRY_PAYROLL.md §16.3 a third
 // time, and web-angular/src/app/registry/templates.spec.ts was built as the
 // fourth response.
 //
 // That spec runs under `ng test`, which BUILDS the application first. A stray
 // backtick is a compile error, so the build fails and the spec that would have
 // named the file and the line never executes. Measured, not assumed: it
-// happened during phase 4 of docs/UI_SYSTEM.md, produced eleven errors naming
+// happened during phase 4 of docs/records/UI_SYSTEM.md, produced eleven errors naming
 // `numeric` and `flex`, and the guard printed nothing at all. The spec can only
 // catch the subset of stray backticks that still parse as TypeScript -- which
 // is the rarer half, and not the half that costs an afternoon.

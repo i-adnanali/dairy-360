@@ -102,7 +102,7 @@ describe('EventList — the correction window', () => {
     const a = el.querySelector('[data-event="a"] [data-role="when"]')!;
     const b = el.querySelector('[data-event="b"] [data-role="when"]')!;
 
-    // THE QUALIFIER LOST ITS BRACKETS, per UI_SYSTEM.md §6.1: lowercase, no
+    // THE QUALIFIER LOST ITS BRACKETS, per docs/records/UI_SYSTEM.md §6.1: lowercase, no
     // parentheses, one space after the figure. This assertion used to read
     // `(year)` / `(day)`.
     expect(a.textContent).toContain('2019 year');

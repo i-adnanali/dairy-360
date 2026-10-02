@@ -1,10 +1,10 @@
-// Regression & eval suite -- core scenarios (Cycle 3; see docs/REGRESSION.md).
+// Regression & eval suite -- core scenarios (Cycle 3; see docs/records/REGRESSION.md).
 //
 // Runs against the REAL Anthropic API (no mock), matching the verification
 // standard used for observability: exercise the actual loop, not a simulation.
 // The model is not perfectly deterministic, so a scenario can occasionally take
 // a valid-but-different path; v1 does not auto-retry -- a flake is reviewed by
-// hand (see docs/REGRESSION.md Open items).
+// hand (see docs/records/REGRESSION.md Open items).
 //
 // Load server/.env for a local ANTHROPIC_API_KEY; in CI the key comes from the
 // job env. dotenv never overrides an already-set var, so this is safe.

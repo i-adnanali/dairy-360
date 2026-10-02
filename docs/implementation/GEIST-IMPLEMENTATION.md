@@ -44,7 +44,7 @@ Implemented in the requested order: People/Feed and ordinary form/table patterns
 
 | Recommendation family | Final implementation / concrete evidence |
 |---|---|
-| Current type, spacing and state reference | [UI-CURRENT.md](../UI-CURRENT.md) and [inspectable specimen](geist-screen-evidence/ui-specimen.html), with a reproducible generator; field grids align to content rather than stretching neighboring inputs |
+| Current type, spacing and state reference | [UI-CURRENT.md](../records/UI-CURRENT.md) and [inspectable specimen](geist-screen-evidence/ui-specimen.html), with a reproducible generator; field grids align to content rather than stretching neighboring inputs |
 | People | Imported the existing ScrollRegion consumer; clear Add person/Open stint actions; concise immutable-ID and rehire help; identity/name picker context; balance-first table and unbroken last-paid dates |
 | Person | Balance/open-stint summary and payment action precede history; payment field groups; adjustment versus payment versus earned-wage copy; wrapping ledger rows |
 | Feed overview | Compact costs/coverage retained; supply/quantity/crop lists in native disclosures; purchase drilldown carries the selected date range |

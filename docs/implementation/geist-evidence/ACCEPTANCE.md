@@ -2,7 +2,7 @@
 
 # Audit implementation acceptance — 30 September 2026
 
-Implementation source began at `a1dd2a7` with no tracked changes. The pre-existing untracked `docs/reviews/` tree was preserved. Final uncommitted source is identified by [SOURCE_SHA256.txt](SOURCE_SHA256.txt). See the [implementation checklist](../GEIST-IMPLEMENTATION.md) for every route and finding, and [UI_SYSTEM §26](../../UI_SYSTEM.md#26-audit-implementation--30-september-2026) for the revised contract.
+Implementation source began at `a1dd2a7` with no tracked changes. The pre-existing untracked `docs/reviews/` tree was preserved. Final uncommitted source is identified by [SOURCE_SHA256.txt](SOURCE_SHA256.txt). See the [implementation checklist](../GEIST-IMPLEMENTATION.md) for every route and finding, and [UI_SYSTEM §26](../../records/UI_SYSTEM.md#26-audit-implementation--30-september-2026) for the revised contract.
 
 This is implementation verification, not a claim of complete native accessibility or release acceptance. PASS below applies only at the stated evidence level. No deployment, publishing, merge or real farm write was performed.
 

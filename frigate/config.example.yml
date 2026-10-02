@@ -1,5 +1,5 @@
 # Frigate config for the Cycle 7 step 1 payload-shape validation window.
-# See docs/cycle-7-live-camera-validation.md.
+# See docs/records/cycle-7-live-camera-validation.md.
 #
 #   cp frigate/config.example.yml frigate/config.yml
 #

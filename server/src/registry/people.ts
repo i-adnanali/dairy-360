@@ -1,4 +1,4 @@
-// Animal registry -- people and engagements (docs/REGISTRY_PAYROLL.md §4.1, §4.2).
+// Animal registry -- people and engagements (docs/records/REGISTRY_PAYROLL.md §4.1, §4.2).
 //
 // Who works here, and for which stretches. payroll.ts (packages, the run) and
 // wages.ts (the ledger) both read from here.

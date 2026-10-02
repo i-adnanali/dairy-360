@@ -1,4 +1,4 @@
-// Dispatcher (Cycle 2 multi-agent; see docs/MULTI_AGENT.md).
+// Dispatcher (Cycle 2 multi-agent; see docs/records/MULTI_AGENT.md).
 //
 // This is the one deliberate, narrow exception to the app's "no hand-written
 // intent parsing" principle. Its ONLY job is to select which agent sees a turn

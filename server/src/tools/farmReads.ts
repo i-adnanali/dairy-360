@@ -1,4 +1,4 @@
-// Farm monitor read tools (Cycle 5; see docs/FARM_MONITOR.md Decision 6).
+// Farm monitor read tools (Cycle 5; see docs/records/FARM_MONITOR.md Decision 6).
 //
 // Both tools return STRUCTURED findings in a modelDigest and nothing else --
 // no prose, no Anthropic SDK call. That is not a style preference: runReads()
@@ -23,7 +23,7 @@ type Args = Record<string, unknown>;
 
 /** Cap on rows returned to the model, mirroring search_animals' tooMany flag.
  * Real cameras produce orders of magnitude more rows than the herd does
- * (FARM_EVENTS.md § Open items), so this tool never streams a whole day. */
+ * (docs/records/FARM_EVENTS.md § Open items), so this tool never streams a whole day. */
 const MAX_ROWS = 50;
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -128,7 +128,7 @@ export interface CameraFinding {
 }
 
 /** Longest trailing silence per camera, measured against the day's last event
- * on any camera. See FARM_MONITOR.md: Cycle 4 documents that a dropout is
+ * on any camera. See docs/records/FARM_MONITOR.md: Cycle 4 documents that a dropout is
  * indistinguishable from a genuinely quiet camera until a watchdog exists, so
  * this reports the gap as DATA and leaves the reading to the model. */
 export function cameraFindings(rows: FarmEvent[]): CameraFinding[] {
@@ -222,7 +222,7 @@ export function summarizeDailyActivity(args: Args): ReadToolResult {
 
   // Only the unexamined rows are (re)classified. Re-running for the same date
   // is deterministic given the same data, so this is a cost saving rather than
-  // a correctness fix (FARM_MONITOR.md § Open items).
+  // a correctness fix (docs/records/FARM_MONITOR.md § Open items).
   const unclassified = before.filter((r) => r.classified_at === null);
   classifyEvents(unclassified);
 

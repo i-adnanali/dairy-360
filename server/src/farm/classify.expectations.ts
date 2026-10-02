@@ -1,5 +1,5 @@
 // Expected CLASSIFICATION outcomes per scenario (Cycle 5; see
-// docs/FARM_MONITOR.md Decision 7).
+// docs/records/FARM_MONITOR.md Decision 7).
 //
 // Deliberately a separate module from scenarios.ts, which stays ingestion-only
 // truth: that file answers "what rows land", this one answers "what do they
@@ -99,7 +99,7 @@ const ALL_ENROLLED = ['employee_1', 'employee_2', 'employee_3', 'owner'];
 // --- expectations -----------------------------------------------------------
 
 /** Baseline: nothing flagged. The two silence findings are NOT a defect --
- * see the note on CAMERA_SILENCE_MINUTES in FARM_MONITOR.md § Open items.
+ * see the note on CAMERA_SILENCE_MINUTES in docs/records/FARM_MONITOR.md § Open items.
  * gate_cam and barn_cam each catch one moment early in a 30-minute window and
  * are quiet afterwards, which absence-based detection cannot tell apart from a
  * dropout. Recorded here as observed truth rather than hidden. */

@@ -286,7 +286,7 @@ test('the picker still offers a dam whose own calvings are years later', () => {
  * gestation floor removed from the shared predicate, the three tests above go
  * red and this one stays GREEN, because the picker and recordCalving agree
  * perfectly on the wrong answer. Which is the third corollary in
- * REGISTRY_ENTRY_UX.md section 3 arriving again: a consistency check finds the
+ * docs/records/REGISTRY_ENTRY_UX.md section 3 arriving again: a consistency check finds the
  * row that disagrees with its neighbours and is blind to a whole column that is
  * evenly false. The gestation bug was found by reading a screen and knowing the
  * animal was wrong, and nothing else was ever going to find it.

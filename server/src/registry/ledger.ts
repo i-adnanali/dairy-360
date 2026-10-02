@@ -1,4 +1,4 @@
-// Animal registry -- the buyer ledger (docs/REGISTRY_SALES.md §4.4, §12.3).
+// Animal registry -- the buyer ledger (docs/records/REGISTRY_SALES.md §4.4, §12.3).
 //
 // What is owed, and the statement that says why.
 //

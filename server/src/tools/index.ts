@@ -187,7 +187,7 @@ export const WRITE_TOOLS: ToolSchema[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Vendor / sales tools (Cycle 2 multi-agent; see docs/MULTI_AGENT.md). Kept in
+// Vendor / sales tools (Cycle 2 multi-agent; see docs/records/MULTI_AGENT.md). Kept in
 // their own schema arrays so the dispatcher (Phase 03) can advertise the dairy
 // set, the vendor set, or both to the model per turn.
 // ---------------------------------------------------------------------------
@@ -277,7 +277,7 @@ export const VENDOR_WRITE_TOOLS: ToolSchema[] = [
 export { RECONCILE_TOOLS };
 
 // ---------------------------------------------------------------------------
-// Farm monitor tools (Cycle 5; see docs/FARM_MONITOR.md Decision 6).
+// Farm monitor tools (Cycle 5; see docs/records/FARM_MONITOR.md Decision 6).
 //
 // AGENT-AGNOSTIC: offered in every toolsForAgent() branch, not gated behind an
 // AgentKind and not given dispatcher keywords. The dispatcher routes on herd
@@ -293,7 +293,7 @@ export { FARM_READ_TOOLS, FARM_WRITE_TOOLS };
 const FARM_TOOLS: ToolSchema[] = [...FARM_READ_TOOLS, ...FARM_WRITE_TOOLS];
 
 // ---------------------------------------------------------------------------
-// Registry read tools (Cycle 9; see docs/REGISTRY_TOOLS.md).
+// Registry read tools (Cycle 9; see docs/records/REGISTRY_TOOLS.md).
 //
 // AGENT-AGNOSTIC, for the same reason as FARM_TOOLS above and by the same
 // argument: the dairy/vendor seam does not partition registry questions either.
@@ -302,18 +302,18 @@ const FARM_TOOLS: ToolSchema[] = [...FARM_READ_TOOLS, ...FARM_WRITE_TOOLS];
 // dairy question but matches nothing -- DAIRY_KEYWORDS has `calf` and `calves`,
 // and anyMatch is word-boundary anchored, so `\bcalf\b` does NOT match
 // "calving". Registering everywhere removes the failure mode instead of
-// patching the keyword list, which is also why REGISTRY.md's open item about
+// patching the keyword list, which is also why docs/records/REGISTRY.md's open item about
 // `heifer`/`male`/`departed` missing from DAIRY_KEYWORDS needs no fix: it only
 // mattered if these were dairy-gated.
 //
-// Reads only. Writes are a later cycle -- REGISTRY.md's deferral is "reads
+// Reads only. Writes are a later cycle -- docs/records/REGISTRY.md's deferral is "reads
 // unrestricted, writes confirmation-gated", and `record_calving` in particular
 // creates an animal.
 // ---------------------------------------------------------------------------
 export { REGISTRY_READ_TOOLS };
 
 // ---------------------------------------------------------------------------
-// SALES READ TOOLS (docs/REGISTRY_SALES.md)
+// SALES READ TOOLS (docs/records/REGISTRY_SALES.md)
 //
 // Offered to EVERY agent selection, like the farm tools and for a sharper
 // reason: "what does the dodhi owe?" is a vendor question, "does what we
@@ -321,7 +321,7 @@ export { REGISTRY_READ_TOOLS };
 // tables. Gating them by selection would make the dispatcher decide which half
 // of one ledger the model can see.
 //
-// Reads only, per REGISTRY_TOOLS.md Decision 1. The entry screens are the way
+// Reads only, per docs/records/REGISTRY_TOOLS.md Decision 1. The entry screens are the way
 // sales go in, and a second write path competing with a surface under
 // measurement contaminates the reading of that surface.
 // ---------------------------------------------------------------------------

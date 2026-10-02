@@ -1,4 +1,4 @@
-// Sales read tools -- the digest contracts (docs/REGISTRY_SALES.md).
+// Sales read tools -- the digest contracts (docs/records/REGISTRY_SALES.md).
 //
 // Every assertion here is about something a model would get WRONG in a way that
 // still reads as an answer:

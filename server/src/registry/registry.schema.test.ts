@@ -903,7 +903,7 @@ test('the other three precisions are unaffected by migration 2', () => {
 
 // ---------------------------------------------------------------------------
 // Migration 6 -- people, engagements, packages and the wage ledger
-// (docs/REGISTRY_PAYROLL.md §9)
+// (docs/records/REGISTRY_PAYROLL.md §9)
 // ---------------------------------------------------------------------------
 
 /** A person, an engagement and a term, so the child tables have parents. */
@@ -1178,7 +1178,7 @@ test('an advance is just a payment -- the balance is allowed to go negative', ()
 });
 
 // ---------------------------------------------------------------------------
-// Migration 7 -- `staff` destinations (docs/REGISTRY_PAYROLL.md §4.6a)
+// Migration 7 -- `staff` destinations (docs/records/REGISTRY_PAYROLL.md §4.6a)
 // ---------------------------------------------------------------------------
 
 const insDestination = (db: ReturnType<typeof freshDb>) =>

@@ -51,7 +51,7 @@ export const DOUBLE_ENTRY_WINDOW_DAYS = 60;
  * Nili-Ravi is three-and-a-half to four-and-a-half years, so a gap of 400 days
  * is also nonsense -- but it is merely implausible rather than impossible, and
  * refusing it would need a provisional threshold. Those belong to the interval
- * bands (REGISTRY_ENTRY_UX.md 7.2), which are below the cut line. Using the
+ * bands (docs/records/REGISTRY_ENTRY_UX.md 7.2), which are below the cut line. Using the
  * impossibility floor means this check has NO false refusals, which is what
  * lets it refuse outright instead of warning.
  */

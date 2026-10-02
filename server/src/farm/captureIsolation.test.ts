@@ -1,5 +1,5 @@
 // Module-isolation guard for the Cycle 7 capture tooling (see
-// docs/cycle-7-live-camera-validation.md, open decision 1).
+// docs/records/cycle-7-live-camera-validation.md, open decision 1).
 //
 // Open decision 1 is a HARD constraint: "the shared dev DB stays untouched"
 // during the live-camera validation window. That constraint is enforced by an

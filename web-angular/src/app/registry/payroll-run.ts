@@ -6,7 +6,7 @@ import { untracked } from '@angular/core';
 import { writerDraft, replacesContext } from './writer-draft';
 import { WriteLock } from './write-lock';
 import { SummaryBar } from '../ui/surface';
-// `/payroll` -- the monthly run (docs/REGISTRY_PAYROLL.md §12.1).
+// `/payroll` -- the monthly run (docs/records/REGISTRY_PAYROLL.md §12.1).
 //
 // A sibling of dispatch-sheet.ts, with one difference: the period is a month
 // rather than a session, so this is opened monthly rather than twice a day.

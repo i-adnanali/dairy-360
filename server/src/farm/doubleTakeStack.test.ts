@@ -1,5 +1,5 @@
 // Retention/config guard for the Cycle 7 FU-3 Double Take stack.
-// See docs/Cycle7-fu3-double-take-validation.md, finding 6 layer (b).
+// See docs/records/Cycle7-fu3-double-take-validation.md, finding 6 layer (b).
 //
 // WHY THIS TEST EXISTS
 // --------------------
@@ -78,7 +78,7 @@ function settings(text: string, key: string): string[] {
 // `MATCH.SAVE` is never consulted, so any face clearing the match threshold has
 // its crop written whatever this setting says. Measured during Cycle 7 FU-3:
 // 7 crops in /.storage/matches/ and 3 in /.storage/latest/ with BOTH save keys
-// false. Tracked as docs/cycle-7-followups.md § FU-6.
+// false. Tracked as docs/records/cycle-7-followups.md § FU-6.
 //
 // The test is still worth having -- it pins the intent, catches a config that
 // drifts back to the upstream default, and `unknown.save` genuinely does work.

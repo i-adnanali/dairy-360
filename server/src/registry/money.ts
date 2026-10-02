@@ -1,4 +1,4 @@
-// Animal registry -- money. PURE (docs/REGISTRY_SALES.md §5).
+// Animal registry -- money. PURE (docs/records/REGISTRY_SALES.md §5).
 //
 // No `../db`, no clock, no filesystem. Three functions and a constant, and the
 // whole point of the module is that there is exactly ONE place where litres
@@ -27,7 +27,7 @@
 // not round-trip -- X rupees per 40 L is `X * 2.5` paisa per litre, so an odd
 // rupee amount is not a whole number of paisa.
 //
-// See docs/REGISTRY_SALES.md §4.2 for the two consequences that are not about
+// See docs/records/REGISTRY_SALES.md §4.2 for the two consequences that are not about
 // storage at all: the entry form would demand mental arithmetic, and the
 // statement would be arithmetic the buyer cannot check against his own khata.
 
@@ -124,7 +124,7 @@ export function perLitreMinor(priceMinor: number, unitLitres: number): number {
  * dispatch's amount is DERIVED (litres x rate); a wage period stores the agreed
  * figure directly, so payroll adds no multiplication anywhere. If a
  * `wageForPeriod(term, from, to)` ever appears in this file, something has
- * started computing a salary from the calendar -- see docs/REGISTRY_PAYROLL.md
+ * started computing a salary from the calendar -- see docs/records/REGISTRY_PAYROLL.md
  * §4.6 for why that is the one thing this design refuses to do.
  */
 export function formatPeriodRate(cashMinor: number, period: 'month' | 'day'): string {

@@ -306,7 +306,7 @@ export class RegistryApi {
     )));
   }
 
-  // --- sales, home use and the ledger (docs/REGISTRY_SALES.md) -------------
+  // --- sales, home use and the ledger (docs/records/REGISTRY_SALES.md) -------------
 
   destinations(asOf?: string): Promise<DestinationListRow[]> {
     const q = asOf ? `?${new URLSearchParams({ as_of: asOf })}` : '';
@@ -410,7 +410,7 @@ export class RegistryApi {
   }
 
   // -------------------------------------------------------------------------
-  // Labour (docs/REGISTRY_PAYROLL.md §10)
+  // Labour (docs/records/REGISTRY_PAYROLL.md §10)
   // -------------------------------------------------------------------------
 
   people(asOf?: string): Promise<WageBalanceRow[]> {

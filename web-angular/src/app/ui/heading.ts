@@ -1,6 +1,6 @@
 // Three heading levels, which is one more than the app knew it had.
 //
-// The earlier draft of UI_SYSTEM.md had two. There are three, and the middle
+// The earlier draft of docs/records/UI_SYSTEM.md had two. There are three, and the middle
 // one is the most-repeated single heading string in the app:
 //
 //   Page     text-lg font-semibold  --text-primary   14 sites

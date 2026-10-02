@@ -54,7 +54,7 @@
 // 2. IT ADDS A TAB STOP TO BOTH FROZEN FORMS. A fresh /animals/new goes from 8
 //    to 9 and /animals/calvings/new from 6 to 7, because the submit is disabled
 //    in the empty state and now sits in the tab order while inert.
-//    REGISTRY_ENTRY_UX.md section 11 prediction 3 is pre-registered on "ten tab
+//    docs/records/REGISTRY_ENTRY_UX.md section 11 prediction 3 is pre-registered on "ten tab
 //    stops, about half of them empty" and section 2's B1 freezes FIELDS, which
 //    a submit button is not -- so nothing in the trial gate catches this. It
 //    was raised, and the decision was to build the design system now and read

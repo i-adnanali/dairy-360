@@ -47,7 +47,7 @@ export interface HealthEvent {
   next_due_date: string | null;
 }
 
-// --- Vendor / sales domain (Cycle 2 multi-agent; see docs/MULTI_AGENT.md) ----
+// --- Vendor / sales domain (Cycle 2 multi-agent; see docs/records/MULTI_AGENT.md) ----
 
 export type VendorStatus = 'active' | 'inactive';
 
@@ -68,7 +68,7 @@ export interface Delivery {
   paid: boolean;
 }
 
-// --- Farm event ingestion (Cycle 4; see docs/FARM_EVENTS.md) -----------------
+// --- Farm event ingestion (Cycle 4; see docs/records/FARM_EVENTS.md) -----------------
 // Camera events from Frigate (object detection) and Double Take (face
 // recognition). No foreign key to any dairy table -- rows are correlated to
 // each other by source_event_id, never to the herd.
@@ -82,7 +82,7 @@ export type FarmEventSource = 'frigate' | 'double_take';
  * threshold, and lands here too. `confidence` is the only discriminator. */
 export type FarmEventType = 'detection' | 'face_match' | 'unknown_cluster';
 
-/** Classification severity (Cycle 5; see docs/FARM_MONITOR.md). `routine` is
+/** Classification severity (Cycle 5; see docs/records/FARM_MONITOR.md). `routine` is
  * the absence of a flag, so it is never stored in flag_severity -- a routine
  * row is `flagged = 0, flag_severity = NULL` with classified_at set. */
 export type FarmEventSeverity = 'routine' | 'notable' | 'urgent';
@@ -209,12 +209,12 @@ export type AgentRunForwardedProps = {
 };
 
 /** Which agent the dispatcher selected for a turn (Cycle 2). See dispatch.ts
- * on the server and docs/MULTI_AGENT.md. Shared so the client can tag turns. */
+ * on the server and docs/records/MULTI_AGENT.md. Shared so the client can tag turns. */
 export type AgentKind = 'dairy' | 'vendor' | 'both';
 
 /** CUSTOM event names used as app-specific side-channels over AG-UI. Renamed
  * from the Cycle 1 `dairy.*` names in Cycle 2: once a vendor write can also
- * pause a run, `dairy.pending` was misleading. See docs/MULTI_AGENT.md. */
+ * pause a run, `dairy.pending` was misleading. See docs/records/MULTI_AGENT.md. */
 export const AGENT_DATASET_EVENT = 'agent.dataset'; // value: Dataset
 export const AGENT_MESSAGES_EVENT = 'agent.messages'; // value: AnthropicMessage[]
 export const AGENT_PENDING_EVENT = 'agent.pending'; // value: PendingWrite[]

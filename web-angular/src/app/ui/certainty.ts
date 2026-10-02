@@ -1,4 +1,4 @@
-// The certainty vocabulary. Phase 5 of docs/UI_SYSTEM.md, spec in §6.
+// The certainty vocabulary. Phase 5 of docs/records/UI_SYSTEM.md, spec in §6.
 //
 // ---------------------------------------------------------------------------
 // FIVE STATES, AND THE THIRD AND FOURTH ARE THE POINT

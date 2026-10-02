@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 // WHY THIS EXISTS BEFORE THERE ARE TWO OF THEM
 // ---------------------------------------------------------------------------
-// docs/UI_SYSTEM.md §12.6, verbatim:
+// docs/records/UI_SYSTEM.md §12.6, verbatim:
 //
 //   "NOTHING REGISTERS A GLOBAL KEY HANDLER TODAY. Cmd+K, the held Cmd+Enter
 //    and anything after them need one owner, or the second one added silently
@@ -15,7 +15,7 @@
 // on `keydown`, no shared record of which chords are taken, and the failure is
 // that one of them silently stops firing on some keyboards. Held items §12.6
 // names next: Cmd+K for the palette, and Cmd+Enter from
-// REGISTRY_ENTRY_UX.md §11.
+// docs/records/REGISTRY_ENTRY_UX.md §11.
 //
 // ---------------------------------------------------------------------------
 // WHAT IT REFUSES TO DO
@@ -117,7 +117,7 @@ export class Shortcuts {
     if (existing) {
       throw new Error(
         `Shortcut "${chord}" is already registered by ${existing.owner}; ` +
-          `${owner} cannot also take it. See UI_SYSTEM.md §12.6.`,
+          `${owner} cannot also take it. See docs/records/UI_SYSTEM.md §12.6.`,
       );
     }
     this.registered.set(chord, { chord, owner, run });

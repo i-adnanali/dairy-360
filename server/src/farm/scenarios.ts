@@ -1,4 +1,4 @@
-// Synthetic farm-event scenario library (Cycle 4; see docs/FARM_EVENTS.md).
+// Synthetic farm-event scenario library (Cycle 4; see docs/records/FARM_EVENTS.md).
 //
 // One module of exported consts plus a registry map, mirroring the Cycle 3
 // golden dataset in server/src/agent/__tests__/scenarios.ts -- not one file per
@@ -30,7 +30,7 @@ export const ENROLLED_IDENTITIES: ReadonlySet<string> = new Set([
 ]);
 
 // unknown_a1 is a fixed synthetic id for testing recurrence detection.
-// Real Double Take does not cluster faces — see FARM_EVENTS.md §
+// Real Double Take does not cluster faces — see docs/records/FARM_EVENTS.md §
 // Known fidelity gaps. Don't assume Cycle 7's real cluster ids will be
 // this stable.
 export const UNKNOWN_CLUSTER_A1 = 'unknown_a1';
@@ -86,7 +86,7 @@ export interface Scenario {
   /** 'HH:MM:SS', interpreted in the HOST's local timezone -- matching the
    * local-noon anchoring seed.ts's daysAgo() already uses. Generator and
    * verifier share that interpretation, so verification is self-consistent on
-   * any machine; see FARM_EVENTS.md § Timekeeping for the caveat. */
+   * any machine; see docs/records/FARM_EVENTS.md § Timekeeping for the caveat. */
   startTime: string;
   events: ScenarioEvent[];
   expect: ScenarioExpectation;
@@ -275,7 +275,7 @@ export const NIGHT_VISITOR_UNKNOWN: Scenario = {
  * `--days-ago` >= 3 or the generator's future-date guard fires.
  *
  * The unchanging id is a deliberate simplification, NOT a fidelity claim: real
- * Double Take does not cluster faces at all. See FARM_EVENTS.md § Known
+ * Double Take does not cluster faces at all. See docs/records/FARM_EVENTS.md § Known
  * fidelity gaps before building anything on top of it.
  */
 export const RECURRING_UNKNOWN_VISITOR: Scenario = {

@@ -1,5 +1,5 @@
 // Animal registry -- destinations and their price agreements
-// (docs/REGISTRY_SALES.md §4.1, §4.1a, §4.2).
+// (docs/records/REGISTRY_SALES.md §4.1, §4.1a, §4.2).
 //
 // Who milk goes to, and what it costs when it goes there. The daily sheet
 // (dispatch.ts) and the ledger (ledger.ts) both read from here.
@@ -175,7 +175,7 @@ export interface AddDestinationInput {
   recorded_by: string;
   /**
    * REQUIRED for `staff` and forbidden for every other kind -- the schema holds
-   * the two in a biconditional. See REGISTRY_PAYROLL.md §4.6a.
+   * the two in a biconditional. See docs/records/REGISTRY_PAYROLL.md §4.6a.
    */
   person_id?: string | null;
   id?: string;

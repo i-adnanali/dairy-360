@@ -30,7 +30,7 @@ Milking compares raw row entries and observer to its baseline, including partial
 
 Final field-lock changes were verified again on 2026-09-22: all 386 frontend tests, production build, template and contrast checks pass; the rebuilt browser fixture loads successfully.
 
-Evidence: [screenshots and measurements](b1-evidence/), [source fingerprints](b1-evidence/SOURCE_SHA256.txt), and command outputs in that directory. Captures use the Codex in-app browser; its underlying browser version was not exposed by the supported read-only browser API. One stale lazy-chunk error occurred when an older open tab crossed a production rebuild; reloading the final assets cleared that verification interruption. It was not a farm/API failure.
+Evidence: [screenshots and measurements](b1-evidence), [source fingerprints](b1-evidence/SOURCE_SHA256.txt), and command outputs in that directory. Captures use the Codex in-app browser; its underlying browser version was not exposed by the supported read-only browser API. One stale lazy-chunk error occurred when an older open tab crossed a production rebuild; reloading the final assets cleared that verification interruption. It was not a farm/API failure.
 
 ## Limits and justified scope decisions
 

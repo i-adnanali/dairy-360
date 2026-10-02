@@ -1,4 +1,4 @@
-// Golden dataset (Cycle 3; see docs/REGRESSION.md).
+// Golden dataset (Cycle 3; see docs/records/REGRESSION.md).
 //
 // Scoped narrowly to what got riskier by going multi-agent (Cycle 2): the
 // dispatcher can route a turn to the wrong agent, and a coordination bug can

@@ -127,7 +127,7 @@ export function main(argv: string[]): void {
       `'${type}' is a RESERVED event type: named in the taxonomy so it is designed\n` +
         '  once rather than accreted, but not implemented in this cycle. Breeding and\n' +
         '  heat events are step 5; treatments and null-observations arrive with sheet\n' +
-        '  transcription at step 3. See docs/REGISTRY.md, Decision 8.',
+        '  transcription at step 3. See docs/records/REGISTRY.md, Decision 8.',
     );
   }
   if (!(ENTERABLE as readonly string[]).includes(type)) {

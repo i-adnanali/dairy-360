@@ -11,7 +11,7 @@ loses its banner, that is a bug.
 ## What is here
 
 **The animal registry planning pair.** Two revisions, neither implemented as
-written, both superseded by [REGISTRY.md](../REGISTRY.md), which records what was
+written, both superseded by [REGISTRY.md](../records/REGISTRY.md), which records what was
 actually built.
 
 - [ANIMAL_REGISTRY_DECISION_DOCUMENT.md](ANIMAL_REGISTRY_DECISION_DOCUMENT.md) —
@@ -35,7 +35,7 @@ handover summary as repo evidence.
   proposed building things that already existed. What survived is §3.8 (a real
   defect, described with the wrong mechanism) and the calf-sex default. The
   authoritative outcome is
-  [REGISTRY_ENTRY_UX.md §11, "Pre-trial amendment"](../REGISTRY_ENTRY_UX.md#11-still-open),
+  [REGISTRY_ENTRY_UX.md §11, "Pre-trial amendment"](../records/REGISTRY_ENTRY_UX.md#11-still-open),
   which strikes three of its items explicitly so nobody reads them later as open
   work.
 

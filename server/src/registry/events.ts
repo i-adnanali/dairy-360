@@ -57,7 +57,7 @@ export const SERIAL_PAD = 4;
  * prevent, reintroduced through the id format instead of the numbering scheme.
  *
  * This comment used to say step 4's yield rows would carry that id as a FOREIGN
- * KEY. They will not; see lactationIdFor() below and docs/REGISTRY_MILKING.md §2.
+ * KEY. They will not; see lactationIdFor() below and docs/records/REGISTRY_MILKING.md §2.
  *
  * No ULID/UUIDv7 dependency is added, and no sortability is claimed: creation
  * order is recoverable from `recorded_at`, which is NOT NULL and exact.
@@ -95,7 +95,7 @@ export function newEventId(): string {
  * The second case is why a rewrite-on-correction would not have saved it. So
  * yield is keyed on (animal_id, occurred_on, session) and its lactation is
  * DERIVED at read time by date range. Both failures are demonstrated by
- * execution in docs/REGISTRY_MILKING.md §2.
+ * execution in docs/records/REGISTRY_MILKING.md §2.
  *
  * The general rule, which outlives this instance: registry_lactations is a
  * PROJECTION table that the rebuild drops and recreates, so a permanent record

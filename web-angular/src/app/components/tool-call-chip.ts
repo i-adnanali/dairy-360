@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
 import { Button } from '../ui/button';
 import type { ToolCallView } from '@dairy/shared';
 
-// A footnote about how an answer was produced. Phase 6b, docs/UI_SYSTEM.md §13.3.
+// A footnote about how an answer was produced. Phase 6b, docs/records/UI_SYSTEM.md §13.3.
 //
 // ---------------------------------------------------------------------------
 // IT DRAWS FROM THE AGENT RAMP, AND NOT FROM `success`

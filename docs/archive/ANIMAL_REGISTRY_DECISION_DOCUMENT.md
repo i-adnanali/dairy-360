@@ -10,7 +10,7 @@
 >
 > **This document was not implemented.** It is superseded in full by
 > [ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md](ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md),
-> and what was actually built is documented in [REGISTRY.md](../REGISTRY.md). It is
+> and what was actually built is documented in [REGISTRY.md](../records/REGISTRY.md). It is
 > kept because revision 2 §0 disposes of every item here by name, and the
 > reasoning that was *wrong* is the useful part of the record — do not read any
 > decision below as current.

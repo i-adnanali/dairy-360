@@ -135,7 +135,7 @@ import { SubHeading } from '../ui/heading';
              rendered in amber and headed "worth a look", never in the red the
              invariants use -- a report styled as a defect list is one people
              learn to ignore, which costs more than the four lines are worth.
-             See docs/REGISTRY_PAYROLL.md §13. -->
+             See docs/records/REGISTRY_PAYROLL.md §13. -->
         <section appCard>
           <h3 appSubHeading>Advisory worklist · People</h3>
           @if (data.labour.length === 0) {
@@ -401,7 +401,7 @@ import { SubHeading } from '../ui/heading';
              out than was recorded as produced is what 'milked_not_measured'
              MEANS -- the milk existed, nobody weighed it -- and an alarm that
              fires every day for months is trained away, taking the real signal
-             with it. See docs/REGISTRY_SALES.md §11.
+             with it. See docs/records/REGISTRY_SALES.md §11.
              --------------------------------------------------------------- -->
         @if (reconcileError()) {
           <p appErrorPanel role="alert">Milk reconciliation unavailable: {{ reconcileError() }}</p>

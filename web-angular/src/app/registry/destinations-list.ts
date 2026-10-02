@@ -5,7 +5,7 @@ import { pagedList } from './paged-list';
 import { Pagination } from '../ui/pagination';
 import { RowLink } from '../ui/navigation';
 import { StatusBadge } from '../ui/surface';
-// `/buyers` -- destinations, and what they pay (docs/REGISTRY_SALES.md §12.2).
+// `/buyers` -- destinations, and what they pay (docs/records/REGISTRY_SALES.md §12.2).
 //
 // ---------------------------------------------------------------------------
 // THE PRICE CONTROL TAKES THE RATE IN THE FARM'S UNIT

@@ -36,7 +36,7 @@ import {
   Directive, ElementRef, booleanAttribute, computed, inject, input,
 } from '@angular/core';
 
-/** Comfortable for review surfaces, compact for entry. See UI_SYSTEM.md §4. */
+/** Comfortable for review surfaces, compact for entry. See docs/records/UI_SYSTEM.md §4. */
 export type CellDensity = 'comfortable' | 'compact';
 
 /** The text colours cells actually use, as semantic names rather than stops. */

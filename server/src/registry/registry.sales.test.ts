@@ -6,7 +6,7 @@
 //   1. A STANDING destination must be answered in every session and an
 //      OCCASIONAL one must not be. Get this backwards in either direction and
 //      the sheet either lies about completeness or trains people to click past
-//      it (docs/REGISTRY_SALES.md §4.1a).
+//      it (docs/records/REGISTRY_SALES.md §4.1a).
 //   2. The price is CAPTURED WITH ITS LOT SIZE at entry time, so a later price
 //      change cannot re-price history -- the defect §2 found in the demo tables.
 //   3. The balance is DERIVED from rows, never stored, so partial payment and

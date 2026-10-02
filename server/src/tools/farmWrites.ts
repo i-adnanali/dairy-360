@@ -1,4 +1,4 @@
-// Farm monitor write tools (Cycle 5; see docs/FARM_MONITOR.md Decision 6).
+// Farm monitor write tools (Cycle 5; see docs/records/FARM_MONITOR.md Decision 6).
 //
 // This is the HUMAN-APPROVAL half of the split write path. flag_anomaly is a
 // registered WRITE_EXECUTOR, so stream.ts builds a confirmation card, pauses
@@ -31,7 +31,7 @@ const SEVERITIES: ReadonlySet<string> = new Set<FarmFlagSeverity>(['notable', 'u
 // --- flag_anomaly -----------------------------------------------------------
 // Manual override for something the automatic pass missed, or a correction to
 // its severity. Last-write-wins: there is no flag history and no unflagging in
-// this cycle (FARM_MONITOR.md § What we're NOT doing), so re-flagging the same
+// this cycle (docs/records/FARM_MONITOR.md § What we're NOT doing), so re-flagging the same
 // event simply overwrites the previous verdict.
 const flagAnomaly: WriteExecutor = {
   execute(args) {

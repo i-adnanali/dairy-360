@@ -21,6 +21,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run check:docs
       - run: npm run build:shared
       # BEFORE the typecheck and both builds, on purpose. A backtick inside a
       # `template:` literal is a compile error, so the spec that guards against
@@ -39,7 +40,7 @@ jobs:
       # Regression & eval suite (Cycle 3). Runs against the live Anthropic API,
       # so it is gated on the secret: absent the key (forks, contributors), the
       # step is skipped visibly rather than failing CI -- the same
-      # degrade-gracefully convention as GET /api/health. See docs/REGRESSION.md.
+      # degrade-gracefully convention as GET /api/health. See docs/guides/testing.md.
       #
       # ---------------------------------------------------------------------
       # WHY THE GATE IS TWO STEPS, AND NOT `if: secrets.X != ''`
@@ -69,7 +70,7 @@ jobs:
             echo '::notice::ANTHROPIC_API_KEY is set. The live regression suite runs (and spends real tokens) only on a manual run or a v* tag -- see the gate below.'
           else
             echo 'present=false' >> "$GITHUB_OUTPUT"
-            # A warning, not a silent pass. docs/DEVELOPMENT.md § 5: "a skip is
+            # A warning, not a silent pass. docs/guides/testing.md: "a skip is
             # not a pass" -- the whole reason that section exists is that this
             # suite reports `ok # SKIP` without a key, which reads as green.
             echo '::warning::ANTHROPIC_API_KEY is not set -- the live regression suite did NOT run. A skip is not a pass.'

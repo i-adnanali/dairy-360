@@ -1,4 +1,4 @@
-// Regression suite -- iteration-cap path (Cycle 3; see docs/REGRESSION.md).
+// Regression suite -- iteration-cap path (Cycle 3; see docs/records/REGRESSION.md).
 //
 // Reused Cycle 1 Phase 5 case. MAX_ITERATIONS is read once at stream.ts module
 // load, so this scenario runs in its own process with AGENT_MAX_ITERATIONS=1

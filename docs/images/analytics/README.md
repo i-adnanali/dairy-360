@@ -5,7 +5,7 @@
 Captured 2026-09-16 from the production Angular bundle served on port 6456,
 backed by the dedicated `--analytics` in-memory harness on 6455. Farm today was
 2026-09-16. These are disposable fixture records, not real-farm trial evidence.
-See the [analytics specification](../../ANALYTICS_SPEC.md) for metric semantics,
+See the [analytics specification](../../records/ANALYTICS_SPEC.md) for metric semantics,
 scenario dates and `npm run harness:analytics` setup.
 
 These are viewport captures, not full-page exports. Desktop is 1440×1200 except

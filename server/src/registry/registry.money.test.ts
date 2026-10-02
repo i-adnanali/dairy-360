@@ -1,4 +1,4 @@
-// Animal registry -- money, and the schema that holds it (docs/REGISTRY_SALES.md).
+// Animal registry -- money, and the schema that holds it (docs/records/REGISTRY_SALES.md).
 //
 // The load-bearing assertion in this file is the FACTOR OF FORTY. This farm
 // prices in 40-litre lots, and every failure mode here produces a number that
@@ -322,7 +322,7 @@ test('the four sales tables permit UPDATE and DELETE, unlike the event log', () 
 });
 
 // ---------------------------------------------------------------------------
-// formatPeriodRate -- packages (docs/REGISTRY_PAYROLL.md §5)
+// formatPeriodRate -- packages (docs/records/REGISTRY_PAYROLL.md §5)
 // ---------------------------------------------------------------------------
 
 test('formatPeriodRate prints the agreement, not a per-day conversion', () => {

@@ -7,7 +7,7 @@
 //      allowed because the farm asked for them; overlapping wage periods are
 //      refused because that is paying twice. Get this backwards in either
 //      direction and the model is either useless or dangerous
-//      (docs/REGISTRY_PAYROLL.md §4.2, §4.6).
+//      (docs/records/REGISTRY_PAYROLL.md §4.2, §4.6).
 //   2. THE AGREED FIGURE IS THE TRANSACTION. Nothing is computed from the
 //      calendar, so a month with leave stores what was agreed and the deviation
 //      from the term is REPORTED rather than refused.
@@ -718,7 +718,7 @@ test('a staff destination without a person, and a person on a non-staff kind, ar
 });
 
 // ---------------------------------------------------------------------------
-// The fixture (docs/REGISTRY_PAYROLL.md §14, item 8)
+// The fixture (docs/records/REGISTRY_PAYROLL.md §14, item 8)
 // ---------------------------------------------------------------------------
 
 test('staffedHerd renders the states that matter, not the settled ones', () => {

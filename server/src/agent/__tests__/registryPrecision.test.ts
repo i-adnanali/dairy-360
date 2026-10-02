@@ -1,4 +1,4 @@
-// Registry precision eval (Cycle 9; see docs/REGISTRY_TOOLS.md § "The eval that
+// Registry precision eval (Cycle 9; see docs/records/REGISTRY_TOOLS.md § "The eval that
 // matters"). LIVE MODEL -- API-gated, run by `npm run test:regression:registry`.
 //
 // ---------------------------------------------------------------------------
@@ -22,7 +22,7 @@
 // routed through the stream could therefore only ever test the empty registry.
 //
 // Injecting a toolset into runAgentStream is the fix, and it is deliberately
-// deferred to the writes cycle (REGISTRY_TOOLS.md §3). So this eval runs its own
+// deferred to the writes cycle (docs/records/REGISTRY_TOOLS.md §3). So this eval runs its own
 // three-line tool loop over the SAME schemas, the SAME executors and the SAME
 // system prompt that production uses, with a fixture handle. What it does not
 // exercise is the stream plumbing -- and that is already covered by

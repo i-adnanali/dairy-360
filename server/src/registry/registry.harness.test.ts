@@ -92,7 +92,7 @@ test('no harness-reachable module names the forbidden imports at all', () => {
     'time.ts',
     'types.ts',
     'cli.ts',
-    // The sales modules (docs/REGISTRY_SALES.md). Reachable from routes.ts, so
+    // The sales modules (docs/records/REGISTRY_SALES.md). Reachable from routes.ts, so
     // they are covered by the same rule for the same reason -- and `milking.ts`
     // was missing from this list before they were added, which is what a list
     // maintained by hand does.
@@ -103,7 +103,7 @@ test('no harness-reachable module names the forbidden imports at all', () => {
     'destinations.ts',
     'dispatch.ts',
     'ledger.ts',
-    // The labour modules (docs/REGISTRY_PAYROLL.md). Same rule, same reason.
+    // The labour modules (docs/records/REGISTRY_PAYROLL.md). Same rule, same reason.
     // This list is still maintained by hand and OPEN.md still says so; adding
     // three at once is exactly when one gets forgotten, so they went in with
     // the modules rather than after.

@@ -1,6 +1,6 @@
 import { Directive, computed, input } from '@angular/core';
 
-/** Compact for entry screens, comfortable for review. See UI_SYSTEM.md §4. */
+/** Compact for entry screens, comfortable for review. See docs/records/UI_SYSTEM.md §4. */
 export type InputDensity = 'compact' | 'comfortable';
 
 @Directive({

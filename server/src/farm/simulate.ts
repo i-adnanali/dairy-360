@@ -1,4 +1,4 @@
-// Farm event generator / simulator (Cycle 4; see docs/FARM_EVENTS.md).
+// Farm event generator / simulator (Cycle 4; see docs/records/FARM_EVENTS.md).
 //
 //   npm run simulate:farm -w server -- --scenario=night-visitor-unknown --days-ago=3
 //   npm run simulate:farm -w server -- --all --days-ago=14
@@ -39,7 +39,7 @@ const PATHS: Record<string, string> = {
  * `daysAgo()` (reused from the seed, so farm timestamps line up with dairy
  * dates) yields a local 'YYYY-MM-DD'; combining it with 'HH:MM:SS' and no zone
  * designator makes JS parse the result in the HOST's local timezone, which is
- * the documented interpretation (FARM_EVENTS.md § Timekeeping).
+ * the documented interpretation (docs/records/FARM_EVENTS.md § Timekeeping).
  */
 export function scenarioStartMs(days: number, startTime: string): number {
   const ms = new Date(`${daysAgo(days)}T${startTime}`).getTime();

@@ -1,6 +1,6 @@
 import { healthBoard } from './health-reads';
 import { feedStanding } from './feed';
-// Animal registry -- the day board (docs/REGISTRY_PAYROLL.md §12.4).
+// Animal registry -- the day board (docs/records/REGISTRY_PAYROLL.md §12.4).
 //
 // What still needs recording. Assembled on the SERVER rather than by six client
 // round trips, for the reason every other read model is: the rule for "is this

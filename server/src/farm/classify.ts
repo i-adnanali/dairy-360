@@ -1,5 +1,5 @@
 // Farm event classification -- the PURE core (Cycle 5; see
-// docs/FARM_MONITOR.md Decision 5 and Decision 8).
+// docs/records/FARM_MONITOR.md Decision 5 and Decision 8).
 //
 // Deliberately DB-free, exactly like ingest.ts: constants, farm-local time
 // helpers, and scoreEvent(). `priorSightingCount` arrives as a parameter, so
@@ -56,7 +56,7 @@ export const RECURRENCE = {
 /**
  * Zones treated as restricted outside WORK_HOURS.
  *
- * PROVISIONAL working default (FARM_MONITOR.md § Open items): it describes the
+ * PROVISIONAL working default (docs/records/FARM_MONITOR.md § Open items): it describes the
  * real farm, and only feed_store has repo evidence -- scenarios.ts annotates it
  * "Restricted after hours -- the zone night-visitor-unknown fires in".
  *
@@ -87,7 +87,7 @@ export const FARM_TZ = 'Asia/Karachi';
 
 /** Camera-silence gap past which summarize_daily_activity reports a dropout.
  * camera-dropout only pins this below barn_cam's 20-minute gap; the exact
- * value has no scenario behind it (FARM_MONITOR.md § Open items). */
+ * value has no scenario behind it (docs/records/FARM_MONITOR.md § Open items). */
 export const CAMERA_SILENCE_MINUTES = 15;
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// Regression suite harness (Cycle 3; see docs/REGRESSION.md).
+// Regression suite harness (Cycle 3; see docs/records/REGRESSION.md).
 //
 // Drives the REAL agent loop -- the same runAgentStream() the live server calls
 // from POST /api/agent/run -- with an `emit` that captures AG-UI events into an

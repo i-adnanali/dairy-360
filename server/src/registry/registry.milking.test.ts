@@ -1,5 +1,5 @@
 // Milk yield -- the rules, the roster, and the two findings that shaped the
-// schema (docs/REGISTRY_MILKING.md).
+// schema (docs/records/REGISTRY_MILKING.md).
 //
 // No database file and no API key: every test builds its own `:memory:` herd,
 // the same property the rest of the registry suite holds.

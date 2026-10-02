@@ -30,7 +30,7 @@ function dairySection(): string {
   // (registrySection below), so the old heading became the most load-bearing
   // false sentence in the prompt: it is what the model resolves names against,
   // and it invited answering a question about the farm's actual animals from
-  // fourteen fixtures. See docs/REGISTRY_TOOLS.md §2.
+  // fourteen fixtures. See docs/records/REGISTRY_TOOLS.md §2.
   return `HERD & MILK — DEMO DATA (scripted fixtures, NOT the real herd):
 These ${catalog.animalCount} animals are seeded demo records with ids like
 animal_001. They are a scripted demo of milk/feed/health features and are not a
@@ -76,7 +76,7 @@ VENDORS & SALES — HOW TO WORK:
 }
 
 /**
- * Farm monitor guidance (Cycle 5; see docs/FARM_MONITOR.md).
+ * Farm monitor guidance (Cycle 5; see docs/records/FARM_MONITOR.md).
  *
  * Offered to EVERY agent selection, matching the agent-agnostic tool
  * registration in tools/index.ts. This is where the narration lives: the farm
@@ -120,7 +120,7 @@ function farmSection(): string {
 }
 
 /**
- * Animal registry guidance (Cycle 9; see docs/REGISTRY_TOOLS.md).
+ * Animal registry guidance (Cycle 9; see docs/records/REGISTRY_TOOLS.md).
  *
  * Offered to EVERY agent selection, matching the agent-agnostic tool
  * registration in tools/index.ts, for the same reason farmSection() is.
@@ -245,7 +245,7 @@ retrieve.`;
  * prompt from the singleton could only ever test the empty case -- and the
  * claim under test (does the model pool a measured interval with an
  * approximate one?) needs both kinds of interval present. The fixture herd has
- * exactly that pair. See REGISTRY_TOOLS.md § "The eval that matters".
+ * exactly that pair. See docs/records/REGISTRY_TOOLS.md § "The eval that matters".
  *
  * Deliberately narrow: it overrides the CATALOG, not the guidance. The prose
  * the eval tests is the same prose production sends.

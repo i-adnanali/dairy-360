@@ -1,5 +1,5 @@
 // Live Frigate MQTT capture (Cycle 7 step 1; see
-// docs/cycle-7-live-camera-validation.md).
+// docs/records/cycle-7-live-camera-validation.md).
 //
 //   npm run capture:frigate -w server -- --minutes=120
 //   npm run capture:frigate -w server -- --topic='frigate/#' --minutes=5   # discovery
