@@ -1,5 +1,7 @@
 # Feed screenshot gallery
 
+> Historical gallery. For the README/current UI at `a56400a`, see the [1 October 2026 captures](../current/README.md). The images below retain their original dates and are not current-UI evidence.
+
 Captured 2026-09-10 from the production build on port 4310, backed by the isolated in-memory harness on 4110. Desktop captures are 1440×900; mobile captures are 390×844. Long pages continue below the viewport. These are fixture records and disposable browser entries, not real farm trial evidence. The [Phase 7 gallery](../phase7/README.md) remains the historical baseline.
 
 | Screen | Route | Capture |

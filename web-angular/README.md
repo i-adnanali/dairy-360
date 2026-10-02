@@ -20,21 +20,23 @@ pair. The fixture harness does not provide agent responses.
 
 ```bash
 npm run build:angular
-npm test -w web-angular
+npm test -w web-angular -- --watch=false
 npm run check:templates
 npm run check:contrast
 ```
 
-Build output is `web-angular/dist/web-angular/browser`. Contrast currently runs
-in report mode and includes documented failures; exit success is not an AA pass.
+Build output is `web-angular/dist/web-angular/browser`. The contrast gate fails on unexpected failures and unreviewed disabled-text consumers. The latest recorded run (1 October 2026) passed 122 graded checks with no held exceptions. This token/consumer check is not full accessibility certification.
 No `ng e2e` target is configured. Browser capture tooling and its limits are
 covered in [UI_SYSTEM.md](../docs/UI_SYSTEM.md).
 
 ## Read next
 
-- [UI system](../docs/UI_SYSTEM.md): shell, primitives, certainty, themes and verification.
+- [Current UI reference](../docs/UI-CURRENT.md): current contracts and state specimen.
+- [UI system](../docs/UI_SYSTEM.md): detailed contracts and dated implementation history.
+- [Current gallery](../docs/images/current/README.md): fresh screenshots of `a56400a`.
+- [Screen-specific acceptance](../docs/implementation/geist-screen-evidence/ACCEPTANCE.md): 458 frontend tests / 44 files, changed-workflow browser evidence and remaining gates.
 - [Phase 7 gallery](../docs/images/phase7/README.md): historical routes and shell states.
-- [Feed gallery](../docs/images/feed/README.md): new feed routes, updated Today and mobile checks.
+- [Feed gallery](../docs/images/feed/README.md): historical September feed/Today captures and mobile checks.
 - [Feed implementation](../docs/REGISTRY_FEED.md): daily entry, purchases, crops and corrections.
 - [Angular port](../docs/ANGULAR_PORT.md): chat state and component architecture.
 - [Entry UX](../docs/REGISTRY_ENTRY_UX.md): form behavior and the outstanding farm trial.
@@ -69,3 +71,7 @@ already-loaded data. Analytics exports and scheduled reporting are future work.
 [Analytics screen gallery](../docs/images/analytics/README.md): daily, weekly and monthly reviews,
 light/dark themes, production pagination, reconciliation and mobile captures
 from the dedicated fixture harness (2026-09-16).
+
+## Screen-specific audit delivery — 1 October 2026
+
+Commit `a56400a` completes People/Feed task and form/table improvements, precision-aware animal history and correction comparisons, operational continuation/draft context, Health exception groups, analytics inspector synchronization, assistant outcome receipts and unknown-route recovery. Native controls, domain calculations, API contracts, snapshots, historical rates, guards and exact-request retries are preserved. See the [reconciliation ledger](../docs/implementation/GEIST-IMPLEMENTATION.md). The separate native/device/operator and exhaustive fault-injection gates remain open.

@@ -1,5 +1,7 @@
 # Labour: people, engagements, packages and the wage ledger — design decisions
 
+> Presentation update (1 October 2026, `a56400a`): People has separate Add person/Open stint actions, identity/balance-first review, and payment entry before stint/statement history. Today distinguishes outstanding recording from recorded work and states that recorded wages are not payments. Native payroll completeness, historical packages and ledgers are unchanged. [Current implementation](implementation/GEIST-IMPLEMENTATION.md).
+
 > Current extension (2026-09-16): People lists now use server pagination. Analytics is a separate main section; Today remains the outstanding-work board.
 > See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
 

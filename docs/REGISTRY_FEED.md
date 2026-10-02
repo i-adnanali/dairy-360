@@ -1,5 +1,7 @@
 # Feed management
 
+> Presentation update (1 October 2026, `a56400a`): Feed uses route-specific actions, focused new-record forms, grouped purchase quantity/pricing/charges, crop search/lifecycle/reset, and native overview disclosures with scoped purchase links. Original units, unknown values, recipient snapshots and write/revision semantics are unchanged. [Implementation and evidence](implementation/GEIST-IMPLEMENTATION.md).
+
 > Current extension (2026-09-16): Feed history sections now page loaded records locally (25/50/100 rows); their API responses still contain the full collections.
 > See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
 

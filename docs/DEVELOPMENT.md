@@ -10,25 +10,20 @@ Checked against `package.json` (root, `server/`, `web-angular/`, `shared/`),
 `.nvmrc`, `web-angular/proxy.conf.json` and `web-angular/angular.json`. Where
 this document and those files disagree, they are right and this is stale.
 
-**Scope, against the README.** This document owns setup, the two run loops, the
-test suites (including the four live-model regression splits), the registry CLI
-and backups — with the *why* and the failure modes. The README's
-[Command reference](../README.md#command-reference) owns the operational surface
-this one does not cover: farm-event ingestion and classification, the live-camera
-captures, and the Langfuse stack. Neither file is a superset of the other, and
-neither should grow into one.
+**Current entry points (1 October 2026):** the root [README](../README.md) owns the quick start and product overview. This guide owns detailed setup, run loops, tests, registry CLI and backups. [OPERATIONS.md](OPERATIONS.md) owns optional camera simulation/classification and Langfuse commands. [Current screenshots](images/current/README.md) replace historical galleries for the README.
+
+**Latest recorded validation:** [screen-specific evidence](implementation/geist-screen-evidence/ACCEPTANCE.md) at `a56400a`: 458 frontend tests / 44 files, 779 server tests, typecheck, production build, templates and contrast pass; initial bundle 673.73 kB. This documentation refresh does not rerun native-device, live-model, camera or operator acceptance. The older run notes below are historical measurements.
 
 **Re-run on 2026-09-03 at `06034d9`:** § 6's new one-command subsection in full,
 plus `npm install`, `build:shared`, `typecheck`, `build -w server`,
 `build:angular` and both test suites — which is what corrected the two test
 counts in § 5 (410 → **450**, 106 → **196**) and the budget overrun in § 4
-(11.67 → **16.53 kB**). Those three numbers were true at `a6c4842` and had gone
-stale; nothing else in this document was re-measured, so anything not listed
+(11.67 → **16.53 kB**). Those three numbers were true at `a6c4842` and had changed; nothing else in this document was re-measured, so anything not listed
 here still carries its original `a6c4842` verification.
 
 **Re-run on 2026-09-04:** `typecheck`, both test suites and `build:angular`,
 twice. The defect fixes moved § 5 to 458/198 and § 4's overrun to 16.72 kB; milk
-logging then moved them again — § 5 is now **480** server and **210** frontend
+logging then moved them again — that run reached **480** server and **210** frontend
 across **22** files, and § 4's overrun **17.46 kB**. Same caveat both times:
 nothing else was re-measured.
 
@@ -39,7 +34,7 @@ earlier timings, install audit counts and environment observations remain dated.
 
 **Feed verification — 2026-09-10:** 742 server tests and 347 frontend tests across
 33 files pass, with typecheck, template checks and the production build. Initial
-bundle: 596.16 kB. These are the latest runs in §§4–5. The first server run exposed
+bundle: 596.16 kB. These are historical feed-delivery results; current recorded results are in §§4–5. The first server run exposed
 a pre-existing CLI usage import that opened the live database and applied additive
 migration 8; the imports and isolation regression are fixed. Subsequent full tests
 leave the checksum unchanged. [Incident and verification](REGISTRY_FEED.md#database-preservation-incident-and-fix).
@@ -89,11 +84,11 @@ One install at the repo root. It is an npm-workspaces monorepo (`shared`,
 npm install
 ```
 
-Took **8.7 s** in a fresh clone: `better-sqlite3` resolved a prebuilt binary for
+The 2026-09-03 fresh-clone install took **8.7 s**: `better-sqlite3` resolved a prebuilt binary for
 this platform rather than compiling. On a platform with no prebuild it compiles
 the native binding, which is slower. That install reported 19 known
 vulnerabilities in the dependency tree (3 low, 6 moderate, 10 high) — this is a
-local single-operator demo, and none is addressed here.
+historical measurement, not a current dependency-security assessment. No dependency audit was run during the documentation refresh.
 
 ### Then build `shared/` — the step that is easy to skip
 
@@ -159,37 +154,31 @@ All three ran clean. How to tell each worked:
 | `npm run build -w server` | silent, exit 0; `server/dist/index.js` exists |
 | `npm run build:angular` | `Output location: .../web-angular/dist/web-angular` as the last line |
 
-**Three warnings are present** on the Angular build — do not
-treat them as failures:
+The latest recorded Angular build (1 October 2026, `a56400a`) passed with two warnings:
 
-```
-▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 96.16 kB ...
-▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
-▲ [WARNING] NG8113: SummaryBar is not used within the template of PayrollRunScreen
-```
+- Initial bundle **673.73 kB**, above the existing **500 kB warning** budget and below the 1 MB error budget.
+- `@dairy/shared` emits CommonJS, so Angular reports an optimization bailout.
 
-The 2026-09-10 feed build is 596.16 kB against the 500 kB warning budget.
-The budget already warned at the Phase 7 baseline of 584.58 kB.
-The CommonJS notice is about `shared/` emitting CJS.
+The earlier unused `SummaryBar` warning is absent from this run. [Build log](implementation/geist-screen-evidence/build.txt). These dated results do not guarantee future build sizes.
 
 ---
 
 ## 5. Test
 
 ```bash
-npm test -w server           # 742 tests, node:test via tsx
-npm test -w web-angular      # 347 tests across 33 files, Vitest (jsdom)
+npm test -w server           # node:test via tsx
+npm test -w web-angular -- --watch=false  # Vitest (jsdom)
 ```
 
-Both passed during feed verification on 2026-09-10 in the working checkout. They need **no database file and no API key** —
+Both passed in the recorded 1 October 2026 screen-specific validation at `a56400a`. They need **no database file and no API key** —
 registry fixtures use `new Database(':memory:')`. Backup tests also write
 snapshots in temporary directories and clean them up; the suite does not use
 the live database after the CLI-import isolation fix documented above.
 
-| Suite | Latest measured result (2026-09-10) | Notes |
+| Suite | Latest recorded result (2026-10-01) | Notes |
 |---|---|---|
-| `npm test -w server` | `# tests 742 / # pass 742 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
-| `npm test -w web-angular` | `Test Files 33 passed / Tests 347 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
+| `npm test -w server` | `# tests 779 / # pass 779 / # fail 0 / # skipped 0` | Enumerated dirs: `src/`, `src/farm/`, `src/registry/`, `src/tools/` |
+| `npm test -w web-angular` | `Test Files 44 passed / Tests 458 passed` | Prints `Not implemented: HTMLCanvasElement's getContext()` — jsdom noise from the chart component, not a failure |
 
 **`npm test -w web-angular` needs the node version `.nvmrc` pins** — the Angular CLI refuses below
 its floor and runs nothing, so `nvm use` first. See § 1; the failure mode is a green server suite
@@ -343,7 +332,7 @@ What lands, and why each row is there:
 | a **part** payment | Rs 5,000 against a larger balance, so the statement shows a running carried-forward figure. This is the case the demo `deliveries.paid` boolean cannot express at all |
 | 3 staff | two salaried and one dihari. `imran` carries all three benefit kinds, `abdul` carries **none** — a package screen developed against only one of those shapes gets the empty state wrong |
 | `imran`'s milk allowance | a `staff` destination naming him, so the run can compare 2 L/day against what actually left the bulk. **Not `standing` in the seed**, because the dispatch sessions above were already written without it; on a live farm it should be |
-| last month paid, this month not | the current month is outstanding for the whole of it, so a seed that settled it would open `/labour/payroll` on the completed state and hide the one the screen exists for |
+| Prior period recorded, current period unanswered | Payroll completeness describes recorded wages, not payment or settlement. Separate payment fixtures exercise the ledger balances. |
 | `imran` paid **less** than his agreement | four days' leave, so `/check` has a real `amount_differs_from_term` line rather than an empty report |
 | three balance states at once | `abdul` settled, `imran` open, `rashid` **in advance** — the negative balance needs no flag anywhere, and is on screen from the first render |
 
@@ -650,7 +639,7 @@ downtime and writes a consistent, fully-checkpointed file. Its output is **not**
 in WAL mode, so unlike `dairy.db` a backup reads fine from a plain read-only
 open — the `immutable=1` trap in § 6 does not apply to these.
 
-### Versioned history — running. Off-machine — not yet.
+### Versioned history — recorded local setup; off-machine deferred
 
 Two different protections, and only one of them is in place. Stated separately
 because conflating them is how a backup gets trusted for something it does not do.
@@ -738,7 +727,7 @@ reasons in this order:
 The order matters: if this repo ever goes private, the second reason stops
 applying and the first still decides it.
 
-At the current size — the whole database is well under a megabyte and a real
+At the size measured for that setup — the whole database was well under a megabyte and a real
 herd's dump will be tens of kilobytes of text — **keep every snapshot**. Rotation
 logic costs more than the disk it saves, and backups are never overwritten:
 `VACUUM INTO` refuses an existing target, and `runBackup` checks first so the
@@ -873,7 +862,7 @@ and the projections come back identical.
 ### Scheduling it
 
 The local daily job is documented earlier in this section under “Versioned
-history — running. Off-machine — not yet.” Additional destinations or an off-machine schedule are not configured
+history — recorded local setup; off-machine deferred” Additional destinations or an off-machine schedule are not configured
 by these instructions. For a separate macOS job, use absolute executable paths
 and an explicit destination. Its command is:
 
@@ -1014,7 +1003,7 @@ use the pre-migration backup path. Health writes have durable request keys and
 revision conflicts, independently of the older process-local registry keys.
 See [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) for routes and operating limits.
 
-Latest recorded implementation validation: 765 server tests, 351 Angular tests,
+At the 2026-09-15 health delivery: 765 server tests, 351 Angular tests,
 server typecheck, template checks and production build passed with Node 22.22.3.
 Initial bundle: 596.28 kB; budget/CommonJS/unused payroll component warnings remain.
 These measurements supersede earlier dated totals, not their historical results.

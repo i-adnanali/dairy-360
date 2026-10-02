@@ -4,8 +4,7 @@ Two kinds of document live here, and they have opposite lifecycles.
 
 - **Reference** describes what is true *now*. If it disagrees with the code, the
   code is right and the document is stale — fix the document.
-- **Record** describes what was decided *then*, and why. Each one is closed and
-  tied to a git tag. Do not edit a closed record to reflect later changes; the
+- **Record** describes what was decided *then*, and why. Each one is dated and tied to a commit, tag or explicit source manifest. Do not edit a closed record to reflect later changes; the
   later change gets its own record, and the older one gets a banner pointing at it.
 
 Everything in [`archive/`](archive/) is superseded and kept only for its reasoning.
@@ -26,7 +25,10 @@ Those documents are not current specifications; some of their proposals were lat
 | Work on employees, packages and wages | [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md) |
 | Work on crops, expenses, purchases and daily feeding | [REGISTRY_FEED.md](REGISTRY_FEED.md) |
 | Work on owner milk analytics and table pagination | [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) |
-| Work on the frontend | [UI_SYSTEM.md](UI_SYSTEM.md), then [ANGULAR_PORT.md](ANGULAR_PORT.md) for the chat state model |
+| Work on the frontend | [UI-CURRENT.md](UI-CURRENT.md), [UI_SYSTEM.md](UI_SYSTEM.md), then [ANGULAR_PORT.md](ANGULAR_PORT.md) for the chat state model |
+| See current screenshots | [Current gallery](images/current/README.md) |
+| Run optional camera/tracing integrations | [OPERATIONS.md](OPERATIONS.md) |
+| Review recent delivery and validation | [Screen implementation](implementation/GEIST-IMPLEMENTATION.md), [acceptance](implementation/geist-screen-evidence/ACCEPTANCE.md) |
 | Find out why a URL looks the way it does, or what `/` shows | [REGISTRY_PAYROLL.md §12.3–§12.6](REGISTRY_PAYROLL.md#123-navigation-and-url-structure--the-change-that-forced-both-decisions) |
 | Change the wire protocol | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) |
 | Know what is still unfinished | [OPEN.md](OPEN.md) |
@@ -37,14 +39,16 @@ Those documents are not current specifications; some of their proposals were lat
 
 | Doc | Covers | Depth |
 |---|---|---|
-| [DEVELOPMENT.md](DEVELOPMENT.md) | Prereqs, the two `.env` files, build, test, the harness/real loop split, backups, fresh-clone walkthrough, common failures | Every command verified against a real run; unverifiable claims are marked **UNVERIFIED** |
+| [DEVELOPMENT.md](DEVELOPMENT.md) | Prereqs, configuration, build, test, harness/persistent data, backups and common failures | Commands checked against source; execution dates and unverified claims are explicit |
+| [OPERATIONS.md](OPERATIONS.md) | Optional camera simulation/classification and Langfuse commands | Integration runbook; no new live-service acceptance implied |
 | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | Architecture, the agentic workflow end to end, read/write split, digest-vs-dataset, guardrails, data model, wire contract | Medium — the layer between the root [README](../README.md) and TECHNICAL.md |
 | [TECHNICAL.md](TECHNICAL.md) | The loop internals, the eight guardrails, tool contracts, constants | Deep. Highest signal-per-line here |
 | [ANGULAR_PORT.md](ANGULAR_PORT.md) | Angular 22 state service, component tree, the deliberate omissions | Deep |
 | [AGUI_MIGRATION.md](AGUI_MIGRATION.md) | The AG-UI/SSE protocol, custom event channels, the interrupt/resume boundary, the React archival decision | Deep |
 | [REGISTRY.md](REGISTRY.md) | Real-animal records: schema, migrations, append-only guarantee, calving transaction, projections, CLI, HTTP surface, entry UI, invariants | Deep. The single most load-bearing document in the repo |
 | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | The entry surface — screens, the change list with build status, the defaults rule, the five-animal trial | Deep |
-| [UI_SYSTEM.md](UI_SYSTEM.md) | The design system, end to end: what was planned, what validation corrected, what is built, and what is left. Token vocabulary in both modes, fifteen primitives, the certainty axis, the trial gate and four recorded contaminations. Phases 0–7 built; real-farm trial outstanding | Deep, and the single source — the plan and the validation records were folded in and deleted. Historical counts identify their baseline commits; Phase 7 verification is in §9.4; feed is in §17, health in §18 and analytics/pagination in §19 |
+| [UI-CURRENT.md](UI-CURRENT.md) | Current UI roles, native controls, uncertainty and state specimen | Concise entry point |
+| [UI_SYSTEM.md](UI_SYSTEM.md) | Detailed UI contracts and dated implementation history through the screen-specific audit | §26–27 and UI-CURRENT supersede earlier presentation claims; older counts and trial predictions remain historical |
 | [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) | Owner daily/weekly/monthly production and reconciliation, metric semantics, pagination and disposable analytics harness | Implemented first release; refinements and limitations in §11 |
 | [REGISTRY_MILKING.md](REGISTRY_MILKING.md) | Per-animal milk yield: the four row states, session/time model, migration 3, the `/milk/milking` roster | Deep |
 | [REGISTRY_SALES.md](REGISTRY_SALES.md) | Milk sales, home use and the buyer ledger: destinations, effective-dated prices in 40-litre lots, the daily dispatch sheet, the reconciliation, migrations 4–5 | Deep |
@@ -60,7 +64,7 @@ contract is still the live specification, not history.
 
 ## Record — closed, one per cycle
 
-Each maps to a git tag. Read them for *why*, not for *what is true now*.
+Tags or baseline commits identify their historical scope. Some domain documents also carry current reference sections; read their status banners first.
 
 | Cycle | Doc | Tag | Subject |
 |---|---|---|---|
@@ -101,7 +105,8 @@ which are closed.
 - [ANIMAL_HEALTH_SPEC.md](ANIMAL_HEALTH_SPEC.md): original codebase-validated requirements for health management and lifetime reports; implementation and refinements are in [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md).
 - [FEED_SPEC.md](FEED_SPEC.md): confirmed farm practices and original implementation specification; implemented, with current behavior in [REGISTRY_FEED.md](REGISTRY_FEED.md).
 - [AUTH_HANDOFF.md](AUTH_HANDOFF.md): historical, unapproved authentication brainstorm; later decisions deferred that work. It is not an active implementation requirement.
-- [Feed gallery](images/feed/README.md): new routes, Today integration and narrow-layout verification. [Phase 7 gallery](images/phase7/README.md) preserves the earlier baseline.
+- [Current gallery](images/current/README.md): README images from `a56400a`, captured 1 October 2026. The [Feed](images/feed/README.md), [Phase 7](images/phase7/README.md) and [analytics](images/analytics/README.md) galleries retain their older, dated baselines.
+- [Screen-specific implementation](implementation/GEIST-IMPLEMENTATION.md) and [acceptance ledger](implementation/geist-screen-evidence/ACCEPTANCE.md): completed audit recommendations, 458 frontend / 779 server tests, representative browser evidence, and separate outstanding acceptance.
 
 ## Archive — superseded, do not implement from
 
@@ -115,8 +120,7 @@ which are closed.
 
 ## Documentation audit
 
-[2026-09-16 Markdown audit](DOC_AUDIT.md) records the 39-file sweep, corrections,
-validation and the distinction between current references and historical evidence.
+[Markdown audits](DOC_AUDIT.md) records the 1–2 October refresh and earlier sweeps, including corrected stale claims, source checks and the distinction between current references and historical evidence.
 
 ## Conventions
 

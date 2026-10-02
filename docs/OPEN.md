@@ -163,8 +163,7 @@ Built when something needs them, not before.
   [REGISTRY_SALES.md §8](REGISTRY_SALES.md#8-corrections-the-one-question-this-document-does-not-settle)
 - **Yield interval bands**, the equivalent of the calving-interval bands —
   [REGISTRY_MILKING.md §13](REGISTRY_MILKING.md#13-still-open)
-- **Does reconciliation want its own persistent UI widget**, or is a chat answer
-  enough? — [MULTI_AGENT.md § Open items](MULTI_AGENT.md#open-items)
+- **Demo-domain reconciliation UI remains a separate decision.** Registry production/dispatch reconciliation is already implemented at `/analytics`; the older question concerns demo-agent `get_yield_vs_deliveries` — [MULTI_AGENT.md § Open items](MULTI_AGENT.md#open-items)
 - **Revisit "two agents" vs. merged tools** if the dispatcher's `both` default
   fires on nearly every turn — [MULTI_AGENT.md § Open items](MULTI_AGENT.md#open-items)
 - **Widen the original 12-scenario regression set?** Six registry precision evals
@@ -187,8 +186,7 @@ Built when something needs them, not before.
 - **The local Langfuse Docker stack teardown** is optional; the recorded
   validation left it running, and current status needs a container check —
   [OBSERVABILITY.md § Open items](OBSERVABILITY.md#open-items)
-- **Off-machine backups do not exist.** Versioned local history runs; the
-  off-machine half does not — [DEVELOPMENT.md §8](DEVELOPMENT.md)
+- **Off-machine backups are not documented as configured.** Versioned local history has a recorded setup; current runtime status has not been rechecked — [DEVELOPMENT.md §8](DEVELOPMENT.md)
 - **Doc naming is inconsistent** (`SCREAMING_SNAKE`, `cycle-7-…`, `Cycle7-fu3-…`)
   and left that way on purpose: ~300 code citations reference these filenames.
   See [README.md § Conventions](README.md#conventions).
@@ -215,3 +213,7 @@ recording adoption, milk carryover and buyer settlement conventions; server pagi
 for large composite histories; analytics report/export adapters; and later feed,
 health and financial analytics. Monthly payment practice alone does not define an
 overdue balance, and production-minus-dispatch is not established milk loss.
+
+## Screen-specific UI acceptance — deferred
+
+The remaining screen implementation is delivered in `a56400a`; it is no longer implementation backlog. The separate acceptance tasks are intentionally left open: exhaustive per-writer browser failure/navigation permutations, full keyboard/device/screen-reader/zoom/text-spacing checks, native print/export artifact comparison, live assistant execution/unknown-write recovery, and operator/large-data walkthroughs. [Exact scope and evidence](implementation/geist-screen-evidence/ACCEPTANCE.md#remaining-acceptance--explicitly-open).

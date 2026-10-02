@@ -1,6 +1,6 @@
 # Screen-specific implementation evidence — 1 October 2026
 
-Starting commit: `a70aa1e`. Changes remain uncommitted. The untracked `docs/reviews/` audit tree was preserved. [Source hashes](SOURCE_SHA256.txt) and [built asset hashes](BUILD_SHA256.txt) identify the final implementation. The [recommendation ledger](../GEIST-IMPLEMENTATION.md) separates source completion from acceptance.
+Starting commit: `a70aa1e`. The implementation and this evidence were subsequently committed and pushed as `a56400a`; the runs below describe the capture-time working tree. The untracked `docs/reviews/` audit tree was preserved. [Source hashes](SOURCE_SHA256.txt) and [built asset hashes](BUILD_SHA256.txt) identify the final implementation. The [recommendation ledger](../GEIST-IMPLEMENTATION.md) separates source completion from acceptance.
 
 ## Automated validation
 
@@ -57,4 +57,4 @@ Some navigation attempts during rebuild used removed lazy chunks; reloading the 
 - **Assistant:** live integrated executor, approved-awaiting-result timing, unknown write and exact live retry were not browser-tested here. Synthetic immediate success is not proof of execution. Awaiting/unknown distinctions have source/test coverage only in this pass.
 - **Operator/scale:** representative operator walkthroughs, task timing/error/uncertainty interpretation, empty registry, large datasets, permissions and all sticky-header/long-row permutations remain open.
 
-Screen presentation implementation is complete for the reconciled recommendations; comprehensive release acceptance remains partial. Nothing was deployed, published, merged, committed or pushed.
+Screen presentation implementation is complete for the reconciled recommendations; comprehensive release acceptance remains partial. At capture time nothing had been deployed, published, merged, committed or pushed. The later user-authorized commit/push is identified above; no deployment was performed.

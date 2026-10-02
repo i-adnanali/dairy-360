@@ -1,6 +1,37 @@
 # Markdown audits
 
-## Current audit — 2026-09-16
+## Current audit — 2026-10-02
+
+Scanned 59 repository-owned Markdown files, including the new operations guide
+and current screenshot gallery, against package scripts, current source and
+recorded implementation evidence at `a56400a`. Locally untracked review documents
+were preserved unchanged. Generated/dependency documentation is outside this scope.
+
+Restructured the root README around product scope, a synthetic quick start,
+persistent setup, features, screenshots, development checks and documentation.
+Moved optional camera and tracing instructions into [Operations](OPERATIONS.md).
+Updated current domain references and the UI system with the delivered People,
+Feed, animal, operational, Health, analytics, assistant and navigation changes.
+Corrected stale test totals, build warnings, contrast holds and uncommitted-status
+claims. Older counts, specifications and galleries remain explicitly dated history;
+they are not current acceptance claims. Backup runtime status remains unverified.
+
+Refreshed all three README application images on 1 October from the current
+production build using synthetic memory-only data. The [capture manifest](images/current/manifest.json)
+records source commit, bundle, routes, viewport dimensions and image hashes.
+Desktop light/dark and mobile light images were visually inspected; their rendered
+snapshots show no document-level horizontal overflow. Historical images were retained.
+
+Validation: local Markdown file targets and heading anchors, README image hashes
+and dimensions, source-manifest comparison, and `git diff --check`. Application
+source still matches the implementation evidence; this documentation-only pass did
+not rerun application tests or builds. The recorded 458 frontend / 779 server tests
+and 122 contrast checks remain attributed to the implementation validation.
+External URLs, native devices, screen readers, zoom, print/export, live execution,
+operator acceptance and exhaustive fault injection were not revalidated. Deferred
+acceptance work was left unchanged; no persistent farm database was opened.
+
+## Historical audit — 2026-09-16
 
 Scanned all 39 repository-owned Markdown files for stale analytics, navigation,
 pagination, harness and validation claims. Updated the root and Angular READMEs,

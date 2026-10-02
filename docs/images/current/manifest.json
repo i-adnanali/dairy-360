@@ -1,0 +1,47 @@
+{
+  "capturedOn": "2026-10-01",
+  "sourceCommit": "a56400a801c3c8c14c97589a2baef838625403ea",
+  "sourceManifestMatches": true,
+  "data": "Existing synthetic memory-only harness; read-only screenshot pass",
+  "captures": [
+    {
+      "image": "analytics-dark.jpg",
+      "snapshot": "analytics-dark.json",
+      "url": "http://localhost:6512/analytics?view=month&page=1&detailOn=&detailSession=&on=2026-09-01",
+      "dark": true,
+      "documentWidth": 1440,
+      "height": 1000,
+      "scripts": [
+        "main-NGUMFTJF.js"
+      ],
+      "width": 1440,
+      "sha256": "5fd3667df50485c39a62134c6126b1a74e03ebefdf0c3b3272c6c9fd76bba0cc"
+    },
+    {
+      "image": "health-mobile-light.jpg",
+      "snapshot": "health-mobile-light.json",
+      "url": "http://localhost:6512/animals/health",
+      "dark": false,
+      "documentWidth": 390,
+      "height": 844,
+      "scripts": [
+        "main-NGUMFTJF.js"
+      ],
+      "width": 390,
+      "sha256": "b3dfb89032a71f2e2627f51d4c29645b03cfde499f85e2cca102f1122178212a"
+    },
+    {
+      "image": "today-light.jpg",
+      "snapshot": "today-light.json",
+      "url": "http://localhost:6512/",
+      "dark": false,
+      "documentWidth": 1440,
+      "height": 1000,
+      "scripts": [
+        "main-NGUMFTJF.js"
+      ],
+      "width": 1440,
+      "sha256": "693ec600fd4b6cacbfa113ee3eb83d7fded5f2c7e9e49fc622ea7f9ad06856bb"
+    }
+  ]
+}

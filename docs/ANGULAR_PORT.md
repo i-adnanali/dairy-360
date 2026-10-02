@@ -1,5 +1,7 @@
 # Dairy Farm Agent - Angular Frontend (Port Internals)
 
+> Current UI (1 October 2026, `a56400a`): the shared conversation/composer supports contextual dock/mobile presentation, rich-response expansion and outcome-specific approval receipts. Technical operations remain disclosed; approval alone is not successful execution. Current presentation contracts live in [UI-CURRENT.md](UI-CURRENT.md) and [UI_SYSTEM.md §27](UI_SYSTEM.md#27-screen-specific-audit-completion--1-october-2026); the port comparison below is historical architecture context.
+
 A low-level reference for the **Angular 22** frontend (`web-angular/`), originally a
 feature-parity port of the now-archived React frontend (`web-react/`). For the backend
 agent loop, guardrails, and tool contracts, see [TECHNICAL.md](./TECHNICAL.md); this

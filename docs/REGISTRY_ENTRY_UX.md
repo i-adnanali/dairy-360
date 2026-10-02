@@ -1,5 +1,7 @@
 # Registry entry UX — design decisions
 
+> Current presentation (1 October 2026, `a56400a`): shared mobile controls, associated errors, draft safeguards, complete mobile navigation, filter recovery, human correction choices and precision-aware before/after summaries supersede the original presentation baseline below. The five-animal trial and domain decisions remain open. [Current UI reference](UI-CURRENT.md), [implementation/evidence](implementation/GEIST-IMPLEMENTATION.md).
+
 > Current extension (2026-09-16): Main lists and analytics now use server pagination; composite histories and editable session sheets use local pagination.
 > See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
 

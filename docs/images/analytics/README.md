@@ -1,5 +1,7 @@
 # Analytics screen gallery
 
+> Historical gallery. For the README/current UI at `a56400a`, see the [1 October 2026 captures](../current/README.md). The images below retain their original dates and are not current-UI evidence.
+
 Captured 2026-09-16 from the production Angular bundle served on port 6456,
 backed by the dedicated `--analytics` in-memory harness on 6455. Farm today was
 2026-09-16. These are disposable fixture records, not real-farm trial evidence.

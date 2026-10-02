@@ -1,5 +1,7 @@
 # Application screenshot gallery
 
+> Historical gallery. For the README/current UI at `a56400a`, see the [1 October 2026 captures](../current/README.md). The images below retain their original dates and are not current-UI evidence.
+
 Feed routes added on 2026-09-10 are in the [feed gallery](../feed/README.md). These Phase 7 captures remain historical.
 
 All 15 application routes present at the Phase 7 baseline are represented below, with one light and one dark desktop capture each. Parameterized routes use one representative fixture record. Session setup and the two shell overlays are listed separately.

@@ -1,5 +1,7 @@
 # Registry milk logging — design decisions
 
+> Current workflow (1 October 2026, `a56400a`): a successful save retains the roster and shows an explicit date/session receipt with optional Dispatch continuation. Desktop headers stick within local entry regions; mobile uses the same control tree as cards. The owner analytics requirements now specify measuring every milking; the earlier “measure only on a drop” discussion below records the original practice. Not measured, Not milked, missing and explicit zero remain distinct. [Analytics requirements](ANALYTICS_SPEC.md), [UI evidence](implementation/geist-screen-evidence/ACCEPTANCE.md).
+
 > Current extension (2026-09-16): The editable roster now pages 25/50/100 rows while retaining drafts and validating/saving the whole session.
 > See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
 

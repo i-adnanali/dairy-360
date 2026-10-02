@@ -1,6 +1,6 @@
 # Screen recommendation reconciliation — 1 October 2026
 
-Starting implementation: `a70aa1e`. No applicable AGENTS.md found in the repository or ancestors. Local untracked audit documents are preserved. This checklist supersedes completion claims below. The last column records the gaps identified before editing; their implementation disposition follows the table. **Implemented** means source behavior exists; browser and acceptance evidence are separate. **Partial** identifies concrete missing presentation work; it does not imply a broken domain contract.
+Starting implementation: `a70aa1e`; delivered and pushed as `a56400a`. No applicable AGENTS.md found in the repository or ancestors. Local untracked audit documents are preserved. This checklist supersedes completion claims below. The last column records the gaps identified before editing; their implementation disposition follows the table. **Implemented** means source behavior exists; browser and acceptance evidence are separate. **Partial** identifies concrete missing presentation work; it does not imply a broken domain contract.
 
 | Audit recommendation / consumer | Status at start → current source | Gap identified at reconciliation / preserved source evidence |
 |---|---|---|
@@ -69,7 +69,7 @@ Routine design decisions: retain native selects plus search for long entity list
 - [ ] Exhaustive browser fault/navigation matrix across every writer (separate from representative execution).
 - [ ] Native device/screen reader/zoom/text-spacing/print/export/live executor/operator acceptance.
 
-See [screen-specific acceptance](geist-screen-evidence/ACCEPTANCE.md) for 144 browser captures, exact executed interactions, final source/build hashes, validation logs, capture chronology, and explicit remaining gaps. No backend models, APIs, calculations, money/date parsing, historical rates, recipient snapshots, revision handling, write locks or exact-request retries changed. Approval remains separate from a successful result. No commit, push, merge, deployment or publication was performed.
+See [screen-specific acceptance](geist-screen-evidence/ACCEPTANCE.md) for 144 browser captures, exact executed interactions, final source/build hashes, validation logs, capture chronology, and explicit remaining gaps. No backend models, APIs, calculations, money/date parsing, historical rates, recipient snapshots, revision handling, write locks or exact-request retries changed. Approval remains separate from a successful result. The implementation was subsequently committed and pushed as `a56400a` at the user’s request; no merge, deployment or publication was performed.
 
  Historical route captures below are not completion evidence for these remaining recommendations.
 

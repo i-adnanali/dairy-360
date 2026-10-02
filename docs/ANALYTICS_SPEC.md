@@ -1,6 +1,8 @@
 # Owner analytics: production and milk reconciliation
 
-Status: first release implemented, updated 2026-09-16. Section 11 records delivery details and refinements; section 12 documents the dedicated analytics harness.
+> Presentation update (1 October 2026, `a56400a`): trend precedes comparison; a native date/session inspector supports previous/next, reflects URL selection, and retains filter/period context. Unavailable comparison is compact; qualifications and equivalent tables remain. Shared chart presentation is reused by the assistant without changing metric adapters or calculations. [Current evidence](implementation/geist-screen-evidence/ACCEPTANCE.md).
+
+Status: first release implemented; domain specification dated 2026-09-16, with the current presentation update above. Section 11 records delivery details and refinements; section 12 documents the dedicated analytics harness.
 
 ## 1. Confirmed requirements
 
@@ -277,7 +279,7 @@ is an engineering test scale, not an assertion about the actual herd size.
 
 ## 11. Implementation record — 2026-09-15
 
-The first implementation is present in the working tree. The requirements above
+The first implementation was delivered in September 2026. The requirements above
 remain the design baseline; the refinements and limits below describe the delivery.
 
 - `/analytics` is available in the main navigation. Day/week/month, date, session,
