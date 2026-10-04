@@ -1,7 +1,8 @@
+import { BehaviorSubject } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { HealthPage } from './health-page';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { HealthPage } from "./health-page/health-page";
 import { RegistryApi, ApiError } from './api';
 import { Session } from './session';
 import { routes } from '../app.routes';
@@ -294,4 +295,32 @@ describe('health management', () => {
     expect(paths.indexOf('animals/health')).toBeLessThan(paths.indexOf('animals/:id'));
     expect(paths).toContain('animals/:id/report');
   });
+});
+
+it('consumes a second source link on the reused health route', async () => {
+  const queryParamMap = new BehaviorSubject(convertToParamMap({ record: 'A' }));
+  const route = { queryParamMap, snapshot: { queryParamMap: queryParamMap.value } };
+  const doses = ['A', 'B'].map(id => ({ id, entity: 'administrations', revision: 1, animal_id: 'animal',
+    milk_withdrawal: { state: 'unknown' }, meat_withdrawal: { state: 'unknown' } }));
+  TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ActivatedRoute, useValue: route },
+    { provide: RegistryApi, useValue: { herd: async () => [], healthGet: async (path: string) =>
+      path.includes('/board') ? { tasks: [], withdrawals: [], open_cases: [], overdue: 0, due: 0, upcoming: 0 } :
+      path === 'health/administrations' ? doses : [] } }] });
+  const f = TestBed.createComponent(HealthPage); await f.whenStable();
+  const c = f.componentInstance as any;
+  expect(c.editing.id).toBe('A');
+  route.snapshot.queryParamMap = convertToParamMap({ record: 'B' });
+  queryParamMap.next(route.snapshot.queryParamMap);
+  await new Promise(resolve => setTimeout(resolve, 0)); await f.whenStable();
+  expect(c.editing.id).toBe('B');
+  // A cancelled draft transition must not consume the source link.
+  c.form.notes = 'Unsaved correction';
+  const canLeave = vi.spyOn(c, 'canLeave').mockResolvedValue(false);
+  route.snapshot.queryParamMap = convertToParamMap({ record: 'A' });
+  queryParamMap.next(route.snapshot.queryParamMap);
+  await new Promise(resolve => setTimeout(resolve, 0)); await f.whenStable();
+  expect(c.editing.id).toBe('B');
+  canLeave.mockResolvedValue(true);
+  await c.load();
+  expect(c.editing.id).toBe('A');
 });

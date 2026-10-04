@@ -39,7 +39,7 @@
 
 import type { Routes } from '@angular/router';
 import { draftActivate, draftDeactivate } from './registry/draft-registry';
-import { RegistryShell } from './registry/registry-shell';
+import { RegistryShell } from "./registry/registry-shell/registry-shell";
 
 export const routes: Routes = [
   {
@@ -49,23 +49,23 @@ export const routes: Routes = [
     children: [
       {
         path: 'analytics',
-        loadComponent: () => import('./registry/analytics-page').then((m) => m.AnalyticsPage),
+        loadComponent: () => import("./registry/analytics-page/analytics-page").then((m) => m.AnalyticsPage),
       },
       {
         path: '',
         pathMatch: 'full' as const,
-        loadComponent: () => import('./registry/today-board').then((m) => m.TodayBoard),
+        loadComponent: () => import("./registry/today-board/today-board").then((m) => m.TodayBoard),
       },
 
       {
         path: 'animals/health',
         canDeactivate: [draftDeactivate],
         runGuardsAndResolvers: 'always',
-        loadComponent: () => import('./registry/health-page').then((m) => m.HealthPage),
+        loadComponent: () => import("./registry/health-page/health-page").then((m) => m.HealthPage),
       },
       {
         path: 'animals/:id/report',
-        loadComponent: () => import('./registry/life-report').then((m) => m.LifeReport),
+        loadComponent: () => import("./registry/life-report/life-report").then((m) => m.LifeReport),
       },
 
       // --- the animal record -------------------------------------------------
@@ -76,25 +76,25 @@ export const routes: Routes = [
         // recording session should ask for one immediately rather than render a
         // form whose submit is a prompt. See registry-shell.ts.
         data: { writes: true },
-        loadComponent: () => import('./registry/animal-form').then((m) => m.AnimalForm),
+        loadComponent: () => import("./registry/animal-form/animal-form").then((m) => m.AnimalForm),
       },
       {
         path: 'animals/calvings/new',
         data: { writes: true },
-        loadComponent: () => import('./registry/calving-form').then((m) => m.CalvingForm),
+        loadComponent: () => import("./registry/calving-form/calving-form").then((m) => m.CalvingForm),
       },
       {
         path: 'animals',
-        loadComponent: () => import('./registry/herd-list').then((m) => m.HerdList),
+        loadComponent: () => import("./registry/herd-list/herd-list").then((m) => m.HerdList),
       },
       {
         path: 'animals/calvings',
-        loadComponent: () => import('./registry/calvings-list').then((m) => m.CalvingsList),
+        loadComponent: () => import("./registry/calvings-list/calvings-list").then((m) => m.CalvingsList),
       },
       {
         // `:id` is bound to AnimalDetailView.id by withComponentInputBinding().
         path: 'animals/:id',
-        loadComponent: () => import('./registry/animal-detail').then((m) => m.AnimalDetailView),
+        loadComponent: () => import("./registry/animal-detail/animal-detail").then((m) => m.AnimalDetailView),
       },
 
       // --- milk: production, disposition, and who it goes to ------------------
@@ -110,71 +110,71 @@ export const routes: Routes = [
         path: 'milk/milking',
         canDeactivate: [draftDeactivate],
         runGuardsAndResolvers: 'always',
-        loadComponent: () => import('./registry/milking-roster').then((m) => m.MilkingRosterScreen),
+        loadComponent: () => import("./registry/milking-roster/milking-roster").then((m) => m.MilkingRosterScreen),
       },
       {
         path: 'milk/dispatch',
-        loadComponent: () => import('./registry/dispatch-sheet').then((m) => m.DispatchSheetScreen),
+        loadComponent: () => import("./registry/dispatch-sheet/dispatch-sheet").then((m) => m.DispatchSheetScreen),
       },
       {
         path: 'milk/buyers',
-        loadComponent: () => import('./registry/destinations-list').then((m) => m.DestinationsList),
+        loadComponent: () => import("./registry/destinations-list/destinations-list").then((m) => m.DestinationsList),
       },
       {
         // `:id` is bound to DestinationDetail.id by withComponentInputBinding().
         path: 'milk/buyers/:id',
         loadComponent: () =>
-          import('./registry/destination-detail').then((m) => m.DestinationDetail),
+          import("./registry/destination-detail/destination-detail").then((m) => m.DestinationDetail),
       },
 
       {
         path: 'feed',
         data: { feedMode: 'overview' },
-        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+        loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
       },
       {
         path: 'feed/crops',
         data: { feedMode: 'crops' },
-        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+        loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
       },
       {
         path: 'feed/crops/:id',
         data: { feedMode: 'crops' },
-        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+        loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
       },
       {
         path: 'feed/purchases',
         data: { feedMode: 'purchases' },
-        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+        loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
       },
       {
         path: 'feed/purchases/:id',
         data: { feedMode: 'purchases' },
-        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+        loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
       },
       {
         path: 'feed/daily',
         data: { feedMode: 'daily' },
-        loadComponent: () => import('./registry/feed-page').then((m) => m.FeedPage),
+        loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
       },
       {
         path: 'feed/daily/:on',
-        loadComponent: () => import('./registry/feed-daily').then((m) => m.FeedDailyScreen),
+        loadComponent: () => import("./registry/feed-daily/feed-daily").then((m) => m.FeedDailyScreen),
       },
 
       // --- labour -------------------------------------------------------------
       {
         path: 'labour/payroll',
-        loadComponent: () => import('./registry/payroll-run').then((m) => m.PayrollRunScreen),
+        loadComponent: () => import("./registry/payroll-run/payroll-run").then((m) => m.PayrollRunScreen),
       },
       {
         path: 'labour/people',
-        loadComponent: () => import('./registry/people-list').then((m) => m.PeopleList),
+        loadComponent: () => import("./registry/people-list/people-list").then((m) => m.PeopleList),
       },
       {
         // `:id` is bound to PersonDetail.id by withComponentInputBinding().
         path: 'labour/people/:id',
-        loadComponent: () => import('./registry/person-detail').then((m) => m.PersonDetail),
+        loadComponent: () => import("./registry/person-detail/person-detail").then((m) => m.PersonDetail),
       },
 
       // --- cross-cutting ------------------------------------------------------
@@ -184,7 +184,7 @@ export const routes: Routes = [
       {
         path: 'check',
         loadComponent: () =>
-          import('./registry/verification-panel').then((m) => m.VerificationPanel),
+          import("./registry/verification-panel/verification-panel").then((m) => m.VerificationPanel),
       },
 
       // -----------------------------------------------------------------------
@@ -205,9 +205,9 @@ export const routes: Routes = [
       // and templates.spec.ts now guards the list it belongs to.
       {
         path: 'chat',
-        loadComponent: () => import('./components/chat-panel').then((m) => m.ChatPanel),
+        loadComponent: () => import("./components/chat-panel/chat-panel").then((m) => m.ChatPanel),
       },
-      { path: '**', loadComponent: () => import('./registry/not-found').then(m => m.NotFound) },
+      { path: '**', loadComponent: () => import("./registry/not-found/not-found").then(m => m.NotFound) },
     ].map((route) => ({
       ...route,
       canDeactivate: [draftDeactivate],

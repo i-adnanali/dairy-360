@@ -752,7 +752,7 @@ completeness panel.
 ### 12.1 `/milk/dispatch` — the daily sheet
 
 The whole feature is this screen; the rest is reading. A sibling of
-[milking-roster.ts](../../web-angular/src/app/registry/milking-roster.ts), and it should feel like the
+[milking-roster.ts](../../web-angular/src/app/registry/milking-roster/milking-roster.ts), and it should feel like the
 same motion, because it is done by the same person minutes later.
 
 **Header.** Date defaulting to today, session inferred from the clock but shown and changeable,
@@ -845,7 +845,7 @@ with the rows it came from. §8 is where that would change, and it should change
 > which also restructured the URLs. The paragraph below is what was true at
 > `v0.15.0`; the counts in it are historical.
 
-The shell nav is five items ([registry-shell.ts](../../web-angular/src/app/registry/registry-shell.ts));
+The shell nav is five items ([registry-shell.ts](../../web-angular/src/app/registry/registry-shell/registry-shell.ts));
 this makes it seven. That is over the line where a flat row stops working, and the grouping decision
 — probably *record* versus *review* — is real but should be made when the seventh item exists and not
 predicted now.

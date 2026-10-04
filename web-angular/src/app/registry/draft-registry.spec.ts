@@ -3,11 +3,11 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { DraftRegistry, draftActivate, draftDeactivate } from './draft-registry';
-import { MilkingRosterScreen } from './milking-roster';
-import { HealthPage } from './health-page';
+import { MilkingRosterScreen } from "./milking-roster/milking-roster";
+import { HealthPage } from "./health-page/health-page";
 import { RegistryApi } from './api';
 import { Session } from './session';
-import { SessionGate } from './session-gate';
+import { SessionGate } from "./session-gate/session-gate";
 import { Target } from './target';
 
 @Component({ template: '<h2>Other page</h2>' })
@@ -160,6 +160,8 @@ describe('B1 draft pilots', () => {
     enter(h, '4.5');
     // The target remains an isolated fixture; no storage API is involved here.
     vi.spyOn(TestBed.inject(Target), 'probe').mockResolvedValue('harness');
+    TestBed.inject(Target).probed.set(true);
+    TestBed.inject(Target).kind.set('harness');
     const gate = TestBed.createComponent(SessionGate);
     gate.detectChanges();
     const c = gate.componentInstance as any;

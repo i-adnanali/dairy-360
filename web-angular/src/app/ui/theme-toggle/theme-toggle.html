@@ -1,0 +1,22 @@
+
+    <button
+      type="button"
+      data-role="theme-toggle"
+      [attr.aria-label]="'Theme: ' + theme.mode() + '. Switch to ' + next() + '.'"
+      (click)="theme.cycle()"
+      class="rounded-lg px-2 py-1 text-xs font-medium text-content-muted
+             hover:bg-surface-sunken hover:text-content-heading
+             focus:outline-none focus-visible:ring-2 focus-visible:ring-focus
+             focus-visible:ring-offset-1 focus-visible:ring-offset-surface-page"
+    >
+      <!-- The state you are in, not the one you are going to. -->
+      <span class="capitalize" data-role="theme-mode">{{ theme.mode() }}</span>
+      @if (theme.mode() === 'system') {
+        <!-- Which way "system" currently resolves, because the word alone does
+             not tell you whether the OS is light or dark, and that is the whole
+             question somebody clicking this is asking. -->
+        <span class="text-content-subtle" data-role="theme-resolved">
+          · {{ theme.resolved() }}
+        </span>
+      }
+    </button>

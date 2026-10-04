@@ -2,12 +2,12 @@ import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { CommandPalette } from './command-palette';
+import { CommandPalette } from "./command-palette/command-palette";
 import { RegistryApi } from './api';
 import { Session } from './session';
-import { RegistryShell } from './registry-shell';
+import { RegistryShell } from "./registry-shell/registry-shell";
 import { Shortcuts } from '../core/shortcuts';
-import { CalvingsList } from './calvings-list';
+import { CalvingsList } from "./calvings-list/calvings-list";
 
 const storage = () =>
   Promise.resolve({ info: { storage: ':memory:', memory: true }, reachable: true });

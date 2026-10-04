@@ -1,0 +1,104 @@
+
+    <fieldset appCard>
+      <legend class="px-2 text-sm font-medium text-content-heading">{{ label() }}</legend>
+
+      <div class="flex flex-wrap items-end gap-3">
+        <label class="block">
+          <span appFieldLabel>Date</span>
+          <input
+            data-role="date-text"
+            [attr.aria-invalid]="entry().status === 'incomplete' || error() ? true : null"
+            [attr.aria-describedby]="
+              error() ? errorId : entry().status === 'incomplete' ? incompleteId : null
+            "
+            [value]="text()"
+            (input)="setText($any($event.target).value)"
+            placeholder="2019, Mar 2019, or 6 Jul 2023"
+            appInput
+            class="w-56"
+          />
+        </label>
+
+        <!-- Only at day precision, and only because a day was typed. There is
+             no such thing as knowing the hour but not the day. -->
+        @if (allowTime() && precision() === 'day') {
+          <label class="block">
+            <span appFieldLabel>
+              Time <span class="font-normal text-content-subtle">(optional)</span>
+            </span>
+            <input
+              type="time"
+              data-role="time"
+              [value]="time()"
+              (input)="time.set($any($event.target).value)"
+              appInput
+            />
+          </label>
+        }
+      </div>
+
+      <!-- Disabled rather than hidden where it cannot apply, so the reason is
+           readable before it is needed. 'estimated' stores January 1, so it can
+           only qualify a bare year -- a specific day at estimated precision is a
+           fabricated day wearing a humility label, and the write boundary
+           rejects it by name. -->
+      <label
+        class="mt-3 flex items-start gap-2 text-sm"
+        [class]="canEstimate() ? 'cursor-pointer text-content-heading' : 'text-content-disabled'"
+      >
+        <input
+          type="checkbox"
+          data-role="estimated"
+          class="mt-0.5"
+          [checked]="estimated()"
+          [disabled]="!canEstimate()"
+          (change)="estimated.set($any($event.target).checked)"
+        />
+        <span>
+          Even the year is a guess
+          @if (!canEstimate()) {
+            <span class="italic" data-role="estimated-why">
+              — only applies to a bare year, since an estimate is stored as January 1
+            </span>
+          }
+        </span>
+      </label>
+
+      @switch (entry().status) {
+        @case ('complete') {
+          <p class="mt-3 text-sm" data-role="reading">
+
+            <span class="ml-1 font-medium text-content-primary">{{ readingText() }}</span>
+          </p>
+          <p appHelp size="xs" tone="subtle" class="mt-1" data-role="reading-escape">
+            Not what you meant? Type it more precisely — <span class="font-mono">Mar 2019</span> for
+            a month, <span class="font-mono">6 Jul 2023</span> for a day. Nothing here can claim a
+            day you did not type.
+          </p>
+        }
+        @case ('incomplete') {
+          <p
+            class="mt-3 rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
+            data-role="incomplete"
+            [id]="incompleteId"
+          >
+            {{ incompleteMessage() }}
+          </p>
+        }
+        @default {
+          <p appHelp size="xs" class="mt-3" data-role="hint">
+            {{
+              explain()
+                ? 'The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.'
+                : 'The precision is read from what you type and shown back.'
+            }}
+          </p>
+        }
+      }
+
+      @if (error(); as e) {
+        <p appErrorPanel class="mt-3" data-role="error" [id]="errorId">
+          {{ e }}
+        </p>
+      }
+    </fieldset>

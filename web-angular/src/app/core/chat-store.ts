@@ -1,3 +1,4 @@
+import { isDataset, isPendingWrites, isAgentKind } from './custom-events';
 import { Injectable, computed, signal } from '@angular/core';
 import { HttpAgent } from '@ag-ui/client';
 import { EventType } from '@ag-ui/core';
@@ -202,27 +203,28 @@ export class ChatStore {
         const value = (event as unknown as { value?: unknown }).value;
         switch (name) {
           case AGENT_DATASET_EVENT:
-            if (value) this.addDataset(value as Dataset);
+            if (isDataset(value)) this.addDataset(value);
+            else this.error.set('Invalid dataset received from the assistant stream.');
             break;
           case AGENT_MESSAGES_EVENT:
             if (Array.isArray(value)) this.messages.set(value as AnthropicMessage[]);
             break;
           case AGENT_PENDING_EVENT:
-            if (Array.isArray(value)) {
-              const pending = (value as PendingWrite[]).filter(
+            if (isPendingWrites(value)) {
+              const pending = value.filter(
                 (c) => !this.resolvedIds.has(c.toolUseId),
               );
               this.pending.set(pending.length ? pending : null);
               for (const card of pending)
                 this.patchToolCall(card.toolUseId, (c) => ({ ...c, status: 'pending' }));
-            }
+            } else this.error.set('Invalid pending actions received from the assistant stream.');
             break;
           case AGENT_SELECTION_EVENT:
-            if (typeof value === 'string') {
-              this.currentAgent = value as AgentKind;
+            if (isAgentKind(value)) {
+              this.currentAgent = value;
               // Arrives before any text; patch the turn too in case one exists.
               this.updateCurrent((a) => ({ ...a, agent: this.currentAgent }));
-            }
+            } else this.error.set('Invalid agent selection received from the assistant stream.');
             break;
           default:
             // A CUSTOM event whose name matches NONE of our constants. This
@@ -231,7 +233,7 @@ export class ChatStore {
             // (e.g. a stale Vite optimized-deps cache resolving a constant to
             // undefined), which otherwise fails silently -- history not syncing,
             // no confirmation card. Make it loud. (A known name with a
-            // malformed payload no-ops above rather than warning here.)
+            // malformed payload reports a stream error above.)
             if (name) {
               console.warn(`[chat-store] unhandled CUSTOM event name: ${JSON.stringify(name)}`);
             }

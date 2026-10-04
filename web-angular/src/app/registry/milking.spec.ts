@@ -8,7 +8,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { MilkingRosterScreen } from './milking-roster';
+import { MilkingRosterScreen } from "./milking-roster/milking-roster";
 import { Session } from './session';
 import { WriteLog } from './after-write';
 import type { MilkingRoster } from './types';

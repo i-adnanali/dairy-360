@@ -2,8 +2,8 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
-import { FeedEditor } from './feed-editor';
-import { FeedDailyScreen } from './feed-daily';
+import { FeedEditor } from "./feed-editor/feed-editor";
+import { FeedDailyScreen } from "./feed-daily/feed-daily";
 import { RegistryApi, ApiError } from './api';
 import { Session } from './session';
 import { blankFeed } from './feed-model';
@@ -130,6 +130,18 @@ describe('daily feeding', () => {
         { provide: RegistryApi, useValue: { feedGet: read, feedWrite: write } },
       ],
     });
+  });
+  it('ignores history from a previous feeding account', async () => {
+    const f = TestBed.createComponent(FeedDailyScreen);
+    await settle(f);
+    const c = f.componentInstance;
+    c.originalId = 'old';
+    let resolve!: (rows: any[]) => void;
+    vi.spyOn(TestBed.inject(RegistryApi), 'feedGet').mockReturnValueOnce(new Promise(r => { resolve = r; }));
+    const request = c.showRevisions();
+    c.originalId = 'new';
+    resolve([{ id: 'old-revision' }]); await request;
+    expect(c.revisions()).toEqual([]);
   });
   it('untouched account cannot pass review, explicit unknown account can', async () => {
     const f = TestBed.createComponent(FeedDailyScreen);
@@ -283,4 +295,83 @@ describe('saved feeding correction semantics', () => {
     expect(c.draft.revision).toBe(3);
     expect(c.savedView).toBe(true);
   });
+});
+
+describe('feed conflict wire records', () => {
+  for (const [entity, fields] of [
+    ['items', { label: 'Grass', category: 'fresh_fodder', archived: false }],
+    ['crops', { item_id: 'grass', plot: 'North', status: 'growing' }],
+    ['expenses', { crop_id: 'crop', on, category: 'seed', amount_minor: 2500 }],
+    ['purchases', { item_id: 'grass', on, goods_minor: 10000, transport_minor: 300, other_minor: 0 }],
+  ] as const) {
+    it(`adopts ${entity} without creating invalid hidden money`, async () => {
+      TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), provideRouter([]),
+        { provide: RegistryApi, useValue: {} }] });
+      const f = TestBed.createComponent(FeedEditor);
+      f.componentRef.setInput('entity', entity);
+      await f.whenStable();
+      f.componentInstance.latest = { id: 'record', revision: 2, notes: null,
+        source_form: 'direct_entry', recorded_by: 'tester', recorded_at: '', source_ref: null, ...fields } as any;
+      await f.componentInstance.adoptLatest();
+      for (const value of [f.componentInstance.rate, f.componentInstance.goods, f.componentInstance.amount,
+        f.componentInstance.transport, f.componentInstance.other]) {
+        expect(value === null || Number.isFinite(value)).toBe(true);
+      }
+      expect(f.componentInstance.draft.revision).toBe(2);
+    });
+  }
+  it('renders a delayed conflict lookup failure without forced change detection', async () => {
+    let reject!: (reason: Error) => void;
+    const pending = new Promise((_, no) => { reject = no; });
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), provideRouter([]),
+      { provide: RegistryApi, useValue: { feedGet: () => pending } }] });
+    const f = TestBed.createComponent(FeedEditor);
+    f.componentRef.setInput('entity', 'items');
+    f.componentRef.setInput('record', { ...blankFeed(), id: 'item', label: 'Grass' });
+    await f.whenStable();
+    const lookup = f.componentInstance.compareLatest();
+    await f.whenStable();
+    reject(new Error('Latest revision unavailable'));
+    await lookup;
+    await f.whenStable();
+    expect(f.nativeElement.textContent).toContain('Latest revision unavailable');
+  });
+});
+
+it('ignores an older feed conflict result after a newer lookup', async () => {
+  let resolve!: (value: unknown) => void;
+  const old = new Promise(r => { resolve = r; });
+  const latest = { ...blankFeed(), id: 'item', label: 'Current', revision: 3 };
+  const feedGet = vi.fn().mockReturnValueOnce(old).mockResolvedValue(latest);
+  TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), provideRouter([]),
+    { provide: RegistryApi, useValue: { feedGet } }] });
+  const f = TestBed.createComponent(FeedEditor);
+  f.componentRef.setInput('entity', 'items');
+  f.componentRef.setInput('record', { ...blankFeed(), id: 'item', label: 'Original' });
+  await f.whenStable();
+  const first = f.componentInstance.compareLatest();
+  await f.componentInstance.compareLatest();
+  resolve({ ...latest, revision: 2 }); await first;
+  expect(f.componentInstance.latest?.revision).toBe(3);
+  f.componentRef.setInput('record', { ...latest, id: 'other' });
+  await f.whenStable();
+  expect(f.componentInstance.latest).toBeNull();
+});
+
+it('preserves an adopted crop date before date controls emit', async () => {
+  const feedWrite = vi.fn().mockResolvedValue({ ...blankFeed(), id: 'crop' });
+  TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), provideRouter([]),
+    { provide: RegistryApi, useValue: { feedWrite } }] });
+  const f = TestBed.createComponent(FeedEditor);
+  f.componentRef.setInput('entity', 'crops');
+  await f.whenStable();
+  TestBed.inject(Session).set('direct_entry', 'tester');
+  const c = f.componentInstance;
+  c.latest = { ...blankFeed(), id: 'crop', sowing_on: '2026-09-01', sowing_precision: 'month' } as any;
+  await c.adoptLatest();
+  c.draft.notes = 'Correction';
+  c.dateEntries = {};
+  await c.save();
+  expect(feedWrite.mock.calls[0][1].sowing_on).toBe('2026-09-01');
+  expect(feedWrite.mock.calls[0][1].sowing_precision).toBe('month');
 });

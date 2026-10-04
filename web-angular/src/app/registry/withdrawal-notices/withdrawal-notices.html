@@ -1,0 +1,79 @@
+
+    @for (group of groups(); track $index) {
+      <section
+        class="my-2 rounded-lg border border-line bg-surface-sunken p-3 text-sm"
+        data-role="withdrawal-group"
+      >
+        <p class="font-medium">
+          {{ group.animal }} ·
+          {{ group.medium === 'milk' ? 'Milk' : group.medium === 'meat' ? 'Meat' : group.medium }}
+          withdrawal · {{ group.records.length }} instruction(s) needing attention
+        </p>
+        @if (unknownEnds(group.records); as count) {
+          <p>Needs clarification — {{ count }} instruction(s) have no known end.</p>
+        }
+        @for (end of knownEnds(group.records); track end) {
+          <p>
+            Recorded end:
+            <time class="whitespace-nowrap" [attr.datetime]="end">{{ end.replace('T', ' ') }}</time>
+          </p>
+        }
+        <details [open]="expanded()">
+          <summary class="cursor-pointer underline">Original instructions and sources</summary>
+          @for (w of group.records; track $index) {
+            <div class="mt-2 border-t border-line-subtle pt-2 break-words">
+              <p>
+                {{ w.product_name }}{{ w.product_name ? ' · ' : ''
+                }}{{ w.instruction || 'Instruction needs clarification' }}
+              </p>
+              @if (w.issuer) {
+                <p>Issued by {{ w.issuer }}</p>
+              }
+              <p>
+                {{ w.until ? 'Recorded end: ' + w.until : 'Needs clarification — no known end' }}
+              </p>
+              @if (w.administration_id) {
+                @if (localSource()) {
+                  <button
+                    type="button"
+                    class="underline"
+                    [attr.aria-label]="
+                      'Source recorded dose for ' +
+                      group.animal +
+                      ' · ' +
+                      group.medium +
+                      ' · ' +
+                      (w.product_name || w.administration_id)
+                    "
+                    (click)="source.emit(w.administration_id)"
+                  >
+                    Source recorded dose{{
+                      w.revision !== undefined ? ' · revision ' + w.revision : ''
+                    }}
+                  </button>
+                } @else {
+                  <a
+                    class="underline"
+                    routerLink="/animals/health"
+                    [attr.aria-label]="
+                      'Source recorded dose for ' +
+                      group.animal +
+                      ' · ' +
+                      group.medium +
+                      ' · ' +
+                      (w.product_name || w.administration_id)
+                    "
+                    [queryParams]="{ record: w.administration_id }"
+                    >Source recorded dose{{
+                      w.revision !== undefined ? ' · revision ' + w.revision : ''
+                    }}</a
+                  >
+                }
+              } @else {
+                <p>Source reference not supplied</p>
+              }
+            </div>
+          }
+        </details>
+      </section>
+    }

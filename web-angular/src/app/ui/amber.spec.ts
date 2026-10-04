@@ -29,7 +29,7 @@ interface RawGlob {
 const GROUPS: { dir: string; raw: Record<string, string> }[] = [
   {
     dir: 'src/app/registry/',
-    raw: (import.meta as unknown as RawGlob).glob('../registry/*.ts', {
+    raw: (import.meta as unknown as RawGlob).glob('../registry/**/*.{ts,html}', {
       query: '?raw',
       import: 'default',
       eager: true,
@@ -37,7 +37,7 @@ const GROUPS: { dir: string; raw: Record<string, string> }[] = [
   },
   {
     dir: 'src/app/components/',
-    raw: (import.meta as unknown as RawGlob).glob('../components/*.ts', {
+    raw: (import.meta as unknown as RawGlob).glob('../components/**/*.{ts,html}', {
       query: '?raw',
       import: 'default',
       eager: true,
@@ -53,7 +53,7 @@ const GROUPS: { dir: string; raw: Record<string, string> }[] = [
   },
   {
     dir: 'src/app/ui/',
-    raw: (import.meta as unknown as RawGlob).glob('./*.ts', {
+    raw: (import.meta as unknown as RawGlob).glob('./**/*.{ts,html}', {
       query: '?raw',
       import: 'default',
       eager: true,
@@ -66,7 +66,7 @@ function allSources(): { file: string; text: string }[] {
   const out: { file: string; text: string }[] = [];
   for (const { dir, raw } of GROUPS) {
     for (const [path, text] of Object.entries(raw)) {
-      const base = path.slice(path.lastIndexOf('/') + 1);
+      const base = path.replace(/^\.\.\/(registry|components|core)\//, '').replace(/^\.\//, '');
       if (base.endsWith('.spec.ts')) continue;
       out.push({ file: dir + base, text });
     }
@@ -134,13 +134,13 @@ function sites(): string[] {
 const NEEDS_AN_ANSWER = [
   'src/app/ui/certainty.ts', // the unanswered state, at value scale
   'src/app/ui/surface.ts', // the unanswered ROW -- §3.2's scale
-  'src/app/registry/today-board.ts', // incomplete session counters x3
-  'src/app/registry/verification-panel.ts', // /check findings and notes
-  'src/app/registry/session-required.ts', // no session: answer the gate first
+  'src/app/registry/today-board/today-board.html', // incomplete session counters x3
+  'src/app/registry/verification-panel/verification-panel.html', // /check findings and notes
+  'src/app/registry/session-required/session-required.html', // no session: answer the gate first
 ];
 
 /** PERMITTED, meaning 2: "this is not the real registry". §12.2's chip. */
-const NOT_THE_REAL_REGISTRY = ['src/app/registry/session-bar.ts'];
+const NOT_THE_REAL_REGISTRY = ['src/app/registry/session-bar/session-bar.html'];
 
 const CLASSIFIED = new Map<string, string[]>([
   ['needs an answer from you (PERMITTED)', NEEDS_AN_ANSWER],
@@ -187,7 +187,7 @@ describe('amber — §4.2.1 and §10.7', () => {
     const fill = allSources()
       .filter(({ text }) => /\b(?:bg|text|border)-warning-fill\b/.test(code(text)))
       .map(({ file }) => file);
-    expect(fill).toEqual(['src/app/registry/session-bar.ts']);
+    expect(fill).toEqual(['src/app/registry/session-bar/session-bar.html']);
   });
 
   it('prints the census, because a count nobody reads is a count that drifts', () => {

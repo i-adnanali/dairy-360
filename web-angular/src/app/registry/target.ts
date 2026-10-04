@@ -44,6 +44,7 @@ export class Target {
   readonly storage = signal<string | null>(null);
   /** False while the target has never been asked, so `unknown` reads correctly. */
   readonly probed = signal(false);
+  readonly pending = signal(false);
   /** Whether a server answered at all -- separates "none" from "would not say". */
   readonly reachable = signal(true);
 
@@ -72,7 +73,10 @@ export class Target {
 
   /** Ask the server which database it writes to. */
   probe(): Promise<TargetKind> {
-    this.inFlight ??= this.ask().finally(() => {
+    if (this.inFlight) return this.inFlight;
+    this.pending.set(true);
+    this.inFlight = this.ask().finally(() => {
+      this.pending.set(false);
       this.inFlight = null;
     });
     return this.inFlight;
@@ -127,7 +131,7 @@ export class Target {
     const anchor = this.startedOn();
     await this.probe();
     const now = this.storage();
-    if (anchor !== null && now !== null && now !== anchor) {
+    if (this.session.ready() && now !== null && now !== anchor) {
       this.startedOn.set(null);
       this.session.clear();
     }

@@ -108,3 +108,12 @@ describe('Shortcuts — §12.6', () => {
     expect(ran).toBe(0);
   });
 });
+
+it('removes the document listener when its injector is destroyed', () => {
+  const shortcuts = TestBed.inject(Shortcuts);
+  const action = vi.fn();
+  shortcuts.register('x', 'destroy test', action);
+  TestBed.resetTestingModule();
+  document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true }));
+  expect(action).not.toHaveBeenCalled();
+});

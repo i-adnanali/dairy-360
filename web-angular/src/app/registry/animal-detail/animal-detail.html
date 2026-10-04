@@ -1,0 +1,125 @@
+
+    <div data-page-layout="review">
+    @if (loadError(); as e) {
+      <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
+    } @else if (detail(); as d) {
+      <div class="mx-auto  space-y-5">
+        <header appCard>
+          <div class="flex flex-wrap items-baseline gap-x-3">
+            <h2 class="font-mono text-xl font-semibold text-content-primary" data-role="serial">
+              {{ d.animal.id }}
+            </h2>
+            @if (d.animal.name) {
+              <span class="text-lg text-content-heading">{{ d.animal.name }}</span>
+            }
+            <!-- The farm's word, with the stored enum on hover. 'majj' says in
+                 one word what "cow" is vague about: she has calved. -->
+            <span
+              appBadge
+              [tone]="d.status?.status === 'departed' ? 'ended' : 'neutral'"
+              data-role="status"
+              [title]="d.status ? 'stored as ' + d.status.status : ''"
+              >{{ stage(d) }}</span
+            >
+          </div>
+          <dl class="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+            <div class="flex gap-2">
+              <dt class="text-content-muted">Sex</dt>
+              <dd class="text-content-primary">{{ d.animal.sex }}</dd>
+            </div>
+            <div class="flex gap-2">
+              <dt class="text-content-muted">Origin</dt>
+              <dd class="text-content-primary">{{ d.animal.origin }}</dd>
+            </div>
+            <div class="flex gap-2">
+              <dt class="text-content-muted">Born</dt>
+              <!-- Was "2019-03-01 (month)" built by string concatenation in the
+                   template. Same correction as the herd list: the figure is
+                   truncated to the precision it was known to, and the qualifier
+                   loses its brackets. This is the screen where an animal's whole
+                   record is read, so a fabricated day here is the one that gets
+                   believed. -->
+              <dd data-role="birth">
+                @if (born(d); as b) {
+                  @if (b.state === 'no-record') {
+                    <span appCertainty="no-record" data-certainty="no-record">unknown</span>
+                  } @else {
+                    <span [appCertainty]="b.state" [attr.data-certainty]="b.state">{{
+                      b.figure
+                    }}</span>
+                    @if (b.qualifier) {
+                      <span appQualifier>{{ b.qualifier }}</span>
+                    }
+                  }
+                }
+              </dd>
+            </div>
+            <div class="flex gap-2">
+              <dt class="text-content-muted">Parity</dt>
+              <dd data-role="parity">
+                <span
+                  [appCertainty]="(d.status?.parity ?? null) === null ? 'no-record' : 'known'"
+                  >{{ d.status?.parity ?? noRecord }}</span
+                >
+              </dd>
+            </div>
+            @if (d.animal.post_no) {
+              <div class="flex gap-2">
+                <dt class="text-content-muted">Post</dt>
+                <dd class="text-content-primary">{{ d.animal.post_no }}</dd>
+              </div>
+            }
+            @if (d.animal.tag_no) {
+              <div class="flex gap-2">
+                <dt class="text-content-muted">Tag</dt>
+                <dd class="text-content-primary">{{ d.animal.tag_no }}</dd>
+              </div>
+            }
+          </dl>
+        </header>
+
+        <nav class="flex gap-2 border-b border-line-subtle">
+          @for (t of tabs; track t.id) {
+            <button
+              type="button"
+              [attr.data-tab]="t.id"
+              (click)="selectTab(t.id)"
+              class="-mb-px border-b-2 px-3 py-2 text-sm"
+              [class]="
+                tab() === t.id
+                  ? 'border-line-selected font-medium text-content-primary'
+                  : 'border-transparent text-content-muted'
+              "
+            >
+              {{ t.label }}
+            </button>
+          }
+        </nav>
+
+        @switch (tab()) {
+          @case ('events') {
+            <a appButton variant="secondary" [routerLink]="['/animals', d.animal.id, 'report']"
+              >Life report / vaccination card</a
+            >
+            <a appButton variant="secondary" routerLink="/animals/health">Manage health</a>
+            <app-event-list [events]="d.events" />
+          }
+          @case ('add-event') {
+            <app-event-form [animalId]="d.animal.id" [saved]="onSaved" />
+          }
+          @case ('correct') {
+            <app-correction-form [events]="d.events" [done]="onCorrected" />
+            <div class="mt-5">
+              <h3 class="mb-2 text-sm font-medium text-content-heading">
+                The record as it stands — check the correction reads the way you meant
+              </h3>
+              <app-event-list [events]="d.events" />
+            </div>
+          }
+        }
+      </div>
+    } @else {
+      <p appHelp data-role="loading">Loading…</p>
+    }
+
+    </div>

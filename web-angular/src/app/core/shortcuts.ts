@@ -41,7 +41,7 @@
 // still close the panel, because the person pressing it is asking to put the
 // panel away and their hands are already there.
 
-import { Injectable } from '@angular/core';
+import { DestroyRef, inject, Injectable } from '@angular/core';
 
 /** A chord, normalised: `mod+/`, `mod+k`, `escape`. `mod` is Cmd or Ctrl. */
 export type Chord = string;
@@ -91,6 +91,7 @@ export class Shortcuts {
 
   constructor() {
     document.addEventListener('keydown', this.onKeyDown, { capture: true });
+    inject(DestroyRef).onDestroy(() => document.removeEventListener('keydown', this.onKeyDown, { capture: true }));
   }
 
   /**

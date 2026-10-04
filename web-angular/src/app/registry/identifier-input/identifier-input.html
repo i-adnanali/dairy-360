@@ -1,0 +1,34 @@
+
+    <div class="block">
+      <label [attr.for]="listId() + '-input'">
+        <span appFieldLabel>
+          {{ label() }} <span class="font-normal text-content-subtle">(optional)</span>
+        </span>
+      </label>
+      <input
+        [attr.data-role]="field()"
+        [attr.list]="listId()"
+        [id]="listId() + '-input'"
+        [attr.aria-describedby]="listId() + '-help'"
+        [value]="value()"
+        [disabled]="disabled()"
+        (input)="changed.emit($any($event.target).value)"
+        appInput
+        class="w-full max-w-md"
+      />
+      <!-- Suggestions only. An empty datalist is harmless: the input behaves
+           exactly as a plain text field, which is the state of a fresh
+           registry and must not look broken. -->
+      <datalist [attr.id]="listId()">
+        @for (v of suggestions(); track v) {
+          <option [value]="v"></option>
+        }
+      </datalist>
+      <span
+        [id]="listId() + '-help'"
+        class="mt-1 block text-xs text-content-muted"
+        [attr.data-role]="field() + '-hint'"
+      >
+        {{ guidance() }}
+      </span>
+    </div>

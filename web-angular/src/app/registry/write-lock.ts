@@ -52,7 +52,7 @@ export class WriteLock implements DoCheck, OnDestroy {
     if (error !== this.lastError) this.clearFieldError();
     if (error && error !== this.lastError) {
       queueMicrotask(() => {
-        if (!this.alive) return;
+        if (!this.alive || this.appWriteLock().error?.() !== error) return;
         const controls = Array.from(this.host.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input,select,textarea'));
         const invalid = controls.find(el => el.getAttribute('aria-invalid') === 'true');
         const named = error.isRefusal && error.field ? controls.find(el => el.name === error.field) : null;
@@ -74,9 +74,22 @@ export class WriteLock implements DoCheck, OnDestroy {
           control.focus();
           return;
         }
-        const summary = Array.from(
+        let summary = Array.from(
           this.host.querySelectorAll<HTMLElement>('[apperrorpanel], [role="alert"]'),
         ).find((el) => el.textContent?.includes(error.message));
+        if (!summary) {
+          summary = document.createElement('p');
+          summary.id = 'write-summary-error-' + ++nextError;
+          summary.className = 'text-sm text-danger-fg mt-1';
+          summary.setAttribute('role', 'alert');
+          summary.textContent = error.message;
+          this.host.append(summary);
+          this.fieldMessage = summary;
+          this.fieldControl = this.host;
+          this.previousDescription = this.host.getAttribute('aria-describedby');
+          this.previousInvalid = this.host.getAttribute('aria-invalid');
+          this.host.setAttribute('aria-describedby', [this.previousDescription, summary.id].filter(Boolean).join(' '));
+        }
         if (summary) {
           summary.tabIndex = -1;
           summary.focus();

@@ -4,8 +4,8 @@ import { Router, provideRouter, withComponentInputBinding } from '@angular/route
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { routes } from '../app.routes';
-import { TodayBoard } from './today-board';
-import { MilkingRosterScreen } from './milking-roster';
+import { TodayBoard } from "./today-board/today-board";
+import { MilkingRosterScreen } from "./milking-roster/milking-roster";
 import { RegistryApi } from './api';
 import { Session } from './session';
 import type { DayBoard, MilkingRoster } from './types';

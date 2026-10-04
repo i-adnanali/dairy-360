@@ -1,0 +1,32 @@
+
+    <button
+      appButton
+      variant="secondary"
+      size="sm"
+      [attr.aria-expanded]="open()"
+      (click)="open.set(!open())"
+      class="inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1
+        text-xs transition hover:brightness-95 dark:hover:brightness-110"
+      [class]="chipClass()"
+      [title]="call().argSummary"
+    >
+      <span class="h-1.5 w-1.5 rounded-full" [class]="dotClass()"></span>
+      <span class="font-medium">{{ call().name }}</span>
+      <span>{{
+        rejected() ? 'Rejected' : call().status === 'done'
+          ? 'Success'
+          : call().status === 'error'
+            ? 'Error'
+            : call().status === 'pending'
+              ? 'Awaiting approval'
+              : 'Running'
+      }}</span>
+    </button>
+    @if (call().reason) {
+      <p class="mt-1 text-sm text-content-primary">{{ call().reason }}</p>
+    }
+    @if (open()) {
+      <pre class="mt-2 whitespace-pre-wrap text-xs text-content-primary">{{
+        call().argSummary
+      }}</pre>
+    }

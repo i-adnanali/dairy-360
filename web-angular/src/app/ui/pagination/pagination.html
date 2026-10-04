@@ -1,0 +1,48 @@
+@if (total() > 0) {
+    <nav
+      [attr.aria-label]="label() + ' pagination'"
+      class="flex flex-wrap items-center justify-between gap-3 py-4 text-sm text-content-secondary"
+    >
+      @if (total() > 25) {
+        <label
+          >Rows per page
+          <select
+            appInput
+            class="bg-surface-raised"
+            [attr.aria-label]="label() + ' rows per page'"
+            [value]="pageSize()"
+            [disabled]="disabled()"
+            (change)="sizeChange.emit(+$any($event.target).value)"
+          >
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </label>
+      }
+      <span aria-live="polite">{{ start() }}–{{ end() }} of {{ total() }}</span>
+      @if (pages() > 1) {
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            appButton
+            variant="secondary"
+            [disabled]="disabled() || current() <= 1"
+            (click)="move(-1)"
+          >
+            Previous
+          </button>
+          <span>Page {{ current() }} of {{ pages() }}</span>
+          <button
+            type="button"
+            appButton
+            variant="secondary"
+            [disabled]="disabled() || current() >= pages()"
+            (click)="move(1)"
+          >
+            Next
+          </button>
+        </div>
+      }
+    </nav>
+  }

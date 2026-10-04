@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import type { AnalyticsReport } from '@dairy/shared';
-import { AnalyticsPage } from './analytics-page';
+import { AnalyticsPage } from "./analytics-page/analytics-page";
 import { RegistryApi } from './api';
 
 function report(): AnalyticsReport {

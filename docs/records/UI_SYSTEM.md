@@ -130,7 +130,7 @@ focus treatment and neutral warning treatments have changed.
 |---|---|---|---|
 | B1 | Field order and count on `/animals/new`, `/animals/calvings/new` | 1 (`acquired_from` in the tab path), 3 (ten tab stops, half empty) | No field may be added, removed or reordered on either form |
 | B2 | Visual differentiation of the two adjacent `date-text` fields | 2 (overshooting arrival into birth) | Both keep identical placeholders and identical treatment. §11 says the fix "is not obvious, which is why it was not applied blind" |
-| B3 | Relative prominence of the write-log bar | 5 (announcement too quiet) | [registry-shell.ts:123](../../web-angular/src/app/registry/registry-shell.ts#L123) keeps its **contrast against its surroundings**. It may be tokenised at equal contrast; it may not be made louder or quieter |
+| B3 | Relative prominence of the write-log bar | 5 (announcement too quiet) | [registry-shell.ts:123](../../web-angular/src/app/registry/registry-shell/registry-shell.ts#L123) keeps its **contrast against its surroundings**. It may be tokenised at equal contrast; it may not be made louder or quieter |
 
 Predictions 4 (dam surviving between calvings) and 6 (`Cmd+Enter`) are
 behavioural and constrain nothing here.
@@ -335,7 +335,7 @@ already the current values, so phase 4 moved nothing here.
 | `success-dot` (emerald-500) | `#10b981` | `#34D399` |
 
 `danger-soft` exists because `text-red-700` is pinned by
-[tool-call-chip.spec.ts](../../web-angular/src/app/components/tool-call-chip.spec.ts)
+[tool-call-chip.spec.ts](../../web-angular/src/app/components/tool-call-chip/tool-call-chip.spec.ts)
 and a `danger` role fixed at red-800 cannot express it. The `-strong`, `-fill`,
 `-dot` and `-line-soft` names were added during the token migration for the seven
 utilities the original spec never named; **their dark values are derived, not
@@ -724,7 +724,7 @@ would absorb: 38 on an error panel's own `<p>`, 36 on an `<input>`, 12 on a
 not stop at matching. It casts querySelector results to concrete element types 68
 times, reads `.disabled` 37 times, assigns `.value` 31 times, calls
 `dispatchEvent` 44 times, and
-[identifier-input.spec.ts:26](../../web-angular/src/app/registry/identifier-input.spec.ts#L26)
+[identifier-input.spec.ts:26](../../web-angular/src/app/registry/identifier-input/identifier-input.spec.ts#L26)
 asserts `input.tagName === 'INPUT'` outright — a test whose whole point is that
 this control is an input with a datalist and not a `<select>`. A component fails
 that one by construction, and a `<td>` is the only child a `<tr>` accepts.
@@ -1220,7 +1220,7 @@ script — and three more found while writing it:
 - **The gate is filled in WHERE IT ALREADY IS.** §10.2 says to drive the gate
   and then navigate client-side "or the session dies with the reload", which is
   right about reloads and wrong about the route:
-  [registry-shell.ts](../../web-angular/src/app/registry/registry-shell.ts) renders
+  [registry-shell.ts](../../web-angular/src/app/registry/registry-shell/registry-shell.ts) renders
   `<app-session-gate />` inside `<main>` in place of the outlet on a write-only
   route, so `/animals/new` already shows the gate and the shell swaps it for the
   form the moment the session opens, URL untouched. No hop is needed. The first

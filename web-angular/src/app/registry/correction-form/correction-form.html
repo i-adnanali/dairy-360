@@ -1,0 +1,146 @@
+
+    <form data-page-layout="entry" [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
+      <div appCard>
+        <div appSectionLabel legend>Which calving is the date wrong on?</div>
+        @if (correctable().length === 0) {
+          <p appHelp data-role="no-calvings">No effective calvings on this animal to correct.</p>
+        } @else {
+          <div class="space-y-1" data-role="calvings">
+            @for (c of correctable(); track c.id) {
+              <button
+                type="button"
+                [attr.data-calving]="c.id"
+                [attr.aria-pressed]="target() === c.id"
+                (click)="target.set(c.id)"
+                class="flex w-full items-baseline gap-3 rounded-lg border px-3 py-2 text-left text-sm"
+                [class]="
+                  target() === c.id
+                    ? 'border-line-selected bg-surface-sunken'
+                    : 'border-line bg-surface-raised hover:border-line-strong'
+                "
+              >
+                <span class="font-medium">Calving · {{ dateLabel(c.occurred_on, c.date_precision) }}</span>
+
+              </button>
+            }
+          </div>
+        }
+        @if (state.fieldError('calving_event_id'); as e) {
+          <p appErrorText class="mt-2" data-role="error-target">{{ e }}</p>
+        }
+      </div>
+
+      @if (target()) {
+        @if (selected(); as selected) {
+          <section appCard aria-label="Correction comparison" class="space-y-2">
+            <h3 class="font-medium">Review the date change</h3>
+            <p>Current: {{ dateLabel(selected.occurred_on, selected.date_precision) }}</p>
+            <p>Proposed: {{ proposedDate() }}</p>
+            <details><summary>Source event</summary><p class="break-all font-mono text-xs">{{ selected.id }}</p></details>
+          </section>
+        }
+
+        <app-precision-date
+          label="What is the date actually?"
+          [error]="state.fieldError('occurred_on') ?? state.fieldError('date_precision')"
+          (changed)="when.set($event)"
+        />
+
+        <div class="rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-secondary">
+          Both halves are written together: a superseding calving on the dam and a superseding birth
+          on the calf. If the calf did not live, its departure moves too — the three are the same
+          physical fact. The old events stay in the log, marked superseded.
+        </div>
+
+        <label class="block">
+          <span appFieldLabel>Why the change? (optional note)</span>
+          <input
+            data-role="notes"
+            [value]="notes()"
+            (input)="notes.set($any($event.target).value)"
+            placeholder="e.g. remembered again on a second telling"
+            appInput
+            class="w-full max-w-md"
+          />
+        </label>
+
+        @if (state.formError(fields); as e) {
+          <div appErrorPanel data-role="error-form">
+            {{ e }}
+          </div>
+        }
+
+        <!-- Keyed on the code, not nested in the form-level error: this refusal
+             names occurred_on, so its message goes to the date control, and a
+             button nested in that block would be unreachable. -->
+        @if (state.hasCode('near_duplicate_calving')) {
+          <div
+            class="override-notice rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
+            data-role="override"
+          >
+            <p>The corrected date lands near another calving on this dam — check it first.</p>
+            <label class="mt-2 block">
+              <span class="mb-1 block text-xs font-medium">
+                Why, if you want it on the record <span class="font-normal">(optional)</span>
+              </span>
+              <input
+                data-role="override_reason"
+                [value]="overrideReason()"
+                (input)="overrideReason.set($any($event.target).value)"
+                class="w-full rounded-lg border border-line-strong bg-surface-raised px-2 py-1.5 text-sm"
+              />
+            </label>
+            <button
+              type="button"
+              data-role="allow-duplicate"
+              (click)="allowDuplicate.set(true); submit()"
+              class="mt-2 font-medium underline"
+            >
+              Correct it anyway
+            </button>
+          </div>
+        }
+
+        @if (session.ready()) {
+          <button
+            type="submit"
+            data-role="submit"
+            [appButtonDisabled]="!canSubmit()"
+            appButton
+            [busy]="state.submitting()"
+          >
+            Apply correction
+          </button>
+        } @else {
+          <app-session-required what="a correction" />
+        }
+      }
+
+      @if (state.result(); as r) {
+        <div
+          class="rounded-xl border border-success-line bg-success-bg p-4 text-sm"
+          data-role="result"
+        >
+          <p class="font-medium text-success-strong">Correction applied</p>
+          <ul class="mt-1 space-y-0.5 text-success-fg">
+            <li>
+              superseded calving
+              <span class="font-mono text-xs">{{ r.superseded.calving_event_id }}</span>
+            </li>
+            <li>
+              superseded birth
+              <span class="font-mono text-xs">{{ r.superseded.birth_event_id }}</span>
+            </li>
+            @if (r.superseded.departure_event_id) {
+              <li>
+                superseded departure
+                <span class="font-mono text-xs">{{ r.superseded.departure_event_id }}</span>
+              </li>
+            }
+          </ul>
+          <p class="mt-2 text-success-fg">
+            The event list below shows both the old and the new — check it reads the way you meant.
+          </p>
+        </div>
+      }
+    </form>

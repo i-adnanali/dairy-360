@@ -3,10 +3,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import type { Type } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
-import { PayrollRunScreen, monthBounds } from './payroll-run';
-import { PeopleList } from './people-list';
-import { PersonDetail } from './person-detail';
-import { RegistryApi } from './api';
+import { PayrollRunScreen, monthBounds } from "./payroll-run/payroll-run";
+import { PeopleList } from "./people-list/people-list";
+import { PersonDetail } from "./person-detail/person-detail";
+import { RegistryApi, ApiError } from './api';
 import { Session } from './session';
 import { formatPeriodRate } from './money';
 import type { PayrollRun, PayrollRunRow, WageBalanceRow, WageStatement } from './types';
@@ -668,4 +668,21 @@ describe('PersonDetail', () => {
     expect(el.querySelector('[data-role="no-stints"]')!.textContent).toContain('never employed');
     expect(el.querySelector('[data-role="balance"]')!.textContent).toContain('Settled');
   });
+});
+
+for (const field of ['from_on', 'to_on']) {
+  it(`shows payroll refusal for ${field}`, async () => {
+    const { fixture, el } = await render(PayrollRunScreen, new FakeApi());
+    (fixture.componentInstance as any).state.error.set(new ApiError({ error: 'refused', field, message: `Refused ${field}` }, true));
+    await fixture.whenStable();
+    expect(el.textContent).toContain(`Refused ${field}`);
+  });
+}
+it('shows engagement kind refusal for the custom control', async () => {
+  const api = new FakeApi();
+  api.peopleRows = [{ person_id: 'A', identifier: 'A', name: 'A', engaged: false, balance_minor: 0, last_period_on: null, last_payment_on: null }];
+  const { fixture, el } = await render(PeopleList, api);
+  (fixture.componentInstance as any).engageState.error.set(new ApiError({ error: 'refused', field: 'kind', message: 'Refused engagement kind' }, true));
+  await fixture.whenStable();
+  expect(el.textContent).toContain('Refused engagement kind');
 });

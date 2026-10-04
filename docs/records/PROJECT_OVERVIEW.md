@@ -179,7 +179,7 @@ Notes tied to the code:
 
 ## 5. Read/write split & human-in-the-loop
 
-Read tools (dairy: [server/src/tools/reads.ts](../../server/src/tools/reads.ts); vendor: [server/src/tools/vendorReads.ts](../../server/src/tools/vendorReads.ts); reconciliation: [server/src/tools/reconcile.ts](../../server/src/tools/reconcile.ts); farm monitor: [server/src/tools/farmReads.ts](../../server/src/tools/farmReads.ts)) execute automatically inside the loop. Write tools (dairy: [server/src/tools/writes.ts](../../server/src/tools/writes.ts); vendor: [server/src/tools/vendorWrites.ts](../../server/src/tools/vendorWrites.ts); farm monitor: [server/src/tools/farmWrites.ts](../../server/src/tools/farmWrites.ts)) never run on their own: when the model calls one, `runAgentStream` **pauses** - it emits an `agent.pending` CUSTOM event carrying the `PendingWrite` cards and ends the run with a plain `RUN_FINISHED`. The client renders an approve/reject card ([web-angular/src/app/components/confirmation-card.ts](../../web-angular/src/app/components/confirmation-card.ts)); nothing is written until the user decides. Both agents share this exact pause/resume mechanism.
+Read tools (dairy: [server/src/tools/reads.ts](../../server/src/tools/reads.ts); vendor: [server/src/tools/vendorReads.ts](../../server/src/tools/vendorReads.ts); reconciliation: [server/src/tools/reconcile.ts](../../server/src/tools/reconcile.ts); farm monitor: [server/src/tools/farmReads.ts](../../server/src/tools/farmReads.ts)) execute automatically inside the loop. Write tools (dairy: [server/src/tools/writes.ts](../../server/src/tools/writes.ts); vendor: [server/src/tools/vendorWrites.ts](../../server/src/tools/vendorWrites.ts); farm monitor: [server/src/tools/farmWrites.ts](../../server/src/tools/farmWrites.ts)) never run on their own: when the model calls one, `runAgentStream` **pauses** - it emits an `agent.pending` CUSTOM event carrying the `PendingWrite` cards and ends the run with a plain `RUN_FINISHED`. The client renders an approve/reject card ([web-angular/src/app/components/confirmation-card/confirmation-card.ts](../../web-angular/src/app/components/confirmation-card/confirmation-card.ts)); nothing is written until the user decides. Both agents share this exact pause/resume mechanism.
 
 ```mermaid
 sequenceDiagram
@@ -237,7 +237,7 @@ What the approval gate enforces, and its limit:
 `get_milk_yield` runs through the digest shaper in [server/src/tools/shaper.ts](../../server/src/tools/shaper.ts). The shaper produces two very different outputs from the same query:
 
 - a small **digest** (totals, mean, min/max, first/last, period-over-period %) that goes into the model's context as the `tool_result`; and
-- a full **`Dataset`** (every bucket of the time series) that is streamed to the client over a `agent.dataset` CUSTOM event and rendered as a chart in the browser ([web-angular/src/app/components/chart-card.ts](../../web-angular/src/app/components/chart-card.ts)).
+- a full **`Dataset`** (every bucket of the time series) that is streamed to the client over a `agent.dataset` CUSTOM event and rendered as a chart in the browser ([web-angular/src/app/components/chart-card/chart-card.ts](../../web-angular/src/app/components/chart-card/chart-card.ts)).
 
 The full series **never enters the model's context**. You can watch this in Langfuse: each read tool call is traced as its own observation, with the model digest (not the raw rows) recorded as its output, alongside a `datasetRows` count.
 

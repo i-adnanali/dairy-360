@@ -11,8 +11,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { SessionBar } from './session-bar';
-import { SessionGate } from './session-gate';
+import { SessionBar } from "./session-bar/session-bar";
+import { SessionGate } from "./session-gate/session-gate";
 import { Session } from './session';
 import { Target } from './target';
 
@@ -214,6 +214,22 @@ describe('SessionGate target', () => {
     expect(TestBed.inject(Session).ready()).toBe(false);
   });
 
+  it('blocks provenance submission until the storage probe resolves', async () => {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(SessionGate);
+    fixture.detectChanges();
+    const view = fixture.componentInstance as any;
+    view.form.set('direct_entry'); view.who.set('tester');
+    expect(view.canStart()).toBe(false);
+    await view.start();
+    expect(TestBed.inject(Session).ready()).toBe(false);
+    await settle(fixture, http, { storage: REAL, memory: false });
+    expect(view.canStart()).toBe(false);
+    view.acked.set(true);
+    await view.start();
+    expect(TestBed.inject(Session).ready()).toBe(true);
+  });
+
   it('does not ask on the harness — a confirmation clicked through daily protects nothing', async () => {
     const { http } = setup();
     const fixture = TestBed.createComponent(SessionGate);
@@ -285,4 +301,33 @@ describe('SessionBar target', () => {
     );
     expect(e.querySelector('[data-role="target-summary"]')).toBeNull();
   });
+});
+
+it('requires a fresh session when a real target first appears after an offline start', async () => {
+  const { target, http, session } = setup();
+  const probe = target.probe();
+  answer(http, null, { reachable: false });
+  await probe;
+  target.enter(); session.set('recall', 'tester');
+  const check = target.reprobe();
+  answer(http, { storage: REAL, memory: false });
+  await check;
+  expect(session.ready()).toBe(false);
+  expect(session.setupOpen()).toBe(true);
+});
+
+it('requires fresh acknowledgement when the probed storage changes', async () => {
+  const { http, target, session } = setup();
+  const fixture = TestBed.createComponent(SessionGate);
+  fixture.detectChanges();
+  await settle(fixture, http, { storage: REAL, memory: false });
+  const view = fixture.componentInstance as any;
+  view.form.set('direct_entry'); view.who.set('tester'); view.acked.set(true);
+  expect(view.canStart()).toBe(true);
+  const probe = target.probe();
+  answer(http, { storage: REAL + '.other', memory: false });
+  await probe;
+  await view.start();
+  expect(session.ready()).toBe(false);
+  expect(view.acked()).toBe(false);
 });

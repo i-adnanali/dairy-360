@@ -1,0 +1,95 @@
+
+    @if (docked() || !assistant.open()) {
+      <div class="assistant-chat mx-auto flex h-full min-h-0 min-w-0 max-w-3xl flex-col">
+        @if (!docked()) {
+          <header class="border-b border-line-subtle bg-surface-page/80 px-6 py-4 backdrop-blur">
+            <!-- THE DUPLICATE THEME TOGGLE IS GONE. Phase 6a: this route is a child
+             of RegistryShell now, so it inherits the shell's header and its one
+             toggle. Two toggles reading the same signal were not merely
+             redundant -- they were two controls for one setting on one screen,
+             which is the kind of thing that makes a person wonder whether they
+             do different things.
+
+             The <h2> is a heading level down as well. The shell's <h1> is
+             "Animal registry"; two <h1>s on one document is an outline with two
+             roots, and a screen reader reads it as two pages. -->
+            <h2 class="text-lg font-semibold tracking-tight">Assistant</h2>
+            <p appHelp>
+              Ask about records or review a proposed action before authorizing it.
+            </p>
+          </header>
+        }
+
+        <!-- STATUS, NOT THE STREAM. Section 7 asks for aria-live on "streaming
+           chat output", and putting a live region around the streaming text
+           itself is the wrong reading of it: aria-live re-announces its region
+           on every mutation, and a token-by-token stream mutates dozens of
+           times per reply. A screen reader would restart the answer from the
+           beginning on every token and finish none of them.
+           So this announces the TRANSITIONS -- thinking, then the answer having
+           arrived, or a refusal -- and leaves the prose to be read on demand,
+           which is how somebody reads an answer anyway. Same shape as the
+           registry's write log, including a counter so two identical statuses in
+           a row still re-announce. aria-live="polite" because it must not
+           interrupt typing. -->
+        <div aria-live="polite" aria-atomic="true" class="sr-only" data-role="chat-announce">
+          {{ announcement() }}
+        </div>
+
+        <div #scrollEl (scroll)="trackScroll()" class="min-h-0 min-w-0 flex-1 overflow-y-auto p-4">
+          @if (store.isEmpty()) {
+            <app-empty-state (pick)="store.send($event)" />
+          } @else {
+            <app-message-list [renderLog]="store.renderLog()" />
+          }
+
+          @if (store.loading()) {
+            <div class="mt-4 flex items-center gap-2 text-sm text-content-subtle">
+              <span class="h-2 w-2 animate-pulse rounded-full bg-mark-pending"></span>
+              Thinking…
+            </div>
+          }
+
+          @if (store.pending(); as pending) {
+            @if (pending.length > 0) {
+              <div class="mt-4 space-y-3">
+                @for (card of pending; track card.toolUseId) {
+                  <app-confirmation-card [card]="card" (resolve)="resolve($event)" />
+                }
+                @if (pending.length > 1) {
+                  <button appButton size="sm" (click)="approveAll(pending)">
+                    Approve all ({{ pending.length }})
+                  </button>
+                }
+              </div>
+            }
+          }
+
+          @for (decision of store.decisions(); track decision.card.toolUseId) {
+            <app-confirmation-card
+              [card]="decision.card"
+              [decision]="decision.approved ? 'approved' : 'rejected'"
+              [reason]="receiptReason(decision)"
+              [outcome]="receiptOutcome(decision.card.toolUseId)"
+            />
+          }
+          @if (store.error(); as error) {
+            <div appErrorPanel size="lg" class="mt-4">
+              {{ error }}
+            </div>
+          }
+        </div>
+
+        <!-- UI location only; no route context is forwarded to the model. -->
+        @if (assistant.contextLine(); as line) {
+          <div
+            class="border-t border-line-subtle px-6 pt-2 text-xs text-content-muted"
+            data-role="chat-context"
+          >
+            {{ line }}
+          </div>
+        }
+
+        <app-composer [disabled]="store.busy()" (send)="store.send($event)" />
+      </div>
+    }

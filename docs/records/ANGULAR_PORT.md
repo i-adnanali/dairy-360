@@ -117,16 +117,16 @@ improvement over the React prop chain).
 
 | React component | Angular component | Notes |
 |---|---|---|
-| `App.tsx` | [app.ts](../../web-angular/src/app/app.ts) | thin shell in the `farm-50/farm-900` container. It held `<app-chat-panel>` directly until Cycle 8 added routing; it now renders `<router-outlet />`, with the chat panel at `/chat` |
-| `ChatPanel.tsx` | [chat-panel.ts](../../web-angular/src/app/components/chat-panel.ts) | injects `ChatStore`; scroll-to-bottom via `afterRenderEffect` |
-| `MessageList.tsx` | [message-list.ts](../../web-angular/src/app/components/message-list.ts) | `@for` over `renderLog()` |
-| `Message.tsx` | [message.ts](../../web-angular/src/app/components/message.ts) | user/assistant bubbles, chips, chart slots |
-| `Composer.tsx` | [composer.ts](../../web-angular/src/app/components/composer.ts) | local `signal('')`, Enter-to-send / Shift+Enter |
-| `ConfirmationCard.tsx` | [confirmation-card.ts](../../web-angular/src/app/components/confirmation-card.ts) | details `<dl>` + optional `rows` table; approve/reject |
-| `EmptyState.tsx` | [empty-state.ts](../../web-angular/src/app/components/empty-state.ts) | starters; `output('pick')` |
-| `ToolCallChip.tsx` | [tool-call-chip.ts](../../web-angular/src/app/components/tool-call-chip.ts) | local `open` signal toggle |
-| `ChartCard.tsx` | [chart-card.ts](../../web-angular/src/app/components/chart-card.ts) | Recharts -> Chart.js (`ng2-charts`) |
-| (react-markdown pipeline) | [markdown-view.ts](../../web-angular/src/app/components/markdown-view.ts) | `marked` + `DOMPurify` |
+| `App.tsx` | [app.ts](../../web-angular/src/app/app/app.ts) | thin shell in the `farm-50/farm-900` container. It held `<app-chat-panel>` directly until Cycle 8 added routing; it now renders `<router-outlet />`, with the chat panel at `/chat` |
+| `ChatPanel.tsx` | [chat-panel.ts](../../web-angular/src/app/components/chat-panel/chat-panel.ts) | injects `ChatStore`; scroll-to-bottom via `afterRenderEffect` |
+| `MessageList.tsx` | [message-list.ts](../../web-angular/src/app/components/message-list/message-list.ts) | `@for` over `renderLog()` |
+| `Message.tsx` | [message.ts](../../web-angular/src/app/components/message/message.ts) | user/assistant bubbles, chips, chart slots |
+| `Composer.tsx` | [composer.ts](../../web-angular/src/app/components/composer/composer.ts) | local `signal('')`, Enter-to-send / Shift+Enter |
+| `ConfirmationCard.tsx` | [confirmation-card.ts](../../web-angular/src/app/components/confirmation-card/confirmation-card.ts) | details `<dl>` + optional `rows` table; approve/reject |
+| `EmptyState.tsx` | [empty-state.ts](../../web-angular/src/app/components/empty-state/empty-state.ts) | starters; `output('pick')` |
+| `ToolCallChip.tsx` | [tool-call-chip.ts](../../web-angular/src/app/components/tool-call-chip/tool-call-chip.ts) | local `open` signal toggle |
+| `ChartCard.tsx` | [chart-card.ts](../../web-angular/src/app/components/chart-card/chart-card.ts) | Recharts -> Chart.js (`ng2-charts`) |
+| (react-markdown pipeline) | [markdown-view.ts](../../web-angular/src/app/components/markdown-view/markdown-view.ts) | `marked` + `DOMPurify` |
 
 Tailwind classes are copied **verbatim** from the JSX; the `farm` palette and the
 `.prose-chat` markdown CSS were ported into
@@ -163,7 +163,7 @@ step if a genuinely reactive read emerges.
 
 The React `Message` used `react-markdown` + `remark-gfm` + `DOMPurify` with an element
 allowlist. The Angular equivalent
-([markdown-view.ts](../../web-angular/src/app/components/markdown-view.ts)) uses `marked`
+([markdown-view.ts](../../web-angular/src/app/components/markdown-view/markdown-view.ts)) uses `marked`
 (GFM tables on by default) piped through `DOMPurify` with an `ALLOWED_TAGS` list mirroring
 that same allowlist, then bound via `[innerHTML]`.
 

@@ -77,8 +77,8 @@
 // diffing the list against the components that exist -- which is this check,
 // done by hand once.
 
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
+import { join, dirname, basename } from 'node:path';
 
 const ROOT = 'web-angular/src/app';
 
@@ -244,3 +244,18 @@ if (unlisted.length > 0) {
 const guarded = declaredSelectors(files).filter(({ file }) => !routedFiles.has(file)).length;
 console.log(`component templates: ${files.length} files, no stray backticks`);
 console.log(`component hosts: ${guarded} non-routed, all with display:block; ${routed.size} routed`);
+
+// Every component owns external companions, including intentionally style-free wrappers.
+for (const file of sources(ROOT)) {
+  const text = readFileSync(file, 'utf8');
+  if (!text.includes('@Component(')) continue;
+  const template = /templateUrl:\s*['"]([^'"]+)['"]/.exec(text);
+  const style = /styleUrl:\s*['"]([^'"]+)['"]/.exec(text);
+  const base = basename(file, '.ts');
+  if (basename(dirname(file)) !== base || !template || !style ||
+      !existsSync(join(dirname(file), template[1])) || !existsSync(join(dirname(file), style[1])) ||
+      /\btemplate\s*:|\bstyles\s*:/.test(text)) {
+    console.error(`Invalid component companions: ${file}`);
+    process.exitCode = 1;
+  }
+}

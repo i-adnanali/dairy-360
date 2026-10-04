@@ -973,7 +973,7 @@ Out-of-window animals are not dropped from the response. The client collapses th
 
 The warning is **gone rather than softened**. The list is the mitigation, and a warning that no longer names a live risk trains operators to skim warnings — the same reason `/check` has no badge that turns green.
 
-The list lives in [calf-picker.ts](../../web-angular/src/app/registry/calf-picker.ts) as its own component, not as markup inside the calving form, because the animal workbench needs the same list with the dam fixed by context rather than chosen from a dropdown. `recordCalving` needed no change at all: link mode was already a first-class branch via `calf.existing_id`.
+The list lives in [calf-picker.ts](../../web-angular/src/app/registry/calf-picker/calf-picker.ts) as its own component, not as markup inside the calving form, because the animal workbench needs the same list with the dam fixed by context rather than chosen from a dropdown. `recordCalving` needed no change at all: link mode was already a first-class branch via `calf.existing_id`.
 
 One consequence worth knowing when reading that form: the list now has to **arrive on its own**, driven by an effect on the dam, date and calf sex. It used to be fetched when the operator clicked "yes — link to it", and that click no longer exists; an unfetched list would render as "no animal has a birth date near this calving", which is a false statement about the herd and the worst possible thing to show someone deciding whether to create a duplicate.
 

@@ -33,16 +33,20 @@ interface RawGlob {
   ): Record<string, string>;
 }
 
-const RAW = (import.meta as unknown as RawGlob).glob('./*.ts', {
+const RAW = (import.meta as unknown as RawGlob).glob('../**/*.ts', {
   query: '?raw',
   import: 'default',
   eager: true,
 });
 
+const HTML = (import.meta as unknown as RawGlob).glob('../**/*.html', {
+  query: '?raw', import: 'default', eager: true,
+});
+
 function sources(): { file: string; text: string }[] {
   return Object.entries(RAW)
     .filter(([file]) => !file.endsWith('.spec.ts'))
-    .map(([file, text]) => ({ file, text }));
+    .map(([file, text]) => ({ file, text: text + '\n' + (HTML[file.replace(/\.ts$/, '.html')] ?? '') }));
 }
 
 /**
@@ -116,8 +120,8 @@ describe('component templates', () => {
 const ROUTE_GATED = new Set([
   // Pure write surfaces: the whole screen is a form, so the shell shows the
   // gate instead of it. See app.routes.ts `data: { writes: true }`.
-  './animal-form.ts',
-  './calving-form.ts',
+  "./animal-form/animal-form.ts",
+  "./calving-form/calving-form.ts",
 ]);
 
 describe('write controls', () => {

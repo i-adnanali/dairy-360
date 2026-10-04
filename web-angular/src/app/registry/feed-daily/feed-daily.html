@@ -1,0 +1,452 @@
+
+    <div data-page-layout="entry" class="mx-auto max-w-[720px] space-y-5">
+      <header>
+        <h2 appPageHeading>Daily feeding</h2>
+        <p appHelp>
+          One account for the day. Unknown quantity and unspecified recipients are valid.
+        </p>
+      </header>
+      @if (loadError()) {
+        <p appErrorPanel>{{ loadError() }}</p>
+        <button appButton variant="secondary" (click)="load()">Retry loading</button>
+      }
+      @if (loaded()) {
+        @if (draft.id) {
+          <p appHelp>
+            Saved · revision {{ originalRecord?.revision }} · recorded by
+            {{ originalRecord?.recorded_by }}. {{ originalRecord?.source_form }} ·
+            {{ originalRecord?.source_ref || 'no source reference' }}. Editing keeps confirmed
+            recipients unless refreshed.
+          </p>
+        }
+        @if (purchaseSaved()) {
+          <p appCard>
+            Purchase saved independently. Cancelling this daily form leaves it available.
+            <a [routerLink]="['/feed/purchases', purchaseSaved()]" class="underline"
+              >Review purchase</a
+            >. Add its feed line explicitly if given.
+          </p>
+        }
+        <form
+          [appWriteLock]="state"
+          class="space-y-5"
+          (ngSubmit)="review ? save() : reviewDraft()"
+          data-role="feed-daily-form"
+        >
+          @if (!review) {
+            <label class="block"
+              ><span appFieldLabel>Date</span
+              ><input
+                appInput
+                type="date"
+                name="on"
+                [ngModel]="draft.on"
+                (ngModelChange)="changeDate($event)"
+                required
+            /></label>
+            <section appCard class="space-y-4">
+              <h3 class="font-medium">Fresh fodder</h3>
+              <label class="block"
+                ><span appFieldLabel>Fresh fodder account</span
+                ><select
+                  appInput
+                  name="fresh_status"
+                  [(ngModel)]="draft.fresh_status"
+                  (ngModelChange)="freshChanged()"
+                >
+                  <option value="">Choose an answer</option>
+                  <option value="given">Given — add source line below</option>
+                  <option value="none">None given</option>
+                  <option value="unknown">Unknown</option>
+                </select></label
+              >
+              <label class="block"
+                ><span appFieldLabel>Fresh-fodder supply assessment</span
+                ><select appInput name="assessment" [(ngModel)]="draft.assessment">
+                  <option value="">Choose assessment</option>
+                  @for (a of assessments; track a) {
+                    <option [value]="a">{{ words(a) }}</option>
+                  }
+                </select></label
+              >
+              <p appHelp>
+                Your assessment of fresh-fodder supply; no nutritional adequacy is calculated.
+              </p>
+              @if (draft.assessment === 'short') {
+                <button
+                  appButton
+                  variant="secondary"
+                  type="button"
+                  (click)="openNested('purchases')"
+                >
+                  Add a purchase for the shortfall
+                </button>
+              }
+            </section>
+            <section appCard class="space-y-4">
+              <h3 class="font-medium">Additional feed</h3>
+              <label class="block"
+                ><span appFieldLabel>Additional-feed account</span
+                ><select appInput name="additional_status" [(ngModel)]="draft.additional_status">
+                  <option value="">Choose an answer</option>
+                  <option value="given">Given — add lines below</option>
+                  <option value="none">None given</option>
+                  <option value="unknown">Unknown</option>
+                </select></label
+              >
+            </section>
+            @for (l of draft.lines; track l; let i = $index) {
+              <details appCard class="space-y-4" [open]="!l.id" data-role="feeding-line">
+                <summary class="cursor-pointer font-medium">
+                  {{ itemName(l.item_id) || 'New feed line' }} ·
+                  {{ l.quantity === null ? 'unmeasured' : l.quantity + ' ' + l.unit }} ·
+                  {{ words(l.recipients) }}
+                </summary>
+                <label class="block"
+                  ><span appFieldLabel>Item</span
+                  ><select
+                    appInput
+                    [name]="'item' + i"
+                    [(ngModel)]="l.item_id"
+                    (ngModelChange)="l.sources = []"
+                  >
+                    <option value="">Choose item</option>
+                    @for (item of items(); track item.id) {
+                      <option [value]="item.id">
+                        {{ item.label }}{{ item.archived ? ' (archived)' : '' }}
+                      </option>
+                    }
+                  </select></label
+                >
+                <fieldset class="space-y-2">
+                  <legend appFieldLabel>Sources — select all that apply</legend>
+                  @if (category(l.item_id) === 'fresh_fodder') {
+                    @for (c of suggestedCrops(); track c.id) {
+                      <label class="flex gap-2 text-sm"
+                        ><input
+                          type="checkbox"
+                          [checked]="hasSource(l, 'crop', c.id)"
+                          (change)="toggleSource(l, 'crop', c.id)"
+                        />{{ c.label }} · {{ c.status }}{{ c.archived ? ' · archived' : '' }}</label
+                      >
+                    }
+                  }
+                  @for (p of purchases(); track p.id) {
+                    @if (p.item_id === l.item_id) {
+                      <label class="flex gap-2 text-sm"
+                        ><input
+                          type="checkbox"
+                          [checked]="hasSource(l, 'purchase', p.id)"
+                          (change)="toggleSource(l, 'purchase', p.id)"
+                        />Purchase {{ p.on }} · {{ p.supplier || 'supplier unspecified' }}</label
+                      >
+                    }
+                  }
+                  @for (k of ['purchased', 'other', 'unknown']; track k) {
+                    <label class="flex gap-2 text-sm"
+                      ><input
+                        type="checkbox"
+                        [checked]="hasSource(l, k, null)"
+                        (change)="toggleSource(l, k, null)"
+                      />{{
+                        k === 'purchased'
+                          ? 'Purchased stock (no linked invoice)'
+                          : k === 'other'
+                            ? 'Other source'
+                            : 'Unknown source'
+                      }}</label
+                    >
+                  }
+                </fieldset>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label
+                    ><span appFieldLabel>Quantity (optional)</span
+                    ><input
+                      appInput
+                      type="number"
+                      step="any"
+                      [name]="'quantity' + i"
+                      [(ngModel)]="l.quantity"
+                      class="w-full" /></label
+                  ><label
+                    ><span appFieldLabel>Unit</span
+                    ><input appInput [name]="'unit' + i" [(ngModel)]="l.unit" class="w-full"
+                  /></label>
+                </div>
+                <p appHelp>
+                  {{
+                    l.quantity === null
+                      ? 'Unmeasured — no quantity will be inferred.'
+                      : 'Quantity of feed only; preparation water is excluded.'
+                  }}
+                </p>
+                <label class="block"
+                  ><span appFieldLabel>Recipients</span
+                  ><select
+                    appInput
+                    [name]="'recipients' + i"
+                    [(ngModel)]="l.recipients"
+                    (ngModelChange)="refreshLine(l)"
+                  >
+                    <option value="unspecified">Unspecified</option>
+                    <option value="milking">Milking group</option>
+                    <option value="herd">Whole herd</option>
+                    <option value="selected">Selected animals</option>
+                  </select></label
+                >
+                @if (l.recipients === 'selected') {
+                  @for (a of suggestions().herd; track a.id) {
+                    <label class="flex gap-2 text-sm"
+                      ><input
+                        type="checkbox"
+                        [checked]="l.animal_ids.includes(a.id)"
+                        (change)="toggleAnimal(l, a.id)"
+                      />{{ a.id }} {{ a.name }}</label
+                    >
+                  }
+                }
+                @if (l.recipients !== 'unspecified') {
+                  <p appHelp>
+                    Recipients: {{ recipientNames(l) || 'Empty set' }}. Saved snapshots are not
+                    updated automatically.
+                  </p>
+                  <button appButton variant="secondary" type="button" (click)="refreshLine(l)">
+                    Refresh from this date
+                  </button>
+                  <label class="flex gap-2 text-sm"
+                    ><input
+                      type="checkbox"
+                      [name]="'confirmed' + i"
+                      [(ngModel)]="l.recipients_confirmed"
+                    />I confirm these recipients</label
+                  >
+                }
+                <label class="block"
+                  ><span appFieldLabel>Preparation</span
+                  ><select appInput [name]="'preparation' + i" [(ngModel)]="l.preparation">
+                    @for (p of ['unknown', 'dry', 'water_mixed', 'other']; track p) {
+                      <option [value]="p">{{ words(p) }}</option>
+                    }
+                  </select></label
+                >
+                <label class="block"
+                  ><span appFieldLabel>Stated purpose (optional)</span
+                  ><input appInput [name]="'purpose' + i" [(ngModel)]="l.purpose" class="w-full"
+                /></label>
+                <label class="block"
+                  ><span appFieldLabel>Notes / exceptions (optional)</span
+                  ><textarea
+                    appInput
+                    [name]="'lineNotes' + i"
+                    [(ngModel)]="l.notes"
+                    class="w-full"
+                  ></textarea>
+                </label>
+                <button
+                  appButton
+                  variant="secondary"
+                  type="button"
+                  (click)="draft.lines.splice(i, 1)"
+                >
+                  Remove line
+                </button>
+              </details>
+            }
+            <div class="flex flex-wrap gap-2">
+              <button appButton variant="secondary" type="button" (click)="addLine()">
+                Add feed line</button
+              ><button appButton variant="secondary" type="button" (click)="openNested('items')">
+                Create feed item</button
+              ><button
+                appButton
+                variant="secondary"
+                type="button"
+                (click)="openNested('purchases')"
+              >
+                Record purchase
+              </button>
+            </div>
+            <p appHelp>
+              Common items such as wanda, khall and silage are choices, not presumed feeding.
+            </p>
+            <label class="block"
+              ><span appFieldLabel>Day notes (optional)</span
+              ><textarea appInput name="notes" [(ngModel)]="draft.notes" class="w-full"></textarea>
+            </label>
+            <label class="block"
+              ><span appFieldLabel>Source reference (optional)</span
+              ><input appInput name="source_ref" [(ngModel)]="draft.source_ref" class="w-full"
+            /></label>
+          } @else {
+            <section appCard class="space-y-3" tabindex="-1" data-role="feed-review">
+              <h3 class="font-medium">Review {{ draft.on }}</h3>
+              <p>
+                Fresh fodder: {{ draft.fresh_status }} · supply {{ words(draft.assessment) }}.
+                Additional feed: {{ draft.additional_status }}.
+              </p>
+              <p>
+                {{
+                  [draft.fresh_status, draft.additional_status, draft.assessment].includes(
+                    'unknown'
+                  )
+                    ? 'Partial account'
+                    : 'Recorded feeding account'
+                }}
+              </p>
+              @for (l of draft.lines; track l) {
+                <div class="border-t border-line-subtle pt-3">
+                  <strong>{{ itemName(l.item_id) }}</strong>
+                  <p>{{ sourceNames(l) }}</p>
+                  <p>
+                    {{ l.quantity === null ? 'Unmeasured' : l.quantity + ' ' + l.unit }} ·
+                    {{ words(l.preparation) }}
+                  </p>
+                  <p>
+                    {{
+                      l.recipients === 'unspecified'
+                        ? 'Recipients not specified'
+                        : words(l.recipients) +
+                          ': ' +
+                          (recipientNames(l) || 'No recipients selected')
+                    }}
+                  </p>
+                  <p>{{ l.purpose }} {{ l.notes }}</p>
+                </div>
+              }
+              <p>{{ draft.notes }}</p>
+              <p appHelp>
+                @if (originalRecord) {
+                  Saved record: {{ originalRecord.recorded_by }} ·
+                  {{ originalRecord.source_form }} ·
+                  {{ originalRecord.source_ref || 'no source reference' }}.
+                }
+                @if (!savedView) {
+                  {{
+                    originalRecord
+                      ? 'This correction will be recorded by'
+                      : 'This entry will be recorded by'
+                  }}
+                  {{ session.recordedBy() }} · {{ session.sourceForm() }} ·
+                  {{ draft.source_ref || 'no source reference' }}
+                }
+              </p>
+            </section>
+            <button appButton variant="secondary" type="button" (click)="beginEdit()">
+              {{ draft.id ? 'Edit account' : 'Back to editing' }}
+            </button>
+          }
+          @if (localError) {
+            <p appErrorPanel role="alert">{{ localError }}</p>
+          }
+          @if (state.error(); as e) {
+            <p appErrorPanel role="alert">{{ e.message }}</p>
+            @if (e.code === 'feed_conflict') {
+              <button appButton variant="secondary" type="button" (click)="loadLatest()">
+                Load latest alongside my draft
+              </button>
+            }
+          }
+          @if (latest()) {
+            <section appCard>
+              <h3>Latest saved account</h3>
+              <p appHelp>
+                Original revision {{ originalRecord?.revision }}; your draft is still based on
+                revision {{ draft.revision }}.
+              </p>
+              <p>{{ latest()?.on }} · revision {{ latest()?.revision }} · {{ latest()?.notes }}</p>
+              <details>
+                <summary>Latest saved details</summary>
+                <pre class="whitespace-pre-wrap break-all text-xs">{{ latest() | json }}</pre>
+              </details>
+              <button appButton variant="secondary" type="button" (click)="adoptLatest()">
+                Discard draft and load latest
+              </button>
+              <button appButton variant="secondary" type="button" (click)="latest.set(null)">
+                Keep my draft
+              </button>
+            </section>
+          }
+          @if (session.ready() && !savedView) {
+            @if (!writer.meaningful()) {
+              <p appHelp>No changes to save.</p>
+            }
+            <button
+              appButton
+              type="submit"
+              [appButtonDisabled]="state.submitting() || nested !== '' || !writer.meaningful()"
+              [busy]="state.submitting()"
+            >
+              {{
+                state.submitting()
+                  ? 'Saving…'
+                  : review
+                    ? 'Save feeding summary'
+                    : 'Review feeding summary'
+              }}
+            </button>
+          } @else if (!session.ready()) {
+            <app-session-required what="this feeding summary" />
+          }
+          <a routerLink="/" appButton variant="secondary">Cancel daily entry</a>
+        </form>
+        @if (draft.id) {
+          <button appButton variant="secondary" type="button" (click)="showRevisions()">
+            Correction history
+          </button>
+          @for (r of revisions(); track r.id) {
+            <details appCard>
+              <summary>{{ r.operation }} · revision {{ r.revision }} · {{ r.recorded_at }}</summary>
+              <p appHelp>
+                Previous and saved account, including confirmed recipients and provenance.
+              </p>
+              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.before_json }}</pre>
+              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.after_json }}</pre>
+              <p>{{ r.provenance }}</p>
+            </details>
+          }
+          <button appButton variant="secondary" type="button" (click)="confirmRemoval()">
+            Remove summary
+          </button>
+        }
+        @if (removing) {
+          <div appCard>
+            <p>
+              Remove only this date's summary? Its audit trail remains. The date returns to not
+              recorded.
+            </p>
+            <button
+              appButton
+              (click)="remove()"
+              [appButtonDisabled]="!session.ready() || state.submitting()"
+            >
+              Confirm removal</button
+            ><button
+              appButton
+              variant="secondary"
+              [disabled]="state.locked()"
+              (click)="removing = false"
+            >
+              Keep summary
+            </button>
+          </div>
+        }
+        @if (nested) {
+          <app-feed-editor
+            #nestedEditor
+            [entity]="nested"
+            [items]="items()"
+            (saved)="nestedSaved($event)"
+            (cancelled)="nested = ''"
+            (addItem)="openNestedItem()"
+          />
+        }
+        @if (nestedItem) {
+          <app-feed-editor
+            #nestedItemEditor
+            entity="items"
+            (saved)="itemSaved($event)"
+            (cancelled)="nestedItem = false"
+          />
+        }
+      }
+    </div>

@@ -1,0 +1,17 @@
+
+      .analytics-summary {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+      }
+      @media (min-width: 768px) {
+        .analytics-summary {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+      canvas {
+        max-width: 100%;
+      }
+      td {
+        vertical-align: top;
+      }

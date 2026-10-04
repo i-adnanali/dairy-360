@@ -1,11 +1,13 @@
+import type { DatePrecision } from './types';
+
 export interface HealthRecord {
-  [key: string]: any;
+  [key: string]: unknown;
   id: string;
   entity: string;
   revision: number;
   animal_id?: string;
   title?: string;
-  name?: string;
+  name?: string | null;
   product_name?: string;
   reason?: string;
   instructions?: string;
@@ -22,8 +24,15 @@ export interface HealthRecord {
   case_id?: string;
   task_id?: string;
   product_id?: string;
-  date_precision?: string;
+  date_precision?: DatePrecision;
   recorded_by?: string;
+  occurred_time?: string | null;
+  attachment_ids?: string[];
+  correction_reason?: string;
+  details_unknown?: boolean;
+  source_ref?: string | null;
+  milk_withdrawal?: WithdrawalInstruction;
+  meat_withdrawal?: WithdrawalInstruction;
 }
 
 export interface HealthField {
@@ -242,3 +251,25 @@ export function healthLabel(r: HealthRecord): string {
 export function healthWords(s: string): string {
   return s.replaceAll('_', ' ');
 }
+
+export interface WithdrawalInstruction {
+  state: 'unknown' | 'none' | 'specified';
+  instruction?: string;
+  issuer?: string;
+  until?: string;
+}
+/** Dynamic editor keys remain unknown until consumed by a field control. */
+export type HealthEditorDraft = Partial<HealthRecord>;
+
+/** Entity-specific read contracts. Extra versioned fields stay unknown. */
+type DatedHealthRecord = HealthRecord & { occurred_on: string; date_precision: DatePrecision };
+export type HealthEntityRecord =
+  | (DatedHealthRecord & { entity: 'visits'; vet: string; reason: string; status: string })
+  | (DatedHealthRecord & { entity: 'examinations'; animal_id: string; visit_id: string; findings: string })
+  | (DatedHealthRecord & { entity: 'cases'; animal_id: string; title: string; status: string })
+  | (HealthRecord & { entity: 'products'; name: string; kind: 'vaccine' | 'medicine' | 'other' })
+  | (HealthRecord & { entity: 'plans'; animal_id: string; kind: 'treatment' | 'vaccination'; instructions: string; prescriber: string; status: string })
+  | (HealthRecord & { entity: 'tasks'; animal_id: string; kind: 'administration' | 'recheck' | 'test'; instructions: string; due_on: string; status: string })
+  | (DatedHealthRecord & { entity: 'administrations'; animal_id: string; product_name: string; kind: 'vaccine' | 'medicine' | 'other'; milk_withdrawal: WithdrawalInstruction; meat_withdrawal: WithdrawalInstruction })
+  | (DatedHealthRecord & { entity: 'results'; animal_id: string; kind: 'test' | 'follow_up'; result: string })
+  | (DatedHealthRecord & { entity: 'costs'; amount_minor: number | null; currency: string });

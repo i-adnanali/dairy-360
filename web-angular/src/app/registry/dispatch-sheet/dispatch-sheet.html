@@ -1,0 +1,424 @@
+
+    <form
+      data-page-layout="review"
+      [appWriteLock]="state"
+      class="entry-sheet space-y-4"
+      (submit)="onSubmit($event)"
+    >
+      <header>
+        <h2 appPageHeading>Where the milk went</h2>
+        <p appHelp class="mt-1">
+          One session, and everything that left the bulk in it — sold and kept. The dodhi and the
+          house are on every sheet; a neighbour appears only when they took something.
+        </p>
+        <p appHelp><a appButton variant="link" routerLink="/milk/buyers" target="_blank" rel="noopener">Manage buyers and rates (new tab)</a>. This sheet stays open with its draft; reload only after saving it.</p>
+      </header>
+
+      <!-- when -->
+      <div appCard>
+        <div class="entry-context flex flex-wrap items-end gap-4">
+          <label class="block">
+            <span appFieldLabel>Date</span>
+            <input
+              type="date"
+              data-role="on"
+              [value]="on()"
+              (change)="setOn($any($event.target).value)"
+              appInput
+            />
+          </label>
+          <div>
+            <div appFieldLabel inline>Session</div>
+            <app-chip-group
+              name="session"
+              label="Session"
+              [options]="sessionChips"
+              [value]="session()"
+              (changed)="setSession($any($event))"
+            />
+          </div>
+          <div class="md:ml-auto">
+            <app-identifier-input
+              help="Person who handed over the milk, if known. Use a stable identifier, not a display name."
+              field="observed_by"
+              label="Handed over by"
+              [value]="handedBy()"
+              [suggestions]="identifiers.values().observed_by"
+              (changed)="handedBy.set($event)"
+            />
+          </div>
+        </div>
+        <p class="mt-2 text-xs text-content-muted" data-role="today-note">
+          Defaults to today and this session — the one place a date is defaulted, because today is a
+          fact rather than a guess. Change it to enter a session you missed.
+        </p>
+      </div>
+
+      @if (loadError(); as e) {
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
+      } @else if (sheet(); as s) {
+        @if (s.standing.length === 0 && s.occasional.length === 0) {
+          <p appCard empty data-role="nobody">
+            Nobody was taking milk on {{ s.occurred_on }}.
+            <a routerLink="/milk/buyers" appTextLink tone="strong">Add a buyer</a>
+            — and add the house too, so milk kept at home is on the record rather than in the gap.
+          </p>
+        } @else {
+          <!-- MUST be answered -->
+          <div
+            appScrollRegion="Standing dispatch quantities"
+            class="rounded-xl border border-line bg-surface-raised"
+          >
+            <div
+              class="border-b border-line-subtle bg-surface-page px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-secondary"
+              data-role="standing-head"
+            >
+              Every session — leave none of these unanswered
+            </div>
+            <table class="entry-table w-full text-left text-sm">
+              <thead
+                class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
+              >
+                <tr>
+                  <th scope="col" appCell>Goes to</th>
+                  <th scope="col" appCell numeric nowrap>
+                    Yesterday {{ s.previous_session.session }}
+                  </th>
+                  <th scope="col" appCell numeric nowrap>Rate</th>
+                  <th scope="col" appCell>Litres</th>
+                  <th scope="col" appCell numeric>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  row of s.standing.slice(tableOffset(), tableOffset() + tableSize());
+                  track row.destination_id;
+                  let i = $index
+                ) {
+                  <!-- The standing rows are the ones the header calls "leave
+                       none of these unanswered", so they are exactly §3.2's
+                       case: a destination lost in the sheet, findable at row
+                       scale. The occasional rows below take no such treatment --
+                       "nothing to answer here" is their own header. -->
+                  <tr
+                    appRowDivider
+                    [attr.data-row]="row.destination_id"
+                    [unanswered]="draft(row.destination_id).status === null"
+                    [attr.data-certainty]="
+                      draft(row.destination_id).status === null ? 'unanswered' : null
+                    "
+                  >
+                    <td appCell density="compact" nowrap>
+                      @if (draft(row.destination_id).status === null) {
+                        <span class="mobile-entry-label">Not answered</span>
+                      }
+                      <span class="text-content-heading">{{ row.name }}</span>
+                      @if (!row.billable) {
+                        <span appBadge class="ml-2 whitespace-nowrap" data-role="not-billed"
+                          >kept, not sold</span
+                        >
+                      }
+                    </td>
+                    <td appCell density="compact" numeric tone="secondary" data-role="previous">
+                      <span class="mobile-entry-label"
+                        >Yesterday {{ s.previous_session.session }}:
+                      </span>
+                      <span
+                        [appCertainty]="previousState(row)"
+                        [attr.data-certainty]="previousState(row)"
+                        >{{ previousText(row) }}</span
+                      >
+                    </td>
+                    <!-- Right-aligned but NOT numeric, and that is what keeps this
+                         sheet its original height.
+
+                         "Rs 7,000.00 / 40 L" is a composite rate label, identical in
+                         every row -- not a column of digits anybody scans down. Given
+                         the numeric prop it was monospaced, and mono is wider: table
+                         layout took the width back off the litres cell, whose wrapping
+                         flex row then dropped the "already saved" note onto a second
+                         line and grew the sheet 48px. Alignment without the face costs
+                         nothing and gives nothing up, because there is nothing here to
+                         align against.
+
+                         The AMOUNT column next door keeps numeric and keeps mono. It
+                         is a real figure column -- rupees, section 4 -- and it is the
+                         reason the litres cell is tighter than it was. It fits. -->
+                    <td
+                      appCell
+                      density="compact"
+                      nowrap
+                      small
+                      tone="muted"
+                      class="text-right"
+                      data-role="rate"
+                    >
+                      <span class="mobile-entry-label">Rate: </span>
+                      @if (rateState(row); as st) {
+                        <span [appCertainty]="st" [attr.data-certainty]="st">{{
+                          rateText(row)
+                        }}</span>
+                      } @else {
+                        {{ rateText(row) }}
+                      }
+                    </td>
+                    <td appCell density="compact" class="entry-answer">
+                      <label
+                        class="mobile-entry-label"
+                        [attr.for]="'quantity-' + row.destination_id"
+                        >Litres for {{ row.name }}</label
+                      >
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="input-group"><input
+                          #cell
+                          appInput
+                          [id]="'quantity-' + row.destination_id"
+                          [attr.aria-label]="
+                            'Litres for ' + row.name + ' — ' + on() + ' ' + session()
+                          "
+                          [attr.data-role]="'litres-' + row.destination_id"
+                          inputmode="decimal"
+                          [value]="draft(row.destination_id).litres"
+                          (input)="typeLitres(row.destination_id, $any($event.target).value)"
+                          (keydown)="onKey($event, i + tableOffset())"
+                          class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm disabled:bg-surface-page"
+                        /><span class="input-unit" aria-hidden="true">L</span></span>
+                        <button
+                          type="button"
+                          [attr.aria-label]="'Nothing taken by ' + row.name"
+                          [attr.aria-pressed]="draft(row.destination_id).status === 'none'"
+                          [attr.data-role]="'none-' + row.destination_id"
+                          (click)="markNone(row.destination_id)"
+                          [class]="noneClass(row.destination_id)"
+                        >
+                          nothing taken
+                        </button>
+                        @if (draft(row.destination_id).status === 'none') {
+                          <input
+                            [attr.aria-label]="'Reason nothing taken by ' + row.name"
+                            [attr.data-role]="'reason-' + row.destination_id"
+                            [value]="draft(row.destination_id).reason"
+                            (input)="setReason(row.destination_id, $any($event.target).value)"
+                            placeholder="why (optional)"
+                            class="w-44 rounded-lg border border-line px-2 py-1 text-sm"
+                          />
+                        }
+                        @if (row.existing) {
+                          <span
+                            class="text-xs italic text-content-subtle"
+                            [attr.data-role]="'saved-' + row.destination_id"
+                            >already saved</span
+                          >
+                        }
+                      </div>
+                    </td>
+                    <td
+                      appCell
+                      density="compact"
+                      numeric
+                      tone="secondary"
+                      [attr.data-role]="'amount-' + row.destination_id"
+                    >
+                      <span class="mobile-entry-label">Amount: </span>
+                      <span
+                        [appCertainty]="amountState(row)"
+                        [attr.data-certainty]="amountState(row)"
+                        >{{ amountText(row) }}</span
+                      >
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <app-pagination
+              label="Standing destinations"
+              [page]="tablePage()"
+              [pageSize]="tableSize()"
+              [total]="s.standing.length"
+              (pageChange)="tablePage.set($event)"
+              (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"
+            />
+            @if (pageError()) {
+              <p role="alert" class="p-3">{{ pageError() }}</p>
+            }
+          </div>
+
+          <!-- OFFERED, never required -->
+          @if (s.occasional.length > 0) {
+            <div
+              appScrollRegion="Occasional dispatch quantities"
+              class="rounded-xl border border-dashed border-line bg-surface-raised"
+            >
+              <div
+                class="border-b border-line-subtle px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-muted"
+                data-role="occasional-head"
+              >
+                Only if they came — nothing to answer here
+              </div>
+              <app-pagination
+                label="Occasional destinations"
+                [page]="occasionalPage()"
+                [pageSize]="tableSize()"
+                [total]="s.occasional.length"
+                (pageChange)="occasionalPage.set($event)"
+                (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"
+              />
+              <table class="entry-table w-full text-left text-sm">
+                <tbody>
+                  @for (
+                    row of s.occasional.slice(
+                      (occasionalPage() - 1) * tableSize(),
+                      occasionalPage() * tableSize()
+                    );
+                    track row.destination_id
+                  ) {
+                    <tr appRowDivider [attr.data-row]="row.destination_id">
+                      <td appCell density="compact" tone="heading">
+                        {{ row.name }}
+                        @if (rateState(row); as st) {
+                          <span
+                            class="ml-2 text-xs"
+                            [appCertainty]="st"
+                            [attr.data-certainty]="st"
+                            data-role="rate"
+                            >{{ rateText(row) }}</span
+                          >
+                        } @else {
+                          <span class="ml-2 text-xs text-content-subtle" data-role="rate">{{
+                            rateText(row)
+                          }}</span>
+                        }
+                      </td>
+                      <td appCell density="compact" class="entry-answer">
+                        @if (draft(row.destination_id).status === null) {
+                          <button
+                            type="button"
+                            [attr.aria-label]="'Record milk taken by ' + row.name"
+                            [attr.data-role]="'add-' + row.destination_id"
+                            (click)="addOccasional(row.destination_id)"
+                            class="rounded-lg border border-line bg-surface-raised px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
+                          >
+                            they took some
+                          </button>
+                        } @else {
+                          <label
+                            class="mobile-entry-label"
+                            [attr.for]="'quantity-' + row.destination_id"
+                            >Litres for {{ row.name }}</label
+                          >
+                          <div class="flex items-center gap-2">
+                            <span class="input-group"><input
+                              appInput
+                              [id]="'quantity-' + row.destination_id"
+                              [attr.aria-label]="
+                                'Litres for ' + row.name + ' — ' + on() + ' ' + session()
+                              "
+                              [attr.data-role]="'litres-' + row.destination_id"
+                              inputmode="decimal"
+                              [value]="draft(row.destination_id).litres"
+                              (input)="typeLitres(row.destination_id, $any($event.target).value)"
+                              class="w-24 text-right font-mono tabular-nums rounded-lg border border-line px-2 py-1 text-sm"
+                            /><span class="input-unit" aria-hidden="true">L</span></span>
+                            <span
+                              class="text-sm"
+                              [appCertainty]="amountState(row)"
+                              [attr.data-certainty]="amountState(row)"
+                              [attr.data-role]="'amount-' + row.destination_id"
+                              >{{ amountText(row) }}</span
+                            >
+                            <button
+                              type="button"
+                              [attr.aria-label]="'Did not come: ' + row.name"
+                              [attr.data-role]="'remove-' + row.destination_id"
+                              (click)="removeOccasional(row.destination_id)"
+                              class="text-xs text-content-subtle underline hover:text-content-secondary"
+                            >
+                              didn't come
+                            </button>
+                          </div>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <!-- THE FOOTER, and the reason it carries production -->
+          <div
+            appSummaryBar
+            class="flex flex-wrap items-center justify-between gap-4 bg-surface-raised"
+          >
+            <span data-role="out">
+              <span class="text-content-muted">Out </span>
+              <span class="font-medium text-content-primary">{{ totalLitres() }} L</span>
+              <span class="text-content-muted"> · billed </span>
+              <span class="font-medium text-content-primary">{{ totalAmount() }}</span>
+            </span>
+            <span data-role="produced">
+              <span class="text-content-muted">Measured this session </span>
+              <span class="font-medium text-content-primary"
+                >{{ s.produced.measured_litres }} L</span
+              >
+              @if (s.produced.not_measured > 0) {
+                <span class="text-content-muted">
+                  · {{ s.produced.not_measured }} milked but not weighed</span
+                >
+              }
+            </span>
+          </div>
+
+          <!-- Not an alert. See the comment on producedNote(). -->
+          @if (producedNote(); as note) {
+            <p
+              class="rounded-xl bg-surface-page px-4 py-2 text-xs text-content-secondary"
+              data-role="produced-note"
+            >
+              {{ note }}
+            </p>
+          }
+        }
+      } @else {
+        <p appHelp data-role="loading">Loading…</p>
+      }
+
+      @if (state.formError([]); as e) {
+        <p appErrorPanel data-role="error-form">{{ e }}</p>
+      }
+
+      <div class="entry-summary-details space-y-2">
+        @if (untouchedStanding().length) {
+          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
+            Go to first unanswered destination
+          </button>
+        }
+        @if (blockedReason(); as b) {
+          <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
+        }
+      </div>
+      <div appSummaryBar class="entry-save-bar">
+        <span data-role="resolved">
+          <span class="font-medium text-content-primary"
+            >{{ answered() }} of {{ sheet()?.standing?.length || 0 }}</span
+          >
+          <span class="text-content-muted">
+            answered<span class="sr-only"> required destinations</span></span
+          >
+        </span>
+        @if (session_.ready()) {
+          <button
+            type="submit"
+            data-role="submit"
+            [appButtonDisabled]="!canSubmit()"
+            appButton
+            reason="dispatch-submit-reason"
+            [busy]="state.submitting()"
+          >
+            Save session
+          </button>
+        } @else {
+          <app-session-required what="this session" />
+        }
+      </div>
+    </form>

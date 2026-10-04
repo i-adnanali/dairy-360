@@ -1,0 +1,393 @@
+
+    <div data-page-layout="review" class="space-y-5">
+      <header>
+        <h2 appPageHeading>{{ title() }}</h2>
+        <p appHelp>
+          Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured;
+          recorded costs are not cash paid or feed consumed cost.
+        </p>
+      <div class="flex flex-wrap gap-2">
+        @if (!id && (mode === 'overview' || mode === 'crops')) {
+        <a appButton variant="secondary" routerLink="/feed/crops/new">Add crop</a
+        > } @if (!id && (mode === 'overview' || mode === 'purchases')) { <a appButton variant="secondary" routerLink="/feed/purchases/new">Record purchase</a
+        > } @if (mode === 'overview' || mode === 'daily') { <a appButton [routerLink]="['/feed/daily', today]">Record feeding</a
+        > } <button appButton variant="secondary" [attr.aria-expanded]="catalogue" (click)="catalogue = !catalogue">
+          Feed catalogue
+        </button>
+      </div>
+      </header>
+      @if (error()) {
+        <p appErrorPanel role="alert">{{ error() }}</p>
+        <button appButton variant="secondary" (click)="load()">Retry</button>
+      }
+      @if (loading()) {
+        <p appHelp>Loading feed records…</p>
+      }
+
+      @if (catalogue) {
+        <section appCard class="space-y-3">
+          <h3 class="font-medium">Feed items</h3>
+          <button appButton variant="secondary" (click)="openEditor('item', null)">
+            Create item
+          </button>
+          @for (i of items(); track i.id) {
+            <div class="flex flex-wrap gap-3">
+              <span
+                >{{ i.label }} · {{ words(i.category) }}{{ i.archived ? ' · archived' : '' }}</span
+              ><button appButton variant="secondary" (click)="openEditor('item', i)">
+                Edit / archive
+              </button>
+            </div>
+          }
+        </section>
+      }
+      @if (mode === 'overview' || mode === 'daily') {
+        <form class="flex flex-wrap items-end gap-3" (ngSubmit)="loadRange()">
+          <label
+            ><span appFieldLabel>From</span
+            ><input appInput type="date" name="from" [(ngModel)]="from" /></label
+          ><label
+            ><span appFieldLabel>Through</span
+            ><input appInput type="date" name="to" [(ngModel)]="to" /></label
+          ><button appButton variant="secondary" type="submit">Show range</button>
+        </form>
+        <p appHelp>
+          Default coverage begins at the first saved summary. A missing day means not recorded,
+          never not fed.
+        </p>
+        @if (overview(); as o) {
+          @if (mode === 'overview') {
+            <div class="grid gap-4 sm:grid-cols-3">
+              <section appCard>
+                <h3 class="font-medium">Daily coverage</h3>
+                <p>
+                  {{ o.recorded }} recorded · {{ o.partial }} partial ·
+                  {{ o.unrecorded }} unrecorded
+                </p>
+              </section>
+              <section appCard>
+                <h3 class="font-medium">Recorded purchase costs</h3>
+                <p>{{ money(o.purchase_cost_minor) }}</p>
+                <p appHelp>{{ o.unknown_costs }} unknown totals excluded</p>
+                <a class="underline" routerLink="/feed/purchases" [queryParams]="{from: from, to: to}">Review purchases in this range</a>
+              </section>
+              <section appCard>
+                <h3 class="font-medium">Recorded crop expenses</h3>
+                <a class="underline" routerLink="/feed/crops">Review crops and expenses</a>
+                <p>{{ money(o.expense_cost_minor) }}</p>
+              </section>
+            </div>
+            <details appCard class="space-y-3">
+              <summary class="font-medium cursor-pointer">Fresh-fodder supply</summary>
+              @for (a of assessmentKeys; track a) {
+                <p>
+                  {{ words(a) }}: {{ o.assessments[a].length }}
+                  @for (on of o.assessments[a]; track on) {
+                    <a class="underline ml-2" [routerLink]="['/feed/daily', on]">{{ on }}</a>
+                  }
+                </p>
+              }
+              <p appHelp>
+                Own-source days {{ o.own_days }} · purchased-source days {{ o.purchased_days }} ·
+                mixed-source days {{ o.mixed_days }}. Counts overlap; do not add them.
+              </p>
+            </details>
+            <details appCard>
+              <summary class="font-medium cursor-pointer">Purchase quantities by original unit</summary>
+              @for (q of o.quantities; track q.item_id + q.unit) {
+                <p>
+                  {{ itemName(q.item_id) }}:
+                  {{
+                    q.quantity > 0
+                      ? q.quantity + ' ' + q.unit + ' measured'
+                      : 'No measured quantity'
+                  }}
+                  · {{ q.unmeasured }} unmeasured purchases excluded
+                </p>
+              } @empty {
+                <p appHelp>No purchases in this range.</p>
+              }
+            </details>
+            <details appCard class="space-y-3">
+              <summary class="font-medium cursor-pointer">Crop cycles — currently recorded lifecycle</summary>
+              <p appHelp>
+                Status is the latest recorded state, not a reconstructed range history. Dates may be
+                unknown or approximate.
+              </p>
+              @for (c of o.crops; track c.id) {
+                <p>
+                  <a class="underline" [routerLink]="['/feed/crops', c.id]">{{ c.label }}</a> ·
+                  {{ c.status }}{{ c.archived ? ' · archived' : '' }} ·
+                  {{ c.acreage ?? 'unknown' }} acres · {{ money(c.expense_minor ?? 0) }} expenses to
+                  date · {{ c.supply_days?.length ?? 0 }} distinct recorded supply dates
+                </p>
+              } @empty {
+                <p appHelp>
+                  No crops recorded. Add a growing or already-cutting crop; unknown dates are valid.
+                </p>
+              }
+            </details>
+          }
+          <section appCard>
+            <h3 class="font-medium">Recorded days</h3>
+            <app-local-pagination
+              label="Feeding days"
+              #pages0="localPagination"
+              [total]="o.days.length"
+            />
+            @for (d of pages0.rows(o.days); track d.on) {
+              <div class="flex flex-wrap justify-between gap-2 border-b border-line-subtle py-2">
+                <a class="underline" [routerLink]="['/feed/daily', d.on]">{{ d.on }}</a
+                ><span>{{
+                  d.summary
+                    ? d.summary.completeness === 'partial'
+                      ? 'Partially recorded'
+                      : 'Recorded'
+                    : 'Not recorded'
+                }}</span>
+              </div>
+            }
+          </section>
+        }
+      }
+      @if (mode === 'crops' || mode === 'purchases') {
+        @if (!id || id === 'new') {
+          @if (id === 'new') {
+            <div class="max-w-[720px]">
+              <app-feed-editor
+                #primaryEditor
+                [entity]="mode"
+                [items]="items()"
+                (saved)="saved($event, 'primary')"
+                (cancelled)="cancelEditor()"
+                (addItem)="openEditor('item', null)"
+              />
+            </div>
+          }
+          @if (!id) {
+          @if (mode === 'crops') {
+            <div class="flex flex-wrap gap-3">
+              <label><span appFieldLabel>Find crop</span><input appInput type="search" [(ngModel)]="cropSearch" /></label>
+              <label><span appFieldLabel>Lifecycle</span><select appInput [(ngModel)]="cropStatus"><option value="">All statuses</option><option value="growing">Growing</option><option value="cutting">Cutting</option><option value="finished">Finished</option><option value="archived">Archived</option></select></label>
+              @if ((cropSearch || cropStatus) && filtered().length) { <button appButton variant="secondary" (click)="cropSearch = ''; cropStatus = ''">Clear filters</button> }
+            </div>
+          }
+          @if (mode === 'purchases') {
+            <div class="flex flex-wrap gap-3">
+              <label
+                ><span appFieldLabel>Item filter</span
+                ><select appInput [(ngModel)]="itemFilter">
+                  <option value="">All items</option>
+                  @for (i of items(); track i.id) {
+                    <option [value]="i.id">{{ i.label }}</option>
+                  }
+                </select></label
+              ><label
+                ><span appFieldLabel>From</span
+                ><input appInput type="date" [(ngModel)]="from" /></label
+              ><label
+                ><span appFieldLabel>Through</span><input appInput type="date" [(ngModel)]="to"
+              /></label>
+            </div>
+          }
+          <section appCard class="space-y-3">
+            <app-local-pagination
+              label="Feed records"
+              #pages1="localPagination"
+              [total]="filtered().length"
+            />
+            @for (r of pages1.rows(filtered()); track r.id) {
+              <div class="border-b border-line-subtle py-3">
+                <a class="underline font-medium" [routerLink]="['/feed', mode, r.id]">{{
+                  mode === 'crops' ? r.label : itemName(r.item_id) + ' · ' + r.on
+                }}</a>
+                @if (mode === 'crops') {
+                  <p>
+                    {{ r.status }}{{ r.archived ? ' · archived' : '' }} ·
+                    {{ r.acreage ?? 'unknown' }} acres
+                  </p>
+                } @else {
+                  <p>
+                    {{ r.quantity === null ? 'Unmeasured' : r.quantity + ' ' + r.unit }} ·
+                    {{ money(r.total_minor) }}
+                  </p>
+                  <p appHelp>{{ agreement(r) }}</p>
+                }
+              </div>
+            } @empty {
+              @if (records().length) {
+                <p appHelp>No {{ mode }} match these filters.</p>
+                <button appButton variant="secondary" (click)="itemFilter = ''; from = ''; to = ''; cropSearch = ''; cropStatus = ''">Clear filters</button>
+              } @else {
+                <p appHelp>No {{ mode }} recorded. Use the actions above to record the first one.</p>
+              }
+            }
+          </section>
+          }
+        } @else {
+          @if (detail(); as d) {
+            <section appCard class="space-y-3">
+              <h3 class="font-medium">{{ mode === 'crops' ? d.label : itemName(d.item_id) }}</h3>
+              <p appHelp>
+                Revision {{ d.revision }} · {{ d.source_form }} · {{ d.recorded_by }} ·
+                {{ d.source_ref || 'no source reference' }} · {{ d.recorded_at }}
+              </p>
+              @if (mode === 'crops') {
+                <p appHelp>Current recorded lifecycle; expenses and supply dates below retain their history.</p>
+                <p>
+                  {{ d.status }}{{ d.archived ? ' · archived' : '' }} ·
+                  {{ d.plot || 'plot unspecified' }} · {{ d.acreage ?? 'unknown' }} acres
+                </p>
+                @for (k of dateKeys; track k) {
+                  <p>{{ words(k) }}: {{ cropDate(d, k) }}</p>
+                }
+              } @else {
+                <p>Delivered {{ d.on }} · {{ d.supplier || 'supplier unspecified' }}</p>
+                <p>
+                  {{ d.quantity === null ? 'Unmeasured' : d.quantity + ' ' + d.unit }} ·
+                  {{ agreement(d) }}
+                </p>
+                <p>
+                  Goods {{ money(d.goods_minor) }} + transport {{ money(d.transport_minor) }} +
+                  other {{ money(d.other_minor) }} = {{ money(d.total_minor) }}
+                </p>
+              }
+              <p>{{ d.notes }}</p>
+              <button appButton variant="secondary" (click)="openEditor('primary', d)">
+                Correct{{ mode === 'crops' ? ' / finish / archive' : '' }}
+              </button>
+              @if (mode === 'purchases') {
+                <button appButton variant="secondary" (click)="startRemoval(d)">
+                  Remove purchase
+                </button>
+              }
+              <button appButton variant="secondary" (click)="showRevisions(d)">
+                Correction history
+              </button>
+            </section>
+            @if (editor) {
+              <div class="max-w-[720px]">
+                <app-feed-editor
+                  #primaryEditor
+                  [entity]="mode"
+                  [record]="editRecord"
+                  [items]="items()"
+                  (saved)="saved($event, 'primary')"
+                  (cancelled)="cancelEditor()"
+                  (addItem)="openEditor('item', null)"
+                />
+              </div>
+            }
+            @if (mode === 'crops') {
+              <section appCard class="space-y-3">
+                <h3 class="font-medium">Expenses recorded so far — {{ money(expenseTotal(d)) }}</h3>
+                <p appHelp>Do not duplicate existing payroll salaries.</p>
+                <button appButton variant="secondary" (click)="openEditor('expense', null)">
+                  Add expense
+                </button>
+                <app-local-pagination
+                  label="Expenses"
+                  #pages2="localPagination"
+                  [total]="(d.expenses ?? []).length"
+                />
+                @for (e of pages2.rows(d.expenses ?? []); track e.id) {
+                  <div class="flex flex-wrap gap-3">
+                    <span
+                      >{{ e.on }} · {{ words(e.category) }} · {{ money(e.amount_minor) }} ·
+                      {{ e.notes }}</span
+                    ><button appButton variant="secondary" (click)="openEditor('expense', e)">
+                      Correct expense</button
+                    ><button appButton variant="secondary" (click)="startRemoval(e)">
+                      Remove expense
+                    </button>
+                    <button appButton variant="secondary" (click)="showRevisions(e, 'expenses')">
+                      Expense history
+                    </button>
+                  </div>
+                }
+              </section>
+              @if (expenseOpen) {
+                <div class="max-w-[720px]">
+                  <app-feed-editor
+                    #expenseEditor
+                    entity="expenses"
+                    [cropId]="d.id"
+                    [record]="expenseEdit"
+                    (saved)="saved($event, 'expense')"
+                    (cancelled)="expenseOpen = false"
+                  />
+                </div>
+              }
+              <section appCard>
+                <h3 class="font-medium">Recorded supply days</h3>
+                @for (on of d.supply_days; track on) {
+                  <a class="underline mr-3" [routerLink]="['/feed/daily', on]">{{ on }}</a>
+                } @empty {
+                  <p appHelp>
+                    No linked supply days recorded. This does not mean no fodder was cut.
+                  </p>
+                }
+              </section>
+            }
+          }
+        }
+      }
+      @if (itemOpen) {
+        <div class="max-w-[720px]">
+          <app-feed-editor
+            #itemEditor
+            entity="items"
+            [record]="itemEdit"
+            (saved)="saved($event, 'item')"
+            (cancelled)="itemOpen = false"
+          />
+        </div>
+      }
+      @if (revisions().length) {
+        <section appCard class="space-y-3">
+          <h3 class="font-medium">Recoverable correction history</h3>
+          <app-local-pagination
+            label="Revision history"
+            #pages3="localPagination"
+            [total]="revisions().length"
+          />
+          @for (r of pages3.rows(revisions()); track r.id) {
+            <details>
+              <summary>{{ r.operation }} · revision {{ r.revision }} · {{ r.recorded_at }}</summary>
+              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.before_json }}</pre>
+              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.after_json }}</pre>
+              <p>{{ r.provenance }}</p>
+            </details>
+          }
+        </section>
+      }
+      @if (removeTarget) {
+        <section appCard>
+          @if (state.uncertain()) {
+            <p role="status">Removal outcome unknown. Retry the same removal before leaving.</p>
+          }
+          <p>
+            Remove this {{ removeTarget.crop_id ? 'expense' : 'purchase' }}? The audit trail
+            remains. A linked purchase cannot be removed.
+          </p>
+          @if (session.ready()) {
+            <button appButton (click)="remove()" [appButtonDisabled]="state.submitting()">
+              Confirm removal
+            </button>
+          } @else {
+            <app-session-required what="this removal" />
+          }
+          <button
+            appButton
+            variant="secondary"
+            [disabled]="state.locked()"
+            (click)="removeTarget = null"
+          >
+            Keep record
+          </button>
+          @if (state.error(); as e) {
+            <p appErrorPanel>{{ e.message }}</p>
+          }
+        </section>
+      }
+    </div>

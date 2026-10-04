@@ -203,7 +203,7 @@ function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) walk(p, out);
-    else if (name.endsWith('.ts') && !name.endsWith('.spec.ts')) out.push(p);
+    else if ((name.endsWith('.ts') && !name.endsWith('.spec.ts')) || name.endsWith('.html')) out.push(p);
   }
   return out;
 }
@@ -291,7 +291,7 @@ const aaa = graded.filter((x) => x.tier === 'TEXT' && x.pass && x.r < 7);
 console.log(`TEXT pairs passing AA but under AAA (7:1): ${aaa.length}`);
 
 const unexpected = failures;
-const disabledConsumers = new Set(['ui/button.ts', 'registry/calf-picker.ts', 'registry/precision-date.ts']);
+const disabledConsumers = new Set(['ui/button.ts', 'registry/calf-picker/calf-picker.html', 'registry/precision-date/precision-date.html']);
 const invalidUses = walk(APP).filter(file => {
   const source = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
   return source.includes('text-content-disabled') && !disabledConsumers.has(relative(APP, file));

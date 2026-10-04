@@ -1,0 +1,568 @@
+import { ScrollRegion } from "../../ui/scroll-region";
+import { untracked } from '@angular/core';
+import { writerDraft, replacesContext } from "../writer-draft";
+import { WriteLock } from "../write-lock";
+import { Pagination } from "../../ui/pagination/pagination";
+import { StatusBadge } from "../../ui/surface";
+// `/dispatch` -- where the milk went (docs/records/REGISTRY_SALES.md §12.1).
+//
+// A sibling of milking-roster.ts, and it should feel like the same motion,
+// because it is done by the same person minutes later.
+//
+// ---------------------------------------------------------------------------
+// THE BODY IS IN TWO PARTS, AND THE DIVIDER IS LOAD-BEARING
+// ---------------------------------------------------------------------------
+// STANDING destinations -- the dodhi, home -- are one row each and untouched
+// BLOCKS THE SAVE. OCCASIONAL ones -- the households, who take surplus -- are
+// not rows until they took something.
+//
+// That split is not a convenience. Forcing a household who comes eight days a
+// month to answer "took nothing" on the other fifty-two sessions is ~1,400
+// deliberate non-events a year, and a mandatory field answered by reflex stops
+// protecting the dodhi row too. The cost is stated where it lands: an
+// occasional sale nobody records leaves no hole here, and the reconciliation is
+// the only thing that catches it -- which is why the footer shows production.
+//
+// Everything above the divider must be answered; nothing below it must. An
+// operator should be able to see whether the sheet is saveable without reading
+// it.
+
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChildren,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import { ChipGroup } from "../chip-group/chip-group";
+import { Cell } from "../../ui/cell";
+import { Certainty } from "../../ui/certainty";
+import type { CertaintyState } from "../../ui/certainty";
+import { NO_RECORD } from "../precision-display";
+import { FormState } from "../form-state";
+import { Identifiers } from "../identifiers";
+import { IdentifierInput } from "../identifier-input/identifier-input";
+import { RegistryApi } from "../api";
+import { Session } from "../session";
+import { SessionRequired } from "../session-required/session-required";
+import { WriteLog } from "../after-write";
+import { amountMinor, formatMinor, formatRate } from "../money";
+import { farmToday, likelySession } from "../today";
+import { urlParams } from "../url-state";
+import type { DispatchSheet, MilkingSession, SheetRow } from "../types";
+import { Card } from "../../ui/surface";
+import { ErrorPanel } from "../../ui/surface";
+import { FieldLabel } from "../../ui/text";
+import { HelpText } from "../../ui/text";
+import { TextInput } from "../../ui/input";
+import { PageHeading } from "../../ui/heading";
+import { RowDivider } from "../../ui/surface";
+import { TextLink } from "../../ui/text";
+import { Button } from "../../ui/button";
+import { SummaryBar } from "../../ui/surface";
+
+/**
+ * A row's pending answer.
+ *
+ * `status: null` is UNTOUCHED, which for a standing destination blocks the save
+ * and for an occasional one simply means they are not on the sheet.
+ */
+interface Draft {
+  status: 'taken' | 'none' | null;
+  litres: string;
+  reason: string;
+}
+
+const EMPTY: Draft = { status: null, litres: '', reason: '' };
+
+@Component({
+  selector: 'app-dispatch-sheet',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ScrollRegion,
+    WriteLock,
+    Pagination,
+    StatusBadge,
+    Button,
+    Card,
+    Cell,
+    Certainty,
+    ChipGroup,
+    ErrorPanel,
+    FieldLabel,
+    HelpText,
+    IdentifierInput,
+    PageHeading,
+    RouterLink,
+    RowDivider,
+    SessionRequired,
+    SummaryBar,
+    TextInput,
+    TextLink,
+  ],
+  templateUrl: './dispatch-sheet.html',
+  styleUrl: './dispatch-sheet.css',
+})
+export class DispatchSheetScreen {
+  protected writer!: ReturnType<typeof writerDraft>;
+  protected readonly occasionalPage = signal(1);
+  protected readonly tablePage = signal(1);
+  protected readonly tableSize = signal(25);
+  protected readonly pageError = signal('');
+  protected tableOffset(): number {
+    return (this.tablePage() - 1) * this.tableSize();
+  }
+  private readonly api = inject(RegistryApi);
+  protected readonly session_ = inject(Session);
+  private readonly writeLog = inject(WriteLog);
+  protected readonly identifiers = inject(Identifiers);
+
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly cells = viewChildren<ElementRef<HTMLInputElement>>('cell');
+
+  protected readonly fields = [
+    'occurred_on',
+    'session',
+    'entries',
+    'destination_id',
+    'litres',
+  ] as const;
+  protected readonly sessionChips = [
+    { value: 'morning', label: 'Morning' },
+    { value: 'evening', label: 'Evening' },
+  ];
+  protected readonly state = new FormState<{
+    written: number;
+    litres: number;
+    amount_minor: number;
+    updated: number;
+  }>();
+
+  /**
+   * The date and session live in the URL, not in a component signal.
+   *
+   * A bare /milk/... opens today's likely session and STAYS bare; changing
+   * either puts it in the query string, at which point the URL names that
+   * specific sheet and can be sent to somebody. See url-state.ts.
+   */
+  private readonly contextDefaults = { on: farmToday(), session: likelySession() };
+  private readonly url = urlParams(this.contextDefaults);
+  protected readonly on = computed(() => this.url.value().on);
+  // VALIDATED, not cast: `?session=lunch` is a URL somebody can type, and
+  // passing it through would produce a server refusal on a screen that has no
+  // field to attach it to.
+  protected readonly session = computed<MilkingSession>(() => {
+    const raw = this.url.value().session;
+    return raw === 'morning' || raw === 'evening' ? raw : likelySession();
+  });
+  protected readonly handedBy = signal('');
+
+  protected readonly sheet = signal<DispatchSheet | null>(null);
+  protected readonly loadError = signal<string | null>(null);
+  private readonly drafts = signal<Record<string, Draft>>({});
+
+  constructor() {
+    this.writer = writerDraft({
+      name: 'Dispatch',
+      description: () => 'Dispatch · ' + this.on() + ' · ' + this.session(),
+      fields: { drafts: this.drafts, handedBy: this.handedBy },
+      states: [this.state],
+      replaces: replacesContext(
+        '/milk/dispatch',
+        () => ({ on: this.on(), session: this.session() }),
+        this.contextDefaults,
+      ),
+    });
+
+    void this.identifiers.refresh();
+    effect(() => {
+      const on = this.on();
+      const s = this.session();
+      void untracked(() => this.load(on, s));
+    });
+  }
+
+  private loadGeneration = 0;
+  private async load(on: string, session: MilkingSession): Promise<void> {
+    const generation = ++this.loadGeneration;
+    const observerAtLoad = this.handedBy();
+    this.sheet.set(null);
+    this.occasionalPage.set(1);
+    this.tablePage.set(1);
+    this.pageError.set('');
+    try {
+      const s = await this.api.dispatchSheet(on, session);
+      if (generation !== this.loadGeneration) return;
+      // A session already saved comes back filled in, so re-opening one is a
+      // correction rather than a blank slate that would overwrite it.
+      const drafts: Record<string, Draft> = {};
+      for (const row of [...s.standing, ...s.occasional]) {
+        drafts[row.destination_id] = row.existing
+          ? {
+              status: row.existing.status,
+              litres: row.existing.litres === null ? '' : String(row.existing.litres),
+              reason: row.existing.reason ?? '',
+            }
+          : { ...EMPTY };
+      }
+      this.drafts.set(drafts);
+      this.sheet.set(s);
+      this.loadError.set(null);
+      this.writer.accept({ drafts: this.drafts(), handedBy: observerAtLoad });
+    } catch (e) {
+      if (generation !== this.loadGeneration) return;
+      this.loadError.set(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  protected async setOn(v: string): Promise<void> {
+    if (v.length > 0) await this.url.set({ on: v });
+    const input = document.querySelector<HTMLInputElement>('input[data-role="on"]');
+    if (input) input.value = this.on();
+  }
+
+  protected setSession(s: MilkingSession): void {
+    this.url.set({ session: s });
+  }
+
+  protected draft(id: string): Draft {
+    return this.drafts()[id] ?? EMPTY;
+  }
+
+  private patch(id: string, d: Partial<Draft>): void {
+    if (this.state.locked()) return;
+    this.drafts.update((all) => ({ ...all, [id]: { ...(all[id] ?? EMPTY), ...d } }));
+  }
+
+  /**
+   * Typing a number IS the answer.
+   *
+   * Clearing the field returns the row to untouched rather than to a zero: an
+   * empty box means nothing was said, and a zero would be a claim that they came
+   * and took nothing -- which is what "nothing taken" is for.
+   */
+  protected typeLitres(id: string, v: string): void {
+    const trimmed = v.trim();
+    this.patch(id, { litres: v, status: trimmed.length === 0 ? null : 'taken', reason: '' });
+  }
+
+  protected markNone(id: string): void {
+    const current = this.draft(id).status;
+    this.patch(id, current === 'none' ? { ...EMPTY } : { status: 'none', litres: '', reason: '' });
+  }
+
+  protected setReason(id: string, v: string): void {
+    this.patch(id, { reason: v });
+  }
+
+  /** An occasional destination becomes a row only when someone says it did. */
+  protected addOccasional(id: string): void {
+    this.patch(id, { status: 'taken', litres: '', reason: '' });
+  }
+
+  protected removeOccasional(id: string): void {
+    this.patch(id, { ...EMPTY });
+  }
+
+  /** Enter commits and advances. Same motion as the milking roster. */
+  protected showUnanswered(): void {
+    const id = this.untouchedStanding()[0]?.destination_id;
+    const index = this.sheet()?.standing.findIndex((r) => r.destination_id === id) ?? -1;
+    if (index < 0) return;
+    this.tablePage.set(Math.floor(index / this.tableSize()) + 1);
+    setTimeout(() => this.cells()[index % this.tableSize()]?.nativeElement.focus(), 0);
+  }
+
+  protected onKey(e: KeyboardEvent, index: number): void {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const next = index + 1;
+    if (next >= (this.sheet()?.standing.length ?? 0)) return;
+    this.tablePage.set(Math.floor(next / this.tableSize()) + 1);
+    setTimeout(() => {
+      const el = this.cells()[next % this.tableSize()]?.nativeElement;
+      el?.focus();
+      if (el && !el.disabled) el.select();
+    }, 0);
+  }
+
+  protected previousText(row: SheetRow): string {
+    const p = row.previous;
+    if (!p) return NO_RECORD;
+    return p.status === 'taken' ? `${p.litres}` : 'nothing';
+  }
+
+  /**
+   * The same three branches as a certainty state.
+   *
+   * `'none'` is DELIBERATELY ABSENT, which is the whole distinction: a
+   * destination that was offered milk and took none gave an answer, and one
+   * that was never on the sheet that session did not. Both used to render as
+   * `tone="secondary"` -- and one of them as a dash and the other as the word
+   * `nothing`, so the copy already knew the difference the type did not show.
+   */
+  protected previousState(row: SheetRow): CertaintyState {
+    const p = row.previous;
+    if (!p) return 'no-record';
+    return p.status === 'taken' ? 'known' : 'absent';
+  }
+
+  /**
+   * The rate AS AGREED, never converted to per-litre.
+   *
+   * On the sheet so a wrong-destination entry is visible before it is saved,
+   * and in the unit the operator thinks in, so the amount beside it is
+   * checkable rather than trusted.
+   */
+  protected rateText(row: SheetRow): string {
+    if (!row.billable) return 'not billed';
+    if (row.price === null) return 'no price agreed';
+    return formatRate(row.price.price_minor, row.price.price_unit_litres);
+  }
+
+  /**
+   * The rate cell's certainty -- and `known` IS DELIBERATELY NOT ONE OF THE
+   * ANSWERS.
+   *
+   * §6's `known` treatment carries `font-mono tabular-nums`, and the comment on
+   * the rate cell in the template is the record of what that costs here: given
+   * the monospace face this composite label grew the sheet 48px, because table
+   * layout took the width back off the litres cell. §11 lists it as the single
+   * most expensive surprise of phase 4.
+   *
+   * The rate is a LABEL, identical in every row, not a value whose certainty a
+   * reader is weighing -- so it takes a state only when it is saying that
+   * something is missing, and otherwise stays exactly as it renders today.
+   */
+  protected rateState(row: SheetRow): CertaintyState | null {
+    if (!row.billable) return 'absent';
+    if (row.price === null) return 'no-record';
+    return null;
+  }
+
+  private rowAmountMinor(row: SheetRow): number {
+    const d = this.draft(row.destination_id);
+    if (d.status !== 'taken' || !row.billable || row.price === null) return 0;
+    const litres = Number(d.litres);
+    if (!Number.isFinite(litres)) return 0;
+    return amountMinor(litres, row.price.price_minor, row.price.price_unit_litres);
+  }
+
+  /**
+   * ---------------------------------------------------------------------------
+   * TWO OF THE THREE DASHES HERE WERE HIDING A REASON, AND ONE WAS NOT.
+   * ---------------------------------------------------------------------------
+   * All three branches returned `—`, and §15 rule 1 is that "an absence is
+   * named, not blanked ... The one dash permitted is §6's no-record state, which
+   * is the absence of an answer rather than an answer."
+   *
+   *   nothing taken yet    the row is unanswered and already says so, in amber,
+   *                        at row scale. The dash is right: there is nothing to
+   *                        name that is not already on screen. NO-RECORD.
+   *   not billable         a REASON, and one the rate column beside it already
+   *                        prints in words. So the amount says it too rather
+   *                        than going blank. DELIBERATELY ABSENT.
+   *   no agreed price      nobody ever recorded a price. NO-RECORD, but in
+   *                        words, because "no price" tells a reader what to go
+   *                        and fix and a dash does not.
+   *
+   * The rule that falls out, and it is the one §6 wants: THE DASH IS FOR WHEN
+   * THERE IS NOTHING TO SAY THAT IS NOT ALREADY SAID. Where the absence has a
+   * reason worth naming, name it -- and the treatment follows the fact, not the
+   * glyph.
+   */
+  protected amountText(row: SheetRow): string {
+    const d = this.draft(row.destination_id);
+    if (d.status !== 'taken') return NO_RECORD;
+    if (!row.billable) return 'not billed';
+    if (row.price === null) return 'no price';
+    return formatMinor(this.rowAmountMinor(row));
+  }
+
+  protected amountState(row: SheetRow): CertaintyState {
+    const d = this.draft(row.destination_id);
+    if (d.status !== 'taken') return 'no-record';
+    if (!row.billable) return 'absent';
+    if (row.price === null) return 'no-record';
+    return 'known';
+  }
+
+  protected noneClass(id: string): string {
+    const base = 'rounded-lg border px-2 py-1 text-xs ';
+    return this.draft(id).status === 'none'
+      ? base + 'border-line-selected bg-brand text-content-onFill'
+      : base + 'border-line bg-surface-raised text-content-secondary hover:border-line-strong';
+  }
+
+  private allRows(): SheetRow[] {
+    const s = this.sheet();
+    return s ? [...s.standing, ...s.occasional] : [];
+  }
+
+  protected readonly answered = computed(() => {
+    const s = this.sheet();
+    if (!s) return 0;
+    const d = this.drafts();
+    return s.standing.filter((r) => (d[r.destination_id] ?? EMPTY).status !== null).length;
+  });
+
+  protected readonly totalLitres = computed(() => {
+    const d = this.drafts();
+    let sum = 0;
+    for (const r of this.allRows()) {
+      const draft = d[r.destination_id] ?? EMPTY;
+      if (draft.status !== 'taken') continue;
+      const v = Number(draft.litres);
+      if (Number.isFinite(v)) sum += v;
+    }
+    return Math.round(sum * 10) / 10;
+  });
+
+  protected readonly totalAmount = computed(() => {
+    // Recomputed from the drafts rather than shown from the last save, so the
+    // number moves as the operator types. The SERVER's figure is authoritative
+    // -- see money.ts on why this duplicate exists and what pins it.
+    void this.drafts();
+    return formatMinor(this.allRows().reduce((s, r) => s + this.rowAmountMinor(r), 0));
+  });
+
+  /**
+   * A note about production, deliberately NOT an alert.
+   *
+   * More milk going out than was recorded as produced is what
+   * `milked_not_measured` MEANS -- the milk existed, nobody weighed it. Styling
+   * that as a warning would fire every day for months and be trained away,
+   * taking the real signal with it. So this says what is missing, and only when
+   * something is.
+   */
+  protected readonly producedNote = computed(() => {
+    const s = this.sheet();
+    if (!s) return null;
+    const p = s.produced;
+    const missing = Math.max(0, p.expected - p.recorded);
+    if (p.not_measured === 0 && missing === 0) return null;
+    const parts: string[] = [];
+    if (p.not_measured > 0) parts.push(`${p.not_measured} milked but not weighed`);
+    if (missing > 0) parts.push(`${missing} in milk with no row yet`);
+    return (
+      `Production this session is a lower bound — ${parts.join(', ')}. Milk going out can ` +
+      `exceed it, and that is the missing measurement rather than missing milk.`
+    );
+  });
+
+  protected readonly untouchedStanding = computed(() => {
+    const s = this.sheet();
+    if (!s) return [];
+    const d = this.drafts();
+    return s.standing.filter((r) => (d[r.destination_id] ?? EMPTY).status === null);
+  });
+
+  protected readonly blockedReason = computed(() => {
+    const s = this.sheet();
+    if (s === null) return 'Loading the sheet.';
+    if (s.standing.length === 0 && s.occasional.length === 0) {
+      return 'Nobody was taking milk on this date.';
+    }
+    const left = this.untouchedStanding();
+    if (left.length === 0) return null;
+    // NAMED, not counted. "2 left" makes the operator hunt, and the hunt is
+    // where one gets skipped.
+    const names = left
+      .slice(0, 3)
+      .map((x) => x.name)
+      .join(', ');
+    return left.length <= 3
+      ? `Still to answer: ${names}.`
+      : `Still to answer: ${names} and ${left.length - 3} more.`;
+  });
+
+  protected readonly canSubmit = computed(
+    () => !this.state.submitting() && this.blockedReason() === null,
+  );
+
+  protected async onSubmit(e: Event): Promise<void> {
+    e.preventDefault();
+    if (!this.canSubmit()) return;
+
+    const s = this.sheet();
+    if (!s) return;
+    const d = this.drafts();
+    const allRows = this.allRows();
+    const invalid = allRows.findIndex((row) => {
+      const draft = d[row.destination_id] ?? EMPTY;
+      return (
+        draft.status === 'taken' &&
+        (!draft.litres.trim() || !Number.isFinite(Number(draft.litres)) || Number(draft.litres) < 0)
+      );
+    });
+    if (invalid >= 0) {
+      if (invalid < s.standing.length)
+        this.tablePage.set(Math.floor(invalid / this.tableSize()) + 1);
+      else
+        this.occasionalPage.set(Math.floor((invalid - s.standing.length) / this.tableSize()) + 1);
+      this.pageError.set('Enter valid non-negative litres for ' + allRows[invalid].name);
+      setTimeout(
+        () =>
+          Array.from(
+            this.element.nativeElement.querySelectorAll<HTMLInputElement>('input[data-role]'),
+          )
+            .find(
+              (el) => el.getAttribute('data-role') === 'litres-' + allRows[invalid].destination_id,
+            )
+            ?.focus(),
+        0,
+      );
+      return;
+    }
+    this.pageError.set('');
+
+    // Only rows with an answer are sent. An untouched OCCASIONAL row is not an
+    // omission -- it is the normal state of a neighbour who did not come.
+    const entries = this.allRows()
+      .map((r) => ({ row: r, draft: d[r.destination_id] ?? EMPTY }))
+      .filter((x) => x.draft.status !== null)
+      .map((x) =>
+        x.draft.status === 'taken'
+          ? {
+              destination_id: x.row.destination_id,
+              status: 'taken' as const,
+              litres: Number(x.draft.litres),
+            }
+          : {
+              destination_id: x.row.destination_id,
+              status: 'none' as const,
+              reason: x.draft.reason.trim().length > 0 ? x.draft.reason.trim() : null,
+            },
+      );
+
+    const result = await this.state.runRequest(
+      () =>
+        [
+          {
+            occurred_on: s.occurred_on,
+            session: s.session,
+            observed_by: this.handedBy().trim().length > 0 ? this.handedBy().trim() : null,
+            entries,
+            ...this.session_.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.saveDispatchSession(request[0], key),
+    );
+
+    if (result) {
+      this.writeLog.announce(
+        `${s.occurred_on} ${s.session}: ${result.written} row(s), ${result.litres} L out, ` +
+          `${formatMinor(result.amount_minor)} billed` +
+          (result.updated > 0 ? ` (${result.updated} corrected)` : ''),
+      );
+      void this.identifiers.refresh();
+      this.writer.accept();
+      await this.load(this.on(), this.session());
+    }
+  }
+}

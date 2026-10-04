@@ -4,16 +4,16 @@ import { provideRouter, Router } from '@angular/router';
 import { RegistryApi } from './api';
 import { Session } from './session';
 import { DraftRegistry, draftActivate } from './draft-registry';
-import { AnimalForm } from './animal-form';
-import { CalvingForm } from './calving-form';
-import { EventForm } from './event-form';
-import { CorrectionForm } from './correction-form';
-import { DispatchSheetScreen } from './dispatch-sheet';
-import { PayrollRunScreen } from './payroll-run';
-import { PeopleList } from './people-list';
-import { PersonDetail } from './person-detail';
-import { DestinationsList } from './destinations-list';
-import { DestinationDetail } from './destination-detail';
+import { AnimalForm } from "./animal-form/animal-form";
+import { CalvingForm } from "./calving-form/calving-form";
+import { EventForm } from "./event-form/event-form";
+import { CorrectionForm } from "./correction-form/correction-form";
+import { DispatchSheetScreen } from "./dispatch-sheet/dispatch-sheet";
+import { PayrollRunScreen } from "./payroll-run/payroll-run";
+import { PeopleList } from "./people-list/people-list";
+import { PersonDetail } from "./person-detail/person-detail";
+import { DestinationsList } from "./destinations-list/destinations-list";
+import { DestinationDetail } from "./destination-detail/destination-detail";
 
 @Component({ template: 'Destination' })
 class Destination {}

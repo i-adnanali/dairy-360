@@ -1,0 +1,21 @@
+
+      :host {
+        display: block;
+      }
+      label {
+        display: block;
+      }
+      select,
+      textarea {
+        width: 100%;
+
+        background: transparent;
+      }
+      textarea {
+        min-height: 5rem;
+      }
+      .rows {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+      }

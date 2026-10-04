@@ -73,7 +73,7 @@ competes with breeding events for a slot, and it does not.
 every one of them free text.
 
 That was a deliberate choice and it is still the right one for those columns.
-[identifier-input.ts:6-15](../../web-angular/src/app/registry/identifier-input.ts#L6-L15) argues it:
+[identifier-input.ts:6-15](../../web-angular/src/app/registry/identifier-input/identifier-input.ts#L6-L15) argues it:
 
 > Free text typed across a hundred records produces `abdul`, `Abdul` and `abdul_r` — three
 > identifiers for one person. […] A `<datalist>` is the right shape because it is a SUGGESTION and
@@ -947,7 +947,7 @@ and the pay consequence stays a decision somebody made — which is the same sep
 
 ### 12.1 `/labour/payroll` — the run
 
-The sibling of [dispatch-sheet.ts](../../web-angular/src/app/registry/dispatch-sheet.ts), and it should
+The sibling of [dispatch-sheet.ts](../../web-angular/src/app/registry/dispatch-sheet/dispatch-sheet.ts), and it should
 feel like it, with one difference: the period is a month rather than a session, so this is opened
 monthly rather than twice a day.
 
@@ -987,7 +987,7 @@ impossible.
 ### 12.2 `/labour/people` and `/labour/people/:id`
 
 `/labour/people` is the list with each person's current engagement, the term in force, and their balance —
-the sibling of [destinations-list.ts](../../web-angular/src/app/registry/destinations-list.ts). People
+the sibling of [destinations-list.ts](../../web-angular/src/app/registry/destinations-list/destinations-list.ts). People
 with no open engagement are shown, dimmed, because they are still the referent for historical rows
 and may well come back.
 

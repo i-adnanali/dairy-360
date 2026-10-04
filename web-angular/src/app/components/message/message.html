@@ -1,0 +1,49 @@
+
+    @if (item().role === 'user') {
+      <div class="flex justify-end">
+        <div
+          class="max-w-[80%] rounded-2xl rounded-br-sm border border-line-subtle
+            bg-surface-sunken px-3 py-2 text-sm text-content-secondary"
+          data-role="user-turn"
+        >
+          {{ item().text }}
+        </div>
+      </div>
+    } @else if (assistant(); as a) {
+      <div class="flex flex-col items-start gap-2">
+        @if (a.agent) {
+          <span
+            class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium lowercase"
+            [class]="agentClass()"
+            title="Which agent the dispatcher routed this turn to"
+          >
+            <span class="opacity-60">⟨</span>{{ a.agent }}<span class="opacity-60">⟩</span>
+          </span>
+        }
+
+        @if (a.text) {
+          <div class="prose-chat text-sm text-content-primary" data-role="answer">
+            <app-markdown-view [text]="a.text" />
+          </div>
+        }
+
+        @if (a.datasets.length > 0) {
+          <div class="w-full space-y-3">
+            @for (ds of a.datasets; track ds.datasetId) {
+              <app-chart-card [dataset]="ds" />
+            }
+          </div>
+        }
+
+        <!-- LAST, and that is the whole change. A footnote about how the answer
+             was produced belongs under the answer, not between it and a chart
+             it is not about. -->
+        @if (a.toolCalls.length > 0) {
+          <div class="flex flex-wrap gap-1.5" data-role="tool-calls">
+            @for (tc of a.toolCalls; track tc.toolUseId) {
+              <app-tool-call-chip [call]="tc" [agent]="a.agent ?? null" />
+            }
+          </div>
+        }
+      </div>
+    }

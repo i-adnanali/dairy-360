@@ -1,0 +1,60 @@
+
+    <div class="rounded-xl border-2 border-line bg-surface-sunken p-4 shadow-sm">
+      <div class="mb-1 flex items-center gap-2">
+        <span appBadge tone="brand">{{ statusLabel() }}</span>
+      </div>
+
+      <p class="mb-3 text-sm font-medium text-content-primary">{{ card().summary }}</p>
+
+      <details [open]="!decision() && !resolved()" class="mb-3">
+      <summary class="text-sm cursor-pointer">{{ decision() || resolved() ? 'Action details' : 'Review proposed changes' }}</summary>
+      <dl class="mb-3 grid grid-cols-[minmax(0,1fr),minmax(0,2fr)] gap-x-4 gap-y-1 text-sm">
+        @for (d of card().details; track d.label) {
+          <div class="contents">
+            <dt class="text-content-subtle">{{ d.label }}</dt>
+            <dd class="text-content-primary">{{ d.value }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (card().rows && card().rows!.length > 0) {
+        <div appScrollRegion="Proposed operation rows">
+          <table class="mb-3 w-full text-sm">
+            <thead>
+              <tr class="border-b border-line-subtle text-left text-content-subtle">
+                <th scope="col" appCell emphasis>Animal</th>
+                <th scope="col" appCell numeric emphasis>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of card().rows; track $index) {
+                <tr class="border-b border-line-subtle/60 last:border-0">
+                  <td appCell>{{ r.tag }}{{ r.name ? ' · ' + r.name : '' }}</td>
+                  <td appCell numeric>{{ r.value }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <details><summary class="text-xs text-content-muted">Technical operation</summary><code class="text-xs break-all">{{ card().toolName }}</code></details>
+      </details>
+      @if (decision() || resolved()) {
+        <p
+          role="status"
+          tabindex="-1"
+          data-role="decision-status"
+          [attr.data-tool-use-id]="card().toolUseId"
+          class="text-sm"
+        >
+          {{ statusLabel() }} ·
+          {{ reason() || outcomeDescription() }}
+        </p>
+      } @else {
+        <div class="flex gap-2">
+          <button appButton size="sm" (click)="approve()">Approve proposed action</button>
+          <button appButton variant="secondary" size="sm" (click)="reject()">Reject</button>
+        </div>
+      }
+    </div>

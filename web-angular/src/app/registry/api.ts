@@ -77,6 +77,17 @@ export interface ProvenanceFields {
 type SourceFormValue = import('./types').SourceForm;
 type MilkingSessionValue = import('./types').MilkingSession;
 
+export interface PaymentRequest {
+  occurred_on: string;
+  amount_minor: number;
+  method: import('./types').PaymentMethod;
+  reference: string | null;
+  note: string | null;
+  recorded_by: string;
+}
+export interface BuyerPaymentRequest extends PaymentRequest { destination_id: string; }
+export interface WagePaymentRequest extends PaymentRequest { person_id: string; observed_by: string | null; }
+
 @Injectable({ providedIn: 'root' })
 export class RegistryApi {
   private readonly http = inject(HttpClient);
@@ -275,7 +286,10 @@ export class RegistryApi {
     dam: AnimalDetail; calf: AnimalDetail;
   }> {
     return unwrap(firstValueFrom(
-      this.http.post<never>(`${BASE}/calvings`, body, RegistryApi.keyed(idempotencyKey)),
+      this.http.post<{
+    calf_id: string; linked: boolean; superseded_origin_event_id: string | null;
+    dam: AnimalDetail; calf: AnimalDetail;
+  }>(`${BASE}/calvings`, body, RegistryApi.keyed(idempotencyKey)),
     ));
   }
 
@@ -291,7 +305,11 @@ export class RegistryApi {
     written: number; measured: number; milked_not_measured: number; not_milked: number;
     updated: number;
   }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{
+    occurred_on: string; session: MilkingSessionValue;
+    written: number; measured: number; milked_not_measured: number; not_milked: number;
+    updated: number;
+  }>(
       `${BASE}/milking/session`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -301,7 +319,11 @@ export class RegistryApi {
     departure_event_id: string | null;
     superseded: { calving_event_id: string; birth_event_id: string; departure_event_id: string | null };
   }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{
+    dam_id: string; calf_id: string; calving_event_id: string; birth_event_id: string;
+    departure_event_id: string | null;
+    superseded: { calving_event_id: string; birth_event_id: string; departure_event_id: string | null };
+  }>(
       `${BASE}/calvings/${eventId}/correction`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -338,7 +360,7 @@ export class RegistryApi {
   }
 
   addDestination(body: Record<string, unknown>, idempotencyKey: string): Promise<DestinationListRow> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<DestinationListRow>(
       `${BASE}/destinations`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -348,7 +370,7 @@ export class RegistryApi {
     body: Record<string, unknown>,
     idempotencyKey: string,
   ): Promise<DestinationListRow> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<DestinationListRow>(
       `${BASE}/destinations/${id}`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -371,7 +393,7 @@ export class RegistryApi {
     },
     idempotencyKey: string,
   ): Promise<DestinationPrice> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<DestinationPrice>(
       `${BASE}/destinations/${id}/prices`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -381,7 +403,11 @@ export class RegistryApi {
     written: number; taken: number; none: number; updated: number;
     litres: number; amount_minor: number;
   }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{
+    occurred_on: string; session: MilkingSessionValue;
+    written: number; taken: number; none: number; updated: number;
+    litres: number; amount_minor: number;
+  }>(
       `${BASE}/dispatch/session`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -390,21 +416,23 @@ export class RegistryApi {
     body: Record<string, unknown>,
     idempotencyKey: string,
   ): Promise<{ removed: number }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{ removed: number }>(
       `${BASE}/dispatch/session/delete`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
 
-  recordPayment(body: Record<string, unknown>, idempotencyKey: string): Promise<{
+  recordPayment(body: BuyerPaymentRequest, idempotencyKey: string): Promise<{
     id: string; amount_minor: number; method: string;
   }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{
+    id: string; amount_minor: number; method: string;
+  }>(
       `${BASE}/payments`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
 
   deletePayment(id: string, idempotencyKey: string): Promise<{ removed: number }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{ removed: number }>(
       `${BASE}/payments/${id}/delete`, {}, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -443,7 +471,7 @@ export class RegistryApi {
   }
 
   addPerson(body: Record<string, unknown>, idempotencyKey: string): Promise<Person> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<Person>(
       `${BASE}/people`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -461,7 +489,7 @@ export class RegistryApi {
     body: { name?: string | null; contact?: string | null; note?: string | null },
     idempotencyKey: string,
   ): Promise<Person> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<Person>(
       `${BASE}/people/${id}`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -471,7 +499,7 @@ export class RegistryApi {
     body: Record<string, unknown>,
     idempotencyKey: string,
   ): Promise<Engagement> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<Engagement>(
       `${BASE}/people/${personId}/engagements`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -481,7 +509,7 @@ export class RegistryApi {
     body: Record<string, unknown>,
     idempotencyKey: string,
   ): Promise<Engagement> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<Engagement>(
       `${BASE}/engagements/${id}`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -513,7 +541,7 @@ export class RegistryApi {
     },
     idempotencyKey: string,
   ): Promise<PayTermWithBenefits> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<PayTermWithBenefits>(
       `${BASE}/engagements/${engagementId}/terms`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
@@ -521,27 +549,31 @@ export class RegistryApi {
   saveRun(body: Record<string, unknown>, idempotencyKey: string): Promise<{
     from_on: string; to_on: string; written: number; updated: number; total_minor: number;
   }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{
+    from_on: string; to_on: string; written: number; updated: number; total_minor: number;
+  }>(
       `${BASE}/payroll/run`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
 
   deleteWagePeriods(ids: string[], idempotencyKey: string): Promise<{ removed: number }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{ removed: number }>(
       `${BASE}/payroll/run/delete`, { ids }, RegistryApi.keyed(idempotencyKey),
     )));
   }
 
-  recordWagePayment(body: Record<string, unknown>, idempotencyKey: string): Promise<{
+  recordWagePayment(body: WagePaymentRequest, idempotencyKey: string): Promise<{
     id: string; amount_minor: number; method: string;
   }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{
+    id: string; amount_minor: number; method: string;
+  }>(
       `${BASE}/wage-payments`, body, RegistryApi.keyed(idempotencyKey),
     )));
   }
 
   deleteWagePayment(id: string, idempotencyKey: string): Promise<{ removed: number }> {
-    return unwrap(firstValueFrom(this.http.post<never>(
+    return unwrap(firstValueFrom(this.http.post<{ removed: number }>(
       `${BASE}/wage-payments/${id}/delete`, {}, RegistryApi.keyed(idempotencyKey),
     )));
   }

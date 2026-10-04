@@ -1,0 +1,161 @@
+
+    <!-- A real <form [appWriteLock]="state">, which is what makes Enter submit from any text field.
+         Before this there was no form element anywhere in the registry and
+         every button was type="button", so Enter did nothing on any screen. -->
+    <form data-page-layout="entry" [appWriteLock]="state" class="mx-auto max-w-2xl" (submit)="onSubmit($event)">
+      <header class="mb-4">
+        <h2 appPageHeading>Add an acquired animal</h2>
+        <p appHelp class="mt-1">
+          Only animals that arrived from elsewhere. A farm-born animal is created by its dam's
+          calving — record the calving instead, and it appears as a consequence.
+        </p>
+      </header>
+
+      <div class="space-y-4">
+        <div appCard>
+          <div appSectionLabel legend>Sex</div>
+          <app-chip-group
+            name="sex"
+            label="Sex"
+            [options]="sexChips"
+            [value]="sex()"
+            (changed)="sex.set($any($event))"
+          />
+          @if (state.fieldError('sex'); as e) {
+            <p appErrorText class="mt-2" data-role="error-sex">{{ e }}</p>
+          }
+
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <label class="block">
+              <span appFieldLabel>Name (optional)</span>
+              <input
+                #firstField
+                data-role="name"
+                [value]="name()"
+                (input)="name.set($any($event.target).value)"
+                appInput
+                class="w-full"
+              />
+            </label>
+            <app-identifier-input
+              field="acquired_from"
+              label="Acquired from"
+              [value]="from()"
+              [suggestions]="identifiers.values().acquired_from"
+              (changed)="from.set($event)"
+            />
+            <label class="block">
+              <span appFieldLabel>Post no. (optional)</span>
+              <input
+                data-role="post_no"
+                [value]="postNo()"
+                (input)="postNo.set($any($event.target).value)"
+                appInput
+                class="w-full"
+              />
+            </label>
+            <label class="block">
+              <span appFieldLabel>Ear tag (optional)</span>
+              <input
+                data-role="tag_no"
+                [value]="tagNo()"
+                (input)="tagNo.set($any($event.target).value)"
+                appInput
+                class="w-full"
+              />
+            </label>
+          </div>
+          <p class="mt-2 text-xs text-content-subtle">
+            Post number and ear tag are attributes, not identity — both change over an animal's
+            life.
+          </p>
+        </div>
+
+        <!-- Placed directly under the identity fields it watches, not near the
+             submit button: the useful moment is while the name is still being
+             typed, not after the decision to save has been made. -->
+        <app-duplicate-warning
+          [name]="name()"
+          [postNo]="postNo()"
+          [tagNo]="tagNo()"
+          [sex]="sex()"
+          [refreshToken]="writes()"
+        />
+
+        <app-precision-date
+          label="When did it arrive on the farm?"
+          [error]="state.fieldError('occurred_on') ?? state.fieldError('date_precision')"
+          (changed)="acquired.set($event)"
+        />
+
+        <!-- explain=false: the no-default rationale is one sentence and it is
+             identical on both controls, so printing it twice on one page trains
+             the reader to skip it. Said once, above. -->
+        <app-precision-date
+          label="Birth date — optional, but not its precision"
+          [explain]="false"
+          [error]="state.fieldError('birth_on') ?? state.fieldError('birth_precision')"
+          (changed)="birth.set($event)"
+        />
+        <p class="-mt-2 px-1 text-xs text-content-muted">
+          Leave the birth date blank if you do not know it. Without one the animal shows as heifer
+          or male even if it is visibly a calf — the age rule has no date to test. An estimated year
+          is the fix: type the year and tick the guess box.
+        </p>
+
+        <app-identifier-input
+          field="observed_by"
+          label="Observed by"
+          [value]="observedBy()"
+          [suggestions]="identifiers.values().observed_by"
+          (changed)="observedBy.set($event)"
+        />
+
+        @if (state.formError(fields); as e) {
+          <p appErrorPanel data-role="error-form">{{ e }}</p>
+        }
+
+        <div class="flex items-center gap-3">
+          <button
+            type="submit"
+            data-role="submit"
+            [appButtonDisabled]="!canSubmit()"
+            appButton
+            reason="animal-submit-reason"
+            [busy]="state.submitting()"
+          >
+            Add animal
+          </button>
+          @if (blockedReason(); as r) {
+            <span appHelp data-role="blocked" id="animal-submit-reason">{{ r }}</span>
+          }
+        </div>
+
+        @if (state.result(); as r) {
+          <div class="rounded-xl border border-success-line bg-success-bg p-4" data-role="result">
+            <p class="text-sm font-medium text-success-strong">
+              Added {{ r.animal_id }}{{ r.animal.animal.name ? ' — ' + r.animal.animal.name : '' }}
+            </p>
+            <p class="mt-1 text-sm text-success-fg">
+              Status <span class="font-mono">{{ r.animal.status?.status }}</span
+              >, birth
+              <span class="font-mono">{{
+                r.animal.status?.birth_on
+                  ? r.animal.status.birth_on + ' (' + r.animal.status.birth_precision + ')'
+                  : 'unknown'
+              }}</span>
+            </p>
+            <button
+              type="button"
+              (click)="open(r.animal_id)"
+              class="mt-2 text-sm font-medium text-success-strong underline"
+            >
+              Open its record
+            </button>
+          </div>
+        }
+      </div>
+      <p class="mt-2 text-xs text-content-muted">
+        Cmd/Ctrl+Enter saves from a field when the record is ready.
+      </p>
+    </form>

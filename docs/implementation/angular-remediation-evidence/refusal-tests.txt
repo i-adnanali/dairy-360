@@ -1,0 +1,16 @@
+
+> web-angular@0.0.0 test
+> ng test --watch=false --include=**/sales.spec.ts --include=**/payroll.spec.ts --include=**/payment-identity.spec.ts --include=**/write-lock.spec.ts
+
+❯ Building...
+✔ Building...
+Application bundle generation complete. [4.043 seconds] - 2026-10-03T06:05:02.021Z
+
+
+ RUN  v4.1.9 /Users/adnanali/personal/dairy-360/web-angular
+
+
+ Test Files  4 passed (4)
+      Tests  83 passed (83)
+   Start at  11:05:02
+   Duration  1.14s (transform 502ms, setup 654ms, import 722ms, tests 816ms, environment 1.23s)

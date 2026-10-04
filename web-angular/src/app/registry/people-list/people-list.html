@@ -1,0 +1,313 @@
+
+    <div data-page-layout="review">
+    @if (paging.loading()) {
+      <p role="status" class="text-sm text-content-muted">Loading records…</p>
+    }
+
+    <div class="mx-auto  space-y-6">
+      <header>
+        <div class="page-header"><h2 appPageHeading>People</h2><a appButton href="#add-person" (click)="focusAdd($event)">Add person</a>@if (rows()?.length) { <a appButton variant="secondary" href="#open-stint" (click)="focusStint($event)">Open stint</a> }</div>
+        <p appHelp class="mt-1">
+          People, employment stints and balances. Add a person first, then open a stint if they work here.
+        </p>
+      </header>
+    <label class="mb-3 block text-sm text-content-secondary"
+      >Search records
+      <input
+        appInput type="search"
+        maxlength="100"
+        class="rounded border border-line bg-surface-page p-2"
+        [value]="paging.url.value().search"
+        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
+    /></label>
+
+
+      @if (paging.error(); as e) {
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
+      }
+
+      @if (!paging.loading() && !paging.error() && paging.result()?.items; as list) {
+        @if (list.length === 0 && paging.url.value().search) {
+          <p appCard empty>No matches for this search.</p>
+        } @else if (list.length === 0) {
+          <p appCard empty data-role="empty">
+            @if (paging.url.value().search) { No matching people. <button appButton variant="link" (click)="paging.url.set({search: '', page: '1'})">Clear search</button> } @else {
+            Nobody on file yet. Add the people who work here — then open a stint for each, and
+            record what they are on. }
+          </p>
+        } @else {
+          <div appScrollRegion="People and balances"><table
+            class="w-full overflow-hidden rounded-xl border border-line-subtle bg-surface-raised text-sm"
+            data-role="people-table"
+          >
+            <thead
+              class="bg-surface-sunken text-left text-xs uppercase tracking-wide text-content-muted"
+            >
+              <tr>
+                <th appCell>Person</th>
+                <th appCell numeric>Owed</th>
+                <th appCell>Last paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of paging.result()?.items ?? []; track p.person_id) {
+                <tr
+                  appRowDivider
+                  [appRowLink]="'/labour/people/' + p.person_id"
+                  [class.opacity-60]="!p.engaged"
+                  [attr.data-engaged]="p.engaged"
+                >
+                  <td appCell small class="font-mono">
+                    <!-- WAS "decoration-certainty-rule", AND IT HAD TO MOVE.
+                         §6.2 listed this as "the dotted rule, now named" -- but
+                         it is a SOLID underline on an identifier link, and from
+                         this phase on "--certainty-rule" is the dotted rule that
+                         means "this figure is approximate". Leaving it here
+                         would have said this person's identifier was a guess.
+                         "line-strong" is the value §14.2 specifies for exactly
+                         this treatment: "an identifier is a name, not a link". -->
+                    <a [routerLink]="['/labour/people', p.person_id]" appIdentifier>{{
+                      p.identifier
+                    }}</a>
+                  <span class="block font-sans text-sm">
+                    <span [appCertainty]="p.name ? 'known' : 'no-record'">{{
+                      p.name ?? noRecord
+                    }}</span>
+                  </span>
+                    @if (!p.engaged) {
+                      <span appBadge tone="ended" class="ml-2" data-role="not-engaged"
+                        >no open stint</span
+                      >
+                    }
+                  </td>
+
+                  <!-- THE ZERO BRANCH IS THE ONE THAT MOVED, and it moved
+                       because it was the inverse of §15's rule rather than an
+                       instance of it. "owed()" returned a bare "—" for a
+                       balance of exactly zero -- a dash standing in for a
+                       number that IS known, from a ledger with entries in it
+                       that net to nothing. §15 rule 1 forbids "a zero standing
+                       in for an unknown"; this was an unknown standing in for a
+                       zero, which is the same lie facing the other way.
+
+                       "settled" is the answer, so it is words, and it is §6's
+                       third state: the amount owed is deliberately nil.
+
+                       The other two branches keep their existing treatment and
+                       the cell keeps its amber. A "text-certainty-known" span
+                       inside would have won the cascade against the <td>'s
+                       "text-content-secondary" and silently deleted the in-advance
+                       highlight -- which is a liability marker, not a certainty
+                       state, and not this phase's to remove. -->
+                  <td
+                    appCell
+                    numeric
+                    [class.text-content-secondary]="p.balance_minor < 0"
+                    [attr.data-role]="'balance'"
+                  >
+                    @if (p.balance_minor === 0) {
+                      <span appCertainty="absent" data-certainty="absent">settled</span>
+                    } @else {
+                      {{ owed(p) }}
+                    }
+                  </td>
+                  <td appCell tone="muted" class="whitespace-nowrap">
+                    <span
+                      [appCertainty]="p.last_payment_on ? 'known' : 'no-record'"
+                      [attr.data-certainty]="p.last_payment_on ? 'known' : 'no-record'"
+                      >{{ p.last_payment_on ?? noRecord }}</span
+                    >
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table></div>
+          @if (paging.result(); as pg) {
+            <app-pagination
+              label="People"
+              [page]="pg.page"
+              [pageSize]="pg.pageSize"
+              [total]="pg.totalItems"
+              [disabled]="paging.loading()"
+              (pageChange)="paging.url.set({ page: '' + $event })"
+              (sizeChange)="paging.url.set({ pageSize: '' + $event, page: '1' })"
+            />
+          }
+          @if (paging.error()) {
+            <p role="alert">{{ paging.error() }}</p>
+          }
+        }
+      }
+
+      <!-- Add a person. The identifier is asked for HERE and nowhere else. -->
+      <form data-page-layout="entry"
+        [appWriteLock]="personState"
+        class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
+        (submit)="submitPerson($event)"
+        data-role="add-person"
+        id="add-person"
+        tabindex="-1"
+      >
+        <h3 appSectionHeading>Add a person</h3>
+
+        <div class="block space-y-1">
+          <label appSubHeading for="person-identifier">Identifier</label>
+          <input
+            id="person-identifier"
+            [attr.aria-invalid]="personState.fieldError('identifier') ? 'true' : null"
+            [attr.aria-describedby]="personState.fieldError('identifier') ? 'person-identifier-help person-identifier-error' : 'person-identifier-help'"
+            name="identifier"
+            [value]="identifier()"
+            (input)="identifier.set($any($event.target).value)"
+            appInput
+            density="comfortable"
+            class="w-full font-mono"
+            placeholder="imran"
+            autocomplete="off"
+          />
+          <span id="person-identifier-help" class="block text-xs text-content-subtle">
+            Permanent and unique; used on records and in “observed by”. Cannot be changed later.
+          </span>
+          @if (personState.fieldError('identifier'); as msg) {
+            <span id="person-identifier-error" appErrorText size="xs" tone="soft" class="block" data-role="error-identifier">{{
+              msg
+            }}</span>
+          }
+        </div>
+
+        <app-field label="Display name (optional)">
+          <input name="name" [value]="name()" (input)="name.set($any($event.target).value)" appInput density="comfortable" class="w-full" placeholder="Imran" />
+        </app-field>
+        <app-field label="Contact (optional)">
+          <input name="contact" [value]="contact()" (input)="contact.set($any($event.target).value)" appInput density="comfortable" class="w-full" />
+        </app-field>
+
+        @if (personState.formError([]); as msg) {
+          <p appErrorPanel data-role="person-form-error">{{ msg }}</p>
+        }
+
+        @if (session.ready()) {
+          <button
+            type="submit"
+            [appButtonDisabled]="!canAddPerson()"
+            appButton
+            [busy]="personState.submitting()"
+          >
+            Add person
+          </button>
+        } @else {
+          <app-session-required what="a person" />
+        }
+      </form>
+
+      <!-- Open a stint. Separate from adding a person BECAUSE a person is not an
+           employment: somebody may be on file and not employed, and somebody
+           returning gets a second stint rather than an edited first one. -->
+      @if (loadError(); as error) {
+        <p role="alert">People for the engagement selector could not be loaded: {{ error }}</p>
+      }
+      @if (rows(); as list) {
+        @if (list.length > 0) {
+          <form data-page-layout="entry"
+            [appWriteLock]="engageState"
+            class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
+            (submit)="submitEngagement($event)"
+            data-role="add-engagement" id="open-stint"
+          >
+            <h3 appSectionHeading>Open a stint</h3>
+            <p appHelp size="xs" tone="subtle">
+              For rehire, open a new stint to keep earlier pay terms separate. Concurrent stints are allowed for different roles.
+            </p>
+
+            <label class="block text-sm">Find person by identifier or name
+              <input appInput type="search" [value]="personSearch()" (input)="personSearch.set($any($event.target).value)" />
+            </label>
+            <label class="block space-y-1">
+              <span appSubHeading>Person</span>
+              <select
+                name="person_id"
+                [value]="engagePerson()"
+                (change)="engagePerson.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                class="w-full"
+              >
+                <option value="">Choose…</option>
+                @for (p of matchingPeople(list); track p.person_id) {
+                  <option [value]="p.person_id">{{ p.identifier }}{{ p.name ? " · " + p.name : "" }}</option>
+                }
+              </select>
+            </label>
+
+            <div class="space-y-1">
+              <span appSubHeading>Kind</span>
+              <app-chip-group
+                label="Engagement kind"
+                name="kind"
+                [options]="kindChips"
+                [value]="engageKind()"
+                (changed)="engageKind.set($any($event))"
+              />
+              <span class="block text-xs text-content-subtle">
+                Salaried people are on every monthly run and must be answered. Dihari are not a row
+                until they worked a day.
+              </span>
+            </div>
+
+            <label class="block space-y-1">
+              <span appSubHeading>Role <span class="text-content-subtle">(optional)</span></span>
+              <input
+                name="role"
+                [value]="engageRole()"
+                (input)="engageRole.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                class="w-full"
+                placeholder="milker"
+              />
+            </label>
+
+            <label class="block space-y-1">
+              <span appSubHeading>Started on</span>
+              <input
+                name="started_on"
+                type="date"
+                [value]="engageFrom()"
+                (input)="engageFrom.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+              />
+              @if (engageState.fieldError('started_on'); as msg) {
+                <span
+                  appErrorText
+                  size="xs"
+                  tone="soft"
+                  class="block"
+                  data-role="error-started-on"
+                  >{{ msg }}</span
+                >
+              }
+            </label>
+
+            @if (engageState.formError([]); as msg) {
+              <p appErrorPanel data-role="engage-form-error">{{ msg }}</p>
+            }
+
+            @if (session.ready()) {
+              <button
+                type="submit"
+                [appButtonDisabled]="!canEngage()"
+                appButton
+                [busy]="engageState.submitting()"
+              >
+                Open stint
+              </button>
+            } @else {
+              <app-session-required what="a stint" />
+            }
+          </form>
+        }
+      }
+    </div>
+
+    </div>

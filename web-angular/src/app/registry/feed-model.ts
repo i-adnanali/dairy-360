@@ -124,3 +124,15 @@ export interface FeedOverview {
   crops: FeedRecord[];
   quantities: { item_id: string; unit: string; quantity: number; unmeasured: number }[];
 }
+
+// Wire entities have only their own fields. FeedRecord is the normalized editor
+// state retained by the existing composite views, never an entity response DTO.
+type FeedIdentity = Pick<FeedRecord, 'id' | 'revision' | 'notes' | 'source_form' | 'recorded_by' | 'source_ref' | 'recorded_at'>;
+export type FeedItem = FeedIdentity & Pick<FeedRecord, 'label' | 'category' | 'archived'>;
+export type FeedCrop = FeedIdentity & Pick<FeedRecord, 'item_id' | 'plot' | 'acreage' | 'status' | 'sowing_on' | 'sowing_precision' | 'cutting_start_on' | 'cutting_start_precision' | 'cutting_end_on' | 'cutting_end_precision'>;
+export type FeedExpense = FeedIdentity & Pick<FeedRecord, 'crop_id' | 'on' | 'category' | 'amount_minor'>;
+export type FeedPurchase = FeedIdentity & Pick<FeedRecord, 'item_id' | 'on' | 'supplier' | 'quantity' | 'unit' | 'pricing' | 'basis_quantity' | 'basis_price_minor' | 'basis_unit' | 'goods_minor' | 'transport_minor' | 'other_minor' | 'total_minor'>;
+export type FeedWireRecord = FeedItem | FeedCrop | FeedExpense | FeedPurchase;
+export function normalizeFeed(record: FeedWireRecord): FeedRecord {
+  return { ...blankFeed(), ...structuredClone(record) };
+}

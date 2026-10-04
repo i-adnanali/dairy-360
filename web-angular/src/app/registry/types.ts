@@ -158,7 +158,7 @@ export interface MilkingRow {
 }
 
 export interface RosterRow {
-  health_withdrawals?: import('./withdrawal-notices').WithdrawalNotice[];
+  health_withdrawals?: import("./withdrawal-notices/withdrawal-notices").WithdrawalNotice[];
   animal_id: string;
   name: string | null;
   days_in_milk: number;
@@ -182,7 +182,7 @@ export interface MilkingRoster {
   saved: number;
 }
 
-export interface SessionCompleteness {
+export interface MilkingSessionCompleteness {
   occurred_on: string;
   session: MilkingSession;
   expected: number;
@@ -201,7 +201,7 @@ export interface MilkingReport {
   complete_sessions: number;
   first_on: string | null;
   last_on: string | null;
-  recent: SessionCompleteness[];
+  recent: MilkingSessionCompleteness[];
   caveat: string;
 }
 
@@ -442,7 +442,7 @@ export interface OffSchedule {
   agreed_unit_litres: number;
 }
 
-export interface SessionCompleteness {
+export interface DispatchSessionCompleteness {
   occurred_on: string;
   session: MilkingSession;
   expected_standing: number;
@@ -474,7 +474,7 @@ export interface Reconciliation {
   gap_pct_withheld_because: string | null;
   sessions: number;
   complete_sessions: number;
-  incomplete: SessionCompleteness[];
+  incomplete: DispatchSessionCompleteness[];
   off_schedule: OffSchedule[];
   interpretation: string;
 }

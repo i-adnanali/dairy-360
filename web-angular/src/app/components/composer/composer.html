@@ -1,0 +1,30 @@
+
+    <div class="border-t border-line-subtle bg-surface-page px-6 py-4">
+      <p id="assistant-composer-help" class="mb-2 text-xs text-content-muted">
+        {{
+          disabled()
+            ? 'Assistant busy or awaiting approval; sending is unavailable.'
+            : 'Enter to send · Shift+Enter for a new line'
+        }}
+      </p>
+      <div class="flex items-end gap-2">
+        <textarea
+          #field
+          appInput
+          density="comfortable"
+          aria-label="Message to Dairy 360 assistant"
+          aria-describedby="assistant-composer-help"
+          [value]="value()"
+          (input)="value.set($any($event.target).value)"
+          (keydown)="onKeydown($event)"
+          [readOnly]="disabled()"
+          [attr.aria-disabled]="disabled() ? true : null"
+          rows="1"
+          [placeholder]="placeholder()"
+          class="min-w-0 max-h-40 min-h-[44px] flex-1 resize-none bg-surface-raised text-content-primary read-only:bg-surface-sunken"
+        ></textarea>
+        <button (click)="submit()" [appButtonDisabled]="disabled() || !value().trim()" appButton>
+          Send
+        </button>
+      </div>
+    </div>

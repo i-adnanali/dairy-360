@@ -1,0 +1,7 @@
+<app-pagination [label]="label()" [disabled]="disabled()"
+    [page]="current()"
+    [pageSize]="size()"
+    [total]="total()"
+    (pageChange)="page.set($event)"
+    (sizeChange)="size.set($event); page.set(1)"
+  />

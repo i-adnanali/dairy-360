@@ -91,3 +91,13 @@ describe('Theme', () => {
     expect(fresh().mode()).toBe('system');
   });
 });
+
+it('removes its exact media-query listener on injector destruction', () => {
+  const addEventListener = vi.fn(), removeEventListener = vi.fn();
+  vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener, removeEventListener }));
+  TestBed.inject(Theme);
+  const handler = addEventListener.mock.calls[0][1];
+  TestBed.resetTestingModule();
+  expect(removeEventListener).toHaveBeenCalledWith('change', handler);
+  vi.unstubAllGlobals();
+});

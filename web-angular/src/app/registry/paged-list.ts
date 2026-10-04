@@ -17,16 +17,18 @@ export function pagedList<T>(kind: string, sort = 'identifier') {
     loading = signal(false),
     revision = signal(0);
   let request = 0;
-  effect(() => {
+  effect((onCleanup) => {
     const query = url.value();
     revision();
     const id = ++request;
+    onCleanup(() => ++request);
     loading.set(true);
     error.set(null);
     void api
       .list<T>(kind, query)
       .then((r) => {
         if (id !== request) return;
+        loading.set(false);
         result.set(r);
         if (r.page !== Number(query.page)) url.set({ page: '' + r.page });
       })

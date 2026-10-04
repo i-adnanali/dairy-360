@@ -52,9 +52,9 @@ Three indicators were moved to `INFO` **on the evidence of the code**, not on
 preference:
 
 - `--mark-pending` sits immediately beside the literal word `Thinking…`
-  ([chat-panel.ts:72](web-angular/src/app/components/chat-panel.ts#L72)).
+  ([chat-panel.ts:72](web-angular/src/app/components/chat-panel/chat-panel.ts#L72)).
 - `--success-dot` / `--danger-dot` sit beside `{{ call().status }}`, rendered as
-  words ([tool-call-chip.ts:18](web-angular/src/app/components/tool-call-chip.ts#L18)).
+  words ([tool-call-chip.ts:18](web-angular/src/app/components/tool-call-chip/tool-call-chip.ts#L18)).
 - `--warning-fill` is the harness banner, which says `harness · in memory` on
   itself; §12.2's chip keeps that text.
 
@@ -156,50 +156,50 @@ in `web-angular/src/app/**`, excluding `*.spec.ts`.
 
 | Site | What |
 |---|---|
-| [today-board.ts:72](web-angular/src/app/registry/today-board.ts#L72), :75 | incomplete session counter |
-| [today-board.ts:87](web-angular/src/app/registry/today-board.ts#L87), :90 | incomplete session counter |
-| [today-board.ts:102](web-angular/src/app/registry/today-board.ts#L102), :105 | outstanding item |
-| [verification-panel.ts:108](web-angular/src/app/registry/verification-panel.ts#L108) | a `/check` finding |
-| [verification-panel.ts:233](web-angular/src/app/registry/verification-panel.ts#L233) | `recorded < expected` |
-| [verification-panel.ts:296](web-angular/src/app/registry/verification-panel.ts#L296) | a `/check` note |
-| [session-required.ts:39](web-angular/src/app/registry/session-required.ts#L39), :40 | "you need a session to write" |
+| [today-board.ts:72](web-angular/src/app/registry/today-board/today-board.ts#L72), :75 | incomplete session counter |
+| [today-board.ts:87](web-angular/src/app/registry/today-board/today-board.ts#L87), :90 | incomplete session counter |
+| [today-board.ts:102](web-angular/src/app/registry/today-board/today-board.ts#L102), :105 | outstanding item |
+| [verification-panel.ts:108](web-angular/src/app/registry/verification-panel/verification-panel.ts#L108) | a `/check` finding |
+| [verification-panel.ts:233](web-angular/src/app/registry/verification-panel/verification-panel.ts#L233) | `recorded < expected` |
+| [verification-panel.ts:296](web-angular/src/app/registry/verification-panel/verification-panel.ts#L296) | a `/check` note |
+| [session-required.ts:39](web-angular/src/app/registry/session-required/session-required.ts#L39), :40 | "you need a session to write" |
 
 ### Permitted — meaning 2, "this is not the real registry" (1 site)
 
 | Site | What |
 |---|---|
-| [session-bar.ts:27](web-angular/src/app/registry/session-bar.ts#L27) | the harness banner, `warning-fill` |
+| [session-bar.ts:27](web-angular/src/app/registry/session-bar/session-bar.ts#L27) | the harness banner, `warning-fill` |
 
 ### Meaning 3 — "you are overriding a refusal" (4 sites)
 
 | Site | What |
 |---|---|
-| [event-form.ts:124](web-angular/src/app/registry/event-form.ts#L124), :139 | the override box |
-| [correction-form.ts:102](web-angular/src/app/registry/correction-form.ts#L102), :110 | the override box |
-| [calving-form.ts:178](web-angular/src/app/registry/calving-form.ts#L178), :187 | the override box — **frozen form** |
-| [precision-date.ts:141](web-angular/src/app/registry/precision-date.ts#L141) | the bare-year override — **on both frozen forms** |
+| [event-form.ts:124](web-angular/src/app/registry/event-form/event-form.ts#L124), :139 | the override box |
+| [correction-form.ts:102](web-angular/src/app/registry/correction-form/correction-form.ts#L102), :110 | the override box |
+| [calving-form.ts:178](web-angular/src/app/registry/calving-form/calving-form.ts#L178), :187 | the override box — **frozen form** |
+| [precision-date.ts:141](web-angular/src/app/registry/precision-date/precision-date.ts#L141) | the bare-year override — **on both frozen forms** |
 
 ### Meaning 4 — "this looks unlike its neighbours" (4 sites)
 
 | Site | What |
 |---|---|
-| [milking-roster.ts:222](web-angular/src/app/registry/milking-roster.ts#L222) | out-of-band litres |
-| [payroll-run.ts:170](web-angular/src/app/registry/payroll-run.ts#L170) | expected ≠ taken |
-| [calving-form.ts:141](web-angular/src/app/registry/calving-form.ts#L141) | the outcome warning — **frozen form** |
-| [duplicate-warning.ts:49](web-angular/src/app/registry/duplicate-warning.ts#L49), :50, :56, :70 | a possible duplicate — **on `/animals/new`** |
+| [milking-roster.ts:222](web-angular/src/app/registry/milking-roster/milking-roster.ts#L222) | out-of-band litres |
+| [payroll-run.ts:170](web-angular/src/app/registry/payroll-run/payroll-run.ts#L170) | expected ≠ taken |
+| [calving-form.ts:141](web-angular/src/app/registry/calving-form/calving-form.ts#L141) | the outcome warning — **frozen form** |
+| [duplicate-warning.ts:49](web-angular/src/app/registry/duplicate-warning/duplicate-warning.ts#L49), :50, :56, :70 | a possible duplicate — **on `/animals/new`** |
 
 ### Meaning 5 — "this is a liability, or a missing agreement" (4 sites)
 
 | Site | What |
 |---|---|
-| [person-detail.ts:85](web-angular/src/app/registry/person-detail.ts#L85) | negative balance |
-| [people-list.ts:122](web-angular/src/app/registry/people-list.ts#L122) | negative balance |
-| [destinations-list.ts:131](web-angular/src/app/registry/destinations-list.ts#L131) | "no price agreed" |
-| [event-list.ts:84](web-angular/src/app/registry/event-list.ts#L84) | "not billed" |
+| [person-detail.ts:85](web-angular/src/app/registry/person-detail/person-detail.ts#L85) | negative balance |
+| [people-list.ts:122](web-angular/src/app/registry/people-list/people-list.ts#L122) | negative balance |
+| [destinations-list.ts:131](web-angular/src/app/registry/destinations-list/destinations-list.ts#L131) | "no price agreed" |
+| [event-list.ts:84](web-angular/src/app/registry/event-list/event-list.ts#L84) | "not billed" |
 
 ### And one that is a bug, not a meaning
 
-[message.ts:73](web-angular/src/app/components/message.ts#L73) is
+[message.ts:73](web-angular/src/app/components/message/message.ts#L73) is
 `bg-warning-bg text-agent-vendor-fg border-agent-vendor-line`.
 
 §4.3 states that **"`vendor` has left amber, which was the point: a vendor
@@ -266,7 +266,7 @@ row to `null` explicitly. So:
 | Unanswered | `draft(id).status === null` — client state, already computed as `untouched()` |
 
 `previousText()` at
-[milking-roster.ts:434](web-angular/src/app/registry/milking-roster.ts#L434)
+[milking-roster.ts:434](web-angular/src/app/registry/milking-roster/milking-roster.ts#L434)
 **already makes exactly this distinction** and throws it away typographically:
 it returns `'—'` for `null` and the words `not measured` / `not milked` for the
 two statuses, all three rendered identically in `tone="secondary"`. Phase 5 is

@@ -1,0 +1,9 @@
+
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-warning-line
+      bg-warning-bg px-3 py-2 text-sm text-warning-strong" data-role="session-required">
+      <span>
+        Recording is off, so {{ what() }} cannot be saved yet.
+      </span>
+      <button type="button" (click)="session.requestSetup()"
+        class="font-medium underline" data-role="start-recording">Start recording</button>
+    </div>

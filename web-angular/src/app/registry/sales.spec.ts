@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
-import { DispatchSheetScreen } from './dispatch-sheet';
-import { DestinationsList } from './destinations-list';
-import { RegistryApi } from './api';
+import { DispatchSheetScreen } from "./dispatch-sheet/dispatch-sheet";
+import { DestinationsList } from "./destinations-list/destinations-list";
+import { RegistryApi, ApiError } from './api';
 import { Session } from './session';
 import {
   amountMinor,
@@ -426,4 +426,34 @@ describe('Dispatch pagination', () => {
     fixture.detectChanges();screen.tablePage.set(1);fixture.detectChanges();expect((el.querySelector('[data-role="litres-D0"]') as HTMLInputElement).value).toBe('1');screen.tablePage.set(2);fixture.detectChanges();
     await screen.onSubmit(new Event('submit'));expect((api.saved?.['entries'] as unknown[]).length).toBe(30);
   });
+});
+
+describe('visible field refusals', () => {
+  for (const field of ['entries', 'occurred_on', 'session', 'litres', 'destination_id']) {
+    it(`shows dispatch refusal for ${field}`, async () => {
+      const { fixture, el } = await renderSheet(new FakeApi());
+      (fixture.componentInstance as any).state.error.set(new ApiError({ error: 'refused', field, message: `Refused ${field}` }, true));
+      await fixture.whenStable();
+      expect(el.textContent).toContain(`Refused ${field}`);
+    });
+  }
+  for (const field of ['name', 'kind', 'started_on', 'billable', 'price_minor', 'price_unit_litres', 'effective_from']) {
+    it(`shows buyer refusal for ${field}`, async () => {
+      const { fixture, el } = await renderBuyers(new FakeDestApi());
+      const price = ['price_minor', 'price_unit_litres', 'effective_from'].includes(field);
+      if (price) { (el.querySelector('[data-role="price-dst_dodhi"]') as HTMLButtonElement).click(); await fixture.whenStable(); }
+      const c = fixture.componentInstance as any;
+      (price ? c.priceState : c.addState).error.set(new ApiError({ error: 'refused', field, message: `Refused ${field}` }, true));
+      await fixture.whenStable();
+      expect(el.textContent).toContain(`Refused ${field}`);
+    });
+  }
+});
+
+it('shows an empty paged search even when the full buyer collection is populated', async () => {
+  const api = new FakeDestApi();
+  vi.spyOn(api, 'list').mockResolvedValue({ items: [], page: 1, pageSize: 25, totalItems: 0, totalPages: 0, sort: 'identifier', direction: 'asc' });
+  const { el } = await renderBuyers(api);
+  expect(el.querySelector('table')).toBeNull();
+  expect(el.querySelector('[data-role="empty"]')).not.toBeNull();
 });

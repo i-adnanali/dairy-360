@@ -25,3 +25,14 @@ describe('WriteLock field recovery', () => {
     expect(document.getElementById(ids[1])).toBeNull();
   });
 });
+
+it('gives unknown and dynamic fields a visible, focused and associated fallback', async () => {
+  const f = TestBed.createComponent(Fixture);
+  await f.whenStable();
+  f.componentInstance.state.error.set(new ApiError({ error: 'refused', field: 'entries.5.animal', message: 'Choose an animal for row six.' }, true));
+  await f.whenStable(); await Promise.resolve();
+  const summary = f.nativeElement.querySelector('[role="alert"]');
+  expect(summary?.textContent).toBe('Choose an animal for row six.');
+  expect(document.activeElement).toBe(summary);
+  expect(f.nativeElement.querySelector('form').getAttribute('aria-describedby')).toBe(summary.id);
+});

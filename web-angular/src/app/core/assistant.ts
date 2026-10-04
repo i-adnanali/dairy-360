@@ -52,7 +52,7 @@ export class Assistant {
   readonly draft = signal('');
 
   /**
-   * The route the panel is reading, as §13.2's context line.
+   * The current UI location. This is not sent to the model.
    *
    * Set by the shell, which is the only thing that knows the activated route.
    * A signal rather than a Router read in here so the service stays testable
@@ -61,10 +61,10 @@ export class Assistant {
    */
   readonly context = signal<string | null>(null);
 
-  /** `Reading BD-0003`, or nothing at all when the route says nothing useful. */
+  /** Location only; questions must include their own record identity. */
   readonly contextLine = computed(() => {
     const c = this.context();
-    return c === null || c.length === 0 ? null : `Reading ${c}`;
+    return c === null || c.length === 0 ? null : `Viewing ${c} — include the record ID in your question; this location is not sent.`;
   });
 
   constructor() {

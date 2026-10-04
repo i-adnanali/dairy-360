@@ -1,8 +1,9 @@
-import { Component, DestroyRef, Injectable, inject } from '@angular/core';
-import { Dialog, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { DestroyRef, Injectable, inject } from '@angular/core';
+import { Dialog } from '@angular/cdk/dialog';
 import { Router, CanActivateChildFn, CanDeactivateFn } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { Button } from '../ui/button';
+import { DraftDialog } from "./draft-dialog/draft-dialog";
+export { DraftDialog } from "./draft-dialog/draft-dialog";
 
 /** Callbacks read current semantic values, including raw incomplete input. */
 export interface DraftParticipant {
@@ -16,51 +17,6 @@ export interface DraftParticipant {
   unresolved?: () => boolean;
   discard: () => void;
   replaces: (url: string) => boolean;
-}
-@Component({
-  selector: 'app-draft-dialog',
-  imports: [Button],
-  template: `<section
-    class="dialog-surface rounded-xl border border-line bg-surface-raised p-6 text-content-primary shadow-xl space-y-4"
-  >
-    <h2 id="draft-title" class="text-lg font-semibold">
-      {{
-        data.title ||
-          (data.unresolved
-            ? 'Resolve the save outcome before leaving.'
-            : data.pending
-              ? 'Saving; wait for the result.'
-              : 'Discard unsaved changes?')
-      }}
-    </h2>
-    <div id="draft-description" class="space-y-2">
-      <p>{{ data.description }}</p>
-      @if (!data.title) {
-        <p>{{ data.unresolved ? 'The save may have reached the server. Resolve its outcome before leaving.' : data.pending ? 'Wait for the save result before changing context.' : 'Leaving discards this draft. Keep editing to retain your entries.' }}</p>
-      }
-    </div>
-    <div class="flex flex-wrap gap-3">
-      <button appButton variant="secondary" data-role="keep-editing" (click)="ref.close(false)">
-        {{ data.cancelLabel || 'Keep editing' }}
-      </button>
-      @if (!data.pending) {
-        <button appButton intent="danger" data-role="discard-changes" (click)="ref.close(true)">
-          {{ data.confirmLabel || 'Discard changes' }}
-        </button>
-      }
-    </div>
-  </section>`,
-})
-export class DraftDialog {
-  readonly data = inject<{
-    pending: boolean;
-    unresolved: boolean;
-    description: string;
-    title?: string;
-    cancelLabel?: string;
-    confirmLabel?: string;
-  }>(DIALOG_DATA);
-  readonly ref = inject(DialogRef<boolean>);
 }
 @Injectable({ providedIn: 'root' })
 export class DraftRegistry {

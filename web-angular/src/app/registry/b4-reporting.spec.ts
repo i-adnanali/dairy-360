@@ -1,7 +1,8 @@
+import { BehaviorSubject, of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter } from '@angular/router';
-import { LifeReport } from './life-report';
-import { DestinationDetail } from './destination-detail';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { LifeReport } from "./life-report/life-report";
+import { DestinationDetail } from "./destination-detail/destination-detail";
 import { RegistryApi } from './api';
 import { lifeSections, lifeSummary, reportDate } from './life-report-model';
 import { labourPresentation } from './check-presentation';
@@ -134,7 +135,7 @@ describe('B4 life report', () => {
         { provide: RegistryApi, useValue: { healthGet: async () => r } },
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: new Map([['id', 'BD-0001']]) } },
+          useValue: { paramMap: of(new Map([['id', 'BD-0001']])), snapshot: { paramMap: new Map([['id', 'BD-0001']]) } },
         },
       ],
     });
@@ -183,7 +184,7 @@ describe('B4 life report', () => {
         { provide: RegistryApi, useValue: { healthGet: async () => life(0) } },
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: new Map([['id', 'BD-0001']]) } },
+          useValue: { paramMap: of(new Map([['id', 'BD-0001']])), snapshot: { paramMap: new Map([['id', 'BD-0001']]) } },
         },
       ],
     });
@@ -262,7 +263,7 @@ describe('B4 buyer statement', () => {
 
 describe('B4 Check loading and failures', () => {
   it('never displays a clean result while rechecking or after verification fails; reconciliation failure is explicit', async () => {
-    const { VerificationPanel } = await import('./verification-panel');
+    const { VerificationPanel } = await import("./verification-panel/verification-panel");
     const data = {
       as_of: '2026-09-17',
       counts: { animals: 0, events: 0, lactations: 0, milkings: 0 },
@@ -386,4 +387,18 @@ describe('B4 revision and domain adapters', () => {
       expect(lines).not.toContain('do not flatten');
     }
   });
+});
+
+it('reloads a reused life report when the animal parameter changes', async () => {
+  const paramMap = new BehaviorSubject(convertToParamMap({ id: 'A' }));
+  const route = { paramMap, snapshot: { paramMap: paramMap.value } };
+  const healthGet = vi.fn(async (path: string) => ({ ...life(0), animal_id: path.split('/')[1] }));
+  TestBed.configureTestingModule({ providers: [provideRouter([]),
+    { provide: ActivatedRoute, useValue: route }, { provide: RegistryApi, useValue: { healthGet } }] });
+  const f = TestBed.createComponent(LifeReport); await tick(f);
+  expect((f.componentInstance as any).report().animal_id).toBe('A');
+  route.snapshot.paramMap = convertToParamMap({ id: 'B' });
+  paramMap.next(route.snapshot.paramMap); await tick(f);
+  expect((f.componentInstance as any).report().animal_id).toBe('B');
+  expect(healthGet.mock.calls[1][0]).toContain('animals/B/life-report');
 });

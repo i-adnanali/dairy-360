@@ -9,11 +9,11 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { AnimalForm } from './animal-form';
-import { EventForm } from './event-form';
-import { CorrectionForm } from './correction-form';
-import { CalvingForm } from './calving-form';
-import { SessionGate } from './session-gate';
+import { AnimalForm } from "./animal-form/animal-form";
+import { EventForm } from "./event-form/event-form";
+import { CorrectionForm } from "./correction-form/correction-form";
+import { CalvingForm } from "./calving-form/calving-form";
+import { SessionGate } from "./session-gate/session-gate";
 import { Session } from './session';
 import { WriteLog } from './after-write';
 import type { TimelineEvent } from './types';
@@ -681,11 +681,13 @@ describe('idempotency key', () => {
 });
 
 describe('SessionGate', () => {
-  it('blocks until both source form and recorder are given', () => {
-    setup();
+  it('blocks until both source form and recorder are given', async () => {
+    const { http } = setup();
     const fixture = TestBed.createComponent(SessionGate);
     TestBed.inject(Session).clear();
     fixture.detectChanges();
+    http.expectOne(`${BASE}/storage`).flush({ storage: ':memory:', memory: true });
+    await settle(fixture);
     const el = fixture.nativeElement as HTMLElement;
     const start = el.querySelector('[data-role="start"]') as HTMLButtonElement;
     expect(start.getAttribute('aria-disabled')).toBe('true');

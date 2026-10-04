@@ -1,0 +1,120 @@
+
+    <div appCard>
+      <div appSectionLabel legend>
+        Which calf is this?
+      </div>
+
+      @if (status() === 'loading') {
+        <p role="status">Looking for matching calves…</p>
+      } @else if (status() === 'failed') {
+        <p>Matching calves could not be checked.</p>
+      } @else if (!ready()) {
+        <p appHelp data-role="picker-blocked">
+          Choose the dam, the calving date and the calf's sex first — which animals can be linked
+          depends on all three: an animal's birth cannot postdate its own history, and one recorded
+          as the other sex is not this calf.
+        </p>
+      } @else {
+        <p class="mb-2 text-xs text-content-muted">
+          Animals already in the registry that could be this calf, nearest birth date first. One
+          will be here if you entered it in the roster pass, or in pass one because its dam was
+          already in the herd.
+        </p>
+
+        @if (near().length > 0) {
+          <div class="space-y-1" data-role="candidates">
+            @for (c of near(); track c.id) {
+              <button
+                type="button" [attr.data-candidate]="c.id" [disabled]="!c.eligible"
+                (click)="pick(c.id)"
+                class="flex w-full items-baseline gap-2 rounded-lg border px-3 py-2 text-left text-sm"
+                [class]="
+                  chosen() === c.id
+                    ? 'border-line-selected bg-surface-sunken'
+                    : c.eligible
+                      ? 'border-line bg-surface-raised hover:border-line-strong'
+                      : 'border-line-subtle bg-surface-page text-content-disabled cursor-not-allowed'
+                "
+              >
+                <span class="font-mono">{{ c.id }}</span>
+                <span>{{ c.name ?? '—' }}</span>
+                <span class="text-xs">{{ c.sex }}</span>
+                <span class="text-xs" data-role="distance">{{ distance(c) }}</span>
+                @if (!c.eligible) {
+                  <span class="ml-auto text-xs italic" data-role="reason">{{ c.ineligible_reason }}</span>
+                }
+              </button>
+            }
+          </div>
+          <p class="mt-2 text-xs text-content-subtle">
+            Animals that cannot be linked are shown greyed with the reason, rather than hidden — an
+            animal missing from this list would read as data loss.
+          </p>
+        } @else {
+          <p appHelp data-role="candidates-empty">
+            No animal in the registry has a birth date near this calving.
+          </p>
+        }
+
+        <!-- Nothing is ever unreachable, but a birth date two years off is not
+             a plausible match and putting it in the main list would bury the
+             ones that are. The COUNT is always visible, so this reads as
+             "further away" rather than "missing". -->
+        @if (far().length > 0) {
+          @if (showFar()) {
+            <div class="mt-2 space-y-1" data-role="far-candidates">
+              @for (c of far(); track c.id) {
+                <button
+                  type="button" [attr.data-candidate]="c.id" [disabled]="!c.eligible"
+                  (click)="pick(c.id)"
+                  class="flex w-full items-baseline gap-2 rounded-lg border px-3 py-2 text-left text-sm"
+                  [class]="
+                    chosen() === c.id
+                      ? 'border-line-selected bg-surface-sunken'
+                      : c.eligible
+                        ? 'border-line bg-surface-raised hover:border-line-strong'
+                        : 'border-line-subtle bg-surface-page text-content-disabled cursor-not-allowed'
+                  "
+                >
+                  <span class="font-mono">{{ c.id }}</span>
+                  <span>{{ c.name ?? '—' }}</span>
+                  <span class="text-xs">{{ c.sex }}</span>
+                  <span class="text-xs" data-role="distance">{{ distance(c) }}</span>
+                  @if (!c.eligible) {
+                    <span class="ml-auto text-xs italic" data-role="reason">{{ c.ineligible_reason }}</span>
+                  }
+                </button>
+              }
+            </div>
+          } @else {
+            <button type="button" data-role="show-far" (click)="showFar.set(true)"
+              class="mt-2 text-xs text-content-secondary underline">
+              {{ far().length }} more, with birth dates further from this date
+            </button>
+          }
+        }
+
+        <!-- LAST, and visually separated. Creating an animal is the deliberate
+             act; linking to one that exists is the safe default path. -->
+        <div class="mt-3 border-t border-line-subtle pt-3">
+          <button type="button" data-role="mode-new" (click)="pick(null)"
+            class="w-full rounded-lg border px-3 py-2 text-left text-sm"
+            [class]="chosen() === null && answered() ? 'border-line-selected bg-surface-sunken' : 'border-line bg-surface-raised hover:border-line-strong'"
+          >
+            <span class="font-medium text-content-primary">None of these — create a new animal</span>
+          </button>
+
+          @if (chosen() === null && answered()) {
+            <label class="mt-3 block">
+              <span appFieldLabel>Calf name (optional)</span>
+              <input data-role="calf_name" [value]="calfName()"
+                (input)="setName($any($event.target).value)" appInput class="w-full max-w-xs" />
+            </label>
+          }
+        </div>
+      }
+
+      @if (error(); as e) {
+        <p appErrorText class="mt-2" data-role="error-calf">{{ e }}</p>
+      }
+    </div>

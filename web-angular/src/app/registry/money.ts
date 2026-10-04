@@ -103,3 +103,11 @@ export function minorToRupees(minor: number): string {
 export function formatPeriodRate(cashMinor: number, period: 'month' | 'day'): string {
   return `${formatMinor(cashMinor)} / ${period}`;
 }
+
+/** Signed values are reserved for ledger adjustments. */
+export function signedRupeesToMinor(text: string): number | null {
+  const value = text.trim();
+  const negative = value.startsWith('-');
+  const minor = rupeesToMinor(value.replace(/^[+-]/, ''));
+  return minor === null || !Number.isSafeInteger(minor) ? null : negative ? -minor : minor;
+}

@@ -32,7 +32,7 @@
 // underlines. Those follow `color-scheme`, and without it a dark page opens a
 // blinding white calendar over itself.
 
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { DestroyRef, inject, Injectable, computed, effect, signal } from '@angular/core';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -66,7 +66,9 @@ export class Theme {
     // `addEventListener` on a MediaQueryList is the modern form; Safari before
     // 14 only had `addListener`. Guarded rather than assumed, because the
     // failure is silent -- the theme simply stops following the OS.
-    query?.addEventListener?.('change', (e) => this.prefersDark.set(e.matches));
+    const changed = (e: MediaQueryListEvent) => this.prefersDark.set(e.matches);
+    query?.addEventListener?.('change', changed);
+    inject(DestroyRef).onDestroy(() => query?.removeEventListener?.('change', changed));
 
     effect(() => {
       const scheme = this.resolved();

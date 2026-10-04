@@ -1,0 +1,177 @@
+
+    <div class="flex h-full flex-col bg-surface-page text-content-primary">
+      <header
+        [inert]="assistant.modal()"
+        class="border-b border-line-subtle bg-surface-raised px-4"
+      >
+        <div class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 py-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <h1 class="text-base font-semibold tracking-tight">Dairy 360</h1>
+            <app-session-bar mode="storage" />
+            <app-session-bar mode="session" />
+          </div>
+          <div class="shell-utilities flex flex-wrap items-center gap-3">
+        <button appButton variant="secondary" class="mobile-menu-toggle" [attr.aria-label]="'Menu · ' + activeSection().label" [attr.aria-expanded]="menuOpen()" aria-controls="section-navigation" (keydown.escape)="closeMenu($event)" (click)="menuOpen.set(!menuOpen())">Menu<span class="menu-current-section"> · {{ activeSection().label }}</span></button>
+            <button type="button" appTextLink (click)="palette.show()" data-role="search-toggle">
+              Search <kbd>{{ palette.chordLabel }}</kbd>
+            </button>
+            <app-theme-toggle />
+            <button
+              type="button"
+              appTextLink
+              (click)="assistant.toggle()"
+              [attr.aria-expanded]="assistant.open()"
+              aria-controls="assistant-panel"
+              data-role="assistant-toggle"
+            >
+              Assistant
+            </button>
+          </div>
+        </div>
+        <nav
+          id="section-navigation"
+          [class.menu-open]="menuOpen()"
+          (keydown.escape)="closeMenu($event)"
+          class="phase7-nav mx-auto flex max-w-[1400px] gap-5 overflow-x-auto text-sm"
+          data-role="nav"
+          aria-label="Sections"
+        >
+          @for (section of sections; track section.label) {
+            <div class="navigation-group">
+            <a
+              [routerLink]="section.path"
+              [class.ml-auto]="section.label === 'Check'"
+              [class.active]="activeSection().label === section.label"
+              [attr.aria-current]="activeSection().label === section.label ? 'page' : null"
+              [attr.data-role]="section.label === 'Today' ? 'nav-today' : null"
+              >{{ section.label }}</a>
+            @if (menuOpen()) {
+              <div class="mobile-section-links">
+                @for (view of section.views; track view.path) { <a [routerLink]="view.path" routerLinkActive="font-semibold" [routerLinkActiveOptions]="{exact: true}">{{ view.label }}</a> }
+              </div>
+            }
+            </div>
+          }
+        </nav>
+      </header>
+      @if (
+        activeSection().views.length ||
+        activeSection().label === 'Today' ||
+        activeSection().label === 'Check'
+      ) {
+        <div
+          [inert]="assistant.modal()"
+          class="border-b border-line-subtle bg-surface-sunken px-4"
+          data-role="section-bar"
+        >
+          <div
+            class="mx-auto flex min-h-12 max-w-[1400px] flex-wrap items-center justify-between gap-3 py-2"
+          >
+            @if (activeSection().views.length) {
+              <nav class="flex flex-wrap gap-4 text-sm" aria-label="Section views">
+                @for (view of activeSection().views; track view.path) {
+                  <a
+                    [routerLink]="view.path"
+                    routerLinkActive="font-medium !text-content-primary"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    appTextLink
+                    >{{ view.label }}</a
+                  >
+                }
+              </nav>
+            }
+            <div class="flex flex-wrap gap-3">
+              @if (activeSection().label === 'Check') {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  (click)="actions.refresh()"
+                  data-role="section-recheck"
+                >
+                  Recheck
+                </button>
+              } @else if (activeSection().label === 'Today') {
+                <button
+                  type="button"
+                  appButton
+                  variant="secondary"
+                  (click)="session.requestSetup()"
+                  data-role="section-start-session"
+                >
+                  {{ session.ready() ? 'Change recording session' : 'Start a recording session' }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+      <app-command-palette #palette />
+
+      <!-- WHAT JUST HAPPENED, without looking for it.
+           A cleared form is ambiguous: it looks exactly like a form that was
+           never filled in. So the write says which serial it wrote, in a live
+           region a screen reader announces and in a line that persists until
+           the next write replaces it. Not a toast -- an operator who looks up
+           five seconds later should not have to reconstruct it from the herd
+           list.
+           'aria-live="polite"' rather than assertive: it must not interrupt
+           typing, which is the entire activity here. -->
+      <div aria-live="polite" aria-atomic="true" class="sr-only" data-role="write-announce">
+        {{ writeLog.last() }}
+      </div>
+      @if (writeLog.last(); as msg) {
+        <div
+          class="border-b border-writelog-line bg-writelog-bg px-4 py-1.5 text-center text-xs font-medium text-writelog-fg"
+          data-role="write-log"
+        >
+          {{ msg }}
+        </div>
+      }
+
+      <!-- READS ARE FREE; ONLY A SCREEN THAT IS NOTHING BUT A FORM IS GATED.
+
+           This used to be an @if on session.ready() around the whole outlet, so
+           no route rendered until provenance was declared. That was stricter
+           than the rule session.ts states -- "refuses to show any FORM" -- and
+           it charged a toll on the commonest thing anybody does here, which is
+           look something up.
+
+           Two routes are pure write surfaces (/animals/new and
+           /animals/calvings/new): there is nothing on them to browse, so
+           arriving without a session should ask immediately rather than show a
+           form whose submit is a prompt. They declare data.writes === true in
+           app.routes.ts and are gated here.
+
+           Every other screen renders, and its write controls carry
+           <app-session-required> instead of a submit. -->
+      <!-- Requested from a write control: the gate opens ABOVE the screen and
+           the screen STAYS MOUNTED. Swapping the outlet for it would destroy
+           the routed component and take any half-typed figure with it, which is
+           precisely the moment somebody reaches for this. -->
+      @if (session.setupOpen() && (session.ready() || !writeOnlyRoute())) {
+        <div
+          class="max-h-[70vh] overflow-y-auto border-b border-line-subtle bg-surface-raised"
+          [inert]="assistant.modal()"
+          data-role="session-setup"
+        >
+          <button type="button" class="m-3 text-sm underline" (click)="session.dismissSetup()">
+            Cancel session setup
+          </button>
+          <app-session-gate />
+        </div>
+      }
+
+      <!-- B5: reserve the nonmodal desktop dock in the content grid. -->
+      <div class="assistant-layout min-h-0 flex-1" [class.has-assistant]="assistant.open()">
+        <main [inert]="assistant.modal()" class="phase7-content flex-1 overflow-y-auto px-4 py-6">
+          @if (writeOnlyRoute() && !session.ready()) {
+            <app-session-gate />
+          } @else {
+            <router-outlet />
+          }
+        </main>
+
+        <app-assistant-panel />
+      </div>
+    </div>

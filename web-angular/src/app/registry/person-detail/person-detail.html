@@ -1,0 +1,351 @@
+
+    <div data-page-layout="review">
+    <div class="mx-auto  space-y-6">
+      <a routerLink="/labour/people" class="text-sm text-content-muted underline">← People</a>
+
+      @if (loadError(); as e) {
+        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
+      }
+
+      @if (statement(); as s) {
+        <header class="space-y-1">
+          <h2 appPageHeading>
+            {{ s.name ?? s.identifier }}
+            <span class="ml-2 font-mono text-sm font-normal text-content-subtle">{{
+              s.identifier
+            }}</span>
+          </h2>
+          <p
+            class="text-sm"
+            [class.text-content-secondary]="s.balance_minor < 0"
+            data-role="balance"
+          >
+            {{ balanceLabel(s) }}
+          </p>
+          <p appHelp>{{ openStints(s) }} open employment stint(s)</p>
+          <a appButton variant="secondary" href="#person-payment" (click)="focusPayment($event)">Record payment or adjustment</a>
+        </header>
+
+        <!-- Record a payment. -->
+        <form data-page-layout="entry"
+          [appWriteLock]="payState"
+          class="space-y-4 rounded-xl border border-line bg-surface-raised p-4"
+          (submit)="submitPayment($event)"
+          data-role="payment-form" id="person-payment"
+        >
+          <h3 appSectionHeading>Record a payment</h3>
+          <p appHelp>Payments settle the balance; wages earned are recorded in Payroll. Adjustments change the balance without recording a payment.</p>
+          <fieldset class="space-y-4"><legend appSubHeading>Amount, date and method</legend>
+
+          <div class="space-y-1">
+            <span appSubHeading>Method</span>
+            <app-chip-group
+              label="Payment method"
+              name="method"
+              [options]="methodChips"
+              [value]="method()"
+              (changed)="setMethod($any($event))"
+            />
+            @if (method() === 'adjustment') {
+              <span class="block text-xs text-content-subtle" data-role="adjustment-hint">
+                The only signed kind, and it must say why. This is also how a deduction is recorded
+                — damage, or milk taken above the allowance — because those reduce what the farm
+                owes. A positive figure reduces the balance.
+              </span>
+            }
+          </div>
+
+          <div class="flex flex-wrap gap-4">
+            <label class="space-y-1">
+              <span class="block text-sm font-medium text-content-heading">Amount (Rs)</span>
+              <span class="input-group"><input
+                name="amount_minor"
+                type="text"
+                inputmode="decimal"
+                [value]="amount()"
+                (input)="amount.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                class="w-36 text-right font-mono tabular-nums"
+              /><span class="input-unit" aria-hidden="true">Rs</span></span>
+              @if (payState.fieldError('amount_minor'); as msg) {
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-amount">{{
+                  msg
+                }}</span>
+              }
+            </label>
+            <label class="space-y-1">
+              <span class="block text-sm font-medium text-content-heading">On</span>
+              <input
+                name="occurred_on"
+                type="date"
+                [value]="paidOn()"
+                (input)="paidOn.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+              />
+            </label>
+            <label class="space-y-1">
+              <span class="block text-sm font-medium text-content-heading">
+                Reference <span class="text-content-subtle">(optional)</span>
+              </span>
+              <input
+                name="reference"
+                [value]="reference()"
+                (input)="reference.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                placeholder="peshgi"
+              />
+            </label>
+          </div>
+
+          </fieldset>
+          <fieldset class="space-y-4"><legend appSubHeading>Reason and recorder</legend>
+          <label class="block space-y-1">
+            <span appSubHeading>
+              Note
+              @if (method() === 'adjustment') {
+                <span class="text-danger-soft">(required)</span>
+              } @else {
+                <span class="text-content-subtle">(optional)</span>
+              }
+            </span>
+            <input
+              name="note"
+              [value]="note()"
+              (input)="note.set($any($event.target).value)"
+              appInput
+              density="comfortable"
+              class="w-full"
+            />
+            @if (payState.fieldError('note'); as msg) {
+              <span appErrorText size="xs" tone="soft" class="block" data-role="error-note">{{
+                msg
+              }}</span>
+            }
+          </label>
+
+          <div class="block space-y-1">
+            <app-identifier-input
+              field="observed_by"
+              label="Handed over by"
+              help="Person who handed over this payment, if known. Use a stable identifier, not a display name."
+              name="observed_by"
+              [value]="observedBy()"
+              (changed)="observedBy.set($event)"
+            />
+          </div>
+
+          </fieldset>
+          @if (payState.formError(['amount_minor', 'note', 'occurred_on', 'method']); as msg) {
+            <p appErrorPanel data-role="payment-error">{{ msg }}</p>
+          }
+
+          @if (session.ready()) {
+            <button
+              type="submit"
+              [appButtonDisabled]="!canPay()"
+              appButton
+              [busy]="payState.submitting()"
+            >
+              Record payment
+            </button>
+          } @else {
+            <app-session-required what="a payment" />
+          }
+        </form>
+
+        <!-- Stints. Overlapping and multiple-open are LEGITIMATE and are
+             rendered plainly -- the screen must not mark them as a problem. -->
+        <section class="space-y-2" data-role="engagements">
+          <h3 appSectionHeading>Stints</h3>
+          @if (s.engagements.length === 0) {
+            <p appHelp data-role="no-stints">
+              On file, but never employed. That is a legitimate row — the vet and whoever sold you
+              an animal belong here too.
+            </p>
+          } @else {
+            <ul class="space-y-2">
+              @for (e of s.engagements; track e.id) {
+                <li
+                  class="rounded-xl border border-line-subtle bg-surface-raised p-3 text-sm"
+                  [attr.data-engagement]="e.id"
+                >
+                  <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <span>
+                      <span class="font-medium">{{
+                        e.kind === 'daily' ? 'Dihari' : 'Salaried'
+                      }}</span>
+                      @if (e.role) {
+                        <span class="text-content-muted">· {{ e.role }}</span>
+                      }
+                    </span>
+                    <span appHelp size="xs">
+                      {{ e.started_on }} → {{ e.ended_on ?? 'open' }}
+                      @if (e.ended_on) {
+                        <span appBadge tone="ended">closed engagement</span>
+                      }
+                      @if (e.end_reason) {
+                        <span class="text-content-subtle">({{ e.end_reason }})</span>
+                      }
+                    </span>
+                  </div>
+
+                  <!-- The package, as its lines. Never as a total. -->
+                  <p
+                    class="mt-1 text-xs text-content-secondary"
+                    [attr.data-role]="'package-' + e.id"
+                  >
+                    {{ packageLabel(e) }}
+                  </p>
+
+                  @if (e.ended_on === null) {
+                    <button
+                      type="button"
+                      (click)="openClose(e)"
+                      class="mt-2 text-xs text-content-muted underline"
+                      data-role="close-stint"
+                    >
+                      Close this stint
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        @if (closing(); as e) {
+          <form data-page-layout="entry"
+            [appWriteLock]="closeState"
+            appCard
+            class="space-y-3"
+            (submit)="submitClose($event)"
+            data-role="close-form"
+          >
+            <h3 appSectionHeading>Close the stint</h3>
+            <p appHelp size="xs" tone="subtle">
+              This closes the selected stint on {{ endedOn() || 'the last day you enter' }}. Earlier wages and payments remain in the statement. A later settlement is allowed and appears in Checks.
+            </p>
+            <label class="block space-y-1">
+              <span appSubHeading>Last day</span>
+              <input
+                type="date"
+                name="ended_on"
+                [value]="endedOn()"
+                (input)="endedOn.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+              />
+              @if (closeState.fieldError('ended_on'); as msg) {
+                <span appErrorText size="xs" tone="soft" class="block" data-role="error-ended-on">{{
+                  msg
+                }}</span>
+              }
+            </label>
+            <label class="block space-y-1">
+              <span appSubHeading>Why <span class="text-content-subtle">(optional)</span></span>
+              <input
+                name="end_reason"
+                [value]="endReason()"
+                (input)="endReason.set($any($event.target).value)"
+                appInput
+                density="comfortable"
+                class="w-full"
+              />
+            </label>
+            @if (closeState.formError(['ended_on', 'end_reason']); as msg) {
+              <p appErrorPanel data-role="close-error">{{ msg }}</p>
+            }
+            <div class="flex gap-2">
+              @if (session.ready()) {
+                <button type="submit" appButton [busy]="closeState.submitting()">
+                  Close stint
+                </button>
+              } @else {
+                <app-session-required what="the closing date" />
+              }
+              <button
+                type="button"
+                (click)="closeInline()"
+                class="rounded-lg px-4 py-2 text-sm text-content-secondary"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        }
+
+        <!-- The statement proper, grouped by month. The monthly line is the
+             artifact; the rows underneath are the evidence. -->
+        <section class="space-y-3" data-role="months">
+          <h3 appSectionHeading>Statement</h3>
+          @if (s.months.length === 0) {
+            <p appHelp data-role="no-months">Nothing recorded yet.</p>
+          } @else {
+            @for (m of s.months; track m.month) {
+              <div
+                class="overflow-hidden rounded-xl border border-line-subtle bg-surface-raised"
+                [attr.data-month]="m.month"
+              >
+                <div
+                  class="flex flex-wrap items-baseline justify-between gap-2 bg-surface-sunken px-3 py-2 text-sm"
+                >
+                  <span class="font-medium text-content-primary">{{ m.month }}</span>
+                  <span class="font-mono tabular-nums text-content-secondary">
+                    earned {{ formatMinor(m.earned_minor) }} · paid
+                    {{ formatMinor(m.paid_minor) }} ·
+                    <span class="font-medium">closing {{ formatMinor(m.closing_minor) }}</span>
+                  </span>
+                </div>
+                <ul class="divide-y divide-divider text-sm">
+                  @for (w of m.periods; track w.id) {
+                    <li class="flex flex-wrap gap-2 items-baseline justify-between px-3 py-1.5">
+                      <span>
+                        {{ w.kind === 'bonus' ? 'Bonus' : 'Wage' }}
+                        {{ w.from_on }}
+                        @if (w.to_on !== w.from_on) {
+                          <span> → {{ w.to_on }}</span>
+                        }
+                        @if (w.note) {
+                          <span appHelp size="xs" tone="subtle">· {{ w.note }}</span>
+                        }
+                      </span>
+                      <span class="font-mono tabular-nums">{{ formatMinor(w.amount_minor) }}</span>
+                    </li>
+                  }
+                  @for (p of m.payments; track p.id) {
+                    <li
+                      class="flex flex-wrap gap-2 items-baseline justify-between px-3 py-1.5 text-content-secondary"
+                    >
+                      <span>
+                        {{ p.method === 'adjustment' ? 'Adjustment' : 'Paid' }} {{ p.occurred_on }}
+                        <span appHelp size="xs" tone="subtle">{{ p.method }}</span>
+                        @if (p.reference) {
+                          <span appHelp size="xs" tone="subtle">· {{ p.reference }}</span>
+                        }
+                        @if (p.note) {
+                          <span appHelp size="xs" tone="subtle">· {{ p.note }}</span>
+                        }
+                      </span>
+                      <span class="font-mono tabular-nums"
+                        >− {{ formatMinor(p.amount_minor) }}</span
+                      >
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+          }
+        </section>
+
+
+      } @else {
+        @if (!loadError()) {
+          <p appHelp tone="subtle">Loading…</p>
+        }
+      }
+    </div>
+
+    </div>

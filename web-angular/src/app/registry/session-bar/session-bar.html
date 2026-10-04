@@ -1,0 +1,51 @@
+
+    @if (mode() === 'storage' || mode() === 'both') {
+      <span
+        tabindex="0"
+        class="storage-chip relative inline-block rounded-full border px-2 py-1 text-xs"
+        [class.border-line-strong]="target.kind() === 'real'"
+        [class.bg-warning-fill]="target.kind() !== 'real'"
+        [class.text-warning-strong]="target.kind() !== 'real'"
+        [attr.data-role]="target.kind() === 'harness' ? 'harness-banner' : 'target-summary'"
+        [attr.aria-label]="target.kind() === 'real' ? 'registry: ' + target.storage() : null"
+      >
+        {{
+          target.kind() === 'harness'
+            ? 'harness · in memory'
+            : target.kind() === 'real'
+              ? 'registry'
+              : 'target unknown'
+        }}
+        @if (target.kind() === 'real') {
+          <span
+            class="storage-path absolute left-0 top-full z-40 mt-1 max-w-[80vw] break-all rounded border border-line bg-surface-raised p-2 text-content-primary"
+            >{{ target.storage() }}</span
+          >
+        }
+      </span>
+    }
+    @if (mode() === 'session' || mode() === 'both') {
+      @if (session.ready()) {
+        <span data-role="session-summary">
+          <button
+            type="button"
+            class="rounded-full border border-line-strong px-2 py-1 text-xs text-content-primary"
+            data-role="change-session"
+            (click)="session.requestSetup()"
+          >
+            Recording as {{ session.recordedBy() }} · {{ sourceLabel() }}
+          </button>
+        </span>
+      } @else {
+        <span data-role="browsing">
+          <button
+            type="button"
+            class="rounded-full border border-line px-2 py-1 text-xs text-content-subtle"
+            data-role="start-session"
+            (click)="session.requestSetup()"
+          >
+            browsing<span class="sr-only"> — nothing is being recorded</span>
+          </button>
+        </span>
+      }
+    }

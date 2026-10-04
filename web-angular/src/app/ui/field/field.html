@@ -1,0 +1,5 @@
+
+    <label [for]="controlId" class="text-sm font-medium text-content-primary">{{ label() }}</label>
+    <ng-content />
+    @if (help()) { <p [id]="helpId" class="text-sm text-content-muted">{{ help() }}</p> }
+    @if (error()) { <p [id]="errorId" role="status" class="text-sm text-danger-fg">{{ error() }}</p> }
