@@ -1,0 +1,60 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - 'generic "registry: /synthetic/acceptance-a.db"': registry
+  - button "Recording as acceptance-target · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- button "Change recording session"
+- main:
+  - heading "Today" [level=2]
+  - paragraph: Monday 5 October 2026
+  - heading "Animal health" [level=3]
+  - link "3 overdue · 0 due today · 6 withdrawal instructions to review":
+    - /url: /animals/health
+  - heading "Milking" [level=3]
+  - heading "Outstanding answers" [level=4]
+  - link "morning 0 of 3 recorded":
+    - /url: /milk/milking?on=2026-10-05&session=morning
+    - generic: morning
+    - generic: 0 of 3 recorded
+  - link "evening 0 of 3 recorded":
+    - /url: /milk/milking?on=2026-10-05&session=evening
+    - generic: evening
+    - generic: 0 of 3 recorded
+  - heading "Dispatch" [level=3]
+  - heading "Outstanding answers" [level=4]
+  - link "morning 0 of 3 recorded":
+    - /url: /milk/dispatch?on=2026-10-05&session=morning
+    - generic: morning
+    - generic: 0 of 3 recorded
+  - link "evening 0 of 3 recorded":
+    - /url: /milk/dispatch?on=2026-10-05&session=evening
+    - generic: evening
+    - generic: 0 of 3 recorded
+  - heading "Feed" [level=3]
+  - link "Not recorded Record feeding":
+    - /url: /feed/daily/2026-10-05
+    - generic: Not recorded
+    - generic: Record feeding
+  - heading "Payroll · period recording" [level=3]
+  - paragraph: Earlier unanswered periods are separate from today’s work. Recorded wages are not payments.
+  - link "October 2026 2 of 2 still to enter":
+    - /url: /labour/payroll?from=2026-10-01&to=2026-10-31
+    - generic: October 2026
+    - generic: 2 of 2 still to enter

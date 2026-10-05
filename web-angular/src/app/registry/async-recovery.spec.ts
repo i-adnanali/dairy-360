@@ -52,3 +52,33 @@ it('shows failed calf and dam lookups with retry instead of an empty-match concl
   expect(f.nativeElement.textContent).toContain('Dam lookup failed');
   expect(f.nativeElement.querySelector('[data-role="candidates-empty"]')).toBeNull();
 });
+
+it('keeps keyboard focus in the lookup region when retry replaces its button', async () => {
+  const dams = deferred<any[]>(), calves = deferred<any[]>();
+  const damCandidates = vi.fn().mockRejectedValueOnce(new Error('Dam lookup failed')).mockReturnValue(dams.promise);
+  const linkCandidates = vi.fn().mockRejectedValueOnce(new Error('Calf lookup failed')).mockReturnValue(calves.promise);
+  TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: RegistryApi, useValue: {
+    damCandidates, linkCandidates,
+    identifierValues: async () => ({ observed_by: [], acquired_from: [], sire_ref: [] }),
+  } }] });
+  const f = TestBed.createComponent(CalvingForm); await f.whenStable();
+  const c = f.componentInstance as any;
+  const damRegion = f.nativeElement.querySelector('[aria-label="Dam lookup"]') as HTMLElement;
+  const damRetry = damRegion.querySelector('button')!;
+  damRetry.focus(); damRetry.click(); await f.whenStable();
+  expect(document.activeElement).toBe(damRegion);
+  expect(damRegion.textContent).toContain('Loading dams');
+  dams.resolve([]); await new Promise(resolve => setTimeout(resolve, 0)); await f.whenStable();
+  expect(document.activeElement).toBe(damRegion);
+  c.damId.set('A'); c.calfSex.set('female');
+  c.when.set({ status: 'complete', value: { occurred_on: '2026-10-01', date_precision: 'day', occurred_time: null }, reading: '' });
+  await f.whenStable();
+  const calfRegion = f.nativeElement.querySelector('[aria-label="Calf lookup"]') as HTMLElement;
+  const calfRetry = calfRegion.querySelector('button')!;
+  calfRetry.focus(); calfRetry.click(); await f.whenStable();
+  expect(document.activeElement).toBe(calfRegion);
+  expect(calfRegion.textContent).toContain('Looking for matching calves');
+  calves.resolve([]); await new Promise(resolve => setTimeout(resolve, 0)); await f.whenStable();
+  expect(document.activeElement).toBe(calfRegion);
+  expect(calfRegion.textContent).toContain('None of these');
+});

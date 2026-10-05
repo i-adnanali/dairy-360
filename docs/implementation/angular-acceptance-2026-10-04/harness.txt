@@ -1,0 +1,29 @@
+
+> @dairy/server@1.0.0 registry:harness
+> TZ=Asia/Karachi tsx src/registry/harness.ts --port=6510
+
+registry harness  http://localhost:6510/api/registry
+  storage     :memory:  (dairy.db is NOT open in this process)
+  herd        13 animal(s)
+    BD-0001  Noor     lactating  parity 2  5 event(s)
+    BD-0002  -        lactating  parity 2  3 event(s)
+    BD-0003  -        dry        parity 1  3 event(s)
+    BD-0004  -        departed   parity 0  2 event(s)
+    BD-0005  -        lactating  parity 1  2 event(s)
+    BD-0006  -        male       parity 0  1 event(s)
+    BD-0007  -        heifer     parity 0  1 event(s)
+    BD-0008  -        heifer     parity 0  1 event(s)
+    BD-0009  -        heifer     parity 0  1 event(s)
+    BD-0010  -        heifer     parity 0  1 event(s)
+    BD-0011  -        departed   parity 0  2 event(s)
+    BD-0013  -        heifer     parity 0  1 event(s)
+    BD-0014  -        calf       parity 0  1 event(s)
+
+  Everything here is discarded when this process exits.
+npm error Lifecycle script `registry:harness` failed with error:
+npm error code 130
+npm error path /Users/adnanali/personal/dairy-360/server
+npm error workspace @dairy/server@1.0.0
+npm error location /Users/adnanali/personal/dairy-360/server
+npm error command failed
+npm error command sh -c TZ=Asia/Karachi tsx src/registry/harness.ts --port=6510

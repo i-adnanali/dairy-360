@@ -1,0 +1,144 @@
+- banner:
+  - heading [level=1]: Dairy 360
+  - generic: harness · in memory
+  - button: Recording as acceptance-synthetic · Direct entry
+  - button: Search ⌘K
+  - button: system · light
+  - button: Assistant
+  - navigation:
+    - link:
+      - /url: /
+      - text: Today
+    - link:
+      - /url: /analytics
+      - text: Analytics
+    - link:
+      - /url: /animals
+      - text: Herd
+    - link:
+      - /url: /milk/milking
+      - text: Milk
+    - link:
+      - /url: /feed
+      - text: Feed
+    - link:
+      - /url: /labour/people
+      - text: Labour
+    - link:
+      - /url: /check
+      - text: Check
+- navigation:
+  - link:
+    - /url: /animals
+    - text: Animals
+  - link:
+    - /url: /animals/calvings
+    - text: Calvings
+  - link:
+    - /url: /animals/health
+    - text: Health
+- generic: "imran: -Rs 10.50 adjustment"
+- generic: "imran: -Rs 10.50 adjustment"
+- button: Cancel session setup
+- heading [level=2]: Before entering anything
+- paragraph: Both of these go on every record you write in this session. They are asked once rather than on each form, and they are not defaulted — a mislabelled source reads exactly like a correct one.
+- generic: Where is this coming from?
+- radiogroup:
+  - radio:
+    - generic: "1"
+    - generic: Recall
+    - generic: reconstructed from memory
+  - radio:
+    - generic: "2"
+    - generic: Daily herd sheet
+    - generic: the signed paper round
+  - radio:
+    - generic: "3"
+    - generic: Cycle card
+    - generic: an animal's own card
+  - radio [checked]:
+    - generic: "4"
+    - generic: Direct entry
+    - generic: seen and typed now
+  - radio:
+    - generic: "5"
+    - generic: Import
+    - generic: from another system
+- generic: Who is typing?
+- textbox:
+  - /placeholder: a stable identifier, not a display name
+  - text: acceptance-other
+- generic: Recorded on every event as recorded_by. Whoever remembered it, if this is recall.
+- paragraph:
+  - text: Whether someone actually
+  - emphasis: saw
+  - text: a thing is asked per record, and left blank by default. Nobody observed a purchase record.
+- generic: Where is this going?
+- paragraph: Harness — :memory:. Fixture data, discarded when that process exits. Nothing you enter here is kept.
+- button: Update recording session
+- main:
+  - heading [level=2]: Record a calving
+  - paragraph: Enter calvings oldest first. Each one creates its calf, so in order means a farm-born animal exists before anything refers to it.
+  - text: Dam
+  - generic: Find dam by serial or name
+  - searchbox
+  - paragraph: Search narrows the list. Ineligible dams remain visible with their reason.
+  - combobox
+  - generic: When did she calve?
+  - generic: Date
+  - textbox:
+    - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+    - text: 4 Oct 2026
+  - generic: Time (optional)
+  - textbox
+  - checkbox [disabled]
+  - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+  - paragraph: reading as an exact day — 2026-10-04
+  - paragraph: Not what you meant? Type it more precisely — Mar 2019 for a month, 6 Jul 2023 for a day. Nothing here can claim a day you did not type.
+  - generic: Calf sex
+  - radiogroup:
+    - radio [checked]:
+      - generic: "1"
+      - generic: female
+    - radio:
+      - generic: "2"
+      - generic: male
+  - generic: Outcome
+  - radiogroup:
+    - radio [checked]:
+      - generic: "1"
+      - generic: Live
+    - radio:
+      - generic: "2"
+      - generic: Stillborn
+    - radio:
+      - generic: "3"
+      - generic: Died within 24h
+  - paragraph: A calf that did not live is still recorded as an animal, still opens the lactation, and still counts toward parity and the calving interval.
+  - generic: Which calf is this?
+  - paragraph: Animals already in the registry that could be this calf, nearest birth date first. One will be here if you entered it in the roster pass, or in pass one because its dam was already in the herd.
+  - button [disabled]:
+    - generic: BD-0006
+    - generic: —
+    - generic: male
+    - generic: no birth date
+    - generic: recorded as male, but this calving says female
+  - paragraph: Animals that cannot be linked are shown greyed with the reason, rather than hidden — an animal missing from this list would read as data loss.
+  - button: 12 more, with birth dates further from this date
+  - button: None of these — create a new animal
+  - generic: Calf name (optional)
+  - textbox
+  - generic: Sire reference (optional)
+  - combobox
+  - generic: Free text. A stable identifier, not a display name.
+  - generic: Observed by (optional)
+  - combobox
+  - generic: Who actually saw it. Leave blank unless someone did — nobody observed a purchase record. A stable identifier, not a display name.
+  - button: Record calving
+  - paragraph: Cmd/Ctrl+Enter saves from a field when the record is ready.
+- dialog "Discard unsaved changes?":
+  - heading "Discard unsaved changes?" [level=2]
+  - paragraph: "Calving: your changes have not been saved. Discarding removes these changes."
+  - paragraph: Leaving discards this draft. Keep editing to retain your entries.
+  - button "Keep editing" [active]
+  - button "Discard changes"

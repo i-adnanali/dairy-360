@@ -1,0 +1,86 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance-synthetic · Direct entry"
+  - button "Menu · Herd":
+    - text: Menu
+    - generic: · Herd
+  - button "Search"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+- navigation "Section views":
+  - link "Animals":
+    - /url: /animals
+  - link "Calvings":
+    - /url: /animals/calvings
+  - link "Health":
+    - /url: /animals/health
+- generic: "imran: -Rs 10.50 adjustment"
+- generic: "imran: -Rs 10.50 adjustment"
+- main:
+  - heading "Record a calving" [level=2]
+  - paragraph: Enter calvings oldest first. Each one creates its calf, so in order means a farm-born animal exists before anything refers to it.
+  - text: Dam
+  - generic: Find dam by serial or name
+  - searchbox "Find dam by serial or name"
+  - paragraph: Search narrows the list. Ineligible dams remain visible with their reason.
+  - combobox "Dam":
+    - option "Choose a dam…"
+    - option "BD-0001 — Noor"
+    - option "BD-0002"
+    - option "BD-0003" [selected]
+    - option "BD-0004 (departed -- a calving on or after a departure is refused)" [disabled]
+    - option "BD-0005"
+    - option "BD-0007"
+    - option "BD-0008"
+    - option "BD-0009"
+    - option "BD-0010"
+    - option "BD-0011 (departed -- a calving on or after a departure is refused)" [disabled]
+    - option "BD-0013"
+    - option "BD-0014"
+  - group "When did she calve?":
+    - generic: When did she calve?
+    - generic: Date
+    - textbox "Date":
+      - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+      - text: 4 Oct 2026
+    - generic: Time (optional)
+    - textbox "Time (optional)"
+    - checkbox "Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1" [disabled]
+    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+    - paragraph: reading as an exact day — 2026-10-04
+    - paragraph: Not what you meant? Type it more precisely — Mar 2019 for a month, 6 Jul 2023 for a day. Nothing here can claim a day you did not type.
+  - generic: Calf sex
+  - radiogroup "Calf sex":
+    - radio "female" [checked] [active]:
+      - generic: "1"
+      - generic: female
+    - radio "male":
+      - generic: "2"
+      - generic: male
+  - generic: Outcome
+  - radiogroup "Outcome":
+    - radio "Live" [checked]:
+      - generic: "1"
+      - generic: Live
+    - radio "Stillborn":
+      - generic: "2"
+      - generic: Stillborn
+    - radio "Died within 24h":
+      - generic: "3"
+      - generic: Died within 24h
+  - paragraph: A calf that did not live is still recorded as an animal, still opens the lactation, and still counts toward parity and the calving interval.
+  - alert:
+    - text: Could not load calf candidates.
+    - button "Retry"
+  - generic: Which calf is this?
+  - paragraph: Matching calves could not be checked.
+  - generic: Sire reference (optional)
+  - combobox "Sire reference (optional)"
+  - generic: Free text. A stable identifier, not a display name.
+  - generic: Observed by (optional)
+  - combobox "Observed by (optional)"
+  - generic: Who actually saw it. Leave blank unless someone did — nobody observed a purchase record. A stable identifier, not a display name.
+  - button "Record calving" [disabled]
+  - generic: Retry the calf candidate lookup.
+  - paragraph: Cmd/Ctrl+Enter saves from a field when the record is ready.

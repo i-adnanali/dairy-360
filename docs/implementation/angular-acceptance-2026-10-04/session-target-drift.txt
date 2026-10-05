@@ -1,0 +1,233 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - 'generic "registry: /synthetic/acceptance-b.db"': registry
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Animals":
+    - /url: /animals
+  - link "Calvings":
+    - /url: /animals/calvings
+  - link "Health":
+    - /url: /animals/health
+- button "Cancel session setup"
+- heading "Before entering anything" [level=2]
+- paragraph: Both of these go on every record you write in this session. They are asked once rather than on each form, and they are not defaulted — a mislabelled source reads exactly like a correct one.
+- generic: Where is this coming from?
+- radiogroup "Where is this coming from?":
+  - radio "Recall":
+    - generic: "1"
+    - generic: Recall
+    - generic: reconstructed from memory
+  - radio "Daily herd sheet":
+    - generic: "2"
+    - generic: Daily herd sheet
+    - generic: the signed paper round
+  - radio "Cycle card":
+    - generic: "3"
+    - generic: Cycle card
+    - generic: an animal's own card
+  - radio "Direct entry":
+    - generic: "4"
+    - generic: Direct entry
+    - generic: seen and typed now
+  - radio "Import":
+    - generic: "5"
+    - generic: Import
+    - generic: from another system
+- generic: Who is typing?
+- textbox "Who is typing?":
+  - /placeholder: a stable identifier, not a display name
+- generic: Recorded on every event as recorded_by. Whoever remembered it, if this is recall.
+- paragraph:
+  - text: Whether someone actually
+  - emphasis: saw
+  - text: a thing is asked per record, and left blank by default. Nobody observed a purchase record.
+- generic: Where is this going?
+- paragraph: "The real registry — /synthetic/acceptance-b.db. Every record you enter is permanent: corrections are new events, and nothing is deleted."
+- checkbox "I mean to write to this database. This is not the harness."
+- generic: I mean to write to this database. This is not the harness.
+- button "Start entering" [disabled]
+- main:
+  - heading "Herd" [active] [level=2]
+  - text: Search records
+  - searchbox "Search records"
+  - paragraph: 13 animals
+  - link "Add animal":
+    - /url: /animals/new
+  - region "Herd records":
+    - table:
+      - rowgroup:
+        - row "Animal Status Sex Parity Born Origin Events":
+          - columnheader "Animal"
+          - columnheader "Status"
+          - columnheader "Sex"
+          - columnheader "Parity"
+          - columnheader "Born"
+          - columnheader "Origin"
+          - columnheader "Events"
+      - rowgroup:
+        - row "BD-0001 Noor majj · in milk female 2 2018year acquired 5":
+          - cell "BD-0001 Noor":
+            - link "BD-0001":
+              - /url: /animals/BD-0001
+            - generic: Noor
+          - cell "majj · in milk"
+          - cell "female"
+          - cell "2"
+          - cell "2018year"
+          - cell "acquired"
+          - cell "5"
+        - row "BD-0002 No record majj · in milk female 2 2017year acquired 3":
+          - cell "BD-0002 No record":
+            - link "BD-0002":
+              - /url: /animals/BD-0002
+            - generic "No record": –
+          - cell "majj · in milk"
+          - cell "female"
+          - cell "2"
+          - cell "2017year"
+          - cell "acquired"
+          - cell "3"
+        - row "BD-0003 No record majj · dry female 1 2019year acquired 3":
+          - cell "BD-0003 No record":
+            - link "BD-0003":
+              - /url: /animals/BD-0003
+            - generic "No record": –
+          - cell "majj · dry"
+          - cell "female"
+          - cell "1"
+          - cell "2019year"
+          - cell "acquired"
+          - cell "3"
+        - row "BD-0004 No record departed female 0 2016year acquired 2":
+          - cell "BD-0004 No record":
+            - link "BD-0004":
+              - /url: /animals/BD-0004
+            - generic "No record": –
+          - cell "departed"
+          - cell "female"
+          - cell "0"
+          - cell "2016year"
+          - cell "acquired"
+          - cell "2"
+        - row "BD-0005 No record majj · in milk female 1 2023year acquired 2":
+          - cell "BD-0005 No record":
+            - link "BD-0005":
+              - /url: /animals/BD-0005
+            - generic "No record": –
+          - cell "majj · in milk"
+          - cell "female"
+          - cell "1"
+          - cell "2023year"
+          - cell "acquired"
+          - cell "2"
+        - row "BD-0006 No record male male 0 No record acquired 1":
+          - cell "BD-0006 No record":
+            - link "BD-0006":
+              - /url: /animals/BD-0006
+            - generic "No record": –
+          - cell "male"
+          - cell "male"
+          - cell "0"
+          - cell "No record": unknown
+          - cell "acquired"
+          - cell "1"
+        - row "BD-0007 No record choti female 0 2023-03-14 born_on_farm 1":
+          - cell "BD-0007 No record":
+            - link "BD-0007":
+              - /url: /animals/BD-0007
+            - generic "No record": –
+          - cell "choti"
+          - cell "female"
+          - cell "0"
+          - cell "2023-03-14"
+          - cell "born_on_farm"
+          - cell "1"
+        - row "BD-0008 No record choti female 0 2024-06-02 born_on_farm 1":
+          - cell "BD-0008 No record":
+            - link "BD-0008":
+              - /url: /animals/BD-0008
+            - generic "No record": –
+          - cell "choti"
+          - cell "female"
+          - cell "0"
+          - cell "2024-06-02"
+          - cell "born_on_farm"
+          - cell "1"
+        - row "BD-0009 No record choti female 0 2023-04month born_on_farm 1":
+          - cell "BD-0009 No record":
+            - link "BD-0009":
+              - /url: /animals/BD-0009
+            - generic "No record": –
+          - cell "choti"
+          - cell "female"
+          - cell "0"
+          - cell "2023-04month"
+          - cell "born_on_farm"
+          - cell "1"
+        - row "BD-0010 No record choti female 0 2024-07month born_on_farm 1":
+          - cell "BD-0010 No record":
+            - link "BD-0010":
+              - /url: /animals/BD-0010
+            - generic "No record": –
+          - cell "choti"
+          - cell "female"
+          - cell "0"
+          - cell "2024-07month"
+          - cell "born_on_farm"
+          - cell "1"
+        - row "BD-0011 No record departed female 0 2025-02month born_on_farm 2":
+          - cell "BD-0011 No record":
+            - link "BD-0011":
+              - /url: /animals/BD-0011
+            - generic "No record": –
+          - cell "departed"
+          - cell "female"
+          - cell "0"
+          - cell "2025-02month"
+          - cell "born_on_farm"
+          - cell "2"
+        - row "BD-0013 No record choti female 0 ~2020est acquired 1":
+          - cell "BD-0013 No record":
+            - link "BD-0013":
+              - /url: /animals/BD-0013
+            - generic "No record": –
+          - cell "choti"
+          - cell "female"
+          - cell "0"
+          - cell "~2020est"
+          - cell "acquired"
+          - cell "1"
+        - row "BD-0014 No record katti female 0 2026-06-02 born_on_farm 1":
+          - cell "BD-0014 No record":
+            - link "BD-0014":
+              - /url: /animals/BD-0014
+            - generic "No record": –
+          - cell "katti"
+          - cell "female"
+          - cell "0"
+          - cell "2026-06-02"
+          - cell "born_on_farm"
+          - cell "1"
+    - navigation "Animals pagination":
+      - generic: 1–13 of 13

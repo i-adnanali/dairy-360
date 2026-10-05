@@ -10,10 +10,10 @@
       </header>
 
       <!-- dam -->
-      <div appCard>
+      <div appCard #damLookup tabindex="-1" role="group" aria-label="Dam lookup">
         <label appSectionLabel legend for="calving-dam">Dam</label>
         @if (damError()) {
-          <p role="alert">{{ damError() }} <button type="button" (click)="loadDams()">Retry</button></p>
+          <p role="alert">{{ damError() }} <button type="button" (click)="damLookup.focus(); loadDams()">Retry</button></p>
         } @else if (damsLoading()) {
           <p role="status">Loading dams…</p>
         } @else if (dams().length === 0) {
@@ -100,8 +100,9 @@
         </div>
       </div>
 
+      <div #calfLookup tabindex="-1" role="group" aria-label="Calf lookup">
       @if (candidateStatus() === 'failed') {
-        <p role="alert">Could not load calf candidates. <button type="button" (click)="retryCandidates()">Retry</button></p>
+        <p role="alert">Could not load calf candidates. <button type="button" (click)="calfLookup.focus(); retryCandidates()">Retry</button></p>
       }
       <app-calf-picker
         [candidates]="candidates()"
@@ -110,6 +111,7 @@
         [error]="state.fieldError('calf')"
         (changed)="onCalfChosen($event)"
       />
+      </div>
 
       <app-identifier-input
         field="sire_ref"

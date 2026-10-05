@@ -1,0 +1,16 @@
+
+> web-angular@0.0.0 test
+> ng test --watch=false --include=src/app/registry/feed-page/feed-page.spec.ts
+
+❯ Building...
+✔ Building...
+Application bundle generation complete. [5.993 seconds] - 2026-10-05T08:16:53.939Z
+
+
+ RUN  v4.1.9 /Users/adnanali/personal/dairy-360/web-angular
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  13:16:54
+   Duration  1.08s (transform 176ms, setup 189ms, import 256ms, tests 91ms, environment 451ms)

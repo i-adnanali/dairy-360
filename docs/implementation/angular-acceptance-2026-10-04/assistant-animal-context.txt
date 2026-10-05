@@ -1,0 +1,83 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant" [expanded]
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Animals":
+    - /url: /animals
+  - link "Calvings":
+    - /url: /animals/calvings
+  - link "Health":
+    - /url: /animals/health
+- main:
+  - heading "BD-0002" [level=2]
+  - generic "stored as lactating": majj · in milk
+  - term: Sex
+  - definition: female
+  - term: Origin
+  - definition: acquired
+  - term: Born
+  - definition: 2017year
+  - term: Parity
+  - definition: "2"
+  - navigation:
+    - button "Record"
+    - button "Add an event"
+    - button "Correct a calving"
+  - link "Life report / vaccination card":
+    - /url: /animals/BD-0002/report
+  - link "Manage health":
+    - /url: /animals/health
+  - list:
+    - generic: Acquired
+    - generic: 2019 year
+    - generic "Technical event details"
+    - paragraph: born 2017 (year)
+    - paragraph: recall · fixture · recorded by fixture_operator · no witness recorded
+    - generic: Calved
+    - generic: 2023-04 month
+    - generic "Technical event details"
+    - paragraph: calf BD-0009 · female · live
+    - paragraph: recall · fixture · recorded by fixture_operator · no witness recorded
+    - generic: Calved
+    - generic: 2024-07 month
+    - generic "Technical event details"
+    - paragraph: calf BD-0010 · female · live
+    - paragraph: recall · fixture · recorded by fixture_operator · no witness recorded
+- complementary "Dairy 360 assistant":
+  - heading "Dairy 360 assistant" [level=2]
+  - button "Expand"
+  - button "Close Dairy 360 assistant":
+    - text: Close
+    - generic: Dairy 360 assistant
+  - generic: 🐃
+  - heading "How can I help?" [level=3]
+  - paragraph: I can read your records to answer questions, and propose record changes that you approve before anything is written.
+  - button "Review BD-0002 and explain what is missing."
+  - button "Summarize the recorded facts for BD-0002."
+  - button "What should I check before recording changes for BD-0002?"
+  - generic: Viewing BD-0002 — include the record ID in your question; this location is not sent.
+  - paragraph: Enter to send · Shift+Enter for a new line
+  - textbox "Message to Dairy 360 assistant" [active]:
+    - /placeholder: Ask about the herd, or request an action…
+  - button "Send" [disabled]

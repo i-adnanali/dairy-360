@@ -1,0 +1,79 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "People":
+    - /url: /labour/people
+  - link "Payroll":
+    - /url: /labour/payroll
+- main:
+  - heading "People" [active] [level=2]
+  - link "Add person":
+    - /url: "#add-person"
+  - link "Open stint":
+    - /url: "#open-stint"
+  - paragraph: People, employment stints and balances. Add a person first, then open a stint if they work here.
+  - text: Search records
+  - searchbox "Search records": no-such-synthetic-personxy
+  - paragraph: No matches for this search.
+  - heading "Add a person" [level=3]
+  - text: Identifier
+  - textbox "Identifier":
+    - /placeholder: imran
+  - generic: Permanent and unique; used on records and in “observed by”. Cannot be changed later.
+  - generic: Display name (optional)
+  - textbox "Display name (optional)":
+    - /placeholder: Imran
+  - generic: Contact (optional)
+  - textbox "Contact (optional)"
+  - generic: Recording is off, so a person cannot be saved yet.
+  - button "Start recording"
+  - heading "Open a stint" [level=3]
+  - paragraph: For rehire, open a new stint to keep earlier pay terms separate. Concurrent stints are allowed for different roles.
+  - text: Find person by identifier or name
+  - searchbox "Find person by identifier or name"
+  - text: Person
+  - combobox "Person":
+    - option "Choose…" [selected]
+    - option "abdul · Abdul"
+    - option "imran · Imran"
+    - option "rashid · Rashid"
+  - text: Kind
+  - radiogroup "Engagement kind":
+    - radio "Salaried" [checked]:
+      - generic: "1"
+      - generic: Salaried
+      - generic: on every monthly run
+    - radio "Dihari":
+      - generic: "2"
+      - generic: Dihari
+      - generic: per day, when hired
+  - generic: Salaried people are on every monthly run and must be answered. Dihari are not a row until they worked a day.
+  - generic: Role (optional)
+  - textbox "Role (optional)":
+    - /placeholder: milker
+  - text: Started on
+  - textbox "Started on": 2026-10-05
+  - generic: Recording is off, so a stint cannot be saved yet.
+  - button "Start recording"

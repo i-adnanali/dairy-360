@@ -1,0 +1,111 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance-synthetic · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- generic: Saved crop Seasonal maize.
+- generic: Saved crop Seasonal maize.
+- main:
+  - heading "Fodder crops" [level=2]
+  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.
+  - button "Feed catalogue"
+  - heading "Seasonal maize" [level=3]
+  - paragraph: Revision 2 · direct_entry · acceptance-synthetic · isolated fixture · 2026-10-04T03:50:35.221Z
+  - paragraph: Current recorded lifecycle; expenses and supply dates below retain their history.
+  - paragraph: cutting · East plot · 2 acres
+  - paragraph: "sowing: 2026-09 (month)"
+  - paragraph: "cutting start: Unknown"
+  - paragraph: "cutting end: Unknown"
+  - paragraph
+  - button "Correct / finish / archive"
+  - button "Correction history"
+  - status: The save outcome is unknown. Your entries are locked. Use the save action again to retry the exact same request before editing or leaving.
+  - paragraph: Saved record · revision 3 · recorded by acceptance-concurrent · direct_entry · isolated fixture
+  - heading "Correct crop" [level=3]
+  - generic: Name
+  - textbox "Name" [disabled]: Seasonal maize
+  - heading "Plot and lifecycle" [level=4]
+  - generic: Plot (optional)
+  - textbox "Plot (optional)" [disabled]: East plot
+  - generic: Acres (optional)
+  - spinbutton "Acres (optional)" [disabled]: "2"
+  - generic: Status
+  - combobox "Status" [disabled]:
+    - option "Growing"
+    - option "Cutting" [selected]
+    - option "Finished"
+  - group "sowing date (optional)":
+    - generic: sowing date (optional)
+    - generic: Date
+    - textbox "Date" [disabled]:
+      - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+      - text: Sep 2026
+    - checkbox "Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1" [disabled]
+    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+    - paragraph: reading as month only — 2026-09, stored as the 1st
+    - paragraph: Not what you meant? Type it more precisely — Mar 2019 for a month, 6 Jul 2023 for a day. Nothing here can claim a day you did not type.
+  - group "cutting start date (optional)":
+    - generic: cutting start date (optional)
+    - generic: Date
+    - textbox "Date" [disabled]:
+      - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+    - checkbox "Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1" [disabled]
+    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.
+  - group "cutting end date (optional)":
+    - generic: cutting end date (optional)
+    - generic: Date
+    - textbox "Date" [disabled]:
+      - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+    - checkbox "Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1" [disabled]
+    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.
+  - paragraph: Unknown dates and acreage are valid. Finishing does not invent a last cutting date.
+  - checkbox "Archived — keep historical references" [disabled]
+  - text: Archived — keep historical references
+  - generic: Notes (optional)
+  - textbox "Notes (optional)" [disabled]: Acceptance lost response after month-preserving adoption
+  - generic: Source reference (optional)
+  - textbox "Source reference (optional)" [disabled]: isolated fixture
+  - alert [active]: this static server could not reach http://127.0.0.1:6511 (ECONNRESET). Start a registry backend -- harness or real -- and reload.
+  - paragraph: This correction will be recorded by acceptance-synthetic · direct_entry
+  - button "Save crop"
+  - button "Cancel"
+  - heading "Expenses recorded so far — Rs 1,500.00" [level=3]
+  - paragraph: Do not duplicate existing payroll salaries.
+  - button "Add expense"
+  - navigation "Expenses pagination":
+    - generic: 1–1 of 1
+  - generic: 2026-10-04 · seed · Rs 1,500.00 · Expense incurred; payment not tracked
+  - button "Correct expense"
+  - button "Remove expense"
+  - button "Expense history"
+  - heading "Recorded supply days" [level=3]
+  - link "2026-10-04":
+    - /url: /feed/daily/2026-10-04

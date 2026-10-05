@@ -97,6 +97,25 @@ describe('health management', () => {
     expect(c.form.vet).toBe('Doctor');
     expect(f.nativeElement.querySelector('input[name="vet"]')).not.toBeNull();
   });
+  it('focuses the visible error summary after a field refusal and keeps its field association', async () => {
+    write.mockRejectedValue(new ApiError({ error: 'invalid_field', field: 'vet', message: 'Use the recorded vet name.' }, true));
+    const f = TestBed.createComponent(HealthPage), c = f.componentInstance as any;
+    await f.whenStable();
+    TestBed.inject(Session).set('direct_entry', 'operator');
+    await c.create('visits');
+    c.dateChanged({ status: 'complete', value: { occurred_on: '2026-09-17', date_precision: 'day', occurred_time: null }, reading: '' });
+    c.form.vet = 'Doctor';
+    await c.save();
+    await f.whenStable();
+    await new Promise(resolve => setTimeout(resolve, 10));
+    const summary = f.nativeElement.querySelector('[role="alert"]');
+    expect(document.activeElement).toBe(summary);
+    expect(summary.textContent).toContain('Use the recorded vet name.');
+    const field = f.nativeElement.querySelector('#health-vet');
+    expect(field.getAttribute('aria-invalid')).toBe('true');
+    expect(document.getElementById(field.getAttribute('aria-describedby'))?.textContent).toContain('Use the recorded vet name.');
+    expect(c.form.vet).toBe('Doctor');
+  });
   it('preserves inputs and retry key when a save outcome is uncertain', async () => {
     write.mockRejectedValue(
       new ApiError({ error: 'network_unreachable', message: 'Network unavailable' }, false),

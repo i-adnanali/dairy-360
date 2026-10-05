@@ -1,0 +1,211 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant" [expanded]
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Animals":
+    - /url: /animals
+  - link "Calvings":
+    - /url: /animals/calvings
+  - link "Health":
+    - /url: /animals/health
+- main:
+  - heading "Animal health" [level=2]
+  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.
+  - button "Start vet visit"
+  - button "Record dose"
+  - button "Vaccination round"
+  - generic: Health board date
+  - textbox "Health board date": 2026-10-05
+  - generic "Task status summary":
+    - button "3 Overdue"
+    - button "0 Due today"
+    - button "2 Upcoming"
+  - generic: Filter animal
+  - combobox "Filter animal":
+    - option "All animals" [selected]
+    - option "BD-0001 · Noor"
+    - option "BD-0002 · Unnamed"
+    - option "BD-0003 · Unnamed"
+    - option "BD-0004 · Unnamed"
+    - option "BD-0005 · Unnamed"
+    - option "BD-0006 · Unnamed"
+    - option "BD-0007 · Unnamed"
+    - option "BD-0008 · Unnamed"
+    - option "BD-0009 · Unnamed"
+    - option "BD-0010 · Unnamed"
+    - option "BD-0011 · Unnamed"
+    - option "BD-0013 · Unnamed"
+    - option "BD-0014 · Unnamed"
+  - generic: Task type
+  - combobox "Task type":
+    - option "All task types" [selected]
+    - option "Doses"
+    - option "Rechecks"
+    - option "Tests"
+  - generic: Due status
+  - combobox "Due status":
+    - option "All outstanding" [selected]
+    - option "Overdue"
+    - option "Due today"
+    - option "Upcoming"
+    - option "Completed"
+    - option "Cancelled"
+    - option "Missed"
+    - option "Deferred"
+  - generic: Assigned person
+  - textbox "Assigned person":
+    - /placeholder: Filter by name
+  - heading "Outstanding tasks" [level=3]
+  - navigation "Health tasks pagination":
+    - generic: 1–5 of 5
+  - article:
+    - link "BD-0001 Noor":
+      - /url: /animals/BD-0001
+    - generic: Overdue
+    - heading "Fixture overdue" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-03
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture overdue"': Record completion
+    - 'button "Change status for BD-0001: Fixture overdue"': Change status
+  - article:
+    - link "BD-0001 Noor":
+      - /url: /animals/BD-0001
+    - generic: Overdue
+    - heading "Fixture due" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-04
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture due"': Record completion
+    - 'button "Change status for BD-0001: Fixture due"': Change status
+  - article:
+    - link "BD-0001 Noor":
+      - /url: /animals/BD-0001
+    - generic: Overdue
+    - heading "Fixture recheck" [level=4]
+    - paragraph:
+      - text: Recheck · Due
+      - time: 2026-10-04
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture recheck"': Record completion
+    - 'button "Change status for BD-0001: Fixture recheck"': Change status
+  - article:
+    - link "BD-0001 Noor":
+      - /url: /animals/BD-0001
+    - generic: Upcoming
+    - heading "Fixture upcoming" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-07
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture upcoming"': Record completion
+    - 'button "Change status for BD-0001: Fixture upcoming"': Change status
+  - article:
+    - link "BD-0002":
+      - /url: /animals/BD-0002
+    - generic: Upcoming
+    - heading "Demonstration round vaccine" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-08
+    - 'button "Record completion for BD-0002: Demonstration round vaccine"': Record completion
+    - 'button "Change status for BD-0002: Demonstration round vaccine"': Change status
+  - region "Withdrawal instructions needing attention (6)":
+    - heading "Withdrawal instructions needing attention (6)" [level=3]
+    - paragraph: BD-0003 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0003 · milk · Historical vaccine, details incomplete": Source recorded dose
+    - paragraph: BD-0003 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0003 · meat · Historical vaccine, details incomplete": Source recorded dose
+    - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention
+    - paragraph: Needs clarification — 2 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Demonstration vaccine (not a clinical protocol) · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0001 · meat · Demonstration vaccine (not a clinical protocol)": Source recorded dose
+    - paragraph: Demonstration round vaccine · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0001 · meat · Demonstration round vaccine": Source recorded dose
+    - paragraph: BD-0002 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph:
+      - text: "Recorded end:"
+      - time: 2026-10-06 18:00:00+05:00
+    - generic "Original instructions and sources"
+    - paragraph: Demonstration medicine corrected · Synthetic withdrawal instruction for UI demonstration
+    - paragraph: Issued by Dr Fixture
+    - paragraph: "Recorded end: 2026-10-06T18:00:00+05:00"
+    - button "Source recorded dose for BD-0002 · milk · Demonstration medicine corrected": Source recorded dose
+    - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Demonstration medicine corrected · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0002 · meat · Demonstration medicine corrected": Source recorded dose
+  - generic "Open cases (1)"
+  - generic: Records
+  - combobox "Records":
+    - option "Veterinary visits" [selected]
+    - option "Examinations"
+    - option "Health cases"
+    - option "Medicines and vaccines"
+    - option "Treatment and vaccination plans"
+    - option "Scheduled tasks"
+    - option "Recorded doses"
+    - option "Test results"
+    - option "Health costs"
+  - navigation "Health records pagination":
+    - generic: 1–1 of 1
+  - article:
+    - paragraph: Demonstration vaccination and treatment round · 2026-10-02
+    - paragraph: closed · day · revision 2 · recorded by health_fixture
+    - button "View / edit"
+    - button "History"
+    - button "Examine animal"
+    - button "Record dose"
+- complementary "Dairy 360 assistant":
+  - heading "Dairy 360 assistant" [level=2]
+  - button "Expand"
+  - button "Close Dairy 360 assistant":
+    - text: Close
+    - generic: Dairy 360 assistant
+  - generic: 🐃
+  - heading "How can I help?" [level=3]
+  - paragraph: I can read your records to answer questions, and propose record changes that you approve before anything is written.
+  - button "Review animal health and explain what is missing."
+  - button "Summarize the recorded facts for animal health."
+  - button "What should I check before recording changes for animal health?"
+  - generic: Viewing animal health — include the record ID in your question; this location is not sent.
+  - paragraph: Enter to send · Shift+Enter for a new line
+  - textbox "Message to Dairy 360 assistant" [active]:
+    - /placeholder: Ask about the herd, or request an action…
+  - button "Send" [disabled]

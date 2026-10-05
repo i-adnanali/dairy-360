@@ -55,6 +55,9 @@
           Default coverage begins at the first saved summary. A missing day means not recorded,
           never not fed.
         </p>
+        @if (rangeLoading()) {
+          <p role="status" appHelp>Loading selected feed range…</p>
+        }
         @if (overview(); as o) {
           @if (mode === 'overview') {
             <div class="grid gap-4 sm:grid-cols-3">

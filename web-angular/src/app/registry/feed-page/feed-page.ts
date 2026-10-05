@@ -3,7 +3,7 @@ import { DraftRegistry } from "../draft-registry";
 import { writerDraft } from "../writer-draft";
 import { LocalPagination } from "../../ui/local-pagination/local-pagination";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RegistryApi } from "../api";
@@ -53,6 +53,7 @@ export class FeedPage {
   readonly overview = signal<FeedOverview | null>(null);
   readonly error = signal('');
   readonly loading = signal(true);
+  readonly rangeLoading = signal(false);
   readonly revisions = signal<
     {
       id: string;
@@ -89,6 +90,8 @@ export class FeedPage {
   private readonly drafts = inject(DraftRegistry);
   private readonly changeDetector = inject(ChangeDetectorRef);
   private loadGeneration = 0;
+  private historyGeneration = 0;
+  private rangeGeneration = 0;
   private readonly removalDraft = writerDraft({
     name: 'Feed removal',
     fields: {},
@@ -118,6 +121,11 @@ export class FeedPage {
     this.changeDetector.markForCheck();
   }
   constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      ++this.loadGeneration;
+      ++this.historyGeneration;
+      ++this.rangeGeneration;
+    });
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(() => {
       this.editor = false;
       this.itemOpen = false;
@@ -183,6 +191,10 @@ export class FeedPage {
     );
   }
   async load() {
+    ++this.rangeGeneration;
+    this.rangeLoading.set(false);
+    ++this.historyGeneration;
+    this.revisions.set([]);
     const generation = ++this.loadGeneration,
       mode = this.mode,
       id = this.id;
@@ -211,16 +223,23 @@ export class FeedPage {
     }
   }
   async loadRange() {
+    const generation = ++this.rangeGeneration;
+    this.rangeLoading.set(true);
+    this.overview.set(null);
+    this.error.set('');
     try {
       const q = new URLSearchParams({ to: this.to });
       if (this.from) q.set('from', this.from);
       const o = await this.api.feedGet<FeedOverview>('overview?' + q);
+      if (generation !== this.rangeGeneration) return;
       this.overview.set(o);
       this.from = o.from;
       this.to = o.to;
       this.error.set('');
     } catch (e) {
-      this.error.set(String(e));
+      if (generation === this.rangeGeneration) this.error.set(String(e));
+    } finally {
+      if (generation === this.rangeGeneration) this.rangeLoading.set(false);
     }
   }
   cancelEditor() {
@@ -236,10 +255,14 @@ export class FeedPage {
     else await this.load();
   }
   async showRevisions(d: FeedRecord, entity = this.mode) {
+    const generation = ++this.historyGeneration;
+    this.revisions.set([]);
+    this.error.set('');
     try {
-      this.revisions.set(await this.api.feedGet(entity + '/' + d.id + '/revisions'));
+      const revisions = await this.api.feedGet<ReturnType<typeof this.revisions>>(entity + '/' + d.id + '/revisions');
+      if (generation === this.historyGeneration) this.revisions.set(revisions);
     } catch (e) {
-      this.error.set(String(e));
+      if (generation === this.historyGeneration) this.error.set(String(e));
     }
   }
   async startRemoval(record: FeedRecord) {
