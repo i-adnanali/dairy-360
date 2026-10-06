@@ -1,0 +1,16 @@
+
+> dairy-360@1.0.0 check:contrast
+> node scripts/check-contrast.mjs
+
+
+WCAG contrast over the token layer
+  122 graded checks (TEXT/FOCUS/MARK), 0 failures
+  102 INFO rows, reported and never failed
+
+--- LIGHT: 0 failure(s) ---
+
+--- DARK: 0 failure(s) ---
+
+TEXT pairs passing AA but under AAA (7:1): 48
+Held resting-border failures: 0; unexpected failures: 0
+Disabled text census: Button inactive actions, CalfPicker ineligible disabled options, PrecisionDate disabled estimated checkbox.

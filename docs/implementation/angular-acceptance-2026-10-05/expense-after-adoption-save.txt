@@ -1,0 +1,59 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_20261006 · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- generic: Saved expense.
+- generic: Saved expense.
+- main:
+  - heading "Fodder crops" [level=2]
+  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.
+  - button "Feed catalogue"
+  - heading "Seasonal maize" [level=3]
+  - paragraph: Revision 1 · direct_entry · adnan · harness fixture · 2026-10-05T08:45:27.267Z
+  - paragraph: Current recorded lifecycle; expenses and supply dates below retain their history.
+  - paragraph: cutting · East plot · 2 acres
+  - paragraph: "sowing: Unknown"
+  - paragraph: "cutting start: Unknown"
+  - paragraph: "cutting end: Unknown"
+  - paragraph
+  - button "Correct / finish / archive"
+  - button "Correction history"
+  - heading "Expenses recorded so far — Rs 1,600.00" [level=3]
+  - paragraph: Do not duplicate existing payroll salaries.
+  - button "Add expense"
+  - navigation "Expenses pagination":
+    - generic: 1–1 of 1
+  - generic: 2026-10-05 · seed · Rs 1,600.00 · Saved after expense adoption
+  - button "Correct expense"
+  - button "Remove expense"
+  - button "Expense history"
+  - heading "Recorded supply days" [level=3]
+  - link "2026-10-05":
+    - /url: /feed/daily/2026-10-05

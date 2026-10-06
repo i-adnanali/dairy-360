@@ -1,0 +1,39 @@
+
+> dairy-360@1.0.0 check:docs
+> node --test scripts/check-docs.test.mjs && node scripts/check-docs.mjs
+
+TAP version 13
+# Subtest: Markdown handles reference links, nested labels, HTML, Unicode headings and duplicate anchors; ignores code
+ok 1 - Markdown handles reference links, nested labels, HTML, Unicode headings and duplicate anchors; ignores code
+  ---
+  duration_ms: 12.215458
+  type: 'test'
+  ...
+# Subtest: Missing paths and fragments fail, valid local references and source line fragments pass
+ok 2 - Missing paths and fragments fail, valid local references and source line fragments pass
+  ---
+  duration_ms: 2.579084
+  type: 'test'
+  ...
+# Subtest: Image manifest catches hash, dimensions and snapshot drift
+ok 3 - Image manifest catches hash, dimensions and snapshot drift
+  ---
+  duration_ms: 1.744
+  type: 'test'
+  ...
+# Subtest: Local-only targets fail identically in local and clean checkouts
+ok 4 - Local-only targets fail identically in local and clean checkouts
+  ---
+  duration_ms: 1.079875
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 74.885709
+Documentation: 94 Markdown files, 1570 local links; 0 errors.

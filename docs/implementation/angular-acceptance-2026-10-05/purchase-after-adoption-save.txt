@@ -1,0 +1,46 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_20261006 · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- generic: Saved purchase.
+- generic: Saved purchase.
+- main:
+  - heading "Feed purchases" [level=2]
+  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.
+  - button "Feed catalogue"
+  - heading "Silage" [level=3]
+  - paragraph: Revision 3 · direct_entry · acceptance_20261006 · harness fixture · 2026-10-06T01:03:11.080Z
+  - paragraph: Delivered 2026-10-05 · supplier unspecified
+  - paragraph: 400 kg · Rs 2,000.00 per 40 kg
+  - paragraph: Goods Rs 20,000.00 + transport Rs 150.00 + other Rs 0.00 = Rs 20,150.00
+  - paragraph: Saved after purchase adoption
+  - button "Correct"
+  - button "Remove purchase"
+  - button "Correction history"

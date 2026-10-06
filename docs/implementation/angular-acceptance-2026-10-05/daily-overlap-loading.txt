@@ -1,0 +1,36 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_20261006 · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- generic: Saved expense.
+- generic: Saved expense.
+- main:
+  - heading "Daily feeding" [active] [level=2]
+  - paragraph: One account for the day. Unknown quantity and unspecified recipients are valid.

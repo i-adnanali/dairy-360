@@ -1,0 +1,49 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "People":
+    - /url: /labour/people
+  - link "Payroll":
+    - /url: /labour/payroll
+- main:
+  - heading "People" [active] [level=2]
+  - link "Add person":
+    - /url: "#add-person"
+  - paragraph: People, employment stints and balances. Add a person first, then open a stint if they work here.
+  - text: Search records
+  - searchbox "Search records"
+  - paragraph: Nobody on file yet. Add the people who work here — then open a stint for each, and record what they are on.
+  - heading "Add a person" [level=3]
+  - text: Identifier
+  - textbox "Identifier":
+    - /placeholder: imran
+  - generic: Permanent and unique; used on records and in “observed by”. Cannot be changed later.
+  - generic: Display name (optional)
+  - textbox "Display name (optional)":
+    - /placeholder: Imran
+  - generic: Contact (optional)
+  - textbox "Contact (optional)"
+  - generic: Recording is off, so a person cannot be saved yet.
+  - button "Start recording"

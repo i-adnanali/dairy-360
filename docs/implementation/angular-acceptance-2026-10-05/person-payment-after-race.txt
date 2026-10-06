@@ -1,0 +1,88 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_20261005 · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "People":
+    - /url: /labour/people
+  - link "Payroll":
+    - /url: /labour/payroll
+- generic: "imran: Rs 1.00 cash"
+- generic: "imran: Rs 1.00 cash"
+- main:
+  - link "← People":
+    - /url: /labour/people
+  - heading "Imran imran" [level=2]
+  - paragraph: Rs 6,999.00 owed.
+  - paragraph: 1 open employment stint(s)
+  - link "Record payment or adjustment":
+    - /url: "#person-payment"
+  - heading "Record a payment" [level=3]
+  - paragraph: Payments settle the balance; wages earned are recorded in Payroll. Adjustments change the balance without recording a payment.
+  - group "Amount, date and method":
+    - generic: Amount, date and method
+    - text: Method
+    - radiogroup "Payment method":
+      - radio "Cash" [checked]:
+        - generic: "1"
+        - generic: Cash
+      - radio "Bank":
+        - generic: "2"
+        - generic: Bank
+      - radio "Adjustment":
+        - generic: "3"
+        - generic: Adjustment
+        - generic: signed, must say why
+    - generic: Amount (Rs)
+    - textbox "Amount (Rs)"
+    - generic: Rs
+    - generic: "On"
+    - textbox "On": 2026-10-05
+    - generic: Reference (optional)
+    - textbox "Reference (optional)":
+      - /placeholder: peshgi
+  - group "Reason and recorder":
+    - generic: Reason and recorder
+    - generic: Note (optional)
+    - textbox "Note (optional)"
+    - generic: Handed over by (optional)
+    - combobox "Handed over by (optional)"
+    - generic: Person who handed over this payment, if known. Use a stable identifier, not a display name.
+  - button "Record payment" [disabled] [active]
+  - heading "Stints" [level=3]
+  - list:
+    - generic: Salaried· milker
+    - generic: 2026-06-07 → open
+    - paragraph: Rs 25,000.00 / month · accommodation · 20 kg flour / month · 2 L milk / day
+    - button "Close this stint"
+  - heading "Statement" [level=3]
+  - generic: 2026-09
+  - generic: earned Rs 22,000.00 · paid Rs 15,000.00 · closing Rs 7,000.00
+  - list:
+    - generic: Wage 2026-09-01 → 2026-09-30· four days leave
+    - generic: Rs 22,000.00
+    - generic: Paid 2026-09-30 cash
+    - generic: − Rs 15,000.00
+  - generic: 2026-10
+  - generic: earned Rs 0.00 · paid Rs 1.00 · closing Rs 6,999.00
+  - list:
+    - generic: Paid 2026-10-05 cash
+    - generic: − Rs 1.00

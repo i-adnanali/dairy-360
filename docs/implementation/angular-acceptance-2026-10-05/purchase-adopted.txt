@@ -1,0 +1,99 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_20261006 · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- generic: Saved feed item Silage.
+- generic: Saved feed item Silage.
+- main:
+  - heading "Feed purchases" [level=2]
+  - paragraph: Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured; recorded costs are not cash paid or feed consumed cost.
+  - button "Feed catalogue"
+  - heading "Silage" [level=3]
+  - paragraph: Revision 1 · direct_entry · adnan · harness fixture · 2026-10-05T08:45:27.270Z
+  - paragraph: Delivered 2026-10-05 · supplier unspecified
+  - paragraph: 400 kg · Rs 2,000.00 per 40 kg
+  - paragraph: Goods Rs 20,000.00 + transport Rs 100.00 + other Rs 0.00 = Rs 20,100.00
+  - paragraph
+  - button "Correct"
+  - button "Remove purchase"
+  - button "Correction history"
+  - paragraph: Saved record · revision 2 · recorded by acceptance_concurrent · direct_entry · harness fixture
+  - heading "Correct purchase" [level=3]
+  - heading "Item and delivery" [level=4]
+  - generic: Delivery date
+  - textbox "Delivery date": 2026-10-05
+  - paragraph: Use an exact date. Defer uncertain historical invoices rather than assign today.
+  - generic: Feed item
+  - combobox "Feed item":
+    - option "Choose item"
+    - option "Silage" [selected]
+    - option "Khall"
+    - option "Fresh fodder"
+  - button "Create feed item"
+  - generic: Supplier (optional)
+  - textbox "Supplier (optional)"
+  - heading "Quantity and original unit" [level=4]
+  - generic: Quantity (optional)
+  - spinbutton "Quantity (optional)": "400"
+  - generic: Original unit
+  - textbox "Original unit":
+    - /placeholder: kg, trolley, bundle, bag…
+    - text: kg
+  - paragraph: Blank quantity means unmeasured. A bag or container has no inferred weight.
+  - heading "Price agreement" [level=4]
+  - generic: Pricing
+  - combobox "Pricing":
+    - option "Total cost unknown"
+    - option "Known goods total"
+    - option "Quantity × agreed rate" [selected]
+  - generic: Price (Rs)
+  - spinbutton "Price (Rs)": "2000"
+  - generic: Rs
+  - generic: Per quantity
+  - spinbutton "Per quantity": "40"
+  - generic: Rate unit
+  - textbox "Rate unit":
+    - /placeholder: kg
+    - text: kg
+  - heading "Additional charges" [level=4]
+  - generic: Transport (Rs)
+  - spinbutton "Transport (Rs)": "150"
+  - generic: Rs
+  - generic: Other charges (Rs)
+  - spinbutton "Other charges (Rs)": "0"
+  - generic: Rs
+  - paragraph: Recorded acquisition cost; this does not record a payment or assert that the feed was given.
+  - generic: Notes (optional)
+  - textbox "Notes (optional)": Concurrent purchase revision
+  - generic: Source reference (optional)
+  - textbox "Source reference (optional)": harness fixture
+  - paragraph: This correction will be recorded by acceptance_20261006 · direct_entry
+  - button "Save purchase" [disabled]
+  - button "Cancel"

@@ -1,0 +1,40 @@
+{
+  "source_form": "direct_entry",
+  "recorded_by": "adnan",
+  "source_ref": "harness fixture",
+  "observed_by": null,
+  "notes": null,
+  "sowing_on": null,
+  "sowing_precision": null,
+  "cutting_start_on": null,
+  "cutting_start_precision": null,
+  "cutting_end_on": null,
+  "cutting_end_precision": null,
+  "label": "Seasonal maize",
+  "plot": "East plot",
+  "acreage": 2,
+  "status": "cutting",
+  "archived": false,
+  "id": "feed_78532560-fcfe-4edc-9aa2-05f25d979559",
+  "revision": 1,
+  "recorded_at": "2026-10-05T08:45:27.267Z",
+  "expenses": [
+    {
+      "source_form": "direct_entry",
+      "recorded_by": "adnan",
+      "source_ref": "harness fixture",
+      "observed_by": null,
+      "notes": null,
+      "crop_id": "feed_78532560-fcfe-4edc-9aa2-05f25d979559",
+      "on": "2026-10-05",
+      "category": "seed",
+      "amount_minor": 150000,
+      "id": "feed_2f45009b-b871-40de-8af6-599dfcec4a48",
+      "revision": 1,
+      "recorded_at": "2026-10-05T08:45:27.268Z"
+    }
+  ],
+  "supply_days": [
+    "2026-10-05"
+  ]
+}

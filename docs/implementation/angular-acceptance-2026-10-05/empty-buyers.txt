@@ -1,0 +1,77 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Milking":
+    - /url: /milk/milking
+  - link "Dispatch":
+    - /url: /milk/dispatch
+  - link "Buyers":
+    - /url: /milk/buyers
+- main:
+  - heading "Buyers" [active] [level=2]
+  - paragraph: Everyone milk goes to, and what they pay for it. The house is here too — milk kept at home is a disposition, not a sale, so it has no price and never appears in a balance.
+  - text: Search records
+  - searchbox "Search records"
+  - paragraph:
+    - text: No destinations yet. Add the dodhi, the neighbours who buy, and
+    - strong: the house
+    - text: — without a home row, milk kept for the family disappears into the reconciliation gap instead of being recorded.
+  - heading "Add a destination" [level=3]
+  - generic: Name
+  - textbox "Name"
+  - generic: Kind
+  - radiogroup "Kind":
+    - radio "Dodhi" [checked]:
+      - generic: "1"
+      - generic: Dodhi
+    - radio "Household":
+      - generic: "2"
+      - generic: Household
+    - radio "Shop":
+      - generic: "3"
+      - generic: Shop
+    - radio "Home (kept)":
+      - generic: "4"
+      - generic: Home (kept)
+    - radio "Other":
+      - generic: "5"
+      - generic: Other
+  - generic: Buying since
+  - textbox "Buying since": 2026-10-05
+  - generic: On every sheet?
+  - radiogroup "On every sheet":
+    - radio "Every session" [checked]:
+      - generic: "1"
+      - generic: Every session
+    - radio "Only when they come":
+      - generic: "2"
+      - generic: Only when they come
+  - paragraph:
+    - strong: Every session
+    - text: for someone who is always accounted for — the dodhi, the house.
+    - strong: Only when they come
+    - text: "for a neighbour who takes surplus: they will never be marked absent, so nothing trains anyone to click past the sheet."
+  - generic: Recording is off, so a destination cannot be saved yet.
+  - button "Start recording"

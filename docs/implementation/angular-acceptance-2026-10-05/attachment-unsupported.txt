@@ -1,0 +1,244 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_20261005 · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Animals":
+    - /url: /animals
+  - link "Calvings":
+    - /url: /animals/calvings
+  - link "Health":
+    - /url: /animals/health
+- generic: "imran: Rs 1.00 cash"
+- generic: "imran: Rs 1.00 cash"
+- main:
+  - heading "Animal health" [level=2]
+  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.
+  - button "Start vet visit"
+  - button "Record dose"
+  - button "Vaccination round"
+  - alert [active]: "ApiError: Only JPEG, PNG and PDF files are supported."
+  - button "Reload records"
+  - heading "Record veterinary visit" [level=3]
+  - paragraph: The recorder and source come from your recording session. Enter the actual vet or administrator separately.
+  - paragraph: This entry will be recorded by acceptance_20261005 · direct_entry
+  - paragraph: Return to the task board using Close; unsaved changes remain protected.
+  - group "Record date":
+    - generic: Record date
+    - generic: Date
+    - textbox "Date":
+      - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+    - checkbox "Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1" [disabled]
+    - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+    - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.
+  - generic: Veterinarian (enter unknown if unavailable)
+  - textbox "Veterinarian (enter unknown if unavailable)"
+  - generic: Reason for visit
+  - textbox "Reason for visit"
+  - generic: Visit status
+  - combobox "Visit status":
+    - option "Choose"
+    - option "open"
+    - option "closed"
+  - heading "Evidence" [level=4]
+  - generic: Source reference / prescription number
+  - textbox "Source reference / prescription number"
+  - generic: Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)
+  - button "Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)"
+  - status: Upload failed. The attachment has not been linked to this record.
+  - button "Retry failed upload"
+  - button "Save record"
+  - button "Close"
+  - generic: Health board date
+  - textbox "Health board date": 2026-10-05
+  - generic "Task status summary":
+    - button "1 Overdue"
+    - button "2 Due today"
+    - button "2 Upcoming"
+  - generic: Filter animal
+  - combobox "Filter animal":
+    - option "All animals" [selected]
+    - option "BD-0001 · Noori"
+    - option "BD-0002 · Sohni"
+    - option "BD-0003 · Kali"
+    - option "BD-0004 · Bholi"
+    - option "BD-0005 · Rani"
+    - option "BD-0006 · Chandni"
+    - option "BD-0007 · Heera"
+    - option "BD-0008 · Zeba"
+    - option "BD-0009 · Guddi"
+    - option "BD-0010 · Pari"
+    - option "BD-0011 · Bhoori"
+    - option "BD-0012 · Lali"
+    - option "BD-0013 · Kalo"
+    - option "BD-0014 · Reshma"
+    - option "BD-0015 · Sadqa"
+    - option "BD-0016 · Mithi"
+    - option "BD-0017 · Unnamed"
+    - option "BD-0018 · Unnamed"
+    - option "BD-0019 · Chitti"
+    - option "BD-0020 · Unnamed"
+    - option "BD-0021 · Unnamed"
+    - option "BD-0022 · Neeli"
+    - option "BD-0023 · Unnamed"
+    - option "BD-0024 · Unnamed"
+    - option "BD-0025 · Unnamed"
+    - option "BD-0026 · Unnamed"
+    - option "BD-0027 · Unnamed"
+    - option "BD-0028 · Unnamed"
+    - option "BD-0029 · Unnamed"
+    - option "BD-0030 · Unnamed"
+    - option "BD-0031 · Unnamed"
+  - generic: Task type
+  - combobox "Task type":
+    - option "All task types" [selected]
+    - option "Doses"
+    - option "Rechecks"
+    - option "Tests"
+  - generic: Due status
+  - combobox "Due status":
+    - option "All outstanding" [selected]
+    - option "Overdue"
+    - option "Due today"
+    - option "Upcoming"
+    - option "Completed"
+    - option "Cancelled"
+    - option "Missed"
+    - option "Deferred"
+  - generic: Assigned person
+  - textbox "Assigned person":
+    - /placeholder: Filter by name
+  - heading "Outstanding tasks" [level=3]
+  - navigation "Health tasks pagination":
+    - generic: 1–5 of 5
+  - article:
+    - link "BD-0001 Noori":
+      - /url: /animals/BD-0001
+    - generic: Overdue
+    - heading "Fixture overdue" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-04
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture overdue"': Record completion
+    - 'button "Change status for BD-0001: Fixture overdue"': Change status
+  - article:
+    - link "BD-0001 Noori":
+      - /url: /animals/BD-0001
+    - generic: Due today
+    - heading "Fixture due" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-05
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture due"': Record completion
+    - 'button "Change status for BD-0001: Fixture due"': Change status
+  - article:
+    - link "BD-0001 Noori":
+      - /url: /animals/BD-0001
+    - generic: Due today
+    - heading "Fixture recheck" [level=4]
+    - paragraph:
+      - text: Recheck · Due
+      - time: 2026-10-05
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture recheck"': Record completion
+    - 'button "Change status for BD-0001: Fixture recheck"': Change status
+  - article:
+    - link "BD-0001 Noori":
+      - /url: /animals/BD-0001
+    - generic: Upcoming
+    - heading "Fixture upcoming" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-08
+    - paragraph: Assigned to Dr Fixture
+    - 'button "Record completion for BD-0001: Fixture upcoming"': Record completion
+    - 'button "Change status for BD-0001: Fixture upcoming"': Change status
+  - article:
+    - link "BD-0002 Sohni":
+      - /url: /animals/BD-0002
+    - generic: Upcoming
+    - heading "Demonstration round vaccine" [level=4]
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-09
+    - 'button "Record completion for BD-0002: Demonstration round vaccine"': Record completion
+    - 'button "Change status for BD-0002: Demonstration round vaccine"': Change status
+  - region "Withdrawal instructions needing attention (6)":
+    - heading "Withdrawal instructions needing attention (6)" [level=3]
+    - paragraph: BD-0003 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0003 · milk · Historical vaccine, details incomplete": Source recorded dose
+    - paragraph: BD-0003 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0003 · meat · Historical vaccine, details incomplete": Source recorded dose
+    - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention
+    - paragraph: Needs clarification — 2 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Demonstration vaccine (not a clinical protocol) · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0001 · meat · Demonstration vaccine (not a clinical protocol)": Source recorded dose
+    - paragraph: Demonstration round vaccine · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0001 · meat · Demonstration round vaccine": Source recorded dose
+    - paragraph: BD-0002 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph:
+      - text: "Recorded end:"
+      - time: 2026-10-07 18:00:00+05:00
+    - generic "Original instructions and sources"
+    - paragraph: Demonstration medicine · Synthetic withdrawal instruction for UI demonstration
+    - paragraph: Issued by Dr Fixture
+    - paragraph: "Recorded end: 2026-10-07T18:00:00+05:00"
+    - button "Source recorded dose for BD-0002 · milk · Demonstration medicine": Source recorded dose
+    - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic "Original instructions and sources"
+    - paragraph: Demonstration medicine · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button "Source recorded dose for BD-0002 · meat · Demonstration medicine": Source recorded dose
+  - generic "Open cases (1)"
+  - generic: Records
+  - combobox "Records":
+    - option "Veterinary visits" [selected]
+    - option "Examinations"
+    - option "Health cases"
+    - option "Medicines and vaccines"
+    - option "Treatment and vaccination plans"
+    - option "Scheduled tasks"
+    - option "Recorded doses"
+    - option "Test results"
+    - option "Health costs"
+  - navigation "Health records pagination":
+    - generic: 1–1 of 1
+  - article:
+    - paragraph: Demonstration vaccination and treatment round · 2026-10-03
+    - paragraph: closed · day · revision 2 · recorded by health_fixture
+    - button "View / edit"
+    - button "History"
+    - button "Examine animal"
+    - button "Record dose"

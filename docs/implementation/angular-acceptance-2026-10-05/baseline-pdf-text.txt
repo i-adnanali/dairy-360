@@ -1,0 +1,3052 @@
+PAGE 1
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 1 of 55http://localhost:6512/animals/BD-0001/report
+Animal lifetime reportRecorded history with evidence, uncertainty and coverage gaps.
+BD-0001 · Noori · Generated 2026-10-05T13:15:58.942Z
+Identity and provenance · BD-0001 · Noori
+Tag: PK-4412 · female · buffalo
+Status: lactating · Origin: acquired
+Generated 2026-10-05T13:15:58.942Z. Coverage: all recorded life through latest record.
+Corrections excluded. Vaccination card and current identity cover all recorded history.
+Vaccination card · all recorded history
+Only administered vaccines appear below. Absence is not evidence of no prior vaccination.
+Demonstration vaccine (not a clinical protocol) · 3 Oct 2026
+1 fixture unit · recorded fixture route · Batch DEMO-LOT-002
+Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness
+health card
+Record 1a082082-5a73-44f5-aff1-7a006dca7f58
+Demonstration round vaccine · 3 Oct 2026
+1 fixture unit · recorded fixture route · Batch DEMO-LOT-001
+Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness
+health card
+Record cf825294-d391-4774-9fad-fd207ba642aa
+Outstanding instructions
+Fixture overdue · due 4 Oct 2026
+Fixture due · due 5 Oct 2026
+Fixture recheck · due 5 Oct 2026
+Fixture upcoming · due 8 Oct 2026
+Withdrawal instructions requiring attention
+meat · Demonstration vaccine (not a clinical protocol) · Instruction unknown · End
+needs clarification
+meat · Demonstration round vaccine · Instruction unknown · End needs clarification
+Recorded production totals
+20 measured litres · 4 measured sessions · 0 milked but unmeasured · 1 not milked
+Absent sessions are not zero; these totals describe entered records.
+
+PAGE 2
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 2 of 55http://localhost:6512/animals/BD-0001/report
+Identity and provenance · 3 records
+Current identity above; recorded parentage below. Identity events appear in Timeline.
+Parentage
+Date: Date not recorded
+Subject: BD-0018
+Parent: BD-0001
+Relationship: dam
+Confidence: known
+▼ Source and linked records
+Record: Not supplied
+Recorded by: Not recorded
+Source: Not recorded
+source event id: aevt_6f139fbf-601a-4bd6-bff3-db9430b6b20b
+Parentage
+Date: Date not recorded
+Subject: BD-0017
+Parent: BD-0001
+Relationship: dam
+Confidence: known
+▼ Source and linked records
+Record: Not supplied
+Recorded by: Not recorded
+Source: Not recorded
+source event id: aevt_384fdf40-fccf-4ff1-b4d8-72da921c4c34
+Parentage
+Date: Date not recorded
+Subject: BD-0016
+Parent: BD-0001
+Relationship: dam
+Confidence: known
+▼ Source and linked records
+Record: Not supplied
+Recorded by: Not recorded
+Source: Not recorded
+source event id: aevt_b1070a8e-b0fd-44ab-bddc-afbad1334774
+Timeline · 21 records
+Effective life events in chronological order; corrected originals are available in the
+appendix.
+
+PAGE 3
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 3 of 55http://localhost:6512/animals/BD-0001/report
+acquired
+Date: 2019 (year known)
+Record state: Effective
+Acquired from: Chak 42 dairy
+Birth date: Mar 2017 (month known)
+▼ Source and linked records
+Record: aevt_dc401881-2c9d-4da9-9d2f-77292e7108b2
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.180Z
+calving
+Date: 11 Feb 2021
+Record state: Effective
+Calf: BD-0016
+Calf sex: female
+Outcome: live
+▼ Source and linked records
+Record: aevt_6315436e-0705-417f-87d0-da4130a80500
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.201Z
+dry off
+Date: 6 Nov 2021
+Record state: Effective
+Reason: scheduled
+▼ Source and linked records
+Record: aevt_1489b5aa-850d-481b-85c8-495d89accb02
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-05T08:45:27.202Z
+calving
+Date: 19 Jul 2022
+Record state: Effective
+Calf: BD-0017
+Calf sex: female
+Outcome: live
+▼ Source and linked records
+Record: aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.203Z
+
+PAGE 4
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 4 of 55http://localhost:6512/animals/BD-0001/report
+dry off
+Date: 2 Apr 2023
+Record state: Effective
+Reason: scheduled
+▼ Source and linked records
+Record: aevt_5991efee-836e-41a2-b35b-fdbc69e61ded
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-05T08:45:27.204Z
+calving
+Date: 8 Jan 2024
+Record state: Effective
+Calf: BD-0018
+Calf sex: male
+Outcome: live
+▼ Source and linked records
+Record: aevt_12960a15-1028-4195-b7cc-38ee9dcf2441
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-05T08:45:27.205Z
+note
+Date: 14 Feb 2026
+Record state: Effective
+Note: off feed two days after the morning round, back to normal by the 16th
+▼ Source and linked records
+Record: aevt_1afc8a89-7b6c-4418-893c-5b0329b853c7
+Recorded by: adnan
+Source: 2026-02-14
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.206Z
+Health case
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Subject: Observation requiring follow-up
+Status: open
+▼ Source and linked records
+Record: 00b7ad99-e57e-42cf-a9b5-75dd24b0f31f
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.280Z
+revision: 1
+
+PAGE 5
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 5 of 55http://localhost:6512/animals/BD-0001/report
+Administration
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration vaccine (not a clinical protocol)
+Route: recorded fixture route
+Batch: DEMO-LOT-002
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded ·
+Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not
+recorded · Issuer unknown
+▼ Source and linked records
+Record: 1a082082-5a73-44f5-aff1-7a006dca7f58
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.288Z
+revision: 2
+correction reason: Corrected synthetic batch transcription
+visit id: 3f895597-4589-4b35-bacf-a516914e6c5b
+task id: 9eb38001-ddab-465b-a9dc-ff07b8f4e066
+Result
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Result: Synthetic test result; no clinical interpretation
+▼ Source and linked records
+Record: 38f1ac6e-7c9e-44a5-a87f-1b24eb329742
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.290Z
+revision: 1
+task id: 1ecbbf23-f1b9-4a42-b602-34342f2dca12
+
+PAGE 6
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 6 of 55http://localhost:6512/animals/BD-0001/report
+Examination
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Findings: Synthetic observation for workflow practice
+Diagnosis: Fixture finding
+Certainty: suspected
+▼ Source and linked records
+Record: 728a2e04-b73a-4226-a208-d2e1e4e77a1d
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.280Z
+revision: 1
+visit id: 3f895597-4589-4b35-bacf-a516914e6c5b
+Health task
+Scheduled date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: completed
+Instructions: Fixture given
+Assigned to: Dr Fixture
+Due: 3 Oct 2026
+▼ Source and linked records
+Record: 9eb38001-ddab-465b-a9dc-ff07b8f4e066
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.288Z
+revision: 3
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+
+PAGE 7
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 7 of 55http://localhost:6512/animals/BD-0001/report
+Administration
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration round vaccine
+Route: recorded fixture route
+Batch: DEMO-LOT-001
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded ·
+Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not
+recorded · Issuer unknown
+▼ Source and linked records
+Record: cf825294-d391-4774-9fad-fd207ba642aa
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.294Z
+revision: 1
+visit id: 3f895597-4589-4b35-bacf-a516914e6c5b
+Health task
+Scheduled date: 4 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Status: completed
+Instructions: Fixture test
+Assigned to: Dr Fixture
+Due: 4 Oct 2026
+▼ Source and linked records
+Record: 1ecbbf23-f1b9-4a42-b602-34342f2dca12
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.290Z
+revision: 2
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+
+PAGE 8
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 8 of 55http://localhost:6512/animals/BD-0001/report
+Health task
+Scheduled date: 4 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture overdue
+Assigned to: Dr Fixture
+Due: 4 Oct 2026
+▼ Source and linked records
+Record: 945f9e8e-8792-4874-babb-be6366c65924
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.283Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Health task
+Scheduled date: 4 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: missed
+Instructions: Fixture missed
+Assigned to: Dr Fixture
+Due: 4 Oct 2026
+▼ Source and linked records
+Record: aa5c677d-8815-4838-9506-1b0e82212791
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.288Z
+revision: 2
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Care plan
+Recorded date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccination
+Status: active
+Instructions: Demonstration course; dates are fixture data, not clinical advice
+Prescriber: Dr Fixture
+▼ Source and linked records
+Record: 00673f00-96c9-4056-9399-7d8030ec7488
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.282Z
+revision: 1
+case id: 00b7ad99-e57e-42cf-a9b5-75dd24b0f31f
+
+PAGE 9
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 9 of 55http://localhost:6512/animals/BD-0001/report
+Health task
+Scheduled date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture due
+Assigned to: Dr Fixture
+Due: 5 Oct 2026
+▼ Source and linked records
+Record: 601039ff-c2e4-4a06-bc71-4b9ba18cd6dc
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.284Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Health task
+Scheduled date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: recheck
+Status: pending
+Instructions: Fixture recheck
+Assigned to: Dr Fixture
+Due: 5 Oct 2026
+▼ Source and linked records
+Record: d65b0f20-473c-48b1-9426-21aa0e4d7417
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.285Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Health task
+Scheduled date: 6 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: cancelled
+Instructions: Fixture cancelled
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+▼ Source and linked records
+Record: 65d600b1-4933-4067-a092-742fcfd7f326
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.289Z
+revision: 2
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+
+PAGE 10
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 10 of 55http://localhost:6512/animals/BD-0001/report
+Health task
+Scheduled date: 8 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture upcoming
+Assigned to: Dr Fixture
+Due: 8 Oct 2026
+▼ Source and linked records
+Record: f005f9e9-fcb9-42f9-ab73-f6b20a88c1f4
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.284Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Calvings and reproduction · 5 records
+Breeding and pregnancy-check capture is not yet supported.
+calving
+Date: 11 Feb 2021
+Record state: Effective
+Calf: BD-0016
+Calf sex: female
+Outcome: live
+▼ Source and linked records
+Record: aevt_6315436e-0705-417f-87d0-da4130a80500
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.201Z
+dry off
+Date: 6 Nov 2021
+Record state: Effective
+Reason: scheduled
+▼ Source and linked records
+Record: aevt_1489b5aa-850d-481b-85c8-495d89accb02
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-05T08:45:27.202Z
+
+PAGE 11
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 11 of 55http://localhost:6512/animals/BD-0001/report
+calving
+Date: 19 Jul 2022
+Record state: Effective
+Calf: BD-0017
+Calf sex: female
+Outcome: live
+▼ Source and linked records
+Record: aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.203Z
+dry off
+Date: 2 Apr 2023
+Record state: Effective
+Reason: scheduled
+▼ Source and linked records
+Record: aevt_5991efee-836e-41a2-b35b-fdbc69e61ded
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-05T08:45:27.204Z
+calving
+Date: 8 Jan 2024
+Record state: Effective
+Calf: BD-0018
+Calf sex: male
+Outcome: live
+▼ Source and linked records
+Record: aevt_12960a15-1028-4195-b7cc-38ee9dcf2441
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-05T08:45:27.205Z
+Milk · 5 records
+Only recorded measured milkings contribute litres. Missing and unmeasured sessions are
+not zero.
+
+PAGE 12
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 12 of 55http://localhost:6512/animals/BD-0001/report
+Milking
+Date: 3 Oct 2026
+Subject: BD-0001
+Session: evening
+Measurement: 5 L
+▼ Source and linked records
+Record: mlk_4001db2d-c402-4dd8-8bcc-ceed1444eb62
+Recorded by: adnan
+Source: direct_entry
+observed by: imran
+recorded at: 2026-10-05T08:45:27.240Z
+Milking
+Date: 3 Oct 2026
+Subject: BD-0001
+Session: morning
+Measurement: 5 L
+▼ Source and linked records
+Record: mlk_c500f7db-088b-43d9-8e60-9f72d49a8198
+Recorded by: adnan
+Source: direct_entry
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.238Z
+Milking
+Date: 4 Oct 2026
+Subject: BD-0001
+Session: evening
+Measurement: 5 L
+▼ Source and linked records
+Record: mlk_fc218557-e9b1-439d-9eac-bca94eada76c
+Recorded by: adnan
+Source: direct_entry
+observed by: imran
+recorded at: 2026-10-05T08:45:27.243Z
+Milking
+Date: 4 Oct 2026
+Subject: BD-0001
+Session: morning
+Measurement: Not milked
+▼ Source and linked records
+Record: mlk_29926bc1-84d6-4bd4-8e41-1b105eac0f3b
+Recorded by: adnan
+Source: direct_entry
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.242Z
+
+PAGE 13
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 13 of 55http://localhost:6512/animals/BD-0001/report
+Milking
+Date: 5 Oct 2026
+Subject: BD-0001
+Session: morning
+Measurement: 5 L
+▼ Source and linked records
+Record: mlk_2c21829d-cc39-4578-bf85-ac16ae5dc358
+Recorded by: adnan
+Source: direct_entry
+observed by: abdul
+recorded at: 2026-10-05T08:45:27.245Z
+Lactations · 3 records
+Lactation
+Date: 11 Feb 2021
+Subject: BD-0001
+Ended: 6 Nov 2021
+Start precision: day
+End reason: dry off
+▼ Source and linked records
+Record: lact_6315436e-0705-417f-87d0-da4130a80500
+Recorded by: Not recorded
+Source: Not recorded
+opened by event id: aevt_6315436e-0705-417f-87d0-da4130a80500
+closed by event id: aevt_1489b5aa-850d-481b-85c8-495d89accb02
+Lactation
+Date: 19 Jul 2022
+Subject: BD-0001
+Ended: 2 Apr 2023
+Start precision: day
+End reason: dry off
+▼ Source and linked records
+Record: lact_94dd6736-f717-434a-9f3c-45f81ac2e9cd
+Recorded by: Not recorded
+Source: Not recorded
+opened by event id: aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd
+closed by event id: aevt_5991efee-836e-41a2-b35b-fdbc69e61ded
+Lactation
+Date: 8 Jan 2024
+Subject: BD-0001
+Ended: No end recorded
+Start precision: day
+▼ Source and linked records
+Record: lact_12960a15-1028-4195-b7cc-38ee9dcf2441
+Recorded by: Not recorded
+Source: Not recorded
+opened by event id: aevt_12960a15-1028-4195-b7cc-38ee9dcf2441
+
+PAGE 14
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 14 of 55http://localhost:6512/animals/BD-0001/report
+Health records · 14 records
+Health case
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Subject: Observation requiring follow-up
+Status: open
+▼ Source and linked records
+Record: 00b7ad99-e57e-42cf-a9b5-75dd24b0f31f
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.280Z
+revision: 1
+Administration
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration vaccine (not a clinical protocol)
+Route: recorded fixture route
+Batch: DEMO-LOT-002
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded ·
+Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not
+recorded · Issuer unknown
+▼ Source and linked records
+Record: 1a082082-5a73-44f5-aff1-7a006dca7f58
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.288Z
+revision: 2
+correction reason: Corrected synthetic batch transcription
+visit id: 3f895597-4589-4b35-bacf-a516914e6c5b
+task id: 9eb38001-ddab-465b-a9dc-ff07b8f4e066
+
+PAGE 15
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 15 of 55http://localhost:6512/animals/BD-0001/report
+Result
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Result: Synthetic test result; no clinical interpretation
+▼ Source and linked records
+Record: 38f1ac6e-7c9e-44a5-a87f-1b24eb329742
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.290Z
+revision: 1
+task id: 1ecbbf23-f1b9-4a42-b602-34342f2dca12
+Examination
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Findings: Synthetic observation for workflow practice
+Diagnosis: Fixture finding
+Certainty: suspected
+▼ Source and linked records
+Record: 728a2e04-b73a-4226-a208-d2e1e4e77a1d
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.280Z
+revision: 1
+visit id: 3f895597-4589-4b35-bacf-a516914e6c5b
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: completed
+Instructions: Fixture given
+Assigned to: Dr Fixture
+Due: 3 Oct 2026
+▼ Source and linked records
+Record: 9eb38001-ddab-465b-a9dc-ff07b8f4e066
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.288Z
+revision: 3
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+
+PAGE 16
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 16 of 55http://localhost:6512/animals/BD-0001/report
+Administration
+Date: 3 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration round vaccine
+Route: recorded fixture route
+Batch: DEMO-LOT-001
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded ·
+Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not
+recorded · Issuer unknown
+▼ Source and linked records
+Record: cf825294-d391-4774-9fad-fd207ba642aa
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.294Z
+revision: 1
+visit id: 3f895597-4589-4b35-bacf-a516914e6c5b
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Status: completed
+Instructions: Fixture test
+Assigned to: Dr Fixture
+Due: 4 Oct 2026
+▼ Source and linked records
+Record: 1ecbbf23-f1b9-4a42-b602-34342f2dca12
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.290Z
+revision: 2
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+
+PAGE 17
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 17 of 55http://localhost:6512/animals/BD-0001/report
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture overdue
+Assigned to: Dr Fixture
+Due: 4 Oct 2026
+▼ Source and linked records
+Record: 945f9e8e-8792-4874-babb-be6366c65924
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.283Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: missed
+Instructions: Fixture missed
+Assigned to: Dr Fixture
+Due: 4 Oct 2026
+▼ Source and linked records
+Record: aa5c677d-8815-4838-9506-1b0e82212791
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.288Z
+revision: 2
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture due
+Assigned to: Dr Fixture
+Due: 5 Oct 2026
+▼ Source and linked records
+Record: 601039ff-c2e4-4a06-bc71-4b9ba18cd6dc
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.284Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+
+PAGE 18
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 18 of 55http://localhost:6512/animals/BD-0001/report
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: recheck
+Status: pending
+Instructions: Fixture recheck
+Assigned to: Dr Fixture
+Due: 5 Oct 2026
+▼ Source and linked records
+Record: d65b0f20-473c-48b1-9426-21aa0e4d7417
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.285Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Care plan
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: vaccination
+Status: active
+Instructions: Demonstration course; dates are fixture data, not clinical advice
+Prescriber: Dr Fixture
+▼ Source and linked records
+Record: 00673f00-96c9-4056-9399-7d8030ec7488
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.282Z
+revision: 1
+case id: 00b7ad99-e57e-42cf-a9b5-75dd24b0f31f
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: cancelled
+Instructions: Fixture cancelled
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+▼ Source and linked records
+Record: 65d600b1-4933-4067-a092-742fcfd7f326
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.289Z
+revision: 2
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+
+PAGE 19
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 19 of 55http://localhost:6512/animals/BD-0001/report
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture upcoming
+Assigned to: Dr Fixture
+Due: 8 Oct 2026
+▼ Source and linked records
+Record: f005f9e9-fcb9-42f9-ab73-f6b20a88c1f4
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.284Z
+revision: 1
+plan id: 00673f00-96c9-4056-9399-7d8030ec7488
+Veterinary visits · 1 records
+Veterinary visit
+Date: 3 Oct 2026
+Record state: Current revision
+Status: closed
+Veterinarian: Dr Fixture
+Purpose / reason: Demonstration vaccination and treatment round
+▼ Source and linked records
+Record: 3f895597-4589-4b35-bacf-a516914e6c5b
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.296Z
+revision: 2
+correction reason: Visit finished; pending tasks remain open
+Attached document
+Feed · 1 records
+Confirmed participation in shared feeding; individual intake and cost are not measured.
+
+PAGE 20
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 20 of 55http://localhost:6512/animals/BD-0001/report
+Shared feeding
+Date: 5 Oct 2026
+Item: Khall
+Quantity: Unknown quantity
+Recipients: BD-0001, BD-0002, BD-0011, BD-0012, BD-0016, BD-0022
+Recipient group: milking
+Shared feed quantity; individual intake is not measured.
+▼ Source and linked records
+Record: feed_29c835a4-8b12-4572-8d76-4247d356af7f
+Recorded by: adnan
+Source: direct_entry
+summary id: feed_a250afac-3a81-4a2c-9859-2f6968551341
+Direct health costs · 0 records
+Direct health costs only; not lifetime profit. Shared visit charges are listed separately.
+No records available in this section.
+Shared visit costs · 1 records
+Unallocated; excluded from animal cost totals.
+Recorded cost
+Date: 3 Oct 2026
+Record state: Current revision
+Recorded cost: Rs 2,000.00
+▼ Source and linked records
+Record: 7cc10a13-10b4-49c3-8b8e-961483c8b42b
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-05T08:45:27.292Z
+revision: 1
+visit id: 3f895597-4589-4b35-bacf-a516914e6c5b
+Coverage notes
+No records means no evidence entered, not that an event never happened.
+This is recorded history as known at generation, not a reconstruction of an earlier
+database.
+Structured breed, weight, movement, breeding and discarded-milk capture are
+deferred.
+Bulk sales and shared feed/payroll costs are not attributable animal profit.
+Technical audit · complete response
+Original fields, unsupported domains, unknown record types and requested corrections
+are retained below and in the JSON export. Main sections preserve API record order.
+▼ Complete original report, including source records and corrections
+{
+  "schema_version": 1,
+
+PAGE 21
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 21 of 55http://localhost:6512/animals/BD-0001/report
+  "animal_id": "BD-0001",
+  "generated_at": "2026-10-05T13:15:58.942Z",
+  "data_snapshot_at": "2026-10-05T13:15:58.942Z",
+  "filters": {
+    "corrections": false
+  },
+  "current_snapshot": {
+    "animal": {
+      "id": "BD-0001",
+      "name": "Noori",
+      "sex": "female",
+      "species": "buffalo",
+      "origin": "acquired",
+      "post_no": "1",
+      "tag_no": "PK-4412"
+    },
+    "status": {
+      "animal_id": "BD-0001",
+      "status": "lactating",
+      "parity": 3,
+      "birth_on": "2017-03-01",
+      "birth_precision": "month",
+      "open_lactation_id": "lact_12960a15-1028-4195-b7cc-38ee9dcf2441"
+    },
+    "events": [
+      {
+        "id": "aevt_dc401881-2c9d-4da9-9d2f-77292e7108b2",
+        "type": "acquired",
+        "occurred_on": "2019-01-01",
+        "occurred_time": null,
+        "date_precision": "year",
+        "payload": {
+          "estimated_birth_on": "2017-03-01",
+          "estimated_birth_precision": "month",
+          "from": "Chak 42 dairy",
+          "notes": null
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.180Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_6315436e-0705-417f-87d0-da4130a80500",
+        "type": "calving",
+        "occurred_on": "2021-02-11",
+        "occurred_time": "05:40",
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0016",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },
+
+PAGE 22
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 22 of 55http://localhost:6512/animals/BD-0001/report
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.201Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_1489b5aa-850d-481b-85c8-495d89accb02",
+        "type": "dry_off",
+        "occurred_on": "2021-11-06",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.202Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd",
+        "type": "calving",
+        "occurred_on": "2022-07-19",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0017",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.203Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_5991efee-836e-41a2-b35b-fdbc69e61ded",
+        "type": "dry_off",
+        "occurred_on": "2023-04-02",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+
+PAGE 23
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 23 of 55http://localhost:6512/animals/BD-0001/report
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.204Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_12960a15-1028-4195-b7cc-38ee9dcf2441",
+        "type": "calving",
+        "occurred_on": "2024-01-08",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0018",
+          "calf_sex": "male",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.205Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_1afc8a89-7b6c-4418-893c-5b0329b853c7",
+        "type": "note",
+        "occurred_on": "2026-02-14",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "text": "off feed two days after the morning round, back to
+normal by the 16th"
+        },
+        "source_form": "daily_herd_sheet",
+        "source_ref": "2026-02-14",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.206Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    ]
+  },
+  "health": {
+    "animal_id": "BD-0001",
+    "records": [
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+
+PAGE 24
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 24 of 55http://localhost:6512/animals/BD-0001/report
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "title": "Observation requiring follow-up",
+        "status": "open",
+        "id": "00b7ad99-e57e-42cf-a9b5-75dd24b0f31f",
+        "entity": "cases",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.280Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "product_id": "d64883f4-4074-48d6-a442-580867145803",
+        "product_name": "Demonstration vaccine (not a clinical
+protocol)",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-002",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "task_id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+        "id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+        "entity": "administrations",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.288Z",
+        "observed_by": null,
+        "correction_reason": "Corrected synthetic batch transcription"
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "task_id": "1ecbbf23-f1b9-4a42-b602-34342f2dca12",
+        "kind": "test",
+        "result": "Synthetic test result; no clinical interpretation",
+        "id": "38f1ac6e-7c9e-44a5-a87f-1b24eb329742",
+        "entity": "results",
+
+PAGE 25
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 25 of 55http://localhost:6512/animals/BD-0001/report
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.290Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "findings": "Synthetic observation for workflow practice",
+        "diagnosis": "Fixture finding",
+        "certainty": "suspected",
+        "id": "728a2e04-b73a-4226-a208-d2e1e4e77a1d",
+        "entity": "examinations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.280Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture given",
+        "due_on": "2026-10-03",
+        "assignee": "Dr Fixture",
+        "id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+        "entity": "tasks",
+        "revision": 3,
+        "voided": false,
+        "status": "completed",
+        "evidence_id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+        "recorded_at": "2026-10-05T08:45:27.288Z",
+        "observed_by": null
+      },
+      {
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "product_id": "d64883f4-4074-48d6-a442-580867145803",
+        "product_name": "Demonstration round vaccine",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-001",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+
+PAGE 26
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 26 of 55http://localhost:6512/animals/BD-0001/report
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "disposition": "given",
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "observed_by": null,
+        "id": "cf825294-d391-4774-9fad-fd207ba642aa",
+        "entity": "administrations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.294Z"
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "test",
+        "instructions": "Fixture test",
+        "due_on": "2026-10-04",
+        "assignee": "Dr Fixture",
+        "id": "1ecbbf23-f1b9-4a42-b602-34342f2dca12",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "completed",
+        "evidence_id": "38f1ac6e-7c9e-44a5-a87f-1b24eb329742",
+        "recorded_at": "2026-10-05T08:45:27.290Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture overdue",
+        "due_on": "2026-10-04",
+        "assignee": "Dr Fixture",
+        "id": "945f9e8e-8792-4874-babb-be6366c65924",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.283Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+
+PAGE 27
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 27 of 55http://localhost:6512/animals/BD-0001/report
+        "kind": "administration",
+        "instructions": "Fixture missed",
+        "due_on": "2026-10-04",
+        "assignee": "Dr Fixture",
+        "id": "aa5c677d-8815-4838-9506-1b0e82212791",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "missed",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.288Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture due",
+        "due_on": "2026-10-05",
+        "assignee": "Dr Fixture",
+        "id": "601039ff-c2e4-4a06-bc71-4b9ba18cd6dc",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.284Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "recheck",
+        "instructions": "Fixture recheck",
+        "due_on": "2026-10-05",
+        "assignee": "Dr Fixture",
+        "id": "d65b0f20-473c-48b1-9426-21aa0e4d7417",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.285Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "case_id": "00b7ad99-e57e-42cf-a9b5-75dd24b0f31f",
+        "kind": "vaccination",
+        "instructions": "Demonstration course; dates are fixture data,
+
+PAGE 28
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 28 of 55http://localhost:6512/animals/BD-0001/report
+not clinical advice",
+        "prescriber": "Dr Fixture",
+        "status": "active",
+        "id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "entity": "plans",
+        "revision": 1,
+        "voided": false,
+        "completed_with_exceptions": false,
+        "recorded_at": "2026-10-05T08:45:27.282Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture cancelled",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "65d600b1-4933-4067-a092-742fcfd7f326",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "cancelled",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.289Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture upcoming",
+        "due_on": "2026-10-08",
+        "assignee": "Dr Fixture",
+        "id": "f005f9e9-fcb9-42f9-ab73-f6b20a88c1f4",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.284Z",
+        "observed_by": null
+      }
+    ],
+    "visits": [
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "vet": "Dr Fixture",
+        "reason": "Demonstration vaccination and treatment round",
+
+PAGE 29
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 29 of 55http://localhost:6512/animals/BD-0001/report
+        "status": "closed",
+        "id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "entity": "visits",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.296Z",
+        "observed_by": null,
+        "correction_reason": "Visit finished; pending tasks remain
+open",
+        "attachment_ids": [
+          "8ae78871-bedb-4bfe-82ea-a6ea6c198f95"
+        ]
+      }
+    ],
+    "vaccinations": [
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "product_id": "d64883f4-4074-48d6-a442-580867145803",
+        "product_name": "Demonstration vaccine (not a clinical
+protocol)",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-002",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "task_id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+        "id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+        "entity": "administrations",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.288Z",
+        "observed_by": null,
+        "correction_reason": "Corrected synthetic batch transcription"
+      },
+      {
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "product_id": "d64883f4-4074-48d6-a442-580867145803",
+        "product_name": "Demonstration round vaccine",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+
+PAGE 30
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 30 of 55http://localhost:6512/animals/BD-0001/report
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-001",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "disposition": "given",
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "observed_by": null,
+        "id": "cf825294-d391-4774-9fad-fd207ba642aa",
+        "entity": "administrations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.294Z"
+      }
+    ],
+    "withdrawals": [
+      {
+        "animal_id": "BD-0001",
+        "administration_id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+        "product_name": "Demonstration vaccine (not a clinical
+protocol)",
+        "target": "meat",
+        "state": "unknown",
+        "status": "needs_clarification"
+      },
+      {
+        "animal_id": "BD-0001",
+        "administration_id": "cf825294-d391-4774-9fad-fd207ba642aa",
+        "product_name": "Demonstration round vaccine",
+        "target": "meat",
+        "state": "unknown",
+        "status": "needs_clarification"
+      }
+    ],
+    "coverage": "recorded"
+  },
+  "sections": {
+    "life_events": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "aevt_dc401881-2c9d-4da9-9d2f-77292e7108b2",
+          "type": "acquired",
+          "occurred_on": "2019-01-01",
+          "occurred_time": null,
+          "date_precision": "year",
+          "payload": {
+            "estimated_birth_on": "2017-03-01",
+            "estimated_birth_precision": "month",
+            "from": "Chak 42 dairy",
+            "notes": null
+
+PAGE 31
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 31 of 55http://localhost:6512/animals/BD-0001/report
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.180Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_6315436e-0705-417f-87d0-da4130a80500",
+          "type": "calving",
+          "occurred_on": "2021-02-11",
+          "occurred_time": "05:40",
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0016",
+            "calf_sex": "female",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.201Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_1489b5aa-850d-481b-85c8-495d89accb02",
+          "type": "dry_off",
+          "occurred_on": "2021-11-06",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.202Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd",
+          "type": "calving",
+          "occurred_on": "2022-07-19",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+
+PAGE 32
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 32 of 55http://localhost:6512/animals/BD-0001/report
+            "calf_id": "BD-0017",
+            "calf_sex": "female",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.203Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_5991efee-836e-41a2-b35b-fdbc69e61ded",
+          "type": "dry_off",
+          "occurred_on": "2023-04-02",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.204Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_12960a15-1028-4195-b7cc-38ee9dcf2441",
+          "type": "calving",
+          "occurred_on": "2024-01-08",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0018",
+            "calf_sex": "male",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.205Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_1afc8a89-7b6c-4418-893c-5b0329b853c7",
+          "type": "note",
+          "occurred_on": "2026-02-14",
+
+PAGE 33
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 33 of 55http://localhost:6512/animals/BD-0001/report
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "text": "off feed two days after the morning round, back to
+normal by the 16th"
+          },
+          "source_form": "daily_herd_sheet",
+          "source_ref": "2026-02-14",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.206Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        }
+      ],
+      "note": "Effective life events in chronological order; corrected
+originals are available in the appendix."
+    },
+    "identity": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "aevt_dc401881-2c9d-4da9-9d2f-77292e7108b2",
+          "type": "acquired",
+          "occurred_on": "2019-01-01",
+          "occurred_time": null,
+          "date_precision": "year",
+          "payload": {
+            "estimated_birth_on": "2017-03-01",
+            "estimated_birth_precision": "month",
+            "from": "Chak 42 dairy",
+            "notes": null
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.180Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        }
+      ],
+      "note": null
+    },
+    "reproduction": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "aevt_6315436e-0705-417f-87d0-da4130a80500",
+          "type": "calving",
+          "occurred_on": "2021-02-11",
+          "occurred_time": "05:40",
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0016",
+            "calf_sex": "female",
+
+PAGE 34
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 34 of 55http://localhost:6512/animals/BD-0001/report
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.201Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_1489b5aa-850d-481b-85c8-495d89accb02",
+          "type": "dry_off",
+          "occurred_on": "2021-11-06",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.202Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd",
+          "type": "calving",
+          "occurred_on": "2022-07-19",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0017",
+            "calf_sex": "female",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.203Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_5991efee-836e-41a2-b35b-fdbc69e61ded",
+          "type": "dry_off",
+          "occurred_on": "2023-04-02",
+          "occurred_time": null,
+          "date_precision": "day",
+
+PAGE 35
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 35 of 55http://localhost:6512/animals/BD-0001/report
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.204Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_12960a15-1028-4195-b7cc-38ee9dcf2441",
+          "type": "calving",
+          "occurred_on": "2024-01-08",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0018",
+            "calf_sex": "male",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.205Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        }
+      ],
+      "note": "Breeding and pregnancy-check capture is not yet
+supported."
+    },
+    "parentage": {
+      "state": "recorded",
+      "records": [
+        {
+          "child_id": "BD-0018",
+          "relation": "dam",
+          "parent_ref": "BD-0001",
+          "certainty": "known",
+          "source_event_id": "aevt_6f139fbf-601a-4bd6-bff3-db9430b6b20b"
+        },
+        {
+          "child_id": "BD-0017",
+          "relation": "dam",
+          "parent_ref": "BD-0001",
+          "certainty": "known",
+          "source_event_id": "aevt_384fdf40-fccf-4ff1-b4d8-72da921c4c34"
+        },
+        {
+          "child_id": "BD-0016",
+          "relation": "dam",
+
+PAGE 36
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 36 of 55http://localhost:6512/animals/BD-0001/report
+          "parent_ref": "BD-0001",
+          "certainty": "known",
+          "source_event_id": "aevt_b1070a8e-b0fd-44ab-bddc-afbad1334774"
+        }
+      ],
+      "note": null
+    },
+    "lactations": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "lact_6315436e-0705-417f-87d0-da4130a80500",
+          "animal_id": "BD-0001",
+          "opened_by_event_id": "aevt_6315436e-0705-417f-87d0-
+da4130a80500",
+          "started_on": "2021-02-11",
+          "start_precision": "day",
+          "ended_on": "2021-11-06",
+          "end_precision": "day",
+          "end_reason": "dry_off",
+          "closed_by_event_id": "aevt_1489b5aa-850d-481b-85c8-
+495d89accb02"
+        },
+        {
+          "id": "lact_94dd6736-f717-434a-9f3c-45f81ac2e9cd",
+          "animal_id": "BD-0001",
+          "opened_by_event_id": "aevt_94dd6736-f717-434a-9f3c-
+45f81ac2e9cd",
+          "started_on": "2022-07-19",
+          "start_precision": "day",
+          "ended_on": "2023-04-02",
+          "end_precision": "day",
+          "end_reason": "dry_off",
+          "closed_by_event_id": "aevt_5991efee-836e-41a2-b35b-
+fdbc69e61ded"
+        },
+        {
+          "id": "lact_12960a15-1028-4195-b7cc-38ee9dcf2441",
+          "animal_id": "BD-0001",
+          "opened_by_event_id": "aevt_12960a15-1028-4195-b7cc-
+38ee9dcf2441",
+          "started_on": "2024-01-08",
+          "start_precision": "day",
+          "ended_on": null,
+          "end_precision": null,
+          "end_reason": null,
+          "closed_by_event_id": null
+        }
+      ],
+      "note": null
+    },
+    "production": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "mlk_4001db2d-c402-4dd8-8bcc-ceed1444eb62",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-03",
+          "session": "evening",
+
+PAGE 37
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 37 of 55http://localhost:6512/animals/BD-0001/report
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "imran",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.240Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_c500f7db-088b-43d9-8e60-9f72d49a8198",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-03",
+          "session": "morning",
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.238Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_fc218557-e9b1-439d-9eac-bca94eada76c",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-04",
+          "session": "evening",
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "imran",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.243Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_29926bc1-84d6-4bd4-8e41-1b105eac0f3b",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-04",
+          "session": "morning",
+          "status": "not_milked",
+          "yield_litres": null,
+          "reason": "under treatment",
+          "occurred_time": null,
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.242Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_2c21829d-cc39-4578-bf85-ac16ae5dc358",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-05",
+
+PAGE 38
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 38 of 55http://localhost:6512/animals/BD-0001/report
+          "session": "morning",
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-05T08:45:27.245Z",
+          "source_form": "direct_entry",
+          "note": null
+        }
+      ],
+      "note": "Only recorded measured milkings contribute litres.
+Missing and unmeasured sessions are not zero."
+    },
+    "health": {
+      "state": "recorded",
+      "records": [
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-03",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "title": "Observation requiring follow-up",
+          "status": "open",
+          "id": "00b7ad99-e57e-42cf-a9b5-75dd24b0f31f",
+          "entity": "cases",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-05T08:45:27.280Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-03",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+          "product_id": "d64883f4-4074-48d6-a442-580867145803",
+          "product_name": "Demonstration vaccine (not a clinical
+protocol)",
+          "kind": "vaccine",
+          "amount": 1,
+          "unit": "fixture unit",
+          "route": "recorded fixture route",
+          "administrator": "Dr Fixture",
+          "batch": "DEMO-LOT-002",
+          "milk_withdrawal": {
+            "state": "none",
+            "instruction": "Synthetic no-withdrawal entry",
+            "issuer": "Dr Fixture"
+          },
+          "meat_withdrawal": {
+            "state": "unknown"
+          },
+
+PAGE 39
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 39 of 55http://localhost:6512/animals/BD-0001/report
+          "task_id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+          "id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+          "entity": "administrations",
+          "revision": 2,
+          "voided": false,
+          "recorded_at": "2026-10-05T08:45:27.288Z",
+          "observed_by": null,
+          "correction_reason": "Corrected synthetic batch transcription"
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-03",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "task_id": "1ecbbf23-f1b9-4a42-b602-34342f2dca12",
+          "kind": "test",
+          "result": "Synthetic test result; no clinical interpretation",
+          "id": "38f1ac6e-7c9e-44a5-a87f-1b24eb329742",
+          "entity": "results",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-05T08:45:27.290Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-03",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+          "findings": "Synthetic observation for workflow practice",
+          "diagnosis": "Fixture finding",
+          "certainty": "suspected",
+          "id": "728a2e04-b73a-4226-a208-d2e1e4e77a1d",
+          "entity": "examinations",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-05T08:45:27.280Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "kind": "administration",
+          "instructions": "Fixture given",
+          "due_on": "2026-10-03",
+          "assignee": "Dr Fixture",
+          "id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+          "entity": "tasks",
+          "revision": 3,
+          "voided": false,
+          "status": "completed",
+
+PAGE 40
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 40 of 55http://localhost:6512/animals/BD-0001/report
+          "evidence_id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+          "recorded_at": "2026-10-05T08:45:27.288Z",
+          "observed_by": null
+        },
+        {
+          "occurred_on": "2026-10-03",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+          "product_id": "d64883f4-4074-48d6-a442-580867145803",
+          "product_name": "Demonstration round vaccine",
+          "kind": "vaccine",
+          "amount": 1,
+          "unit": "fixture unit",
+          "route": "recorded fixture route",
+          "administrator": "Dr Fixture",
+          "batch": "DEMO-LOT-001",
+          "milk_withdrawal": {
+            "state": "none",
+            "instruction": "Synthetic no-withdrawal entry",
+            "issuer": "Dr Fixture"
+          },
+          "meat_withdrawal": {
+            "state": "unknown"
+          },
+          "disposition": "given",
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "observed_by": null,
+          "id": "cf825294-d391-4774-9fad-fd207ba642aa",
+          "entity": "administrations",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-05T08:45:27.294Z"
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "kind": "test",
+          "instructions": "Fixture test",
+          "due_on": "2026-10-04",
+          "assignee": "Dr Fixture",
+          "id": "1ecbbf23-f1b9-4a42-b602-34342f2dca12",
+          "entity": "tasks",
+          "revision": 2,
+          "voided": false,
+          "status": "completed",
+          "evidence_id": "38f1ac6e-7c9e-44a5-a87f-1b24eb329742",
+          "recorded_at": "2026-10-05T08:45:27.290Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+
+PAGE 41
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 41 of 55http://localhost:6512/animals/BD-0001/report
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "kind": "administration",
+          "instructions": "Fixture overdue",
+          "due_on": "2026-10-04",
+          "assignee": "Dr Fixture",
+          "id": "945f9e8e-8792-4874-babb-be6366c65924",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-05T08:45:27.283Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "kind": "administration",
+          "instructions": "Fixture missed",
+          "due_on": "2026-10-04",
+          "assignee": "Dr Fixture",
+          "id": "aa5c677d-8815-4838-9506-1b0e82212791",
+          "entity": "tasks",
+          "revision": 2,
+          "voided": false,
+          "status": "missed",
+          "evidence_id": null,
+          "recorded_at": "2026-10-05T08:45:27.288Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "kind": "administration",
+          "instructions": "Fixture due",
+          "due_on": "2026-10-05",
+          "assignee": "Dr Fixture",
+          "id": "601039ff-c2e4-4a06-bc71-4b9ba18cd6dc",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-05T08:45:27.284Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+
+PAGE 42
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 42 of 55http://localhost:6512/animals/BD-0001/report
+          "kind": "recheck",
+          "instructions": "Fixture recheck",
+          "due_on": "2026-10-05",
+          "assignee": "Dr Fixture",
+          "id": "d65b0f20-473c-48b1-9426-21aa0e4d7417",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-05T08:45:27.285Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "case_id": "00b7ad99-e57e-42cf-a9b5-75dd24b0f31f",
+          "kind": "vaccination",
+          "instructions": "Demonstration course; dates are fixture data,
+not clinical advice",
+          "prescriber": "Dr Fixture",
+          "status": "active",
+          "id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "entity": "plans",
+          "revision": 1,
+          "voided": false,
+          "completed_with_exceptions": false,
+          "recorded_at": "2026-10-05T08:45:27.282Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "kind": "administration",
+          "instructions": "Fixture cancelled",
+          "due_on": "2026-10-06",
+          "assignee": "Dr Fixture",
+          "id": "65d600b1-4933-4067-a092-742fcfd7f326",
+          "entity": "tasks",
+          "revision": 2,
+          "voided": false,
+          "status": "cancelled",
+          "evidence_id": null,
+          "recorded_at": "2026-10-05T08:45:27.289Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+          "kind": "administration",
+          "instructions": "Fixture upcoming",
+
+PAGE 43
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 43 of 55http://localhost:6512/animals/BD-0001/report
+          "due_on": "2026-10-08",
+          "assignee": "Dr Fixture",
+          "id": "f005f9e9-fcb9-42f9-ab73-f6b20a88c1f4",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-05T08:45:27.284Z",
+          "observed_by": null
+        }
+      ],
+      "note": null
+    },
+    "veterinary_visits": {
+      "state": "recorded",
+      "records": [
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-03",
+          "date_precision": "day",
+          "vet": "Dr Fixture",
+          "reason": "Demonstration vaccination and treatment round",
+          "status": "closed",
+          "id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+          "entity": "visits",
+          "revision": 2,
+          "voided": false,
+          "recorded_at": "2026-10-05T08:45:27.296Z",
+          "observed_by": null,
+          "correction_reason": "Visit finished; pending tasks remain
+open",
+          "attachment_ids": [
+            "8ae78871-bedb-4bfe-82ea-a6ea6c198f95"
+          ]
+        }
+      ],
+      "note": null
+    },
+    "feed": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "feed_29c835a4-8b12-4572-8d76-4247d356af7f",
+          "item_id": "feed_479327c2-28e6-4ebf-bd7c-093c44c5ddfa",
+          "quantity": null,
+          "unit": null,
+          "recipients": "milking",
+          "animal_ids": [
+            "BD-0001",
+            "BD-0002",
+            "BD-0011",
+            "BD-0012",
+            "BD-0016",
+            "BD-0022"
+          ],
+          "recipients_confirmed": true,
+
+PAGE 44
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 44 of 55http://localhost:6512/animals/BD-0001/report
+          "sources": [
+            {
+              "kind": "unknown",
+              "ref_id": null
+            }
+          ],
+          "preparation": "water_mixed",
+          "notes": null,
+          "purpose": null,
+          "on": "2026-10-05",
+          "summary_id": "feed_a250afac-3a81-4a2c-9859-2f6968551341",
+          "item_name": "Khall",
+          "recorded_by": "adnan",
+          "source_form": "direct_entry",
+          "shared": true
+        }
+      ],
+      "note": "Confirmed participation in shared feeding; individual
+intake and cost are not measured."
+    },
+    "financial": {
+      "state": "no_records",
+      "records": [],
+      "note": "Direct health costs only; not lifetime profit. Shared
+visit charges are listed separately."
+    },
+    "shared_visit_costs": {
+      "state": "recorded",
+      "records": [
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-03",
+          "date_precision": "day",
+          "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+          "amount_minor": 200000,
+          "currency": "PKR",
+          "id": "7cc10a13-10b4-49c3-8b8e-961483c8b42b",
+          "entity": "costs",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-05T08:45:27.292Z",
+          "observed_by": null
+        }
+      ],
+      "note": "Unallocated; excluded from animal cost totals."
+    },
+    "growth": {
+      "state": "not_supported",
+      "records": [],
+      "note": "Structured weights are not recorded yet."
+    },
+    "movements": {
+      "state": "not_supported",
+      "records": [],
+      "note": "Structured pen/farm movements are not recorded yet."
+    }
+  },
+
+PAGE 45
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 45 of 55http://localhost:6512/animals/BD-0001/report
+  "timeline": [
+    {
+      "id": "aevt_dc401881-2c9d-4da9-9d2f-77292e7108b2",
+      "domain": "animal",
+      "on": "2019-01-01",
+      "date_precision": "year",
+      "title": "acquired",
+      "record": {
+        "id": "aevt_dc401881-2c9d-4da9-9d2f-77292e7108b2",
+        "type": "acquired",
+        "occurred_on": "2019-01-01",
+        "occurred_time": null,
+        "date_precision": "year",
+        "payload": {
+          "estimated_birth_on": "2017-03-01",
+          "estimated_birth_precision": "month",
+          "from": "Chak 42 dairy",
+          "notes": null
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.180Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_6315436e-0705-417f-87d0-da4130a80500",
+      "domain": "animal",
+      "on": "2021-02-11",
+      "date_precision": "day",
+      "title": "calving",
+      "record": {
+        "id": "aevt_6315436e-0705-417f-87d0-da4130a80500",
+        "type": "calving",
+        "occurred_on": "2021-02-11",
+        "occurred_time": "05:40",
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0016",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.201Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+
+PAGE 46
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 46 of 55http://localhost:6512/animals/BD-0001/report
+      "id": "aevt_1489b5aa-850d-481b-85c8-495d89accb02",
+      "domain": "animal",
+      "on": "2021-11-06",
+      "date_precision": "day",
+      "title": "dry_off",
+      "record": {
+        "id": "aevt_1489b5aa-850d-481b-85c8-495d89accb02",
+        "type": "dry_off",
+        "occurred_on": "2021-11-06",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.202Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd",
+      "domain": "animal",
+      "on": "2022-07-19",
+      "date_precision": "day",
+      "title": "calving",
+      "record": {
+        "id": "aevt_94dd6736-f717-434a-9f3c-45f81ac2e9cd",
+        "type": "calving",
+        "occurred_on": "2022-07-19",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0017",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.203Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_5991efee-836e-41a2-b35b-fdbc69e61ded",
+      "domain": "animal",
+      "on": "2023-04-02",
+      "date_precision": "day",
+
+PAGE 47
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 47 of 55http://localhost:6512/animals/BD-0001/report
+      "title": "dry_off",
+      "record": {
+        "id": "aevt_5991efee-836e-41a2-b35b-fdbc69e61ded",
+        "type": "dry_off",
+        "occurred_on": "2023-04-02",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.204Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_12960a15-1028-4195-b7cc-38ee9dcf2441",
+      "domain": "animal",
+      "on": "2024-01-08",
+      "date_precision": "day",
+      "title": "calving",
+      "record": {
+        "id": "aevt_12960a15-1028-4195-b7cc-38ee9dcf2441",
+        "type": "calving",
+        "occurred_on": "2024-01-08",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0018",
+          "calf_sex": "male",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.205Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_1afc8a89-7b6c-4418-893c-5b0329b853c7",
+      "domain": "animal",
+      "on": "2026-02-14",
+      "date_precision": "day",
+      "title": "note",
+      "record": {
+        "id": "aevt_1afc8a89-7b6c-4418-893c-5b0329b853c7",
+        "type": "note",
+
+PAGE 48
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 48 of 55http://localhost:6512/animals/BD-0001/report
+        "occurred_on": "2026-02-14",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "text": "off feed two days after the morning round, back to
+normal by the 16th"
+        },
+        "source_form": "daily_herd_sheet",
+        "source_ref": "2026-02-14",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-05T08:45:27.206Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "00b7ad99-e57e-42cf-a9b5-75dd24b0f31f",
+      "domain": "health",
+      "on": "2026-10-03",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "cases",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "title": "Observation requiring follow-up",
+        "status": "open",
+        "id": "00b7ad99-e57e-42cf-a9b5-75dd24b0f31f",
+        "entity": "cases",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.280Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+      "domain": "health",
+      "on": "2026-10-03",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "administrations",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "product_id": "d64883f4-4074-48d6-a442-580867145803",
+        "product_name": "Demonstration vaccine (not a clinical
+protocol)",
+
+PAGE 49
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 49 of 55http://localhost:6512/animals/BD-0001/report
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-002",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "task_id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+        "id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+        "entity": "administrations",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.288Z",
+        "observed_by": null,
+        "correction_reason": "Corrected synthetic batch transcription"
+      }
+    },
+    {
+      "id": "38f1ac6e-7c9e-44a5-a87f-1b24eb329742",
+      "domain": "health",
+      "on": "2026-10-03",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "results",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "task_id": "1ecbbf23-f1b9-4a42-b602-34342f2dca12",
+        "kind": "test",
+        "result": "Synthetic test result; no clinical interpretation",
+        "id": "38f1ac6e-7c9e-44a5-a87f-1b24eb329742",
+        "entity": "results",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.290Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "728a2e04-b73a-4226-a208-d2e1e4e77a1d",
+      "domain": "health",
+      "on": "2026-10-03",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "examinations",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+
+PAGE 50
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 50 of 55http://localhost:6512/animals/BD-0001/report
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "findings": "Synthetic observation for workflow practice",
+        "diagnosis": "Fixture finding",
+        "certainty": "suspected",
+        "id": "728a2e04-b73a-4226-a208-d2e1e4e77a1d",
+        "entity": "examinations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.280Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+      "domain": "health",
+      "on": "2026-10-03",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture given",
+        "due_on": "2026-10-03",
+        "assignee": "Dr Fixture",
+        "id": "9eb38001-ddab-465b-a9dc-ff07b8f4e066",
+        "entity": "tasks",
+        "revision": 3,
+        "voided": false,
+        "status": "completed",
+        "evidence_id": "1a082082-5a73-44f5-aff1-7a006dca7f58",
+        "recorded_at": "2026-10-05T08:45:27.288Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "cf825294-d391-4774-9fad-fd207ba642aa",
+      "domain": "health",
+      "on": "2026-10-03",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "administrations",
+      "record": {
+        "occurred_on": "2026-10-03",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "3f895597-4589-4b35-bacf-a516914e6c5b",
+        "product_id": "d64883f4-4074-48d6-a442-580867145803",
+        "product_name": "Demonstration round vaccine",
+        "kind": "vaccine",
+        "amount": 1,
+
+PAGE 51
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 51 of 55http://localhost:6512/animals/BD-0001/report
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-001",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "disposition": "given",
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "observed_by": null,
+        "id": "cf825294-d391-4774-9fad-fd207ba642aa",
+        "entity": "administrations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-05T08:45:27.294Z"
+      }
+    },
+    {
+      "id": "1ecbbf23-f1b9-4a42-b602-34342f2dca12",
+      "domain": "health",
+      "on": "2026-10-04",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "test",
+        "instructions": "Fixture test",
+        "due_on": "2026-10-04",
+        "assignee": "Dr Fixture",
+        "id": "1ecbbf23-f1b9-4a42-b602-34342f2dca12",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "completed",
+        "evidence_id": "38f1ac6e-7c9e-44a5-a87f-1b24eb329742",
+        "recorded_at": "2026-10-05T08:45:27.290Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "945f9e8e-8792-4874-babb-be6366c65924",
+      "domain": "health",
+      "on": "2026-10-04",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+
+PAGE 52
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 52 of 55http://localhost:6512/animals/BD-0001/report
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture overdue",
+        "due_on": "2026-10-04",
+        "assignee": "Dr Fixture",
+        "id": "945f9e8e-8792-4874-babb-be6366c65924",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.283Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "aa5c677d-8815-4838-9506-1b0e82212791",
+      "domain": "health",
+      "on": "2026-10-04",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture missed",
+        "due_on": "2026-10-04",
+        "assignee": "Dr Fixture",
+        "id": "aa5c677d-8815-4838-9506-1b0e82212791",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "missed",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.288Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "00673f00-96c9-4056-9399-7d8030ec7488",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "recorded",
+      "title": "plans",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "case_id": "00b7ad99-e57e-42cf-a9b5-75dd24b0f31f",
+
+PAGE 53
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 53 of 55http://localhost:6512/animals/BD-0001/report
+        "kind": "vaccination",
+        "instructions": "Demonstration course; dates are fixture data,
+not clinical advice",
+        "prescriber": "Dr Fixture",
+        "status": "active",
+        "id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "entity": "plans",
+        "revision": 1,
+        "voided": false,
+        "completed_with_exceptions": false,
+        "recorded_at": "2026-10-05T08:45:27.282Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "601039ff-c2e4-4a06-bc71-4b9ba18cd6dc",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture due",
+        "due_on": "2026-10-05",
+        "assignee": "Dr Fixture",
+        "id": "601039ff-c2e4-4a06-bc71-4b9ba18cd6dc",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.284Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "d65b0f20-473c-48b1-9426-21aa0e4d7417",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "recheck",
+        "instructions": "Fixture recheck",
+        "due_on": "2026-10-05",
+        "assignee": "Dr Fixture",
+        "id": "d65b0f20-473c-48b1-9426-21aa0e4d7417",
+
+PAGE 54
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 54 of 55http://localhost:6512/animals/BD-0001/report
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.285Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "65d600b1-4933-4067-a092-742fcfd7f326",
+      "domain": "health",
+      "on": "2026-10-06",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture cancelled",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "65d600b1-4933-4067-a092-742fcfd7f326",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "cancelled",
+        "evidence_id": null,
+        "recorded_at": "2026-10-05T08:45:27.289Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "f005f9e9-fcb9-42f9-ab73-f6b20a88c1f4",
+      "domain": "health",
+      "on": "2026-10-08",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "00673f00-96c9-4056-9399-7d8030ec7488",
+        "kind": "administration",
+        "instructions": "Fixture upcoming",
+        "due_on": "2026-10-08",
+        "assignee": "Dr Fixture",
+        "id": "f005f9e9-fcb9-42f9-ab73-f6b20a88c1f4",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+
+PAGE 55
+05/10/2026, 6:16 PMDairy Farm Agent
+Page 55 of 55http://localhost:6512/animals/BD-0001/report
+        "recorded_at": "2026-10-05T08:45:27.284Z",
+        "observed_by": null
+      }
+    }
+  ],
+  "totals": {
+    "measured_litres": 20,
+    "measured_sessions": 4,
+    "unmeasured_sessions": 0,
+    "not_milked_sessions": 1,
+    "recorded_sessions": 5,
+    "health_records": 14,
+    "health_costs": {}
+  },
+  "coverage_warnings": [
+    "No records means no evidence entered, not that an event never
+happened.",
+    "This is recorded history as known at generation, not a
+reconstruction of an earlier database.",
+    "Structured breed, weight, movement, breeding and discarded-milk
+capture are deferred.",
+    "Bulk sales and shared feed/payroll costs are not attributable
+animal profit."
+  ]
+}

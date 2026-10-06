@@ -1,0 +1,213 @@
+- banner:
+  - heading [level=1]: Dairy 360
+  - generic: harness · in memory
+  - button: Recording as acceptance_final · Direct entry
+  - button: Search ⌘K
+  - button: system · light
+  - button: Assistant
+  - navigation:
+    - link:
+      - /url: /
+      - text: Today
+    - link:
+      - /url: /analytics
+      - text: Analytics
+    - link:
+      - /url: /animals
+      - text: Herd
+    - link:
+      - /url: /milk/milking
+      - text: Milk
+    - link:
+      - /url: /feed
+      - text: Feed
+    - link:
+      - /url: /labour/people
+      - text: Labour
+    - link:
+      - /url: /check
+      - text: Check
+- navigation:
+  - link:
+    - /url: /animals
+    - text: Animals
+  - link:
+    - /url: /animals/calvings
+    - text: Calvings
+  - link:
+    - /url: /animals/health
+    - text: Health
+- main:
+  - heading [level=2]: Animal health
+  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.
+  - button: Start vet visit
+  - button: Record dose
+  - button: Vaccination round
+  - heading [level=3]: Record veterinary visit
+  - paragraph: The recorder and source come from your recording session. Enter the actual vet or administrator separately.
+  - paragraph: This entry will be recorded by acceptance_final · direct_entry
+  - paragraph: Return to the task board using Close; unsaved changes remain protected.
+  - generic: Record date
+  - generic: Date
+  - textbox:
+    - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+  - checkbox [disabled]
+  - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+  - paragraph: The precision is read from what you type and shown back — there is no default, because a default is how “exact day” gets applied to a guess.
+  - generic: Veterinarian (enter unknown if unavailable)
+  - textbox
+  - generic: Reason for visit
+  - textbox
+  - generic: Visit status
+  - combobox
+  - heading [level=4]: Evidence
+  - generic: Source reference / prescription number
+  - textbox
+  - generic: Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)
+  - button
+  - status: Attachment stored. Save the record to link it.
+  - paragraph:
+    - link:
+      - /url: /api/registry/health/attachments/728d5f38-69f9-4bcf-8f35-5d111c89c839
+      - text: Download attached document
+  - button: Save record
+  - button: Close
+  - generic: Health board date
+  - textbox: 2026-10-06
+  - button: 3 Overdue
+  - button: 0 Due today
+  - button: 2 Upcoming
+  - generic: Filter animal
+  - combobox
+  - generic: Task type
+  - combobox
+  - generic: Due status
+  - combobox
+  - generic: Assigned person
+  - textbox:
+    - /placeholder: Filter by name
+  - heading [level=3]: Outstanding tasks
+  - navigation:
+    - generic: 1–5 of 5
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Overdue
+    - heading [level=4]: Fixture overdue
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-04
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Overdue
+    - heading [level=4]: Fixture due
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-05
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Overdue
+    - heading [level=4]: Fixture recheck
+    - paragraph:
+      - text: Recheck · Due
+      - time: 2026-10-05
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Upcoming
+    - heading [level=4]: Fixture upcoming
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-08
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0002
+      - text: BD-0002 Sohni
+    - generic: Upcoming
+    - heading [level=4]: Demonstration round vaccine
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-09
+    - button: Record completion
+    - button: Change status
+  - region:
+    - heading [level=3]: Withdrawal instructions needing attention (6)
+    - paragraph: BD-0003 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: BD-0003 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention
+    - paragraph: Needs clarification — 2 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Demonstration vaccine (not a clinical protocol) · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: Demonstration round vaccine · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: BD-0002 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph:
+      - text: "Recorded end:"
+      - time: 2026-10-07 18:00:00+05:00
+    - generic: Original instructions and sources
+    - paragraph: Demonstration medicine · Synthetic withdrawal instruction for UI demonstration
+    - paragraph: Issued by Dr Fixture
+    - paragraph: "Recorded end: 2026-10-07T18:00:00+05:00"
+    - button: Source recorded dose
+    - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Demonstration medicine · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+  - generic: Open cases (1)
+  - generic: Records
+  - combobox
+  - navigation:
+    - generic: 1–2 of 2
+  - article:
+    - paragraph: Demonstration vaccination and treatment round · 2026-10-03
+    - paragraph: closed · day · revision 2 · recorded by health_fixture
+    - button: View / edit
+    - button: History
+    - button: Examine animal
+    - button: Record dose
+  - article:
+    - paragraph: Acceptance uncertain attachment recovery · 2026-10-05
+    - paragraph: closed · day · revision 1 · recorded by acceptance_20261005
+    - button: View / edit
+    - button: History
+    - button: Examine animal
+    - button: Record dose
+- dialog "Discard unsaved changes?":
+  - heading "Discard unsaved changes?" [level=2]
+  - paragraph: "veterinary visit: these changes have not been saved."
+  - paragraph: Leaving discards this draft. Keep editing to retain your entries.
+  - button "Keep editing" [active]
+  - button "Discard changes"

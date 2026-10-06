@@ -488,7 +488,9 @@ export class HealthPage {
     } catch (e) {
       this.error.set(String(e));
       if (this.uploadStatus.startsWith('Uploading'))
-        this.uploadStatus = 'Upload failed. The attachment has not been linked to this record.';
+        this.uploadStatus = this.writeState.uncertain()
+          ? 'Upload outcome unknown. Retry the same request to recover the attachment before linking it.'
+          : 'Upload failed. The attachment has not been linked to this record.';
       setTimeout(() => document.querySelector<HTMLElement>('[role=alert]')?.focus());
     } finally {
       this.busy.set(false);

@@ -1,0 +1,33 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K" [active]
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "People":
+    - /url: /labour/people
+  - link "Payroll":
+    - /url: /labour/payroll
+- main:
+  - link "← People":
+    - /url: /labour/people
+  - paragraph: Loading…

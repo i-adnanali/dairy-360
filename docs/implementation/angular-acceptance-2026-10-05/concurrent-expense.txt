@@ -1,0 +1,1 @@
+200 {"source_form":"direct_entry","recorded_by":"acceptance_concurrent","source_ref":"harness fixture","observed_by":null,"notes":"Concurrent expense revision","crop_id":"feed_78532560-fcfe-4edc-9aa2-05f25d979559","on":"2026-10-05","category":"seed","amount_minor":160000,"id":"feed_2f45009b-b871-40de-8af6-599dfcec4a48","revision":2,"recorded_at":"2026-10-06T01:03:48.177Z"}

@@ -1,0 +1,16 @@
+{
+  "pages": 55,
+  "identity_header_pages": [
+    1
+  ],
+  "fixture_identifiers": 39,
+  "identifiers_absent_from_pdf": [],
+  "navigation_text_in_pdf": {
+    "Search \u2318K": false,
+    "Start entering": false,
+    "Print / Save as PDF": false,
+    "Export complete JSON": false,
+    "Manage health": false,
+    "Rows per page": false
+  }
+}

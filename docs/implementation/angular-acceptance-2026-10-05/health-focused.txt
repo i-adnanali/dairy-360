@@ -1,0 +1,16 @@
+
+> web-angular@0.0.0 test
+> ng test --watch=false --include=src/app/registry/health.spec.ts
+
+❯ Building...
+✔ Building...
+Application bundle generation complete. [4.849 seconds] - 2026-10-06T01:01:28.105Z
+
+
+ RUN  v4.1.9 /Users/adnanali/personal/dairy-360/web-angular
+
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  06:01:28
+   Duration  1.26s (transform 184ms, setup 175ms, import 264ms, tests 313ms, environment 419ms)

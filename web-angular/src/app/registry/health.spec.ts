@@ -291,6 +291,10 @@ describe('health management', () => {
     } as unknown as Event);
     expect(c.writeState.uncertain()).toBe(true);
     expect(c.hasUnsavedChanges()).toBe(true);
+    expect(c.uploadStatus).toContain('Upload outcome unknown');
+    expect(c.uploadStatus).not.toContain('Upload failed');
+    await f.whenStable();
+    expect(f.nativeElement.textContent).toContain('Upload outcome unknown');
     const original = structuredClone(write.mock.calls[0]);
     await c.retryLast();
     expect(write.mock.calls[1]).toEqual(original);

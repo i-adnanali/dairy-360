@@ -1,0 +1,1 @@
+200 {"source_form":"direct_entry","recorded_by":"acceptance_concurrent","source_ref":"harness fixture","observed_by":null,"notes":"Concurrent item revision","label":"Silage","category":"silage","archived":false,"id":"feed_6e48cc80-57a3-47e0-8373-cfcd1c27384b","revision":2,"recorded_at":"2026-10-06T01:01:04.119Z"}

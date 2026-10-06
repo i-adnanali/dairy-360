@@ -1,0 +1,1 @@
+Client rejection fixture: oversize.pdf, 10485761 bytes. Generate with Buffer.alloc(10 * 1024 * 1024 + 1). Payload removed after acceptance. See attachment-oversize.txt.
