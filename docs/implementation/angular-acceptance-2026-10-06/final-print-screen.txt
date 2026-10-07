@@ -1,0 +1,598 @@
+The following is a diff from the previous accessibility tree for Window: "Dairy Farm Agent" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 435-1045
++			1076 scroll area
++				1077 HTML content Description: Dairy Farm Agent, URL: localhost:6514/animals/BD-0001/report
++					1078 container
++						1079 heading Dairy 360, Value: 1
++							1080 text Dairy 360
++						1081 text harness · in memory
++						1082 button browsing — nothing is being recorded
++						1083 button Search ⌘K
++						1084 button Theme: system. Switch to light.
++						1085 button (collapsed) Assistant, Secondary Actions: Expand
++						1086 container Sections
++							1087 link Today, Value: localhost:6514/
++							1088 link Analytics, Value: localhost:6514/analytics
++							1089 link Herd, Value: localhost:6514/animals
++							1090 link Milk, Value: localhost:6514/milk/milking
++							1091 link Feed, Value: localhost:6514/feed
++							1092 link Labour, Value: localhost:6514/labour/people
++							1093 link Check, Value: localhost:6514/check
++					1094 container Section views
++						1095 link Animals, Value: localhost:6514/animals
++						1096 link Calvings, Value: localhost:6514/animals/calvings
++						1097 link Health, Value: localhost:6514/animals/health
++					1098 container (showing 0-100 of 136 items)
++						1099 heading Animal lifetime report, Value: 2
++							1100 text Animal lifetime report
++						1101 text Recorded history with evidence, uncertainty and coverage gaps.
++						1102 container
++							1103 text From
++							1104 date time area From, Value: 06/10/2026
++								1105 container
++									1106 stepper (settable, float) day, Value: 0
++									1107 text /
++									1108 stepper (settable, float) month, Value: 0
++									1109 text /
++									1110 stepper (settable, float) year, Value: 0
++						1111 container
++							1112 text Through
++							1113 date time area Through, Value: 06/10/2026
++								1114 container
++									1115 stepper (settable, float) day, Value: 0
++									1116 text /
++									1117 stepper (settable, float) month, Value: 0
++									1118 text /
++									1119 stepper (settable, float) year, Value: 0
++						1120 container
++							1121 tickbox Include corrections, Value: 0
++							1122 text  Include corrections
++						1123 button Apply
++						1124 link Animal profile, Value: localhost:6514/animals/BD-0001
++						1125 link Manage health, Value: localhost:6514/animals/health
++						1126 button Print / Save as PDF
++						1127 button Export complete JSON
++						1128 container Report contents
++							1129 link Identity and provenance (3), Value: localhost:6514/#report-identity
++							1130 link Timeline (21), Value: localhost:6514/#report-timeline
++							1131 link Calvings and reproduction (5), Value: localhost:6514/#report-calvings
++							1132 link Milk (30), Value: localhost:6514/#report-milk
++							1133 link Lactations (3), Value: localhost:6514/#report-lactations
++							1134 link Health records (14), Value: localhost:6514/#report-health
++							1135 link Veterinary visits (1), Value: localhost:6514/#report-visits
++							1136 link Feed (1), Value: localhost:6514/#report-feed
++							1137 link Direct health costs (0), Value: localhost:6514/#report-financial
++							1138 link Shared visit costs (1), Value: localhost:6514/#report-shared_visit_costs
++							1139 link Technical audit · complete response, Value: localhost:6514/#report-audit
++						1140 heading Identity and provenance · BD-0001 · Noori, Value: 3
++							1141 text Identity and provenance · BD-0001 · Noori
++						1142 text Tag: PK-4412 · female · buffalo Status: lactating · Origin: acquired Generated 2026-10-06T07:11:56.064Z. Coverage: all recorded life through latest record. Corrections excluded. Vaccination card and current identity cover all recorded history.
++						1143 heading Vaccination card · all recorded history, Value: 3
++							1144 text Vaccination card · all recorded history
++						1145 text Only administered vaccines appear below. Absence is not evidence of no prior vaccination.
++						1146 text Demonstration vaccine (not a clinical protocol) · 4 Oct 2026
++						1147 text 1 fixture unit · recorded fixture route · Batch DEMO-LOT-002
++						1148 text Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness health card
++						1149 text Record 016840fc-a957-49c1-8f31-7a9ffe617165
++						1150 text Demonstration round vaccine · 4 Oct 2026
++						1151 text 1 fixture unit · recorded fixture route · Batch DEMO-LOT-001
++						1152 text Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness health card
++						1153 text Record 7a938c59-fda0-4edd-bfee-18fd1113d355
++						1154 heading Outstanding instructions, Value: 4
++							1155 text Outstanding instructions
++						1156 text Fixture overdue · due 5 Oct 2026 Fixture recheck · due 6 Oct 2026 Fixture due · due 6 Oct 2026 Fixture upcoming · due 9 Oct 2026
++						1157 heading Withdrawal instructions requiring attention, Value: 4
++							1158 text Withdrawal instructions requiring attention
++						1159 text meat · Demonstration vaccine (not a clinical protocol) · Instruction unknown · End needs clarification meat · Demonstration round vaccine · Instruction unknown · End needs clarification
++						1160 heading Recorded production totals, Value: 3
++							1161 text Recorded production totals
++						1162 text 20 measured litres · 4 measured sessions · 0 milked but unmeasured · 1 not milked Absent sessions are not zero; these totals describe entered records.
++						1163 heading Identity and provenance · 3 records, Value: 3
++							1164 text Identity and provenance · 3 records
++						1165 text Current identity above; recorded parentage below. Identity events appear in Timeline.
++						1166 container Identity and provenance pagination
++							1167 text 1–3 of 3
++						1168 text Parentage
++						1169 text Date: Date not recorded
++						1170 text Subject: BD-0018
++						1171 text Parent: BD-0001
++						1172 text Relationship: dam
++						1173 text Confidence: known
++						1174 summary Source and linked records, Value: off
++							1175 text Source and linked records
++						1176 text Parentage
++						1177 text Date: Date not recorded
++						1178 text Subject: BD-0017
++						1179 text Parent: BD-0001
++						1180 text Relationship: dam
++						1181 text Confidence: known
++						1182 summary Source and linked records, Value: off
++							1183 text Source and linked records
++						1184 text Parentage
++						1185 text Date: Date not recorded
++						1186 text Subject: BD-0016
++						1187 text Parent: BD-0001
++						1188 text Relationship: dam
++						1189 text Confidence: known
++						1190 summary Source and linked records, Value: off
++							1191 text Source and linked records
++						1192 heading Timeline · 21 records, Value: 3
++							1193 text Timeline · 21 records
++						1194 text Effective life events in chronological order; corrected originals are available in the appendix.
++						1195 container Timeline pagination
++							1196 text 1–21 of 21
++						1197 text acquired
++						1198 text Date: 2019 (year known)
++						1199 text Record state: Effective
++						1200 text Acquired from: Chak 42 dairy
++						1201 text Birth date: Mar 2017 (month known)
++						1202 summary Source and linked records, Value: off
++							1203 text Source and linked records
++						1204 text calving
++						1205 text Date: 11 Feb 2021
++						1206 text Record state: Effective
++						1207 text Calf: BD-0016
++						1208 text Calf sex: female
++						1209 text Outcome: live
++						1210 summary Source and linked records, Value: off
++							1211 text Source and linked records
++						1212 text dry off
++						1213 text Date: 6 Nov 2021
++						1214 text Record state: Effective
++						1215 text Reason: scheduled
++						1216 summary Source and linked records, Value: off
++							1217 text Source and linked records
++						1218 text calving
++						1219 text Date: 19 Jul 2022
++						1220 text Record state: Effective
++						1221 text Calf: BD-0017
++						1222 text Calf sex: female
++						1223 text Outcome: live
++						1224 summary Source and linked records, Value: off
++							1225 text Source and linked records
++						1226 text dry off
++						1227 text Date: 2 Apr 2023
++						1228 text Record state: Effective
++						1229 text Reason: scheduled
++						1230 summary Source and linked records, Value: off
++							1231 text Source and linked records
++						1232 text calving
++						1233 text Date: 8 Jan 2024
++						1234 text Record state: Effective
++						1235 text Calf: BD-0018
++						1236 text Calf sex: male
++						1237 text Outcome: live
++						1238 summary Source and linked records, Value: off
++							1239 text Source and linked records
++						1240 text note
++						1241 text Date: 14 Feb 2026
++						1242 text Record state: Effective
++						1243 text Note: off feed two days after the morning round, back to normal by the 16th
++						1244 summary Source and linked records, Value: off
++							1245 text Source and linked records
++						1246 text Administration
++						1247 text Date: 4 Oct 2026
++						1248 text Subject: BD-0001
++						1249 text Record state: Current revision
++						1250 text Type: vaccine
++						1251 text Product: Demonstration vaccine (not a clinical protocol)
++						1252 text Route: recorded fixture route
++						1253 text Batch: DEMO-LOT-002
++						1254 text Administered by: Dr Fixture
++						1255 text Amount: 1 fixture unit
++						1256 text milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture
++						1257 text meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown
++						1258 summary Source and linked records, Value: off
++							1259 text Source and linked records
++						1260 text Result
++						1261 text Date: 4 Oct 2026
++						1262 text Subject: BD-0001
++						1263 text Record state: Current revision
++						1264 text Type: test
++						1265 text Result: Synthetic test result; no clinical interpretation
++						1266 summary Source and linked records, Value: off
++							1267 text Source and linked records
++						1268 text Administration
++						1269 text Date: 4 Oct 2026
++						1270 text Subject: BD-0001
++						1271 text Record state: Current revision
++						1272 text Type: vaccine
++						1273 text Product: Demonstration round vaccine
++						1274 text Route: recorded fixture route
++						1275 text Batch: DEMO-LOT-001
++						1276 text Administered by: Dr Fixture
++						1277 text Amount: 1 fixture unit
++						1278 text milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture
++						1279 text meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown
++						1280 summary Source and linked records, Value: off
++							1281 text Source and linked records
++						1282 text Examination
++						1283 text Date: 4 Oct 2026
++						1284 text Subject: BD-0001
++						1285 text Record state: Current revision
++						1286 text Findings: Synthetic observation for workflow practice
++						1287 text Diagnosis: Fixture finding
++						1288 text Certainty: suspected
++						1289 summary Source and linked records, Value: off
++							1290 text Source and linked records
++						1291 text Health case
++						1292 text Date: 4 Oct 2026
++						1293 text Subject: BD-0001
++						1294 text Record state: Current revision
++						1295 text Subject: Observation requiring follow-up
++						1296 text Status: open
++						1297 summary Source and linked records, Value: off
++							1298 text Source and linked records
++						1299 text Health task
++						1300 text Scheduled date: 4 Oct 2026
++						1301 text Subject: BD-0001
++						1302 text Record state: Current revision
++						1303 text Type: administration
++						1304 text Status: completed
++						1305 text Instructions: Fixture given
++						1306 text Assigned to: Dr Fixture
++						1307 text Due: 4 Oct 2026
++						1308 summary Source and linked records, Value: off
++							1309 text Source and linked records
++						1310 text Health task
++						1311 text Scheduled date: 5 Oct 2026
++						1312 text Subject: BD-0001
++						1313 text Record state: Current revision
++						1314 text Type: administration
++						1315 text Status: pending
++						1316 text Instructions: Fixture overdue
++						1317 text Assigned to: Dr Fixture
++						1318 text Due: 5 Oct 2026
++						1319 summary Source and linked records, Value: off
++							1320 text Source and linked records
++						1321 text Health task
++						1322 text Scheduled date: 5 Oct 2026
++						1323 text Subject: BD-0001
++						1324 text Record state: Current revision
++						1325 text Type: test
++						1326 text Status: completed
++						1327 text Instructions: Fixture test
++						1328 text Assigned to: Dr Fixture
++						1329 text Due: 5 Oct 2026
++						1330 summary Source and linked records, Value: off
++							1331 text Source and linked records
++						1332 text Health task
++						1333 text Scheduled date: 5 Oct 2026
++						1334 text Subject: BD-0001
++						1335 text Record state: Current revision
++						1336 text Type: administration
++						1337 text Status: missed
++						1338 text Instructions: Fixture missed
++						1339 text Assigned to: Dr Fixture
++						1340 text Due: 5 Oct 2026
++						1341 summary Source and linked records, Value: off
++							1342 text Source and linked records
++						1343 text Health task
++						1344 text Scheduled date: 6 Oct 2026
++						1345 text Subject: BD-0001
++						1346 text Record state: Current revision
++						1347 text Type: recheck
++						1348 text Status: pending
++						1349 text Instructions: Fixture recheck
++						1350 text Assigned to: Dr Fixture
++						1351 text Due: 6 Oct 2026
++						1352 summary Source and linked records, Value: off
++							1353 text Source and linked records
++						1354 text Care plan
++						1355 text Recorded date: 6 Oct 2026
++						1356 text Subject: BD-0001
++						1357 text Record state: Current revision
++						1358 text Type: vaccination
++						1359 text Status: active
++						1360 text Instructions: Demonstration course; dates are fixture data, not clinical advice
++						1361 text Prescriber: Dr Fixture
++						1362 summary Source and linked records, Value: off
++							1363 text Source and linked records
++						1364 text Health task
++						1365 text Scheduled date: 6 Oct 2026
++						1366 text Subject: BD-0001
++						1367 text Record state: Current revision
++						1368 text Type: administration
++						1369 text Status: pending
++						1370 text Instructions: Fixture due
++						1371 text Assigned to: Dr Fixture
++						1372 text Due: 6 Oct 2026
++						1373 summary Source and linked records, Value: off
++							1374 text Source and linked records
++						1375 text Health task
++						1376 text Scheduled date: 7 Oct 2026
++						1377 text Subject: BD-0001
++						1378 text Record state: Current revision
++						1379 text Type: administration
++						1380 text Status: cancelled
++						1381 text Instructions: Fixture cancelled
++						1382 text Assigned to: Dr Fixture
++						1383 text Due: 7 Oct 2026
++						1384 summary Source and linked records, Value: off
++							1385 text Source and linked records
++						1386 text Health task
++						1387 text Scheduled date: 9 Oct 2026
++						1388 text Subject: BD-0001
++						1389 text Record state: Current revision
++						1390 text Type: administration
++						1391 text Status: pending
++						1392 text Instructions: Fixture upcoming
++						1393 text Assigned to: Dr Fixture
++						1394 text Due: 9 Oct 2026
++						1395 summary Source and linked records, Value: off
++							1396 text Source and linked records
++						1397 heading Calvings and reproduction · 5 records, Value: 3
++							1398 text Calvings and reproduction · 5 records
++						1399 text Breeding and pregnancy-check capture is not yet supported.
++						1400 container Calvings and reproduction pagination
++							1401 text 1–5 of 5
++						1402 text calving
++						1403 text Date: 11 Feb 2021
++						1404 text Record state: Effective
++						1405 text Calf: BD-0016
++						1406 text Calf sex: female
++						1407 text Outcome: live
++						1408 summary Source and linked records, Value: off
++							1409 text Source and linked records
++						1410 text dry off
++						1411 text Date: 6 Nov 2021
++						1412 text Record state: Effective
++						1413 text Reason: scheduled
++						1414 summary Source and linked records, Value: off
++							1415 text Source and linked records
++						1416 text calving
++						1417 text Date: 19 Jul 2022
++						1418 text Record state: Effective
++						1419 text Calf: BD-0017
++						1420 text Calf sex: female
++						1421 text Outcome: live
++						1422 summary Source and linked records, Value: off
++							1423 text Source and linked records
++						1424 text dry off
++						1425 text Date: 2 Apr 2023
++						1426 text Record state: Effective
++						1427 text Reason: scheduled
++						1428 summary Source and linked records, Value: off
++							1429 text Source and linked records
++						1430 text calving
++						1431 text Date: 8 Jan 2024
++						1432 text Record state: Effective
++						1433 text Calf: BD-0018
++						1434 text Calf sex: male
++						1435 text Outcome: live
++						1436 summary Source and linked records, Value: off
++							1437 text Source and linked records
++						1438 heading Milk · 30 records, Value: 3
++							1439 text Milk · 30 records
++						1440 text Only recorded measured milkings contribute litres. Missing and unmeasured sessions are not zero.
++						1441 container Milk pagination
++							1442 container
++								1443 text Rows per page 
++								1444 pop-up button Milk rows per page, Value: 25
++							1445 text 1–25 of 30
++							1446 button (disabled) Previous
++							1447 text Page 1 of 2
++							1448 button Next
++						1449 text Milking
++						1450 text Date: 4 Oct 2026
++						1451 text Subject: BD-0001
++						1452 text Session: evening
++						1453 text Measurement: 5 L
++						1454 summary Source and linked records, Value: off
++							1455 text Source and linked records
++						1456 text Milking
++						1457 text Date: 4 Oct 2026
++						1458 text Subject: BD-0001
++						1459 text Session: evening
++						1460 text Measurement: 5 L
++						1461 summary Source and linked records, Value: off
++							1462 text Source and linked records
++						1463 text Milking
++						1464 text Date: 4 Oct 2026
++						1465 text Subject: BD-0001
++						1466 text Session: evening
++						1467 text Measurement: 5 L
++						1468 summary Source and linked records, Value: off
++							1469 text Source and linked records
++						1470 text Milking
++						1471 text Date: 4 Oct 2026
++						1472 text Subject: BD-0001
++						1473 text Session: evening
++						1474 text Measurement: 5 L
++						1475 summary Source and linked records, Value: off
++							1476 text Source and linked records
++						1477 text Milking
++						1478 text Date: 4 Oct 2026
++						1479 text Subject: BD-0001
++						1480 text Session: evening
++						1481 text Measurement: 5 L
++						1482 summary Source and linked records, Value: off
++							1483 text Source and linked records
++						1484 text Milking
++						1485 text Date: 4 Oct 2026
++						1486 text Subject: BD-0001
++						1487 text Session: evening
++						1488 text Measurement: 5 L
++						1489 summary Source and linked records, Value: off
++							1490 text Source and linked records
++						1491 text Milking
++						1492 text Date: 4 Oct 2026
++						1493 text Subject: BD-0001
++						1494 text Session: evening
++						1495 text Measurement: 5 L
++						1496 summary Source and linked records, Value: off
++							1497 text Source and linked records
++						1498 text Milking
++						1499 text Date: 4 Oct 2026
++						1500 text Subject: BD-0001
++						1501 text Session: evening
++						1502 text Measurement: 5 L
++						1503 summary Source and linked records, Value: off
++							1504 text Source and linked records
++						1505 text Milking
++						1506 text Date: 4 Oct 2026
++						1507 text Subject: BD-0001
++						1508 text Session: evening
++						1509 text Measurement: 5 L
++						1510 summary Source and linked records, Value: off
++							1511 text Source and linked records
++						1512 text Milking
++						1513 text Date: 4 Oct 2026
++						1514 text Subject: BD-0001
++						1515 text Session: evening
++						1516 text Measurement: 5 L
++						1517 summary Source and linked records, Value: off
++							1518 text Source and linked records
++						1519 text Milking
++						1520 text Date: 4 Oct 2026
++						1521 text Subject: BD-0001
++						1522 text Session: evening
++						1523 text Measurement: 5 L
++						1524 summary Source and linked records, Value: off
++							1525 text Source and linked records
++						1526 text Milking
++						1527 text Date: 4 Oct 2026
++						1528 text Subject: BD-0001
++						1529 text Session: evening
++						1530 text Measurement: 5 L
++						1531 summary Source and linked records, Value: off
++							1532 text Source and linked records
++						1533 text Milking
++						1534 text Date: 4 Oct 2026
++						1535 text Subject: BD-0001
++						1536 text Session: evening
++						1537 text Measurement: 5 L
++						1538 summary Source and linked records, Value: off
++							1539 text Source and linked records
++						1540 text Milking
++						1541 text Date: 4 Oct 2026
++						1542 text Subject: BD-0001
++						1543 text Session: evening
++						1544 text Measurement: 5 L
++						1545 summary Source and linked records, Value: off
++							1546 text Source and linked records
++						1547 text Milking
++						1548 text Date: 4 Oct 2026
++						1549 text Subject: BD-0001
++						1550 text Session: evening
++						1551 text Measurement: 5 L
++						1552 summary Source and linked records, Value: off
++							1553 text Source and linked records
++						1554 text Milking
++						1555 text Date: 4 Oct 2026
++						1556 text Subject: BD-0001
++						1557 text Session: evening
++						1558 text Measurement: 5 L
++						1559 summary Source and linked records, Value: off
++							1560 text Source and linked records
++						1561 text Milking
++						1562 text Date: 4 Oct 2026
++						1563 text Subject: BD-0001
++						1564 text Session: evening
++						1565 text Measurement: 5 L
++						1566 summary Source and linked records, Value: off
++							1567 text Source and linked records
++						1568 text Milking
++						1569 text Date: 4 Oct 2026
++						1570 text Subject: BD-0001
++						1571 text Session: evening
++						1572 text Measurement: 5 L
++						1573 summary Source and linked records, Value: off
++							1574 text Source and linked records
++						1575 text Milking
++						1576 text Date: 4 Oct 2026
++						1577 text Subject: BD-0001
++						1578 text Session: evening
++						1579 text Measurement: 5 L
++						1580 summary Source and linked records, Value: off
++							1581 text Source and linked records
++						1582 text Milking
++						1583 text Date: 4 Oct 2026
++						1584 text Subject: BD-0001
++						1585 text Session: evening
++						1586 text Measurement: 5 L
++						1587 summary Source and linked records, Value: off
++							1588 text Source and linked records
++						1589 text Milking
++						1590 text Date: 4 Oct 2026
++						1591 text Subject: BD-0001
++						1592 text Session: evening
++						1593 text Measurement: 5 L
++						1594 summary Source and linked records, Value: off
++							1595 text Source and linked records
++						1596 text Milking
++						1597 text Date: 4 Oct 2026
++						1598 text Subject: BD-0001
++						1599 text Session: evening
++						1600 text Measurement: 5 L
++						1601 summary Source and linked records, Value: off
++							1602 text Source and linked records
++						1603 text Milking
++						1604 text Date: 4 Oct 2026
++						1605 text Subject: BD-0001
++						1606 text Session: evening
++						1607 text Measurement: 5 L
++						1608 summary Source and linked records, Value: off
++							1609 text Source and linked records
++						1610 text Milking
++						1611 text Date: 4 Oct 2026
++						1612 text Subject: BD-0001
++						1613 text Session: evening
++						1614 text Measurement: 5 L
++						1615 summary Source and linked records, Value: off
++							1616 text Source and linked records
++						1617 text Milking
++						1618 text Date: 4 Oct 2026
++						1619 text Subject: BD-0001
++						1620 text Session: evening
++						1621 text Measurement: 5 L
++						1622 summary Source and linked records, Value: off
++							1623 text Source and linked records
++						1624 heading Lactations · 3 records, Value: 3
++							1625 text Lactations · 3 records
++						1626 container Lactations pagination
++							1627 text 1–3 of 3
++						1628 text Lactation
++						1629 text Date: 11 Feb 2021
++						1630 text Subject: BD-0001
++						1631 text Ended: 6 Nov 2021
++						1632 text Start precision: day
++						1633 text End reason: dry off
++						1634 summary Source and linked records, Value: off
++							1635 text Source and linked records
++						1636 text Lactation
++						1637 text Date: 19 Jul 2022
++						1638 text Subject: BD-0001
++						1639 text Ended: 2 Apr 2023
++						1640 text Start precision: day
++						1641 text End reason: dry off
++						1642 summary Source and linked records, Value: off
++							1643 text Source and linked records
++						1644 text Lactation
++						1645 text Date: 8 Jan 2024
++						1646 text Subject: BD-0001
++						1647 text Ended: No end recorded
++						1648 text Start precision: day
++						1649 summary Source and linked records, Value: off
++							1650 text Source and linked records
++						1651 heading Health records · 14 records, Value: 3
++							1652 text Health records · 14 records
++						1653 container Health records pagination
++							1654 text 1–14 of 14
++						1655 text Administration
++						1656 text Date: 4 Oct 2026
++						1657 text Subject: BD-0001
++						1658 text Record state: Current revision
++						1659 text Type: vaccine
++						1660 text Product: Demonstration vaccine (not a clinical protocol)
++						1661 text Route: recorded fixture route
++						1662 text Batch: DEMO-LOT-002
++						1663 text Administered by: Dr Fixture
++						1664 text Amount: 1 fixture unit
++						1665 text milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture
++						1666 text meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown
++						1667 summary Source and linked records, Value: off
++							1668 text Source and linked records
+~			1055 button Show Reader, ID: AssistantButton
+~			1057 text field (settable) Description: smart search field, Value: localhost:6514/animals/BD-0001/report, ID: WEB_BROWSER_ADDRESS_AND_SEARCH_FIELD
+The focused UI element is 1099 heading Animal lifetime report, Value: 2

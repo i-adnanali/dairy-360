@@ -889,3 +889,26 @@ app-health-page .rows[hidden] { display: none; }
   .entry-sheet thead { position: sticky; top: 0; z-index: 2; background: rgb(var(--surface-sunken)); }
   .entry-sheet [appScrollRegion] :is(input, select, button, a) { scroll-margin-block-start: 64px; }
 }
+
+/* Measured print sheets stay offscreen while being laid out, and become the
+   only document content during printing. A4 is explicit for deterministic
+   physical pagination in Safari as well as Chromium. */
+.life-print-pages {
+  position: absolute; left: -10000px; top: 0;
+  width: 180mm; background: white; color: black;
+  font-size: 10pt; line-height: 1.5;
+}
+.life-print-page { width: 180mm; height: 266mm; }
+.life-print-header { height: 16mm; overflow-wrap: anywhere; font-weight: 600; }
+.life-print-content { height: 250mm; display: flow-root; }
+.life-print-content p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.life-print-content pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 8pt; }
+.life-print-content article { border-top: 1px solid #999; padding-top: 3mm; }
+.life-print-content h3, .life-print-content h4 { font-weight: 600; }
+@media print {
+  body:has(> .life-print-pages) > :not(.life-print-pages) { display: none !important; }
+  .life-print-pages { position: static; }
+  .life-print-page { page: animal-life-report; break-after: page; }
+  .life-print-page:last-child { break-after: auto; }
+  @page animal-life-report { size: A4 portrait; margin: 15mm; }
+}

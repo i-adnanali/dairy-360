@@ -1,0 +1,43 @@
+
+> web-angular@0.0.0 build
+> ng build --browser=src/acceptance-driver.ts --output-path=/private/tmp/dairy-acceptance-driver
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names              |  Raw size | Estimated transfer size
+main-IPZH2L7O.js    | main               | 630.53 kB |               170.61 kB
+styles-BJEOC5MC.css | styles             |  46.13 kB |                 8.78 kB
+
+                    | Initial total      | 676.66 kB |               179.39 kB
+
+Lazy chunk files    | Names              |  Raw size | Estimated transfer size
+chunk-Cwtf2EgT.js   | chat-panel         | 356.17 kB |                70.25 kB
+chunk-DesA0vep.js   | health-page        |  52.13 kB |                11.97 kB
+chunk-Dk-BELP9.js   | -                  |  42.74 kB |                 9.23 kB
+chunk-CRdyg54Z.js   | animal-detail      |  29.58 kB |                 7.62 kB
+chunk-Bv2h-K6P.js   | feed-daily         |  28.14 kB |                 7.17 kB
+chunk-BxQ4_AC3.js   | feed-page          |  25.93 kB |                 6.82 kB
+chunk-upqI4jQ5.js   | analytics-page     |  24.55 kB |                 6.84 kB
+chunk-DjAO4RGB.js   | dispatch-sheet     |  23.69 kB |                 6.76 kB
+chunk-Bu4XyvQD.js   | calving-form       |  21.65 kB |                 6.23 kB
+chunk-BXszNrWe.js   | life-report        |  21.12 kB |                 6.97 kB
+chunk-DibZWFqt.js   | -                  |  21.05 kB |                 5.39 kB
+chunk-B9aDzzWz.js   | milking-roster     |  20.69 kB |                 6.42 kB
+chunk-5bwnk-dg.js   | verification-panel |  19.70 kB |                 5.44 kB
+chunk-C-vhqfUc.js   | person-detail      |  17.79 kB |                 5.03 kB
+chunk-CkFTSXXb.js   | payroll-run        |  17.66 kB |                 5.41 kB
+...and 30 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [9.583 seconds] - 2026-10-06T07:12:43.655Z
+
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 176.66 kB with a total of 676.66 kB.
+
+
+▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Output location: /private/tmp/dairy-acceptance-driver
+

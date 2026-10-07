@@ -1,0 +1,28 @@
+{
+  "pages": 239,
+  "missing_headers": [],
+  "missing_rows": [],
+  "missing_ends": [],
+  "row30_pages": [
+    129,
+    220
+  ],
+  "section_pages": {
+    "Timeline \u00b7": [
+      2
+    ],
+    "Milk \u00b7 30": [
+      11
+    ],
+    "Lactations \u00b7": [
+      131
+    ],
+    "Health records \u00b7": [
+      132
+    ],
+    "Technical audit \u00b7": [
+      139
+    ]
+  },
+  "navigation_leaks": []
+}

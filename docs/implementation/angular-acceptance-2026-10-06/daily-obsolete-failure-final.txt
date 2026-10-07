@@ -1,0 +1,48 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_fixture · Direct entry"
+  - button "Menu · Feed":
+    - text: Menu
+    - generic: · Feed
+  - button "Search"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- main:
+  - heading "Daily feeding" [active] [level=2]
+  - paragraph: One account for the day. Unknown quantity and unspecified recipients are valid.
+  - paragraph: Saved · revision 1 · recorded by adnan. direct_entry · harness fixture. Editing keeps confirmed recipients unless refreshed.
+  - heading "Review 2026-10-06" [level=3]
+  - paragraph: "Fresh fodder: given · supply enough. Additional feed: given."
+  - paragraph: Recorded feeding account
+  - strong: Fresh fodder
+  - paragraph: "Own crop: Seasonal maize; Purchase: 2026-10-06"
+  - paragraph: Unmeasured · unknown
+  - paragraph: Recipients not specified
+  - paragraph
+  - strong: Khall
+  - paragraph: unknown source
+  - paragraph: Unmeasured · water mixed
+  - paragraph: "milking: BD-0001 Noori, BD-0002 Sohni, BD-0011 Bhoori, BD-0012 Lali, BD-0016 Mithi, BD-0022 Neeli"
+  - paragraph
+  - paragraph
+  - paragraph: "Saved record: adnan · direct_entry · harness fixture."
+  - button "Edit account"
+  - link "Cancel daily entry":
+    - /url: /
+  - button "Correction history"
+  - button "Remove summary"
+- complementary "Isolated acceptance driver":
+  - textbox "Driver route": /feed/daily/2026-10-06
+  - button "Driver Angular navigation"
+  - button "Driver target probe in 3 seconds"
+  - status "Driver outcome": "Navigation 7: /feed/daily/2026-10-06; reused Health true: {\"record\":\"7a938c59-fda0-4edd-bfee-18fd1113d355\"} -> {\"record\":\"7a938c59-fda0-4edd-bfee-18fd1113d355\",\"acceptance\":\"retry\"}; result true"

@@ -1,0 +1,79 @@
+The following is a diff from the previous accessibility tree for Window: "Unknown" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 1028-1650
+~432 sheet Secondary Actions: Raise
+~		434 scroll area Secondary Actions: Scroll Up, Scroll Down
++			435 collection (disabled)
++				436 section (disabled) (showing 0-2 of 20 items)
++					437 container
++						438 image
++						439 image selected
++						440 text Page 1 of 320
++					441 container
++						442 image
++						443 image selected
++						444 text Page 2 of 320
++			445 scroll bar (settable, float) 0
++				446 value indicator (settable, float) 0
++				447 increment arrow button
++				448 decrement arrow button
++				449 increment page button
++				450 decrement page button
++		451 splitter (disabled, settable, float) 264
++		452 scroll area Secondary Actions: Scroll Up, Scroll Down
++			453 container
++				454 text field (settable) Description: Copies, Value: 1
++				455 text Copies
++				456 stepper Description: copies, Value: 1, Secondary Actions: Increment, Decrement
++					457 increment arrow button
++					458 decrement arrow button
++				459 text Pages
++				460 text field (settable) 1
++				461 text to
++				462 text field (settable) 1
++				463 text Select pages from the sidebar
++				464 radio button All 320 Pages, Value: 1
++				465 radio button Range from, Value: 0
++				466 radio button Selection, Value: 0
++				467 text Paper Size
++				468 pop-up button Value: A4  210 by 297 mm, Help: A4: 210 by 297 mm
+  Top 6.35 mm  Bottom 14.46 mm
+  Left 6.35 mm  Right 6.35 mm
++				469 text Orientation
++				470 radio button  Portrait, Value: 1
++				471 radio button  Landscape, Value: 0
++				472 text field (settable) 100%
++				473 text Scaling
++				474 stepper Value: 100, Secondary Actions: Increment, Decrement
++					475 increment arrow button
++					476 decrement arrow button
++			477 container
++				478 disclosure triangle 1
++				479 text Safari
++				480 tickbox Print headers and footers, Value: 1
++				481 tickbox Print backgrounds, Value: 0
++				482 text Layout 1 page per sheet
++				483 disclosure triangle 0
++				484 text Paper Handling Collate Sheets • All Sheets
++				485 disclosure triangle 0
++			486 scroll bar (settable, float) 0
++				487 value indicator (settable, float) 0
++				488 increment arrow button
++				489 decrement arrow button
++				490 increment page button
++				491 decrement page button
++		492 container
++			493 text Printer
++			494 pop-up button No Printer Selected
++			495 text Presets
++			496 pop-up button Default Settings
++		497 button Cancel
++		498 button Help
++		499 container
++			500 button PDF
++			501 menu button PDF
++		502 button (disabled) Print
+Selected text: ```
+1
+```
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

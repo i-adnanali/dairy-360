@@ -1,0 +1,40 @@
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "browsing — nothing is being recorded":
+    - text: browsing
+    - generic: — nothing is being recorded
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Animals":
+    - /url: /animals
+  - link "Calvings":
+    - /url: /animals/calvings
+  - link "Health":
+    - /url: /animals/health
+- main:
+  - status: Loading records…
+  - heading "Calvings" [active] [level=2]
+  - link "Record calving":
+    - /url: /animals/calvings/new
+  - text: Search records
+  - searchbox "Search records"
+  - paragraph: Recorded calvings across the herd. Open the animal to inspect or correct its history. Approximate dates keep their recorded precision.
+  - status: Loading calvings…

@@ -1,0 +1,16 @@
+
+> @dairy/server@1.0.0 registry:harness
+> TZ=Asia/Karachi tsx src/registry/harness.ts --port=6515 --empty
+
+registry harness  http://localhost:6515/api/registry
+  storage     :memory:  (dairy.db is NOT open in this process)
+  herd        0 animal(s)  [--empty]
+
+  Everything here is discarded when this process exits.
+npm error Lifecycle script `registry:harness` failed with error:
+npm error code 143
+npm error path /Users/adnanali/personal/dairy-360/server
+npm error workspace @dairy/server@1.0.0
+npm error location /Users/adnanali/personal/dairy-360/server
+npm error command failed
+npm error command sh -c TZ=Asia/Karachi tsx src/registry/harness.ts --port=6515 --empty

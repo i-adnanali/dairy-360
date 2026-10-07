@@ -1,0 +1,1 @@
+{"rules": [{"path": "/animals/BD-0001/life-report", "method": "GET", "fixture": "print-pagination-fixture.json"}]}

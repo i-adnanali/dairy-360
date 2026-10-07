@@ -1,0 +1,7 @@
+built app  http://localhost:6516
+  root      /Users/adnanali/personal/dairy-360/web-angular/dist/web-angular/browser
+  api       http://localhost:6515 -> HARNESS  :memory:
+            in-memory fixture data, discarded when that process exits.
+
+  Production bundle -- no HMR, no watch. Re-run 'npm run build:angular'
+  and reload to pick up a source change.

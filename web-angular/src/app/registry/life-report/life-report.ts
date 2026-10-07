@@ -1,3 +1,5 @@
+import { reportPrintPages } from './print-pages';
+import { ElementRef } from '@angular/core';
 import { DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { lifeSections, lifeSummary, provenanceLines, reportDate } from "../life-report-model";
@@ -39,6 +41,8 @@ import { HelpText } from "../../ui/text";
 })
 export class LifeReport {
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly element = inject(ElementRef<HTMLElement>);
+  private printPages: HTMLElement | null = null;
   protected readonly sections = () => (this.report() ? lifeSections(this.report()) : []);
   protected readonly summary = lifeSummary;
   protected readonly sources = provenanceLines;
@@ -57,7 +61,7 @@ export class LifeReport {
   protected limit = 10;
   protected words = healthWords;
   constructor() {
-    inject(DestroyRef).onDestroy(() => ++this.request);
+    inject(DestroyRef).onDestroy(() => { ++this.request; this.printPages?.remove(); });
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(() => {
       this.report.set(null);
       void this.load();
@@ -96,17 +100,23 @@ export class LifeReport {
   beforePrint() {
     this.printing.set(true);
     this.cdr.detectChanges();
+    if (!this.printPages && this.report()) {
+      const r = this.report();
+      this.printPages = reportPrintPages(this.element.nativeElement,
+        `${r.animal_id} · ${r.current_snapshot.animal.name || 'Unnamed'} · Generated ${r.generated_at}`);
+    }
   }
   @HostListener('window:afterprint')
   afterPrint() {
+    this.printPages?.remove();
+    this.printPages = null;
     this.printing.set(false);
     this.cdr.detectChanges();
   }
   protected print() {
     if (this.loading() || this.error() || !this.report()) return;
     this.beforePrint();
-    window.print();
-    this.afterPrint();
+    try { window.print(); } finally { this.afterPrint(); }
   }
   protected download() {
     if (this.loading() || this.error() || !this.report()) return;

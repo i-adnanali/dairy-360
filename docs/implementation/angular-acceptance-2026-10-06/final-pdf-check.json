@@ -1,0 +1,31 @@
+{
+  "pages": 160,
+  "missing_headers": [],
+  "missing_rows": [],
+  "missing_ends": [],
+  "row30_pages": [
+    52,
+    141
+  ],
+  "section_pages": {
+    "Timeline \u00b7": [
+      2
+    ],
+    "Milk \u00b7 30": [
+      11
+    ],
+    "Lactations \u00b7": [
+      54
+    ],
+    "Health records \u00b7": [
+      55
+    ],
+    "Technical audit \u00b7": [
+      62
+    ]
+  },
+  "navigation_leaks": [],
+  "unique_fixture_ids": 58,
+  "missing_fixture_ids": [],
+  "complete_audit_matches_ignoring_layout_whitespace": true
+}

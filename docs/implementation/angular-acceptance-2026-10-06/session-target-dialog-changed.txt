@@ -1,0 +1,279 @@
+- banner:
+  - heading [level=1]: Dairy 360
+  - generic: registry
+  - button: Recording as acceptance_fixture · Direct entry
+  - button:
+    - text: Menu
+    - generic: · Herd
+  - button: Search
+  - button: system · light
+  - button: Assistant
+- navigation:
+  - link:
+    - /url: /animals
+    - text: Animals
+  - link:
+    - /url: /animals/calvings
+    - text: Calvings
+  - link:
+    - /url: /animals/health
+    - text: Health
+- button: Cancel session setup
+- heading [level=2]: Before entering anything
+- paragraph: Both of these go on every record you write in this session. They are asked once rather than on each form, and they are not defaulted — a mislabelled source reads exactly like a correct one.
+- generic: Where is this coming from?
+- radiogroup:
+  - radio:
+    - generic: "1"
+    - generic: Recall
+    - generic: reconstructed from memory
+  - radio:
+    - generic: "2"
+    - generic: Daily herd sheet
+    - generic: the signed paper round
+  - radio:
+    - generic: "3"
+    - generic: Cycle card
+    - generic: an animal's own card
+  - radio [checked]:
+    - generic: "4"
+    - generic: Direct entry
+    - generic: seen and typed now
+  - radio:
+    - generic: "5"
+    - generic: Import
+    - generic: from another system
+- generic: Who is typing?
+- textbox:
+  - /placeholder: a stable identifier, not a display name
+  - text: acceptance_changed
+- generic: Recorded on every event as recorded_by. Whoever remembered it, if this is recall.
+- paragraph:
+  - text: Whether someone actually
+  - emphasis: saw
+  - text: a thing is asked per record, and left blank by default. Nobody observed a purchase record.
+- generic: Where is this going?
+- paragraph: "The real registry — /synthetic-acceptance/changed-target. Every record you enter is permanent: corrections are new events, and nothing is deleted."
+- checkbox
+- generic: I mean to write to this database. This is not the harness.
+- button [disabled]: Update recording session
+- main:
+  - heading [level=2]: Animal health
+  - paragraph: Veterinary visits, actual treatments and vaccination plans. A planned dose is not an administered dose.
+  - button: Start vet visit
+  - button: Record dose
+  - button: Vaccination round
+  - heading [level=3]: Correct dose
+  - paragraph: The recorder and source come from your recording session. Enter the actual vet or administrator separately.
+  - paragraph: Saved · revision 1 · recorded by health_fixture · direct_entry · Synthetic harness health card
+  - paragraph: This correction will be recorded by acceptance_fixture · direct_entry
+  - paragraph: Return to the task board using Close; unsaved changes remain protected.
+  - heading [level=4]: Identity and date
+  - generic: Dose / booster label (optional)
+  - textbox
+  - generic: Animal
+  - generic: Find animal
+  - searchbox
+  - combobox
+  - generic: Record date
+  - generic: Date
+  - textbox:
+    - /placeholder: 2019, Mar 2019, or 6 Jul 2023
+    - text: 4 Oct 2026
+  - generic: Time (optional)
+  - textbox
+  - checkbox [disabled]
+  - generic: Even the year is a guess — only applies to a bare year, since an estimate is stored as January 1
+  - paragraph: reading as an exact day — 2026-10-04
+  - paragraph: Not what you meant? Type it more precisely — Mar 2019 for a month, 6 Jul 2023 for a day. Nothing here can claim a day you did not type.
+  - generic: Veterinary visit
+  - combobox
+  - generic: Examination
+  - combobox
+  - generic: Health case
+  - combobox
+  - generic: Treatment / vaccination plan
+  - combobox
+  - generic: Complete a planned dose
+  - combobox
+  - heading [level=4]: Administration
+  - generic: Product from catalog (optional)
+  - combobox
+  - generic: Product name as administered
+  - textbox: Demonstration round vaccine
+  - generic: Product type
+  - combobox
+  - generic: Amount administered
+  - spinbutton: "1"
+  - generic: Unit (for example mL)
+  - textbox: fixture unit
+  - generic: Administration route
+  - textbox: recorded fixture route
+  - generic: Administered by
+  - textbox: Dr Fixture
+  - generic: Batch / lot
+  - textbox: SESSION-DRAFT
+  - generic: Product expiry, if known
+  - textbox
+  - heading [level=4]: Historical details and exceptions
+  - button: Add outside-ownership or duplicate-dose explanation
+  - generic: Historical details are incomplete
+  - checkbox
+  - heading [level=4]: Withdrawal instructions
+  - generic: milk withdrawal instruction
+  - text: Recorded state
+  - combobox
+  - text: Instruction
+  - textbox: Synthetic no-withdrawal entry
+  - text: Issuer
+  - textbox: Dr Fixture
+  - generic: meat withdrawal instruction
+  - text: Recorded state
+  - combobox
+  - heading [level=4]: Evidence
+  - generic: Source reference / prescription number
+  - textbox: Synthetic harness health card
+  - generic: Prescription, photo or lab report (JPEG, PNG, PDF; 10 MiB each)
+  - button
+  - generic: Reason for correction / status change
+  - textbox
+  - button: Save record
+  - button: Close
+  - button: Void record with reason
+  - generic: Health board date
+  - textbox: 2026-10-06
+  - button: 1 Overdue
+  - button: 2 Due today
+  - button: 2 Upcoming
+  - generic: Filter animal
+  - combobox
+  - generic: Task type
+  - combobox
+  - generic: Due status
+  - combobox
+  - generic: Assigned person
+  - textbox:
+    - /placeholder: Filter by name
+  - heading [level=3]: Outstanding tasks
+  - navigation:
+    - generic: 1–5 of 5
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Overdue
+    - heading [level=4]: Fixture overdue
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-05
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Due today
+    - heading [level=4]: Fixture recheck
+    - paragraph:
+      - text: Recheck · Due
+      - time: 2026-10-06
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Due today
+    - heading [level=4]: Fixture due
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-06
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0001
+      - text: BD-0001 Noori
+    - generic: Upcoming
+    - heading [level=4]: Fixture upcoming
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-09
+    - paragraph: Assigned to Dr Fixture
+    - button: Record completion
+    - button: Change status
+  - article:
+    - link:
+      - /url: /animals/BD-0002
+      - text: BD-0002 Sohni
+    - generic: Upcoming
+    - heading [level=4]: Demonstration round vaccine
+    - paragraph:
+      - text: Dose · Due
+      - time: 2026-10-10
+    - button: Record completion
+    - button: Change status
+  - region:
+    - heading [level=3]: Withdrawal instructions needing attention (6)
+    - paragraph: BD-0003 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: BD-0003 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Historical vaccine, details incomplete · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: BD-0001 · Meat withdrawal · 2 instruction(s) needing attention
+    - paragraph: Needs clarification — 2 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Demonstration vaccine (not a clinical protocol) · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: Demonstration round vaccine · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+    - paragraph: BD-0002 · Milk withdrawal · 1 instruction(s) needing attention
+    - paragraph:
+      - text: "Recorded end:"
+      - time: 2026-10-08 18:00:00+05:00
+    - generic: Original instructions and sources
+    - paragraph: Demonstration medicine · Synthetic withdrawal instruction for UI demonstration
+    - paragraph: Issued by Dr Fixture
+    - paragraph: "Recorded end: 2026-10-08T18:00:00+05:00"
+    - button: Source recorded dose
+    - paragraph: BD-0002 · Meat withdrawal · 1 instruction(s) needing attention
+    - paragraph: Needs clarification — 1 instruction(s) have no known end.
+    - generic: Original instructions and sources
+    - paragraph: Demonstration medicine · Instruction needs clarification
+    - paragraph: Needs clarification — no known end
+    - button: Source recorded dose
+  - generic: Open cases (1)
+  - generic: Records
+  - combobox
+  - navigation:
+    - generic: 1–1 of 1
+  - article:
+    - paragraph: Demonstration vaccination and treatment round · 2026-10-04
+    - paragraph: closed · day · revision 2 · recorded by health_fixture
+    - button: View / edit
+    - button: History
+    - button: Examine animal
+    - button: Record dose
+- complementary:
+  - textbox: /animals/health?record=7a938c59-fda0-4edd-bfee-18fd1113d355&acceptance=retry
+  - button: Driver Angular navigation
+  - button: Driver target probe in 3 seconds
+  - status: "Probe real: /synthetic-acceptance/changed-target"
+- dialog "Discard unsaved changes?":
+  - heading "Discard unsaved changes?" [level=2]
+  - paragraph: "Dose record for BD-0001: these changes have not been saved."
+  - paragraph: Leaving discards this draft. Keep editing to retain your entries.
+  - button "Keep editing" [active]
+  - button "Discard changes"
