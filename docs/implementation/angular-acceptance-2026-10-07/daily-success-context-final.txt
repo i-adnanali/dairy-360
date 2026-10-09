@@ -1,0 +1,84 @@
+Browser tab: 636327677, Title: "Dairy Farm Agent", URL: "http://localhost:6512/feed/daily/2026-10-06".
+1 AXWebArea Dairy Farm Agent, URL: localhost:6512/feed/daily/2026-10-06
+	2 container
+		3 heading Dairy 360, Value: 1
+			4 text Dairy 360
+		5 text harness · in memory
+		6 button Recording as acceptance_fixture · Direct entry
+		7 button Search ⌘K
+			8 text Search
+			9 text ⌘K
+		10 button Theme: system. Switch to light.
+			11 text System
+			12 text  · light
+		13 button (collapsed) Assistant, Secondary Actions: Expand
+		14 container Description: Sections, ID: section-navigation
+			15 link Description: Today, Value: localhost:6512/
+			16 link Description: Analytics, Value: localhost:6512/analytics
+			17 link Description: Herd, Value: localhost:6512/animals
+			18 link Description: Milk, Value: localhost:6512/milk/milking
+			19 link Description: Feed, Value: localhost:6512/feed
+			20 link Description: Labour, Value: localhost:6512/labour/people
+			21 link Description: Check, Value: localhost:6512/check
+		22 container Section views
+			23 link Description: Overview, Value: localhost:6512/feed
+			24 link Description: Crops, Value: localhost:6512/feed/crops
+			25 link Description: Purchases, Value: localhost:6512/feed/purchases
+			26 link Description: Daily history, Value: localhost:6512/feed/daily
+		27 container
+			28 heading Daily feeding, Value: 2
+				29 text Daily feeding
+			30 text One account for the day. Unknown quantity and unspecified recipients are valid.
+		31 text Saved · revision 1 · recorded by adnan. direct_entry · harness fixture. Editing keeps confirmed recipients unless refreshed.
+		32 container
+			42 text Date
+			43 date field (settable) Date, Value: 2026-10-06
+				44 container
+					45 stepper
+					46 stepper
+					47 stepper
+				48 pop up button Show date picker Show date picker
+			49 heading Fresh fodder, Value: 3
+				50 text Fresh fodder
+			51 container
+				52 text Fresh fodder account
+				53 pop up button (collapsed, settable) Fresh fodder account, Value: Unknown, Secondary Actions: Expand
+					54 menu
+						55 Choose an answer
+						56 Given — add source line below
+						57 None given
+						58 (selected) Unknown
+			59 container
+				60 text Fresh-fodder supply assessment
+				61 pop up button (collapsed, settable) Fresh-fodder supply assessment, Value: unknown, Secondary Actions: Expand
+					62 menu
+						63 Choose assessment
+						64 enough
+						65 short
+						66 surplus
+						67 (selected) unknown
+						68 not applicable
+			69 text Your assessment of fresh-fodder supply; no nutritional adequacy is calculated.
+			70 heading Additional feed, Value: 3
+				71 text Additional feed
+			72 container
+				73 text Additional-feed account
+				74 pop up button (collapsed, settable) Additional-feed account, Value: Unknown, Secondary Actions: Expand
+					75 menu
+						76 Choose an answer
+						77 Given — add lines below
+						78 None given
+						79 (selected) Unknown
+			80 button Add feed line
+			81 button Create feed item
+			82 button Record purchase
+			83 text Common items such as wanda, khall and silage are choices, not presumed feeding. Day notes (optional)
+			84 text entry area (settable) Day notes (optional), Value: CURRENT-DAY-06-DRAFT
+			85 text Source reference (optional)
+			86 text field (settable) Source reference (optional), Value: harness fixture
+			87 button Review feeding summary
+			39 link Description: Cancel daily entry, Value: localhost:6512/
+		40 button Correction history
+		41 button Remove summary
+
+The focused UI element is 84 text entry area (settable) Day notes (optional), Value: CURRENT-DAY-06-DRAFT

@@ -1,7 +1,7 @@
 /** Build measured A4 pages so identity does not depend on browser header repetition.
  * The live report remains the source; all records/disclosures are expanded first.
  */
-export function reportPrintPages(source: HTMLElement, identity: string): HTMLElement {
+export function reportPrintPages(source: HTMLElement, identity: string, reportTitle = 'Animal lifetime report'): HTMLElement {
   const root = document.createElement('div');
   root.className = 'life-print-pages';
   root.setAttribute('aria-hidden', 'true');
@@ -20,7 +20,7 @@ export function reportPrintPages(source: HTMLElement, identity: string): HTMLEle
   };
   page();
   const title = document.createElement('h2');
-  title.textContent = 'Animal lifetime report';
+  title.textContent = reportTitle;
   content.append(title);
   const fits = (node: HTMLElement) => {
     content.append(node);
@@ -61,6 +61,9 @@ export function reportPrintPages(source: HTMLElement, identity: string): HTMLEle
   const fitsEmpty = (node: HTMLElement) => {
     const measure = document.createElement('div');
     measure.className = 'life-print-content';
+    // A wrapped identity consumes part of each sheet. Measure against the
+    // actual remaining space, including when the probe is outside a sheet.
+    measure.style.height = `${content.clientHeight}px`;
     root.append(measure);
     measure.append(node);
     const fits = measure.scrollHeight <= measure.clientHeight;

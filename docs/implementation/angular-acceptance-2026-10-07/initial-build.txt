@@ -1,0 +1,54 @@
+
+> dairy-360@1.0.0 build:angular
+> npm run build:shared && npm run build -w web-angular
+
+
+> dairy-360@1.0.0 build:shared
+> npm run build -w shared
+
+
+> @dairy/shared@1.0.0 build
+> tsc -p tsconfig.json
+
+
+> web-angular@0.0.0 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names              |  Raw size | Estimated transfer size
+main-JW2622V5.js    | main               | 629.10 kB |               170.10 kB
+styles-BJEOC5MC.css | styles             |  46.13 kB |                 8.78 kB
+
+                    | Initial total      | 675.23 kB |               178.88 kB
+
+Lazy chunk files    | Names              |  Raw size | Estimated transfer size
+chunk-CJamfo2W.js   | chat-panel         | 356.17 kB |                70.30 kB
+chunk-CmP_TxsX.js   | health-page        |  52.13 kB |                11.98 kB
+chunk-4p45YnC6.js   | -                  |  42.74 kB |                 9.23 kB
+chunk-DFEnxFkQ.js   | animal-detail      |  29.58 kB |                 7.64 kB
+chunk-DStgaIdo.js   | feed-daily         |  28.14 kB |                 7.19 kB
+chunk-DkqBzO9B.js   | feed-page          |  25.93 kB |                 6.81 kB
+chunk-AFN05I2o.js   | analytics-page     |  24.55 kB |                 6.84 kB
+chunk-DVCVh7dO.js   | dispatch-sheet     |  23.69 kB |                 6.77 kB
+chunk-C--KVpWI.js   | calving-form       |  21.65 kB |                 6.23 kB
+chunk-BpfgFRUA.js   | life-report        |  21.38 kB |                 7.01 kB
+chunk-BH4X-64v.js   | -                  |  21.05 kB |                 5.38 kB
+chunk-DegR6c9j.js   | milking-roster     |  20.69 kB |                 6.41 kB
+chunk-BydWvwjU.js   | verification-panel |  19.70 kB |                 5.43 kB
+chunk-DBcUmaui.js   | person-detail      |  17.79 kB |                 5.03 kB
+chunk-DPCrj5dG.js   | payroll-run        |  17.66 kB |                 5.42 kB
+...and 30 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [7.605 seconds] - 2026-10-07T11:58:59.525Z
+
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 175.23 kB with a total of 675.23 kB.
+
+
+▲ [WARNING] Module '@dairy/shared' used by 'src/app/core/chat-store.ts' is not ESM
+
+  CommonJS or AMD dependencies can cause optimization bailouts.
+  For more information see: https://angular.dev/tools/cli/build#configuring-commonjs-dependencies
+
+
+Output location: /Users/adnanali/personal/dairy-360/web-angular/dist/web-angular

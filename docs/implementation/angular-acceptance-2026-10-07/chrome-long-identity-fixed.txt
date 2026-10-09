@@ -1,0 +1,3044 @@
+BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Animal lifetime report
+Identity and provenance · BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words IDENTITY END
+Tag: PK-4412 · female · buffalo
+Status: lactating · Origin: acquired
+Generated 2026-10-07T12:06:10.807Z. Coverage: all recorded life through latest record.
+Corrections excluded. Vaccination card and current identity cover all recorded history.
+Vaccination card · all recorded history
+Only administered vaccines appear below. Absence is not evidence of no prior
+vaccination.
+Demonstration round vaccine · 5 Oct 2026
+1 fixture unit · recorded fixture route · Batch DEMO-LOT-001
+Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness health card
+Record 679fb2f6-f359-411a-89e0-b71a4ff8753e
+Demonstration vaccine (not a clinical protocol) · 5 Oct 2026
+1 fixture unit · recorded fixture route · Batch DEMO-LOT-002
+Administered by Dr Fixture · Recorded by health_fixture · Source Synthetic harness health card
+Record 9ff92b25-5288-4c8a-95e5-c2284e3dced1
+Outstanding instructions
+Fixture overdue · due 6 Oct 2026
+Fixture recheck · due 7 Oct 2026
+Fixture due · due 7 Oct 2026
+Fixture upcoming · due 10 Oct 2026
+Withdrawal instructions requiring attention
+meat · Demonstration round vaccine · Instruction unknown · End needs clarification
+meat · Demonstration vaccine (not a clinical protocol) · Instruction unknown · End needs clarification
+Recorded production totals
+20 measured litres · 4 measured sessions · 0 milked but unmeasured · 1 not milked
+Absent sessions are not zero; these totals describe entered records. BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Identity and provenance · 3 records
+Current identity above; recorded parentage below. Identity events appear in Timeline.
+Parentage
+Date: Date not recorded
+Subject: BD-0018
+Parent: BD-0001
+Relationship: dam
+Confidence: known
+Source and linked records
+Record: Not supplied
+Recorded by: Not recorded
+Source: Not recorded
+source event id: aevt_ffbc0214-9aaa-47f8-94a2-55588b0fa516
+Parentage
+Date: Date not recorded
+Subject: BD-0017
+Parent: BD-0001
+Relationship: dam
+Confidence: known
+Source and linked records
+Record: Not supplied
+Recorded by: Not recorded
+Source: Not recorded
+source event id: aevt_091047d1-0620-4edc-be88-e05fb42f734b
+Parentage
+Date: Date not recorded
+Subject: BD-0016
+Parent: BD-0001
+Relationship: dam
+Confidence: known
+Source and linked records
+Record: Not supplied
+Recorded by: Not recorded
+Source: Not recorded
+source event id: aevt_e4e73123-d206-42cd-aab2-b034ad08f786BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Timeline · 21 records
+Effective life events in chronological order; corrected originals are available in the
+appendix.
+acquired
+Date: 2019 (year known)
+Record state: Effective
+Acquired from: Chak 42 dairy
+Birth date: Mar 2017 (month known)
+Source and linked records
+Record: aevt_d6dfbb56-b3b5-4c6e-ab24-b3cbf821d423
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.010Z
+calving
+Date: 11 Feb 2021
+Record state: Effective
+Calf: BD-0016
+Calf sex: female
+Outcome: live
+Source and linked records
+Record: aevt_c6d788b3-9481-4101-821d-e3ad443c282e
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.030Z
+dry off
+Date: 6 Nov 2021
+Record state: Effective
+Reason: scheduled
+Source and linked records
+Record: aevt_e093701f-d361-475b-a8b4-46070eb1ca89
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-07T11:59:51.031ZBD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+calving
+Date: 19 Jul 2022
+Record state: Effective
+Calf: BD-0017
+Calf sex: female
+Outcome: live
+Source and linked records
+Record: aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.032Z
+dry off
+Date: 2 Apr 2023
+Record state: Effective
+Reason: scheduled
+Source and linked records
+Record: aevt_0a705166-3fc8-4641-93e9-d203b0151a17
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-07T11:59:51.033Z
+calving
+Date: 8 Jan 2024
+Record state: Effective
+Calf: BD-0018
+Calf sex: male
+Outcome: live
+Source and linked records
+Record: aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-07T11:59:51.034Z
+note
+Date: 14 Feb 2026
+Record state: Effective
+Note: off feed two days after the morning round, back to normal by the 16th
+Source and linked records
+Record: aevt_f6a9d33d-a485-4563-9f66-84fb8b80f5ae
+Recorded by: adnan
+Source: 2026-02-14
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.035ZBD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Examination
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Findings: Synthetic observation for workflow practice
+Diagnosis: Fixture finding
+Certainty: suspected
+Source and linked records
+Record: 0f270008-8c37-41f9-81a6-c13f36345da8
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.104Z
+revision: 1
+visit id: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5
+Health task
+Scheduled date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: completed
+Instructions: Fixture given
+Assigned to: Dr Fixture
+Due: 5 Oct 2026
+Source and linked records
+Record: 42596b02-1a55-4170-8c0f-30c15ce9092c
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.111Z
+revision: 3
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Administration
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration round vaccine
+Route: recorded fixture route
+Batch: DEMO-LOT-001
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown
+Source and linked records
+Record: 679fb2f6-f359-411a-89e0-b71a4ff8753e
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.118Z
+revision: 1
+visit id: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5
+Health case
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Subject: Observation requiring follow-up
+Status: open
+Source and linked records
+Record: 833b2129-be12-442b-aaa5-50bcfbf171f0
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.104Z
+revision: 1BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Administration
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration vaccine (not a clinical protocol)
+Route: recorded fixture route
+Batch: DEMO-LOT-002
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown
+Source and linked records
+Record: 9ff92b25-5288-4c8a-95e5-c2284e3dced1
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.111Z
+revision: 2
+correction reason: Corrected synthetic batch transcription
+visit id: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5
+task id: 42596b02-1a55-4170-8c0f-30c15ce9092c
+Result
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Result: Synthetic test result; no clinical interpretation
+Source and linked records
+Record: e0ff46e0-7d9c-480b-acc6-b779f934a29a
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.113Z
+revision: 1
+task id: a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Scheduled date: 6 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Status: completed
+Instructions: Fixture test
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+Source and linked records
+Record: a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.113Z
+revision: 2
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Health task
+Scheduled date: 6 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: missed
+Instructions: Fixture missed
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+Source and linked records
+Record: c0001bd8-5695-42ca-9b8e-f363ce2416d2
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.112Z
+revision: 2
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Scheduled date: 6 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture overdue
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+Source and linked records
+Record: e8aeaa6a-89bc-41ef-bc3c-d4911cdfb75a
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.107Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Health task
+Scheduled date: 7 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: recheck
+Status: pending
+Instructions: Fixture recheck
+Assigned to: Dr Fixture
+Due: 7 Oct 2026
+Source and linked records
+Record: b7a8f23d-f394-497e-831b-d78501370807
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.109Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Scheduled date: 7 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture due
+Assigned to: Dr Fixture
+Due: 7 Oct 2026
+Source and linked records
+Record: db71b67a-ebe6-4066-bb93-d76837322b0a
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.108Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Care plan
+Recorded date: 7 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccination
+Status: active
+Instructions: Demonstration course; dates are fixture data, not clinical advice
+Prescriber: Dr Fixture
+Source and linked records
+Record: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.106Z
+revision: 1
+case id: 833b2129-be12-442b-aaa5-50bcfbf171f0BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Scheduled date: 8 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: cancelled
+Instructions: Fixture cancelled
+Assigned to: Dr Fixture
+Due: 8 Oct 2026
+Source and linked records
+Record: ab20dadc-28f2-45da-a367-9f87feb4fd96
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.113Z
+revision: 2
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Health task
+Scheduled date: 10 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture upcoming
+Assigned to: Dr Fixture
+Due: 10 Oct 2026
+Source and linked records
+Record: 85b41fe3-ab0b-4793-85bb-bb3cd11d18b0
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.108Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Calvings and reproduction · 5 records
+Breeding and pregnancy-check capture is not yet supported.
+calving
+Date: 11 Feb 2021
+Record state: Effective
+Calf: BD-0016
+Calf sex: female
+Outcome: live
+Source and linked records
+Record: aevt_c6d788b3-9481-4101-821d-e3ad443c282e
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.030ZBD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+dry off
+Date: 6 Nov 2021
+Record state: Effective
+Reason: scheduled
+Source and linked records
+Record: aevt_e093701f-d361-475b-a8b4-46070eb1ca89
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-07T11:59:51.031Z
+calving
+Date: 19 Jul 2022
+Record state: Effective
+Calf: BD-0017
+Calf sex: female
+Outcome: live
+Source and linked records
+Record: aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e
+Recorded by: adnan
+Source: card-01
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.032Z
+dry off
+Date: 2 Apr 2023
+Record state: Effective
+Reason: scheduled
+Source and linked records
+Record: aevt_0a705166-3fc8-4641-93e9-d203b0151a17
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-07T11:59:51.033Z
+calving
+Date: 8 Jan 2024
+Record state: Effective
+Calf: BD-0018
+Calf sex: male
+Outcome: live
+Source and linked records
+Record: aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500
+Recorded by: adnan
+Source: card-01
+recorded at: 2026-10-07T11:59:51.034ZBD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Milk · 5 records
+Only recorded measured milkings contribute litres. Missing and unmeasured sessions are
+not zero.
+Milking
+Date: 5 Oct 2026
+Subject: BD-0001
+Session: evening
+Measurement: 5 L
+Source and linked records
+Record: mlk_51fd9202-57d6-44bf-a34b-cdbc7e48b9df
+Recorded by: adnan
+Source: direct_entry
+observed by: imran
+recorded at: 2026-10-07T11:59:51.067Z
+Milking
+Date: 5 Oct 2026
+Subject: BD-0001
+Session: morning
+Measurement: 5 L
+Source and linked records
+Record: mlk_aa533017-5633-4879-bd56-4b2bb11b1a61
+Recorded by: adnan
+Source: direct_entry
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.065Z
+Milking
+Date: 6 Oct 2026
+Subject: BD-0001
+Session: evening
+Measurement: 5 L
+Source and linked records
+Record: mlk_3963abd8-4f5b-40f1-89dd-a4dfa80e4a9b
+Recorded by: adnan
+Source: direct_entry
+observed by: imran
+recorded at: 2026-10-07T11:59:51.070ZBD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Milking
+Date: 6 Oct 2026
+Subject: BD-0001
+Session: morning
+Measurement: Not milked
+Source and linked records
+Record: mlk_386b32a7-5d23-4cac-b8bf-5536ac39efff
+Recorded by: adnan
+Source: direct_entry
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.069Z
+Milking
+Date: 7 Oct 2026
+Subject: BD-0001
+Session: morning
+Measurement: 5 L
+Source and linked records
+Record: mlk_680dc32c-171c-4fda-9510-6c524ab66844
+Recorded by: adnan
+Source: direct_entry
+observed by: abdul
+recorded at: 2026-10-07T11:59:51.072Z
+Lactations · 3 records
+Lactation
+Date: 11 Feb 2021
+Subject: BD-0001
+Ended: 6 Nov 2021
+Start precision: day
+End reason: dry off
+Source and linked records
+Record: lact_c6d788b3-9481-4101-821d-e3ad443c282e
+Recorded by: Not recorded
+Source: Not recorded
+opened by event id: aevt_c6d788b3-9481-4101-821d-e3ad443c282e
+closed by event id: aevt_e093701f-d361-475b-a8b4-46070eb1ca89BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Lactation
+Date: 19 Jul 2022
+Subject: BD-0001
+Ended: 2 Apr 2023
+Start precision: day
+End reason: dry off
+Source and linked records
+Record: lact_657e7d0a-6c6b-445e-b708-ea53e3647e3e
+Recorded by: Not recorded
+Source: Not recorded
+opened by event id: aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e
+closed by event id: aevt_0a705166-3fc8-4641-93e9-d203b0151a17
+Lactation
+Date: 8 Jan 2024
+Subject: BD-0001
+Ended: No end recorded
+Start precision: day
+Source and linked records
+Record: lact_3c40a80a-0aee-43f9-aef2-3fa4bb94e500
+Recorded by: Not recorded
+Source: Not recorded
+opened by event id: aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500
+Health records · 14 records
+Examination
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Findings: Synthetic observation for workflow practice
+Diagnosis: Fixture finding
+Certainty: suspected
+Source and linked records
+Record: 0f270008-8c37-41f9-81a6-c13f36345da8
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.104Z
+revision: 1
+visit id: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: completed
+Instructions: Fixture given
+Assigned to: Dr Fixture
+Due: 5 Oct 2026
+Source and linked records
+Record: 42596b02-1a55-4170-8c0f-30c15ce9092c
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.111Z
+revision: 3
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Administration
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration round vaccine
+Route: recorded fixture route
+Batch: DEMO-LOT-001
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown
+Source and linked records
+Record: 679fb2f6-f359-411a-89e0-b71a4ff8753e
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.118Z
+revision: 1
+visit id: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health case
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Subject: Observation requiring follow-up
+Status: open
+Source and linked records
+Record: 833b2129-be12-442b-aaa5-50bcfbf171f0
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.104Z
+revision: 1
+Administration
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: vaccine
+Product: Demonstration vaccine (not a clinical protocol)
+Route: recorded fixture route
+Batch: DEMO-LOT-002
+Administered by: Dr Fixture
+Amount: 1 fixture unit
+milk withdrawal: Explicitly none · Synthetic no-withdrawal entry · End not recorded · Issuer Dr Fixture
+meat withdrawal: Unknown; needs clarification · Instruction not recorded · End not recorded · Issuer unknown
+Source and linked records
+Record: 9ff92b25-5288-4c8a-95e5-c2284e3dced1
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.111Z
+revision: 2
+correction reason: Corrected synthetic batch transcription
+visit id: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5
+task id: 42596b02-1a55-4170-8c0f-30c15ce9092c
+Result
+Date: 5 Oct 2026
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Result: Synthetic test result; no clinical interpretation
+Source and linked records
+Record: e0ff46e0-7d9c-480b-acc6-b779f934a29a
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.113Z
+revision: 1
+task id: a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: test
+Status: completed
+Instructions: Fixture test
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+Source and linked records
+Record: a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.113Z
+revision: 2
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: missed
+Instructions: Fixture missed
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+Source and linked records
+Record: c0001bd8-5695-42ca-9b8e-f363ce2416d2
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.112Z
+revision: 2
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture overdue
+Assigned to: Dr Fixture
+Due: 6 Oct 2026
+Source and linked records
+Record: e8aeaa6a-89bc-41ef-bc3c-d4911cdfb75a
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.107Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: recheck
+Status: pending
+Instructions: Fixture recheck
+Assigned to: Dr Fixture
+Due: 7 Oct 2026
+Source and linked records
+Record: b7a8f23d-f394-497e-831b-d78501370807
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.109Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture due
+Assigned to: Dr Fixture
+Due: 7 Oct 2026
+Source and linked records
+Record: db71b67a-ebe6-4066-bb93-d76837322b0a
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.108Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Care plan
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: vaccination
+Status: active
+Instructions: Demonstration course; dates are fixture data, not clinical advice
+Prescriber: Dr Fixture
+Source and linked records
+Record: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.106Z
+revision: 1
+case id: 833b2129-be12-442b-aaa5-50bcfbf171f0BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: cancelled
+Instructions: Fixture cancelled
+Assigned to: Dr Fixture
+Due: 8 Oct 2026
+Source and linked records
+Record: ab20dadc-28f2-45da-a367-9f87feb4fd96
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.113Z
+revision: 2
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080
+Health task
+Date: Date not recorded
+Subject: BD-0001
+Record state: Current revision
+Type: administration
+Status: pending
+Instructions: Fixture upcoming
+Assigned to: Dr Fixture
+Due: 10 Oct 2026
+Source and linked records
+Record: 85b41fe3-ab0b-4793-85bb-bb3cd11d18b0
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.108Z
+revision: 1
+plan id: fb9494ad-38e5-4917-a4ae-594bffa5b080BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Veterinary visits · 1 records
+Veterinary visit
+Date: 5 Oct 2026
+Record state: Current revision
+Status: closed
+Veterinarian: Dr Fixture
+Purpose / reason: Demonstration vaccination and treatment round
+Source and linked records
+Record: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.120Z
+revision: 2
+correction reason: Visit finished; pending tasks remain open
+Attached document
+Feed · 1 records
+Confirmed participation in shared feeding; individual intake and cost are not measured.
+Shared feeding
+Date: 7 Oct 2026
+Item: Khall
+Quantity: Unknown quantity
+Recipients: BD-0001, BD-0002, BD-0011, BD-0012, BD-0016, BD-0022
+Recipient group: milking
+Shared feed quantity; individual intake is not measured.
+Source and linked records
+Record: feed_6e109c53-1bf7-430f-9347-30ee04f5ef05
+Recorded by: adnan
+Source: direct_entry
+summary id: feed_19f17f4b-f86f-4e6d-9587-2c160ad8e88e
+Direct health costs · 0 records
+Direct health costs only; not lifetime profit. Shared visit charges are listed separately.
+No records available in this section.
+Shared visit costs · 1 records
+Unallocated; excluded from animal cost totals.
+Recorded cost
+Date: 5 Oct 2026
+Record state: Current revision
+Recorded cost: Rs 2,000.00
+Source and linked records
+Record: 43b5e170-5239-4e9c-9677-4727941dc570
+Recorded by: health_fixture
+Source: Synthetic harness health card
+recorded at: 2026-10-07T11:59:51.116Z
+revision: 1
+visit id: 6ba3b310-67af-4e5c-bf02-17c9ba476bb5BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Coverage notes
+No records means no evidence entered, not that an event never happened.
+This is recorded history as known at generation, not a reconstruction of an earlier database.
+Structured breed, weight, movement, breeding and discarded-milk capture are deferred.
+Bulk sales and shared feed/payroll costs are not attributable animal profit.BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+Technical audit · complete response
+Original fields, unsupported domains, unknown record types and requested corrections
+are retained below and in the JSON export. Main sections preserve API record order.
+Complete original report, including source records and corrections
+{
+  "schema_version": 1,
+  "animal_id": "BD-0001",
+  "generated_at": "2026-10-07T12:06:10.807Z",
+  "data_snapshot_at": "2026-10-07T12:06:10.807Z",
+  "filters": {
+    "corrections": false
+  },
+  "current_snapshot": {
+    "animal": {
+      "id": "BD-0001",
+      "name": "LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END",
+      "sex": "female",
+      "species": "buffalo",
+      "origin": "acquired",
+      "post_no": "1",
+      "tag_no": "PK-4412"
+    },
+    "status": {
+      "animal_id": "BD-0001",
+      "status": "lactating",
+      "parity": 3,
+      "birth_on": "2017-03-01",
+      "birth_precision": "month",
+      "open_lactation_id": "lact_3c40a80a-0aee-43f9-aef2-3fa4bb94e500"
+    },
+    "events": [
+      {
+        "id": "aevt_d6dfbb56-b3b5-4c6e-ab24-b3cbf821d423",
+        "type": "acquired",
+        "occurred_on": "2019-01-01",
+        "occurred_time": null,
+        "date_precision": "year",
+        "payload": {
+          "estimated_birth_on": "2017-03-01",
+          "estimated_birth_precision": "month",
+          "from": "Chak 42 dairy",
+          "notes": null
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.010Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": trueBD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+      },
+      {
+        "id": "aevt_c6d788b3-9481-4101-821d-e3ad443c282e",
+        "type": "calving",
+        "occurred_on": "2021-02-11",
+        "occurred_time": "05:40",
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0016",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.030Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_e093701f-d361-475b-a8b4-46070eb1ca89",
+        "type": "dry_off",
+        "occurred_on": "2021-11-06",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.031Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e",
+        "type": "calving",
+        "occurred_on": "2022-07-19",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0017",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.032Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_0a705166-3fc8-4641-93e9-d203b0151a17",
+        "type": "dry_off",
+        "occurred_on": "2023-04-02",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.033Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500",
+        "type": "calving",
+        "occurred_on": "2024-01-08",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0018",
+          "calf_sex": "male",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.034Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      },
+      {
+        "id": "aevt_f6a9d33d-a485-4563-9f66-84fb8b80f5ae",
+        "type": "note",
+        "occurred_on": "2026-02-14",
+        "occurred_time": null,BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "date_precision": "day",
+        "payload": {
+          "text": "off feed two days after the morning round, back to normal by the 16th"
+        },
+        "source_form": "daily_herd_sheet",
+        "source_ref": "2026-02-14",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.035Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    ]
+  },
+  "health": {
+    "animal_id": "BD-0001",
+    "records": [
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "findings": "Synthetic observation for workflow practice",
+        "diagnosis": "Fixture finding",
+        "certainty": "suspected",
+        "id": "0f270008-8c37-41f9-81a6-c13f36345da8",
+        "entity": "examinations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.104Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture given",
+        "due_on": "2026-10-05",
+        "assignee": "Dr Fixture",
+        "id": "42596b02-1a55-4170-8c0f-30c15ce9092c",
+        "entity": "tasks",
+        "revision": 3,
+        "voided": false,
+        "status": "completed",
+        "evidence_id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+        "recorded_at": "2026-10-07T11:59:51.111Z",
+        "observed_by": null
+      },BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+      {
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+        "product_name": "Demonstration round vaccine",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-001",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "disposition": "given",
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "observed_by": null,
+        "id": "679fb2f6-f359-411a-89e0-b71a4ff8753e",
+        "entity": "administrations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.118Z"
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "title": "Observation requiring follow-up",
+        "status": "open",
+        "id": "833b2129-be12-442b-aaa5-50bcfbf171f0",
+        "entity": "cases",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.104Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+        "product_name": "Demonstration vaccine (not a clinical protocol)",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-002",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "task_id": "42596b02-1a55-4170-8c0f-30c15ce9092c",
+        "id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+        "entity": "administrations",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.111Z",
+        "observed_by": null,
+        "correction_reason": "Corrected synthetic batch transcription"
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "task_id": "a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6",
+        "kind": "test",
+        "result": "Synthetic test result; no clinical interpretation",
+        "id": "e0ff46e0-7d9c-480b-acc6-b779f934a29a",
+        "entity": "results",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.113Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "test",
+        "instructions": "Fixture test",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6",
+        "entity": "tasks",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "revision": 2,
+        "voided": false,
+        "status": "completed",
+        "evidence_id": "e0ff46e0-7d9c-480b-acc6-b779f934a29a",
+        "recorded_at": "2026-10-07T11:59:51.113Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture missed",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "c0001bd8-5695-42ca-9b8e-f363ce2416d2",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "missed",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.112Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture overdue",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "e8aeaa6a-89bc-41ef-bc3c-d4911cdfb75a",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.107Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "recheck",
+        "instructions": "Fixture recheck",
+        "due_on": "2026-10-07",
+        "assignee": "Dr Fixture",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "id": "b7a8f23d-f394-497e-831b-d78501370807",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.109Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture due",
+        "due_on": "2026-10-07",
+        "assignee": "Dr Fixture",
+        "id": "db71b67a-ebe6-4066-bb93-d76837322b0a",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.108Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "case_id": "833b2129-be12-442b-aaa5-50bcfbf171f0",
+        "kind": "vaccination",
+        "instructions": "Demonstration course; dates are fixture data, not clinical advice",
+        "prescriber": "Dr Fixture",
+        "status": "active",
+        "id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "entity": "plans",
+        "revision": 1,
+        "voided": false,
+        "completed_with_exceptions": false,
+        "recorded_at": "2026-10-07T11:59:51.106Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture cancelled",
+        "due_on": "2026-10-08",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "assignee": "Dr Fixture",
+        "id": "ab20dadc-28f2-45da-a367-9f87feb4fd96",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "cancelled",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.113Z",
+        "observed_by": null
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture upcoming",
+        "due_on": "2026-10-10",
+        "assignee": "Dr Fixture",
+        "id": "85b41fe3-ab0b-4793-85bb-bb3cd11d18b0",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.108Z",
+        "observed_by": null
+      }
+    ],
+    "visits": [
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "vet": "Dr Fixture",
+        "reason": "Demonstration vaccination and treatment round",
+        "status": "closed",
+        "id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "entity": "visits",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.120Z",
+        "observed_by": null,
+        "correction_reason": "Visit finished; pending tasks remain open",
+        "attachment_ids": [
+          "15396493-8573-40e8-bf0b-312edadcc779"
+        ]
+      }
+    ],
+    "vaccinations": [
+      {
+        "occurred_on": "2026-10-05",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+        "product_name": "Demonstration round vaccine",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-001",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "disposition": "given",
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "observed_by": null,
+        "id": "679fb2f6-f359-411a-89e0-b71a4ff8753e",
+        "entity": "administrations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.118Z"
+      },
+      {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+        "product_name": "Demonstration vaccine (not a clinical protocol)",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-002",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "task_id": "42596b02-1a55-4170-8c0f-30c15ce9092c",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+        "entity": "administrations",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.111Z",
+        "observed_by": null,
+        "correction_reason": "Corrected synthetic batch transcription"
+      }
+    ],
+    "withdrawals": [
+      {
+        "animal_id": "BD-0001",
+        "administration_id": "679fb2f6-f359-411a-89e0-b71a4ff8753e",
+        "product_name": "Demonstration round vaccine",
+        "target": "meat",
+        "state": "unknown",
+        "status": "needs_clarification"
+      },
+      {
+        "animal_id": "BD-0001",
+        "administration_id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+        "product_name": "Demonstration vaccine (not a clinical protocol)",
+        "target": "meat",
+        "state": "unknown",
+        "status": "needs_clarification"
+      }
+    ],
+    "coverage": "recorded"
+  },
+  "sections": {
+    "life_events": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "aevt_d6dfbb56-b3b5-4c6e-ab24-b3cbf821d423",
+          "type": "acquired",
+          "occurred_on": "2019-01-01",
+          "occurred_time": null,
+          "date_precision": "year",
+          "payload": {
+            "estimated_birth_on": "2017-03-01",
+            "estimated_birth_precision": "month",
+            "from": "Chak 42 dairy",
+            "notes": null
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.010Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "id": "aevt_c6d788b3-9481-4101-821d-e3ad443c282e",
+          "type": "calving",
+          "occurred_on": "2021-02-11",
+          "occurred_time": "05:40",
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0016",
+            "calf_sex": "female",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.030Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_e093701f-d361-475b-a8b4-46070eb1ca89",
+          "type": "dry_off",
+          "occurred_on": "2021-11-06",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.031Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e",
+          "type": "calving",
+          "occurred_on": "2022-07-19",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0017",
+            "calf_sex": "female",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.032Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_0a705166-3fc8-4641-93e9-d203b0151a17",
+          "type": "dry_off",
+          "occurred_on": "2023-04-02",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.033Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500",
+          "type": "calving",
+          "occurred_on": "2024-01-08",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0018",
+            "calf_sex": "male",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.034Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_f6a9d33d-a485-4563-9f66-84fb8b80f5ae",
+          "type": "note",
+          "occurred_on": "2026-02-14",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+            "text": "off feed two days after the morning round, back to normal by the 16th"
+          },
+          "source_form": "daily_herd_sheet",
+          "source_ref": "2026-02-14",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.035Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        }
+      ],
+      "note": "Effective life events in chronological order; corrected originals are available in the
+appendix."
+    },
+    "identity": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "aevt_d6dfbb56-b3b5-4c6e-ab24-b3cbf821d423",
+          "type": "acquired",
+          "occurred_on": "2019-01-01",
+          "occurred_time": null,
+          "date_precision": "year",
+          "payload": {
+            "estimated_birth_on": "2017-03-01",
+            "estimated_birth_precision": "month",
+            "from": "Chak 42 dairy",
+            "notes": null
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.010Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        }
+      ],
+      "note": null
+    },
+    "reproduction": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "aevt_c6d788b3-9481-4101-821d-e3ad443c282e",
+          "type": "calving",
+          "occurred_on": "2021-02-11",
+          "occurred_time": "05:40",
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0016",
+            "calf_sex": "female",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.030Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_e093701f-d361-475b-a8b4-46070eb1ca89",
+          "type": "dry_off",
+          "occurred_on": "2021-11-06",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.031Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e",
+          "type": "calving",
+          "occurred_on": "2022-07-19",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0017",
+            "calf_sex": "female",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.032Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_0a705166-3fc8-4641-93e9-d203b0151a17",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "type": "dry_off",
+          "occurred_on": "2023-04-02",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "notes": null,
+            "reason": "scheduled"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.033Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        },
+        {
+          "id": "aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500",
+          "type": "calving",
+          "occurred_on": "2024-01-08",
+          "occurred_time": null,
+          "date_precision": "day",
+          "payload": {
+            "assistance": null,
+            "calf_id": "BD-0018",
+            "calf_sex": "male",
+            "notes": null,
+            "outcome": "live"
+          },
+          "source_form": "cycle_card",
+          "source_ref": "card-01",
+          "observed_by": null,
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.034Z",
+          "supersedes_id": null,
+          "superseded_by_id": null,
+          "effective": true
+        }
+      ],
+      "note": "Breeding and pregnancy-check capture is not yet supported."
+    },
+    "parentage": {
+      "state": "recorded",
+      "records": [
+        {
+          "child_id": "BD-0018",
+          "relation": "dam",
+          "parent_ref": "BD-0001",
+          "certainty": "known",
+          "source_event_id": "aevt_ffbc0214-9aaa-47f8-94a2-55588b0fa516"
+        },
+        {
+          "child_id": "BD-0017",
+          "relation": "dam",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "parent_ref": "BD-0001",
+          "certainty": "known",
+          "source_event_id": "aevt_091047d1-0620-4edc-be88-e05fb42f734b"
+        },
+        {
+          "child_id": "BD-0016",
+          "relation": "dam",
+          "parent_ref": "BD-0001",
+          "certainty": "known",
+          "source_event_id": "aevt_e4e73123-d206-42cd-aab2-b034ad08f786"
+        }
+      ],
+      "note": null
+    },
+    "lactations": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "lact_c6d788b3-9481-4101-821d-e3ad443c282e",
+          "animal_id": "BD-0001",
+          "opened_by_event_id": "aevt_c6d788b3-9481-4101-821d-e3ad443c282e",
+          "started_on": "2021-02-11",
+          "start_precision": "day",
+          "ended_on": "2021-11-06",
+          "end_precision": "day",
+          "end_reason": "dry_off",
+          "closed_by_event_id": "aevt_e093701f-d361-475b-a8b4-46070eb1ca89"
+        },
+        {
+          "id": "lact_657e7d0a-6c6b-445e-b708-ea53e3647e3e",
+          "animal_id": "BD-0001",
+          "opened_by_event_id": "aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e",
+          "started_on": "2022-07-19",
+          "start_precision": "day",
+          "ended_on": "2023-04-02",
+          "end_precision": "day",
+          "end_reason": "dry_off",
+          "closed_by_event_id": "aevt_0a705166-3fc8-4641-93e9-d203b0151a17"
+        },
+        {
+          "id": "lact_3c40a80a-0aee-43f9-aef2-3fa4bb94e500",
+          "animal_id": "BD-0001",
+          "opened_by_event_id": "aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500",
+          "started_on": "2024-01-08",
+          "start_precision": "day",
+          "ended_on": null,
+          "end_precision": null,
+          "end_reason": null,
+          "closed_by_event_id": null
+        }
+      ],
+      "note": null
+    },
+    "production": {
+      "state": "recorded",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+      "records": [
+        {
+          "id": "mlk_51fd9202-57d6-44bf-a34b-cdbc7e48b9df",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-05",
+          "session": "evening",
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "imran",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.067Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_aa533017-5633-4879-bd56-4b2bb11b1a61",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-05",
+          "session": "morning",
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.065Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_3963abd8-4f5b-40f1-89dd-a4dfa80e4a9b",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-06",
+          "session": "evening",
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "imran",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.070Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_386b32a7-5d23-4cac-b8bf-5536ac39efff",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-06",
+          "session": "morning",
+          "status": "not_milked",
+          "yield_litres": null,
+          "reason": "under treatment",
+          "occurred_time": null,BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.069Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "mlk_680dc32c-171c-4fda-9510-6c524ab66844",
+          "animal_id": "BD-0001",
+          "occurred_on": "2026-10-07",
+          "session": "morning",
+          "status": "measured",
+          "yield_litres": 5,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.072Z",
+          "source_form": "direct_entry",
+          "note": null
+        }
+      ],
+      "note": "Only recorded measured milkings contribute litres. Missing and unmeasured sessions are not
+zero."
+    },
+    "health": {
+      "state": "recorded",
+      "records": [
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-05",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+          "findings": "Synthetic observation for workflow practice",
+          "diagnosis": "Fixture finding",
+          "certainty": "suspected",
+          "id": "0f270008-8c37-41f9-81a6-c13f36345da8",
+          "entity": "examinations",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-07T11:59:51.104Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "administration",
+          "instructions": "Fixture given",
+          "due_on": "2026-10-05",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "assignee": "Dr Fixture",
+          "id": "42596b02-1a55-4170-8c0f-30c15ce9092c",
+          "entity": "tasks",
+          "revision": 3,
+          "voided": false,
+          "status": "completed",
+          "evidence_id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+          "recorded_at": "2026-10-07T11:59:51.111Z",
+          "observed_by": null
+        },
+        {
+          "occurred_on": "2026-10-05",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+          "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+          "product_name": "Demonstration round vaccine",
+          "kind": "vaccine",
+          "amount": 1,
+          "unit": "fixture unit",
+          "route": "recorded fixture route",
+          "administrator": "Dr Fixture",
+          "batch": "DEMO-LOT-001",
+          "milk_withdrawal": {
+            "state": "none",
+            "instruction": "Synthetic no-withdrawal entry",
+            "issuer": "Dr Fixture"
+          },
+          "meat_withdrawal": {
+            "state": "unknown"
+          },
+          "disposition": "given",
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "observed_by": null,
+          "id": "679fb2f6-f359-411a-89e0-b71a4ff8753e",
+          "entity": "administrations",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-07T11:59:51.118Z"
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-05",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "title": "Observation requiring follow-up",
+          "status": "open",
+          "id": "833b2129-be12-442b-aaa5-50bcfbf171f0",
+          "entity": "cases",
+          "revision": 1,
+          "voided": false,BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "recorded_at": "2026-10-07T11:59:51.104Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-05",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+          "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+          "product_name": "Demonstration vaccine (not a clinical protocol)",
+          "kind": "vaccine",
+          "amount": 1,
+          "unit": "fixture unit",
+          "route": "recorded fixture route",
+          "administrator": "Dr Fixture",
+          "batch": "DEMO-LOT-002",
+          "milk_withdrawal": {
+            "state": "none",
+            "instruction": "Synthetic no-withdrawal entry",
+            "issuer": "Dr Fixture"
+          },
+          "meat_withdrawal": {
+            "state": "unknown"
+          },
+          "task_id": "42596b02-1a55-4170-8c0f-30c15ce9092c",
+          "id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+          "entity": "administrations",
+          "revision": 2,
+          "voided": false,
+          "recorded_at": "2026-10-07T11:59:51.111Z",
+          "observed_by": null,
+          "correction_reason": "Corrected synthetic batch transcription"
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-05",
+          "date_precision": "day",
+          "animal_id": "BD-0001",
+          "task_id": "a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6",
+          "kind": "test",
+          "result": "Synthetic test result; no clinical interpretation",
+          "id": "e0ff46e0-7d9c-480b-acc6-b779f934a29a",
+          "entity": "results",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-07T11:59:51.113Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "test",
+          "instructions": "Fixture test",
+          "due_on": "2026-10-06",
+          "assignee": "Dr Fixture",
+          "id": "a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6",
+          "entity": "tasks",
+          "revision": 2,
+          "voided": false,
+          "status": "completed",
+          "evidence_id": "e0ff46e0-7d9c-480b-acc6-b779f934a29a",
+          "recorded_at": "2026-10-07T11:59:51.113Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "administration",
+          "instructions": "Fixture missed",
+          "due_on": "2026-10-06",
+          "assignee": "Dr Fixture",
+          "id": "c0001bd8-5695-42ca-9b8e-f363ce2416d2",
+          "entity": "tasks",
+          "revision": 2,
+          "voided": false,
+          "status": "missed",
+          "evidence_id": null,
+          "recorded_at": "2026-10-07T11:59:51.112Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "administration",
+          "instructions": "Fixture overdue",
+          "due_on": "2026-10-06",
+          "assignee": "Dr Fixture",
+          "id": "e8aeaa6a-89bc-41ef-bc3c-d4911cdfb75a",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-07T11:59:51.107Z",
+          "observed_by": null
+        },BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "recheck",
+          "instructions": "Fixture recheck",
+          "due_on": "2026-10-07",
+          "assignee": "Dr Fixture",
+          "id": "b7a8f23d-f394-497e-831b-d78501370807",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-07T11:59:51.109Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "administration",
+          "instructions": "Fixture due",
+          "due_on": "2026-10-07",
+          "assignee": "Dr Fixture",
+          "id": "db71b67a-ebe6-4066-bb93-d76837322b0a",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-07T11:59:51.108Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "case_id": "833b2129-be12-442b-aaa5-50bcfbf171f0",
+          "kind": "vaccination",
+          "instructions": "Demonstration course; dates are fixture data, not clinical advice",
+          "prescriber": "Dr Fixture",
+          "status": "active",
+          "id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "entity": "plans",
+          "revision": 1,
+          "voided": false,
+          "completed_with_exceptions": false,
+          "recorded_at": "2026-10-07T11:59:51.106Z",
+          "observed_by": nullBD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "administration",
+          "instructions": "Fixture cancelled",
+          "due_on": "2026-10-08",
+          "assignee": "Dr Fixture",
+          "id": "ab20dadc-28f2-45da-a367-9f87feb4fd96",
+          "entity": "tasks",
+          "revision": 2,
+          "voided": false,
+          "status": "cancelled",
+          "evidence_id": null,
+          "recorded_at": "2026-10-07T11:59:51.113Z",
+          "observed_by": null
+        },
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "animal_id": "BD-0001",
+          "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+          "kind": "administration",
+          "instructions": "Fixture upcoming",
+          "due_on": "2026-10-10",
+          "assignee": "Dr Fixture",
+          "id": "85b41fe3-ab0b-4793-85bb-bb3cd11d18b0",
+          "entity": "tasks",
+          "revision": 1,
+          "voided": false,
+          "status": "pending",
+          "evidence_id": null,
+          "recorded_at": "2026-10-07T11:59:51.108Z",
+          "observed_by": null
+        }
+      ],
+      "note": null
+    },
+    "veterinary_visits": {
+      "state": "recorded",
+      "records": [
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-05",
+          "date_precision": "day",
+          "vet": "Dr Fixture",
+          "reason": "Demonstration vaccination and treatment round",
+          "status": "closed",
+          "id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+          "entity": "visits",
+          "revision": 2,
+          "voided": false,
+          "recorded_at": "2026-10-07T11:59:51.120Z",
+          "observed_by": null,
+          "correction_reason": "Visit finished; pending tasks remain open",
+          "attachment_ids": [
+            "15396493-8573-40e8-bf0b-312edadcc779"
+          ]
+        }
+      ],
+      "note": null
+    },
+    "feed": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "feed_6e109c53-1bf7-430f-9347-30ee04f5ef05",
+          "item_id": "feed_1d7590bd-f56b-4125-9015-14acb3a72e37",
+          "quantity": null,
+          "unit": null,
+          "recipients": "milking",
+          "animal_ids": [
+            "BD-0001",
+            "BD-0002",
+            "BD-0011",
+            "BD-0012",
+            "BD-0016",
+            "BD-0022"
+          ],
+          "recipients_confirmed": true,
+          "sources": [
+            {
+              "kind": "unknown",
+              "ref_id": null
+            }
+          ],
+          "preparation": "water_mixed",
+          "notes": null,
+          "purpose": null,
+          "on": "2026-10-07",
+          "summary_id": "feed_19f17f4b-f86f-4e6d-9587-2c160ad8e88e",
+          "item_name": "Khall",
+          "recorded_by": "adnan",
+          "source_form": "direct_entry",
+          "shared": true
+        }
+      ],
+      "note": "Confirmed participation in shared feeding; individual intake and cost are not measured."
+    },
+    "financial": {
+      "state": "no_records",
+      "records": [],
+      "note": "Direct health costs only; not lifetime profit. Shared visit charges are listed separately."BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+    },
+    "shared_visit_costs": {
+      "state": "recorded",
+      "records": [
+        {
+          "recorded_by": "health_fixture",
+          "source_form": "direct_entry",
+          "source_ref": "Synthetic harness health card",
+          "occurred_on": "2026-10-05",
+          "date_precision": "day",
+          "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+          "amount_minor": 200000,
+          "currency": "PKR",
+          "id": "43b5e170-5239-4e9c-9677-4727941dc570",
+          "entity": "costs",
+          "revision": 1,
+          "voided": false,
+          "recorded_at": "2026-10-07T11:59:51.116Z",
+          "observed_by": null
+        }
+      ],
+      "note": "Unallocated; excluded from animal cost totals."
+    },
+    "growth": {
+      "state": "not_supported",
+      "records": [],
+      "note": "Structured weights are not recorded yet."
+    },
+    "movements": {
+      "state": "not_supported",
+      "records": [],
+      "note": "Structured pen/farm movements are not recorded yet."
+    }
+  },
+  "timeline": [
+    {
+      "id": "aevt_d6dfbb56-b3b5-4c6e-ab24-b3cbf821d423",
+      "domain": "animal",
+      "on": "2019-01-01",
+      "date_precision": "year",
+      "title": "acquired",
+      "record": {
+        "id": "aevt_d6dfbb56-b3b5-4c6e-ab24-b3cbf821d423",
+        "type": "acquired",
+        "occurred_on": "2019-01-01",
+        "occurred_time": null,
+        "date_precision": "year",
+        "payload": {
+          "estimated_birth_on": "2017-03-01",
+          "estimated_birth_precision": "month",
+          "from": "Chak 42 dairy",
+          "notes": null
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.010Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_c6d788b3-9481-4101-821d-e3ad443c282e",
+      "domain": "animal",
+      "on": "2021-02-11",
+      "date_precision": "day",
+      "title": "calving",
+      "record": {
+        "id": "aevt_c6d788b3-9481-4101-821d-e3ad443c282e",
+        "type": "calving",
+        "occurred_on": "2021-02-11",
+        "occurred_time": "05:40",
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0016",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.030Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_e093701f-d361-475b-a8b4-46070eb1ca89",
+      "domain": "animal",
+      "on": "2021-11-06",
+      "date_precision": "day",
+      "title": "dry_off",
+      "record": {
+        "id": "aevt_e093701f-d361-475b-a8b4-46070eb1ca89",
+        "type": "dry_off",
+        "occurred_on": "2021-11-06",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.031Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e",
+      "domain": "animal",
+      "on": "2022-07-19",
+      "date_precision": "day",
+      "title": "calving",
+      "record": {
+        "id": "aevt_657e7d0a-6c6b-445e-b708-ea53e3647e3e",
+        "type": "calving",
+        "occurred_on": "2022-07-19",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0017",
+          "calf_sex": "female",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": "abdul",
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.032Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_0a705166-3fc8-4641-93e9-d203b0151a17",
+      "domain": "animal",
+      "on": "2023-04-02",
+      "date_precision": "day",
+      "title": "dry_off",
+      "record": {
+        "id": "aevt_0a705166-3fc8-4641-93e9-d203b0151a17",
+        "type": "dry_off",
+        "occurred_on": "2023-04-02",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "notes": null,
+          "reason": "scheduled"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.033Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500",
+      "domain": "animal",
+      "on": "2024-01-08",
+      "date_precision": "day",
+      "title": "calving",
+      "record": {
+        "id": "aevt_3c40a80a-0aee-43f9-aef2-3fa4bb94e500",
+        "type": "calving",
+        "occurred_on": "2024-01-08",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "assistance": null,
+          "calf_id": "BD-0018",
+          "calf_sex": "male",
+          "notes": null,
+          "outcome": "live"
+        },
+        "source_form": "cycle_card",
+        "source_ref": "card-01",
+        "observed_by": null,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.034Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "aevt_f6a9d33d-a485-4563-9f66-84fb8b80f5ae",
+      "domain": "animal",
+      "on": "2026-02-14",
+      "date_precision": "day",
+      "title": "note",
+      "record": {
+        "id": "aevt_f6a9d33d-a485-4563-9f66-84fb8b80f5ae",
+        "type": "note",
+        "occurred_on": "2026-02-14",
+        "occurred_time": null,
+        "date_precision": "day",
+        "payload": {
+          "text": "off feed two days after the morning round, back to normal by the 16th"
+        },
+        "source_form": "daily_herd_sheet",
+        "source_ref": "2026-02-14",
+        "observed_by": "abdul",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.035Z",
+        "supersedes_id": null,
+        "superseded_by_id": null,
+        "effective": true
+      }
+    },
+    {
+      "id": "0f270008-8c37-41f9-81a6-c13f36345da8",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "examinations",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "findings": "Synthetic observation for workflow practice",
+        "diagnosis": "Fixture finding",
+        "certainty": "suspected",
+        "id": "0f270008-8c37-41f9-81a6-c13f36345da8",
+        "entity": "examinations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.104Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "42596b02-1a55-4170-8c0f-30c15ce9092c",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture given",
+        "due_on": "2026-10-05",
+        "assignee": "Dr Fixture",
+        "id": "42596b02-1a55-4170-8c0f-30c15ce9092c",
+        "entity": "tasks",
+        "revision": 3,
+        "voided": false,
+        "status": "completed",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "evidence_id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+        "recorded_at": "2026-10-07T11:59:51.111Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "679fb2f6-f359-411a-89e0-b71a4ff8753e",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "administrations",
+      "record": {
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+        "product_name": "Demonstration round vaccine",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-001",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "disposition": "given",
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "observed_by": null,
+        "id": "679fb2f6-f359-411a-89e0-b71a4ff8753e",
+        "entity": "administrations",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.118Z"
+      }
+    },
+    {
+      "id": "833b2129-be12-442b-aaa5-50bcfbf171f0",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "cases",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "title": "Observation requiring follow-up",
+        "status": "open",
+        "id": "833b2129-be12-442b-aaa5-50bcfbf171f0",
+        "entity": "cases",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.104Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "administrations",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "visit_id": "6ba3b310-67af-4e5c-bf02-17c9ba476bb5",
+        "product_id": "e6ff494e-a942-4448-9a02-0c4e511e7634",
+        "product_name": "Demonstration vaccine (not a clinical protocol)",
+        "kind": "vaccine",
+        "amount": 1,
+        "unit": "fixture unit",
+        "route": "recorded fixture route",
+        "administrator": "Dr Fixture",
+        "batch": "DEMO-LOT-002",
+        "milk_withdrawal": {
+          "state": "none",
+          "instruction": "Synthetic no-withdrawal entry",
+          "issuer": "Dr Fixture"
+        },
+        "meat_withdrawal": {
+          "state": "unknown"
+        },
+        "task_id": "42596b02-1a55-4170-8c0f-30c15ce9092c",
+        "id": "9ff92b25-5288-4c8a-95e5-c2284e3dced1",
+        "entity": "administrations",
+        "revision": 2,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.111Z",
+        "observed_by": null,
+        "correction_reason": "Corrected synthetic batch transcription"
+      }
+    },BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+    {
+      "id": "e0ff46e0-7d9c-480b-acc6-b779f934a29a",
+      "domain": "health",
+      "on": "2026-10-05",
+      "date_precision": "day",
+      "date_basis": "occurred",
+      "title": "results",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "occurred_on": "2026-10-05",
+        "date_precision": "day",
+        "animal_id": "BD-0001",
+        "task_id": "a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6",
+        "kind": "test",
+        "result": "Synthetic test result; no clinical interpretation",
+        "id": "e0ff46e0-7d9c-480b-acc6-b779f934a29a",
+        "entity": "results",
+        "revision": 1,
+        "voided": false,
+        "recorded_at": "2026-10-07T11:59:51.113Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6",
+      "domain": "health",
+      "on": "2026-10-06",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "test",
+        "instructions": "Fixture test",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "a87d106a-bc9e-403b-b7e6-a9d0f0ddb0f6",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "completed",
+        "evidence_id": "e0ff46e0-7d9c-480b-acc6-b779f934a29a",
+        "recorded_at": "2026-10-07T11:59:51.113Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "c0001bd8-5695-42ca-9b8e-f363ce2416d2",
+      "domain": "health",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+      "on": "2026-10-06",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture missed",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "c0001bd8-5695-42ca-9b8e-f363ce2416d2",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "missed",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.112Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "e8aeaa6a-89bc-41ef-bc3c-d4911cdfb75a",
+      "domain": "health",
+      "on": "2026-10-06",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture overdue",
+        "due_on": "2026-10-06",
+        "assignee": "Dr Fixture",
+        "id": "e8aeaa6a-89bc-41ef-bc3c-d4911cdfb75a",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.107Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "b7a8f23d-f394-497e-831b-d78501370807",
+      "domain": "health",
+      "on": "2026-10-07",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "recheck",
+        "instructions": "Fixture recheck",
+        "due_on": "2026-10-07",
+        "assignee": "Dr Fixture",
+        "id": "b7a8f23d-f394-497e-831b-d78501370807",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.109Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "db71b67a-ebe6-4066-bb93-d76837322b0a",
+      "domain": "health",
+      "on": "2026-10-07",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture due",
+        "due_on": "2026-10-07",
+        "assignee": "Dr Fixture",
+        "id": "db71b67a-ebe6-4066-bb93-d76837322b0a",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.108Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+      "domain": "health",
+      "on": "2026-10-07",
+      "date_precision": "day",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+      "date_basis": "recorded",
+      "title": "plans",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "case_id": "833b2129-be12-442b-aaa5-50bcfbf171f0",
+        "kind": "vaccination",
+        "instructions": "Demonstration course; dates are fixture data, not clinical advice",
+        "prescriber": "Dr Fixture",
+        "status": "active",
+        "id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "entity": "plans",
+        "revision": 1,
+        "voided": false,
+        "completed_with_exceptions": false,
+        "recorded_at": "2026-10-07T11:59:51.106Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "ab20dadc-28f2-45da-a367-9f87feb4fd96",
+      "domain": "health",
+      "on": "2026-10-08",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture cancelled",
+        "due_on": "2026-10-08",
+        "assignee": "Dr Fixture",
+        "id": "ab20dadc-28f2-45da-a367-9f87feb4fd96",
+        "entity": "tasks",
+        "revision": 2,
+        "voided": false,
+        "status": "cancelled",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.113Z",
+        "observed_by": null
+      }
+    },
+    {
+      "id": "85b41fe3-ab0b-4793-85bb-bb3cd11d18b0",
+      "domain": "health",
+      "on": "2026-10-10",
+      "date_precision": "day",
+      "date_basis": "scheduled",
+      "title": "tasks",BD-0001 · LONG IDENTITY Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity
+words Noori synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori
+synthetic identity words Noori synthetic identity words Noori synthetic identity words Noori synthetic
+identity words Noori synthetic identity words IDENTITY END · Generated 2026-10-07T12:06:10.807Z
+      "record": {
+        "recorded_by": "health_fixture",
+        "source_form": "direct_entry",
+        "source_ref": "Synthetic harness health card",
+        "animal_id": "BD-0001",
+        "plan_id": "fb9494ad-38e5-4917-a4ae-594bffa5b080",
+        "kind": "administration",
+        "instructions": "Fixture upcoming",
+        "due_on": "2026-10-10",
+        "assignee": "Dr Fixture",
+        "id": "85b41fe3-ab0b-4793-85bb-bb3cd11d18b0",
+        "entity": "tasks",
+        "revision": 1,
+        "voided": false,
+        "status": "pending",
+        "evidence_id": null,
+        "recorded_at": "2026-10-07T11:59:51.108Z",
+        "observed_by": null
+      }
+    }
+  ],
+  "totals": {
+    "measured_litres": 20,
+    "measured_sessions": 4,
+    "unmeasured_sessions": 0,
+    "not_milked_sessions": 1,
+    "recorded_sessions": 5,
+    "health_records": 14,
+    "health_costs": {}
+  },
+  "coverage_warnings": [
+    "No records means no evidence entered, not that an event never happened.",
+    "This is recorded history as known at generation, not a reconstruction of an earlier database.",
+    "Structured breed, weight, movement, breeding and discarded-milk capture are deferred.",
+    "Bulk sales and shared feed/payroll costs are not attributable animal profit."
+  ]
+}

@@ -71,6 +71,9 @@
                 <div [appScrollRegion]="'Deliveries — ' + monthLabel(m.month)">
                   <table class="w-full text-left text-sm">
                     <thead>
+                      <tr class="statement-print-context">
+                        <th colspan="4">{{ s.name }} · {{ s.destination_id }} · {{ monthLabel(m.month) }} · Deliveries</th>
+                      </tr>
                       <tr>
                         <th appCell scope="col">Date / session</th>
                         <th appCell scope="col">Quantity / reason</th>
@@ -79,7 +82,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @for (d of dispatchPages.rows(m.dispatches); track d.id) {
+                      @for (d of printing() ? m.dispatches : dispatchPages.rows(m.dispatches); track d.id) {
                         <tr appRowDivider [attr.data-dispatch]="d.id">
                           <td appCell nowrap tone="secondary">
                             {{ d.occurred_on }} {{ d.session }}
@@ -142,6 +145,9 @@
                 <div [appScrollRegion]="'Payments — ' + monthLabel(m.month)">
                   <table class="w-full text-left text-sm">
                     <thead>
+                      <tr class="statement-print-context">
+                        <th colspan="3">{{ s.name }} · {{ s.destination_id }} · {{ monthLabel(m.month) }} · Payments</th>
+                      </tr>
                       <tr>
                         <th appCell scope="col">Date</th>
                         <th appCell scope="col">Method / reference / note</th>
@@ -149,7 +155,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @for (p of paymentPages.rows(m.payments); track p.id) {
+                      @for (p of printing() ? m.payments : paymentPages.rows(m.payments); track p.id) {
                         <tr
                           class="border-t border-line-hairline bg-success-bg/40"
                           [attr.data-payment]="p.id"
@@ -303,7 +309,7 @@
                 [total]="s.prices.length"
               />
               <ul class="space-y-1 text-sm text-content-secondary">
-                @for (p of pricePages.rows(s.prices); track p.id) {
+                @for (p of printing() ? s.prices : pricePages.rows(s.prices); track p.id) {
                   <li>
                     from {{ p.effective_from }} —
                     <span class="font-medium">{{ rate(p.price_minor, p.price_unit_litres) }}</span>

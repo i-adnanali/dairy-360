@@ -65,3 +65,23 @@ it('uses the remaining page space for oversized records without isolating short 
   expect(first.textContent).toContain('MilkExplanationMilkingDate: month knownRecorder: fixtureSource');
   expect(root.querySelectorAll('.life-print-page').length).toBeLessThanOrEqual(5);
 });
+
+it('measures oversized records against the space left by a wrapped identity', () => {
+  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function(this: HTMLElement) {
+    if (this.parentElement?.classList.contains('life-print-page')) return 75;
+    // A detached fit probe must explicitly use the sheet's reduced capacity.
+    return this.style.height ? Number.parseFloat(this.style.height) : 250;
+  });
+  vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function(this: HTMLElement) {
+    return this.textContent?.length || 0;
+  });
+  const source = document.createElement('div');
+  const note = 'Retained long record '.repeat(12);
+  source.innerHTML = `<section><h3>Milk</h3><article><p>${note}</p></article></section>`;
+  const identity = 'An unusually long animal identity '.repeat(14);
+  const root = reportPrintPages(source, identity);
+  const contents = Array.from(root.querySelectorAll<HTMLElement>('.life-print-content'));
+  expect(contents.every(p => p.scrollHeight <= p.clientHeight)).toBe(true);
+  expect(contents.map(p => p.textContent).join('')).toBe('Animal lifetime reportMilk' + note);
+  expect(Array.from(root.querySelectorAll('.life-print-header')).every(p => p.textContent === identity)).toBe(true);
+});

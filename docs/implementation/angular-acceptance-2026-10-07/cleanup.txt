@@ -1,0 +1,8 @@
+2026-10-08 cleanup
+Verified and stopped task processes 85658 (memory harness 6510), 85682 (fault proxy 6511), 85688 (production static server 6512).
+Post-stop lsof found no listeners on these ports.
+Closed task Chrome tabs 636327677 and 636327680 and the task Safari Dairy Farm Agent tab. Existing user tabs preserved.
+Reset fault rules to an empty list. Task-only drivers retained exclusively in this dated evidence directory for reproduction.
+Preserved docs/reviews: exact file set and SHA256 hashes unchanged (367 files).
+No JavaScript files present beside web-angular/src TypeScript sources.
+No commit, push or deployment performed.

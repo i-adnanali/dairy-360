@@ -1,0 +1,560 @@
+08/10/2026, 1:35 PMDairy Farm Agent
+Page 1 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Buyer statement
+Synthetic buyer statement identity OWES
+Rs 31,470.00 140 L over 1 month(s) · billed Rs 31,500.00 · paid Rs 30.00
+October 2026 140 L · billed Rs 31,500.00 · paid Rs 30.00 · Rs 31,470.00 carried forward
+Deliveries — October 2026
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-01-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-02-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-03-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-04-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 2 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-05-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-06-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-07-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-08-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-09-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 3 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-10-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-11-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-12-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-13-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-14-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 4 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-15-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-16-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-17-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-18-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-19-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 5 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-20-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-21-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-22-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-23-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-24-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 6 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-25-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-26-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-27-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-28-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-29-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 7 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-30-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-31-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-32-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-33-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-34-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 8 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date / session Quantity / reasonRecorded rate Billed
+2026-10-05 morning
+4 L— DELIVERY-35-
+END long synthetic
+delivery reason long
+synthetic delivery
+reason long synthetic
+delivery reason
+Rs 9,000.00 / 40 L Rs 900.00
+Payments — October 2026
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-01-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-02-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-03-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-04-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-05-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 9 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-06-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-07-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-08-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-09-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-10-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-11-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 10 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-12-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-13-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-14-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-15-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-16-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-17-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 11 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-18-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-19-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-20-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-21-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-22-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-23-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 12 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-24-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-25-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-26-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-27-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-28-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-29-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.0008/10/2026, 1:35 PMDairy Farm Agent
+Page 13 of 13http://localhost:6512/milk/buyers/dst_7038ce95-06c4-4039-835d-7595218fd769
+Synthetic buyer statement identity · dst_7038ce95-06c4-4039-835d-7595218fd769 · Buyer statement
+Date Method / reference / note Payment
+2026-10-07
+cash · PAYMENT-30-END—
+Synthetic payment note long
+note long note long note long
+note long note long note
+−Rs 1.00
+Agreed rates
+from 2026-06-09 — Rs 9,000.00 / 40 L

@@ -1,0 +1,100 @@
+2026-10-08T08:34:52.632Z
+- banner:
+  - heading "Dairy 360" [level=1]
+  - generic: harness · in memory
+  - button "Recording as acceptance_fixture · Direct entry"
+  - button "Search ⌘K"
+  - 'button "Theme: system. Switch to light."': system · light
+  - button "Assistant"
+  - navigation "Sections":
+    - link "Today":
+      - /url: /
+    - link "Analytics":
+      - /url: /analytics
+    - link "Herd":
+      - /url: /animals
+    - link "Milk":
+      - /url: /milk/milking
+    - link "Feed":
+      - /url: /feed
+    - link "Labour":
+      - /url: /labour/people
+    - link "Check":
+      - /url: /check
+- navigation "Section views":
+  - link "Overview":
+    - /url: /feed
+  - link "Crops":
+    - /url: /feed/crops
+  - link "Purchases":
+    - /url: /feed/purchases
+  - link "Daily history":
+    - /url: /feed/daily
+- main:
+  - heading "Daily feeding" [level=2]
+  - paragraph: One account for the day. Unknown quantity and unspecified recipients are valid.
+  - paragraph: Saved · revision 2 · recorded by acceptance_concurrent. direct_entry · harness fixture. Editing keeps confirmed recipients unless refreshed.
+  - generic: Date
+  - textbox "Date": 2026-10-07
+  - heading "Fresh fodder" [level=3]
+  - generic: Fresh fodder account
+  - combobox "Fresh fodder account":
+    - option "Choose an answer"
+    - option "Given — add source line below" [selected]
+    - option "None given"
+    - option "Unknown"
+  - generic: Fresh-fodder supply assessment
+  - combobox "Fresh-fodder supply assessment":
+    - option "Choose assessment"
+    - option "enough" [selected]
+    - option "short"
+    - option "surplus"
+    - option "unknown"
+    - option "not applicable"
+  - paragraph: Your assessment of fresh-fodder supply; no nutritional adequacy is calculated.
+  - heading "Additional feed" [level=3]
+  - generic: Additional-feed account
+  - combobox "Additional-feed account":
+    - option "Choose an answer"
+    - option "Given — add lines below" [selected]
+    - option "None given"
+    - option "Unknown"
+  - generic "Fresh fodder · unmeasured · unspecified"
+  - option "Choose item"
+  - option "Silage"
+  - option "Khall"
+  - option "Fresh fodder" [selected]
+  - option "Unspecified" [selected]
+  - option "Milking group"
+  - option "Whole herd"
+  - option "Selected animals"
+  - option "unknown" [selected]
+  - option "dry"
+  - option "water mixed"
+  - option "other"
+  - generic "Khall · unmeasured · milking"
+  - option "Choose item"
+  - option "Silage"
+  - option "Khall" [selected]
+  - option "Fresh fodder"
+  - option "Unspecified"
+  - option "Milking group" [selected]
+  - option "Whole herd"
+  - option "Selected animals"
+  - option "unknown"
+  - option "dry"
+  - option "water mixed" [selected]
+  - option "other"
+  - button "Add feed line"
+  - button "Create feed item"
+  - button "Record purchase"
+  - paragraph: Common items such as wanda, khall and silage are choices, not presumed feeding.
+  - generic: Day notes (optional)
+  - textbox "Day notes (optional)" [active]: DAY07-AFTER-OBSOLETE-FAILURE
+  - generic: Source reference (optional)
+  - textbox "Source reference (optional)": harness fixture
+  - button "Review feeding summary"
+  - link "Cancel daily entry":
+    - /url: /
+  - button "Correction history"
+  - button "Remove summary"

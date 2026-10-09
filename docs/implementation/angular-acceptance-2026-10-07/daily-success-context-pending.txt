@@ -1,0 +1,50 @@
+Browser tab: 636327677, Title: "Dairy Farm Agent", URL: "http://localhost:6512/feed/daily/2026-10-06".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 33-38
++			42 text Date
++			43 date field (settable) Date, Value: 2026-10-06
++				44 container
++					45 stepper
++					46 stepper
++					47 stepper
++				48 pop up button Show date picker Show date picker
++			49 heading Fresh fodder, Value: 3
++				50 text Fresh fodder
++			51 container
++				52 text Fresh fodder account
++				53 pop up button (collapsed, settable) Fresh fodder account, Value: Unknown, Secondary Actions: Expand
++					54 menu
++						55 Choose an answer
++						56 Given — add source line below
++						57 None given
++						58 (selected) Unknown
++			59 container
++				60 text Fresh-fodder supply assessment
++				61 pop up button (collapsed, settable) Fresh-fodder supply assessment, Value: unknown, Secondary Actions: Expand
++					62 menu
++						63 Choose assessment
++						64 enough
++						65 short
++						66 surplus
++						67 (selected) unknown
++						68 not applicable
++			69 text Your assessment of fresh-fodder supply; no nutritional adequacy is calculated.
++			70 heading Additional feed, Value: 3
++				71 text Additional feed
++			72 container
++				73 text Additional-feed account
++				74 pop up button (collapsed, settable) Additional-feed account, Value: Unknown, Secondary Actions: Expand
++					75 menu
++						76 Choose an answer
++						77 Given — add lines below
++						78 None given
++						79 (selected) Unknown
++			80 button Add feed line
++			81 button Create feed item
++			82 button Record purchase
++			83 text Common items such as wanda, khall and silage are choices, not presumed feeding. Day notes (optional)
++			84 text entry area (settable) Day notes (optional), Value: CURRENT-DAY-06-DRAFT
++			85 text Source reference (optional)
++			86 text field (settable) Source reference (optional), Value: harness fixture
++			87 button Review feeding summary
+The focused UI element is 84 text entry area (settable) Day notes (optional), Value: CURRENT-DAY-06-DRAFT

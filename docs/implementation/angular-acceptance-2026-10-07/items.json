@@ -1,0 +1,41 @@
+[
+  {
+    "source_form": "direct_entry",
+    "recorded_by": "adnan",
+    "source_ref": "harness fixture",
+    "observed_by": null,
+    "notes": null,
+    "label": "Silage",
+    "category": "silage",
+    "archived": false,
+    "id": "feed_eaf930f1-eb24-48bb-8416-30be0631a440",
+    "revision": 1,
+    "recorded_at": "2026-10-07T11:59:51.092Z"
+  },
+  {
+    "source_form": "direct_entry",
+    "recorded_by": "adnan",
+    "source_ref": "harness fixture",
+    "observed_by": null,
+    "notes": null,
+    "label": "Khall",
+    "category": "concentrate",
+    "archived": false,
+    "id": "feed_1d7590bd-f56b-4125-9015-14acb3a72e37",
+    "revision": 1,
+    "recorded_at": "2026-10-07T11:59:51.092Z"
+  },
+  {
+    "source_form": "direct_entry",
+    "recorded_by": "adnan",
+    "source_ref": "harness fixture",
+    "observed_by": null,
+    "notes": null,
+    "label": "Fresh fodder",
+    "category": "fresh_fodder",
+    "archived": false,
+    "id": "feed_a90e13e8-87b3-4350-9bf3-25b31b05d78a",
+    "revision": 1,
+    "recorded_at": "2026-10-07T11:59:51.091Z"
+  }
+]

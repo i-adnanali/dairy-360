@@ -1,0 +1,199 @@
+
+> web-angular@0.0.0 test
+> ng test --watch=false
+
+❯ Building...
+✔ Building...
+Initial chunk files                                        | Names                                                   |  Raw size
+chunk-GYI44VQT.js                                          | -                                                       | 156.71 kB |
+chunk-HJ3FKV3R.js                                          | -                                                       |  89.67 kB |
+chunk-OYL4KGE3.js                                          | -                                                       |  87.00 kB |
+chunk-2FCEWQ6G.js                                          | -                                                       |  78.17 kB |
+chunk-7O2HRWPR.js                                          | -                                                       |  76.48 kB |
+chunk-QWX2NR3T.js                                          | -                                                       |  64.35 kB |
+chunk-PFN6NL5U.js                                          | -                                                       |  60.88 kB |
+chunk-KQB53AYU.js                                          | -                                                       |  57.59 kB |
+chunk-EPMXIURR.js                                          | -                                                       |  56.99 kB |
+chunk-OUBPIB3G.js                                          | -                                                       |  56.56 kB |
+chunk-IASBAYLT.js                                          | -                                                       |  55.96 kB |
+styles.css                                                 | styles                                                  |  55.19 kB |
+chunk-VUWSXB3C.js                                          | -                                                       |  51.72 kB |
+chunk-3RHBLEZB.js                                          | -                                                       |  50.56 kB |
+chunk-23LWPB4X.js                                          | -                                                       |  50.16 kB |
+chunk-Z3OK3H52.js                                          | -                                                       |  49.09 kB |
+chunk-G32UUG7P.js                                          | -                                                       |  43.45 kB |
+spec-app-registry-forms.js                                 | spec-app-registry-forms                                 |  36.18 kB |
+chunk-O74DLUFQ.js                                          | -                                                       |  26.73 kB |
+chunk-U5IQVAX6.js                                          | -                                                       |  26.22 kB |
+chunk-DVF46PDB.js                                          | -                                                       |  24.59 kB |
+chunk-57YGFP7P.js                                          | -                                                       |  22.95 kB |
+spec-app-registry-payroll.js                               | spec-app-registry-payroll                               |  22.59 kB |
+chunk-VAZ33FWN.js                                          | -                                                       |  22.58 kB |
+chunk-QHOV2FTT.js                                          | -                                                       |  19.95 kB |
+chunk-E737YF6A.js                                          | -                                                       |  19.80 kB |
+spec-app-registry-sales.js                                 | spec-app-registry-sales                                 |  17.61 kB |
+spec-app-registry-health.js                                | spec-app-registry-health                                |  16.48 kB |
+spec-app-registry-b4-reporting.js                          | spec-app-registry-b4-reporting                          |  16.36 kB |
+chunk-M2URXWSK.js                                          | -                                                       |  15.83 kB |
+spec-app-registry-feed.js                                  | spec-app-registry-feed                                  |  15.76 kB |
+chunk-VQWA5O5G.js                                          | -                                                       |  13.90 kB |
+chunk-YB2MSVJI.js                                          | -                                                       |  13.78 kB |
+chunk-4666SGAF.js                                          | -                                                       |  13.41 kB |
+spec-app-registry-routing.js                               | spec-app-registry-routing                               |  13.37 kB |
+chunk-YEMFUIAS.js                                          | -                                                       |  13.22 kB |
+chunk-DEC22UXG.js                                          | -                                                       |  12.78 kB |
+spec-app-registry-milking.js                               | spec-app-registry-milking                               |  12.54 kB |
+chunk-FLXRJ6VM.js                                          | -                                                       |  12.23 kB |
+spec-app-core-chat-store.js                                | spec-app-core-chat-store                                |  11.76 kB |
+spec-app-registry-draft-registry.js                        | spec-app-registry-draft-registry                        |  11.23 kB |
+spec-app-registry-analytics.js                             | spec-app-registry-analytics                             |  11.05 kB |
+chunk-H7MWLX3Z.js                                          | -                                                       |  10.87 kB |
+spec-app-registry-phase7.js                                | spec-app-registry-phase7                                |  10.71 kB |
+spec-app-registry-target.js                                | spec-app-registry-target                                |  10.59 kB |
+chunk-HE5IW3QS.js                                          | -                                                       |  10.19 kB |
+spec-app-registry-precision-date-precision-date.js         | spec-app-registry-precision-date-precision-date         |   9.90 kB |
+chunk-4FBNOPUG.js                                          | -                                                       |   9.73 kB |
+chunk-PTPUCFV5.js                                          | -                                                       |   9.49 kB |
+spec-app-registry-duplicate-warning-duplicate-warning.js   | spec-app-registry-duplicate-warning-duplicate-warning   |   9.38 kB |
+chunk-45CMFVHW.js                                          | -                                                       |   9.26 kB |
+chunk-P3A44BGH.js                                          | -                                                       |   9.06 kB |
+spec-app-registry-calf-picker-calf-picker.js               | spec-app-registry-calf-picker-calf-picker               |   7.79 kB |
+chunk-P4CBFCAU.js                                          | -                                                       |   7.46 kB |
+chunk-YM4EENWU.js                                          | -                                                       |   7.39 kB |
+chunk-ALUNAIWB.js                                          | -                                                       |   7.35 kB |
+spec-app-ui-certainty.js                                   | spec-app-ui-certainty                                   |   7.30 kB |
+spec-app-registry-event-list-event-list.js                 | spec-app-registry-event-list-event-list                 |   7.20 kB |
+chunk-NHK3MVQA.js                                          | -                                                       |   7.15 kB |
+spec-app-registry-writer-matrix.js                         | spec-app-registry-writer-matrix                         |   6.76 kB |
+chunk-DQBOQ63V.js                                          | -                                                       |   6.72 kB |
+spec-app-components-chat-panel-chat-panel.js               | spec-app-components-chat-panel-chat-panel               |   6.58 kB |
+chunk-PNLW5VQJ.js                                          | -                                                       |   6.32 kB |
+spec-app-registry-date-parse.js                            | spec-app-registry-date-parse                            |   6.21 kB |
+chunk-EMFW76XY.js                                          | -                                                       |   6.20 kB |
+spec-app-registry-chip-group-chip-group.js                 | spec-app-registry-chip-group-chip-group                 |   5.86 kB |
+chunk-3LV3OEYS.js                                          | -                                                       |   5.83 kB |
+spec-app-registry-payment-identity.js                      | spec-app-registry-payment-identity                      |   5.64 kB |
+spec-app-registry-async-recovery.js                        | spec-app-registry-async-recovery                        |   5.47 kB |
+chunk-ZNV4FLXL.js                                          | -                                                       |   5.46 kB |
+chunk-HVEJSA6X.js                                          | -                                                       |   5.38 kB |
+chunk-OPRD3MKS.js                                          | -                                                       |   5.28 kB |
+spec-app-registry-life-report-print-pages.js               | spec-app-registry-life-report-print-pages               |   5.15 kB |
+chunk-LWUA33VG.js                                          | -                                                       |   5.04 kB |
+spec-app-registry-feed-page-feed-page.js                   | spec-app-registry-feed-page-feed-page                   |   5.02 kB |
+chunk-VPXXIWYL.js                                          | -                                                       |   4.88 kB |
+chunk-RSTWSNOR.js                                          | -                                                       |   4.75 kB |
+spec-app-components-chart-card-chart-card.js               | spec-app-components-chart-card-chart-card               |   4.75 kB |
+chunk-EJPAGSFB.js                                          | -                                                       |   4.53 kB |
+chunk-HQZDDJMW.js                                          | -                                                       |   4.36 kB |
+spec-app-ui-amber.js                                       | spec-app-ui-amber                                       |   4.26 kB |
+spec-app-components-assistant-panel-assistant-panel.js     | spec-app-components-assistant-panel-assistant-panel     |   4.23 kB |
+chunk-TNIM2ZNF.js                                          | -                                                       |   4.10 kB |
+spec-app-registry-identifier-input-identifier-input.js     | spec-app-registry-identifier-input-identifier-input     |   4.09 kB |
+spec-app-components-message-message.js                     | spec-app-components-message-message                     |   4.00 kB |
+spec-app-registry-write-lock.js                            | spec-app-registry-write-lock                            |   3.98 kB |
+spec-app-ui-button.js                                      | spec-app-ui-button                                      |   3.83 kB |
+chunk-RR2PLWN6.js                                          | -                                                       |   3.66 kB |
+spec-app-components-confirmation-card-confirmation-card.js | spec-app-components-confirmation-card-confirmation-card |   3.57 kB |
+chunk-TRNE776L.js                                          | -                                                       |   3.44 kB |
+chunk-WXH3YLGH.js                                          | -                                                       |   3.26 kB |
+chunk-RV5EU4OG.js                                          | -                                                       |   3.25 kB |
+chunk-B5WIZCWR.js                                          | -                                                       |   3.17 kB |
+spec-app-components-tool-call-chip-tool-call-chip.js       | spec-app-components-tool-call-chip-tool-call-chip       |   3.17 kB |
+spec-app-ui-field-field.js                                 | spec-app-ui-field-field                                 |   3.15 kB |
+chunk-RHS6ZCNH.js                                          | -                                                       |   3.05 kB |
+spec-app-core-shortcuts.js                                 | spec-app-core-shortcuts                                 |   2.91 kB |
+spec-app-core-theme.js                                     | spec-app-core-theme                                     |   2.89 kB |
+chunk-IPOFFCLI.js                                          | -                                                       |   2.84 kB |
+chunk-C74BZ3GW.js                                          | -                                                       |   2.83 kB |
+chunk-GIEWTPBW.js                                          | -                                                       |   2.79 kB |
+chunk-HNCL7YJA.js                                          | -                                                       |   2.77 kB |
+spec-app-registry-templates.js                             | spec-app-registry-templates                             |   2.67 kB |
+chunk-LYXV476F.js                                          | -                                                       |   2.66 kB |
+spec-app-ui-pagination-pagination.js                       | spec-app-ui-pagination-pagination                       |   2.43 kB |
+spec-app-registry-withdrawal-notices-withdrawal-notices.js | spec-app-registry-withdrawal-notices-withdrawal-notices |   2.35 kB |
+chunk-WETXEJK5.js                                          | -                                                       |   2.30 kB |
+init-testbed.js                                            | init-testbed                                            |   2.22 kB |
+chunk-B3MBBUQS.js                                          | -                                                       |   2.18 kB |
+chunk-6QIGPVSB.js                                          | -                                                       |   2.16 kB |
+chunk-PZU3BTWN.js                                          | -                                                       |   2.14 kB |
+spec-app-app-app.js                                        | spec-app-app-app                                        |   2.01 kB |
+spec-app-registry-write-safety.js                          | spec-app-registry-write-safety                          |   1.91 kB |
+spec-app-registry-life-stage.js                            | spec-app-registry-life-stage                            |   1.86 kB |
+spec-app-core-custom-events.js                             | spec-app-core-custom-events                             |   1.70 kB |
+chunk-FZIYXENI.js                                          | -                                                       |   1.64 kB |
+chunk-TOFY7RD4.js                                          | -                                                       |   1.59 kB |
+spec-app-components-composer-composer.js                   | spec-app-components-composer-composer                   |   1.57 kB |
+chunk-L5SF5DLS.js                                          | -                                                       |   1.49 kB |
+spec-app-components-markdown-view-markdown-view.js         | spec-app-components-markdown-view-markdown-view         |   1.39 kB |
+chunk-UVEGLWIC.js                                          | -                                                       |   1.36 kB |
+spec-app-registry-health-workflows.js                      | spec-app-registry-health-workflows                      |   1.19 kB |
+chunk-HWWZOR54.js                                          | -                                                       |   1.13 kB |
+spec-app-components-message-list-message-list.js           | spec-app-components-message-list-message-list           |   1.02 kB |
+chunk-JWYLCV3D.js                                          | -                                                       |   1.00 kB |
+chunk-YE7M6VRW.js                                          | -                                                       | 955 bytes |
+vitest-mock-patch.js                                       | vitest-mock-patch                                       | 939 bytes |
+spec-app-components-empty-state-empty-state.js             | spec-app-components-empty-state-empty-state             | 813 bytes |
+chunk-PY5KMASP.js                                          | -                                                       | 714 bytes |
+spec-app-registry-completeness-contracts.js                | spec-app-registry-completeness-contracts                | 587 bytes |
+
+                                                           | Initial total                                           |   1.97 MB
+
+Lazy chunk files                                           | Names                                                   |  Raw size
+chunk-5B2LPRIH.js                                          | verification-panel                                      |  69.52 kB |
+chunk-ZYACEVAE.js                                          | herd-list                                               |  24.29 kB |
+chunk-TDV3DALX.js                                          | animal-detail                                           |  22.16 kB |
+chunk-IGYJXV32.js                                          | not-found                                               |   2.73 kB |
+chunk-AECSD4OM.js                                          | dispatch-sheet                                          | 858 bytes |
+chunk-BLDWC4YE.js                                          | milking-roster                                          | 858 bytes |
+chunk-IBJK2Q2R.js                                          | people-list                                             | 840 bytes |
+chunk-RQMTPLU3.js                                          | destination-detail                                      | 824 bytes |
+chunk-S6QKHX4I.js                                          | destinations-list                                       | 822 bytes |
+chunk-2N3MLBFQ.js                                          | payroll-run                                             | 792 bytes |
+chunk-IQ3JTVRC.js                                          | feed-page                                               | 746 bytes |
+chunk-AYUHPQ77.js                                          | health-page                                             | 720 bytes |
+chunk-FNDZOM45.js                                          | feed-daily                                              | 700 bytes |
+chunk-HMBIFYWD.js                                          | chat-panel                                              | 688 bytes |
+chunk-ADP6B4B2.js                                          | calving-form                                            | 662 bytes |
+...and 7 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [5.467 seconds] - 2026-10-08T08:38:02.056Z
+
+
+ RUN  v4.1.9 /Users/adnanali/personal/dairy-360/web-angular
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  51 passed (51)
+      Tests  529 passed (529)
+   Start at  13:38:02
+   Duration  7.66s (transform 7.48s, setup 4.73s, import 11.88s, tests 19.62s, environment 48.68s)

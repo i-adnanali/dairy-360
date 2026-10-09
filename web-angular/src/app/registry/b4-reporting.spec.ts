@@ -253,6 +253,19 @@ describe('B4 buyer statement', () => {
     expect(el.querySelector('[data-payment=p0]')).not.toBeNull();
     expect(el.querySelector('[data-role=totals]')!.textContent).toBe(totals);
     expect(el.querySelectorAll('[role=region]').length).toBe(2);
+    window.dispatchEvent(new Event('beforeprint'));
+    // Synchronous native print snapshots cannot wait for another Angular tick.
+    expect(el.querySelectorAll('[data-dispatch]').length).toBe(101);
+    expect(el.querySelectorAll('[data-payment]').length).toBe(26);
+    expect(el.querySelector('.statement-print-context')!.textContent).toContain('Fixture buyer');
+    expect(document.querySelectorAll('.life-print-pages [data-dispatch]').length).toBe(101);
+    expect(document.querySelectorAll('.life-print-pages [data-payment]').length).toBe(26);
+    window.dispatchEvent(new Event('afterprint'));
+    expect(document.querySelector('.life-print-pages')).toBeNull();
+    expect(el.querySelectorAll('[data-dispatch]').length).toBe(25);
+    expect(el.querySelector('[data-dispatch=d25]')).not.toBeNull();
+    expect(el.querySelectorAll('[data-payment]').length).toBe(25);
+    expect(el.querySelector('[data-role=totals]')!.textContent).toBe(totals);
     m.dispatches = [];
     (f.componentInstance as any).statement.set({ ...s });
     await tick(f);

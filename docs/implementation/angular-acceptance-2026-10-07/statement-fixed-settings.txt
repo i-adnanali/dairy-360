@@ -1,0 +1,90 @@
+Window: "Unknown", App: Safari.
+0 sheet Secondary Actions: Raise
+	1 split group
+		2 scroll area Secondary Actions: Scroll Up, Scroll Down
+			3 collection (disabled)
+				4 section (disabled)
+					5 container
+						6 image
+						7 image selected
+						8 text Page 1 of 12
+					9 container
+						10 image
+						11 image selected
+						12 text Page 2 of 12
+			13 scroll bar (settable, float) 0
+				14 value indicator (settable, float) 0
+				15 increment arrow button
+				16 decrement arrow button
+				17 increment page button
+				18 decrement page button
+		19 splitter (disabled, settable, float) 264
+		20 scroll area Secondary Actions: Scroll Up, Scroll Down
+			21 container
+				22 text field (settable) Description: Copies, Value: 1
+				23 text Copies
+				24 stepper Description: copies, Value: 1, Secondary Actions: Increment, Decrement
+					25 increment arrow button
+					26 decrement arrow button
+				27 text Pages
+				28 text field (settable) 1
+				29 text to
+				30 text field (settable) 1
+				31 text Select pages from the sidebar
+				32 radio button All 12 Pages, Value: 1
+				33 radio button Range from, Value: 0
+				34 radio button Selection, Value: 0
+				35 text Paper Size
+				36 pop-up button Value: A4  210 by 297 mm, Help: A4: 210 by 297 mm
+  Top 6.35 mm  Bottom 14.46 mm
+  Left 6.35 mm  Right 6.35 mm
+				37 text Orientation
+				38 radio button  Portrait, Value: 1
+				39 radio button  Landscape, Value: 0
+				40 text field (settable) 100%
+				41 text Scaling
+				42 stepper Value: 100, Secondary Actions: Increment, Decrement
+					43 increment arrow button
+					44 decrement arrow button
+			45 container
+				46 disclosure triangle 1
+				47 text Safari
+				48 tickbox Print headers and footers, Value: 1
+				49 tickbox Print backgrounds, Value: 0
+				50 text Layout 1 page per sheet
+				51 disclosure triangle 0
+				52 text Paper Handling Collate Sheets • All Sheets
+				53 disclosure triangle 0
+			54 scroll bar (settable, float) 0
+				55 value indicator (settable, float) 0
+				56 increment arrow button
+				57 decrement arrow button
+				58 increment page button
+				59 decrement page button
+		60 container
+			61 text Printer
+			62 pop-up button No Printer Selected
+			63 text Presets
+			64 pop-up button Default Settings
+		65 button Cancel
+		66 button Help
+		67 container
+			68 button PDF
+			69 menu button PDF
+		70 button (disabled) Print
+71 menu bar
+	72 Safari
+	73 File
+	74 Edit
+	75 View, ID: SafariViewMenu
+	76 History
+	77 Bookmarks, ID: SafariBookmarksMenu
+	78 Develop
+	79 Window, ID: SafariWindowMenu
+	80 Help, ID: SafariHelpMenu
+
+Selected text: ```
+1
+```
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

@@ -1,0 +1,98 @@
+Window: "Unknown", App: Safari.
+0 sheet Secondary Actions: Raise
+	1 split group
+		2 scroll area Secondary Actions: Scroll Up, Scroll Down
+			3 collection (disabled)
+				4 section (disabled)
+					5 container
+						6 image
+						7 image selected
+						8 text Page 1 of 90
+					9 container
+						10 image
+						11 image selected
+						12 text Page 2 of 90
+					13 container
+						14 image
+						15 image selected
+						16 text Page 3 of 90
+					17 container
+						18 image
+						19 image selected
+						20 text Page 4 of 90
+			21 scroll bar (settable, float) 0
+				22 value indicator (settable, float) 0
+				23 increment arrow button
+				24 decrement arrow button
+				25 increment page button
+				26 decrement page button
+		27 splitter (disabled, settable, float) 264
+		28 scroll area Secondary Actions: Scroll Up, Scroll Down
+			29 container
+				30 text field (settable) Description: Copies, Value: 1
+				31 text Copies
+				32 stepper Description: copies, Value: 1, Secondary Actions: Increment, Decrement
+					33 increment arrow button
+					34 decrement arrow button
+				35 text Pages
+				36 text field (settable) 1
+				37 text to
+				38 text field (settable) 1
+				39 text Select pages from the sidebar
+				40 radio button All 90 Pages, Value: 1
+				41 radio button Range from, Value: 0
+				42 radio button Selection, Value: 0
+				43 text Paper Size
+				44 pop-up button Value: US Letter  216 by 279 mm, Help: US Letter: 216 by 279 mm
+  Top 6.35 mm  Bottom 14.11 mm
+  Left 6.35 mm  Right 6.35 mm
+				45 text Orientation
+				46 radio button  Portrait, Value: 0
+				47 radio button  Landscape, Value: 1
+				48 text field (settable) 80%
+				49 text Scaling
+				50 stepper Value: 80, Secondary Actions: Increment, Decrement
+					51 increment arrow button
+					52 decrement arrow button
+			53 container
+				54 disclosure triangle 1
+				55 text Safari
+				56 tickbox Print headers and footers, Value: 1
+				57 tickbox Print backgrounds, Value: 0
+				58 text Layout 1 page per sheet
+				59 disclosure triangle 0
+				60 text Paper Handling Collate Sheets • All Sheets
+				61 disclosure triangle 0
+			62 scroll bar (settable, float) 0
+				63 value indicator (settable, float) 0
+				64 increment arrow button
+				65 decrement arrow button
+				66 increment page button
+				67 decrement page button
+		68 container
+			69 text Printer
+			70 pop-up button No Printer Selected
+			71 text Presets
+			72 pop-up button Default Settings
+		73 button Cancel
+		74 button Help
+		75 container
+			76 button PDF
+			77 menu button PDF
+		78 button (disabled) Print
+79 menu bar
+	80 Safari
+	81 File
+	82 Edit
+	83 View, ID: SafariViewMenu
+	84 History
+	85 Bookmarks, ID: SafariBookmarksMenu
+	86 Develop
+	87 Window, ID: SafariWindowMenu
+	88 Help, ID: SafariHelpMenu
+
+Selected text: ```
+1
+```
+
+Note: Pay special attention to the content selected by the user. If the user asks a question or refers to the content they are looking at on-screen, they might be referring to the selected content (but they might be referring to something else that's visible, too).

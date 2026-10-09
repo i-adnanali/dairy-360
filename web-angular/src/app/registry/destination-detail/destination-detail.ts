@@ -1,4 +1,5 @@
-import { DestroyRef } from '@angular/core';
+import { reportPrintPages } from '../life-report/print-pages';
+import { DestroyRef, ElementRef } from '@angular/core';
 import { ScrollRegion } from "../../ui/scroll-region";
 import { effect } from '@angular/core';
 import { writerDraft } from "../writer-draft";
@@ -24,7 +25,7 @@ import { LocalPagination } from "../../ui/local-pagination/local-pagination";
 // with an occasional household, so a stored period would have to be
 // per-destination and per-run rather than a calendar month.
 
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, HostListener, Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ChipGroup } from "../chip-group/chip-group";
@@ -78,6 +79,63 @@ import { Button } from "../../ui/button";
   styleUrl: './destination-detail.css',
 })
 export class DestinationDetail {
+  private printPages: HTMLElement | null = null;
+  private readonly element = inject(ElementRef<HTMLElement>);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  protected readonly printing = signal(false);
+
+  @HostListener('window:beforeprint')
+  protected beforePrint(): void {
+    this.printing.set(true);
+    // Native print snapshots must include all rows before the browser lays out pages.
+    this.changeDetector.detectChanges();
+    const statement = this.statement();
+    if (this.printPages || !statement) return;
+    // Safari does not reliably repeat table headers or keep rows intact. Measure
+    // each row with its own column context, without changing screen pagination.
+    const source = document.createElement('div');
+    const summary = document.createElement('section');
+    for (const node of this.element.nativeElement.querySelectorAll('header, [data-role="totals"], [data-role="unpriced"]')) {
+      summary.append(node.cloneNode(true));
+    }
+    source.append(summary);
+    for (const table of this.element.nativeElement.querySelectorAll('table')) {
+      const section = document.createElement('section');
+      const heading = document.createElement('h3');
+      heading.textContent = table.closest('section')?.getAttribute('aria-label') || '';
+      const month = table.closest('[data-month]');
+      if (month?.querySelector('table') === table) {
+        const summary = month.querySelector(':scope > div');
+        if (summary) section.append(summary.cloneNode(true));
+      }
+      section.append(heading);
+      for (const row of table.querySelectorAll('tbody > tr')) {
+        const article = document.createElement('article');
+        const copy = table.cloneNode(false) as HTMLTableElement;
+        copy.append(table.querySelector('thead')!.cloneNode(true));
+        copy.querySelector('.statement-print-context')?.remove();
+        const body = document.createElement('tbody');
+        body.append(row.cloneNode(true));
+        copy.append(body);
+        article.append(copy);
+        section.append(article);
+      }
+      source.append(section);
+    }
+    const prices = this.element.nativeElement.querySelector('[data-role="price-history"]');
+    if (prices) source.append(prices.cloneNode(true));
+    this.printPages = reportPrintPages(source,
+      `${statement.name} · ${statement.destination_id} · Buyer statement`, 'Buyer statement');
+  }
+
+  @HostListener('window:afterprint')
+  protected afterPrint(): void {
+    this.printPages?.remove();
+    this.printPages = null;
+    this.printing.set(false);
+    this.changeDetector.detectChanges();
+  }
+
   protected writer!: ReturnType<typeof writerDraft>;
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
@@ -106,7 +164,7 @@ export class DestinationDetail {
   ];
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => ++this.loadSequence);
+    inject(DestroyRef).onDestroy(() => { ++this.loadSequence; this.printPages?.remove(); });
     this.writer = writerDraft({
       name: 'Buyer payment',
       fields: {

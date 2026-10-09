@@ -26,6 +26,7 @@
           ><button appButton (click)="print()">Print / Save as PDF</button
           ><button appButton variant="secondary" (click)="download()">Export complete JSON</button>
         </div>
+        <p appHelp class="no-print">For complete printed sheets, use A4, portrait orientation and 100% scale.</p>
         <nav class="no-print flex flex-wrap gap-3" aria-label="Report contents">
           @for (section of sections(); track section.id) {
             <a class="underline" [href]="'#report-' + section.id" (click)="goTo($event, section.id)"

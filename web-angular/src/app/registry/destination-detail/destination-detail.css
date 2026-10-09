@@ -1,1 +1,13 @@
-/* This component uses shared styles; no local rules are needed. */
+.statement-print-context { display: none; }
+@media print {
+  :host { display: block; color: black; }
+  a, form, app-local-pagination { display: none !important; }
+  section, [appScrollRegion] { overflow: visible !important; max-height: none !important; }
+  table { table-layout: fixed; width: 100%; }
+  th, td { white-space: normal !important; overflow-wrap: anywhere; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  h2, h3, [data-month] > div { break-after: avoid; }
+  .statement-print-context { display: table-row; }
+  .statement-print-context th { padding-block: 8px; text-align: left; }
+}

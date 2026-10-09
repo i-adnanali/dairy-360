@@ -1,0 +1,84 @@
+{
+  "destination_id": "dst_7038ce95-06c4-4039-835d-7595218fd769",
+  "name": "Ali (next door)",
+  "billable": true,
+  "months": [
+    {
+      "month": "2026-10",
+      "litres": 17,
+      "billed_minor": 382500,
+      "paid_minor": 0,
+      "closing_minor": 382500,
+      "dispatches": [
+        {
+          "id": "dsp_e2c203ac-cd8e-47d1-bc64-4089bf354e54",
+          "destination_id": "dst_7038ce95-06c4-4039-835d-7595218fd769",
+          "occurred_on": "2026-10-05",
+          "session": "morning",
+          "status": "taken",
+          "litres": 4,
+          "price_minor": 900000,
+          "price_unit_litres": 40,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.077Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "dsp_e8f6e2ec-8e85-4ac6-bd18-b2fad15707b7",
+          "destination_id": "dst_7038ce95-06c4-4039-835d-7595218fd769",
+          "occurred_on": "2026-10-06",
+          "session": "morning",
+          "status": "taken",
+          "litres": 4,
+          "price_minor": 900000,
+          "price_unit_litres": 40,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "abdul",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.079Z",
+          "source_form": "direct_entry",
+          "note": null
+        },
+        {
+          "id": "dsp_b8c515d9-b36b-4ece-976d-ecab78acb524",
+          "destination_id": "dst_7038ce95-06c4-4039-835d-7595218fd769",
+          "occurred_on": "2026-10-06",
+          "session": "evening",
+          "status": "taken",
+          "litres": 9,
+          "price_minor": 900000,
+          "price_unit_litres": 40,
+          "reason": null,
+          "occurred_time": null,
+          "observed_by": "imran",
+          "recorded_by": "adnan",
+          "recorded_at": "2026-10-07T11:59:51.080Z",
+          "source_form": "direct_entry",
+          "note": null
+        }
+      ],
+      "payments": []
+    }
+  ],
+  "litres": 17,
+  "billed_minor": 382500,
+  "paid_minor": 0,
+  "balance_minor": 382500,
+  "prices": [
+    {
+      "id": "prc_3d78f4c4-278d-4c6c-907d-c576a2d70c86",
+      "destination_id": "dst_7038ce95-06c4-4039-835d-7595218fd769",
+      "effective_from": "2026-06-09",
+      "price_minor": 900000,
+      "price_unit_litres": 40,
+      "recorded_by": "adnan",
+      "recorded_at": "2026-10-07T11:59:51.075Z",
+      "note": null
+    }
+  ]
+}

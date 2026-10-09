@@ -1,0 +1,11 @@
+Thu Oct  8 08:40:32 UTC 2026
+ProductName:		macOS
+ProductVersion:		26.6.2
+BuildVersion:		25G83
+xcrun: error: unable to find utility "simctl", not a developer tool or in PATH
+VoiceOver
+VoiceOverStarter
+sysmon request failed with error: sysmond service not found
+pgrep: Cannot get process list
+154.0.8037.98
+26.6.2

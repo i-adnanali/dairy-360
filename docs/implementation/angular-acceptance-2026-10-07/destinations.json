@@ -1,0 +1,112 @@
+{
+  "as_of": "2026-10-08",
+  "destinations": [
+    {
+      "id": "dst_7038ce95-06c4-4039-835d-7595218fd769",
+      "name": "Ali (next door)",
+      "kind": "household",
+      "billable": true,
+      "standing": false,
+      "contact": null,
+      "started_on": "2026-06-09",
+      "ended_on": null,
+      "note": null,
+      "recorded_by": "adnan",
+      "recorded_at": "2026-10-07T11:59:51.075Z",
+      "person_id": null,
+      "price": {
+        "id": "prc_3d78f4c4-278d-4c6c-907d-c576a2d70c86",
+        "destination_id": "dst_7038ce95-06c4-4039-835d-7595218fd769",
+        "effective_from": "2026-06-09",
+        "price_minor": 900000,
+        "price_unit_litres": 40,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.075Z",
+        "note": null
+      },
+      "active": true
+    },
+    {
+      "id": "dst_50da9ed4-0b15-4848-8be1-a03dd493c0ee",
+      "name": "Bashir (dodhi)",
+      "kind": "dodhi",
+      "billable": true,
+      "standing": true,
+      "contact": null,
+      "started_on": "2026-06-09",
+      "ended_on": null,
+      "note": null,
+      "recorded_by": "adnan",
+      "recorded_at": "2026-10-07T11:59:51.073Z",
+      "person_id": null,
+      "price": {
+        "id": "prc_879fe075-b156-47b3-a7f6-2d7ad55be598",
+        "destination_id": "dst_50da9ed4-0b15-4848-8be1-a03dd493c0ee",
+        "effective_from": "2026-06-09",
+        "price_minor": 700000,
+        "price_unit_litres": 40,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.074Z",
+        "note": null
+      },
+      "active": true
+    },
+    {
+      "id": "dst_f7b14133-93a8-4402-85e0-deb62862ec5e",
+      "name": "Bibi (corner house)",
+      "kind": "household",
+      "billable": true,
+      "standing": false,
+      "contact": null,
+      "started_on": "2026-06-09",
+      "ended_on": null,
+      "note": null,
+      "recorded_by": "adnan",
+      "recorded_at": "2026-10-07T11:59:51.076Z",
+      "person_id": null,
+      "price": {
+        "id": "prc_12d236b9-b975-4f6a-8f55-09edfe92838e",
+        "destination_id": "dst_f7b14133-93a8-4402-85e0-deb62862ec5e",
+        "effective_from": "2026-06-09",
+        "price_minor": 900000,
+        "price_unit_litres": 40,
+        "recorded_by": "adnan",
+        "recorded_at": "2026-10-07T11:59:51.076Z",
+        "note": null
+      },
+      "active": true
+    },
+    {
+      "id": "dst_436aa001-712f-4cef-8e43-9a60cadc6452",
+      "name": "Home",
+      "kind": "home",
+      "billable": false,
+      "standing": true,
+      "contact": null,
+      "started_on": "2026-06-09",
+      "ended_on": null,
+      "note": null,
+      "recorded_by": "adnan",
+      "recorded_at": "2026-10-07T11:59:51.074Z",
+      "person_id": null,
+      "price": null,
+      "active": true
+    },
+    {
+      "id": "dst_10408608-07d4-43ed-9031-7caec38d032e",
+      "name": "Imran (milk allowance)",
+      "kind": "staff",
+      "billable": false,
+      "standing": false,
+      "contact": null,
+      "started_on": "2026-06-09",
+      "ended_on": null,
+      "note": null,
+      "recorded_by": "adnan",
+      "recorded_at": "2026-10-07T11:59:51.087Z",
+      "person_id": "per_7341ca2e-3cab-46a1-86be-c0b3a09dbcc8",
+      "price": null,
+      "active": true
+    }
+  ]
+}

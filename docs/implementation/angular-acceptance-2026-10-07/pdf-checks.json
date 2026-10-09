@@ -1,0 +1,92 @@
+{
+  "chrome-a4-final": {
+    "pages": 60,
+    "page_size_points": [
+      594.95996,
+      841.91998
+    ],
+    "blank_pages": [],
+    "identity_missing_pages": [],
+    "navigation_present": false,
+    "complete_audit_matches_fixture_ignoring_whitespace": true,
+    "unique_fixture_uuids": 36,
+    "missing_fixture_uuids": [],
+    "audit_end_present": true
+  },
+  "safari-a4-final": {
+    "pages": 56,
+    "page_size_points": [
+      595.0,
+      842.0
+    ],
+    "blank_pages": [],
+    "identity_missing_pages": [],
+    "navigation_present": false,
+    "complete_audit_matches_fixture_ignoring_whitespace": true,
+    "unique_fixture_uuids": 36,
+    "missing_fixture_uuids": [],
+    "audit_end_present": true
+  },
+  "safari-letter-landscape-80": {
+    "pages": 90,
+    "page_size_points": [
+      792.0,
+      612.0
+    ],
+    "blank_pages": [],
+    "identity_missing_pages": [
+      3,
+      6,
+      8,
+      11,
+      14,
+      16,
+      19,
+      22,
+      24,
+      27,
+      30,
+      32,
+      35,
+      38,
+      40,
+      43,
+      46,
+      48,
+      51,
+      54,
+      56,
+      59,
+      62,
+      64,
+      67,
+      70,
+      72,
+      75,
+      78,
+      80,
+      83,
+      86,
+      88,
+      90
+    ],
+    "navigation_present": false,
+    "unique_fixture_uuids": 36,
+    "missing_fixture_uuids": [],
+    "audit_end_present": true
+  },
+  "statement-a4-final": {
+    "pages": 13,
+    "page_size_points": [
+      595.0,
+      842.0
+    ],
+    "blank_pages": [],
+    "identity_missing_pages": [],
+    "navigation_present": false,
+    "missing_delivery_markers": [],
+    "missing_payment_markers": [],
+    "monthly_balance_present": true,
+    "agreed_rates_present": true
+  }
+}

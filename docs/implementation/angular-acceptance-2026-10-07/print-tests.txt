@@ -1,0 +1,25 @@
+
+> web-angular@0.0.0 test
+> ng test --watch=false --include=**/print-pages.spec.ts
+
+❯ Building...
+✔ Building...
+Initial chunk files                          | Names                                     |  Raw size
+styles.css                                   | styles                                    |  54.80 kB |
+spec-app-registry-life-report-print-pages.js | spec-app-registry-life-report-print-pages |   9.09 kB |
+chunk-CGZBV6BD.js                            | -                                         |   4.07 kB |
+init-testbed.js                              | init-testbed                              |   2.22 kB |
+vitest-mock-patch.js                         | vitest-mock-patch                         | 939 bytes |
+
+                                             | Initial total                             |  71.12 kB
+
+Application bundle generation complete. [5.016 seconds] - 2026-10-07T12:12:34.965Z
+
+
+ RUN  v4.1.9 /Users/adnanali/personal/dairy-360/web-angular
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  17:12:35
+   Duration  786ms (transform 40ms, setup 158ms, import 17ms, tests 41ms, environment 479ms)

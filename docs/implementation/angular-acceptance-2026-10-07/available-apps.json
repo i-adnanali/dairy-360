@@ -1,0 +1,22 @@
+[
+  {
+    "id": "com.google.Chrome",
+    "name": "Google Chrome",
+    "isRunning": true
+  },
+  {
+    "id": "com.apple.Safari",
+    "name": "Safari",
+    "isRunning": true
+  },
+  {
+    "id": "com.apple.VoiceOverUtility",
+    "name": "VoiceOver Utility",
+    "isRunning": false
+  },
+  {
+    "id": "com.apple.VoiceOver",
+    "name": "VoiceOver",
+    "isRunning": false
+  }
+]
