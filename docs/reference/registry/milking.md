@@ -29,4 +29,4 @@ Migration 3 introduced `registry_milkings`, unique by animal/date/session. Effec
 
 ## Interfaces and evidence
 
-[milking.ts](../../../server/src/registry/milking.ts), [routes.ts](../../../server/src/registry/routes.ts) and [milking-roster.ts](../../../web-angular/src/app/registry/milking-roster/milking-roster.ts) own calculations, validation and entry. [Screen acceptance](../../implementation/geist-screen-evidence/ACCEPTANCE.md) records executed checks. [Original design and schema](../../records/REGISTRY_MILKING.md) retain historical reasoning, not a requirement to restart the build sequence.
+[milking.ts](../../../server/src/registry/milking.ts), [routes.ts](../../../server/src/registry/routes.ts) and [milking-roster.ts](../../../web-angular/src/app/registry/milking-roster/milking-roster.ts) own calculations, validation and entry. [Screen acceptance](../ui/acceptance-status.md) records executed checks. [Original design and schema](../../records/REGISTRY_MILKING.md) retain historical reasoning, not a requirement to restart the build sequence.

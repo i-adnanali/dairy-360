@@ -71,6 +71,7 @@ Open http://localhost:6512. Rebuild after source changes before treating capture
 | Frontend rejects Node while server tests run | `nvm use`; the Angular CLI enforces its own Node floor |
 | Port already in use | Stop the other harness/persistent process or choose explicit matching ports |
 | Angular dependency-cache errors after dependency changes | Stop dev server; `npm run clean:web-deps-cache`; restart |
+| macOS cache-enabled production build aborts in the native LMDB addon | The recorded workaround is `CI=true NG_BUILD_MAX_WORKERS=1 npm run build:angular`; see the [investigation](../implementation/angular-remediation-2026-10-02.md#production-build-abort-investigation). This bypasses the local Angular cache; it does not repair the addon |
 | Missing shared exports | `npm run build:shared` before running an individual workspace |
 | Assistant unavailable in harness | Expected: the registry fixture harness does not serve model responses |
 | Assistant fails in persistent app | Check server env/credentials and the surfaced error; do not blindly replay uncertain writes |

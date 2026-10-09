@@ -2,7 +2,7 @@
 
 This is the active status index. Stable `OPEN-*` identifiers locate existing items; original Cycle 7 `FU-*` IDs remain in linked evidence. Unless stated otherwise, items are open/deferred, not newly authorized implementation work. Resolve status here and link new evidence; do not rewrite historical records to appear current.
 
-The documentation reorganization leaves deferred acceptance unchanged. The old contrast-failure claim and inconsistent-current-filenames item are removed because their documented fixes are already delivered. [Current references](README.md) own behavior; links below retain the detailed rationale.
+The 9 October 2026 scope decision closes the Angular remediation task with specific checks skipped; see [acceptance status](reference/ui/acceptance-status.md). Other deferred product and real-farm work is unchanged. The old contrast-failure claim and inconsistent-current-filenames item are removed because their documented fixes are already delivered. [Current references](README.md) own behavior; links below retain the detailed rationale.
 
 ## Blocking on the real farm
 
@@ -200,7 +200,7 @@ Built when something needs them, not before.
 
 <a id="open-037"></a>
 
-- **OPEN-037** — **Colour-vision and exhaustive accessibility acceptance remain open.** The automated contrast gate has passed; historical 30-failure/border-hold claims are superseded. See [current acceptance](implementation/geist-screen-evidence/ACCEPTANCE.md).
+- **OPEN-037** — **Colour-vision and exhaustive accessibility acceptance are not established.** The automated contrast gate has passed; historical 30-failure/border-hold claims are superseded. Spoken screen-reader and native-mobile checks were explicitly skipped for the completed remediation on 9 October 2026; they are not outstanding gates for that task or certified passes. Broader accessibility coverage is unchanged. See [acceptance status](reference/ui/acceptance-status.md).
 
 <a id="open-038"></a>
 
@@ -301,8 +301,7 @@ Built when something needs them, not before.
   remain stage 3; the report labels unsupported coverage — [REGISTRY_HEALTH.md](records/REGISTRY_HEALTH.md#using-it).
 <a id="open-057"></a>
 
-- **OPEN-057** — Health/report real-farm acceptance and actual browser Save-as-PDF output remain
-  unverified; isolated browser checks are recorded — [REGISTRY_HEALTH.md](records/REGISTRY_HEALTH.md#validation).
+- **OPEN-057** — Health/report real-farm acceptance remains unverified. Actual Chrome/Safari A4 Save-as-PDF output was verified on synthetic animal reports, including complete audit content and repeated long identity. Alternative-format support and further browser/report coverage were skipped on 9 October 2026; the known alternate-format limitation remains. See [current status and PDF evidence](reference/ui/acceptance-status.md), and the [original delivery record](records/REGISTRY_HEALTH.md#validation).
 <a id="open-058"></a>
 
 - **OPEN-058** — Large-history server pagination and scheduled cleanup of unlinked uploads are
@@ -320,11 +319,11 @@ for large composite histories; analytics report/export adapters; and later feed,
 health and financial analytics. Monthly payment practice alone does not define an
 overdue balance, and production-minus-dispatch is not established milk loss.
 
-## Screen-specific UI acceptance — deferred
+## Screen-specific UI acceptance — scope decision
 
 <a id="open-060"></a>
 
-- **OPEN-060** — The remaining screen implementation is delivered in `a56400a`; it is no longer implementation backlog. The separate acceptance tasks are intentionally left open: exhaustive per-writer browser failure/navigation permutations, full keyboard/device/screen-reader/zoom/text-spacing checks, native print/export artifact comparison, live assistant execution/unknown-write recovery, and operator/large-data walkthroughs. [Exact scope and evidence](implementation/geist-screen-evidence/ACCEPTANCE.md#remaining-acceptance--explicitly-open).
+- **OPEN-060** — **Angular remediation closed within the agreed scope.** Screen implementation at `a56400a` and subsequent fixes through `cb94fe9` are delivered. Feed comparison races and native A4 animal/buyer PDF checks have recorded evidence. On 9 October 2026, the owner chose to skip alternative print formats, Firefox/additional reports, spoken-reader and native-mobile acceptance. Those exclusions no longer block this remediation and are not passes. Unrelated historical follow-ups—including operator/large-data walkthroughs, live assistant/unknown-write acceptance, exhaustive per-writer permutations and further zoom/text-spacing coverage—are unchanged. [Current decision and evidence](reference/ui/acceptance-status.md) · [original acceptance scope](implementation/geist-screen-evidence/ACCEPTANCE.md#remaining-acceptance--explicitly-open).
 
 ## Camera finding carried forward
 

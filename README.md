@@ -9,7 +9,7 @@ Dairy 360 keeps uncertainty visible: approximate dates stay approximate, missing
 
 ![Current Today workspace with health tasks, recorded milking and dispatch, feeding status and payroll recording](docs/images/current/today-light.jpg)
 
-*Current production UI at `a56400a`, captured 1 October 2026 using synthetic, memory-only records. [Screenshot provenance and gallery](docs/images/current/README.md).*
+*Production UI at `a56400a`, captured 1 October 2026 using synthetic, memory-only records. [Screenshot provenance and gallery](docs/images/current/README.md).*
 
 [Quick start](#quick-start) · [Features](#features) · [Screenshots](#screenshots) · [Development](#development) · [Documentation](#documentation) · [Status and limitations](#status-and-limitations)
 
@@ -61,6 +61,8 @@ Read [setup and data boundaries](docs/guides/development.md) before using persis
 
 ### Recent improvements
 
+Angular remediation through `cb94fe9` adds request/context race guards, form and accessibility fixes, and complete A4 animal/buyer statement printing. [Remediation ledger](docs/implementation/angular-remediation-2026-10-02.md) · [Acceptance status and skipped checks](docs/reference/ui/acceptance-status.md).
+
 The screen-specific audit implementation landed in [`a56400a`](https://github.com/i-adnanali/dairy-360/commit/a56400a):
 
 - Clearer People actions and payment-before-history layout; focused Feed forms, crop filters and compact overview disclosures.
@@ -72,7 +74,7 @@ Native semantics, APIs, calculations, historical rates, snapshots, provenance, d
 
 ## Screenshots
 
-These are fresh captures of the current application, not design mockups. Desktop: 1440×1000; mobile: 390×844. All records are synthetic. Long pages continue below the viewport.
+These browser captures show `a56400a` on 1 October 2026, before the subsequent Angular remediation. Desktop viewport: 1440×1000; narrow desktop-browser viewport: 390×844 (not native-device acceptance). All records are synthetic. Long pages continue below the viewport.
 
 <details>
 <summary>Monthly analytics — dark theme</summary>
@@ -122,7 +124,7 @@ npm run build:angular
 
 The frontend build is written to `web-angular/dist/web-angular/browser`. To serve it against an already running memory harness on 6400, run `npm run harness:serve` and open http://localhost:6430.
 
-**Latest recorded validation (1 October 2026):** 458 frontend tests across 44 files, 779 server tests, production build and typecheck passed. The contrast gate passed 122 graded checks with no held or unexpected failures. Existing bundle-size and shared CommonJS warnings remain. [Logs and browser evidence](docs/implementation/geist-screen-evidence/ACCEPTANCE.md).
+**Latest recorded validation (7–8 October 2026):** 529 frontend tests across 51 files and 779 server tests passed, along with production build, type/compiler, template, contrast and documentation checks. Existing bundle-size and shared CommonJS warnings remain. [Logs and browser/PDF evidence](docs/implementation/angular-acceptance-2026-10-07/ACCEPTANCE.md).
 
 Unit suites need no API key or farm database. Live-model regression tests are separate, require credentials, and can spend API tokens; a skipped live run is not a pass. See [testing](docs/guides/testing.md).
 
@@ -138,13 +140,13 @@ Unit suites need no API key or farm database. Live-model regression tests are se
 | Feed, health and labour | [Feed](docs/reference/registry/feed.md), [health](docs/reference/registry/health.md), [payroll](docs/reference/registry/payroll.md) |
 | Metrics and uncertainty | [Analytics specification](docs/reference/registry/analytics.md) |
 | Optional integrations | [Camera operations](docs/guides/camera-operations.md), [tracing](docs/guides/observability.md) |
-| Remaining work | [Open items](docs/OPEN.md), [acceptance limits](docs/implementation/geist-screen-evidence/ACCEPTANCE.md#remaining-acceptance--explicitly-open) |
+| Remaining work | [Open items](docs/OPEN.md), [acceptance status](docs/reference/ui/acceptance-status.md) |
 
 ## Status and limitations
 
 This is a local application without authentication or multi-user tenancy. It is not documented as production-hardened. Registry HTTP retry protections do not provide cross-request replay protection for assistant demo writes.
 
-Screen-specific implementation is complete; comprehensive acceptance remains open. Native-device/screen-reader/zoom, print/export artifact verification, live assistant execution, exhaustive browser fault injection and operator walkthroughs have not all been completed. Existing evidence states exactly what was performed. Those acceptance tasks remain deferred.
+Angular remediation and its agreed acceptance scope are complete. On 9 October 2026, the owner chose to skip alternative print settings, Firefox/additional-report print coverage, spoken screen-reader and native-mobile checks. These are exclusions, not passes. A4 portrait/100% is the verified print configuration; the alternative-format limitation remains. [Acceptance status](docs/reference/ui/acceptance-status.md) separates verified work, skipped checks and unrelated backlog. Real-farm/operator and live assistant acceptance are not implied.
 
 ## Contributing
 

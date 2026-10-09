@@ -14,9 +14,9 @@ Start with the task you need to complete. Current guides and references describe
 | Change presentation or navigation | [UI design system](reference/ui/design-system.md), [application interactions](reference/ui/application-interactions.md) |
 | Operate optional integrations | [Camera operations](guides/camera-operations.md), [capture](guides/camera-capture.md), [tracing](guides/observability.md) |
 | Look up integration contracts | [Integration references](reference/integrations/README.md) |
-| See current appearance | [Screenshot gallery](images/current/README.md) |
+| See recorded appearance | [Screenshot gallery](images/current/README.md) |
 | Find remaining work | [Open items](OPEN.md) |
-| Review completed work and acceptance limits | [Implementation ledger](implementation/GEIST-IMPLEMENTATION.md), [screen evidence](implementation/geist-screen-evidence/ACCEPTANCE.md) |
+| Review completed work and acceptance limits | [Acceptance status](reference/ui/acceptance-status.md), [remediation ledger](implementation/angular-remediation-2026-10-02.md), [latest evidence](implementation/angular-acceptance-2026-10-07/ACCEPTANCE.md) |
 | Understand earlier decisions | [Decision index](decisions/README.md), [historical records](records/README.md) |
 
 ## Conventions

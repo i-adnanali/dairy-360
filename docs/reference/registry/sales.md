@@ -24,7 +24,7 @@ Buyer balance is the sum of billable dispatch amounts less payment amounts. Cash
 
 ## Workflows and corrections
 
-Dispatch uses one draft across local pages with whole-session validation/save. Buyer maintenance can open in a separate tab without discarding that draft. Statements retain rates, source context and payment history; browsing requires no recording session.
+Dispatch uses one draft across local pages with whole-session validation/save. Buyer maintenance can open in a separate tab without discarding that draft. Statements retain rates, source context and payment history; browsing requires no recording session. Browser printing expands all loaded deliveries, payments and agreed rates, includes monthly totals, repeats buyer identity and column context, and excludes navigation/payment-entry controls. Screen pagination is restored after printing. Use A4 portrait at 100% scale; Safari output was checked with 35 deliveries and 30 payments. See [acceptance status](../ui/acceptance-status.md) for evidence and print limitations.
 
 Older effective dispatch/payment rows can be corrected or removed under domain rules; they do not yet have a generic immutable revision trail. Process-local request replay differs from Feed/Health durability. Do not extend one domain's guarantee to another.
 

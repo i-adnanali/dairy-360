@@ -1,5 +1,7 @@
 # Angular acceptance — 7–8 October 2026
 
+> Status update — 9 October 2026: the owner chose to skip the listed alternative-print, Firefox/additional-report, spoken-reader and native-mobile follow-ups. The remediation task is closed within that scope. This dated report preserves the results and gaps observed on 7–8 October; “open” below describes the status at that time. See [current acceptance status](../../reference/ui/acceptance-status.md).
+
 Baseline: `9b154cd` on main. This continuation uses a new disposable in-memory harness and the production Angular build. No commit, push, deployment, persistent database, production service or live model API was used. Dates in fixture responses remain 7 October although execution continued on 8 October (Asia/Karachi).
 
 Read alongside the [6 October acceptance](../angular-acceptance-2026-10-06/ACCEPTANCE.md), [5 October acceptance](../angular-acceptance-2026-10-05/ACCEPTANCE.md), [remediation ledger](../angular-remediation-2026-10-02.md), [development guide](../../guides/development.md), and [testing guide](../../guides/testing.md). The original audit read was `/Users/adnanali/personal/audits/angular-2026-10-02/audit.md`.

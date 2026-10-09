@@ -90,4 +90,4 @@ Entirely absent historical sessions are enumerated from effective lactations. To
 
 No tank carryover, automatic loss/clinical alarm, unbounded public export or new materialized-total schema is introduced. Dedicated server paging for composite histories and analytics exports remain future work. Measurement practice and real-farm adoption are not established by synthetic fixtures.
 
-[Testing and analytics harness](../../guides/testing.md) owns commands. [Original analytics record](../../records/ANALYTICS_SPEC.md) retains performance measurements and delivery results. [Current UI evidence](../../implementation/geist-screen-evidence/ACCEPTANCE.md) distinguishes exercised browser workflows from unperformed acceptance.
+[Testing and analytics harness](../../guides/testing.md) owns commands. [Original analytics record](../../records/ANALYTICS_SPEC.md) retains performance measurements and delivery results. [Current UI evidence](../ui/acceptance-status.md) distinguishes exercised browser workflows from unperformed acceptance.

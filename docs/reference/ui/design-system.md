@@ -30,7 +30,7 @@ Keep type, spacing and tabular figures consistent. Qualify approximate dates and
 
 ## State gallery
 
-The [local specimen](../../implementation/geist-screen-evidence/ui-specimen.html) uses the current compiled stylesheet and synthetic examples. It demonstrates light/dark, normal/invalid/readonly/disabled inputs, a busy button, empty/error content, long text, numeric table overflow and narrow width. It is a presentation specimen, not proof of Angular directive behavior or device accessibility. Actual component interactions are separately recorded in [acceptance](../../implementation/geist-screen-evidence/ACCEPTANCE.md).
+The [local specimen](../../implementation/geist-screen-evidence/ui-specimen.html) preserves the 1 October compiled stylesheet and synthetic examples. It demonstrates light/dark, normal/invalid/readonly/disabled inputs, a busy button, empty/error content, long text, numeric table overflow and narrow width. It is a presentation specimen, not proof of Angular directive behavior or device accessibility. Actual component interactions are separately recorded in [acceptance status and evidence](acceptance-status.md).
 
 ## Preserve these meanings
 

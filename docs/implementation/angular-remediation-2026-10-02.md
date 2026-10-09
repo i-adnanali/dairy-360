@@ -1,5 +1,7 @@
 # Angular audit remediation — 2–3 October 2026
 
+Current disposition: remediation and acceptance fixes through `cb94fe9` are complete within the scope agreed on 9 October 2026. [Acceptance status](../reference/ui/acceptance-status.md) records verified work and the owner-approved skipped follow-ups. Sections below retain their original dates and validation claims.
+
 Baseline: `d021d81`. Each reported behavior was checked against current source before changes. No finding was dismissed as obsolete. Existing untracked `docs/reviews/` was preserved. All checks used installed dependencies and Node **22.22.3**. No production endpoints, live models, persistent database, dependency upgrades, deployment or push were used.
 
 Work proceeded in separate logical batches: payment/session correctness with focused tests; asynchronous/error/context fixes; mechanical component relocation; bounded health/typing/lifecycle improvements. The component move manifest is in [evidence](angular-remediation-evidence/component-moves.json). No unrelated working-tree changes were discarded.

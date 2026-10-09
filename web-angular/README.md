@@ -26,7 +26,7 @@ npm run check:templates
 npm run check:contrast
 ```
 
-Build output is `web-angular/dist/web-angular/browser`. The contrast gate fails on unexpected failures and unreviewed disabled-text consumers. Dated results are in [acceptance evidence](../docs/implementation/geist-screen-evidence/ACCEPTANCE.md). This token/consumer check is not full accessibility certification.
+Build output is `web-angular/dist/web-angular/browser`. The contrast gate fails on unexpected failures and unreviewed disabled-text consumers. Dated results and the owner-approved skipped checks are linked from [acceptance status](../docs/reference/ui/acceptance-status.md). This token/consumer check is not full accessibility certification.
 No `ng e2e` target is configured. Browser capture tooling and its limits are
 covered in [testing guide](../docs/guides/testing.md).
 
@@ -34,8 +34,8 @@ covered in [testing guide](../docs/guides/testing.md).
 
 - [Current UI reference](../docs/reference/ui/design-system.md): current contracts and state specimen.
 - [Application interactions](../docs/reference/ui/application-interactions.md): navigation, drafts and recovery.
-- [Current gallery](../docs/images/current/README.md): fresh screenshots of `a56400a`.
-- [Screen-specific acceptance](../docs/implementation/geist-screen-evidence/ACCEPTANCE.md): dated test results, changed-workflow browser evidence and remaining gates.
+- [Recorded gallery](../docs/images/current/README.md): 1 October screenshots of `a56400a`, predating remediation.
+- [Acceptance status](../docs/reference/ui/acceptance-status.md): performed browser/PDF checks and explicitly skipped platform checks.
 - [Phase 7 gallery](../docs/images/phase7/README.md): historical routes and shell states.
 - [Feed gallery](../docs/images/feed/README.md): historical September feed/Today captures and mobile checks.
 - [Feed implementation](../docs/reference/registry/feed.md): daily entry, purchases, crops and corrections.
@@ -45,7 +45,7 @@ covered in [testing guide](../docs/guides/testing.md).
 Health entry and due work live at `/animals/health` within Herd. Animal profiles
 link to `/animals/:id/report` for the life report and vaccination card. Report
 sections use local pagination (25/50/100 rows); JSON export and browser print include all loaded
-records. See [Health implementation](../docs/reference/registry/health.md).
+records. Use A4 portrait at 100% scale for the verified print configuration. Buyer statements also expand all loaded rows for printing and restore screen pagination afterward. See [Health implementation](../docs/reference/registry/health.md).
 
 The standard harness seeds these health screens as well: due work, visits, doses,
 round outcomes, follow-up results and vaccination-card history are ready to browse.
@@ -75,4 +75,4 @@ from the dedicated fixture harness (2026-09-16).
 
 ## Screen-specific audit delivery — 1 October 2026
 
-Commit `a56400a` completes People/Feed task and form/table improvements, precision-aware animal history and correction comparisons, operational continuation/draft context, Health exception groups, analytics inspector synchronization, assistant outcome receipts and unknown-route recovery. Native controls, domain calculations, API contracts, snapshots, historical rates, guards and exact-request retries are preserved. See the [reconciliation ledger](../docs/implementation/GEIST-IMPLEMENTATION.md). The separate native/device/operator and exhaustive fault-injection gates remain open.
+Commit `a56400a` completes People/Feed task and form/table improvements, precision-aware animal history and correction comparisons, operational continuation/draft context, Health exception groups, analytics inspector synchronization, assistant outcome receipts and unknown-route recovery. Native controls, domain calculations, API contracts, snapshots, historical rates, guards and exact-request retries are preserved. See the [reconciliation ledger](../docs/implementation/GEIST-IMPLEMENTATION.md). Subsequent remediation is recorded in the [Angular ledger](../docs/implementation/angular-remediation-2026-10-02.md). The [current acceptance status](../docs/reference/ui/acceptance-status.md) distinguishes completed checks and the owner-approved exclusions from unrelated operator/live-service follow-ups.

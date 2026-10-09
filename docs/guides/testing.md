@@ -19,6 +19,13 @@ npm run build:angular
 
 Expected result: each command exits successfully. Template checking runs before compilation to identify malformed templates directly. Server test directories are deliberately enumerated so unit runs do not import live-model suites or open the persistent singleton. Do not broaden that glob without preserving the boundary.
 
+For compiler-only frontend checks, use `--noEmit` to avoid writing JavaScript beside TypeScript sources:
+
+```bash
+web-angular/node_modules/.bin/ngc -p web-angular/tsconfig.app.json --noEmit
+web-angular/node_modules/.bin/tsc -p web-angular/tsconfig.spec.json --noEmit
+```
+
 Frontend tests use Vitest/jsdom. A missing jsdom canvas implementation is not browser chart acceptance; verify rendered charts separately. Keep calculations/invariants in meaningful tests rather than treating screenshot appearance as proof.
 
 ## Synthetic browser workflows
@@ -45,6 +52,6 @@ CI gates the live suite on credential availability and manual/tag execution; ord
 
 ## Evidence ownership
 
-Dated suite totals, warnings, screenshots and remaining gates belong in [implementation evidence](../implementation/geist-screen-evidence/ACCEPTANCE.md). Current guides link there instead of repeating moving counts. [Current README images](../images/current/README.md) document appearance and provenance, independently of interaction testing.
+Dated suite totals, warnings, screenshots and remaining gates belong in [latest implementation evidence](../implementation/angular-acceptance-2026-10-07/ACCEPTANCE.md). Current guides link there instead of repeating moving counts. [Current README images](../images/current/README.md) document appearance and provenance, independently of interaction testing.
 
-Native devices, screen readers, zoom, print/export artifacts, live executor behavior, operator trials and exhaustive fault injection require their own performed checks. The existing deferred items in [OPEN](../OPEN.md) remain deferred.
+[Acceptance status](../reference/ui/acceptance-status.md) records the completed browser/PDF checks and the 9 October decision to skip remaining alternative-print, Firefox/additional-report, spoken-reader and native-mobile checks for this remediation. A skipped check is not a pass. Other deferred items in [OPEN](../OPEN.md), including real-farm and live executor acceptance, are unchanged.

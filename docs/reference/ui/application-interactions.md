@@ -40,6 +40,6 @@ Only meaningful overflow regions receive a named keyboard stop. Keep identity an
 
 The command palette uses `Cmd/Ctrl+K`; shortcut handling must respect text-entry contexts and existing owners. The assistant shares conversation state across dock/mobile presentation, retains draft consequences and keeps technical details available through disclosures. See [frontend architecture](../../architecture/frontend.md).
 
-## Evidence and outstanding acceptance
+## Evidence and acceptance scope
 
-[Screen-specific acceptance](../../implementation/geist-screen-evidence/ACCEPTANCE.md) records executed synthetic browser checks separately from source/tests. Native devices, screen readers, zoom, print/export, live execution, operator trials and exhaustive fault injection remain independently tracked. Historical reasons for these contracts are in the [entry UX](../../records/REGISTRY_ENTRY_UX.md) and [payroll](../../records/REGISTRY_PAYROLL.md) records.
+[Acceptance status](acceptance-status.md) links the performed synthetic browser and native PDF checks, including Feed comparison races and complete A4 animal/buyer reports. The owner chose to skip the remaining alternative-print, Firefox/additional-report, spoken-reader and native-mobile checks on 9 October 2026; they are not passes. Other operator/live-service acceptance remains separately tracked. Historical reasons for these contracts are in the [entry UX](../../records/REGISTRY_ENTRY_UX.md) and [payroll](../../records/REGISTRY_PAYROLL.md) records.

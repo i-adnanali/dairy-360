@@ -31,4 +31,4 @@ Styles use semantic roles and the warm palette defined in the [UI reference](../
 
 ## Development and limits
 
-See [development](../guides/development.md) for startup, [testing](../guides/testing.md) for unit/browser boundaries and [acceptance](../implementation/geist-screen-evidence/ACCEPTANCE.md) for performed checks. No persistent browser draft store is implied by local form retention. React and the blocking `/api/chat` transport are retired; their comparison belongs to the [port record](../records/ANGULAR_PORT.md).
+See [development](../guides/development.md) for startup, [testing](../guides/testing.md) for unit/browser boundaries and [acceptance](../reference/ui/acceptance-status.md) for performed checks. No persistent browser draft store is implied by local form retention. React and the blocking `/api/chat` transport are retired; their comparison belongs to the [port record](../records/ANGULAR_PORT.md).

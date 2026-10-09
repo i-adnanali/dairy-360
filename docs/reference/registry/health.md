@@ -42,7 +42,7 @@ filters apply to historical sections. Approximate dates remain marked, and year/
 records overlap date ranges rather than disappearing due to their stored first-day
 convention. Estimated history remains visible because its bounds are uncertain.
 
-The report includes full JSON export and a print layout for browser Save as PDF.
+The report includes full JSON export and measured pages for browser Save as PDF. Use A4 portrait at 100% scale. Each sheet repeats the animal identity; wrapped names reduce the available body height instead of overlapping content. Chrome and Safari exports were verified against complete synthetic audit content. Alternative paper/orientation/scale can split sheets without repeated identity; broader support was skipped by decision, not verified.
 Long sections use local pagination with 25, 50 or 100 records per page. Print/export includes
 all loaded records. Source fields remain available separately from readable record
 content. New structured weight, movement, breed, breeding/pregnancy and discarded-milk
@@ -126,6 +126,6 @@ Actual administration, planned work and operator/veterinary instructions remain 
 
 ## Limits and evidence
 
-Structured weight, movement, breed, breeding/pregnancy and discarded-milk capture remain deferred stage-3 scope. Clinical, real-farm and exhaustive print/export acceptance are not implied by the implemented report layout. [Current acceptance](../../implementation/geist-screen-evidence/ACCEPTANCE.md) records precisely what was performed.
+Structured weight, movement, breed, breeding/pregnancy and discarded-milk capture remain deferred stage-3 scope. Clinical, real-farm and exhaustive print/export acceptance are not implied by the implemented report layout. [Acceptance status](../ui/acceptance-status.md) records performed checks and the owner-approved exclusions.
 
 [Testing](../../guides/testing.md) describes the synthetic harness. [Original requirements](../../records/ANIMAL_HEALTH_SPEC.md) and [delivery record](../../records/REGISTRY_HEALTH.md) preserve original acceptance examples, deviations and dated measurements.

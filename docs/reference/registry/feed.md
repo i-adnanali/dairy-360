@@ -51,4 +51,4 @@ Sources: [feed.ts](../../../server/src/registry/feed.ts), [routes.ts](../../../s
 
 ## Evidence and history
 
-[Current acceptance](../../implementation/geist-screen-evidence/ACCEPTANCE.md) separates source/tests from browser checks. Original requirements are preserved in [the Feed specification](../../records/FEED_SPEC.md), and the isolation incident plus original verification in [the delivery record](../../records/REGISTRY_FEED.md). The incident is retained as evidence, not omitted from history.
+[Current acceptance](../ui/acceptance-status.md) separates source/tests from browser checks. Original requirements are preserved in [the Feed specification](../../records/FEED_SPEC.md), and the isolation incident plus original verification in [the delivery record](../../records/REGISTRY_FEED.md). The incident is retained as evidence, not omitted from history.
