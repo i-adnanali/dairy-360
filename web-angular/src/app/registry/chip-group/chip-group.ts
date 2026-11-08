@@ -77,9 +77,9 @@ export class ChipGroup {
 
   protected chipClass(v: string): string {
     const base =
-      'inline-flex items-baseline rounded-lg border px-3 py-1.5 text-sm capitalize ' +
+      'inline-flex items-baseline rounded-lg border px-3 py-1.5 text-sm ' +
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1';
-    const wide = this.vertical() ? ' w-full text-left normal-case' : '';
+    const wide = this.vertical() ? ' w-full text-left' : '';
     return (
       base +
       wide +

@@ -120,7 +120,7 @@ describe('Owner analytics', () => {
     expect(f.componentInstance.chartData().datasets[0].data[1]).toBeNull();
     expect(el.querySelector('app-pagination')?.textContent).toContain('1–25 of 63');
   });
-  it('moves the date inspector without losing the period and search context', async () => {
+  it('moves the page-wide selection without losing the period and search context', async () => {
     const f = await mount(async () => report());
     const router = TestBed.inject(Router);
     await router.navigate([], { queryParams: { view: 'month', on: '2026-09-14', search: 'Noor', detailOn: '2026-09-14', detailSession: 'morning' } });
@@ -131,9 +131,10 @@ describe('Owner analytics', () => {
     expect(router.url).toContain('view=month');
     expect(router.url).toContain('search=Noor');
     f.detectChanges();
-    const inspector = Array.from(f.nativeElement.querySelectorAll('select') as NodeListOf<HTMLSelectElement>)
-      .find(select => select.closest('label')?.textContent?.includes('Inspect date'))!;
-    expect(inspector.value).toBe('2026-09-14|evening');
+    // The pick applies to the whole page: the bar names it and the figures follow it.
+    expect(f.nativeElement.querySelector('[data-role="selection-bar"]')?.textContent).toContain('Evening');
+    expect(f.componentInstance.shown()?.produced).toBeNull();
+    expect(f.nativeElement.querySelector('[aria-pressed="true"][aria-label^="2026-09-14, evening"]')).not.toBeNull();
     (f.componentInstance as any).moveBucket(1);
     await f.whenStable();
     expect(router.url).toContain('detailSession=evening');
@@ -285,4 +286,32 @@ it('exposes No measurements rather than the generic no-record label to assistive
   expect(
     f.nativeElement.querySelector('td span[aria-label="No measurements"]')?.textContent,
   ).toContain('No measurements');
+});
+
+describe('analytics arrangement', () => {
+  it('opens on a week, names the period in words and drops zero-count noise', async () => {
+    const f = await mount(async () => report());
+    const a = f.componentInstance as any;
+    expect(a.q().view).toBe('week');
+    expect(a.coverageText({ ...report().metrics.coverage, missing: 0 })).toBe('Nothing missing');
+    expect(a.coverageText(report().metrics.coverage)).toBe('1 missing');
+    expect(a.differenceNote({ ...report().metrics, difference: null })).not.toContain('..');
+    expect(a.bucketName({ on: '2026-09-14', session: 'morning' })).toBe('Mon 14 Sep · Morning');
+  });
+  it('lists what is still to record with a link to each sheet', async () => {
+    const f = await mount(async () => report());
+    const links = Array.from(f.nativeElement.querySelectorAll('[data-role="to-review"] a') as NodeListOf<HTMLAnchorElement>)
+      .map((a) => a.getAttribute('href'));
+    expect(links.some((h) => h?.startsWith('/milk/milking') && h.includes('on=2026-09-14'))).toBe(true);
+  });
+  it('selecting the same bucket again returns to the whole period', async () => {
+    const f = await mount(async () => report());
+    const a = f.componentInstance as any;
+    const b = report().buckets[0];
+    a.selectBucket(b); await f.whenStable();
+    expect(a.q().detailOn).toBe('2026-09-14');
+    expect(a.shown().produced).toBe(30);
+    a.selectBucket(b); await f.whenStable();
+    expect(a.q().detailOn).toBe('');
+  });
 });

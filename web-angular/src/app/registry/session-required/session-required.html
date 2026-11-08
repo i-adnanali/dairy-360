@@ -4,6 +4,6 @@
       <span>
         Recording is off, so {{ what() }} cannot be saved yet.
       </span>
-      <button type="button" (click)="session.requestSetup()"
+      <button type="button" (click)="session.requestSetup(what())"
         class="font-medium underline" data-role="start-recording">Start recording</button>
     </div>

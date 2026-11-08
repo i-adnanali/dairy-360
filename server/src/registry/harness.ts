@@ -32,6 +32,8 @@ import express from 'express';
 import cors from 'cors';
 
 import { registryRouter } from './routes';
+import { farmMonitorRouter } from '../farm/monitorRoutes';
+import { syntheticFarmEvents } from '../farm/monitorFixtures';
 import { freshDb, staffedHerd } from './fixtures';
 import { farmToday } from './time';
 import { herd } from './reads';
@@ -98,6 +100,15 @@ export function harnessApp(db: Db): express.Express {
   app.use('/api/registry/health/attachments', express.json({ limit: '14mb' }));
   app.use(express.json({ limit: '2mb' }));
   app.use('/api/registry', registryRouter(db));
+  // Synthetic farm events for the Farm Monitor screen (no cameras, no dairy.db).
+  app.use(
+    '/api/farm',
+    farmMonitorRouter(
+      // An empty registry (--empty) gets no events either: a first-run farm has no cameras.
+      (from, to) => (herd(db).length === 0 ? [] : syntheticFarmEvents().filter((e) => e.occurred_at >= from && e.occurred_at < to)),
+      { synthetic: true },
+    ),
+  );
 
   // A banner endpoint, so a client can tell at a glance that it is talking to
   // the harness and not the real server. Worth the four lines: the forms write

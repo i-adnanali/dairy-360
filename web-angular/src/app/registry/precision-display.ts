@@ -84,3 +84,22 @@ export function precisionParts(
 export function approximateQuantity(value: number | string, unit = ''): string {
   return `~${value}${unit.length > 0 ? ` ${unit}` : ''}`;
 }
+
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * The same parts with the figure in words: "11 Feb 2021", "Mar 2017" month,
+ * "2016" year, "~2018" est.
+ *
+ * ONLY THE FIGURE CHANGES. The qualifier stays exactly as precisionParts gives
+ * it -- UI_SYSTEM §6.1, "never a bare date" -- so an approximate date still
+ * names its precision in a word. An exact day still takes no qualifier.
+ */
+export function readableParts(on: string | null, precision: DatePrecision | null): PrecisionParts {
+  const p = precisionParts(on, precision);
+  if (p.state === 'no-record' || on === null) return p;
+  const y = on.slice(0, 4), m = MONTHS_SHORT[Number(on.slice(5, 7)) - 1], d = Number(on.slice(8, 10));
+  if (precision === 'day' || precision === null) return { ...p, figure: m && d ? `${d} ${m} ${y}` : on };
+  if (precision === 'month') return { ...p, figure: m ? `${m} ${y}` : p.figure };
+  return p;
+}

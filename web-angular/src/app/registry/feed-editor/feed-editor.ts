@@ -14,6 +14,7 @@ import { SessionRequired } from "../session-required/session-required";
 import { FormState } from "../form-state";
 import { WriteLog } from "../after-write";
 import { TextInput } from "../../ui/input";
+import { feedLabel, feedProvenance } from "../feed-format";
 import { Button } from "../../ui/button";
 import { Card, ErrorPanel } from "../../ui/surface";
 import { FieldLabel, HelpText } from "../../ui/text";
@@ -45,6 +46,12 @@ export class FeedEditor {
   readonly record = input<FeedWireRecord | null>(null);
   readonly items = input<FeedRecord[]>([]);
   readonly cropId = input('');
+  /** Off where the page heading already names the form ("Add crop" on /feed/crops/new). */
+  readonly titled = input(true);
+  protected readonly label = feedLabel;
+  protected provenance(r: FeedWireRecord | null): string {
+    return r ? feedProvenance(r) : '';
+  }
   readonly saved = output<FeedRecord>();
   readonly cancelled = output<void>();
   readonly addItem = output<void>();
@@ -202,7 +209,7 @@ export class FeedEditor {
     });
   }
   words(v: string) {
-    return v.replaceAll('_', ' ');
+    return feedLabel(v);
   }
   noun() {
     return (

@@ -32,11 +32,14 @@ import { TextInput } from "../../ui/input";
 
 /** The wording each field carries, in one place so three forms cannot diverge. */
 export const IDENTIFIER_GUIDANCE = {
+  // Plain words for the same rule: one spelling per person, so their records
+  // stay together. "A stable identifier, not a display name" was the data
+  // model's phrasing, not the farm's.
   observed_by:
     'Who actually saw it. Leave blank unless someone did — nobody observed a purchase record. ' +
-    'A stable identifier, not a display name.',
-  acquired_from: 'Who it came from. A stable identifier, not a display name.',
-  sire_ref: 'Free text. A stable identifier, not a display name.',
+    'Pick the name from the list, so it is spelled the same on every record.',
+  acquired_from: 'Who it came from. Pick the name from the list if it is there, so it is spelled the same every time.',
+  sire_ref: 'Free text. Use the same spelling every time, so the same bull is one name.',
 } as const;
 
 export type IdentifierField = keyof typeof IDENTIFIER_GUIDANCE;

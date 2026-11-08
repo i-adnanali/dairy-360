@@ -1,23 +1,109 @@
 
-    <div data-page-layout="entry" class="mx-auto max-w-[720px] space-y-5">
-      <header>
-        <h2 appPageHeading>Daily feeding</h2>
-        <p appHelp>
-          One account for the day. Unknown quantity and unspecified recipients are valid.
-        </p>
+    <div data-page-layout="entry" class="feed-day mx-auto max-w-[760px] space-y-5">
+      <!-- A day's account names the day, says whether it is saved, and carries
+           the saved record's own actions. Cancel and Back both return to Days. -->
+      <header class="space-y-2">
+        <a appTextLink class="text-sm" routerLink="/feed/daily" data-role="feed-back">Back to days</a>
+        <div class="flex flex-wrap items-end justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 appPageHeading>{{ heading() }}</h2>
+              @if (loaded()) {
+                <span appBadge [tone]="standing().tone" data-role="feed-day-standing">{{ standing().label }}</span>
+              }
+            </div>
+            <p appHelp>One account for the day. Unknown quantities and unspecified recipients are valid.</p>
+          </div>
+          <label class="block"
+            ><span appFieldLabel>Day</span
+            ><input
+              appInput
+              type="date"
+              name="on"
+              [ngModel]="draft.on"
+              (ngModelChange)="changeDate($event)"
+              required
+          /></label>
+        </div>
+        @if (loaded() && draft.id) {
+          <p appHelp size="xs" data-role="feed-provenance">{{ savedLine() }}</p>
+          <div class="flex flex-wrap gap-2">
+            @if (review) {
+              <button appButton variant="secondary" type="button" (click)="beginEdit()">Edit account</button>
+            }
+            <button appButton variant="secondary" type="button" [attr.aria-expanded]="historyOpen" (click)="toggleHistory()">
+              Correction history
+            </button>
+            <button appButton variant="secondary" type="button" (click)="confirmRemoval()">Remove summary</button>
+          </div>
+        }
       </header>
       @if (loadError()) {
         <p appErrorPanel>{{ loadError() }}</p>
         <button appButton variant="secondary" (click)="load()">Retry loading</button>
       }
       @if (loaded()) {
-        @if (draft.id) {
-          <p appHelp>
-            Saved · revision {{ originalRecord?.revision }} · recorded by
-            {{ originalRecord?.recorded_by }}. {{ originalRecord?.source_form }} ·
-            {{ originalRecord?.source_ref || 'no source reference' }}. Editing keeps confirmed
-            recipients unless refreshed.
-          </p>
+        @if (historyOpen) {
+          <section appCard class="space-y-3" data-role="feed-history">
+            <div class="flex items-baseline justify-between gap-3">
+              <h3 appSectionHeading>Correction history</h3>
+              <button appButton variant="secondary" size="sm" type="button" (click)="toggleHistory()">Close</button>
+            </div>
+            @for (r of revisions(); track r.id) {
+              <details class="border-t border-line-subtle pt-2">
+                <summary class="cursor-pointer text-sm">
+                  <span class="font-medium">{{ label(r.operation) }}</span> · revision {{ r.revision }}
+                </summary>
+                <p appHelp size="xs" class="mt-2">Previous and saved account, including confirmed recipients and provenance.</p>
+                <pre class="whitespace-pre-wrap break-all text-xs">{{ r.before_json }}</pre>
+                <pre class="whitespace-pre-wrap break-all text-xs">{{ r.after_json }}</pre>
+                <p appHelp size="xs">{{ r.provenance }}</p>
+              </details>
+            } @empty {
+              <p appHelp role="status">Loading history…</p>
+            }
+          </section>
+        }
+        @if (removing) {
+          <div appCard class="space-y-3" data-role="feed-removal">
+            <p>Remove only this day's summary? Its audit trail remains, and the day returns to not recorded.</p>
+            <div class="flex flex-wrap gap-2">
+              <button appButton type="button" (click)="remove()" [appButtonDisabled]="!session.ready() || state.submitting()">Confirm removal</button>
+              <button appButton variant="secondary" type="button" [disabled]="state.locked()" (click)="removing = false">Keep summary</button>
+            </div>
+          </div>
+        }
+        <!-- Item and purchase forms open HERE, above the account, under the
+             buttons that ask for them -- never below the page's last control.
+             They are outside the account's <form>: a form cannot nest. -->
+        @if (!review) {
+          <div class="feed-day-tools">
+            <p appHelp>Missing an item or a delivery?</p>
+            <button appButton variant="secondary" size="sm" type="button" (click)="openNested('items')">Create feed item</button>
+            <button appButton variant="secondary" size="sm" type="button" (click)="openNested('purchases')">Record purchase</button>
+          </div>
+        }
+        @if (nested) {
+          <div data-editor-slot="nested">
+            <app-feed-editor
+              #nestedEditor
+              [entity]="nested"
+              [items]="items()"
+              (saved)="nestedSaved($event)"
+              (cancelled)="nested = ''"
+              (addItem)="openNestedItem()"
+            />
+          </div>
+        }
+        @if (nestedItem) {
+          <div data-editor-slot="nested-item">
+            <app-feed-editor
+              #nestedItemEditor
+              entity="items"
+              (saved)="itemSaved($event)"
+              (cancelled)="nestedItem = false"
+            />
+          </div>
         }
         @if (purchaseSaved()) {
           <p appCard>
@@ -34,16 +120,6 @@
           data-role="feed-daily-form"
         >
           @if (!review) {
-            <label class="block"
-              ><span appFieldLabel>Date</span
-              ><input
-                appInput
-                type="date"
-                name="on"
-                [ngModel]="draft.on"
-                (ngModelChange)="changeDate($event)"
-                required
-            /></label>
             <section appCard class="space-y-4">
               <h3 class="font-medium">Fresh fodder</h3>
               <label class="block"
@@ -252,20 +328,9 @@
                 </button>
               </details>
             }
-            <div class="flex flex-wrap gap-2">
-              <button appButton variant="secondary" type="button" (click)="addLine()">
-                Add feed line</button
-              ><button appButton variant="secondary" type="button" (click)="openNested('items')">
-                Create feed item</button
-              ><button
-                appButton
-                variant="secondary"
-                type="button"
-                (click)="openNested('purchases')"
-              >
-                Record purchase
-              </button>
-            </div>
+            <button appButton variant="secondary" type="button" data-role="add-feed-line" (click)="addLine()">
+              Add feed line
+            </button>
             <p appHelp>
               Common items such as wanda, khall and silage are choices, not presumed feeding.
             </p>
@@ -279,10 +344,11 @@
             /></label>
           } @else {
             <section appCard class="space-y-3" tabindex="-1" data-role="feed-review">
-              <h3 class="font-medium">Review {{ draft.on }}</h3>
+              <h3 appSectionHeading>{{ savedView ? 'Saved account' : 'Check before saving' }}</h3>
               <p>
-                Fresh fodder: {{ draft.fresh_status }} · supply {{ words(draft.assessment) }}.
-                Additional feed: {{ draft.additional_status }}.
+                Fresh fodder: {{ words(draft.fresh_status).toLowerCase() || 'not answered' }} · supply
+                {{ words(draft.assessment).toLowerCase() || 'not assessed' }}. Additional feed:
+                {{ words(draft.additional_status).toLowerCase() || 'not answered' }}.
               </p>
               <p>
                 {{
@@ -299,7 +365,7 @@
                   <p>{{ sourceNames(l) }}</p>
                   <p>
                     {{ l.quantity === null ? 'Unmeasured' : l.quantity + ' ' + l.unit }} ·
-                    {{ words(l.preparation) }}
+                    {{ words(l.preparation).toLowerCase() }}
                   </p>
                   <p>
                     {{
@@ -315,25 +381,18 @@
               }
               <p>{{ draft.notes }}</p>
               <p appHelp>
-                @if (originalRecord) {
-                  Saved record: {{ originalRecord.recorded_by }} ·
-                  {{ originalRecord.source_form }} ·
-                  {{ originalRecord.source_ref || 'no source reference' }}.
-                }
+
                 @if (!savedView) {
                   {{
                     originalRecord
                       ? 'This correction will be recorded by'
                       : 'This entry will be recorded by'
                   }}
-                  {{ session.recordedBy() }} · {{ session.sourceForm() }} ·
+                  {{ session.recordedBy() }} · {{ words(session.sourceForm() ?? '') }} ·
                   {{ draft.source_ref || 'no source reference' }}
                 }
               </p>
             </section>
-            <button appButton variant="secondary" type="button" (click)="beginEdit()">
-              {{ draft.id ? 'Edit account' : 'Back to editing' }}
-            </button>
           }
           @if (localError) {
             <p appErrorPanel role="alert">{{ localError }}</p>
@@ -366,87 +425,37 @@
               </button>
             </section>
           }
-          @if (session.ready() && !savedView) {
-            @if (!writer.meaningful()) {
-              <p appHelp>No changes to save.</p>
+          <!-- The form's actions stay in reach on a long account. -->
+          <div class="feed-day-actions" data-role="feed-day-actions">
+            @if (!session.ready()) {
+              <app-session-required what="this feeding summary" />
             }
-            <button
-              appButton
-              type="submit"
-              [appButtonDisabled]="state.submitting() || nested !== '' || !writer.meaningful()"
-              [busy]="state.submitting()"
-            >
-              {{
-                state.submitting()
-                  ? 'Saving…'
-                  : review
-                    ? 'Save feeding summary'
-                    : 'Review feeding summary'
-              }}
-            </button>
-          } @else if (!session.ready()) {
-            <app-session-required what="this feeding summary" />
-          }
-          <a routerLink="/" appButton variant="secondary">Cancel daily entry</a>
-        </form>
-        @if (draft.id) {
-          <button appButton variant="secondary" type="button" (click)="showRevisions()">
-            Correction history
-          </button>
-          @for (r of revisions(); track r.id) {
-            <details appCard>
-              <summary>{{ r.operation }} · revision {{ r.revision }} · {{ r.recorded_at }}</summary>
-              <p appHelp>
-                Previous and saved account, including confirmed recipients and provenance.
-              </p>
-              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.before_json }}</pre>
-              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.after_json }}</pre>
-              <p>{{ r.provenance }}</p>
-            </details>
-          }
-          <button appButton variant="secondary" type="button" (click)="confirmRemoval()">
-            Remove summary
-          </button>
-        }
-        @if (removing) {
-          <div appCard>
-            <p>
-              Remove only this date's summary? Its audit trail remains. The date returns to not
-              recorded.
-            </p>
-            <button
-              appButton
-              (click)="remove()"
-              [appButtonDisabled]="!session.ready() || state.submitting()"
-            >
-              Confirm removal</button
-            ><button
-              appButton
-              variant="secondary"
-              [disabled]="state.locked()"
-              (click)="removing = false"
-            >
-              Keep summary
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+              @if (session.ready() && !savedView) {
+                <button
+                  appButton
+                  type="submit"
+                  [appButtonDisabled]="state.submitting() || nested !== '' || !writer.meaningful()"
+                  [busy]="state.submitting()"
+                >
+                  {{
+                    state.submitting()
+                      ? 'Saving…'
+                      : review
+                        ? 'Save feeding summary'
+                        : 'Review feeding summary'
+                  }}
+                </button>
+              }
+              @if (review && !savedView) {
+                <button appButton variant="secondary" type="button" (click)="beginEdit()">Back to editing</button>
+              }
+              <a routerLink="/feed/daily" appButton variant="secondary" data-role="feed-day-cancel">{{ savedView ? 'Back to days' : 'Cancel' }}</a>
+              @if (session.ready() && !savedView && !writer.meaningful()) {
+                <span appHelp size="xs">No changes to save.</span>
+              }
+            </div>
           </div>
-        }
-        @if (nested) {
-          <app-feed-editor
-            #nestedEditor
-            [entity]="nested"
-            [items]="items()"
-            (saved)="nestedSaved($event)"
-            (cancelled)="nested = ''"
-            (addItem)="openNestedItem()"
-          />
-        }
-        @if (nestedItem) {
-          <app-feed-editor
-            #nestedItemEditor
-            entity="items"
-            (saved)="itemSaved($event)"
-            (cancelled)="nestedItem = false"
-          />
-        }
+        </form>
       }
     </div>

@@ -36,3 +36,20 @@ test('analytics harness flag is explicit and incompatible with empty mode', () =
   assert.equal(parseArgs([]).analytics, false);
   assert.throws(() => parseArgs(['--analytics', '--empty']), /mutually exclusive/);
 });
+
+test('a whole-day bucket names the sessions still to record, so links open only those', () => {
+  const { db, scenarios } = analyticsHerd('2026-09-16');
+  try {
+    const now = new Date('2026-09-16T06:00:00Z');
+    const week = analytics(db, { on: scenarios.today, view: 'week' }, now);
+    const today = week.buckets.find((b) => b.on === scenarios.today)!;
+    // At 11:00 farm time the morning is recorded and only the evening is open:
+    // the day used to link both, so "Morning" opened a saved sheet.
+    assert.deepEqual(today.missingSessions, { milking: ['evening'], dispatch: ['evening'] });
+    const complete = week.buckets.find((b) => b.on !== scenarios.today && b.coverage.missing + b.coverage.pending === 0);
+    if (complete) assert.deepEqual(complete.missingSessions?.milking, []);
+    // A single-session (day view) bucket carries its own session instead.
+    const day = analytics(db, { on: scenarios.today, view: 'day' }, now);
+    assert.equal(day.buckets[0].missingSessions, undefined);
+  } finally { db.close(); }
+});

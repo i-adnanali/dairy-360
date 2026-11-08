@@ -1,21 +1,26 @@
 
     @for (group of groups(); track $index) {
+      <!-- MILK WITHDRAWALS ARE A SALE BLOCK, not a note: danger tone and the
+           consequence in words. Meat stays neutral -- it does not change today's
+           work. An unknown end is still a withdrawal, never "clear". -->
       <section
-        class="my-2 rounded-lg border border-line bg-surface-sunken p-3 text-sm"
+        class="withdrawal my-2 rounded-md p-3 text-sm"
+        [attr.data-medium]="group.medium"
         data-role="withdrawal-group"
       >
-        <p class="font-medium">
+        <p class="font-semibold">
           {{ group.animal }} ·
           {{ group.medium === 'milk' ? 'Milk' : group.medium === 'meat' ? 'Meat' : group.medium }}
-          withdrawal · {{ group.records.length }} instruction(s) needing attention
+          withdrawal
+          @if (group.medium === 'milk') {<span class="not-for-sale">Not for sale</span>}
         </p>
         @if (unknownEnds(group.records); as count) {
-          <p>Needs clarification — {{ count }} instruction(s) have no known end.</p>
+          <p>Needs clarification — {{ count === 1 ? 'the instruction has' : count + ' instructions have' }} no known end{{ group.medium === 'milk' ? ', so the milk stays out of sale until it is clarified' : '' }}.</p>
         }
         @for (end of knownEnds(group.records); track end) {
           <p>
-            Recorded end:
-            <time class="whitespace-nowrap" [attr.datetime]="end">{{ end.replace('T', ' ') }}</time>
+            Until
+            <time class="whitespace-nowrap font-semibold" [attr.datetime]="end">{{ farmMoment(end) }}</time>
           </p>
         }
         <details [open]="expanded()">
@@ -30,7 +35,7 @@
                 <p>Issued by {{ w.issuer }}</p>
               }
               <p>
-                {{ w.until ? 'Recorded end: ' + w.until : 'Needs clarification — no known end' }}
+                {{ w.until ? 'Recorded end: ' + farmMoment(w.until) : 'Needs clarification — no known end' }}
               </p>
               @if (w.administration_id) {
                 @if (localSource()) {

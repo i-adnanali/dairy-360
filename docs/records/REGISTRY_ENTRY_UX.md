@@ -844,9 +844,9 @@ never hides it from anyone debugging.
 calved either way, and drying off does not undo that. The stage and the milking state are different
 facts and neither replaces the other.
 
-**The male side is deliberately untouched.** katta / jhota is unconfirmed, and on a dairy where
-bulls leave young it may not need a boundary at all. A guessed local term is worse than the English
-one, because it reads as authoritative to the next person. Still open.
+**The male side: katta and sandda.** Confirmed by the owner on 6 Nov 2026: `katta` is the young
+male, `sandda` the grown bull. A male `calf` shows as katta and a stored `male` as sandda (built
+8 Nov 2026). A female-only status on a male stays in English, so the data error stays visible.
 
 **The age boundary remains overridable in principle and is not built.** The real katti→choti
 transition is physical — she gains weight and features — not arithmetic. 18 months is the default
@@ -1209,13 +1209,8 @@ gate**, and the question stays open rather than being resolved on nothing.
 
 ### Other open items
 
-- **Male terminology — partly confirmed, still blocking.** `katta` is the young male. The term for
-  the grown bull is **not** confirmed, and it is not to be guessed from the female pattern.
-
-  The male side of §7.1 stays entirely in English until both are known, and that is deliberate
-  rather than lazy: a half-mapped vocabulary is worse than an unmapped one. `katta` for the calf
-  beside a bare `male` for the adult *looks* like a complete mapping, so the next reader takes the
-  English word for the farm's word. Uniform English is at least honestly incomplete.
+- ~~Male terminology~~ — resolved: `katta` (young male) and `sandda` (grown bull), confirmed by the
+  owner 6 Nov 2026 and shown since 8 Nov 2026.
 - The cheapest shape for a manual life-stage override event.
 - How boundary ambiguity surfaces in status when birth precision is year-only or estimated.
 - Interval band numbers, to be retuned against real data once the backfill is in.

@@ -12,11 +12,12 @@ describe('named sparse pagination', () => {
         f.componentRef.setInput('pageSize', size);
         f.detectChanges();
         const el: HTMLElement = f.nativeElement;
-        expect(!!el.querySelector('nav')).toBe(total > 0);
+        // One page of 25 or fewer has nothing to page through and says nothing.
+        expect(!!el.querySelector('nav')).toBe(total > 25 || total > size);
         expect(!!el.querySelector('select')).toBe(total > 25);
         expect(el.querySelectorAll('button').length).toBe(total > size ? 2 : 0);
         expect(el.textContent).not.toContain('Page 0');
-        if (total)
+        if (total > 25 || total > size)
           expect(el.querySelector('nav')?.getAttribute('aria-label')).toBe(
             'Health tasks pagination',
           );

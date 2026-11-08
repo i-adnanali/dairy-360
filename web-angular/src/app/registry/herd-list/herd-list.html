@@ -1,7 +1,29 @@
 
     <div data-page-layout="review">
-    <h2 appPageHeading class="mb-4">Herd</h2>
-    <label class="mb-3 block text-sm text-content-secondary">Search records <input appInput type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
+    <header class="herd-head">
+      <div class="space-y-1">
+        <h2 appPageHeading>Animals</h2>
+        @if (paging.result(); as r) {
+          <p appHelp data-role="herd-count">{{ r.totalItems }} {{ r.totalItems === 1 ? 'animal' : 'animals' }}{{ q('group') === 'current' ? ' on the farm' : q('group') === 'departed' ? ' departed' : '' }}</p>
+        }
+      </div>
+      <a routerLink="/animals/new" appButton data-role="add-animal">Add animal</a>
+    </header>
+    <div class="herd-tools" role="search">
+      <label><span class="tool-label">Find</span>
+        <input appInput type="search" maxlength="100" placeholder="ID, name or tag" [value]="paging.url.value().search" (change)="setFilter({ search: $any($event.target).value })" />
+      </label>
+      <div class="seg" role="group" aria-label="Which animals">
+        @for (g of groups; track g.value) {
+          <button type="button" [attr.aria-pressed]="q('group') === g.value" (click)="setFilter({ group: g.value })">{{ g.label }}</button>
+        }
+      </div>
+      <label><span class="tool-label">Stage</span>
+        <select appInput [value]="q('status')" (change)="setFilter({ status: $any($event.target).value })">
+          @for (st of stages; track st.value) { <option [value]="st.value" [selected]="q('status') === st.value">{{ st.label }}</option> }
+        </select>
+      </label>
+    </div>
     @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
 
     <div class="mx-auto ">
@@ -9,8 +31,8 @@
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (rows() === null) {
         <p appHelp data-role="loading">Loading…</p>
-      } @else if (rows()!.length === 0 && paging.url.value().search) {
-        <p>No matching animals. <button appButton variant="link" (click)="paging.url.set({search: '', page: '1'})">Clear search</button></p>
+      } @else if (rows()!.length === 0 && (paging.url.value().search || q('status') || q('group') === 'departed')) {
+        <p>No animals match. <button appButton variant="link" (click)="setFilter({ search: '', status: '', group: 'current' })">Show the whole herd</button></p>
       } @else if (rows()!.length === 0) {
         <!-- THE EMPTY STATE. What the first hour looks like before any row
              exists: one thing to do, and no furniture pretending there is data. -->
@@ -29,19 +51,6 @@
           >
         </div>
       } @else {
-        <div class="mb-3 flex items-baseline justify-between">
-          <p class="text-sm text-content-muted">
-            {{ paging.result()?.totalItems }} {{ paging.result()?.totalItems === 1 ? 'animal' : 'animals' }}
-          </p>
-          @if (true) {
-            <a
-              routerLink="/animals/new"
-              class="text-sm font-medium text-content-secondary underline"
-              >Add animal</a
-            >
-          }
-        </div>
-
         @if (rows()!.length === 1) {
           <!-- THE ONE-ROW STATE. A real table with one row rather than a
                placeholder: the header, the columns and the drill-through all
@@ -61,13 +70,12 @@
               class="border-b border-line-subtle bg-surface-page text-xs uppercase tracking-wide text-content-muted"
             >
               <tr>
-                <th appCell>Animal</th>
-                <th appCell>Status</th>
-                <th appCell>Sex</th>
-                <th appCell numeric>Parity</th>
-                <th appCell>Born</th>
+                <th appCell [attr.aria-sort]="ariaSort('identifier')"><button type="button" class="sort" (click)="sortBy('identifier')">Animal<span class="sort-mark" [attr.data-dir]="paging.url.value().sort === 'identifier' ? paging.url.value().direction : null"></span></button></th>
+                <th appCell>Stage</th>
+                <th appCell numeric [attr.aria-sort]="ariaSort('parity')"><button type="button" class="sort" (click)="sortBy('parity')">Calvings<span class="sort-mark" [attr.data-dir]="paging.url.value().sort === 'parity' ? paging.url.value().direction : null"></span></button></th>
+                <th appCell [attr.aria-sort]="ariaSort('born')"><button type="button" class="sort" (click)="sortBy('born')">Born<span class="sort-mark" [attr.data-dir]="paging.url.value().sort === 'born' ? paging.url.value().direction : null"></span></button></th>
                 <th appCell>Origin</th>
-                <th appCell numeric>Events</th>
+                <th appCell numeric>Records</th>
               </tr>
             </thead>
             <tbody>
@@ -79,20 +87,17 @@
                 >
                   <td appCell>
                     <a [routerLink]="['/animals', r.id]" appIdentifier class="whitespace-nowrap">{{ r.id }}</a>
-
-                    <span class="block" [appCertainty]="r.name ? 'known' : 'no-record'">{{
-                      r.name ?? noRecord
-                    }}</span>
+                    @if (r.name) { <span class="animal-name">{{ r.name }}</span> }
+                    @if (r.tag_no) { <span class="animal-tag">{{ r.tag_no }}</span> }
                   </td>
                   <!-- The local term, with what the enum actually holds on hover:
                        the screen shows the farm's word and never hides the
                        stored value from anyone debugging it. -->
                   <td appCell data-role="status" [title]="r.status ? 'stored as ' + r.status : ''">
                     <span appBadge [tone]="r.status === 'departed' ? 'ended' : 'neutral'">
-                      {{ r.status ? stage(r) : 'no projection' }}
+                      {{ r.status ? stage(r) : 'no projection' }}@if (r.sex === 'male' && r.status === 'departed') { · male }
                     </span>
                   </td>
-                  <td appCell tone="secondary">{{ r.sex }}</td>
                   <td appCell numeric tone="heading">
                     <span [appCertainty]="r.parity === null ? 'no-record' : 'known'">{{
                       r.parity ?? noRecord
@@ -130,7 +135,7 @@
                       }
                     }
                   </td>
-                  <td appCell small tone="muted">{{ r.origin }}</td>
+                  <td appCell small tone="muted">{{ origin(r) }}</td>
                   <td appCell numeric tone="muted">{{ r.event_count }}</td>
                 </tr>
               }

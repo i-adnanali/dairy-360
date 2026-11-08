@@ -83,3 +83,37 @@ describe('feed page revision history ownership', () => {
     expect(c.overview()).toBeNull(); expect(c.rangeLoading()).toBe(false);
   });
 });
+
+describe('feed lists', () => {
+  const setup = (mode: string, rows: unknown[]) => {
+    TestBed.configureTestingModule({ providers: [provideRouter([]),
+      { provide: RegistryApi, useValue: { feedGet: vi.fn().mockResolvedValue(rows) } },
+      { provide: ActivatedRoute, useValue: {
+        paramMap: of(convertToParamMap({})),
+        snapshot: { data: { feedMode: mode }, paramMap: convertToParamMap({}), queryParamMap: convertToParamMap({}) },
+      } },
+    ] });
+    return TestBed.createComponent(FeedPage);
+  };
+
+  it('the catalogue lists every item -- items carry no date to filter on', async () => {
+    const f = setup('items', [{ ...row('b'), label: 'Silage' }, { ...row('a'), label: 'Khall', archived: true }, { ...row('c'), label: 'Bhoosa' }]);
+    await f.whenStable(); f.detectChanges();
+    expect(f.componentInstance.filtered().map((r) => r.label)).toEqual(['Bhoosa', 'Silage', 'Khall']);
+    expect(f.nativeElement.querySelectorAll('[data-role="feed-table-items"] tbody tr').length).toBe(3);
+  });
+
+  it('purchases are newest first; crops still cutting come first', async () => {
+    const f = setup('purchases', [{ ...row('1'), on: '2026-11-01' }, { ...row('2'), on: '2026-11-06' }]);
+    await f.whenStable();
+    expect(f.componentInstance.filtered().map((r) => r.id)).toEqual(['2', '1']);
+    TestBed.resetTestingModule();
+    const g = setup('crops', [
+      { ...row('x'), label: 'Old', status: 'finished' },
+      { ...row('y'), label: 'Maize', status: 'cutting' },
+      { ...row('z'), label: 'Berseem', status: 'growing' },
+    ]);
+    await g.whenStable();
+    expect(g.componentInstance.filtered().map((r) => r.id)).toEqual(['y', 'z', 'x']);
+  });
+});

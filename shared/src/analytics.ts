@@ -35,6 +35,12 @@ export interface AnalyticsBucket extends MilkMetrics {
   key: string;
   on: string;
   session: string;
+  /**
+   * On a whole-day bucket, which sessions still have milking or dispatch
+   * answers to record, so a "Still to record" link opens only those. Absent
+   * on a single-session bucket, whose own `session` already says it.
+   */
+  missingSessions?: { milking: string[]; dispatch: string[] };
 }
 export interface ProductionRow {
   id: string;

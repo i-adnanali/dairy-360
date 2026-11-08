@@ -1,3 +1,6 @@
+import { subjectTitle } from '../page-title';
+import { dayText, monthText, periodText, stintText } from '../labour-format';
+import { feedLabel } from '../feed-format';
 import { DestroyRef } from '@angular/core';
 import { writerDraft } from "../writer-draft";
 import { WriteLock } from "../write-lock";
@@ -34,13 +37,15 @@ import { StatusBadge } from "../../ui/surface";
 import {
   ChangeDetectionStrategy,
   Component,
+  Injector,
+  afterNextRender,
   computed,
   effect,
   inject,
   input,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { ChipGroup } from "../chip-group/chip-group";
 import { FormState } from "../form-state";
@@ -87,7 +92,30 @@ import { Button } from "../../ui/button";
 })
 export class PersonDetail {
   protected openStints(s: { engagements: { ended_on: string | null }[] }) { return s.engagements.filter(e => e.ended_on === null).length; }
-  protected focusPayment(event: Event) { event.preventDefault(); document.querySelector<HTMLInputElement>('#person-payment input[name="amount_minor"]')?.focus(); }
+  /**
+   * THE PAYMENT FORM OPENS ON DEMAND, the same as the People forms. It used to
+   * sit permanently under the header with a button that only scrolled to it.
+   * While it is open the stints and the statement step aside; the balance stays
+   * in the header, because it is the figure being settled. The nav-style
+   * #person-payment link still opens it.
+   */
+  protected readonly paying = signal(false);
+  private readonly injector = inject(Injector);
+  protected openPayment(): void {
+    if (this.paying()) return;
+    this.paying.set(true);
+    afterNextRender(() => {
+      document.querySelector<HTMLInputElement>('#person-payment input[name="amount_minor"]')?.focus();
+    }, { injector: this.injector });
+  }
+  /** Cancel goes through the draft guard, like closing a stint: typed figures are never dropped silently. */
+  protected async cancelPayment(): Promise<void> {
+    const left = await this.payDraft.transition(() => this.paying.set(false));
+    if (!left) return;
+    this.amount.set(''); this.note.set(''); this.reference.set(''); this.observedBy.set('');
+    this.payDraft.accept();
+    afterNextRender(() => document.querySelector<HTMLElement>('[data-role="show-payment"]')?.focus(), { injector: this.injector });
+  }
 
   protected closeInline() {
     return this.closeDraft.transition(() => this.closing.set(null));
@@ -126,7 +154,16 @@ export class PersonDetail {
 
   protected readonly formatMinor = formatMinor;
 
+  protected readonly day = dayText;
+  protected readonly month = monthText;
+  protected readonly period = periodText;
+  protected readonly stint = stintText;
+  protected methodWord(m: string | null | undefined) {
+    return m ? feedLabel(m) : '';
+  }
   constructor() {
+    subjectTitle(() => this.statement()?.name ?? null);
+    if (inject(ActivatedRoute).snapshot.fragment === 'person-payment') this.openPayment();
     inject(DestroyRef).onDestroy(() => ++this.loadSequence);
     this.closeDraft = writerDraft({
       name: 'Close engagement',
@@ -211,6 +248,13 @@ export class PersonDetail {
       this.endReason.set('');
       this.closeState.reset();
     });
+    // The form opens below the stints list; take the owner to it rather than
+    // leaving it to be found by scrolling.
+    afterNextRender(() => {
+      const form = document.querySelector<HTMLElement>('[data-role="close-form"]');
+      form?.scrollIntoView({ block: 'nearest' });
+      form?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
+    }, { injector: this.injector });
   }
 
   protected async submitClose(ev: Event): Promise<void> {
@@ -274,6 +318,7 @@ export class PersonDetail {
       this.note.set('');
       this.reference.set('');
       this.payDraft.accept();
+      this.paying.set(false);
       await this.load(this.id());
     }
   }

@@ -1,31 +1,42 @@
 
-    <div data-page-layout="report">
-      <div class="mx-auto  space-y-6">
-        <a routerLink="/milk/buyers" class="text-sm text-content-muted underline">← all buyers</a>
+    <div data-page-layout="review">
+      <div class="buyer space-y-5">
+        <a routerLink="/milk/buyers" class="buyer-back" data-role="back">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
+          Back to buyers
+        </a>
 
         @if (loadError(); as e) {
           <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
         } @else if (statement(); as s) {
-          <header class="flex flex-wrap items-baseline justify-between gap-3">
+          <!-- The balance is a sentence beside the name, not an uppercase
+               label over a number. -->
+          <header class="buyer-head">
             <h2 appPageHeading data-role="name">{{ s.name }}</h2>
-            <div class="text-right">
-              <div appSectionLabel>
-                {{ s.balance_minor < 0 ? 'In credit' : 'Owes' }}
-              </div>
-              <div
-                class="text-xl font-semibold"
-                [class]="s.balance_minor > 0 ? 'text-content-primary' : 'text-success-fg'"
-                data-role="balance"
-              >
-                {{ balanceText(s) }}
-              </div>
-            </div>
+            @if (s.billable) {
+              <p class="buyer-balance">
+                <span class="text-content-secondary">{{ s.balance_minor < 0 ? 'In credit' : s.balance_minor === 0 ? 'Settled' : 'Owes' }}</span>
+                @if (s.balance_minor !== 0) {
+                  <span
+                    class="buyer-balance-figure"
+                    [class.text-success-fg]="s.balance_minor < 0"
+                    data-role="balance"
+                    >{{ balanceText(s) }}</span
+                  >
+                }
+              </p>
+            } @else {
+              <p class="buyer-balance text-content-secondary">Kept, never billed</p>
+            }
           </header>
 
           <p appHelp data-role="totals">
-            {{ s.litres }} L over {{ s.months.length }} month(s) · billed
-            {{ money(s.billed_minor) }} · paid {{ money(s.paid_minor) }}
+            {{ s.litres }} L over {{ s.months.length }} {{ s.months.length === 1 ? 'month' : 'months' }}
+            · billed {{ money(s.billed_minor) }} · paid {{ money(s.paid_minor) }}
           </p>
+
+          <div class="buyer-body">
+          <div class="buyer-main space-y-5">
 
           @if (unpriced(s) > 0) {
             <p appHelp data-role="unpriced">
@@ -85,7 +96,7 @@
                       @for (d of printing() ? m.dispatches : dispatchPages.rows(m.dispatches); track d.id) {
                         <tr appRowDivider [attr.data-dispatch]="d.id">
                           <td appCell nowrap tone="secondary">
-                            {{ d.occurred_on }} {{ d.session }}
+                            {{ dayText(d.occurred_on) }} · {{ d.session }}
                           </td>
                           <td appCell tone="secondary">
                             <!-- "nothing taken" is §6's third state: an answer was
@@ -160,9 +171,9 @@
                           class="border-t border-line-hairline bg-success-bg/40"
                           [attr.data-payment]="p.id"
                         >
-                          <td appCell nowrap tone="secondary">{{ p.occurred_on }}</td>
+                          <td appCell nowrap tone="secondary">{{ dayText(p.occurred_on) }}</td>
                           <td appCell tone="secondary">
-                            {{ p.method }}
+                            {{ methodLabel(p.method) }}
                             @if (p.reference) {
                               <span class="text-content-subtle">· {{ p.reference }}</span>
                             }
@@ -187,10 +198,11 @@
             </section>
           }
 
+          </div>
+          <aside class="buyer-side space-y-5">
           <!-- record a payment ------------------------------------------- -->
           @if (s.billable) {
             <form
-              data-page-layout="entry"
               [appWriteLock]="payState"
               appCard
               class="space-y-3"
@@ -243,7 +255,7 @@
                   (input)="reference.set($any($event.target).value)"
                   placeholder="cheque no., transfer ref, khata page"
                   appInput
-                  class="w-72"
+                  class="w-full"
                 />
               </label>
 
@@ -302,7 +314,7 @@
           <!-- price history ---------------------------------------------- -->
           @if (s.prices.length > 0) {
             <section appCard data-role="price-history">
-              <h3 class="mb-2 text-sm font-semibold text-content-primary">Agreed rates</h3>
+              <h3 appSectionHeading class="mb-2">Agreed rates</h3>
               <app-local-pagination
                 label="Rates"
                 #pricePages="localPagination"
@@ -311,7 +323,7 @@
               <ul class="space-y-1 text-sm text-content-secondary">
                 @for (p of printing() ? s.prices : pricePages.rows(s.prices); track p.id) {
                   <li>
-                    from {{ p.effective_from }} —
+                    from {{ dayText(p.effective_from) }} —
                     <span class="font-medium">{{ rate(p.price_minor, p.price_unit_litres) }}</span>
                     @if (p.note) {
                       <span class="text-content-subtle">· {{ p.note }}</span>
@@ -321,6 +333,8 @@
               </ul>
             </section>
           }
+          </aside>
+          </div>
         } @else {
           <p appHelp data-role="loading">Loading…</p>
         }

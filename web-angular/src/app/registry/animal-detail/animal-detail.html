@@ -4,105 +4,76 @@
       <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
     } @else if (detail(); as d) {
       <div class="mx-auto  space-y-5">
-        <header appCard>
-          <div class="flex flex-wrap items-baseline gap-x-3">
-            <h2 class="font-mono text-xl font-semibold text-content-primary" data-role="serial">
-              {{ d.animal.id }}
-            </h2>
-            @if (d.animal.name) {
-              <span class="text-lg text-content-heading">{{ d.animal.name }}</span>
-            }
-            <!-- The farm's word, with the stored enum on hover. 'majj' says in
-                 one word what "cow" is vague about: she has calved. -->
-            <span
-              appBadge
-              [tone]="d.status?.status === 'departed' ? 'ended' : 'neutral'"
-              data-role="status"
-              [title]="d.status ? 'stored as ' + d.status.status : ''"
-              >{{ stage(d) }}</span
-            >
+        <nav class="detail-nav" aria-label="Animals">
+          <a appTextLink routerLink="/animals" data-role="back-to-animals">Back to animals</a>
+          <span class="flex gap-3">
+            @if (neighbours().prev; as p) { <a appTextLink [routerLink]="['/animals', p]" data-role="prev-animal">Previous · {{ p }}</a> }
+            @if (neighbours().next; as n) { <a appTextLink [routerLink]="['/animals', n]" data-role="next-animal">Next · {{ n }}</a> }
+          </span>
+        </nav>
+
+        <header class="detail-head">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h2 class="font-mono text-2xl font-semibold text-content-primary" data-role="serial">{{ d.animal.id }}</h2>
+            @if (d.animal.name) { <span class="text-xl text-content-heading">{{ d.animal.name }}</span> }
+            <!-- The farm's word, with the stored enum on hover. -->
+            <span appBadge [tone]="d.status?.status === 'departed' ? 'ended' : 'neutral'" data-role="status"
+              [title]="d.status ? 'stored as ' + d.status.status : ''">{{ stage(d) }}</span>
           </div>
-          <dl class="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-            <div class="flex gap-2">
-              <dt class="text-content-muted">Sex</dt>
-              <dd class="text-content-primary">{{ d.animal.sex }}</dd>
-            </div>
-            <div class="flex gap-2">
-              <dt class="text-content-muted">Origin</dt>
-              <dd class="text-content-primary">{{ d.animal.origin }}</dd>
-            </div>
-            <div class="flex gap-2">
-              <dt class="text-content-muted">Born</dt>
-              <!-- Was "2019-03-01 (month)" built by string concatenation in the
-                   template. Same correction as the herd list: the figure is
-                   truncated to the precision it was known to, and the qualifier
-                   loses its brackets. This is the screen where an animal's whole
-                   record is read, so a fabricated day here is the one that gets
-                   believed. -->
-              <dd data-role="birth">
-                @if (born(d); as b) {
-                  @if (b.state === 'no-record') {
-                    <span appCertainty="no-record" data-certainty="no-record">unknown</span>
-                  } @else {
-                    <span [appCertainty]="b.state" [attr.data-certainty]="b.state">{{
-                      b.figure
-                    }}</span>
-                    @if (b.qualifier) {
-                      <span appQualifier>{{ b.qualifier }}</span>
-                    }
-                  }
-                }
-              </dd>
-            </div>
-            <div class="flex gap-2">
-              <dt class="text-content-muted">Parity</dt>
-              <dd data-role="parity">
-                <span
-                  [appCertainty]="(d.status?.parity ?? null) === null ? 'no-record' : 'known'"
-                  >{{ d.status?.parity ?? noRecord }}</span
-                >
-              </dd>
-            </div>
-            @if (d.animal.post_no) {
-              <div class="flex gap-2">
-                <dt class="text-content-muted">Post</dt>
-                <dd class="text-content-primary">{{ d.animal.post_no }}</dd>
-              </div>
-            }
-            @if (d.animal.tag_no) {
-              <div class="flex gap-2">
-                <dt class="text-content-muted">Tag</dt>
-                <dd class="text-content-primary">{{ d.animal.tag_no }}</dd>
-              </div>
-            }
-          </dl>
+          <div class="flex flex-wrap gap-2">
+            <a appButton variant="secondary" [routerLink]="['/animals', d.animal.id, 'report']">Lifetime report</a>
+            <a appButton variant="secondary" routerLink="/animals/health" [queryParams]="{ animal: d.animal.id }">Health records</a>
+          </div>
         </header>
 
-        <nav class="flex gap-2 border-b border-line-subtle">
+        <!-- The animal at a glance, then what is open for her right now. -->
+        <dl class="facts" data-role="facts">
+          <div><dt>Born</dt>
+            <dd data-role="birth">
+              @if (born(d); as b) {
+                @if (b.state === 'no-record') {
+                  <span appCertainty="no-record" data-certainty="no-record">unknown</span>
+                } @else {
+                  <span [appCertainty]="b.state" [attr.data-certainty]="b.state">{{ b.figure }}</span>
+                  @if (b.qualifier) { <span appQualifier>{{ b.qualifier }}</span> }
+                }
+              }
+            </dd>
+          </div>
+          <div><dt>Calvings</dt>
+            <dd data-role="parity"><span [appCertainty]="(d.status?.parity ?? null) === null ? 'no-record' : 'known'">{{ d.status?.parity ?? noRecord }}</span></dd>
+          </div>
+          <div><dt>Last calving</dt>
+            <dd>@if (lastCalving(d); as c) { <span [appCertainty]="c.state">{{ c.figure }}</span>@if (c.qualifier) { <span appQualifier>{{ c.qualifier }}</span> } } @else { <span class="text-content-muted">None recorded</span> }</dd>
+          </div>
+          <div><dt>Sex</dt><dd>{{ d.animal.sex === 'female' ? 'Female' : 'Male' }}</dd></div>
+          <div><dt>Origin</dt><dd>{{ origin(d) }}</dd></div>
+          <div><dt>Tag · post</dt><dd>{{ d.animal.tag_no || '—' }} · {{ d.animal.post_no || '—' }}</dd></div>
+        </dl>
+
+        @if (milkWithdrawals().length || openTasks().length) {
+          <section class="open-now" aria-label="Open for this animal" data-role="open-now">
+            @for (w of milkWithdrawals(); track $index) {
+              <p class="open-item is-danger"><span appBadge tone="danger">Not for sale</span>
+                Milk withdrawal{{ w.product_name ? ' · ' + w.product_name : '' }}, {{ withdrawalWhen(w.until) }}</p>
+            }
+            @for (t of openTasks(); track t.id) {
+              <p class="open-item"><span appBadge [tone]="t.standing === 'overdue' ? 'danger' : 'warning'">{{ t.standing === 'overdue' ? 'Overdue' : 'Due today' }}</span>
+                <a appTextLink routerLink="/animals/health" [queryParams]="{ animal: d.animal.id, task: t.id }" data-role="open-task">{{ t['instructions'] || t.kind }}</a></p>
+            }
+            <a appTextLink tone="strong" routerLink="/animals/health" [queryParams]="{ animal: d.animal.id }">Open in Health</a>
+          </section>
+        }
+
+        <nav class="detail-tabs" aria-label="Record">
           @for (t of tabs; track t.id) {
-            <button
-              type="button"
-              [attr.data-tab]="t.id"
-              (click)="selectTab(t.id)"
-              class="-mb-px border-b-2 px-3 py-2 text-sm"
-              [class]="
-                tab() === t.id
-                  ? 'border-line-selected font-medium text-content-primary'
-                  : 'border-transparent text-content-muted'
-              "
-            >
-              {{ t.label }}
-            </button>
+            <button type="button" [attr.data-tab]="t.id" [attr.aria-pressed]="tab() === t.id" (click)="selectTab(t.id)">{{ t.label }}</button>
           }
         </nav>
 
         @switch (tab()) {
           @case ('events') {
-            <a appButton variant="secondary" [routerLink]="['/animals', d.animal.id, 'report']"
-              >Life report / vaccination card</a
-            >
-            <a appButton variant="secondary" routerLink="/animals/health">Manage health</a>
-            <app-event-list [events]="d.events" />
+            <app-event-list [events]="d.events" [newestFirst]="true" />
           }
           @case ('add-event') {
             <app-event-form [animalId]="d.animal.id" [saved]="onSaved" />

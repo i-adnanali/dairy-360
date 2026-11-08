@@ -39,7 +39,22 @@ export const SECTIONS: Section[] = [
     ],
     actions: [],
   },
-  { label: 'Feed', path: '/feed', views: [{label:'Overview',path:'/feed'},{label:'Crops',path:'/feed/crops'},{label:'Purchases',path:'/feed/purchases'},{label:'Daily history',path:'/feed/daily'}], actions: [{label:'Record feeding',path:'/feed/daily/'+farmToday(),primary:true},{label:'Add crop',path:'/feed/crops/new'},{label:'Record purchase',path:'/feed/purchases/new'}] },
+  {
+    label: 'Feed',
+    path: '/feed',
+    views: [
+      { label: 'Overview', path: '/feed' },
+      { label: 'Days', path: '/feed/daily' },
+      { label: 'Crops', path: '/feed/crops' },
+      { label: 'Purchases', path: '/feed/purchases' },
+      { label: 'Catalogue', path: '/feed/items' },
+    ],
+    actions: [
+      { label: 'Record feeding', path: '/feed/daily/' + farmToday(), primary: true },
+      { label: 'Add crop', path: '/feed/crops/new' },
+      { label: 'Record purchase', path: '/feed/purchases/new' },
+    ],
+  },
   {
     label: 'Labour',
     path: '/labour/people',
@@ -51,16 +66,46 @@ export const SECTIONS: Section[] = [
       { label: 'Add person', path: '/labour/people', fragment: 'add-person', primary: true },
     ],
   },
+  { label: 'Monitor', path: '/monitor', views: [], actions: [] },
   { label: 'Check', path: '/check', views: [], actions: [] },
 ];
+/**
+ * A route that belongs to no nav section (the full-page Assistant). It used to
+ * fall through to SECTIONS[0], which underlined Today while you were on /chat
+ * (audit F18). It is not in SECTIONS, so no nav link is ever marked current.
+ */
+export const ASSISTANT_SECTION: Section = { label: 'Assistant', path: '/chat', views: [], actions: [] };
+
 export function sectionFor(url: string): Section {
   const path = url.split(/[?#]/)[0];
+  if (path === '/chat' || path.startsWith('/chat/')) return ASSISTANT_SECTION;
   return (
     SECTIONS.find(
       (s) => s.path !== '/' && path.startsWith(s.path.split('/').slice(0, 2).join('/')),
     ) ?? SECTIONS[0]
   );
 }
+/**
+ * Which of a section's views the address is inside: the LONGEST view path that
+ * is the address or a parent of it. The sub-nav used exact matching, so a
+ * crop, a purchase or one day's feeding page marked no view at all and you
+ * lost your place one click in. `/feed` only matches itself, otherwise it
+ * would claim every Feed page.
+ */
+export function activeViewPath(section: Section, url: string): string | null {
+  const path = url.split(/[?#]/)[0];
+  let best: string | null = null;
+  for (const v of section.views) {
+    const hit = v.path === section.path ? path === v.path : path === v.path || path.startsWith(v.path + '/');
+    if (hit && (best === null || v.path.length > best.length)) best = v.path;
+  }
+  // An address under the section with no view of its own (an animal's page)
+  // belongs to the section's first view.
+  if (best === null && section.views.some((v) => v.path === section.path) && path.startsWith(section.path + '/'))
+    best = section.path;
+  return best;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ShellActions {
   readonly inShell = signal(false);

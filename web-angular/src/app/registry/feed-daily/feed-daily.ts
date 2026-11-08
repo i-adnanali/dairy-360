@@ -23,7 +23,10 @@ import { FormState } from "../form-state";
 import { WriteLog } from "../after-write";
 import { TextInput } from "../../ui/input";
 import { Button } from "../../ui/button";
-import { Card, ErrorPanel } from "../../ui/surface";
+import { Card, ErrorPanel, StatusBadge } from "../../ui/surface";
+import { TextLink } from "../../ui/text";
+import { SectionHeading } from "../../ui/heading";
+import { dayStanding, feedDay, feedLabel, feedProvenance, feedRelativeDay, feedWeekday } from "../feed-format";
 import { FieldLabel, HelpText } from "../../ui/text";
 import { PageHeading } from "../../ui/heading";
 import { FeedEditor } from "../feed-editor/feed-editor";
@@ -46,6 +49,9 @@ import { farmToday } from "../today";
     FieldLabel,
     HelpText,
     PageHeading,
+    SectionHeading,
+    StatusBadge,
+    TextLink,
     FeedEditor,
   ],
   templateUrl: './feed-daily.html',
@@ -81,6 +87,30 @@ export class FeedDailyScreen {
   private readonly draftRegistry = inject(DraftRegistry);
   originalRecord: FeedRecord | null = null;
   savedView = false;
+  /** Correction history opens under the record's own actions, and closes again. */
+  historyOpen = false;
+  protected readonly day = feedDay;
+  protected readonly label = feedLabel;
+  protected heading(): string {
+    const on = this.draft.on;
+    const rel = feedRelativeDay(on);
+    return rel === feedDay(on) ? `Feeding, ${feedWeekday(on)} ${feedDay(on)}` : `Feeding, ${rel.toLowerCase()} · ${feedDay(on)}`;
+  }
+  protected standing() {
+    return dayStanding(this.originalRecord);
+  }
+  /** Lower-case "recorded by" on purpose: it continues "Saved account, ". */
+  protected savedLine(): string {
+    const r = this.originalRecord;
+    if (!r) return '';
+    const rest = feedProvenance({ ...r, recorded_by: null });
+    return `Saved account, recorded by ${r.recorded_by} · ${rest}`;
+  }
+  protected toggleHistory(): void {
+    this.historyOpen = !this.historyOpen;
+    if (this.historyOpen) void this.showRevisions();
+    else { ++this.revisionsGeneration; this.revisions.set([]); }
+  }
   readonly writer = writerDraft({
     name: 'Daily feeding',
     description: () => 'Daily feeding · ' + this.draft.on,
@@ -99,7 +129,7 @@ export class FeedDailyScreen {
   beginEdit() {
     this.savedView = false;
     this.review = false;
-    setTimeout(() => this.host.nativeElement.querySelector('input')?.focus());
+    setTimeout(() => this.host.nativeElement.querySelector('form select, form input')?.focus());
   }
   async changeDate(on: string) {
     await this.router.navigate(['/feed/daily', on]);
@@ -115,7 +145,7 @@ export class FeedDailyScreen {
   async load() {
     const generation = ++this.loadGeneration;
     ++this.latestGeneration; ++this.revisionsGeneration;
-    this.latest.set(null); this.revisions.set([]);
+    this.latest.set(null); this.revisions.set([]); this.historyOpen = false;
     this.localError = '';
     this.loaded.set(false);
     try {
@@ -174,7 +204,7 @@ export class FeedDailyScreen {
     );
   }
   words(v: string) {
-    return v.replaceAll('_', ' ');
+    return feedLabel(v);
   }
   category(id: string) {
     return this.items().find((x) => x.id === id)?.category;
@@ -238,8 +268,8 @@ export class FeedDailyScreen {
         s.kind === 'crop'
           ? 'Own crop: ' + (this.crops().find((c) => c.id === s.ref_id)?.label ?? s.ref_id)
           : s.kind === 'purchase'
-            ? 'Purchase: ' + (this.purchases().find((p) => p.id === s.ref_id)?.on ?? s.ref_id)
-            : s.kind + ' source',
+            ? 'Purchase of ' + feedDay(this.purchases().find((p) => p.id === s.ref_id)?.on ?? s.ref_id)
+            : feedLabel(s.kind) + ' source',
       )
       .join('; ');
   }
@@ -290,7 +320,10 @@ export class FeedDailyScreen {
         `Feed ${r.completeness === 'partial' ? 'partially ' : ''}recorded for ${r.on}.`,
       );
       this.writer.accept();
-      await this.router.navigate(['/'], { queryParams: { on: r.on } });
+      // Stay on the day: it now shows as saved, which is the confirmation. The
+      // session board and Today re-read on the write.
+      await this.load();
+      this.changeDetector.markForCheck();
     }
   }
   private readonly changeDetector = inject(ChangeDetectorRef);
@@ -308,11 +341,9 @@ export class FeedDailyScreen {
     this.nested = entity;
     this.changeDetector.markForCheck();
     requestAnimationFrame(() => {
-      const input = this.host.nativeElement.querySelector(
-        'app-feed-editor input',
-      ) as HTMLElement | null;
-      input?.focus();
-      input?.scrollIntoView({ block: 'center' });
+      const slot = this.host.nativeElement.querySelector('[data-editor-slot="nested"]') as HTMLElement | null;
+      slot?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      (slot?.querySelector('input, select, textarea') as HTMLElement | null)?.focus({ preventScroll: true });
     });
   }
   async nestedSaved(r: FeedRecord) {
@@ -406,7 +437,7 @@ export class FeedDailyScreen {
     if (r) {
       this.log.announce('Removed feeding summary; audit trail retained.');
       this.writer.accept();
-      await this.router.navigate(['/'], { queryParams: { on: this.draft.on } });
+      await this.router.navigate(['/feed/daily']);
     }
   }
 }

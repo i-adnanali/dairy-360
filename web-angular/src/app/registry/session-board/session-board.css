@@ -1,0 +1,102 @@
+/*
+ * The session board sits inside the green shell band, so every colour here is
+ * a shell token.
+ *
+ * ONE SIZE ON EVERY PAGE. It used to be large on Today and a one-line strip
+ * elsewhere, and clicking a slot from Today made the whole board jump to the
+ * smaller size, which read as a layout bug. Now each slot is the same two lines
+ * everywhere: the session's name, then its figure with its words beside it.
+ */
+:host { display: block; }
+
+.session-board ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: 'label label' 'figure caption';
+  align-items: baseline;
+  column-gap: 0.5rem;
+  row-gap: 0.125rem;
+  height: 100%;
+  padding: 0.5rem 0.875rem 0.625rem;
+  border: 1px solid rgb(var(--shell-line));
+  border-radius: 0.375rem;
+  color: rgb(var(--shell-fg));
+  text-decoration: none;
+  transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1), border-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slot:hover { background: rgb(var(--shell-bg-deep)); }
+.slot:focus-visible { outline: 2px solid rgb(var(--session-lit)); outline-offset: 2px; }
+
+.slot-label { grid-area: label; font-size: 0.8125rem; line-height: 1.125rem; font-weight: 500; color: rgb(var(--shell-muted)); }
+.slot-figure { grid-area: figure; font-size: 1.5rem; line-height: 1.875rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.slot-caption {
+  grid-area: caption; min-width: 0;
+  font-size: 0.8125rem; line-height: 1.125rem; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Done and nothing-expected recede; their words stay legible. */
+.slot[data-state='done'], .slot[data-state='none'] { border-color: transparent; background: rgb(var(--shell-bg-deep)); }
+.slot[data-state='done'] .slot-figure, .slot[data-state='none'] .slot-figure { color: rgb(var(--shell-muted)); }
+.slot[data-state='done'] .slot-caption, .slot[data-state='none'] .slot-caption { color: rgb(var(--shell-muted)); font-weight: 500; }
+
+/*
+ * TWO SIGNALS, NEVER CONFUSED.
+ *
+ * WHERE YOU ARE is the fill: the slot for the section you are in turns solid
+ * light, like a selected tab. Anywhere in Feed fills Feeding.
+ *
+ * NOW is a small gold tag (and a gold edge) on the session due at this hour.
+ * It used to be the gold FILL, which read as "selected" -- on the Feed page the
+ * gold sat on Morning milking and looked like the wrong tab was chosen.
+ */
+.slot[data-state='lit'] { border-color: rgb(var(--session-lit)); box-shadow: inset 0 3px 0 rgb(var(--session-lit)); }
+.slot-now {
+  display: inline-block; margin-right: 0.375rem; padding: 0 0.375rem; border-radius: 999px;
+  background: rgb(var(--session-lit)); color: rgb(var(--session-lit-fg));
+  font-size: 0.75rem; line-height: 1.125rem; font-weight: 700; vertical-align: 0.0625rem;
+}
+.slot[data-state='lit'] .slot-sep { display: none; }
+
+.slot[data-selected='true'] {
+  background: rgb(var(--shell-fg)); border-color: rgb(var(--shell-fg));
+  color: rgb(var(--shell-bg));
+}
+.slot[data-selected='true']:hover { background: rgb(var(--shell-fg) / 0.92); }
+.slot[data-selected='true'] .slot-label,
+.slot[data-selected='true'] .slot-figure,
+.slot[data-selected='true'] .slot-caption { color: rgb(var(--shell-bg)); }
+.slot[data-selected='true'][data-state='lit'] { box-shadow: inset 0 3px 0 rgb(var(--session-lit)); }
+.slot[data-selected='true']:focus-visible { outline-color: rgb(var(--session-lit)); }
+
+/* A missed session says so in words, on a red mark the eye catches. */
+.slot[data-state='late'] { border-color: rgb(248 113 113 / 0.7); }
+.slot[data-state='late'] .slot-caption { color: rgb(254 202 202); }
+.slot[data-selected='true'][data-state='late'] .slot-caption { color: rgb(185 28 28); }
+
+.slot-all { margin: 0.5rem 0 0; font-size: 0.8125rem; color: rgb(var(--shell-muted)); }
+
+@media (max-width: 1023px) {
+  .slot { grid-template-areas: 'label label' 'figure figure' 'caption caption'; }
+  .slot-caption { white-space: normal; }
+}
+/* Phones: one row that scrolls sideways. Five wrapped slots took ~300px --
+   most of the first screen -- before any page content. */
+@media (max-width: 767px) {
+  .session-board ol {
+    grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(8.5rem, 1fr);
+    overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+  .session-board ol::-webkit-scrollbar { display: none; }
+  .session-board li { scroll-snap-align: start; }
+}

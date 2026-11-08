@@ -4,113 +4,143 @@
       <p role="status" class="text-sm text-content-muted">Loading records…</p>
     }
 
-    <div class="mx-auto  space-y-6">
-      <header>
-        <h2 appPageHeading>Buyers</h2>
-        <p appHelp class="mt-1">
-          Everyone milk goes to, and what they pay for it. The house is here too — milk kept at home
-          is a disposition, not a sale, so it has no price and never appears in a balance.
-        </p>
+    <div class="buyers space-y-5">
+      <header class="buyers-head">
+        <div class="min-w-0">
+          <h2 appPageHeading>Buyers</h2>
+          <p appHelp class="mt-1">
+            Everyone milk goes to and what they owe. The house is here too: milk kept at home is
+            recorded but never billed.
+          </p>
+        </div>
+        <button
+          appButton
+          type="button"
+          data-role="add-open"
+          [attr.aria-expanded]="addOpen()"
+          aria-controls="buyer-add"
+          (click)="toggleAdd()"
+        >
+          {{ addOpen() ? 'Close' : 'Add buyer' }}
+        </button>
       </header>
-    <label class="mb-3 block text-sm text-content-secondary"
-      >Search records
-      <input
-        appInput type="search"
-        maxlength="100"
-        class="rounded border border-line bg-surface-page p-2"
-        [value]="paging.url.value().search"
-        (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
-    /></label>
 
+      <!-- ADD, opened on purpose. It used to fill the bottom of the page
+           permanently. It also opens by itself when there is nobody yet, or a
+           half-typed name or a refusal to show. -->
+      @if (addOpen()) {
+        <ng-container [ngTemplateOutlet]="addForm" />
+      }
 
+      <div class="buyers-tools">
+        <label class="buyers-find">
+          <span>Find</span>
+          <input
+            appInput
+            type="search"
+            maxlength="100"
+            placeholder="Name"
+            aria-label="Find a buyer"
+            [value]="paging.url.value().search"
+            (change)="paging.url.set({ search: $any($event.target).value, page: '1' })"
+          />
+        </label>
+      </div>
+
+      @if (paging.loading()) {
+        <p role="status" class="text-sm text-content-muted">Loading…</p>
+      }
       @if (paging.error(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       }
 
       @if (!paging.loading() && !paging.error() && paging.result()?.items; as list) {
         @if (list.length === 0 && paging.url.value().search) {
-          <p appCard empty>No matches for this search.</p>
+          <p appCard empty>No buyer matches that name.</p>
         } @else if (list.length === 0) {
           <p appCard empty data-role="empty">
-            No destinations yet. Add the dodhi, the neighbours who buy, and
+            No buyers yet. Add the dodhi, the neighbours who buy, and
             <strong>the house</strong> — without a home row, milk kept for the family disappears
             into the reconciliation gap instead of being recorded.
           </p>
         } @else {
-          <div appScrollRegion="Buyers and rates" class="rounded-xl border border-line bg-surface-raised">
+          <div appScrollRegion="Buyers and rates" class="buyers-table">
             <table class="w-full text-left text-sm">
-              <thead
-                class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
-              >
+              <thead>
                 <tr>
-                  <th appCell>Name</th>
-                  <th appCell>Kind</th>
-                  <th appCell>On every sheet</th>
-                  <th appCell>Rate today</th>
-                  <th appCell></th>
+                  <th appCell scope="col">Name</th>
+                  <th appCell scope="col">On the sheet</th>
+                  <th appCell scope="col">Rate today</th>
+                  <th appCell scope="col" numeric>Owes</th>
+                  <th appCell scope="col"><span class="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
                 @for (d of paging.result()?.items ?? []; track d.id) {
                   <tr
                     appRowDivider
-                    [appRowLink]="d.billable ? '/milk/buyers/' + d.id : null"
+                    [appRowLink]="'/milk/buyers/' + d.id"
                     [attr.data-row]="d.id"
                     [class.opacity-50]="!d.active"
                   >
                     <td appCell>
-                      @if (d.billable) {
-                        <a
-                          [routerLink]="['/milk/buyers', d.id]"
-                          appTextLink
-                          tone="strong"
-                          [attr.data-role]="'open-' + d.id"
-                          >{{ d.name }}</a
-                        >
-                      } @else {
-                        <span class="text-content-heading">{{ d.name }}</span>
-                      }
+                      <a
+                        [routerLink]="['/milk/buyers', d.id]"
+                        appTextLink
+                        tone="strong"
+                        [attr.data-role]="'open-' + d.id"
+                        >{{ d.name }}</a
+                      >
+                      <span class="buyers-kind">{{ kindLabel(d.kind) }}</span>
                       @if (!d.active) {
                         <span appBadge tone="ended" class="ml-2" data-role="closed">
-                          stopped {{ d.ended_on }}
+                          stopped {{ day(d.ended_on) }}
                         </span>
                       }
                     </td>
-                    <td appCell tone="secondary">{{ d.kind }}</td>
                     <td appCell tone="secondary" [attr.data-role]="'standing-' + d.id">
-                      {{ d.standing ? 'yes — must be answered' : 'only when they come' }}
+                      @if (d.standing) {
+                        Every session <span class="buyers-kind">must be answered</span>
+                      } @else {
+                        When they come
+                      }
                     </td>
                     <td appCell tone="secondary" [attr.data-role]="'rate-' + d.id">
-                      <!-- Three of §6's states in one cell, and the third one
-                           KEEPS ITS AMBER rather than being quietened into the
-                           no-record grey. A billable destination with no agreed
-                           rate is milk leaving the farm for a price nobody has
-                           written down: that is "still required", not "nothing
-                           was ever entered", and there is a "change rate" button
-                           on the same row to act on it. It was already amber, so
-                           the census gains nothing here -- it is simply
-                           classified now instead of being a bare utility. -->
+                      <!-- Three of §6's states in one cell. A billable buyer with
+                           no agreed rate KEEPS ITS AMBER: milk leaving for a
+                           price nobody wrote down is "still required". -->
                       @if (!d.billable) {
                         <span appCertainty="absent" data-certainty="absent">not billed</span>
                       } @else if (d.price) {
                         {{ rate(d) }}
                         <span class="ml-1 text-xs text-content-subtle">({{ perLitre(d) }})</span>
                       } @else {
-                        <span appCertainty="unanswered" data-certainty="unanswered"
-                          >no price agreed</span
-                        >
+                        <span appCertainty="unanswered" data-certainty="unanswered">no price agreed</span>
                       }
                     </td>
-                    <td appCell numeric>
+                    <td appCell numeric [attr.data-role]="'owes-' + d.id">
+                      @if (!d.billable || d.balance_minor === null || d.balance_minor === undefined) {
+                        <span class="text-content-subtle">{{ noRecord }}</span>
+                      } @else if (d.balance_minor === 0) {
+                        <span class="text-content-muted">settled</span>
+                      } @else if (d.balance_minor < 0) {
+                        <span class="text-success-fg">{{ formatMinor(-d.balance_minor) }} credit</span>
+                      } @else {
+                        <span class="font-medium text-content-heading">{{ formatMinor(d.balance_minor) }}</span>
+                      }
+                    </td>
+                    <td appCell class="text-right">
                       @if (d.billable) {
                         <button
                           type="button"
+                          appButton
+                          variant="secondary"
+                          size="sm"
                           [attr.data-role]="'price-' + d.id"
                           [attr.aria-label]="'Change rate for ' + d.name"
                           (click)="openPrice(d)"
-                          class="rounded-lg border border-line px-2 py-1 text-xs text-content-secondary hover:border-line-strong"
                         >
-                          change rate
+                          Change rate
                         </button>
                       }
                     </td>
@@ -128,9 +158,6 @@
                 (pageChange)="paging.url.set({ page: '' + $event })"
                 (sizeChange)="paging.url.set({ pageSize: '' + $event, page: '1' })"
               />
-            }
-            @if (paging.error()) {
-              <p role="alert">{{ paging.error() }}</p>
             }
           </div>
         }
@@ -226,15 +253,22 @@
         </form>
       }
 
+
+    </div>
+
+    </div>
+
+<ng-template #addForm>
       <!-- add a destination ---------------------------------------------- -->
       <form
         [appWriteLock]="addState"
         appCard
         class="space-y-3"
         data-role="add-form"
+        id="buyer-add"
         (submit)="submitDestination($event)"
       >
-        <h3 appSectionHeading>Add a destination</h3>
+        <h3 appSectionHeading>Add a buyer</h3>
 
         <div class="flex flex-wrap items-end gap-3">
           <label class="block">
@@ -310,12 +344,10 @@
             appButton
             [busy]="addState.submitting()"
           >
-            Add destination
+            Add buyer
           </button>
         } @else {
-          <app-session-required what="a destination" />
+          <app-session-required what="a buyer" />
         }
       </form>
-    </div>
-
-    </div>
+</ng-template>

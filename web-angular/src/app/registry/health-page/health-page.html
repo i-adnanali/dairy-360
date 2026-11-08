@@ -1,97 +1,521 @@
-
-    <div data-page-layout="review" class="space-y-5">
-      <header>
+<!--
+  ANIMAL HEALTH. The page is a list you work down; every form opens in ONE
+  place, a panel beside the list, so the row you clicked stays where it was.
+  Forms used to open in five different places: at the top, inside the task
+  list, under the last case, inside the records list, and full width.
+-->
+<div data-page-layout="review" class="health" [class.panel-open]="!!panelMode()">
+  <div class="health-main">
+    <header class="health-head">
+      <div class="space-y-1">
         <h2 appPageHeading>Animal health</h2>
-        <p appHelp>
-          Veterinary visits, actual treatments and vaccination plans. A planned dose is not an
-          administered dose.
-        </p>
-        <div class="flex flex-wrap gap-2">
+        <p appHelp>Visits, doses, tests and plans. A planned dose is not a given dose.</p>
+      </div>
+      @if (!roundOpen) {
+        <div class="flex flex-wrap gap-2" data-role="health-actions">
           <button appButton (click)="create('visits')">Start vet visit</button
-          ><button appButton variant="secondary" (click)="create('administrations')">
-            Record dose</button
+          ><button appButton variant="secondary" (click)="create('administrations')">Record dose</button
           ><button appButton variant="secondary" (click)="openRound()">Vaccination round</button>
         </div>
-      </header>
-      @if (error()) {
-        <p appErrorPanel role="alert" tabindex="-1">{{ error() }}</p>
-        <button appButton variant="secondary" (click)="load()">Reload records</button>
       }
-      @if (error() && editing) {
-        <button appButton variant="secondary" (click)="reviewConflict()">
-          Compare latest saved record
+    </header>
+
+    @if (!panelMode()) {
+      <ng-container *ngTemplateOutlet="statusTpl" />
+    }
+    @if (notice()) {
+      <p role="status" appHelp>{{ notice() }}</p>
+    }
+
+    @if (roundOpen) {
+      <!-- THE ROUND IS ITS OWN JOB: it takes the page, with a way back. -->
+      <section class="health-round" data-role="round">
+        <button type="button" class="health-back" (click)="closeDrafts()">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
+          Back to health
         </button>
-      }
-      @if (conflictRecord(); as latest) {
-        <section appCard>
-          <h3>Latest saved revision {{ latest.revision }}</h3>
-          @for (line of recordLines(latest); track $index) {
-            <p>{{ line }}</p>
-          }
-          @for (entry of recordObjects(latest); track entry.key) {
-            <details>
-              <summary>{{ words(entry.key) }}</summary>
-              <pre class="whitespace-pre-wrap break-all text-xs">{{ entry.value }}</pre>
-            </details>
-          }
-          <p appHelp>
-            Your draft remains in the form below. Review both before applying your correction.
-          </p>
-          <button appButton variant="secondary" (click)="acceptRevision(latest)">
-            Discard draft and load latest
-          </button>
-          <button appButton variant="secondary" (click)="conflictRecord.set(null)">
-            Keep my draft
-          </button>
-        </section>
-      }
-      @if (writeState.uncertain()) {
-        <p role="status">
-          The save outcome is unknown. Fields are locked until the exact request is retried.
-        </p>
-        <button appButton [busy]="busy()" (click)="retryLast()">Retry same request</button>
-      }
-      @if (notice()) {
-        <p role="status" appHelp>{{ notice() }}</p>
-      }
-      @if (editorOpen && (session.ready() || savedView)) {
-        <section appCard class="space-y-4" data-page-layout="entry" id="health-editor">
-          <h3 class="text-lg font-semibold" tabindex="-1">
-            {{ savedView ? 'Saved record' : editing ? 'Correct' : 'Record' }}
-            {{ editEntity === 'administrations' ? 'dose' : entityLabel(editEntity, true) }}
-          </h3>
-          @if (!savedView) {
-            <p appHelp>
-              The recorder and source come from your recording session. Enter the actual vet or
-              administrator separately.
-            </p>
-          }
-          @if (editing) {
-            <p appHelp>
-              Saved · revision {{ editing.revision }} · recorded by {{ editing.recorded_by }} ·
-              {{ editing['source_form'] }} · {{ editing['source_ref'] || 'no source reference' }}
-            </p>
-          }
-          @if (savedView) {
-            @for (line of recordLines(editing!); track $index) {
-              <p>{{ line }}</p>
+        <h3 class="text-lg font-semibold">Vaccination round</h3>
+        <p appHelp>One vaccine for several animals. Confirm each animal separately; the round saves all rows together.</p>
+        @if (!session.ready()) {
+          <app-session-required what="the vaccination round" />
+        } @else {
+          <form id="health-round" class="space-y-5" (ngSubmit)="saveRound()">
+            <fieldset [disabled]="locked()" class="space-y-5">
+              <div class="round-shared">
+                <label
+                  ><span appFieldLabel>Visit</span
+                  ><select appInput name="roundVisit" [(ngModel)]="round.visit_id">
+                    <option value="">No visit linked</option>
+                    @for (v of catalog()['visits'] || []; track v.id) {
+                      <option [value]="v.id">{{ label(v) }}</option>
+                    }
+                  </select></label
+                >
+                <label
+                  ><span appFieldLabel>Date</span
+                  ><input appInput type="date" name="roundDate" [(ngModel)]="round.occurred_on" required
+                /></label>
+                <label
+                  ><span appFieldLabel>Vaccine name</span
+                  ><input appInput name="roundProduct" [(ngModel)]="round.product_name" required
+                /></label>
+                <label><span appFieldLabel>Batch</span><input appInput name="roundBatch" [(ngModel)]="round.batch" /></label>
+                <label
+                  ><span appFieldLabel>Amount</span
+                  ><input appInput type="number" step="any" name="roundAmount" [(ngModel)]="round.amount" required
+                /></label>
+                <label><span appFieldLabel>Unit</span><input appInput name="roundUnit" [(ngModel)]="round.unit" required /></label>
+                <label><span appFieldLabel>Route</span><input appInput name="roundRoute" [(ngModel)]="round.route" required /></label>
+                <label
+                  ><span appFieldLabel>Administered by</span
+                  ><input appInput name="roundBy" [(ngModel)]="round.administrator" required
+                /></label>
+              </div>
+              <div class="round-find">
+                <label
+                  ><span appFieldLabel>Find an animal</span
+                  ><input appInput type="search" name="roundSearch" [(ngModel)]="roundSearch"
+                /></label>
+                <p role="status" appHelp>{{ selectedRoundCount() }} {{ selectedRoundCount() === 1 ? 'animal' : 'animals' }} selected. Search keeps selected animals visible.</p>
+              </div>
+              <ul class="round-rows">
+                @for (a of animals(); track a.id) {
+                  <li class="round-row" [hidden]="!roundMatches(a)">
+                    <span class="round-animal">{{ a.id }} {{ a.name }}</span>
+                    <label
+                      ><span class="sr-only">Outcome for {{ a.id }}</span
+                      ><select appInput [name]="'round-' + a.id" [(ngModel)]="roundRows[a.id].disposition">
+                        <option value="">Not selected</option>
+                        <option value="given">Given</option>
+                        <option value="deferred">Deferred</option>
+                        <option value="not_given">Not given</option>
+                      </select></label
+                    >
+                    @if (roundRows[a.id].disposition === 'deferred' || roundRows[a.id].disposition === 'not_given') {
+                      <label
+                        ><span appFieldLabel>Reason</span
+                        ><input appInput [name]="'reason-' + a.id" [(ngModel)]="roundRows[a.id].reason" required
+                      /></label>
+                      @if (roundRows[a.id].disposition === 'deferred') {
+                        <label
+                          ><span appFieldLabel>New due date</span
+                          ><input appInput type="date" [name]="'due-' + a.id" [(ngModel)]="roundRows[a.id].due_on" required
+                        /></label>
+                      }
+                    }
+                  </li>
+                }
+              </ul>
+              <label class="round-confirm"
+                ><input type="checkbox" name="confirmed" [(ngModel)]="roundConfirmed" required />
+                I checked the selected animals and their individual outcomes.</label
+              >
+            </fieldset>
+            <div class="flex flex-wrap gap-2">
+              <button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">Save vaccination round</button
+              ><button appButton variant="secondary" type="button" (click)="closeDrafts()">Close round</button>
+            </div>
+          </form>
+        }
+      </section>
+    } @else {
+      <nav class="health-tabs" aria-label="Health views">
+        @for (t of tabs; track t.id) {
+          <button type="button" [attr.aria-pressed]="tab === t.id" (click)="setTab(t.id)">
+            {{ t.label }}@if (t.id === 'todo' && board(); as b) {
+              <span class="tab-n" [attr.aria-label]="dueCount(b) + ' due or overdue'">{{ dueCount(b) }}</span>
             }
-            @for (entry of recordObjects(editing!); track entry.key) {
-              <details>
-                <summary>{{ words(entry.key) }}</summary>
-                <pre class="whitespace-pre-wrap break-all text-xs">{{ entry.value }}</pre>
+          </button>
+        }
+      </nav>
+
+      <!-- Which animal this is filtered to, on every view, with a way out.
+           The filter used to apply on Records without saying so. -->
+      @if (animalFilter) {
+        <p class="health-chip-row">
+          <span class="health-chip" data-role="animal-chip">
+            Showing only {{ animalFilter }}{{ animalName(animalFilter) ? ' ' + animalName(animalFilter) : '' }}
+            <button type="button" [attr.aria-label]="'Show all animals, not only ' + animalFilter" (click)="clearAnimal()">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" /></svg>
+            </button>
+          </span>
+        </p>
+      }
+
+      @if (tab === 'todo' && board(); as b) {
+        <!-- WHAT NEEDS DOING, in one line, before the lists. -->
+        <p class="health-summary" data-role="health-summary">
+          @for (part of summaryParts(b); track part.text; let last = $last) {
+            <span [attr.data-tone]="part.tone">{{ part.text }}</span>@if (!last) { <span aria-hidden="true"> · </span> }
+          }
+        </p>
+
+        <button
+          type="button"
+          class="filters-toggle"
+          [attr.aria-expanded]="filtersOpen"
+          aria-controls="health-filters"
+          (click)="filtersOpen = !filtersOpen"
+        >
+          Filters{{ activeFilters() ? ' · ' + activeFilters() + ' active' : '' }}
+        </button>
+        <div class="filters" id="health-filters" [class.filters-open]="filtersOpen">
+          <label
+            ><span appFieldLabel>As of</span
+            ><input appInput type="date" name="on" [(ngModel)]="on" (change)="writeUrl(); load()" />
+            <span class="filter-note">{{ asOfText() }}</span></label
+          >
+          <label class="health-filter"
+            ><span appFieldLabel>Animal</span
+            ><select appInput name="animal" [(ngModel)]="animalFilter" (ngModelChange)="writeUrl()">
+              <option value="">All animals</option>
+              @for (a of animals(); track a.id) {
+                <option [value]="a.id">{{ a.id }} · {{ a.name || 'Unnamed' }}</option>
+              }
+            </select></label
+          >
+          <label
+            ><span appFieldLabel>Task type</span
+            ><select appInput name="type" [(ngModel)]="taskFilter" (ngModelChange)="writeUrl()">
+              <option value="">All task types</option>
+              <option value="administration">Doses</option>
+              <option value="recheck">Rechecks</option>
+              <option value="test">Tests</option>
+            </select></label
+          >
+          <label
+            ><span appFieldLabel>Due status</span
+            ><select appInput name="due" [(ngModel)]="standingFilter" (ngModelChange)="writeUrl()">
+              <option value="">All outstanding</option>
+              <option value="overdue">Overdue ({{ b.overdue }})</option>
+              <option value="due">Due today ({{ b.due }})</option>
+              <option value="upcoming">Upcoming ({{ b.upcoming }})</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="missed">Missed</option>
+              <option value="deferred">Deferred</option>
+            </select></label
+          >
+          <label
+            ><span appFieldLabel>Assigned person</span
+            ><input appInput name="assignee" [(ngModel)]="assigneeFilter" (ngModelChange)="writeUrl()" placeholder="Filter by name"
+          /></label>
+        </div>
+
+        <!-- WITHDRAWALS FIRST: they stop a sale today. Milk is open; meat and
+             other instructions fold under it. -->
+        <section class="health-block" aria-labelledby="withdrawal-heading">
+          <h3 id="withdrawal-heading" class="health-block-title">
+            Withdrawals needing attention <span class="block-n">{{ milkWithdrawals(b).length + otherWithdrawals(b).length }}</span>
+          </h3>
+          @if (milkWithdrawals(b).length + otherWithdrawals(b).length) {
+            @if (milkWithdrawals(b).length) {
+              <app-withdrawal-notices [notices]="milkWithdrawals(b)" [expanded]="true" [localSource]="true" (source)="openSource($event)" />
+            }
+            @if (otherWithdrawals(b).length) {
+              <details class="health-fold">
+                <summary>Meat and other withdrawals ({{ otherWithdrawals(b).length }})</summary>
+                <app-withdrawal-notices [notices]="otherWithdrawals(b)" [expanded]="false" [localSource]="true" (source)="openSource($event)" />
               </details>
             }
-            <button appButton (click)="beginCorrection()">Correct record</button>
-            <button appButton variant="secondary" (click)="closeEditor()">Close</button>
           } @else {
-            <p appHelp>
-              {{
-                editing ? 'This correction will be recorded by' : 'This entry will be recorded by'
-              }}
-              {{ session.recordedBy() }} · {{ session.sourceForm() }}
-            </p>
-            <p appHelp>Return to the task board using Close; unsaved changes remain protected.</p>
+            <p appHelp>No withdrawal instructions need attention.</p>
+          }
+        </section>
+
+        <section class="health-block" aria-labelledby="tasks-heading">
+          <h3 id="tasks-heading" class="health-block-title">
+            {{
+              standingFilter && !['overdue', 'due', 'upcoming'].includes(standingFilter)
+                ? taskStatus(standingFilter) + ' tasks'
+                : 'Outstanding tasks'
+            }}
+            <span class="block-n">{{ visibleTasks().length }}</span>
+          </h3>
+          <app-local-pagination label="Health tasks" #pages0="localPagination" [total]="visibleTasks().length" />
+          @if (visibleTasks().length) {
+            <ul class="task-rows">
+              @for (t of pages0.records(visibleTasks()); track t.id) {
+                <li class="health-task" [attr.data-task]="t.id" [attr.data-status]="t.standing" [attr.data-current]="activeRow === t.id || null">
+                  <span class="task-animal"
+                    ><a appIdentifier [routerLink]="['/animals', t.animal_id]">{{ t.animal_id }}</a> {{ t.animal_name }}</span
+                  >
+                  <span class="task-what">
+                    <span class="font-medium">{{ t.instructions || words(t.kind) }}</span>
+                    <span class="task-meta"
+                      >{{ taskKind(t.kind) }} · due <time>{{ day(t.due_on) }}{{ t.due_time ? ', ' + t.due_time : '' }}</time
+                      >@if (t.assignee) { · Assigned to {{ t.assignee }} }</span
+                    >
+                    @if (t.needs_review) {
+                      <span class="task-meta">Animal has departed. Review outstanding work.</span>
+                    }
+                  </span>
+                  <span
+                    appBadge
+                    class="task-status"
+                    [tone]="t.standing === 'overdue' ? 'danger' : t.standing === 'due' ? 'warning' : 'neutral'"
+                    >{{ taskStatus(t.standing) }}</span
+                  >
+                  @if (t.status === 'pending') {
+                    <span class="task-actions">
+                      <button
+                        appButton
+                        variant="secondary"
+                        size="sm"
+                        data-role="complete-task"
+                        [attr.aria-label]="'Record completion for ' + t.animal_id + ': ' + t.instructions"
+                        (click)="activeRow = t.id; complete(t)"
+                      >
+                        Record completion
+                      </button>
+                      <span class="task-more">
+                        <button
+                          type="button"
+                          class="more-btn"
+                          data-role="task-more"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="menuFor === t.id"
+                          [attr.aria-label]="'More for ' + t.animal_id + ': ' + t.instructions"
+                          (click)="toggleMenu(t.id)"
+                        >
+                          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.25" /><circle cx="8" cy="8" r="1.25" /><circle cx="12.5" cy="8" r="1.25" /></svg>
+                        </button>
+                        @if (menuFor === t.id) {
+                          <span class="more-menu" role="menu" (keydown.escape)="menuFor = null">
+                            <button type="button" role="menuitem" data-role="change-status" (click)="menuFor = null; activeRow = t.id; openAction(t)">
+                              Change status
+                            </button>
+                            <a role="menuitem" [routerLink]="['/animals', t.animal_id]">Open {{ t.animal_id }}</a>
+                          </span>
+                        }
+                      </span>
+                    </span>
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p appHelp>No tasks for this selection.</p>
+          }
+        </section>
+
+        <!-- CASES as rows like the tasks, not a fold at the foot of the page. -->
+        <section class="health-block" aria-labelledby="cases-heading">
+          <h3 id="cases-heading" class="health-block-title">
+            Open cases <span class="block-n">{{ openCases(b).length }}</span>
+          </h3>
+          <app-local-pagination label="Open health cases" #pages1="localPagination" [total]="openCases(b).length" />
+          @if (openCases(b).length) {
+            <ul class="task-rows">
+              @for (c of pages1.records(openCases(b)); track c.id) {
+                <li class="health-task" data-role="case-row" [attr.data-current]="activeRow === c.id || null">
+                  <span class="task-animal"
+                    ><a appIdentifier [routerLink]="['/animals', c.animal_id]">{{ c.animal_id }}</a> {{ animalName(c.animal_id) }}</span
+                  >
+                  <span class="task-what">
+                    <span class="font-medium">{{ c.title || 'Health case' }}</span>
+                    <span class="task-meta">Opened {{ date(c.occurred_on, c.date_precision) }}</span>
+                  </span>
+                  <span appBadge class="task-status" tone="neutral">{{ statusWord(c.status) }}</span>
+                  <span class="task-actions">
+                    <button appButton variant="secondary" size="sm" data-role="review-case" (click)="activeRow = c.id; edit(c)">Review case</button>
+                  </span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p appHelp>No open cases.</p>
+          }
+        </section>
+      }
+
+      @if (tab !== 'todo') {
+        <section class="health-block" data-role="health-records">
+          <div class="records-bar">
+            <!-- The record types as visible choices with counts, not a
+                 dropdown that hid seven of them. -->
+            <div class="record-types" role="group" [attr.aria-label]="tab === 'records' ? 'Record type' : 'List'">
+              @for (e of tabEntities(); track e) {
+                <button type="button" [attr.aria-pressed]="entity === e" [attr.data-entity]="e" (click)="chooseEntity(e)">
+                  {{ entityLabel(e) }} <span class="type-n">{{ countFor(e) }}</span>
+                </button>
+              }
+            </div>
+            @if (entity !== 'visits' && entity !== 'administrations') {
+              <button appButton variant="secondary" (click)="create(entity)">Add {{ entityLabel(entity, true) }}</button>
+            }
+          </div>
+          <app-local-pagination label="Health records" #pages3="localPagination" [total]="visibleRecords().length" />
+          @for (r of pages3.rows(visibleRecords()); track r.id) {
+            <article class="record-row" [attr.data-current]="activeRow === r.id || null">
+              <div class="min-w-0">
+                <p class="font-medium">{{ label(r) }}</p>
+                <p appHelp size="xs">{{ recordMeta(r) }}</p>
+              </div>
+              <div class="record-actions">
+                <button appButton variant="secondary" size="sm" (click)="activeRow = r.id; edit(r)">View or correct</button
+                ><button appButton variant="secondary" size="sm" (click)="activeRow = r.id; history(r)">History</button>
+                @if (r.entity === 'visits') {
+                  <button appButton variant="secondary" size="sm" (click)="activeRow = r.id; create('examinations', { visit_id: r.id })">
+                    Examine animal</button
+                  ><button appButton variant="secondary" size="sm" (click)="activeRow = r.id; create('administrations', { visit_id: r.id })">
+                    Record dose
+                  </button>
+                }
+                @if (r.entity === 'plans') {
+                  <button
+                    appButton
+                    variant="secondary"
+                    size="sm"
+                    (click)="activeRow = r.id; create('tasks', { plan_id: r.id, animal_id: r.animal_id })"
+                  >
+                    Add scheduled task
+                  </button>
+                }
+                @if (r.animal_id) {
+                  <a appButton variant="secondary" size="sm" [routerLink]="['/animals', r.animal_id, 'report']">Lifetime report</a>
+                }
+              </div>
+            </article>
+          }
+          @if (!visibleRecords().length) {
+            <p appHelp>No records entered for this selection.</p>
+          }
+        </section>
+      }
+    }
+  </div>
+
+  <!-- THE PANEL: every view, record and change opens here, beside the list.
+       Full screen on a phone, with a way back. Close returns you to the row. -->
+  @if (panelMode(); as mode) {
+    <aside class="health-panel" data-role="health-panel" role="region" aria-labelledby="health-panel-title" (keydown.escape)="closePanel()">
+      <div class="panel-head">
+        <button type="button" class="health-back panel-back" (click)="closePanel()">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
+          Back
+        </button>
+        <div class="min-w-0">
+          <h3 id="health-panel-title" tabindex="-1">{{ panelTitle() }}</h3>
+          @if (panelSubject()) {
+            <p class="panel-subject">{{ panelSubject() }}</p>
+          }
+        </div>
+        <button type="button" class="panel-close" aria-label="Close" (click)="closePanel()">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+        </button>
+      </div>
+      <div class="panel-body" id="health-editor">
+        <ng-container *ngTemplateOutlet="statusTpl" />
+        @switch (mode) {
+          @case ('editor') {
+            <ng-container *ngTemplateOutlet="editorTpl" />
+          }
+          @case ('action') {
+            <ng-container *ngTemplateOutlet="actionTpl" />
+          }
+          @case ('history') {
+            <ng-container *ngTemplateOutlet="historyTpl" />
+          }
+        }
+      </div>
+    </aside>
+  }
+</div>
+
+<ng-template #statusTpl>
+  @if (error()) {
+    <p appErrorPanel role="alert" tabindex="-1">{{ error() }}</p>
+    @if (!panelMode()) {
+      <button appButton variant="secondary" (click)="load()">Reload records</button>
+    }
+  }
+  @if (error() && editing) {
+    <button appButton variant="secondary" (click)="reviewConflict()">Compare latest saved record</button>
+  }
+  @if (conflictRecord(); as latest) {
+    <section class="panel-card">
+      <h4 class="font-semibold">Latest saved revision {{ latest.revision }}</h4>
+      @let lv = view(latest);
+      <dl class="hv-facts">
+        @for (fact of lv.facts; track $index) {
+          <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div>
+        }
+      </dl>
+      <p appHelp>Your draft remains in the form below. Review both before applying your correction.</p>
+      <div class="flex flex-wrap gap-2">
+        <button appButton variant="secondary" (click)="acceptRevision(latest)">Discard draft and load latest</button>
+        <button appButton variant="secondary" (click)="conflictRecord.set(null)">Keep my draft</button>
+      </div>
+    </section>
+  }
+  @if (writeState.uncertain()) {
+    <p role="status">The save outcome is unknown. Fields are locked until the exact request is retried.</p>
+    <button appButton [busy]="busy()" (click)="retryLast()">Retry same request</button>
+  }
+</ng-template>
+
+<ng-template #editorTpl>
+  @if (!savedView && !session.ready()) {
+    <app-session-required what="health records" />
+    @if (editing) {
+      @let rv = view(editing);
+      <dl class="hv-facts">
+        @for (fact of rv.facts; track $index) {
+          <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div>
+        }
+      </dl>
+    }
+  }
+  @if (savedView && editing) {
+    <!-- A SAVED RECORD READS: what, when, the facts, who recorded it, then
+         the ids. Not a dump of every stored field. -->
+    @let v = view(editing);
+    <dl class="hv-facts" data-role="saved-facts">
+      @if (v.date) {
+        <div><dt>Date</dt><dd>{{ v.date }}</dd></div>
+      }
+      @for (fact of v.facts; track $index) {
+        <div><dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd></div>
+      }
+    </dl>
+    @if (v.withdrawals.length) {
+      <ul class="hv-withdrawals">
+        @for (w of v.withdrawals; track $index) {
+          <li>{{ w }}</li>
+        }
+      </ul>
+    }
+    @for (id of editing.attachment_ids || []; track id) {
+      <p><a [href]="'/api/registry/health/attachments/' + id" target="_blank" rel="noopener">Attached document</a></p>
+    }
+    <p class="hv-recorded" data-role="saved-recorded">{{ v.recorded }}</p>
+    <details class="hv-ids">
+      <summary>Record ids</summary>
+      @for (line of v.ids; track $index) {
+        <p class="font-mono">{{ line }}</p>
+      }
+    </details>
+    <div class="panel-actions">
+      <button appButton (click)="beginCorrection()">Correct record</button
+      ><button appButton variant="secondary" (click)="history(editing)">History</button
+      ><button appButton variant="secondary" (click)="closeEditor()">Close</button>
+    </div>
+  }
+  @if (!savedView && session.ready()) {
+    @if (completingTask(); as t) {
+      <p class="panel-card" data-role="completing">
+        <span class="font-medium">{{ t.instructions || taskKind(t.kind) }}</span>
+        <span class="task-meta">{{ taskKind(t.kind) }} · due {{ day(t.due_on) }}@if (t.assignee) { · Assigned to {{ t.assignee }} }</span>
+      </p>
+    }
+    @if (editing) {
+      <p appHelp>Correcting the saved record. {{ recorded(editing) }} · revision {{ editing.revision }}.</p>
+    }
+    <p appHelp>
+      {{ editing ? 'This correction will be recorded by' : 'This entry will be recorded by' }}
+      {{ session.recordedBy() }} · {{ sourceName() }}. Enter the actual vet or administrator in the form.
+    </p>
             <form class="space-y-4" (ngSubmit)="save()">
               <fieldset [disabled]="locked()" class="space-y-4">
                 <div class="rows">
@@ -109,6 +533,11 @@
                         [resetKey]="dateGeneration"
                         (changed)="dateChanged($event)"
                       />
+                      <!-- An explicit shortcut, never a default: a default is how
+                           "exact day" gets applied to a guess. -->
+                      <button appButton variant="secondary" size="sm" type="button" class="date-today" data-role="date-today" (click)="setToday()">
+                        Today, {{ day(today) }}
+                      </button>
                     } @else if (f.key !== 'occurred_on' && f.key !== 'occurred_time') {
                       <div class="field-group" [hidden]="!showField(f.key)">
                         <label appFieldLabel [for]="'health-' + f.key">{{ f.label }}</label>
@@ -308,400 +737,64 @@
                 }
               </div>
             </form>
-          }
-        </section>
-      }
-      @if (board(); as b) {
-        <section appCard class="space-y-3">
-          <div class="flex flex-wrap gap-3 items-end">
-            <label
-              ><span appFieldLabel>Health board date</span
-              ><input appInput type="date" [(ngModel)]="on" (change)="load()"
-            /></label>
-            <div class="flex flex-wrap gap-2" aria-label="Task status summary">
-              @for (status of standings; track status) {
-                <button
-                  appButton
-                  variant="secondary"
-                  [attr.aria-pressed]="standingFilter === status"
-                  (click)="standingFilter = standingFilter === status ? '' : status"
-                >
-                  {{ b[status] }} {{ taskStatus(status) }}
-                </button>
-              }
-            </div>
-          </div>
-          <label
-            ><span appFieldLabel>Filter animal</span
-            ><select appInput [(ngModel)]="animalFilter">
-              <option value="">All animals</option>
-              @for (a of animals(); track a.id) {
-                <option [value]="a.id">{{ a.id }} · {{ a.name || 'Unnamed' }}</option>
-              }
-            </select></label
-          >
-          <div class="rows">
-            <label
-              ><span appFieldLabel>Task type</span
-              ><select appInput [(ngModel)]="taskFilter">
-                <option value="">All task types</option>
-                <option value="administration">Doses</option>
-                <option value="recheck">Rechecks</option>
-                <option value="test">Tests</option>
-              </select></label
-            >
-            <label
-              ><span appFieldLabel>Due status</span
-              ><select appInput [(ngModel)]="standingFilter">
-                <option value="">All outstanding</option>
-                <option value="overdue">Overdue</option>
-                <option value="due">Due today</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="missed">Missed</option>
-                <option value="deferred">Deferred</option>
-              </select></label
-            >
-            <label
-              ><span appFieldLabel>Assigned person</span
-              ><input appInput [(ngModel)]="assigneeFilter" placeholder="Filter by name"
-            /></label>
-          </div>
-          <h3 class="font-semibold">
-            {{
-              standingFilter && !['overdue', 'due', 'upcoming'].includes(standingFilter)
-                ? taskStatus(standingFilter) + ' tasks'
-                : 'Outstanding tasks'
-            }}
-          </h3>
-          <app-local-pagination
-            label="Health tasks"
-            #pages0="localPagination"
-            [total]="visibleTasks().length"
-          />
-          @for (t of pages0.records(visibleTasks()); track t.id) {
-            <article
-              class="health-task rounded-xl border border-line p-3 space-y-2"
-              [attr.data-status]="t.standing"
-            >
-              <div class="page-header">
-                <a class="underline" [routerLink]="['/animals', t.animal_id]"
-                  ><span class="font-mono whitespace-nowrap">{{ t.animal_id }}</span>
-                  {{ t.animal_name }}</a
-                >
-                <span class="task-status">{{ taskStatus(t.standing) }}</span>
-              </div>
-              <h4 class="font-medium">{{ t.instructions || words(t.kind) }}</h4>
-              <p>
-                {{ taskKind(t.kind) }} · Due <time>{{ t.due_on }} {{ t.due_time }}</time>
-              </p>
-              @if (t.assignee) {
-                <p>Assigned to {{ t.assignee }}</p>
-              }
-              @if (t.needs_review) {
-                <p appHelp>Animal has departed — review outstanding work.</p>
-              }
-              @if (t.status === 'pending') {
-                <div class="flex flex-wrap gap-2">
-                  <button
-                    appButton
-                    variant="secondary"
-                    [attr.aria-label]="
-                      'Record completion for ' + t.animal_id + ': ' + t.instructions
-                    "
-                    (click)="complete(t)"
-                  >
-                    Record completion
-                  </button>
-                  <button
-                    appButton
-                    variant="secondary"
-                    [attr.aria-label]="'Change status for ' + t.animal_id + ': ' + t.instructions"
-                    (click)="openAction(t)"
-                  >
-                    Change status
-                  </button>
-                </div>
-              }
-            </article>
-          }
-          @if (!visibleTasks().length) {
-            <p appHelp>No tasks for this selection.</p>
-          }
-          @if (actionTask && session.ready()) {
-            <form
-              data-page-layout="entry"
-              id="health-action"
-              class="space-y-3"
-              (ngSubmit)="saveAction()"
-            >
-              <fieldset [disabled]="locked()" class="space-y-3">
-                <p>{{ actionTask.instructions }}</p>
-                <label
-                  >Action<select appInput name="action" [(ngModel)]="action">
-                    <option value="defer">Defer</option>
-                    <option value="miss">Missed</option>
-                    <option value="cancel">Cancel</option>
-                  </select></label
-                >
-                @if (action === 'defer') {
-                  <label
-                    >Replacement date<input
-                      appInput
-                      type="date"
-                      name="newDue"
-                      [(ngModel)]="newDue"
-                      required
-                  /></label>
-                }
-                <label
-                  >Reason<input appInput name="actionReason" [(ngModel)]="actionReason" required
-                /></label>
-              </fieldset>
-              <button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">
-                Save task action</button
-              ><button appButton variant="secondary" type="button" (click)="closeDrafts()">
-                Back
-              </button>
-            </form>
-          }
-          <section aria-labelledby="withdrawal-heading">
-            <h3 id="withdrawal-heading" class="font-semibold">
-              Withdrawal instructions needing attention ({{ b.withdrawals.length }})
-            </h3>
-            @if (b.withdrawals.length) {
-              <app-withdrawal-notices
-                [notices]="b.withdrawals"
-                [expanded]="true"
-                [localSource]="true"
-                (source)="openSource($event)"
-              />
-            } @else {
-              <p appHelp>No withdrawal instructions needing attention in this board response.</p>
-            }
-          </section>
-          <details>
-            <summary>Open cases ({{ b.open_cases.length }})</summary>
-            <app-local-pagination
-              label="Open health cases"
-              #pages1="localPagination"
-              [total]="b.open_cases.length"
-            />
-            @for (c of pages1.records(b.open_cases); track c.id) {
-              <p>
-                {{ label(c) }}
-                <button appButton variant="secondary" (click)="edit(c)">Review case</button>
-              </p>
-            }
-          </details>
-        </section>
-      }
+  }
+</ng-template>
 
-      <section appCard class="space-y-3">
-        <label
-          ><span appFieldLabel>Records</span
-          ><select appInput [(ngModel)]="entity" (change)="loadRecords()">
-            @for (e of entities; track e) {
-              <option [value]="e">{{ entityLabel(e) }}</option>
+<ng-template #actionTpl>
+  @if (!session.ready()) {
+    <app-session-required what="this task change" />
+  } @else if (actionTask; as t) {
+    <form id="health-action" class="space-y-4" (ngSubmit)="saveAction()">
+      <p class="panel-card">
+        <span class="font-medium">{{ t.instructions || taskKind(t.kind) }}</span>
+        <span class="task-meta">{{ taskKind(t.kind) }} · due {{ day(t.due_on) }}@if (t.assignee) { · Assigned to {{ t.assignee }} }</span>
+      </p>
+      <fieldset [disabled]="locked()" class="space-y-4">
+        <legend appFieldLabel>What happened to it?</legend>
+        <div class="action-seg" role="group" aria-label="New status">
+          @for (a of actions; track a.id) {
+            <button type="button" [attr.aria-pressed]="action === a.id" [attr.data-action]="a.id" (click)="action = a.id">{{ a.label }}</button>
+          }
+        </div>
+        @if (action === 'defer') {
+          <label
+            ><span appFieldLabel>New due date</span
+            ><input appInput type="date" name="newDue" [(ngModel)]="newDue" required
+          /></label>
+        }
+        <label><span appFieldLabel>Reason</span><input appInput name="actionReason" [(ngModel)]="actionReason" required /></label>
+      </fieldset>
+      <div class="panel-actions">
+        <button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">Save task change</button
+        ><button appButton variant="secondary" type="button" (click)="closeDrafts()">Back</button>
+      </div>
+    </form>
+  }
+</ng-template>
+
+<ng-template #historyTpl>
+  <section data-role="health-history" class="space-y-3">
+    @for (v of revisionViews(); track $index) {
+      <div class="hv-rev">
+        <p class="font-medium">{{ v.head }}</p>
+        @if (v.reason) {
+          <p class="text-sm">Reason: {{ v.reason }}</p>
+        }
+        @if (v.changes.length) {
+          <ul class="hv-changes">
+            @for (c of v.changes; track $index) {
+              <li>{{ c }}</li>
             }
-          </select></label
-        >
-        @if (entity !== 'visits' && entity !== 'administrations') {
-          <button appButton variant="secondary" (click)="create(entity)">
-            Add {{ entityLabel(entity, true) }}
-          </button>
+          </ul>
+        } @else {
+          <p appHelp size="xs">No field changed.</p>
         }
-        <app-local-pagination
-          label="Health records"
-          #pages3="localPagination"
-          [total]="visibleRecords().length"
-        />
-        @for (r of pages3.rows(visibleRecords()); track r.id) {
-          <article class="border-t border-line py-3 space-y-2">
-            <p class="font-medium">{{ label(r) }}</p>
-            <p appHelp>
-              {{ r.status || r.kind }} · {{ r.date_precision }} · revision {{ r.revision }} ·
-              recorded by {{ r.recorded_by }}
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <button appButton variant="secondary" (click)="edit(r)">View / edit</button
-              ><button appButton variant="secondary" (click)="history(r)">History</button>
-              @if (r.entity === 'visits') {
-                <button
-                  appButton
-                  variant="secondary"
-                  (click)="create('examinations', { visit_id: r.id })"
-                >
-                  Examine animal</button
-                ><button
-                  appButton
-                  variant="secondary"
-                  (click)="create('administrations', { visit_id: r.id })"
-                >
-                  Record dose
-                </button>
-              }
-              @if (r.entity === 'plans') {
-                <button
-                  appButton
-                  variant="secondary"
-                  (click)="create('tasks', { plan_id: r.id, animal_id: r.animal_id })"
-                >
-                  Add scheduled task
-                </button>
-              }
-              @if (r.animal_id) {
-                <a appButton variant="secondary" [routerLink]="['/animals', r.animal_id, 'report']"
-                  >Life report / vaccination card</a
-                >
-              }
-            </div>
-          </article>
-        }
-        @if (!visibleRecords().length) {
-          <p appHelp>No records entered for this selection.</p>
-        }
-      </section>
-      @if (revisions().length) {
-        <section appCard>
-          <h3 class="font-medium">Correction history</h3>
-          @for (v of revisions(); track v.id) {
-            <div class="border-t border-line py-2">
-              <p>
-                Revision {{ v.revision }} · {{ v.operation }} · {{ v.recorded_at }} ·
-                {{ v.reason }}
-              </p>
-              @for (line of revisionLines(v); track $index) {
-                <p appHelp>{{ line }}</p>
-              }
-            </div>
-          }
-          <button appButton variant="secondary" (click)="revisions.set([])">Close history</button>
-        </section>
-      }
-      @if (editing && !savedView && !session.ready()) {
-        <section appCard>
-          <h3>Saved record</h3>
-          @for (line of recordLines(editing); track $index) {
-            <p>{{ line }}</p>
-          }
-        </section>
-      }
-      @if (((editorOpen && !savedView) || roundOpen || actionTask) && !session.ready()) {
-        <app-session-required what="health records" />
-      }
-      @if (roundOpen && session.ready()) {
-        <section appCard class="space-y-3">
-          <h3 class="font-medium">Vaccination round</h3>
-          <p appHelp>Confirm each animal separately. This batch saves all rows together.</p>
-          <form
-            data-page-layout="entry"
-            id="health-round"
-            class="space-y-3"
-            (ngSubmit)="saveRound()"
-          >
-            <fieldset [disabled]="locked()" class="space-y-3">
-              <div class="rows">
-                <label
-                  >Visit<select appInput name="roundVisit" [(ngModel)]="round.visit_id">
-                    <option value="">No visit linked</option>
-                    @for (v of catalog()['visits'] || []; track v.id) {
-                      <option [value]="v.id">{{ label(v) }}</option>
-                    }
-                  </select></label
-                ><label
-                  >Date<input
-                    appInput
-                    type="date"
-                    name="roundDate"
-                    [(ngModel)]="round.occurred_on"
-                    required /></label
-                ><label
-                  >Vaccine name<input
-                    appInput
-                    name="roundProduct"
-                    [(ngModel)]="round.product_name"
-                    required /></label
-                ><label>Batch<input appInput name="roundBatch" [(ngModel)]="round.batch" /></label
-                ><label
-                  >Amount<input
-                    appInput
-                    type="number"
-                    step="any"
-                    name="roundAmount"
-                    [(ngModel)]="round.amount"
-                    required /></label
-                ><label
-                  >Unit<input appInput name="roundUnit" [(ngModel)]="round.unit" required /></label
-                ><label
-                  >Route<input
-                    appInput
-                    name="roundRoute"
-                    [(ngModel)]="round.route"
-                    required /></label
-                ><label
-                  >Administered by<input
-                    appInput
-                    name="roundBy"
-                    [(ngModel)]="round.administrator"
-                    required
-                /></label>
-              </div>
-              <label class="block">Find animal in round
-                <input appInput type="search" name="roundSearch" [(ngModel)]="roundSearch" />
-              </label>
-              <p role="status">{{ selectedRoundCount() }} animals selected. Search keeps selected rows visible.</p>
-              @for (a of animals(); track a.id) {
-                <div class="rows border-t border-line py-2" [hidden]="!roundMatches(a)">
-                  <label
-                    >{{ a.id }} · {{ a.name
-                    }}<select
-                      appInput
-                      [name]="'round-' + a.id"
-                      [(ngModel)]="roundRows[a.id].disposition"
-                    >
-                      <option value="">Not selected</option>
-                      <option value="given">Given</option>
-                      <option value="deferred">Deferred</option>
-                      <option value="not_given">Not given</option>
-                    </select></label
-                  >
-                  @if (
-                    roundRows[a.id].disposition === 'deferred' ||
-                    roundRows[a.id].disposition === 'not_given'
-                  ) {
-                    <label
-                      >Reason<input
-                        appInput
-                        [name]="'reason-' + a.id"
-                        [(ngModel)]="roundRows[a.id].reason"
-                        required
-                    /></label>
-                    @if (roundRows[a.id].disposition === 'deferred') {
-                      <label
-                        >New due date<input
-                          appInput
-                          type="date"
-                          [name]="'due-' + a.id"
-                          [(ngModel)]="roundRows[a.id].due_on"
-                          required
-                      /></label>
-                    }
-                  }
-                </div>
-              }
-              <label
-                ><input type="checkbox" name="confirmed" [(ngModel)]="roundConfirmed" required /> I
-                checked the selected animals and their individual outcomes.</label
-              >
-            </fieldset>
-            <button appButton [disabled]="busy()" [attr.aria-busy]="busy() || null">
-              Save vaccination round</button
-            ><button appButton variant="secondary" type="button" (click)="closeDrafts()">
-              Close round
-            </button>
-          </form>
-        </section>
-      }
+      </div>
+    } @empty {
+      <p appHelp>Loading history…</p>
+    }
+    <div class="panel-actions">
+      <button appButton variant="secondary" (click)="closeHistory()">Close history</button>
     </div>
+  </section>
+</ng-template>

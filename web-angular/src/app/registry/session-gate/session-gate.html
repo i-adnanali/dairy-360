@@ -1,118 +1,127 @@
-
-    <form
-      class="mx-auto max-w-lg rounded-2xl border border-line bg-surface-raised p-6"
-      data-role="gate"
-      (submit)="onSubmit($event)"
-    >
-      <h2 appPageHeading>Before entering anything</h2>
-      <p appHelp class="mt-1">
-        Both of these go on every record you write in this session. They are asked once rather than
-        on each form, and they are not defaulted — a mislabelled source reads exactly like a correct
-        one.
+<form class="gate" data-role="gate" (submit)="onSubmit($event)" (keydown)="onKeydown($event)">
+  <header class="gate-head">
+    <div class="min-w-0 space-y-1">
+      <h2 appPageHeading id="session-panel-title" tabindex="-1" data-role="gate-title">
+        {{ session.ready() ? 'Change recording' : 'Start recording' }}
+      </h2>
+      <p appHelp data-role="gate-purpose">
+        @if (purpose(); as p) {
+          To save {{ p }}, say who is typing and where the records come from.
+        } @else {
+          Everything you save while recording carries who typed it and where it came from.
+        }
       </p>
+    </div>
+    @if (dismissible()) {
+      <button type="button" class="gate-close" aria-label="Close" (click)="cancelled.emit()">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+      </button>
+    }
+  </header>
 
-      <div class="mt-5">
-        <div appSectionLabel legend>Where is this coming from?</div>
-        <app-chip-group
-          name="source-form"
-          label="Where is this coming from?"
-          [vertical]="true"
-          [options]="forms"
-          [value]="form()"
-          (changed)="form.set($any($event))"
-        />
-      </div>
-
-      <div class="mt-5 block">
-        <label for="session-recorder">
-          <span class="mb-1 block text-xs font-medium uppercase tracking-wide text-content-muted">
-            Who is typing?
-          </span>
-        </label>
-        <input
-          id="session-recorder"
-          aria-describedby="session-recorder-help"
-          data-role="recorded-by"
-          [value]="who()"
-          (input)="who.set($any($event.target).value)"
-          placeholder="a stable identifier, not a display name"
-          appInput
-          density="comfortable"
-          class="w-full"
-        />
-        <span id="session-recorder-help" class="mt-1 block text-xs text-content-muted">
-          Recorded on every event as <span class="font-mono">recorded_by</span>. Whoever remembered
-          it, if this is recall.
-        </span>
-      </div>
-
-      <p class="mt-4 rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-secondary">
-        Whether someone actually <em>saw</em> a thing is asked per record, and left blank by
-        default. Nobody observed a purchase record.
-      </p>
-
-      <!-- Which database, stated positively in every case -- including the one
-           where we could not find out. -->
-      @if (target.probed()) {
-        <div class="mt-5 border-t border-line-subtle pt-4" data-role="target">
-          <div appSectionLabel legend>Where is this going?</div>
-
-          @switch (target.kind()) {
-            @case ('harness') {
-              <p class="text-sm text-content-secondary" data-role="target-harness">
-                <span class="font-medium text-content-primary">Harness</span> —
-                <span class="font-mono text-xs">{{ target.storage() }}</span
-                >. Fixture data, discarded when that process exits. Nothing you enter here is kept.
-              </p>
-            }
-            @case ('real') {
-              <p class="text-sm text-content-secondary" data-role="target-real">
-                <span class="font-medium text-content-primary">The real registry</span> —
-                <span class="font-mono text-xs">{{ target.storage() }}</span
-                >. Every record you enter is permanent: corrections are new events, and nothing is
-                deleted.
-              </p>
-            }
-            @case ('unknown') {
-              <p class="text-sm text-content-secondary" data-role="target-unknown">
-                {{
-                  target.reachable()
-                    ? 'A server answered but would not say which database it holds — an older build, or something else serving /api. Treated as real, because it cannot be ruled out.'
-                    : 'No server answered. Nothing can be written until one does.'
-                }}
-              </p>
-            }
-          }
-
-          <!-- Asked for the real case AND for the case we could not determine,
-               because "we could not tell" must not resolve in the permissive
-               direction. Not asked on the harness: see target.ts. -->
-          @if (needsAck()) {
-            <label
-              class="mt-3 flex cursor-pointer items-start gap-2 rounded-lg border border-line bg-surface-raised px-3 py-2 text-sm"
-            >
-              <input
-                type="checkbox"
-                data-role="acknowledge-target"
-                class="mt-0.5"
-                [checked]="acked()"
-                (change)="acked.set($any($event.target).checked)"
-              />
-              <span class="text-content-heading">
-                I mean to write to this database. This is not the harness.
-              </span>
-            </label>
+  <div class="gate-body">
+    <section class="space-y-2">
+      <label for="session-recorder" class="gate-label">Who is typing?</label>
+      @if (recorders().length) {
+        <div class="names" role="group" aria-label="Names used before">
+          @for (n of recorders(); track n) {
+            <button type="button" [attr.aria-pressed]="who().trim() === n" (click)="pickName(n)">{{ n }}</button>
           }
         </div>
       }
+      <input
+        id="session-recorder"
+        aria-describedby="session-recorder-help"
+        data-role="recorded-by"
+        autocomplete="off"
+        [value]="who()"
+        (input)="who.set($any($event.target).value)"
+        [placeholder]="recorders().length ? 'Or type another name' : 'Your name, e.g. adnan'"
+        appInput
+        density="comfortable"
+        class="w-full"
+      />
+      <p id="session-recorder-help" appHelp size="xs">
+        Saved on every record as who typed it. Spell it the same way each time. If this is recall,
+        use the name of whoever remembered it.
+      </p>
+    </section>
 
-      <button
-        type="submit"
-        data-role="start"
-        [appButtonDisabled]="!canStart()"
-        appButton
-        class="mt-5 w-full"
-      >
-        {{ session.ready() ? 'Update recording session' : 'Start entering' }}
+    <section class="space-y-2">
+      <p class="gate-label" id="source-label">Where are these records coming from?</p>
+      <app-chip-group
+        name="source-form"
+        label="Where are these records coming from?"
+        [vertical]="true"
+        [options]="forms"
+        [value]="form()"
+        (changed)="form.set($any($event))"
+      />
+      <p appHelp size="xs">
+        Never filled in for you: a wrong source looks exactly like a right one. Who actually saw
+        something happen is asked per record, not here.
+      </p>
+    </section>
+
+    <!-- Which database, stated positively in every case -- including the one
+         where we could not find out. -->
+    @if (target.probed()) {
+      <section class="gate-target" data-role="target">
+        <p class="gate-label">Where is this going?</p>
+        @switch (target.kind()) {
+          @case ('harness') {
+            <p class="text-sm text-content-secondary" data-role="target-harness">
+              <span class="font-medium text-content-primary">Harness</span> (<span class="font-mono text-xs">{{ target.storage() }}</span>).
+              Test data, discarded when the harness stops. Nothing you enter here is kept.
+            </p>
+          }
+          @case ('real') {
+            <p class="text-sm text-content-secondary" data-role="target-real">
+              <span class="font-medium text-content-primary">The real registry</span> (<span class="font-mono text-xs">{{ target.storage() }}</span>).
+              Every record is permanent: corrections are new records, and nothing is deleted.
+            </p>
+          }
+          @case ('unknown') {
+            <p class="text-sm text-content-secondary" data-role="target-unknown">
+              {{
+                target.reachable()
+                  ? 'A server answered but would not say which database it holds — an older build, or something else serving /api. Treated as real, because it cannot be ruled out.'
+                  : 'No server answered. Nothing can be written until one does.'
+              }}
+            </p>
+          }
+        }
+        <!-- Asked for the real case AND for the case we could not determine,
+             because "we could not tell" must not resolve in the permissive
+             direction. Not asked on the harness: see target.ts. -->
+        @if (needsAck()) {
+          <label class="gate-ack">
+            <input
+              type="checkbox"
+              data-role="acknowledge-target"
+              class="mt-0.5"
+              [checked]="acked()"
+              (change)="acked.set($any($event.target).checked)"
+            />
+            <span class="text-content-heading">I mean to write to this database. This is not the harness.</span>
+          </label>
+        }
+      </section>
+    }
+  </div>
+
+  <footer class="gate-foot">
+    @if (blocker(); as b) {
+      <p class="text-sm text-content-secondary" data-role="start-blocked" aria-live="polite">{{ b }}</p>
+    }
+    <div class="flex flex-wrap gap-2">
+      <button type="submit" data-role="start" [appButtonDisabled]="!canStart()" appButton>
+        {{ session.ready() ? 'Save changes' : 'Start recording' }}
       </button>
-    </form>
+      <button type="button" appButton variant="secondary" data-role="gate-cancel" (click)="cancelled.emit()">
+        Cancel
+      </button>
+    </div>
+    <p appHelp size="xs">Recording lasts until you stop it from the header, or reload the page.</p>
+  </footer>
+</form>

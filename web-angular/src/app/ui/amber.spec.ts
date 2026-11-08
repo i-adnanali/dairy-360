@@ -134,7 +134,10 @@ function sites(): string[] {
 const NEEDS_AN_ANSWER = [
   'src/app/ui/certainty.ts', // the unanswered state, at value scale
   'src/app/ui/surface.ts', // the unanswered ROW -- §3.2's scale
-  'src/app/registry/today-board/today-board.html', // incomplete session counters x3
+  // today-board.html left this list in the Session Board redesign: its session
+  // counters moved to the shell's session board (gold = the current session,
+  // not amber), and its "needs an answer" rows take the warning role from
+  // today-board.css, which this utility census does not scan.
   'src/app/registry/verification-panel/verification-panel.html', // /check findings and notes
   'src/app/registry/session-required/session-required.html', // no session: answer the gate first
 ];

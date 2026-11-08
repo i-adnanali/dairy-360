@@ -3,7 +3,8 @@ import type { Page } from '@dairy/shared';
 import { RegistryApi } from './api';
 import { urlParams } from './url-state';
 /** One request identity prevents stale page responses replacing newer navigation. */
-export function pagedList<T>(kind: string, sort = 'identifier') {
+/** `extra`: page-specific filters carried in the URL with the rest (e.g. the herd's `group`). */
+export function pagedList<T>(kind: string, sort = 'identifier', extra: Record<string, string> = {}) {
   const api = inject(RegistryApi),
     url = urlParams({
       page: '1',
@@ -11,6 +12,7 @@ export function pagedList<T>(kind: string, sort = 'identifier') {
       search: '',
       sort,
       direction: sort === 'date' ? 'desc' : 'asc',
+      ...extra,
     });
   const result = signal<Page<T> | null>(null),
     error = signal<string | null>(null),

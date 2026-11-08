@@ -171,6 +171,20 @@ function declaredPairs() {
   // ZERO consumers in src/app -- a dead token the document still lists.
   // Checked anyway so its deadness is on the record.
   add('text-disabled', 'fill-brand-disabled', INFO, 'DEAD TOKEN: no consumer in src/app');
+
+  // --- Session Board redesign (6 Nov 2026) ---------------------------------
+  // Placeholders carry real hints (date formats), so they are graded as text.
+  for (const bg of SURFACES) add('text-placeholder', bg, TEXT, 'placeholder hint text');
+  // The green shell band: nav, utilities and the session board sit on it.
+  add('shell-fg', 'shell-bg', TEXT, 'shell band text');
+  add('shell-muted', 'shell-bg', TEXT, 'shell band secondary text (nav, slot labels)');
+  add('shell-fg', 'shell-bg-deep', TEXT, 'a done slot on the board');
+  add('shell-muted', 'shell-bg-deep', TEXT, 'a done slot caption');
+  add('session-lit-fg', 'session-lit', TEXT, 'the gold "Now" tag on the due session');
+  add('shell-bg', 'shell-fg', TEXT, 'the filled slot: the section you are in');
+  add('session-lit', 'shell-bg', FOCUS, 'focus ring inside the shell band');
+  add('shell-line', 'shell-bg', INFO, 'a slot outline on the band');
+  add('warning-strong', 'warning-fill', TEXT, 'the harness chip on the band');
   return p;
 }
 

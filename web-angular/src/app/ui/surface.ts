@@ -141,7 +141,11 @@ export class RowDivider {
 // ---------------------------------------------------------------------------
 // StatusBadge: state labels share geometry, while ended records retain a
 // dashed outline and warning/brand have explicit roles. docs/records/UI_SYSTEM.md §14.1.
-export type BadgeTone = 'neutral' | 'default' | 'ended' | 'warning' | 'brand';
+//
+// Session Board redesign: `danger` and `success` join so a state's tone says
+// what it means (audit F13: requested, recorded and rejected all wore brand).
+// danger = act now or unsafe; warning = needs an answer; success = recorded.
+export type BadgeTone = 'neutral' | 'default' | 'ended' | 'warning' | 'brand' | 'danger' | 'success';
 
 @Directive({
   selector: '[appBadge]',
@@ -156,6 +160,10 @@ export class StatusBadge {
         ? 'border border-dashed border-line bg-transparent text-content-subtle'
         : this.tone() === 'warning'
           ? 'bg-warning-bg text-warning-strong'
+          : this.tone() === 'danger'
+            ? 'bg-danger-bg text-danger-fg'
+            : this.tone() === 'success'
+              ? 'bg-success-bg text-success-fg'
           : this.tone() === 'neutral' || this.tone() === 'default'
             ? 'bg-brand-badge text-content-heading'
             : 'bg-brand text-content-onFill'),

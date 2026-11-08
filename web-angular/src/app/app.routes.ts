@@ -40,6 +40,19 @@
 import type { Routes } from '@angular/router';
 import { draftActivate, draftDeactivate } from './registry/draft-registry';
 import { RegistryShell } from "./registry/registry-shell/registry-shell";
+import { APP_NAME } from "./registry/page-title";
+
+/** What each page is called in the browser tab and history ("Payroll · Dairy 360"). */
+const TITLES: Record<string, string> = {
+  '': 'Today', analytics: 'Milk analytics',
+  animals: 'Animals', 'animals/new': 'Add animal', 'animals/calvings': 'Calvings', 'animals/calvings/new': 'Record calving',
+  'animals/health': 'Animal health', 'animals/:id': 'Animal', 'animals/:id/report': 'Lifetime report',
+  'milk/milking': 'Milking', 'milk/dispatch': 'Dispatch', 'milk/buyers': 'Buyers', 'milk/buyers/:id': 'Buyer',
+  feed: 'Feed', 'feed/crops': 'Fodder crops', 'feed/crops/:id': 'Fodder crop', 'feed/purchases': 'Feed purchases',
+  'feed/purchases/:id': 'Feed purchase', 'feed/items': 'Feed catalogue', 'feed/daily': 'Feeding days', 'feed/daily/:on': 'Feeding day',
+  'labour/payroll': 'Payroll', 'labour/people': 'People', 'labour/people/:id': 'Person',
+  monitor: 'Farm monitor', check: 'Check the records', chat: 'Assistant', '**': 'Page not found',
+};
 
 export const routes: Routes = [
   {
@@ -75,12 +88,12 @@ export const routes: Routes = [
         // NOTHING TO BROWSE HERE: the screen is a form, so arriving without a
         // recording session should ask for one immediately rather than render a
         // form whose submit is a prompt. See registry-shell.ts.
-        data: { writes: true },
+        data: { writes: true, writesWhat: 'a new animal' },
         loadComponent: () => import("./registry/animal-form/animal-form").then((m) => m.AnimalForm),
       },
       {
         path: 'animals/calvings/new',
-        data: { writes: true },
+        data: { writes: true, writesWhat: 'a calving' },
         loadComponent: () => import("./registry/calving-form/calving-form").then((m) => m.CalvingForm),
       },
       {
@@ -153,6 +166,13 @@ export const routes: Routes = [
         loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
       },
       {
+        // The feed catalogue was a toggle on every Feed page whose forms opened at
+        // the foot of whatever page you were on. It is reference data: its own view.
+        path: 'feed/items',
+        data: { feedMode: 'items' },
+        loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
+      },
+      {
         path: 'feed/daily',
         data: { feedMode: 'daily' },
         loadComponent: () => import("./registry/feed-page/feed-page").then((m) => m.FeedPage),
@@ -182,6 +202,10 @@ export const routes: Routes = [
       // /check verifies all three axes, so it belongs to none of them and stays
       // at the top level.
       {
+        path: 'monitor',
+        loadComponent: () => import("./registry/farm-monitor/farm-monitor").then((m) => m.FarmMonitor),
+      },
+      {
         path: 'check',
         loadComponent: () =>
           import("./registry/verification-panel/verification-panel").then((m) => m.VerificationPanel),
@@ -210,6 +234,7 @@ export const routes: Routes = [
       { path: '**', loadComponent: () => import("./registry/not-found/not-found").then(m => m.NotFound) },
     ].map((route) => ({
       ...route,
+      title: TITLES[route.path ?? ''] ?? APP_NAME,
       canDeactivate: [draftDeactivate],
       runGuardsAndResolvers: 'always' as const,
     })),

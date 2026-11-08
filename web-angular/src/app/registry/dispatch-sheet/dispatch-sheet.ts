@@ -39,7 +39,9 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { ChipGroup } from "../chip-group/chip-group";
+import { MilkSessionNav, sessionName, type SessionSlot } from "../milk-session-nav/milk-session-nav";
+import { feedDay } from "../feed-format";
+import { farmMoment } from "../today";
 import { Cell } from "../../ui/cell";
 import { Certainty } from "../../ui/certainty";
 import type { CertaintyState } from "../../ui/certainty";
@@ -57,7 +59,6 @@ import { urlParams } from "../url-state";
 import type { DispatchSheet, MilkingSession, SheetRow } from "../types";
 import { Card } from "../../ui/surface";
 import { ErrorPanel } from "../../ui/surface";
-import { FieldLabel } from "../../ui/text";
 import { HelpText } from "../../ui/text";
 import { TextInput } from "../../ui/input";
 import { PageHeading } from "../../ui/heading";
@@ -92,9 +93,8 @@ const EMPTY: Draft = { status: null, litres: '', reason: '' };
     Card,
     Cell,
     Certainty,
-    ChipGroup,
+    MilkSessionNav,
     ErrorPanel,
-    FieldLabel,
     HelpText,
     IdentifierInput,
     PageHeading,
@@ -132,10 +132,6 @@ export class DispatchSheetScreen {
     'destination_id',
     'litres',
   ] as const;
-  protected readonly sessionChips = [
-    { value: 'morning', label: 'Morning' },
-    { value: 'evening', label: 'Evening' },
-  ];
   protected readonly state = new FormState<{
     written: number;
     litres: number;
@@ -192,6 +188,7 @@ export class DispatchSheetScreen {
     const generation = ++this.loadGeneration;
     const observerAtLoad = this.handedBy();
     this.sheet.set(null);
+    void this.loadHolds(on, session, generation);
     this.occasionalPage.set(1);
     this.tablePage.set(1);
     this.pageError.set('');
@@ -220,14 +217,53 @@ export class DispatchSheetScreen {
     }
   }
 
-  protected async setOn(v: string): Promise<void> {
-    if (v.length > 0) await this.url.set({ on: v });
-    const input = document.querySelector<HTMLInputElement>('input[data-role="on"]');
-    if (input) input.value = this.on();
+  /** Move to another session. Both halves go in the URL together. */
+  protected setSlot(slot: SessionSlot): void {
+    void this.url.set({ on: slot.on, session: slot.session });
   }
 
-  protected setSession(s: MilkingSession): void {
-    this.url.set({ session: s });
+  protected readonly sessionWord = computed(() =>
+    this.session() === 'morning' ? 'Morning' : 'Evening',
+  );
+  protected dayText(on: string): string {
+    return feedDay(on);
+  }
+
+  protected readonly statusText = computed(() => {
+    const s = this.sheet();
+    if (!s) return '';
+    const saved = s.standing.filter((r) => r.existing).length;
+    if (saved === s.standing.length) return 'Saved';
+    return saved > 0 ? 'Partly saved' : 'Not saved yet';
+  });
+  protected readonly statusTone = computed(() => (this.statusText() === 'Saved' ? 'saved' : 'open'));
+
+  /**
+   * Animals whose milk may not be sold this session, from the same session's
+   * milking roster. A milk withdrawal with no known end is still a withdrawal.
+   * Best effort: if the roster cannot be read, the sheet says nothing here
+   * rather than failing.
+   */
+  protected readonly notForSale = signal<{ animal: string; name: string | null; until: string }[]>([]);
+  private async loadHolds(on: string, session: MilkingSession, generation: number): Promise<void> {
+    this.notForSale.set([]);
+    try {
+      const roster = await Promise.resolve().then(() => this.api.milkingRoster(on, session));
+      if (generation !== this.loadGeneration || !roster) return;
+      const holds = [];
+      for (const row of roster.rows) {
+        const milk = (row.health_withdrawals ?? []).filter((w) => w.target === 'milk');
+        if (!milk.length) continue;
+        const ends = milk.map((w) => w.until);
+        const until = ends.some((e) => !e)
+          ? 'end not known, so it stays out of sale'
+          : 'until ' + farmMoment(ends.sort().at(-1)!);
+        holds.push({ animal: row.animal_id, name: row.name, until });
+      }
+      this.notForSale.set(holds);
+    } catch {
+      /* the hold list is a courtesy; the sheet does not depend on it */
+    }
   }
 
   protected draft(id: string): Draft {
@@ -450,8 +486,8 @@ export class DispatchSheetScreen {
     if (p.not_measured > 0) parts.push(`${p.not_measured} milked but not weighed`);
     if (missing > 0) parts.push(`${missing} in milk with no row yet`);
     return (
-      `Production this session is a lower bound — ${parts.join(', ')}. Milk going out can ` +
-      `exceed it, and that is the missing measurement rather than missing milk.`
+      `The milked figure is a lower bound: ${parts.join(', ')}. More can go out than was ` +
+      `weighed; that is a missing measurement, not missing milk.`
     );
   });
 
@@ -556,7 +592,8 @@ export class DispatchSheetScreen {
 
     if (result) {
       this.writeLog.announce(
-        `${s.occurred_on} ${s.session}: ${result.written} row(s), ${result.litres} L out, ` +
+        `Saved ${sessionName({ on: s.occurred_on, session: s.session })} — ${result.written} ` +
+          `${result.written === 1 ? 'buyer' : 'buyers'}, ${result.litres} L out, ` +
           `${formatMinor(result.amount_minor)} billed` +
           (result.updated > 0 ? ` (${result.updated} corrected)` : ''),
       );

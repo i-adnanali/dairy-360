@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { RouterLink } from '@angular/router';
 import { RegistryApi } from "../api";
 import { HerdRow, TimelineEvent } from "../types";
-import { precisionParts } from "../precision-display";
+import { readableParts } from "../precision-display";
 import { Certainty, Qualifier } from "../../ui/certainty";
 import { Cell } from "../../ui/cell";
 import { ErrorPanel, StatusBadge } from "../../ui/surface";
@@ -38,6 +38,15 @@ export class CalvingsList {
   readonly paging = pagedList<{animal:HerdRow;event:TimelineEvent}>('calvings','date');
   readonly rows = computed(() => this.paging.result()?.items ?? null);
   readonly error = this.paging.error;
-  readonly precision = precisionParts;
+  readonly precision = readableParts;
+  /** The calf this calving created, when it has one (a stillbirth may not). */
+  calf(e: TimelineEvent): string | null {
+    const id = (e.payload as Record<string, unknown>)['calf_id'];
+    return typeof id === 'string' && id.length > 0 ? id : null;
+  }
+  outcome(e: TimelineEvent): string {
+    const o = (e.payload as Record<string, unknown>)['outcome'];
+    return typeof o === 'string' ? o.charAt(0).toUpperCase() + o.slice(1) : 'Not recorded';
+  }
   load() { this.paging.refresh(); }
 }

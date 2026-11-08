@@ -26,25 +26,32 @@
     }
     @if (mode() === 'session' || mode() === 'both') {
       @if (session.ready()) {
-        <span data-role="session-summary">
+        <!-- Recording: the chip names who and from what, and opens Change / Stop. -->
+        <span class="rec" data-role="session-summary" (keydown.escape)="closeMenu(true)">
           <button
             type="button"
-            class="rounded-full border border-line-strong px-2 py-1 text-xs text-content-primary"
+            class="rec-chip"
             data-role="change-session"
-            (click)="session.requestSetup()"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuOpen()"
+            (click)="menuOpen.set(!menuOpen())"
+            #trigger
           >
-            Recording as {{ session.recordedBy() }} · {{ sourceLabel() }}
+            <span class="rec-dot" aria-hidden="true"></span>
+            Recording · {{ session.recordedBy() }} · {{ sourceLabel() }}
           </button>
+          @if (menuOpen()) {
+            <span class="rec-menu" role="menu" data-role="recording-menu">
+              <button type="button" role="menuitem" data-role="recording-change" (click)="change()">Change who or source…</button>
+              <button type="button" role="menuitem" data-role="recording-stop" (click)="stop()">Stop recording</button>
+            </span>
+          }
         </span>
       } @else {
+        <!-- Not recording: a real button, not a faint "browsing" label. -->
         <span data-role="browsing">
-          <button
-            type="button"
-            class="rounded-full border border-line px-2 py-1 text-xs text-content-subtle"
-            data-role="start-session"
-            (click)="session.requestSetup()"
-          >
-            browsing<span class="sr-only"> — nothing is being recorded</span>
+          <button type="button" class="rec-start" data-role="start-session" (click)="session.requestSetup()">
+            Start recording<span class="sr-only"> — nothing is being recorded</span>
           </button>
         </span>
       }

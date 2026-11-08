@@ -318,7 +318,7 @@ describe('PayrollRunScreen', () => {
     const { el } = await render(PayrollRunScreen, api);
     const milk = el.querySelector('[data-role="milk"]')!;
     expect(milk.textContent).toContain('14 L due to date');
-    expect(milk.textContent).toContain('through 2026-09-07');
+    expect(milk.textContent).toContain('through 7 Sep 2026');
   });
 
   it('lists the in-kind package WITHOUT ever totalling it', async () => {
@@ -450,16 +450,60 @@ describe('PeopleList', () => {
   it('warns that the identifier cannot be changed, on the one form that sets it', async () => {
     const api = new FakeApi();
     api.peopleRows = [balance({})];
-    const { el } = await render(PeopleList, api);
+    const { fixture, el } = await render(PeopleList, api);
+    // People exist, so the form starts closed and opens from the header button.
+    expect(el.querySelector('[data-role="add-person"]')).toBeNull();
+    expect(el.querySelector('[data-role="people-table"]')).toBeTruthy();
+    el.querySelector<HTMLButtonElement>('[data-role="show-add-person"]')!.click();
+    fixture.detectChanges();
+    // While a form is open the list steps aside; Cancel brings it back.
+    expect(el.querySelector('[data-role="people-table"]')).toBeNull();
     const form = el.querySelector('[data-role="add-person"]')!;
     expect(form.textContent?.toLowerCase()).toContain('cannot be changed later');
     expect(form.textContent).toContain('Permanent and unique');
+    el.querySelector<HTMLButtonElement>('[data-role="cancel-add-person"]')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-role="people-table"]')).toBeTruthy();
+  });
+
+  it('opens the forms on demand: add-person first on an empty farm, then the stint for that person', async () => {
+    const api = new FakeApi();
+    const { fixture, el } = await render(PeopleList, api);
+    // Nobody on file: adding a person is the only useful action, so it is open.
+    expect(el.querySelector('[data-role="add-person"]')).toBeTruthy();
+    expect(el.querySelector('[data-role="add-engagement"]')).toBeNull();
+    // Cancel closes it and discards what was typed.
+    const input = el.querySelector<HTMLInputElement>('input[name="identifier"]')!;
+    input.value = 'nawaz';
+    input.dispatchEvent(new Event('input'));
+    el.querySelector<HTMLButtonElement>('[data-role="cancel-add-person"]')!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-role="add-person"]')).toBeNull();
+    el.querySelector<HTMLButtonElement>('[data-role="show-add-person"]')!.click();
+    fixture.detectChanges();
+    expect(el.querySelector<HTMLInputElement>('input[name="identifier"]')!.value).toBe('');
+    // A saved person leads straight into opening their stint.
+    const again = el.querySelector<HTMLInputElement>('input[name="identifier"]')!;
+    again.value = 'nawaz';
+    again.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    api.peopleRows = [balance({ person_id: 'per_new', identifier: 'nawaz' })];
+    (el.querySelector('[data-role="add-person"]') as HTMLFormElement).dispatchEvent(new Event('submit'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-role="add-person"]')).toBeNull();
+    expect(el.querySelector('[data-role="add-engagement"]')).toBeTruthy();
+    expect((fixture.componentInstance as any).engagePerson()).toBe('per_new');
   });
 
   it('trims the identifier and omits an empty display name', async () => {
     const api = new FakeApi();
     api.peopleRows = [balance({})];
     const { fixture, el } = await render(PeopleList, api);
+    el.querySelector<HTMLButtonElement>('[data-role="show-add-person"]')!.click();
+    fixture.detectChanges();
     const input = el.querySelector<HTMLInputElement>('input[name="identifier"]')!;
     input.value = '  nawaz  ';
     input.dispatchEvent(new Event('input'));
@@ -624,6 +668,12 @@ describe('PersonDetail', () => {
     const api = new FakeApi();
     api.statement = structuredClone(STATEMENT);
     const { fixture, el } = await render(PersonDetail, api, { id: 'per_imran' });
+    // The payment form opens on demand, and the statement steps aside while it is open.
+    expect(el.querySelector('[data-role="payment-form"]')).toBeNull();
+    expect(el.querySelector('[data-role="months"]')).toBeTruthy();
+    el.querySelector<HTMLButtonElement>('[data-role="show-payment"]')!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-role="months"]')).toBeNull();
     expect(el.querySelector('[data-role="adjustment-hint"]')).toBeNull();
 
     const chips = el.querySelectorAll<HTMLElement>('[data-role="payment-form"] [role="radio"]');
@@ -638,6 +688,8 @@ describe('PersonDetail', () => {
     const api = new FakeApi();
     api.statement = structuredClone(STATEMENT);
     const { fixture, el } = await render(PersonDetail, api, { id: 'per_imran' });
+    el.querySelector<HTMLButtonElement>('[data-role="show-payment"]')!.click();
+    fixture.detectChanges();
     const amount = el.querySelector<HTMLInputElement>('input[name="amount_minor"]')!;
     amount.value = '10000';
     amount.dispatchEvent(new Event('input'));
@@ -682,6 +734,8 @@ it('shows engagement kind refusal for the custom control', async () => {
   const api = new FakeApi();
   api.peopleRows = [{ person_id: 'A', identifier: 'A', name: 'A', engaged: false, balance_minor: 0, last_period_on: null, last_payment_on: null }];
   const { fixture, el } = await render(PeopleList, api);
+  // A refusal only ever answers a submit, so the stint form is open when it lands.
+  el.querySelector<HTMLButtonElement>('[data-role="show-open-stint"]')!.click();
   (fixture.componentInstance as any).engageState.error.set(new ApiError({ error: 'refused', field: 'kind', message: 'Refused engagement kind' }, true));
   await fixture.whenStable();
   expect(el.textContent).toContain('Refused engagement kind');

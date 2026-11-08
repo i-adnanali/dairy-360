@@ -1,4 +1,10 @@
 import type { DatePrecision } from './types';
+import { readableParts } from './precision-display';
+
+function wordsDate(on: string, precision: DatePrecision): string {
+  const p = readableParts(on.slice(0, 10), precision);
+  return p.figure + (p.qualifier ? ' ' + p.qualifier : '');
+}
 
 export interface HealthRecord {
   [key: string]: unknown;
@@ -243,7 +249,12 @@ export function healthLabel(r: HealthRecord): string {
       r.findings ??
       r.result ??
       r.entity,
-    r.occurred_on ?? r.due_on,
+    // In words, never ISO (UI_SYSTEM §6.1): "6 Nov 2026", or "due 7 Nov 2026".
+    r.occurred_on
+      ? wordsDate(r.occurred_on, r.date_precision ?? 'day')
+      : r.due_on
+        ? 'due ' + wordsDate(r.due_on, 'day')
+        : null,
   ]
     .filter(Boolean)
     .join(' · ');

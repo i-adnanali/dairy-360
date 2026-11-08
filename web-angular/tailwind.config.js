@@ -44,6 +44,28 @@ module.exports = {
           'ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas',
           'Liberation Mono', 'monospace',
         ],
+        // Session Board redesign: one workhorse sans, self-hosted (styles.css).
+        sans: [
+          'Archivo Variable', 'ui-sans-serif', 'system-ui', '-apple-system',
+          'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif',
+        ],
+      },
+
+      /*
+       * THE TYPE SCALE, RE-POINTED (audit F05). Templates used text-sm 195x and
+       * text-xs 127x against one text-base, so moving the scale here lifts the
+       * whole app off 14/12px without touching 300 call sites: body copy is now
+       * 15px, metadata 13px. Headings get real steps (ui/heading.ts).
+       */
+      fontSize: {
+        xs: ['0.8125rem', { lineHeight: '1.125rem' }],   // 13 / 18  metadata
+        sm: ['0.9375rem', { lineHeight: '1.375rem' }],   // 15 / 22  body
+        base: ['1rem', { lineHeight: '1.5rem' }],        // 16 / 24  emphasis body
+        lg: ['1.1875rem', { lineHeight: '1.625rem' }],   // 19 / 26  section
+        xl: ['1.375rem', { lineHeight: '1.75rem' }],     // 22 / 28
+        '2xl': ['1.625rem', { lineHeight: '2rem' }],     // 26 / 32  page
+        '3xl': ['2rem', { lineHeight: '2.375rem' }],     // 32 / 38  session figures
+        '4xl': ['2.5rem', { lineHeight: '2.75rem' }],    // 40 / 44
       },
 
       colors: {
@@ -92,6 +114,15 @@ module.exports = {
         },
         focus: token('focus-ring'),
         divider: token('divider'),
+        // The green band and its lit session. See styles.css.
+        shell: {
+          DEFAULT: token('shell-bg'),
+          deep: token('shell-bg-deep'),
+          fg: token('shell-fg'),
+          muted: token('shell-muted'),
+          line: token('shell-line'),
+        },
+        session: { lit: token('session-lit'), litFg: token('session-lit-fg') },
         // A pending indicator, not text and not a line: the chat's pulse dot.
         mark: { pending: token('mark-pending') },
 

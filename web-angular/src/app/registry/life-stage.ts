@@ -25,12 +25,13 @@
 // fact that both mean the same life stage.
 //
 // ---------------------------------------------------------------------------
-// THE MALE SIDE IS DELIBERATELY UNTOUCHED
+// THE MALE SIDE: katta AND sandda
 // ---------------------------------------------------------------------------
-// katta / jhota is unconfirmed, and on a dairy where bulls leave young it may
-// not matter enough to have a boundary at all. A guessed local term is worse
-// than the English one, because it reads as authoritative to the next person.
-// So `male` stays `male` until someone confirms it. Open item.
+// Confirmed by the owner (PRODUCT.md): `katta` is the young male, `sandda` the
+// grown bull. The stored enum has no male stage beyond `calf` and `male`, so a
+// male calf is katta and a stored `male` is sandda. Both words were needed
+// before either was shown: katta beside a bare English `male` would have read
+// as a complete mapping when it was not.
 
 import type { RegistryAnimalStatus } from './types';
 
@@ -54,7 +55,13 @@ export function lifeStage(
   // is the honest answer to "what is she now".
   if (status === 'departed') return { term: 'departed', qualifier: null, stored: status };
 
-  if (sex === 'male') return { term: status, qualifier: null, stored: status };
+  if (sex === 'male') {
+    if (status === 'calf') return { term: 'katta', qualifier: null, stored: status };
+    if (status === 'male') return { term: 'sandda', qualifier: null, stored: status };
+    // heifer / lactating / dry on a male is a data error: show the stored word
+    // rather than a farm word that would hide it.
+    return { term: status, qualifier: null, stored: status };
+  }
 
   switch (status) {
     case 'calf':

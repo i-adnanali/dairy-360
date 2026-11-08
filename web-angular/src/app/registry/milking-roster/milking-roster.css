@@ -1,1 +1,2 @@
-/* This component uses shared styles; no local rules are needed. */
+/* Shared with Dispatch, so the rules live in styles.css under MILK. */
+:host { display: block; }

@@ -1,5 +1,5 @@
 import { isDataset, isPendingWrites, isAgentKind } from './custom-events';
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { HttpAgent } from '@ag-ui/client';
 import { EventType } from '@ag-ui/core';
 import type { BaseEvent } from '@ag-ui/core';
@@ -19,6 +19,7 @@ import {
   AGENT_SELECTION_EVENT,
 } from '@dairy/shared';
 import type { TurnItem } from './turn-item.type';
+import { PendingApprovals } from './pending-approvals';
 
 /**
  * State model for the AG-UI streaming contract (POST /api/agent/run).
@@ -49,6 +50,12 @@ export class ChatStore {
   }
 
   private readonly agent = new HttpAgent({ url: '/api/agent/run' });
+
+  /** Publishes the waiting-approval count for the shell (see pending-approvals.ts). */
+  private readonly approvals = inject(PendingApprovals);
+  constructor() {
+    effect(() => this.approvals.count.set(this.pending()?.length ?? 0));
+  }
 
   // Per-run streaming state.
   private currentAssistantId: string | null = null;

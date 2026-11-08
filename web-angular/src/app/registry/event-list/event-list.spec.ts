@@ -117,7 +117,8 @@ describe('EventList — the correction window', () => {
 
     // An exact day keeps every digit and takes no qualifier: there is no
     // imprecision to name, and `(day)` was a word spent saying nothing.
-    expect(b.textContent).toContain('2024-03-14');
+    // Written as a day in words ("14 Mar 2024"), the same as the rest of Herd.
+    expect(b.textContent).toContain('14 Mar 2024');
     expect(b.textContent).not.toContain('day');
   });
 
@@ -126,6 +127,28 @@ describe('EventList — the correction window', () => {
     expect(el.querySelector('[data-role="provenance"]')!.textContent).toContain(
       'no witness recorded',
     );
+  });
+
+  it('puts the ids last on the card and writes a sheet date in words', () => {
+    const el = render([
+      ev({ id: 'a', type: 'note', occurred_on: '2026-02-14', date_precision: 'day', source_form: 'daily_herd_sheet', source_ref: '2026-02-14' }),
+      ev({ id: 'b', type: 'note', occurred_on: '2026-02-16', date_precision: 'day', source_form: 'daily_herd_sheet', source_ref: '2026-02-14' }),
+    ]);
+    const a = el.querySelector('[data-event="a"]')!;
+    expect(a.lastElementChild!.tagName).toBe('DETAILS');
+    expect(a.querySelector('summary')!.textContent).toContain('Record ids');
+    // The same day as the event says nothing new; a different one is in words.
+    expect(a.querySelector('[data-role="provenance"]')!.textContent).not.toContain('2026-02-14');
+    expect(el.querySelector('[data-event="b"] [data-role="provenance"]')!.textContent).toContain('sheet of 14 Feb 2026');
+  });
+
+  it('says a correction happened without opening the ids', () => {
+    const el = render([
+      ev({ id: 'old', type: 'calving', effective: false, superseded_by_id: 'new' }),
+      ev({ id: 'new', type: 'calving', supersedes_id: 'old' }),
+    ]);
+    expect(el.querySelector('[data-event="old"] [data-role="superseded-note"]')!.textContent).toContain('replaced by a later correction');
+    expect(el.querySelector('[data-event="new"] [data-role="correction-note"]')!.textContent).toContain('corrects an earlier entry');
   });
 
   it('names the witness when there is one', () => {

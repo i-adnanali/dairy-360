@@ -1028,7 +1028,7 @@ test('a figure differing from the agreement is reported, never refused', () => {
   s.wagePeriods[0].amount_minor = 2_200_000;
   assert.deepEqual(violations(s), []);
   const line = labourReport(s, '2026-09-07').find((l) => l.kind === 'amount_differs_from_term');
-  assert.match(line?.detail ?? '', /has a recorded wage of Rs 22,000.00 for 2026-09-01/);
+  assert.match(line?.detail ?? '', /has a recorded wage of Rs 22,000.00 for Sep 2026/);
   assert.match(line?.detail ?? '', /Expected whenever there was leave/);
 });
 
@@ -1086,4 +1086,11 @@ test('structured wage contexts preserve minor units, including zero, and do not 
   assert.ok(amountLine.detail.includes(amount === 0 ? 'Rs 0.00' : 'Rs 45,000.00'));
   assert.ok(!amountLine.detail.includes('was paid'));
  }
+});
+
+test('advisory periods read in words, not ISO ranges', async () => {
+  const { periodWords } = await import('./invariants');
+  assert.equal(periodWords('2026-10-01', '2026-10-31'), 'Oct 2026');
+  assert.equal(periodWords('2026-11-01', '2026-11-15'), '1–15 Nov 2026');
+  assert.equal(periodWords('2026-09-28', '2026-10-03'), '28 Sep 2026 to 3 Oct 2026');
 });

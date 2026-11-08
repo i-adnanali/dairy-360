@@ -18,11 +18,10 @@ import {
   NavigationEnd,
   Router,
   RouterLink,
-  RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
 import { CommandPalette } from "../command-palette/command-palette";
-import { SECTIONS, sectionFor, ShellActions } from "../navigation";
+import { SECTIONS, activeViewPath, sectionFor, ShellActions } from "../navigation";
 import { Button } from "../../ui/button";
 import { Shortcuts } from "../../core/shortcuts";
 import { WriteLog } from "../after-write";
@@ -33,6 +32,8 @@ import { SessionBar } from "../session-bar/session-bar";
 import { SessionGate } from "../session-gate/session-gate";
 import { ThemeToggle } from "../../ui/theme-toggle/theme-toggle";
 import { TextLink } from "../../ui/text";
+import { SessionBoard } from "../session-board/session-board";
+import { PendingApprovals } from "../../core/pending-approvals";
 
 @Component({
   selector: 'app-registry-shell',
@@ -40,7 +41,6 @@ import { TextLink } from "../../ui/text";
   imports: [
     AssistantPanel,
     RouterLink,
-    RouterLinkActive,
     RouterOutlet,
     SessionBar,
     SessionGate,
@@ -48,6 +48,7 @@ import { TextLink } from "../../ui/text";
     ThemeToggle,
     Button,
     CommandPalette,
+    SessionBoard,
   ],
   templateUrl: './registry-shell.html',
   styleUrl: './registry-shell.css',
@@ -62,6 +63,11 @@ export class RegistryShell {
   protected readonly session = inject(Session);
   protected readonly writeLog = inject(WriteLog);
   protected readonly assistant = inject(Assistant);
+  /**
+   * Proposed writes waiting on the owner. Shown on the Assistant button so a
+   * paused agent is visible from every screen, not only inside the transcript.
+   */
+  protected readonly pendingApprovals = inject(PendingApprovals).count;
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly route = inject(ActivatedRoute);
@@ -70,6 +76,7 @@ export class RegistryShell {
   protected readonly actions = inject(ShellActions);
   private readonly url = signal(this.router.url);
   protected readonly activeSection = computed(() => sectionFor(this.url()));
+  protected readonly activeView = computed(() => activeViewPath(this.activeSection(), this.url()));
 
   /**
    * True when the active route is nothing but a form.
@@ -79,6 +86,23 @@ export class RegistryShell {
    * routes.ts went stale three times before anyone removed it.
    */
   protected readonly writeOnlyRoute = signal(this.declaresWrites());
+
+  /** The side panel: asked for, and not already shown inline on a form-only page. */
+  protected readonly setupPanel = computed(
+    () => this.session.setupOpen() && (this.session.ready() || !this.writeOnlyRoute()),
+  );
+
+  /** "a new animal" -- what a form-only page is for, so its gate can say why it asks. */
+  protected writeOnlyPurpose(): string | null {
+    let r: ActivatedRoute | null = this.route;
+    while (r?.firstChild) r = r.firstChild;
+    return (r?.snapshot?.data?.['writesWhat'] as string | undefined) ?? null;
+  }
+
+  /** Cancel on a form-only page: there is nothing behind the gate, so go back to its section. */
+  protected leaveWriteOnly(): void {
+    void this.router.navigateByUrl(this.activeSection().path);
+  }
 
   constructor() {
     this.actions.inShell.set(true);

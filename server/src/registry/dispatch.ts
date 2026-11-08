@@ -836,16 +836,16 @@ export function reconcile(
   let withheld: string | null = null;
   if (notMeasured.length > 0 && missingMilkingRows > 0) {
     withheld =
-      `${notMeasured.length} milking(s) were taken but not weighed and ${missingMilkingRows} ` +
-      `animal-session(s) have no row at all, so production is a lower bound and a percentage ` +
+      `${plural(notMeasured.length, 'milking was', 'milkings were')} taken but not weighed and ${missingMilkingRows} ` +
+      `${missingMilkingRows === 1 ? 'animal-session has' : 'animal-sessions have'} no row at all, so production is a lower bound and a percentage ` +
       `of it would be false in a direction nobody would guess.`;
   } else if (notMeasured.length > 0) {
     withheld =
-      `${notMeasured.length} milking(s) were taken but not weighed, so production is a lower ` +
+      `${plural(notMeasured.length, 'milking was', 'milkings were')} taken but not weighed, so production is a lower ` +
       `bound and a percentage of it would understate the herd.`;
   } else if (missingMilkingRows > 0) {
     withheld =
-      `${missingMilkingRows} animal-session(s) in milk have no row at all, so production is a ` +
+      `${plural(missingMilkingRows, 'animal-session in milk has', 'animal-sessions in milk have')} no row at all, so production is a ` +
       `lower bound.`;
   } else if (producedMeasured === 0) {
     withheld = 'nothing measured in this range, so there is no denominator.';
@@ -910,4 +910,9 @@ export function reconcileRange(db: Db, from: string, to: string): Reconciliation
     .all() as DestinationPriceRow[];
 
   return reconcile(milkings, lactations, dispatches, destinations, prices, from, to);
+}
+
+/** "1 milking was", "5 milkings were": a count in words, never "milking(s)". */
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
 }

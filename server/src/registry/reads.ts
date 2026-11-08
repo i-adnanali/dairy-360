@@ -181,6 +181,13 @@ export interface IdentifierValues {
   acquired_from: string[];
   /** From `birth` payloads' `sire_ref`. */
   sire_ref: string[];
+  /**
+   * Who has typed records here, MOST-USED FIRST: the recording-session panel
+   * offers these as one-tap choices. The session itself is never remembered
+   * in the browser (session.ts); reading names back from the log stores
+   * nothing new and spells the next session's name the same way.
+   */
+  recorded_by: string[];
 }
 
 export function identifierValues(db: Db): IdentifierValues {
@@ -218,10 +225,23 @@ export function identifierValues(db: Db): IdentifierValues {
   const sorted = (s: Set<string>): string[] =>
     [...s].sort((a, b) => a.localeCompare(b));
 
+  const uses = new Map<string, number>();
+  for (const table of ['registry_animal_events', 'registry_milkings']) {
+    for (const r of db
+      .prepare(`SELECT recorded_by AS who, COUNT(*) AS n FROM ${table} GROUP BY recorded_by`)
+      .all() as { who: string; n: number }[]) {
+      if (r.who && r.who.trim().length > 0) uses.set(r.who, (uses.get(r.who) ?? 0) + r.n);
+    }
+  }
+  const recorders = [...uses.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([who]) => who);
+
   return {
     observed_by: sorted(observed),
     acquired_from: sorted(from),
     sire_ref: sorted(sire),
+    recorded_by: recorders,
   };
 }
 

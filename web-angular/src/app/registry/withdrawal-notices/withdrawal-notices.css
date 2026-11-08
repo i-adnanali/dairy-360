@@ -1,1 +1,14 @@
-/* This component uses shared styles; no local rules are needed. */
+/*
+ * Session Board redesign (audit F09): a milk withdrawal blocks sale, so it
+ * wears the danger role and says "Not for sale" in words; meat withdrawals do
+ * not change today's work and stay neutral. No coloured side stripe: the tone
+ * is the whole block plus the label.
+ */
+.withdrawal { border: 1px solid rgb(var(--border-subtle)); background: rgb(var(--surface-sunken)); }
+.withdrawal[data-medium='milk'] { border-color: rgb(var(--danger-line)); background: rgb(var(--danger-bg)); color: rgb(var(--danger-fg)); }
+.not-for-sale {
+  display: inline-block; margin-left: 0.5rem; padding: 0 0.375rem; border-radius: 4px;
+  font-size: 0.8125rem; font-weight: 700;
+  background: rgb(var(--danger-soft)); color: rgb(255 255 255);
+}
+:host-context(.dark) .not-for-sale { color: rgb(20 10 10); }

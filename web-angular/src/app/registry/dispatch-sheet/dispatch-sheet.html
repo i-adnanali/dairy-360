@@ -1,84 +1,113 @@
+<form
+  data-page-layout="review"
+  [appWriteLock]="state"
+  class="entry-sheet milk-sheet"
+  (submit)="onSubmit($event)"
+>
+  <header class="milk-head">
+    <div class="min-w-0">
+      <h2 appPageHeading data-role="title">{{ sessionWord() }} dispatch</h2>
+      <p appHelp class="mt-1">
+        Where this session's milk went, sold and kept. The dodhi and the house need an answer every
+        session; anyone else only if they came.
+      </p>
+    </div>
+    <div class="milk-head-side">
+      @if (sheet(); as s) {
+        @if (s.standing.length) {
+          <span class="milk-status" [attr.data-state]="statusTone()" data-role="status">{{ statusText() }}</span>
+        }
+      }
+      <!-- A new tab, so a half-filled sheet is never lost to a rate change. -->
+      <a class="milk-ext" routerLink="/milk/buyers" target="_blank" rel="noopener" data-role="buyers-link"
+        >Buyers and rates
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 3h4v4M13 3 7.5 8.5M11.5 9.5V13h-8.5V4.5H7" /></svg
+        ><span class="sr-only"> (opens in a new tab)</span></a
+      >
+    </div>
+  </header>
 
-    <form
-      data-page-layout="review"
-      [appWriteLock]="state"
-      class="entry-sheet space-y-4"
-      (submit)="onSubmit($event)"
-    >
-      <header>
-        <h2 appPageHeading>Where the milk went</h2>
-        <p appHelp class="mt-1">
-          One session, and everything that left the bulk in it — sold and kept. The dodhi and the
-          house are on every sheet; a neighbour appears only when they took something.
-        </p>
-        <p appHelp><a appButton variant="link" routerLink="/milk/buyers" target="_blank" rel="noopener">Manage buyers and rates (new tab)</a>. This sheet stays open with its draft; reload only after saving it.</p>
-      </header>
-
-      <!-- when -->
-      <div appCard>
-        <div class="entry-context flex flex-wrap items-end gap-4">
-          <label class="block">
-            <span appFieldLabel>Date</span>
-            <input
-              type="date"
-              data-role="on"
-              [value]="on()"
-              (change)="setOn($any($event.target).value)"
-              appInput
-            />
-          </label>
-          <div>
-            <div appFieldLabel inline>Session</div>
-            <app-chip-group
-              name="session"
-              label="Session"
-              [options]="sessionChips"
-              [value]="session()"
-              (changed)="setSession($any($event))"
-            />
-          </div>
-          <div class="md:ml-auto">
-            <app-identifier-input
-              help="Person who handed over the milk, if known. Use a stable identifier, not a display name."
-              field="observed_by"
-              label="Handed over by"
-              [value]="handedBy()"
-              [suggestions]="identifiers.values().observed_by"
-              (changed)="handedBy.set($event)"
-            />
-          </div>
-        </div>
-        <p class="mt-2 text-xs text-content-muted" data-role="today-note">
-          Defaults to today and this session — the one place a date is defaulted, because today is a
-          fact rather than a guess. Change it to enter a session you missed.
-        </p>
-      </div>
+  <div class="milk-bar">
+    <app-milk-session-nav
+      [on]="on()"
+      [session]="session()"
+      [disabled]="state.submitting()"
+      (changed)="setSlot($event)"
+    />
+    <div class="milk-by">
+      <app-identifier-input
+        help="Who handed the milk over, if you know."
+        field="observed_by"
+        label="Handed over by"
+        [value]="handedBy()"
+        [suggestions]="identifiers.values().observed_by"
+        (changed)="handedBy.set($event)"
+      />
+    </div>
+  </div>
 
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
       } @else if (sheet(); as s) {
         @if (s.standing.length === 0 && s.occasional.length === 0) {
           <p appCard empty data-role="nobody">
-            Nobody was taking milk on {{ s.occurred_on }}.
+            Nobody was taking milk on {{ dayText(s.occurred_on) }}.
             <a routerLink="/milk/buyers" appTextLink tone="strong">Add a buyer</a>
             — and add the house too, so milk kept at home is on the record rather than in the gap.
           </p>
         } @else {
-          <!-- MUST be answered -->
-          <div
-            appScrollRegion="Standing dispatch quantities"
-            class="rounded-xl border border-line bg-surface-raised"
-          >
-            <div
-              class="border-b border-line-subtle bg-surface-page px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-secondary"
-              data-role="standing-head"
+          <!-- MILK IN, BEFORE MILK OUT. The production figure used to sit at
+               the bottom beside "Out", far from where anyone reads first, and
+               nothing linked back to the milking it came from. -->
+          <section class="milk-balance" data-role="balance-strip" aria-label="Milk this session">
+            <span data-role="produced">
+              <span class="text-content-muted">Milked </span>
+              <span class="font-mono font-semibold text-content-heading">{{ s.produced.measured_litres }}</span><span class="font-semibold text-content-heading"> L</span>
+              <span class="text-content-muted">
+                from {{ s.produced.measured }} measured{{ s.produced.not_measured > 0 ? ' · ' + s.produced.not_measured + ' milked but not weighed' : '' }}</span
+              >
+            </span>
+            <span data-role="out-top">
+              <span class="text-content-muted">Out so far </span>
+              <span class="font-mono font-semibold text-content-heading">{{ totalLitres() }}</span><span class="font-semibold text-content-heading"> L</span>
+            </span>
+            <a
+              appTextLink
+              routerLink="/milk/milking"
+              [queryParams]="{ on: s.occurred_on, session: s.session }"
+              data-role="to-milking"
+              >{{ sessionWord() }} milking</a
             >
-              Every session — leave none of these unanswered
+          </section>
+
+          <!-- Not an alert. See the comment on producedNote(). -->
+          @if (producedNote(); as note) {
+            <p class="milk-note" data-role="produced-note">{{ note }}</p>
+          }
+
+          <!-- MILK THAT MAY NOT BE SOLD, named on the sheet where it is sold.
+               Read from the same session's roster; if that read fails the
+               sheet still works and simply says nothing here. -->
+          @if (notForSale().length) {
+            <section class="milk-hold" data-role="not-for-sale" aria-labelledby="hold-title">
+              <p id="hold-title" class="font-semibold">Not for sale this session</p>
+              <ul>
+                @for (h of notForSale(); track h.animal) {
+                  <li>{{ h.animal }}{{ h.name ? ' ' + h.name : '' }} · {{ h.until }}</li>
+                }
+              </ul>
+              <p class="text-sm">Keep her milk out of what goes to buyers. Home use is a separate decision.</p>
+            </section>
+          }
+
+          <!-- MUST be answered -->
+          <div appScrollRegion="Standing dispatch quantities" class="milk-table">
+            <div class="milk-group-head" data-role="standing-head">
+              <h3>Every session</h3>
+              <span>leave none of these unanswered</span>
             </div>
             <table class="entry-table w-full text-left text-sm">
-              <thead
-                class="border-b border-line-subtle text-xs uppercase tracking-wide text-content-muted"
-              >
+              <thead>
                 <tr>
                   <th scope="col" appCell>Goes to</th>
                   <th scope="col" appCell numeric nowrap>
@@ -207,7 +236,7 @@
                           <span
                             class="text-xs italic text-content-subtle"
                             [attr.data-role]="'saved-' + row.destination_id"
-                            >already saved</span
+                            >saved before</span
                           >
                         }
                       </div>
@@ -245,24 +274,11 @@
 
           <!-- OFFERED, never required -->
           @if (s.occasional.length > 0) {
-            <div
-              appScrollRegion="Occasional dispatch quantities"
-              class="rounded-xl border border-dashed border-line bg-surface-raised"
-            >
-              <div
-                class="border-b border-line-subtle px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-content-muted"
-                data-role="occasional-head"
-              >
-                Only if they came — nothing to answer here
+            <div appScrollRegion="Occasional dispatch quantities" class="milk-table milk-table-optional">
+              <div class="milk-group-head" data-role="occasional-head">
+                <h3>Only if they came</h3>
+                <span>nothing to answer here</span>
               </div>
-              <app-pagination
-                label="Occasional destinations"
-                [page]="occasionalPage()"
-                [pageSize]="tableSize()"
-                [total]="s.occasional.length"
-                (pageChange)="occasionalPage.set($event)"
-                (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"
-              />
               <table class="entry-table w-full text-left text-sm">
                 <tbody>
                   @for (
@@ -342,42 +358,17 @@
                   }
                 </tbody>
               </table>
+              <app-pagination
+                label="Occasional destinations"
+                [page]="occasionalPage()"
+                [pageSize]="tableSize()"
+                [total]="s.occasional.length"
+                (pageChange)="occasionalPage.set($event)"
+                (sizeChange)="tableSize.set($event); tablePage.set(1); occasionalPage.set(1)"
+              />
             </div>
           }
 
-          <!-- THE FOOTER, and the reason it carries production -->
-          <div
-            appSummaryBar
-            class="flex flex-wrap items-center justify-between gap-4 bg-surface-raised"
-          >
-            <span data-role="out">
-              <span class="text-content-muted">Out </span>
-              <span class="font-medium text-content-primary">{{ totalLitres() }} L</span>
-              <span class="text-content-muted"> · billed </span>
-              <span class="font-medium text-content-primary">{{ totalAmount() }}</span>
-            </span>
-            <span data-role="produced">
-              <span class="text-content-muted">Measured this session </span>
-              <span class="font-medium text-content-primary"
-                >{{ s.produced.measured_litres }} L</span
-              >
-              @if (s.produced.not_measured > 0) {
-                <span class="text-content-muted">
-                  · {{ s.produced.not_measured }} milked but not weighed</span
-                >
-              }
-            </span>
-          </div>
-
-          <!-- Not an alert. See the comment on producedNote(). -->
-          @if (producedNote(); as note) {
-            <p
-              class="rounded-xl bg-surface-page px-4 py-2 text-xs text-content-secondary"
-              data-role="produced-note"
-            >
-              {{ note }}
-            </p>
-          }
         }
       } @else {
         <p appHelp data-role="loading">Loading…</p>
@@ -387,38 +378,49 @@
         <p appErrorPanel data-role="error-form">{{ e }}</p>
       }
 
-      <div class="entry-summary-details space-y-2">
-        @if (untouchedStanding().length) {
-          <button appButton variant="secondary" type="button" (click)="showUnanswered()">
-            Go to first unanswered destination
-          </button>
-        }
-        @if (blockedReason(); as b) {
-          <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
-        }
+      <!-- ONE FOOTER: progress, what is going out, and the save. -->
+      <div appSummaryBar class="entry-save-bar milk-foot">
+        <div class="milk-foot-facts">
+          <span data-role="resolved">
+            <span class="font-medium text-content-primary"
+              >{{ answered() }} of {{ sheet()?.standing?.length || 0 }}</span
+            >
+            <span class="text-content-muted">
+              answered<span class="sr-only"> required destinations</span></span
+            >
+          </span>
+          <span data-role="out">
+            <span class="text-content-muted">Out </span>
+            <span class="font-mono font-medium text-content-primary">{{ totalLitres() }}</span><span class="text-content-primary"> L</span>
+            <span class="text-content-muted"> · billed </span>
+            <span class="font-mono font-medium text-content-primary">{{ totalAmount() }}</span>
+          </span>
+          @if (blockedReason(); as b) {
+            <span class="milk-blocked">
+              <span appHelp data-role="blocked" id="dispatch-submit-reason">{{ b }}</span>
+              @if (untouchedStanding().length) {
+                <button type="button" class="milk-jump" data-role="first-unanswered" (click)="showUnanswered()">
+                  Go to the first
+                </button>
+              }
+            </span>
+          }
+        </div>
+        <div class="milk-foot-actions">
+          @if (session_.ready()) {
+            <button
+              type="submit"
+              data-role="submit"
+              [appButtonDisabled]="!canSubmit()"
+              appButton
+              reason="dispatch-submit-reason"
+              [busy]="state.submitting()"
+            >
+              Save session
+            </button>
+          } @else {
+            <app-session-required what="this session" />
+          }
+        </div>
       </div>
-      <div appSummaryBar class="entry-save-bar">
-        <span data-role="resolved">
-          <span class="font-medium text-content-primary"
-            >{{ answered() }} of {{ sheet()?.standing?.length || 0 }}</span
-          >
-          <span class="text-content-muted">
-            answered<span class="sr-only"> required destinations</span></span
-          >
-        </span>
-        @if (session_.ready()) {
-          <button
-            type="submit"
-            data-role="submit"
-            [appButtonDisabled]="!canSubmit()"
-            appButton
-            reason="dispatch-submit-reason"
-            [busy]="state.submitting()"
-          >
-            Save session
-          </button>
-        } @else {
-          <app-session-required what="this session" />
-        }
-      </div>
-    </form>
+</form>

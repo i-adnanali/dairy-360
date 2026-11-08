@@ -16,6 +16,7 @@ const api = {
   herd: () => Promise.resolve([{ id: 'BD-0001', name: 'Noori' }]),
   people: () => Promise.resolve([{ person_id: 'p1', identifier: 'imran', name: 'Imran' }]),
   destinations: () => Promise.resolve([{ id: 'd1', name: 'Home' }]),
+  feedGet: (path: string) => Promise.resolve(path === 'crops' ? [{ id: 'c1', label: 'Seasonal maize' }] : []),
 };
 function setup(overrides: Record<string, any> = {}) {
   const list = async () => {
@@ -67,8 +68,20 @@ describe('Phase 7 command palette', () => {
     const f = TestBed.createComponent(CommandPalette);
     await f.componentInstance.show();
     expect(f.componentInstance.error()).toContain('People');
-    expect(f.componentInstance.records().length).toBe(2);
+    // Animal, crop and buyer still load when People fails.
+    expect(f.componentInstance.records().length).toBe(3);
     expect(f.componentInstance.results().some((c) => c.url === '/check')).toBe(true);
+  });
+  it('finds crops and the daily jobs by the words people type', async () => {
+    setup();
+    const f = TestBed.createComponent(CommandPalette);
+    await f.componentInstance.show();
+    const find = (q: string) => { f.componentInstance.query.set(q); return f.componentInstance.results().map((c) => c.label + ' -> ' + c.url); };
+    expect(find('maize')).toEqual(['Seasonal maize -> /feed/crops/c1']);
+    expect(find('record dose')).toContain('Record dose -> /animals/health?new=administrations');
+    expect(find('vet visit')).toContain('Start vet visit -> /animals/health?new=visits');
+    expect(find('home')[0]).toBe('Home -> /milk/buyers/d1');
+    expect(f.componentInstance.results()[0]).toMatchObject({ detail: 'Buyer' });
   });
   it('ignores a stale load after close and a second open', async () => {
     let finish!: (rows: any[]) => void;
@@ -125,10 +138,11 @@ async function shell() {
   return h;
 }
 describe('Phase 7 shell', () => {
-  it('shows seven sections and leaves contextual write actions to pages', async () => {
+  it('shows eight sections and leaves contextual write actions to pages', async () => {
     const h = await shell();
     const el = h.fixture.nativeElement as HTMLElement;
-    expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(7);
+    // Eight since the Session Board redesign added Monitor (audit gap G1).
+    expect(el.querySelectorAll('[data-role="nav"] a').length).toBe(8);
     expect(el.querySelector('[data-role="section-start-session"]')).toBeNull();
     expect(el.querySelector('[data-role="start-session"]')).toBeTruthy();
     expect(el.querySelector('[data-role="section-bar"] a[href="/animals/new"]')).toBeNull();
@@ -198,7 +212,9 @@ describe('Calvings browse', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     await f.whenStable();
     f.detectChanges();
-    expect(f.nativeElement.textContent).toContain('2020-03');
+    // Month precision reads as a month in words, never as a day.
+    expect(f.nativeElement.textContent).toContain('Mar 2020');
+    expect(f.nativeElement.textContent).not.toContain('1 Mar 2020');
     expect(f.nativeElement.textContent).not.toContain('2020-03-01');
     expect(f.nativeElement.textContent).toContain('superseded');
   });

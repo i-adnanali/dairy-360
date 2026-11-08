@@ -54,6 +54,7 @@ import {
   effect,
   inject,
   signal,
+  viewChild,
   viewChildren,
   untracked,
 } from '@angular/core';
@@ -64,7 +65,9 @@ import { FormState } from "../form-state";
 import { Session } from "../session";
 import { SessionRequired } from "../session-required/session-required";
 import { WriteLog, focusAfterWrite } from "../after-write";
-import { ChipGroup } from "../chip-group/chip-group";
+import { MilkSessionNav, sessionName, type SessionSlot } from "../milk-session-nav/milk-session-nav";
+import { feedDay } from "../feed-format";
+import type { WithdrawalNotice } from "../withdrawal-notices/withdrawal-notices";
 import { Cell } from "../../ui/cell";
 import { Certainty } from "../../ui/certainty";
 import { NO_RECORD, approximateQuantity } from "../precision-display";
@@ -76,7 +79,6 @@ import { urlParams } from "../url-state";
 import type { MilkingRoster, MilkingSession, MilkingStatus, RosterRow } from "../types";
 import { Card } from "../../ui/surface";
 import { ErrorPanel } from "../../ui/surface";
-import { FieldLabel } from "../../ui/text";
 import { HelpText } from "../../ui/text";
 import { TextInput } from "../../ui/input";
 import { PageHeading } from "../../ui/heading";
@@ -117,9 +119,8 @@ export const OUT_OF_BAND = 0.5;
     Card,
     Cell,
     Certainty,
-    ChipGroup,
+    MilkSessionNav,
     ErrorPanel,
-    FieldLabel,
     HelpText,
     IdentifierInput,
     PageHeading,
@@ -143,7 +144,6 @@ export class MilkingRosterScreen {
   }
   private readonly api = inject(RegistryApi);
   protected readonly session_ = inject(Session);
-  protected readonly savedContext = signal<{on: string; session: string} | null>(null);
   private readonly writeLog = inject(WriteLog);
   protected readonly identifiers = inject(Identifiers);
 
@@ -156,10 +156,6 @@ export class MilkingRosterScreen {
     'animal_id',
     'yield_litres',
   ] as const;
-  protected readonly sessionChips = [
-    { value: 'morning', label: 'Morning' },
-    { value: 'evening', label: 'Evening' },
-  ];
   protected readonly state = new FormState<{
     written: number;
     measured: number;
@@ -265,6 +261,7 @@ export class MilkingRosterScreen {
     const generation = ++this.loadGeneration;
     const observer = this.milkedBy();
     this.roster.set(null);
+    this.correcting.set(false);
     this.tablePage.set(1);
     this.pageError.set('');
     try {
@@ -292,18 +289,79 @@ export class MilkingRosterScreen {
     }
   }
 
-  protected setOn(v: string): void {
-    if (v.length > 0)
-      void this.url.set({ on: v }).then(() => {
-        const control = this.element.nativeElement.querySelector(
-          '[data-role=on]',
-        ) as HTMLInputElement | null;
-        if (control) control.value = this.on();
-      });
+  /** Move to another session. Both halves go in the URL together. */
+  protected setSlot(slot: SessionSlot): void {
+    void this.url.set({ on: slot.on, session: slot.session });
   }
 
-  protected setSession(s: MilkingSession): void {
-    this.url.set({ session: s });
+  protected readonly sessionWord = computed(() =>
+    this.session() === 'morning' ? 'Morning' : 'Evening',
+  );
+  protected dayText(on: string): string {
+    return feedDay(on);
+  }
+
+  /**
+   * Correcting a fully saved session. Off on every load, so opening a saved
+   * session shows what was saved rather than a form waiting to be re-saved.
+   */
+  protected readonly correcting = signal(false);
+  private readonly toDispatch = viewChild<ElementRef<HTMLElement>>('toDispatch');
+  protected readonly fullySaved = computed(() => {
+    const rows = this.roster()?.rows ?? [];
+    return rows.length > 0 && rows.every((r) => r.existing !== null);
+  });
+  protected readonly readOnly = computed(() => this.fullySaved() && !this.correcting());
+
+  protected startCorrecting(): void {
+    this.correcting.set(true);
+    this.focusRow(0);
+  }
+  protected cancelCorrecting(): void {
+    this.drafts.set(structuredClone(this.baselineDrafts));
+    this.milkedBy.set(this.baselineObserver);
+    this.state.reset();
+    this.correcting.set(false);
+  }
+
+  /** "6 animals · 31 L measured · 1 not milked", from what was saved. */
+  protected readonly savedLine = computed(() => {
+    const rows = this.roster()?.rows ?? [];
+    let litres = 0, measured = 0, unmeasured = 0, notMilked = 0;
+    for (const r of rows) {
+      const e = r.existing;
+      if (!e) continue;
+      if (e.status === 'measured') { measured++; litres += e.yield_litres ?? 0; }
+      else if (e.status === 'not_milked') notMilked++;
+      else unmeasured++;
+    }
+    const parts = [`${rows.length} ${rows.length === 1 ? 'animal' : 'animals'}`];
+    parts.push(`${Math.round(litres * 10) / 10} L from ${measured} measured`);
+    if (unmeasured) parts.push(`${unmeasured} not measured`);
+    if (notMilked) parts.push(`${notMilked} not milked`);
+    return parts.join(' · ');
+  });
+
+  protected readonly statusText = computed(() => {
+    if (this.readOnly()) return 'Saved';
+    if (this.correcting()) return 'Correcting';
+    const n = this.roster()?.saved ?? 0;
+    return n > 0 ? 'Partly saved' : 'Not saved yet';
+  });
+  protected readonly statusTone = computed(() =>
+    this.readOnly() ? 'saved' : this.correcting() ? 'correcting' : 'open',
+  );
+
+  /** A milk withdrawal stops sale, so it gets the full notice on the row. */
+  protected milkWithdrawals(row: RosterRow): WithdrawalNotice[] {
+    return (row.health_withdrawals ?? []).filter((w) => w.target === 'milk');
+  }
+  /** Meat and the rest do not change milking: named once, as a tag. */
+  protected otherWithdrawals(row: RosterRow): string[] {
+    const media = (row.health_withdrawals ?? [])
+      .map((w) => w.target)
+      .filter((t) => t !== 'milk');
+    return [...new Set(media)].map((t) => t.charAt(0).toUpperCase() + t.slice(1));
   }
 
   protected draft(id: string): Draft {
@@ -558,18 +616,27 @@ export class MilkingRosterScreen {
         0,
       );
     if (saved) {
-      this.savedContext.set({on: r.occurred_on, session: r.session});
       this.acceptBaseline();
       void this.identifiers.refresh();
       this.writeLog.announce(
-        `Saved ${r.session} of ${r.occurred_on} — ${saved.written} animal(s), ` +
+        `Saved ${sessionName({ on: r.occurred_on, session: r.session })} — ` +
+          `${saved.written} ${saved.written === 1 ? 'animal' : 'animals'}, ` +
           `${saved.measured} measured${saved.updated > 0 ? `, ${saved.updated} corrected` : ''}.`,
       );
       // Reload rather than clear: the session is now saved, and showing it back
       // is what lets a wrong figure be spotted and re-entered. A cleared roster
       // would look exactly like one that was never filled in.
       await this.load(r.occurred_on, r.session);
-      focusAfterWrite(this.cells()[0]?.nativeElement);
+      // The next step is Dispatch for the same session. The page used to stay
+      // scrolled to the bottom with focus on Save, and the link to it appeared
+      // at the top, out of sight.
+      setTimeout(() => {
+        const next = this.toDispatch()?.nativeElement;
+        if (next) {
+          next.scrollIntoView({ block: 'center' });
+          focusAfterWrite(next);
+        } else focusAfterWrite(this.cells()[0]?.nativeElement);
+      }, 0);
     }
   }
 }

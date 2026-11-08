@@ -1,0 +1,51 @@
+.toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; }
+
+/* Segmented filters: one choice per group, standard radio semantics. */
+.seg { display: inline-flex; border: 1px solid rgb(var(--border-control)); border-radius: 6px; overflow: hidden; }
+.seg button {
+  padding: 0.4375rem 0.875rem; font: inherit; font-size: 0.9375rem; font-weight: 500;
+  background: rgb(var(--surface-raised)); color: rgb(var(--text-secondary)); border: 0;
+  border-left: 1px solid rgb(var(--border-default)); cursor: pointer;
+}
+.seg button:first-child { border-left: 0; }
+.seg button:hover { color: rgb(var(--text-primary)); background: rgb(var(--surface-sunken)); }
+.seg button[aria-pressed='true'] { background: rgb(var(--fill-brand)); color: rgb(var(--text-on-fill)); font-weight: 600; }
+.seg button:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; }
+
+.summary { margin: 1.25rem 0 0.75rem; font-size: 0.9375rem; color: rgb(var(--text-secondary)); }
+.summary b { color: rgb(var(--text-primary)); }
+.synthetic { color: rgb(var(--warning-strong)); font-weight: 600; }
+.empty { padding: 1.5rem 0; color: rgb(var(--text-muted)); }
+.retry { margin-top: 0.5rem; font: inherit; font-weight: 600; color: rgb(var(--fill-brand)); text-decoration: underline; background: none; border: 0; cursor: pointer; }
+
+.events { width: 100%; border-collapse: collapse; background: rgb(var(--surface-raised)); border: 1px solid rgb(var(--border-subtle)); }
+.events th {
+  text-align: left; font-size: 0.8125rem; font-weight: 600; color: rgb(var(--text-muted));
+  padding: 0.625rem 0.875rem; border-bottom: 1px solid rgb(var(--border-default));
+}
+.events td { padding: 0.75rem 0.875rem; border-bottom: 1px solid rgb(var(--border-subtle)); font-size: 0.9375rem; vertical-align: top; }
+.events .num { text-align: right; }
+.events .time { white-space: nowrap; font-weight: 600; }
+.events tr[data-sev='urgent'] td { background: rgb(var(--danger-bg)); }
+
+.sev { display: inline-block; font-size: 0.8125rem; font-weight: 700; padding: 0.0625rem 0.5rem; border-radius: 4px; }
+.sev[data-sev='urgent'] { background: rgb(var(--danger-soft)); color: rgb(255 255 255); }
+.sev[data-sev='notable'] { background: rgb(var(--warning-bg)); color: rgb(var(--warning-strong)); box-shadow: inset 0 0 0 1px rgb(var(--warning-line)); }
+.reason { display: block; margin-top: 0.25rem; font-size: 0.8125rem; color: rgb(var(--text-secondary)); }
+.routine { font-size: 0.8125rem; color: rgb(var(--text-muted)); }
+:host-context(.dark) .sev[data-sev='urgent'] { color: rgb(20 10 10); }
+
+/* The event Today linked to: outlined, not given a coloured side stripe. */
+.events tr[data-current] { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; }
+
+/* Phone: each event is a card; the table ran off a 390px screen. */
+@media (max-width: 639px) {
+  .events, .events tbody { display: block; border: 0; background: none; }
+  .events thead { display: none; }
+  .events tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.125rem 0.75rem; margin-bottom: 0.5rem; padding: 0.625rem 0.75rem; border: 1px solid rgb(var(--border-subtle)); border-radius: 0.5rem; background: rgb(var(--surface-raised)); }
+  .events tr[data-sev='urgent'] { background: rgb(var(--danger-bg)); }
+  .events td { display: block; padding: 0; border: 0; background: none !important; box-shadow: none !important; }
+  .events td:last-child { grid-column: 1 / -1; margin-top: 0.25rem; }
+  .events .num { grid-column: 2; grid-row: 1; font-size: 0.8125rem; color: rgb(var(--text-muted)); }
+  .events tr[data-current] { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 1px; }
+}

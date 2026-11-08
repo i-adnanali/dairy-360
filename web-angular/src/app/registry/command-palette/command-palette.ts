@@ -62,6 +62,16 @@ export class CommandPalette {
       url: '/check',
       action: 'recheck',
     },
+    // The jobs done every day, by the words people type for them. Only Record
+    // calving and the Feed actions were here; "record dose" found nothing.
+    ...[
+      { id: 'act-milking', label: 'Record milking', detail: 'Milk', url: '/milk/milking' },
+      { id: 'act-dispatch', label: 'Record dispatch', detail: 'Milk', url: '/milk/dispatch' },
+      { id: 'act-dose', label: 'Record dose', detail: 'Health', url: '/animals/health?new=administrations' },
+      { id: 'act-visit', label: 'Start vet visit', detail: 'Health', url: '/animals/health?new=visits' },
+      { id: 'act-round', label: 'Vaccination round', detail: 'Health', url: '/animals/health?new=round' },
+      { id: 'act-payroll', label: 'Enter payroll', detail: 'Labour', url: '/labour/payroll' },
+    ].map((c) => ({ ...c, writes: true })),
     ...new Map(
       SECTIONS.flatMap((s) => [
         { id: s.path, label: s.label, detail: 'Section', url: s.path },
@@ -122,13 +132,23 @@ export class CommandPalette {
             url: '/labour/people/' + encodeURIComponent(r.person_id),
           })),
         ),
+      Promise.resolve()
+        .then(() => this.api.feedGet<{ id: string; label?: string; lifecycle?: string }[]>('crops'))
+        .then((rows) =>
+          rows.map((r) => ({
+            id: 'crop-' + r.id,
+            label: r.label || 'Crop',
+            detail: 'Crop',
+            url: '/feed/crops/' + encodeURIComponent(r.id),
+          })),
+        ),
       this.api
         .destinations()
         .then((rows) =>
           rows.map((r) => ({
             id: 'destination-' + r.id,
             label: r.name,
-            detail: 'Destination',
+            detail: 'Buyer',
             url: '/milk/buyers/' + encodeURIComponent(r.id),
           })),
         ),
@@ -136,7 +156,7 @@ export class CommandPalette {
     if (generation !== this.generation) return;
     this.records.set(results.flatMap((r) => (r.status === 'fulfilled' ? r.value : [])));
     const failed = results.flatMap((r, i) =>
-      r.status === 'rejected' ? [['Animals', 'People', 'Destinations'][i]] : [],
+      r.status === 'rejected' ? [['Animals', 'People', 'Crops', 'Destinations'][i]] : [],
     );
     if (failed.length) this.error.set('Could not load: ' + failed.join(', ') + "..");
     this.loading.set(false);

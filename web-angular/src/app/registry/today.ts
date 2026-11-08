@@ -42,6 +42,22 @@ const FARM_HOUR_FORMAT = new Intl.DateTimeFormat('en-GB', {
   hour12: false,
 });
 
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * "8 Nov, 18:00" from an ISO instant, read in farm time. Pakistan has a fixed
+ * UTC+5 offset (see FARM_TZ), so this needs no Intl and no host ICU data.
+ * Replaces raw "2026-11-08T18:00:00+05:00" strings on screen (audit F07).
+ */
+export function farmMoment(iso: string): string {
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return iso;
+  const local = new Date(t + 5 * 3600_000);
+  const hh = String(local.getUTCHours()).padStart(2, '0');
+  const mm = String(local.getUTCMinutes()).padStart(2, '0');
+  return `${local.getUTCDate()} ${SHORT_MONTHS[local.getUTCMonth()]}, ${hh}:${mm}`;
+}
+
 /** The farm-local hour, 0-23. Used only to guess which session is being entered. */
 export function farmHour(now: Date = new Date()): number {
   return Number(FARM_HOUR_FORMAT.format(now));

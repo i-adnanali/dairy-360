@@ -14,6 +14,26 @@ import type {
 
 const BASE = '/api/registry';
 
+export interface FarmEventRow {
+  id: string;
+  camera_id: string;
+  zone: string | null;
+  event_type: 'detection' | 'face_match' | 'unknown_cluster';
+  identity: string | null;
+  confidence: number | null;
+  occurred_at: string;
+  is_synthetic: boolean;
+  flagged: boolean;
+  flag_severity: 'notable' | 'urgent' | null;
+  flag_reason: string | null;
+}
+export interface FarmEventsWindow {
+  from: string;
+  to: string;
+  synthetic: boolean;
+  events: FarmEventRow[];
+}
+
 /**
  * A server refusal, carrying the wire shape through to whatever caught it.
  *
@@ -115,6 +135,18 @@ export class RegistryApi {
   }
 
   // --- reads ---------------------------------------------------------------
+
+  /**
+   * Classified camera events for the Farm Monitor screen. Not registry data:
+   * served from /api/farm, read-only (flags are written through the assistant's
+   * approval card). The harness serves synthetic events and says so.
+   */
+  farmEvents(from: string, to: string): Promise<FarmEventsWindow> {
+    return unwrap(
+      firstValueFrom(this.http.get<FarmEventsWindow>('/api/farm/events', { params: { from, to } })),
+    );
+  }
+
 
   herd(): Promise<HerdRow[]> {
     return unwrap(

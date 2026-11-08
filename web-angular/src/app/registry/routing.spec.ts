@@ -175,6 +175,11 @@ class BoardApi {
 describe('TodayBoard', () => {
   afterEach(() => TestBed.resetTestingModule());
 
+  // Session Board redesign: the per-session lines moved up into the shell's
+  // session board (session-board.spec.ts pins their states and links). This
+  // screen keeps the rules that are about the WHOLE day: payroll prompting,
+  // the all-clear, and an empty farm reading as done.
+
   async function render(api: BoardApi) {
     TestBed.configureTestingModule({
       providers: [
@@ -190,33 +195,17 @@ describe('TodayBoard', () => {
     return fixture.nativeElement as HTMLElement;
   }
 
-  it('flags only the sessions that are actually outstanding', async () => {
-    const el = await render(new BoardApi());
-    const milking = el.querySelectorAll('[data-role="milking"] [data-session]');
-    expect(milking[0].getAttribute('data-complete')).toBe('false');
-    expect(milking[1].getAttribute('data-complete')).toBe('true');
-    expect(milking[0].textContent).toContain('0 of 3 recorded');
-  });
-
-  it('links each line to the exact session that clears it', async () => {
-    const el = await render(new BoardApi());
-    const evening = el.querySelector('[data-role="dispatch"] [data-session="evening"]')!;
-    const href = evening.getAttribute('href')!;
-    expect(href).toContain('/milk/dispatch');
-    expect(href).toContain('on=2026-09-07');
-    expect(href).toContain('session=evening');
-  });
-
   it('prompts about LAST month and states this one without flagging it', async () => {
-    // The current month is outstanding for the whole of it, so an amber line
+    // The current month is outstanding for the whole of it, so a warning line
     // every day from the 1st to the 30th is one nobody reads by the 3rd.
     const el = await render(new BoardApi());
-    expect(el.querySelector('[data-role="payroll-previous"]')!.textContent).toContain(
-      '2 of 2 unanswered',
-    );
+    const prev = el.querySelector('[data-role="payroll-previous"]')!;
+    expect(prev.textContent).toContain('August 2026');
+    expect(prev.textContent).toContain('2 of 2 salaried still to enter');
+    expect(prev.getAttribute('data-severity')).toBe('warning');
     const current = el.querySelector('[data-role="payroll-current"]')!;
     expect(current.textContent).toContain('September 2026');
-    expect(current.className).not.toContain('amber');
+    expect(current.getAttribute('data-severity')).toBe('none');
   });
 
   it('drops the last-month prompt entirely once it is settled', async () => {
@@ -232,9 +221,9 @@ describe('TodayBoard', () => {
     api.board.dispatch.forEach((s) => { s.complete = true; s.recorded = s.expected; });
     api.board.payroll_previous = null;
     const el = await render(api);
-    expect(el.querySelector('[data-role="all-clear"]')!.textContent).toContain(
-      'Nothing outstanding',
-    );
+    const clear = el.querySelector('[data-role="all-clear"]')!;
+    expect(clear.textContent).toContain('Nothing needs you right now');
+    expect(clear.textContent).toContain('This does not mean wages have been paid');
   });
 
   it('does NOT say all-clear while last month is unpaid', async () => {
@@ -258,8 +247,7 @@ describe('TodayBoard', () => {
     api.board.payroll_previous = null;
     const el = await render(api);
     expect(el.querySelector('[data-role="all-clear"]')).toBeTruthy();
-    expect(el.querySelector('[data-role="milking"] [data-session="morning"]')!.textContent)
-      .toContain('nothing expected');
+    expect(el.querySelector('[data-role="needs-you"]')).toBeNull();
   });
 });
 
@@ -319,7 +307,7 @@ describe('reads without a session', () => {
     // until provenance was declared, so looking at a balance meant declaring a
     // transcription session you were not about to have.
     const el = await browse(boardApi, '/');
-    expect(el.querySelector('[data-role="milking"]')).toBeTruthy();
+    expect(el.querySelector('[data-role="session-board"] [data-slot="milk-morning"]')).toBeTruthy();
     expect(el.querySelector('[data-role="gate"]')).toBeNull();
     expect(el.querySelector('[data-role="browsing"]')!.textContent).toContain(
       'nothing is being recorded',
@@ -358,6 +346,9 @@ describe('reads without a session', () => {
     const el = await browse({...api, list: () => Promise.resolve({items,page:1,pageSize:25,totalItems:items.length,totalPages:1,sort:'identifier',direction:'asc'})}, '/labour/people');
     // The list -- a pure read -- is there.
     expect(el.querySelector('[data-role="people-table"]')).toBeTruthy();
+    // The form opens on demand (it used to sit permanently under the table).
+    el.querySelector<HTMLButtonElement>('[data-role="show-add-person"]')!.click();
+    await new Promise((r) => setTimeout(r));
     // The submit is not, and the prompt stands where it was.
     expect(el.querySelector('[data-role="add-person"] button[type="submit"]')).toBeNull();
     const prompt = el.querySelector('[data-role="session-required"]')!;

@@ -1,7 +1,26 @@
+/*
+ * ONE BUYER. The page now uses the same width and left edge as every other
+ * page; the statement takes the main column and the payment form and agreed
+ * rates sit beside it, where the balance they change is in view.
+ */
+.buyer-back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.875rem; color: rgb(var(--text-secondary)); text-decoration: underline; text-underline-offset: 2px; }
+.buyer-back:hover { color: rgb(var(--text-primary)); }
+.buyer-back svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.buyer-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1.5rem; }
+.buyer-balance { display: inline-flex; align-items: baseline; gap: 0.5rem; font-size: 1rem; }
+.buyer-balance-figure { font-family: ui-monospace, monospace; font-size: 1.5rem; font-weight: 650; color: rgb(var(--text-heading)); }
+.buyer-body { display: grid; gap: 1.5rem; align-items: start; grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem); }
+.buyer-side { position: sticky; top: 0; }
+@media (max-width: 1023px) {
+  .buyer-body { grid-template-columns: minmax(0, 1fr); }
+  .buyer-side { position: static; }
+}
 .statement-print-context { display: none; }
 @media print {
   :host { display: block; color: black; }
   a, form, app-local-pagination { display: none !important; }
+  .buyer-body { display: block; }
+  .buyer-side { position: static; }
   section, [appScrollRegion] { overflow: visible !important; max-height: none !important; }
   table { table-layout: fixed; width: 100%; }
   th, td { white-space: normal !important; overflow-wrap: anywhere; }

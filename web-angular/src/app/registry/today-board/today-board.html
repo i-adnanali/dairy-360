@@ -1,102 +1,175 @@
 
-    <div data-page-layout="review" class="mx-auto  space-y-6">
-      <header>
-        <h2 appPageHeading>Today</h2>
-        <p appHelp class="mt-1" data-role="date">{{ prettyDate() }}</p>
-      </header>
+    <div data-page-layout="review" class="today mx-auto">
+      <section class="today-main" aria-labelledby="today-heading">
+        <header class="today-head">
+          <h2 appPageHeading id="today-heading">Today</h2>
+          <p appHelp class="mt-1" data-role="date">{{ prettyDate() }}</p>
+        </header>
 
-      @if (loadError(); as e) {
-        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
-      }
+        @if (loadError(); as e) {
+          <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
+        }
 
-      @if (board(); as b) {
-        @if (b.health; as h) {
-          <section class="space-y-2" data-role="health">
-            <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Animal health</h3>
-            <a routerLink="/animals/health" class="block rounded-xl border border-line-subtle bg-surface-raised px-4 py-3 text-sm">{{h.overdue}} overdue · {{h.due}} due today · {{h.withdrawals.length}} withdrawal instructions to review</a>
+        @if (board(); as b) {
+          @if (emptyRegistry()) {
+            <section class="setup" data-role="setup" aria-labelledby="setup-heading">
+              <h3 id="setup-heading" class="group-title">Set up the herd</h3>
+              <p appHelp class="mb-3">The registry is empty, so nothing below is outstanding yet. Enter the herd in this order: each step needs the one before it.</p>
+              <ol class="setup-steps">
+                <li><a routerLink="/animals/new"><span class="step-n">1</span><span><b>Add acquired animals</b><span class="step-why">Animals that arrived from elsewhere. Farm-born animals come from their dam's calving.</span></span></a></li>
+                <li><a routerLink="/animals/calvings/new"><span class="step-n">2</span><span><b>Record calvings, oldest first</b><span class="step-why">Each calving creates its calf and opens the dam's lactation.</span></span></a></li>
+                <li><a routerLink="/animals/health"><span class="step-n">3</span><span><b>Add health history</b><span class="step-why">Doses, withdrawals and vaccination rounds.</span></span></a></li>
+                <li><a [routerLink]="['/milk/milking']"><span class="step-n">4</span><span><b>Start daily recording</b><span class="step-why">Milking, dispatch and feeding, session by session.</span></span></a></li>
+              </ol>
+            </section>
+          } @else {
+            @if (allClear()) {
+              <p class="all-clear" data-role="all-clear">
+                <b>Nothing needs you right now.</b>
+                Milk, dispatch and feeding are recorded and no earlier payroll is unanswered. This does not mean wages have been paid.
+              </p>
+            } @else if (attention().now.length === 0 && nextSession(); as next) {
+              <p class="all-clear" data-role="nothing-urgent">
+                <b>Nothing urgent.</b> Next: {{ next.label.toLowerCase() }}, {{ next.caption.toLowerCase() }}.
+              </p>
+            }
+
+            @if (attention().now.length) {
+              <section class="group" data-role="needs-you" aria-labelledby="needs-heading">
+                <h3 id="needs-heading" class="group-title">Needs you now <span class="group-count">{{ attention().now.length }}</span></h3>
+                <ul class="rows">
+                  @for (i of attention().now; track i.key) {
+                    <li>
+                      @if (i.opensAssistant) {
+                        <button type="button" class="row" [attr.data-severity]="i.severity" [attr.data-item]="i.key" (click)="assistant.open.set(true)">
+                          <span class="mark" aria-hidden="true"></span>
+                          <span class="subject">{{ i.subject }}</span>
+                          <span class="what">{{ i.what }}<span class="when">{{ i.when }}</span></span>
+                          <span class="badge">{{ i.badge }}</span>
+                          <span class="act">{{ i.action }}</span>
+                        </button>
+                      } @else {
+                        <a class="row" [attr.data-severity]="i.severity" [attr.data-item]="i.key" [routerLink]="i.link" [queryParams]="i.query ?? {}">
+                          <span class="mark" aria-hidden="true"></span>
+                          <span class="subject">{{ i.subject }}</span>
+                          <span class="what">{{ i.what }}<span class="when">{{ i.when }}</span></span>
+                          <span class="badge">{{ i.badge }}</span>
+                          <span class="act">{{ i.action }}</span>
+                        </a>
+                      }
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+
+            <section class="group" data-role="also-open" aria-labelledby="open-heading">
+              <h3 id="open-heading" class="group-title">Also open</h3>
+              <ul class="rows">
+                @for (i of attention().open; track i.key) {
+                  <li>
+                    <a class="row" [attr.data-severity]="i.severity" [attr.data-item]="i.key"
+                      [attr.data-role]="i.key === 'payroll-previous' ? 'payroll-previous' : null"
+                      [routerLink]="i.link" [queryParams]="i.query ?? {}">
+                      <span class="mark" aria-hidden="true"></span>
+                      <span class="subject">{{ i.subject }}</span>
+                      <span class="what">{{ i.what }}<span class="when">{{ i.when }}</span></span>
+                      <span class="badge">{{ i.badge }}</span>
+                      <span class="act">{{ i.action }}</span>
+                    </a>
+                  </li>
+                }
+                <!-- The current month, stated and never flagged. -->
+                <li>
+                  <a class="row" data-severity="none" data-role="payroll-current" [routerLink]="['/labour/payroll']"
+                    [queryParams]="{ from: b.payroll.from_on, to: b.payroll.to_on }">
+                    <span class="mark" aria-hidden="true"></span>
+                    <span class="subject">Payroll · {{ monthName(b.payroll.from_on) }}</span>
+                    <span class="what">
+                      @if (b.payroll.permanent === 0) { Nobody salaried }
+                      @else if (b.payroll.outstanding === 0) { Recorded }
+                      @else { {{ b.payroll.outstanding }} of {{ b.payroll.permanent }} still to enter }
+                      <span class="when">This month · recorded wages are not payments</span>
+                    </span>
+                    <span class="badge"></span>
+                    <span class="act">Open</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="row" data-severity="none" data-role="feed" [routerLink]="['/feed/daily', b.on]">
+                    <span class="mark" aria-hidden="true"></span>
+                    <span class="subject">Feeding</span>
+                    <span class="what">{{ b.feed?.summary || 'Not recorded' }}<span class="when">Today</span></span>
+                    <span class="badge"></span>
+                    <span class="act">{{ b.feed?.state === 'unrecorded' || !b.feed ? 'Record' : 'Review' }}</span>
+                  </a>
+                </li>
+              </ul>
+            </section>
+          }
+        } @else {
+          @if (!loadError()) { <p appHelp tone="subtle">Loading…</p> }
+        }
+      </section>
+
+      <aside class="today-side" aria-label="Orientation">
+        <section class="side-card" data-role="milk-week" aria-labelledby="milk-heading">
+          <h3 id="milk-heading" class="side-title">Milk today</h3>
+          @if (graph(); as g) {
+            <p class="side-figure">{{ litres(g.today.litres) }}
+              @if (g.today.partial) { <span class="side-qual">so far</span> }
+            </p>
+            <div class="bars" role="img"
+              [attr.aria-label]="'Milk over the last 7 days. ' + (g.lowest ? 'Lowest complete day ' + g.lowest.label + ', ' + litres(g.lowest.litres) + '.' : '')">
+              @for (d of g.days; track d.on) {
+                <span class="bar-slot" [title]="d.label + ': ' + (d.litres === null ? 'no record' : litres(d.litres) + (d.partial ? ', partial' : ''))">
+                  <span class="bar" [style.height.%]="d.pct"
+                    [attr.data-kind]="d.litres === null ? 'none' : d.lowest ? 'lowest' : d.partial ? 'partial' : 'full'"></span>
+                </span>
+              }
+            </div>
+            <div class="bar-axis" aria-hidden="true">
+              @for (d of g.days; track d.on) { <span>{{ d.label.split(' ')[0] }}</span> }
+            </div>
+            <p class="side-note">
+              Last 7 days
+              @if (g.lowest) { · lowest {{ g.lowest.label }} ({{ litres(g.lowest.litres) }}) }
+              · open bars are partial days, gaps have no record
+            </p>
+            <table class="sr-only">
+              <caption>Milk by day</caption>
+              <tr><th scope="col">Day</th><th scope="col">Litres</th></tr>
+              @for (d of g.days; track d.on) {
+                <tr><td>{{ d.label }}</td><td>{{ d.litres === null ? 'no record' : litres(d.litres) + (d.partial ? ' (partial)' : '') }}</td></tr>
+              }
+            </table>
+          } @else {
+            <p class="side-note">No milk figures available.</p>
+          }
+        </section>
+
+        @if (overnight(); as o) {
+          <section class="side-card" data-role="monitor-card" aria-labelledby="monitor-heading">
+            <h3 id="monitor-heading" class="side-title">Farm monitor · last night</h3>
+            @if (o.flagged.length) {
+              <p class="side-figure">{{ o.flagged.length }} <span class="side-qual">flagged of {{ o.total }}</span></p>
+              <p class="side-note">Flagged events are listed with the rest of today's work.</p>
+            } @else {
+              <p class="side-figure">{{ o.total }} <span class="side-qual">{{ o.total === 1 ? 'event' : 'events' }}, none flagged</span></p>
+            }
+            <a class="side-link" routerLink="/monitor">Open farm monitor</a>
           </section>
         }
-        @if (allClear()) {
-          <p class="rounded-xl border border-success-lineSoft bg-success-bg px-4 py-3 text-sm text-success-strong"
-            data-role="all-clear">
-            Nothing outstanding in the recording checklist. Milk, dispatch and feeding are recorded; no prior payroll entries are outstanding. This does not mean wages have been paid.
-          </p>
+
+        @if (herdCounts(); as h) {
+          <section class="side-card" data-role="herd-counts" aria-labelledby="herd-heading">
+            <h3 id="herd-heading" class="side-title">Herd</h3>
+            <p class="side-figure">{{ h.present }} <span class="side-qual">on the farm</span></p>
+            <ul class="herd-parts">
+              @for (p of h.parts; track p[0]) { <li><span>{{ p[0] }}</span><b>{{ p[1] }}</b></li> }
+            </ul>
+            @if (h.departed) { <p class="side-note">{{ h.departed }} departed</p> }
+          </section>
         }
-
-        <section class="space-y-2" data-role="milking">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Milking</h3>
-          @for (complete of [false, true]; track complete) {
-            @if (hasSessions(b.milking, complete)) {
-            <h4 class="text-sm font-medium">{{ complete ? "Recorded · review" : "Outstanding answers" }}</h4>
-            @for (s of b.milking; track s.session) { @if (s.complete === complete) {
-            <a [routerLink]="['/milk/milking']" [queryParams]="{ on: b.on, session: s.session }"
-              class="flex items-baseline justify-between rounded-xl border bg-surface-raised px-4 py-3 text-sm"
-              [class]="s.complete ? 'border-line-subtle' : 'border-warning-line'"
-              [attr.data-session]="s.session" [attr.data-complete]="s.complete">
-              <span class="capitalize text-content-primary">{{ s.session }}</span>
-              <span [class]="s.complete ? 'text-content-muted' : 'font-medium text-warning-fg'">
-                {{ standing(s) }}
-              </span>
-            </a>
-          } } } }
-        </section>
-
-        <section class="space-y-2" data-role="dispatch">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Dispatch</h3>
-          @for (complete of [false, true]; track complete) {
-            @if (hasSessions(b.dispatch, complete)) {
-            <h4 class="text-sm font-medium">{{ complete ? "Recorded · review" : "Outstanding answers" }}</h4>
-            @for (s of b.dispatch; track s.session) { @if (s.complete === complete) {
-            <a [routerLink]="['/milk/dispatch']" [queryParams]="{ on: b.on, session: s.session }"
-              class="flex items-baseline justify-between rounded-xl border bg-surface-raised px-4 py-3 text-sm"
-              [class]="s.complete ? 'border-line-subtle' : 'border-warning-line'"
-              [attr.data-session]="s.session" [attr.data-complete]="s.complete">
-              <span class="capitalize text-content-primary">{{ s.session }}</span>
-              <span [class]="s.complete ? 'text-content-muted' : 'font-medium text-warning-fg'">
-                {{ standing(s) }}
-              </span>
-            </a>
-          } } } }
-        </section>
-
-        <section class="space-y-2" data-role="feed">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Feed</h3>
-          <a [routerLink]="['/feed/daily',b.on]" class="flex flex-wrap justify-between gap-2 rounded-xl border border-line-subtle bg-surface-raised px-4 py-3 text-sm">
-            <span>{{b.feed?.summary || 'Not recorded'}}</span><span>{{b.feed?.state === 'unrecorded' ? 'Record feeding' : 'Review / correct'}}</span>
-          </a>
-        </section>
-        <section class="space-y-2" data-role="payroll">
-          <h3 class="text-xs font-medium uppercase tracking-wide text-content-subtle">Payroll · period recording</h3>
-          <p appHelp>Earlier unanswered periods are separate from today’s work. Recorded wages are not payments.</p>
-          @if (b.payroll_previous; as prev) {
-            <a [routerLink]="['/labour/payroll']"
-              [queryParams]="{ from: prev.from_on, to: prev.to_on }"
-              class="flex items-baseline justify-between rounded-xl border border-warning-line bg-surface-raised
-                px-4 py-3 text-sm" data-role="payroll-previous">
-              <span class="text-content-primary">{{ monthName(prev.from_on) }}</span>
-              <span class="font-medium text-warning-fg">
-                {{ prev.outstanding }} of {{ prev.permanent }} unanswered
-              </span>
-            </a>
-          }
-          <!-- The current month, stated and never flagged. -->
-          <a [routerLink]="['/labour/payroll']"
-            [queryParams]="{ from: b.payroll.from_on, to: b.payroll.to_on }"
-            class="flex items-baseline justify-between rounded-xl border border-line-subtle bg-surface-raised
-              px-4 py-3 text-sm" data-role="payroll-current">
-            <span class="text-content-primary">{{ monthName(b.payroll.from_on) }}</span>
-            <span class="text-content-muted">
-              @if (b.payroll.permanent === 0) {
-                nobody salaried
-              } @else if (b.payroll.outstanding === 0) {
-                recorded
-              } @else {
-                {{ b.payroll.outstanding }} of {{ b.payroll.permanent }} still to enter
-              }
-            </span>
-          </a>
-        </section>
-      } @else {
-        @if (!loadError()) { <p appHelp tone="subtle">Loading…</p> }
-      }
+      </aside>
     </div>

@@ -1388,7 +1388,7 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
       if (term !== null && term.cash_minor !== w.amount_minor) {
         line(
           'amount_differs_from_term',
-          `${who} has a recorded wage of ${formatMinor(w.amount_minor)} for ${w.from_on}..${w.to_on} against an agreement ` +
+          `${who} has a recorded wage of ${formatMinor(w.amount_minor)} for ${periodWords(w.from_on, w.to_on)} against an agreement ` +
             `of ${formatMinor(term.cash_minor)}. Expected whenever there was leave or an adjustment.`,
           { kind: 'amount_differs_from_term', personId: e.person_id, wageId: w.id, engagementId: e.id, amountMinor: w.amount_minor, agreementMinor: term.cash_minor, fromOn: w.from_on, toOn: w.to_on },
         );
@@ -1530,4 +1530,18 @@ export function diffRowSets(
     }
   }
   return failures;
+}
+
+const MONTH_WORDS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "Oct 2026" for a whole month, "1–15 Nov 2026" within one, else both days in words. */
+export function periodWords(from: string, to: string): string {
+  const [fy, fm, fd] = from.split('-').map(Number);
+  const [ty, tm, td] = to.split('-').map(Number);
+  const day = (y: number, m: number, d: number) => `${d} ${MONTH_WORDS[m - 1]} ${y}`;
+  if (from === to) return day(fy, fm, fd);
+  if (fy === ty && fm === tm) {
+    const last = new Date(Date.UTC(ty, tm, 0)).getUTCDate();
+    return fd === 1 && td === last ? `${MONTH_WORDS[fm - 1]} ${fy}` : `${fd}–${td} ${MONTH_WORDS[fm - 1]} ${fy}`;
+  }
+  return `${day(fy, fm, fd)} to ${day(ty, tm, td)}`;
 }

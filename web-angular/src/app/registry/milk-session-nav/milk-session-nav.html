@@ -1,0 +1,57 @@
+<div class="msn" role="group" aria-label="Session">
+  <div class="msn-stepper">
+    <button
+      type="button"
+      class="msn-step"
+      data-role="session-prev"
+      [disabled]="disabled()"
+      [attr.aria-label]="'Previous session: ' + prevName()"
+      [title]="prevName()"
+      (click)="step(-1)"
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
+    </button>
+    <label class="msn-day">
+      <span data-role="session-day">{{ dayLabel() }}</span>
+      <input
+        type="date"
+        data-role="on"
+        aria-label="Date"
+        [value]="on()"
+        [disabled]="disabled()"
+        (change)="pickDay($any($event.target).value)"
+      />
+    </label>
+    <button
+      type="button"
+      class="msn-step"
+      data-role="session-next"
+      [disabled]="disabled() || !canNext()"
+      [attr.aria-label]="'Next session: ' + nextName()"
+      [title]="nextName()"
+      (click)="step(1)"
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg>
+    </button>
+  </div>
+  <div class="msn-seg" role="group" aria-label="Morning or evening">
+    <button
+      type="button"
+      data-role="session-morning"
+      [disabled]="disabled()"
+      [attr.aria-pressed]="session() === 'morning'"
+      (click)="pick('morning')"
+    >
+      Morning
+    </button>
+    <button
+      type="button"
+      data-role="session-evening"
+      [disabled]="disabled()"
+      [attr.aria-pressed]="session() === 'evening'"
+      (click)="pick('evening')"
+    >
+      Evening
+    </button>
+  </div>
+</div>

@@ -7,11 +7,7 @@
       data-role="feed-editor"
     >
       @if (record()) {
-        <p appHelp>
-          Saved record · revision {{ originalRecord?.revision }} · recorded by
-          {{ originalRecord?.recorded_by }} · {{ originalRecord?.source_form }} ·
-          {{ originalRecord?.source_ref || 'no source reference' }}
-        </p>
+        <p appHelp>Correcting the saved record · {{ provenance(originalRecord) }}</p>
       }
       @if (state.error()?.code === 'feed_conflict') {
         <button appButton variant="secondary" type="button" (click)="compareLatest()">
@@ -30,7 +26,9 @@
           </button>
         </section>
       }
-      <h3 class="text-lg font-semibold">{{ record()?.id ? 'Correct' : 'Add' }} {{ noun() }}</h3>
+      @if (titled()) {
+        <h3 class="text-lg font-semibold">{{ record()?.id ? 'Correct' : 'Add' }} {{ noun() }}</h3>
+      }
       @if (entity() === 'items' || entity() === 'crops') {
         <label class="block"
           ><span appFieldLabel>Name</span
@@ -76,7 +74,8 @@
         >
         @for (k of dateKeys; track k) {
           <app-precision-date
-            [label]="words(k) + ' date (optional)'"
+            [explain]="$first"
+            [label]="label(k) + ' date (optional)'"
             [allowTime]="false"
             [initialValue]="dateValue(k)"
             [resetKey]="dateGeneration"

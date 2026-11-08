@@ -18,7 +18,7 @@ import { RouterLink } from '@angular/router';
 import { RegistryApi } from "../api";
 import { Cell } from "../../ui/cell";
 import { Certainty, Qualifier } from "../../ui/certainty";
-import { NO_RECORD, precisionParts } from "../precision-display";
+import { NO_RECORD, readableParts } from "../precision-display";
 import type { PrecisionParts } from "../precision-display";
 import { lifeStageLabel } from "../life-stage";
 import type { HerdRow } from "../types";
@@ -59,10 +59,49 @@ export class HerdList {
 
   /** The birth date at the precision it was known to. See precision-display.ts. */
   protected born(r: HerdRow): PrecisionParts {
-    return precisionParts(r.birth_on, r.birth_precision);
+    return readableParts(r.birth_on, r.birth_precision);
   }
 
-  protected readonly paging = pagedList<HerdRow>('animals');
+  /** "Born here" / "Bought in" instead of born_on_farm / acquired. */
+  protected origin(r: HerdRow): string {
+    return r.origin === 'born_on_farm' ? 'Born here' : r.origin === 'acquired' ? 'Bought in' : String(r.origin);
+  }
+
+  protected readonly groups = [
+    { value: 'current', label: 'On the farm' },
+    { value: 'departed', label: 'Departed' },
+    { value: 'all', label: 'All' },
+  ];
+  /** The farm's words, mapped to the stored status the server filters on. */
+  protected readonly stages = [
+    { value: '', label: 'Every stage' },
+    { value: 'lactating', label: 'majj · in milk' },
+    { value: 'dry', label: 'majj · dry' },
+    { value: 'heifer', label: 'choti' },
+    { value: 'calf', label: 'katti / katta (calves)' },
+    { value: 'male', label: 'sandda' },
+  ];
+
+  /** One URL filter value by name -- `group` and `status` are page-specific. */
+  protected q(key: string): string {
+    return (this.paging.url.value() as Record<string, string>)[key] ?? '';
+  }
+  protected setFilter(patch: Record<string, string>) {
+    this.paging.url.set({ ...patch, page: '1' } as never);
+  }
+  protected sortBy(column: string) {
+    const q = this.paging.url.value() as Record<string, string>;
+    const direction = q['sort'] === column ? (q['direction'] === 'asc' ? 'desc' : 'asc') : column === 'identifier' ? 'asc' : 'desc';
+    this.setFilter({ sort: column, direction });
+  }
+  protected ariaSort(column: string): 'ascending' | 'descending' | null {
+    const q = this.paging.url.value() as Record<string, string>;
+    return q['sort'] === column ? (q['direction'] === 'asc' ? 'ascending' : 'descending') : null;
+  }
+
+  // The herd you have, by default: departed animals are a filter away, not
+  // mixed into the working list.
+  protected readonly paging = pagedList<HerdRow>('animals', 'identifier', { group: 'current', status: '' });
   protected readonly rows = computed(() => this.paging.result()?.items ?? null);
   protected readonly loadError = this.paging.error;
 }

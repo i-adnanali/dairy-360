@@ -1,23 +1,17 @@
 
     <div data-page-layout="review" class="mx-auto  space-y-5">
-      <header>
-        <h2 appPageHeading>Check the records</h2>
-        <p appHelp class="mt-1">
-          Read these; they are not assertions. Nothing in the rest of the app changes based on what
-          is here.
-        </p>
+      <!-- Recheck belongs to this page, beside its title; it sat in the
+           section bar where every other section keeps its views. -->
+      <header class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 appPageHeading>Check the records</h2>
+          <p appHelp class="mt-1">
+            Read these; they are not assertions. Nothing in the rest of the app changes based on what
+            is here.
+          </p>
+        </div>
+        <button type="button" appButton variant="secondary" data-role="refresh" (click)="load()">Recheck</button>
       </header>
-
-      @if (!actions.inShell()) {
-        <button
-          type="button"
-          data-role="refresh"
-          (click)="load()"
-          class="rounded-xl border border-line bg-surface-raised px-4 py-2 text-sm font-medium text-content-heading"
-        >
-          Recheck
-        </button>
-      }
       @if (loading()) {
         <p role="status">Checking records… Previous results are not a current check.</p>
       }
@@ -28,9 +22,9 @@
           <h3 appSubHeading>Invariant violations</h3>
           @if (data.violations.length === 0) {
             <p class="mt-2 text-sm text-content-secondary" data-role="violations-none">
-              No violations across {{ data.counts.animals }} animal(s),
-              {{ data.counts.events }} event(s), {{ data.counts.lactations }} lactation(s), as of
-              {{ data.as_of }}.
+              No violations across {{ count(data.counts.animals, 'animal') }},
+              {{ count(data.counts.events, 'event') }} and {{ count(data.counts.lactations, 'lactation') }}, as of
+              {{ day(data.as_of) }}.
               @if (data.counts.animals === 0) {
                 <span class="italic">
                   An empty registry passes every check vacuously — this says nothing yet.</span
@@ -70,7 +64,7 @@
           <h3 appSubHeading>Advisory worklist · People</h3>
           @if (data.labour.length === 0) {
             <p class="mt-2 text-sm text-content-secondary" data-role="labour-none">
-              No issues found in this advisory check as of {{ data.as_of }}. Wage differences are
+              No issues found in this advisory check as of {{ day(data.as_of) }}. Wage differences are
               advisory and do not establish payment.
             </p>
           } @else {
@@ -113,12 +107,12 @@
           </p>
           @if (data.histogram.length === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="histogram-empty">
-              No events in this check as of {{ data.as_of }}.
+              No events in this check as of {{ day(data.as_of) }}.
             </p>
           } @else {
             <div appScrollRegion="histogram">
               <table class="mt-2 w-full text-left text-sm" data-role="histogram">
-                <thead class="text-xs uppercase tracking-wide text-content-muted">
+                <thead class="text-xs font-semibold text-content-muted">
                   <tr>
                     <th scope="col" appCell>Source</th>
                     <th scope="col" appCell>Precision</th>
@@ -128,7 +122,7 @@
                 <tbody>
                   @for (c of data.histogram; track c.source_form + c.date_precision) {
                     <tr appRowDivider>
-                      <td appCell tone="heading">{{ c.source_form }}</td>
+                      <td appCell tone="heading">{{ source(c.source_form) }}</td>
                       <!-- THE ONE COLUMN IN THE APP WHOSE VALUES ARE THE
                          VOCABULARY'S OWN WORDS. "day" is a known date and
                          "month"/"year"/"estimated" are approximate ones, so the
@@ -158,7 +152,7 @@
           <h3 appSubHeading>Calving intervals</h3>
           @if (data.intervals.intervals.length === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="intervals-empty">
-              No animal has two or more calvings in this check as of {{ data.as_of }}.
+              No animal has two or more calvings in this check as of {{ day(data.as_of) }}.
             </p>
           } @else {
             <app-local-pagination
@@ -168,7 +162,7 @@
             />
             <div appScrollRegion="intervals">
               <table class="mt-2 w-full text-left text-sm" data-role="intervals">
-                <thead class="text-xs uppercase tracking-wide text-content-muted">
+                <thead class="text-xs font-semibold text-content-muted">
                   <tr>
                     <th scope="col" appCell>Animal</th>
                     <th scope="col" appCell>From</th>
@@ -183,9 +177,9 @@
                     track i.animal_id + i.ordinal
                   ) {
                     <tr appRowDivider>
-                      <td appCell tone="heading" class="font-mono">{{ i.animal_id }}</td>
-                      <td appCell tone="secondary">{{ i.from_on }}</td>
-                      <td appCell tone="secondary">{{ i.to_on }}</td>
+                      <td appCell tone="heading"><a appIdentifier [routerLink]="['/animals', i.animal_id]">{{ i.animal_id }}</a></td>
+                      <td appCell tone="secondary">{{ day(i.from_on) }}</td>
+                      <td appCell tone="secondary">{{ day(i.to_on) }}</td>
                       <!-- THE INTERVAL TAKES ITS OWN QUALITY, which is the
                          typographic form of what intervalReport() refuses to do
                          in arithmetic: an interval computed from two approximate
@@ -200,7 +194,7 @@
                       </td>
                       <td appCell>
                         <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'">{{
-                          i.quality
+                          word(i.quality)
                         }}</span>
                       </td>
                     </tr>
@@ -212,7 +206,7 @@
             <div class="mt-3 grid gap-2 sm:grid-cols-2" data-role="summaries">
               @for (s of [data.intervals.measured, data.intervals.approximate]; track s.quality) {
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div appSectionLabel>{{ s.quality }}</div>
+                  <div class="text-sm font-medium text-content-secondary">{{ word(s.quality) }}</div>
                   @if (s.count === 0) {
                     <!-- NO RECORD, NOT AN ABSENT ANSWER. Nobody said "there are
                          no approximate intervals"; there simply are none yet, so
@@ -248,34 +242,34 @@
           </p>
           @if (data.milking.rows === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="milking-empty">
-              No milking records in this check as of {{ data.as_of }}.
+              No milking records in this check as of {{ day(data.as_of) }}.
             </p>
           } @else {
             <div class="mt-2 grid gap-2 sm:grid-cols-3" data-role="milking-summary">
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                <div appSectionLabel>sessions</div>
+                <div class="text-sm font-medium text-content-secondary">Sessions</div>
                 <div class="text-content-primary">
                   {{ data.milking.complete_sessions }} complete of {{ data.milking.sessions }}
                 </div>
                 <div appHelp size="xs">
                   <span [appCertainty]="data.milking.first_on ? 'known' : 'no-record'">{{
-                    data.milking.first_on ?? noRecord
+                    data.milking.first_on ? day(data.milking.first_on) : noRecord
                   }}</span>
-                  →
+                  to
                   <span [appCertainty]="data.milking.last_on ? 'known' : 'no-record'">{{
-                    data.milking.last_on ?? noRecord
+                    data.milking.last_on ? day(data.milking.last_on) : noRecord
                   }}</span>
                 </div>
               </div>
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                <div appSectionLabel>measured</div>
-                <div class="text-content-primary">{{ data.milking.measured }} row(s)</div>
+                <div class="text-sm font-medium text-content-secondary">Measured</div>
+                <div class="text-content-primary">{{ count(data.milking.measured, 'record') }}</div>
                 <div appHelp size="xs">carry a number</div>
               </div>
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                <div appSectionLabel>not measured</div>
+                <div class="text-sm font-medium text-content-secondary">Not measured</div>
                 <div class="text-content-primary">
-                  {{ data.milking.milked_not_measured }} row(s)
+                  {{ count(data.milking.milked_not_measured, 'record') }}
                 </div>
                 <div appHelp size="xs">
                   milked, unweighed · {{ data.milking.not_milked }} not milked
@@ -285,7 +279,7 @@
 
             <div appScrollRegion="milking sessions">
               <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
-                <thead class="text-xs uppercase tracking-wide text-content-muted">
+                <thead class="text-xs font-semibold text-content-muted">
                   <tr>
                     <th scope="col" appCell>Date</th>
                     <th scope="col" appCell>Session</th>
@@ -297,8 +291,9 @@
                 <tbody>
                   @for (s of data.milking.recent; track s.occurred_on + s.session) {
                     <tr appRowDivider>
-                      <td appCell tone="secondary">{{ s.occurred_on }}</td>
-                      <td appCell tone="secondary">{{ s.session }}</td>
+                      <td appCell tone="secondary">{{ day(s.occurred_on) }}</td>
+                      <!-- The sheet that answers the gap, one click away. -->
+                      <td appCell tone="secondary"><a class="underline" routerLink="/milk/milking" [queryParams]="{ on: s.occurred_on, session: s.session }" data-role="gap-link">{{ word(s.session) }}</a></td>
                       <!-- A session with fewer rows than animals in milk has
                          animals nobody answered for, which is §6's fifth state.
                          The colour is unchanged -- this was already amber, and
@@ -339,7 +334,7 @@
         @if (reconciliation(); as r) {
           <section appCard>
             <h3 appSectionHeading>Where the milk went</h3>
-            <p appHelp size="xs" class="mt-1">{{ r.from }} → {{ r.to }}</p>
+            <p appHelp size="xs" class="mt-1">{{ period(r.from, r.to) }}</p>
 
             @if (
               r.sessions === 0 &&
@@ -353,24 +348,24 @@
             } @else {
               <div class="mt-2 grid gap-2 sm:grid-cols-4" data-role="reconcile-summary">
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div appSectionLabel>Measured</div>
+                  <div class="text-sm font-medium text-content-secondary">Measured</div>
                   <div class="text-content-primary" data-role="produced">
                     {{ r.produced_measured }} L
                   </div>
-                  <div appHelp size="xs">from {{ r.measured_rows }} row(s)</div>
+                  <div appHelp size="xs">from {{ count(r.measured_rows, 'record') }}</div>
                 </div>
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div appSectionLabel>Sold</div>
+                  <div class="text-sm font-medium text-content-secondary">Sold</div>
                   <div class="text-content-primary" data-role="sold">{{ r.dispatched_sold }} L</div>
                   <div appHelp size="xs">{{ money(r.billed_minor) }}</div>
                 </div>
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div appSectionLabel>Kept at home</div>
+                  <div class="text-sm font-medium text-content-secondary">Kept at home</div>
                   <div class="text-content-primary" data-role="home">{{ r.dispatched_home }} L</div>
                   <div appHelp size="xs">its own term, not the gap</div>
                 </div>
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div appSectionLabel>Gap</div>
+                  <div class="text-sm font-medium text-content-secondary">Gap</div>
                   <div class="text-content-primary" data-role="gap">{{ r.gap_litres }} L</div>
                   <div appHelp size="xs" data-role="gap-pct">
                     @if (r.gap_pct !== null) {
@@ -398,7 +393,7 @@
               }
 
               <p class="mt-2 text-sm text-content-secondary" data-role="reconcile-sessions">
-                {{ r.complete_sessions }} of {{ r.sessions }} dispatch session(s) had every standing
+                {{ r.complete_sessions }} of {{ count(r.sessions, 'dispatch session') }} had every standing
                 destination answered.
               </p>
 
@@ -410,7 +405,7 @@
                 />
                 <div appScrollRegion="reconcile incomplete">
                   <table class="mt-2 w-full text-left text-sm" data-role="reconcile-incomplete">
-                    <thead class="text-xs uppercase tracking-wide text-content-muted">
+                    <thead class="text-xs font-semibold text-content-muted">
                       <tr>
                         <th scope="col" appCell>Session</th>
                         <th scope="col" appCell numeric>Answered</th>
@@ -419,7 +414,7 @@
                     <tbody>
                       @for (s of checkPages2.rows(r.incomplete); track s.occurred_on + s.session) {
                         <tr appRowDivider>
-                          <td appCell tone="secondary">{{ s.occurred_on }} {{ s.session }}</td>
+                          <td appCell tone="secondary"><a class="underline" routerLink="/milk/dispatch" [queryParams]="{ on: s.occurred_on, session: s.session }" data-role="dispatch-gap-link">{{ day(s.occurred_on) }} · {{ word(s.session) }}</a></td>
                           <td appCell numeric tone="secondary">
                             {{ s.recorded_standing }} of {{ s.expected_standing }}
                           </td>
@@ -434,7 +429,7 @@
                    a stale default look identical from here. -->
               @if (r.off_schedule.length > 0) {
                 <div class="mt-3" data-role="off-schedule">
-                  <h4 class="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+                  <h4 class="text-sm font-semibold text-content-secondary">
                     Billed at something other than the agreed rate
                   </h4>
                   <app-local-pagination
@@ -445,7 +440,7 @@
                   <ul class="mt-1 space-y-1 text-sm text-content-secondary">
                     @for (o of checkPages3.rows(r.off_schedule); track o.dispatch_id) {
                       <li>
-                        {{ o.occurred_on }} {{ o.session }} · {{ o.name }} — billed
+                        {{ day(o.occurred_on) }} · {{ word(o.session) }} · {{ o.name }} — billed
                         {{ rate(o.captured_minor, o.captured_unit_litres) }}, agreed
                         {{ rate(o.agreed_minor, o.agreed_unit_litres) }}
                       </li>

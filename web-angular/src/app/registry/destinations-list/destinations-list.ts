@@ -32,6 +32,8 @@ import { StatusBadge } from "../../ui/surface";
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
+import { feedDay } from '../feed-format';
 
 import { ChipGroup } from "../chip-group/chip-group";
 import { Cell } from "../../ui/cell";
@@ -60,6 +62,7 @@ import { Button } from "../../ui/button";
   selector: 'app-destinations-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ScrollRegion,
+    NgTemplateOutlet,
     WriteLock,
     Pagination,
     RowLink,
@@ -273,9 +276,43 @@ export class DestinationsList {
       );
       this.name.set('');
       this.addDraft.accept();
+      this.adding.set(false);
       await this.load();
     }
   }
 
   protected readonly formatMinor = formatMinor;
+  protected readonly noRecord = NO_RECORD;
+
+  /** Opened by the header button; also open while there is something to see. */
+  private readonly adding = signal(false);
+  protected readonly addOpen = computed(
+    () =>
+      this.adding() ||
+      this.name().trim().length > 0 ||
+      this.addState.error() !== null ||
+      this.paging.result()?.totalItems === 0,
+  );
+  protected toggleAdd(): void {
+    if (this.addOpen()) {
+      void this.addDraft.transition(() => {
+        this.adding.set(false);
+        this.name.set('');
+        this.addState.reset();
+      });
+    } else {
+      this.adding.set(true);
+      setTimeout(() => document.querySelector<HTMLInputElement>('#buyer-add [data-role="name"]')?.focus(), 0);
+    }
+  }
+
+  private static readonly KINDS: Record<string, string> = {
+    dodhi: 'Dodhi', household: 'Household', shop: 'Shop', home: 'Home, kept', other: 'Other', staff: 'Staff',
+  };
+  protected kindLabel(k: string): string {
+    return DestinationsList.KINDS[k] ?? k.charAt(0).toUpperCase() + k.slice(1);
+  }
+  protected day(on: string | null): string {
+    return feedDay(on);
+  }
 }

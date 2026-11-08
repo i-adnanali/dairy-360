@@ -244,7 +244,7 @@ describe('MilkingRoster', () => {
     http.match((r) => r.url.startsWith(`${BASE}/milking/roster`)).forEach((r) => r.flush(ROSTER));
     await settle(fixture);
 
-    expect(TestBed.inject(WriteLog).last()).toContain('2 animal(s)');
+    expect(TestBed.inject(WriteLog).last()).toContain('2 animals');
     expect(TestBed.inject(WriteLog).last()).toContain('1 measured');
   });
 

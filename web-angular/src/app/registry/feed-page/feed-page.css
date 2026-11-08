@@ -1,1 +1,87 @@
-/* This component uses shared styles; no local rules are needed. */
+/*
+ * FEED. Lists are tables, a record is a label/value sheet, and the overview
+ * leads with three figures in one strip -- not three same-size cards, which
+ * gave a money total the same weight as its own caption.
+ */
+:host { display: block; }
+
+.feed-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.feed-range {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgb(var(--border-subtle));
+  border-radius: 0.75rem;
+  background: rgb(var(--surface-sunken));
+}
+
+.feed-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem; }
+
+/* The figures strip: one surface, three columns divided by hairlines. */
+.feed-figures {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem;
+  background: rgb(var(--surface-raised));
+}
+.feed-figures .figure { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.feed-figures .figure + .figure { border-left: 1px solid rgb(var(--border-subtle)); }
+.figure-label { font-size: 0.8125rem; line-height: 1.125rem; font-weight: 500; color: rgb(var(--text-secondary)); }
+.figure-value {
+  font-size: 1.75rem; line-height: 2.125rem; font-weight: 650; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums; color: rgb(var(--text-heading));
+}
+.figure-of { font-size: 1rem; font-weight: 500; color: rgb(var(--text-secondary)); letter-spacing: 0; }
+.figure-note { font-size: 0.8125rem; line-height: 1.125rem; color: rgb(var(--text-muted)); }
+.figure-link { margin-top: auto; padding-top: 0.5rem; font-size: 0.875rem; }
+
+.feed-split {
+  display: grid; gap: 2rem;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.feed-table {
+  width: 100%; font-size: 0.9375rem; border-collapse: separate; border-spacing: 0;
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem; overflow: hidden;
+  background: rgb(var(--surface-raised));
+}
+.feed-table thead { background: rgb(var(--surface-sunken)); text-align: left; }
+.feed-table thead th { font-size: 0.8125rem; font-weight: 600; color: rgb(var(--text-secondary)); }
+.feed-table tbody tr + tr td { border-top: 1px solid rgb(var(--border-hairline)); }
+.feed-table tr[data-editing='true'] td { background: rgb(var(--surface-sunken)); font-weight: 600; }
+.feed-table tr[data-today='true'] td { background: rgb(var(--surface-sunken) / 0.6); }
+
+.feed-list { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.feed-list li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.625rem;
+  padding-bottom: 0.5rem; border-bottom: 1px solid rgb(var(--border-hairline));
+  font-size: 0.9375rem;
+}
+.feed-meta { flex-basis: 100%; font-size: 0.8125rem; color: rgb(var(--text-muted)); }
+.feed-dates { display: inline-flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; font-size: 0.875rem; }
+.feed-list .feed-dates { flex-basis: 100%; }
+
+/* A record: a sheet of labelled values, two or four across. */
+.feed-facts {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  margin: 0; border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem;
+  background: rgb(var(--surface-raised)); overflow: hidden;
+}
+.feed-facts > div { padding: 0.75rem 1rem; border-bottom: 1px solid rgb(var(--border-hairline)); }
+.feed-facts dt { font-size: 0.8125rem; font-weight: 500; color: rgb(var(--text-secondary)); }
+.feed-facts dd { margin: 0.125rem 0 0; font-size: 1rem; color: rgb(var(--text-primary)); }
+.feed-facts .is-total dd { font-weight: 650; }
+.feed-facts .is-wide { grid-column: 1 / -1; }
+
+@media (max-width: 1023px) {
+  .feed-split { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 639px) {
+  .feed-figures { grid-template-columns: minmax(0, 1fr); }
+  .feed-figures .figure + .figure { border-left: 0; border-top: 1px solid rgb(var(--border-subtle)); }
+  .feed-range { padding: 0.75rem; }
+}

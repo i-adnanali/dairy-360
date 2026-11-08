@@ -307,7 +307,7 @@ describe('B4 Check loading and failures', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     f.detectChanges();
     expect(f.nativeElement.textContent).toContain(
-      'No issues found in this advisory check as of 2026-09-17',
+      'No issues found in this advisory check as of 17 Sep 2026',
     );
     expect(f.nativeElement.textContent).toContain('Milk reconciliation unavailable');
     pending = true;

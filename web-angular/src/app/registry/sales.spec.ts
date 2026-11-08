@@ -406,6 +406,9 @@ describe('DestinationsList', () => {
 
   it('says out loud that home milk is never billed', async () => {
     const { fixture, el } = await renderBuyers(new FakeDestApi());
+    // Adding is opened on purpose now; the form no longer fills the page.
+    (el.querySelector('[data-role="add-open"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
     const homeChip = [...el.querySelectorAll('button')].find(
       (b) => b.textContent?.includes('Home (kept)'),
     )!;

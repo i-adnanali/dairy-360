@@ -19,22 +19,32 @@
 import { Directive } from '@angular/core';
 
 /** The screen's title. One per screen. */
+//
+// SESSION BOARD REDESIGN (audit F05): the three levels now differ in SIZE, not
+// only weight -- 26 / 19 / 15px against the old 18 / 14 / 14px. Every page uses
+// PageHeading, so page titles render at one size again.
 @Directive({
   selector: '[appPageHeading]',
-  host: { class: 'text-lg font-semibold text-content-primary' },
+  host: { class: 'text-2xl font-semibold tracking-tight text-content-primary' },
 })
 export class PageHeading {}
 
 /** A titled block within a screen. The middle level. */
 @Directive({
   selector: '[appSectionHeading]',
-  host: { class: 'text-sm font-semibold text-content-primary' },
+  host: { class: 'text-lg font-semibold text-content-primary' },
 })
 export class SectionHeading {}
 
-/** A labelled run of rows inside a block. */
+/**
+ * A labelled run of rows inside a block -- and, in the People forms, the
+ * visible label above a control. BLOCK, because on a <span> inside a
+ * `<label class="block space-y-1">` an inline label sat on the same line as a
+ * short control (a date input) with no gap, and `space-y` cannot space inline
+ * boxes. Every use is meant to sit on its own line.
+ */
 @Directive({
   selector: '[appSubHeading]',
-  host: { class: 'text-sm font-medium text-content-heading' },
+  host: { class: 'block text-sm font-semibold text-content-heading' },
 })
 export class SubHeading {}

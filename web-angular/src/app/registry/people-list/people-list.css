@@ -1,1 +1,2 @@
-/* This component uses shared styles; no local rules are needed. */
+.person-name { font-weight: 500; color: rgb(var(--text-heading)); text-decoration: underline; text-decoration-color: rgb(var(--border-strong, var(--border-default))); text-underline-offset: 3px; }
+.person-name:hover { text-decoration-color: currentColor; }

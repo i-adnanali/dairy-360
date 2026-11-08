@@ -1,3 +1,4 @@
+import { subjectTitle } from '../page-title';
 import { reportPrintPages } from '../life-report/print-pages';
 import { DestroyRef, ElementRef } from '@angular/core';
 import { ScrollRegion } from "../../ui/scroll-region";
@@ -49,7 +50,7 @@ import { TextInput } from "../../ui/input";
 import { PageHeading } from "../../ui/heading";
 import { RowDivider } from "../../ui/surface";
 import { SectionHeading } from "../../ui/heading";
-import { SectionLabel } from "../../ui/text";
+import { feedDay } from "../feed-format";
 import { Button } from "../../ui/button";
 
 @Component({
@@ -71,7 +72,6 @@ import { Button } from "../../ui/button";
     RouterLink,
     RowDivider,
     SectionHeading,
-    SectionLabel,
     SessionRequired,
     TextInput,
   ],
@@ -164,6 +164,7 @@ export class DestinationDetail {
   ];
 
   constructor() {
+    subjectTitle(() => this.statement()?.name ?? null);
     inject(DestroyRef).onDestroy(() => { ++this.loadSequence; this.printPages?.remove(); });
     this.writer = writerDraft({
       name: 'Buyer payment',
@@ -256,6 +257,13 @@ export class DestinationDetail {
       return 'no-record';
     }
     return 'known';
+  }
+
+  protected dayText(on: string): string {
+    return feedDay(on);
+  }
+  protected methodLabel(m: string): string {
+    return m.charAt(0).toUpperCase() + m.slice(1);
   }
 
   protected balanceText(s: Statement): string {

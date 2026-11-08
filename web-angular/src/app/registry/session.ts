@@ -42,13 +42,50 @@ export class Session {
    */
   readonly setupOpen = signal(false);
 
+  /**
+   * What the operator was trying to save when they were asked ("this crop"),
+   * so the panel can say why it opened. Null when opened from the header.
+   */
+  readonly purpose = signal<string | null>(null);
+
+  /** The control that opened the panel: focus goes back there when it closes. */
+  private opener: HTMLElement | null = null;
+
   /** Ask for the gate. Called by SessionRequired and by the session bar. */
-  requestSetup(): void {
+  requestSetup(purpose: string | null = null): void {
+    const active = typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
+    this.opener = active && active !== document.body ? active : null;
+    this.purpose.set(purpose);
     this.setupOpen.set(true);
   }
 
   dismissSetup(): void {
     this.setupOpen.set(false);
+    this.purpose.set(null);
+    this.restoreFocus();
+  }
+
+  /**
+   * Stop recording: back to browsing. Every write control turns back into its
+   * "Start recording" prompt. The panel is NOT reopened -- unlike Change, the
+   * intent here is to stop.
+   */
+  stop(): void {
+    this.sourceForm.set(null);
+    this.recordedBy.set('');
+    this.setupOpen.set(false);
+    this.purpose.set(null);
+    setTimeout(() => requestAnimationFrame(() => focusRecordingControl(null)), 0);
+  }
+
+  private restoreFocus(): void {
+    const el = this.opener;
+    this.opener = null;
+    // After the next render: while the panel is open the header and page are
+    // inert, and an inert element silently refuses focus.
+    // When the opener is gone (Start became the Recording chip), the header's
+    // recording control takes it, so the caret never drops to <body>.
+    setTimeout(() => requestAnimationFrame(() => focusRecordingControl(el)), 0);
   }
 
   readonly ready = computed(
@@ -59,6 +96,8 @@ export class Session {
     this.sourceForm.set(form);
     this.recordedBy.set(who.trim());
     this.setupOpen.set(false);
+    this.purpose.set(null);
+    this.restoreFocus();
   }
 
   clear(): void {
@@ -79,4 +118,13 @@ export class Session {
     }
     return { source_form: form, recorded_by: who };
   }
+}
+
+function focusRecordingControl(preferred: HTMLElement | null): void {
+  if (typeof document === 'undefined') return;
+  const target =
+    preferred && preferred.isConnected
+      ? preferred
+      : document.querySelector<HTMLElement>('[data-role="change-session"], [data-role="start-session"]');
+  target?.focus({ preventScroll: true });
 }

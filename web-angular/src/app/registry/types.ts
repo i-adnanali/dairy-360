@@ -265,6 +265,8 @@ export interface IdentifierValues {
   observed_by: string[];
   acquired_from: string[];
   sire_ref: string[];
+  /** Who has typed records, most-used first. Absent from older servers. */
+  recorded_by?: string[];
 }
 
 export type DuplicateMatchKind = 'post_no' | 'tag_no' | 'name_exact' | 'name_near';
@@ -332,6 +334,8 @@ export interface DestinationPrice {
 export interface DestinationListRow extends Destination {
   price: DestinationPrice | null;
   active: boolean;
+  /** What a billable buyer owes now; null for home and other unbilled rows. */
+  balance_minor?: number | null;
 }
 
 export interface Dispatch {

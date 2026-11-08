@@ -328,3 +328,185 @@ export function provenanceLines(record: RecordData): string[] {
       .map((k) => `${healthWords(k)}: ${r[k]}`),
   ];
 }
+
+// ---------------------------------------------------------------------------
+// ONE LINE PER RECORD
+// ---------------------------------------------------------------------------
+// The report showed every record as a stack of "Label: value" lines, five to
+// eight per record, repeating "Subject: BD-0001" and "Record state: Effective"
+// on a report that is already about her. `lifeRow` reads the same adapter
+// output (`lifeSummary`, so every domain keeps its wording and its states) and
+// lays it out as one row: when, what, the details, and -- only when it is not
+// the normal case -- the record's state.
+
+export interface LifeRow {
+  date: string;
+  title: string;
+  facts: string[];
+  /** Superseded, voided or a revision state. Null for the ordinary case. */
+  state: string | null;
+}
+
+const ORDINARY_STATE = new Set(['Record state: Effective', 'Record state: Current revision']);
+
+export function lifeRow(record: RecordData, domain: string, animalId?: string): LifeRow {
+  const lines = lifeSummary(record, domain);
+  const [first, ...rest] = lines;
+  let date = '';
+  let state: string | null = null;
+  const facts: string[] = [];
+  let due = '';
+  for (const line of rest) {
+    const m = /^(Date|Recorded date|Scheduled date): (.*)$/.exec(line);
+    if (m && !date) { date = m[2]; continue; }
+    if (animalId && line === `Subject: ${animalId}`) continue;
+    if (ORDINARY_STATE.has(line)) continue;
+    if (/^(Record state|Revision state): /.test(line)) {
+      state = state ? `${state} · ${line.split(': ')[1]}` : line.split(': ')[1];
+      continue;
+    }
+    if (line.startsWith('Due: ')) { due = line.slice(5); continue; }
+    facts.push(line);
+  }
+  // A task has a due date, not an occurred one: "Date not recorded" beside a
+  // due date read as a missing fact when it was simply the wrong field.
+  if ((!date || date === 'Date not recorded') && due) date = 'Due ' + due;
+  else if (due) facts.push('Due: ' + due);
+  return {
+    date: date || 'Date not recorded',
+    title: first ? first.charAt(0).toUpperCase() + first.slice(1) : '',
+    facts,
+    state,
+  };
+}
+
+/** "Recorded by adnan · Cycle card (card-01)" -- the provenance that stays in print. */
+export function recordedLine(record: RecordData): string {
+  const r = record['record'] ?? record;
+  const parts: string[] = [];
+  if (r.recorded_by) parts.push('Recorded by ' + r.recorded_by);
+  if (r.observed_by) parts.push('seen by ' + r.observed_by);
+  const form = r.source_form ? healthWords(r.source_form) : '';
+  const source = r.source_ref ? (form ? `${form} (${r.source_ref})` : r.source_ref) : form;
+  if (source) parts.push(source.charAt(0).toUpperCase() + source.slice(1));
+  return parts.join(' · ');
+}
+
+/** "1 record", "3 records". */
+export function recordCount(n: number): string {
+  return `${n} ${n === 1 ? 'record' : 'records'}`;
+}
+
+// ---------------------------------------------------------------------------
+// THE SUMMARY AT THE TOP
+// ---------------------------------------------------------------------------
+// What someone opens a lifetime report to learn, from fields the response
+// already carries. Nothing here is computed from absent records: a missing
+// count stays missing rather than becoming zero.
+
+export interface LifeFact {
+  label: string;
+  value: string;
+  note?: string;
+}
+
+function daysBetween(from: string, to: string): number {
+  const a = Date.UTC(+from.slice(0, 4), +from.slice(5, 7) - 1, +from.slice(8, 10));
+  const b = Date.UTC(+to.slice(0, 4), +to.slice(5, 7) - 1, +to.slice(8, 10));
+  return Math.round((b - a) / 86_400_000);
+}
+
+export function lifeFacts(r: any, today: string): LifeFact[] {
+  const status = r.current_snapshot?.status ?? {};
+  const facts: LifeFact[] = [];
+  if (status.birth_on) {
+    const years = Math.floor(daysBetween(status.birth_on, today) / 365.25);
+    const exact = status.birth_precision === 'day';
+    facts.push({
+      label: 'Born',
+      value: reportDate(status.birth_on, status.birth_precision),
+      note: years >= 0 ? `${exact ? '' : 'about '}${years} ${years === 1 ? 'year' : 'years'} old` : undefined,
+    });
+  } else facts.push({ label: 'Born', value: 'Not recorded' });
+
+  facts.push({ label: 'Calvings', value: status.parity == null ? 'Not recorded' : String(status.parity) });
+
+  const calvings = (r.sections?.reproduction?.records ?? []).filter(
+    (e: RecordData) => e['type'] === 'calving' && e['effective'] !== false,
+  );
+  const last = calvings
+    .map((e: RecordData) => e['occurred_on'] as string)
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+  if (last) {
+    const lastRecord = calvings.find((e: RecordData) => e['occurred_on'] === last)!;
+    facts.push({ label: 'Last calving', value: reportDate(last, lastRecord['date_precision']) });
+  }
+
+  const open = (r.sections?.lactations?.records ?? []).find(
+    (l: RecordData) => l['id'] === status.open_lactation_id,
+  );
+  if (open?.started_on && open.start_precision === 'day') {
+    facts.push({ label: 'In milk', value: `Day ${daysBetween(open.started_on, today)}`, note: 'of this lactation' });
+  } else if (status.status) {
+    facts.push({ label: 'Now', value: healthWords(status.status) });
+  }
+
+  const t = r.totals ?? {};
+  if (t.measured_litres != null) {
+    const parts = [`${t.measured_sessions ?? 0} measured`];
+    if (t.unmeasured_sessions) parts.push(`${t.unmeasured_sessions} not measured`);
+    if (t.not_milked_sessions) parts.push(`${t.not_milked_sessions} not milked`);
+    facts.push({
+      label: r.filters?.from || r.filters?.to ? 'Milk in range' : 'Milk recorded',
+      value: `${new Intl.NumberFormat('en', { maximumFractionDigits: 1 }).format(t.measured_litres)} L`,
+      note: parts.join(' · ') + ' sessions',
+    });
+  }
+
+  const tasks = (r.health?.records ?? []).filter(
+    (h: RecordData) => h['entity'] === 'tasks' && h['status'] === 'pending',
+  );
+  const overdue = tasks.filter((h: RecordData) => h['due_on'] && h['due_on'] < today).length;
+  const withdrawals = (r.health?.withdrawals ?? []).length;
+  const healthParts: string[] = [];
+  if (overdue) healthParts.push(`${overdue} overdue`);
+  if (withdrawals) healthParts.push(`${withdrawals} ${withdrawals === 1 ? 'withdrawal' : 'withdrawals'}`);
+  facts.push({
+    label: 'Health tasks open',
+    value: String(tasks.length),
+    note: healthParts.join(' · ') || undefined,
+  });
+  return facts;
+}
+
+/** A pending task's standing against today, for its badge. */
+export function taskStanding(due: string | null | undefined, today: string): 'overdue' | 'today' | 'upcoming' | 'undated' {
+  if (!due) return 'undated';
+  return due < today ? 'overdue' : due === today ? 'today' : 'upcoming';
+}
+
+/** "Meat withdrawal · Demonstration vaccine · end not known, needs clarification". */
+export function withdrawalLine(w: RecordData): string {
+  const target = w['target'] ? healthWords(w['target']) : 'Unknown';
+  const parts = [`${target.charAt(0).toUpperCase() + target.slice(1)} withdrawal`];
+  if (w['product_name']) parts.push(w['product_name']);
+  if (w['instruction']) parts.push(w['instruction']);
+  parts.push(w['until'] ? 'until ' + reportDate(w['until']) : 'end not known, needs clarification');
+  return parts.join(' · ');
+}
+
+/**
+ * One parentage record in words, from this animal's side: "Mother of BD-0018",
+ * or "Dam: BD-0003" when the record is about her own parent. Confidence is
+ * kept only when it is not "known".
+ */
+export function familyLine(r: RecordData, animalId: string): string {
+  const relation = String(r['relation'] ?? 'parent');
+  const sure = r['certainty'] && r['certainty'] !== 'known' ? ` (${healthWords(r['certainty'])})` : '';
+  if (r['parent_ref'] === animalId && r['child_id'])
+    return `${relation === 'dam' ? 'Mother' : relation === 'sire' ? 'Father' : 'Parent'} of ${r['child_id']}${sure}`;
+  const label = relation.charAt(0).toUpperCase() + relation.slice(1);
+  return `${label}: ${r['parent_ref'] ?? 'not recorded'}${sure}`;
+}

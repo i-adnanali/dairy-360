@@ -1,7 +1,10 @@
 
     <div data-page-layout="review">
     <div class="mx-auto  space-y-6">
-      <a routerLink="/labour/people" class="text-sm text-content-muted underline">← People</a>
+      <a routerLink="/labour/people" class="person-back" data-role="back-to-people">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
+        People
+      </a>
 
       @if (loadError(); as e) {
         <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
@@ -11,9 +14,8 @@
         <header class="space-y-1">
           <h2 appPageHeading>
             {{ s.name ?? s.identifier }}
-            <span class="ml-2 font-mono text-sm font-normal text-content-subtle">{{
-              s.identifier
-            }}</span>
+            <!-- The identifier is what records and "observed by" carry. -->
+            <span class="ml-2 text-sm font-normal text-content-subtle" data-role="identifier">on records as {{ s.identifier }}</span>
           </h2>
           <p
             class="text-sm"
@@ -22,10 +24,15 @@
           >
             {{ balanceLabel(s) }}
           </p>
-          <p appHelp>{{ openStints(s) }} open employment stint(s)</p>
-          <a appButton variant="secondary" href="#person-payment" (click)="focusPayment($event)">Record payment or adjustment</a>
+          <p appHelp>{{ openStints(s) }} open employment {{ openStints(s) === 1 ? 'stint' : 'stints' }}</p>
+          <div class="flex flex-wrap gap-2 pt-3">
+            <button type="button" appButton variant="secondary" data-role="show-payment"
+              aria-controls="person-payment" [attr.aria-expanded]="paying()" (click)="openPayment()">Record payment or adjustment</button
+            ><a appButton variant="secondary" routerLink="/labour/payroll" data-role="to-payroll">Payroll this month</a>
+          </div>
         </header>
 
+        @if (paying()) {
         <!-- Record a payment. -->
         <form data-page-layout="entry"
           [appWriteLock]="payState"
@@ -130,7 +137,7 @@
             <app-identifier-input
               field="observed_by"
               label="Handed over by"
-              help="Person who handed over this payment, if known. Use a stable identifier, not a display name."
+              help="Who handed over this payment, if you know. Pick the name from the list, so it is spelled the same on every record."
               name="observed_by"
               [value]="observedBy()"
               (changed)="observedBy.set($event)"
@@ -154,8 +161,12 @@
           } @else {
             <app-session-required what="a payment" />
           }
+          <button type="button" appButton variant="secondary" data-role="cancel-payment" (click)="cancelPayment()">Cancel</button>
         </form>
+        }
 
+        <!-- While a payment is being entered the rest of the statement steps aside. -->
+        @if (!paying()) {
         <!-- Stints. Overlapping and multiple-open are LEGITIMATE and are
              rendered plainly -- the screen must not mark them as a problem. -->
         <section class="space-y-2" data-role="engagements">
@@ -182,7 +193,7 @@
                       }
                     </span>
                     <span appHelp size="xs">
-                      {{ e.started_on }} → {{ e.ended_on ?? 'open' }}
+                      {{ stint(e.started_on, e.ended_on) }}
                       @if (e.ended_on) {
                         <span appBadge tone="ended">closed engagement</span>
                       }
@@ -292,7 +303,7 @@
                 <div
                   class="flex flex-wrap items-baseline justify-between gap-2 bg-surface-sunken px-3 py-2 text-sm"
                 >
-                  <span class="font-medium text-content-primary">{{ m.month }}</span>
+                  <span class="font-medium text-content-primary">{{ month(m.month) }}</span>
                   <span class="font-mono tabular-nums text-content-secondary">
                     earned {{ formatMinor(m.earned_minor) }} · paid
                     {{ formatMinor(m.paid_minor) }} ·
@@ -304,10 +315,7 @@
                     <li class="flex flex-wrap gap-2 items-baseline justify-between px-3 py-1.5">
                       <span>
                         {{ w.kind === 'bonus' ? 'Bonus' : 'Wage' }}
-                        {{ w.from_on }}
-                        @if (w.to_on !== w.from_on) {
-                          <span> → {{ w.to_on }}</span>
-                        }
+                        {{ period(w.from_on, w.to_on) }}
                         @if (w.note) {
                           <span appHelp size="xs" tone="subtle">· {{ w.note }}</span>
                         }
@@ -320,8 +328,10 @@
                       class="flex flex-wrap gap-2 items-baseline justify-between px-3 py-1.5 text-content-secondary"
                     >
                       <span>
-                        {{ p.method === 'adjustment' ? 'Adjustment' : 'Paid' }} {{ p.occurred_on }}
-                        <span appHelp size="xs" tone="subtle">{{ p.method }}</span>
+                        {{ p.method === 'adjustment' ? 'Adjustment' : 'Paid' }} {{ day(p.occurred_on) }}
+                        @if (p.method !== 'adjustment') {
+                          <span appHelp size="xs" tone="subtle">· {{ methodWord(p.method) }}</span>
+                        }
                         @if (p.reference) {
                           <span appHelp size="xs" tone="subtle">· {{ p.reference }}</span>
                         }
@@ -339,6 +349,7 @@
             }
           }
         </section>
+        }
 
 
       } @else {

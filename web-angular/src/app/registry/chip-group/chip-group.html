@@ -24,7 +24,9 @@
           @if (i < 9) {
             <span class="mr-1.5 font-mono text-xs opacity-60" data-role="chip-key">{{ i + 1 }}</span>
           }
-          <span>{{ o.label }}</span>
+          <!-- Sentence case: only the first letter is raised. "capitalize" on
+               the button made every word a capital ("Only When They Come"). -->
+          <span class="inline-block first-letter:uppercase">{{ o.label }}</span>
           @if (o.hint) {
             <span [id]="name() + '-hint-' + i" class="ml-2 text-xs">{{ o.hint }}</span>
           }

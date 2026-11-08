@@ -1,4 +1,7 @@
-@if (total() > 0) {
+<!-- Nothing to page through, nothing to say: "1–2 of 2" under a two-row
+     table was noise on every short list. Shown once there is a second page
+     or enough rows to offer a page size. -->
+@if (total() > 0 && (pages() > 1 || total() > 25)) {
     <nav
       [attr.aria-label]="label() + ' pagination'"
       class="flex flex-wrap items-center justify-between gap-3 py-4 text-sm text-content-secondary"

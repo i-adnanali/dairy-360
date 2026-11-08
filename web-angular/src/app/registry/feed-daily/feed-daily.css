@@ -1,1 +1,21 @@
-/* This component uses shared styles; no local rules are needed. */
+:host { display: block; }
+
+.feed-day-tools {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem;
+}
+
+/*
+ * The account's actions stick to the bottom of the scrolling page, so Review,
+ * Save and Cancel are in reach from the first section of a long account rather
+ * than after every line, note and reference field.
+ */
+.feed-day-actions {
+  /* The scroller (main) has 1.5rem of bottom padding, and a sticky offset is
+     measured inside it; -1.5rem puts the bar on the real bottom edge. */
+  position: sticky; bottom: -1.5rem; z-index: 5;
+  display: grid; gap: 0.5rem;
+  margin: 0 -1rem -1.5rem; padding: 0.75rem 1rem 2.25rem;
+  border-top: 1px solid rgb(var(--border-subtle));
+  background: rgb(var(--surface-page) / 0.96);
+  backdrop-filter: blur(6px);
+}

@@ -145,7 +145,7 @@ export function intervalReport(
     measured,
     approximate,
     caveat:
-      `${measured.count} measured and ${approximate.count} approximate interval(s). ` +
+      `${measured.count} measured and ${approximate.count} approximate ${measured.count + approximate.count === 1 ? 'interval' : 'intervals'}. ` +
       'These are reported separately and never averaged together: an approximate ' +
       'interval from two month-precision calvings carries roughly +/-60 days, larger ' +
       'than the difference between a good interval and a bad one. At this herd size ' +

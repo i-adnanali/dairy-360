@@ -3,13 +3,18 @@
     @if(paging.loading()){<p role="status" class="text-sm text-content-muted">Loading records…</p>}
 
     <div class="space-y-4">
-      <header class="page-header"><h2 appPageHeading>Calvings</h2><a routerLink="/animals/calvings/new" appButton>Record calving</a></header>
-    <label class="mb-3 block text-sm text-content-secondary">Search records <input appInput type="search" maxlength="100" class="rounded border border-line bg-surface-page p-2" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})"></label>
-
-      <p class="max-w-[68ch] text-sm text-content-muted">
-        Recorded calvings across the herd. Open the animal to inspect or correct its history.
-        Approximate dates keep their recorded precision.
-      </p>
+      <header class="page-header">
+        <div class="space-y-1">
+          <h2 appPageHeading>Calvings</h2>
+          <p class="max-w-[68ch] text-sm text-content-muted">
+            Every recorded calving, newest first. Open the dam to inspect or correct her history.
+          </p>
+        </div>
+        <a routerLink="/animals/calvings/new" appButton>Record calving</a>
+      </header>
+      <label class="block max-w-xs"><span class="mb-1 block text-sm font-medium text-content-secondary">Find dam</span>
+        <input appInput type="search" maxlength="100" placeholder="ID or name" class="w-full" [value]="paging.url.value().search" (change)="paging.url.set({search:$any($event.target).value,page:'1'})">
+      </label>
       @if (error()) {
         <p appErrorPanel>{{ error() }}</p>
         <button type="button" (click)="load()">Retry</button>
@@ -18,33 +23,39 @@
           <table class="w-full text-left text-sm" data-role="calvings-table">
             <thead>
               <tr>
-                <th appCell>Dam</th>
                 <th appCell>Date</th>
+                <th appCell>Dam</th>
                 <th appCell>Outcome</th>
-                <th appCell>Record</th>
+                <th appCell>Calf</th>
               </tr>
             </thead>
             <tbody>
               @for (row of records; track row.event.id) {
                 <tr [appRowLink]="'/animals/' + row.animal.id" class="border-t border-line-subtle">
-                  <td appCell>
-                    <a appIdentifier [routerLink]="['/animals', row.animal.id]">{{
-                      row.animal.id
-                    }}</a>
-                    {{ row.animal.name }}
-                  </td>
-                  <td appCell>
+                  <td appCell class="whitespace-nowrap">
                     @let date = precision(row.event.occurred_on, row.event.date_precision);
                     <span [appCertainty]="date.state">{{ date.figure }}</span>
                     @if (date.qualifier) {
                       <span appQualifier>{{ date.qualifier }}</span>
                     }
                   </td>
-                  <td appCell>{{ row.event.payload['outcome'] ?? 'not recorded' }}</td>
                   <td appCell>
-                    <span appBadge [tone]="row.event.effective ? 'neutral' : 'ended'">{{
-                      row.event.effective ? 'effective' : 'superseded'
-                    }}</span>
+                    <a appIdentifier [routerLink]="['/animals', row.animal.id]">{{ row.animal.id }}</a>
+                    {{ row.animal.name }}
+                  </td>
+                  <td appCell>
+                    {{ outcome(row.event) }}
+                    <!-- Only the exception is marked: almost every row is the effective one. -->
+                    @if (!row.event.effective) {
+                      <span appBadge tone="ended" class="ml-2">superseded</span>
+                    }
+                  </td>
+                  <td appCell>
+                    @if (calf(row.event); as c) {
+                      <a appIdentifier [routerLink]="['/animals', c]" (click)="$event.stopPropagation()">{{ c }}</a>
+                    } @else {
+                      <span class="text-content-muted">—</span>
+                    }
                   </td>
                 </tr>
               } @empty {

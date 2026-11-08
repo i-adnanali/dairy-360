@@ -4,7 +4,8 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, withComponentInputBinding, TitleStrategy } from '@angular/router';
+import { FarmTitleStrategy } from './registry/page-title';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { routes } from './app.routes';
 
@@ -17,6 +18,7 @@ export const appConfig: ApplicationConfig = {
     // reached the server through @ag-ui/client's SSE transport, and
     // @angular/router / @angular/forms were installed but never imported.
     provideRouter(routes, withComponentInputBinding()),
+    { provide: TitleStrategy, useClass: FarmTitleStrategy },
     provideHttpClient(withFetch()),
   ],
 };

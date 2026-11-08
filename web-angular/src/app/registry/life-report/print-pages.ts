@@ -79,7 +79,9 @@ export function reportPrintPages(source: HTMLElement, identity: string, reportTi
     } else text(node);
   };
   try {
-    for (const section of Array.from(source.querySelectorAll('section'))) {
+    // A section marked no-print (the Technical audit, which is the JSON export
+    // again) stays on screen and out of the pages.
+    for (const section of Array.from(source.querySelectorAll<HTMLElement>('section:not(.no-print)'))) {
       const children = Array.from(clean(section).children) as HTMLElement[];
       // Keep heading + explanatory note + the first record together when possible.
       const intro = document.createElement('div');

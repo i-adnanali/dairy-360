@@ -1,0 +1,28 @@
+@if (slots().length) {
+  <nav aria-label="Today's sessions" class="session-board" data-role="session-board">
+    <ol>
+      @for (s of slots(); track s.key) {
+        <li>
+          <a
+            class="slot"
+            [attr.data-state]="s.state"
+            [attr.data-slot]="s.key"
+            [attr.data-selected]="selected() === s.key ? 'true' : null"
+            [attr.aria-current]="selected() === s.key ? 'page' : s.state === 'lit' ? 'step' : null"
+            [routerLink]="s.link"
+            [queryParams]="s.query"
+          >
+            <span class="slot-label">{{ s.label }}</span>
+            <span class="slot-figure">{{ s.figure }}</span>
+            <span class="slot-caption">
+              @if (s.state === 'lit') {<span class="slot-now">Now</span><span class="slot-sep"> · </span>}<span class="slot-cap">{{ s.caption }}</span>
+            </span>
+          </a>
+        </li>
+      }
+    </ol>
+    @if (allDone()) {
+      <p class="slot-all" data-role="sessions-all-done">Every session today is recorded.</p>
+    }
+  </nav>
+}

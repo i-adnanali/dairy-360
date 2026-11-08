@@ -1,3 +1,4 @@
+import { dayText, personLabel } from '../labour-format';
 import { ScrollRegion } from "../../ui/scroll-region";
 import { Field } from "../../ui/field/field";
 import { writerDraft } from "../writer-draft";
@@ -37,8 +38,8 @@ import { IdentifierLink, RowLink } from "../../ui/navigation";
 // (docs/records/REGISTRY_SALES.md §15); this screen answers it one way so there is something
 // concrete to disagree with.
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, Injector, afterNextRender, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { ChipGroup } from "../chip-group/chip-group";
 import { Cell } from "../../ui/cell";
@@ -55,7 +56,7 @@ import type { EngagementKind, Person, WageBalanceRow } from "../types";
 import { Card } from "../../ui/surface";
 import { ErrorPanel } from "../../ui/surface";
 import { ErrorText } from "../../ui/surface";
-import { HelpText } from "../../ui/text";
+import { FieldLabel, HelpText } from "../../ui/text";
 import { TextInput } from "../../ui/input";
 import { PageHeading } from "../../ui/heading";
 import { RowDivider } from "../../ui/surface";
@@ -66,7 +67,7 @@ import { Button } from "../../ui/button";
 @Component({
   selector: 'app-people-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ScrollRegion, Field,
+  imports: [ScrollRegion, Field, FieldLabel,
     WriteLock,
     Pagination,
     StatusBadge,
@@ -92,13 +93,47 @@ import { Button } from "../../ui/button";
   styleUrl: './people-list.css',
 })
 export class PeopleList {
+  protected readonly day = dayText;
+  protected readonly label = personLabel;
   protected readonly personSearch = signal('');
   protected matchingPeople<T extends {person_id: string; identifier: string; name: string | null}>(list: T[]) {
     const query = this.personSearch().trim().toLowerCase();
     return list.filter(p => p.person_id === this.engagePerson() || (p.identifier + ' ' + (p.name ?? '')).toLowerCase().includes(query));
   }
-  protected focusAdd(event: Event) { event.preventDefault(); const field = document.querySelector<HTMLInputElement>('#add-person input'); field?.focus(); field?.scrollIntoView({ block: 'center' }); }
-  protected focusStint(event: Event) { event.preventDefault(); document.querySelector<HTMLInputElement>('#open-stint input')?.focus(); }
+  /**
+   * WHICH FORM IS OPEN, if any. Both forms used to render permanently under the
+   * table, and the header buttons only scrolled down to them -- so the page
+   * always ended in two blank forms, and the buttons read as actions that did
+   * nothing visible. Now each opens on demand, directly under the header, and
+   * closes with Cancel. With nobody on file "Add person" is the only useful
+   * action, so it starts open; the nav's #add-person link opens it too.
+   */
+  protected readonly panel = signal<'none' | 'person' | 'stint'>('none');
+  private readonly injector = inject(Injector);
+  protected openPanel(which: 'person' | 'stint'): void {
+    this.panel.set(this.panel() === which ? 'none' : which);
+    if (this.panel() === which) this.focusFirst(which === 'person' ? '#add-person' : '#open-stint');
+  }
+  protected cancelPanel(which: 'person' | 'stint'): void {
+    // Cancel discards what was typed, so a closed form never holds a hidden draft
+    // that the leave-page guard would then ask about.
+    if (which === 'person') {
+      this.identifier.set(''); this.name.set(''); this.contact.set('');
+      this.personDraft.accept();
+    } else {
+      this.engagePerson.set(''); this.engageRole.set(''); this.engageFrom.set(farmToday());
+      this.engageDraft.accept();
+    }
+    this.panel.set('none');
+    afterNextRender(() => document.querySelector<HTMLElement>(`[data-role="show-${which === 'person' ? 'add-person' : 'open-stint'}"]`)?.focus(), { injector: this.injector });
+  }
+  private focusFirst(selector: string): void {
+    afterNextRender(() => {
+      const field = document.querySelector<HTMLElement>(`${selector} input, ${selector} select`);
+      field?.focus();
+      document.querySelector(selector)?.scrollIntoView({ block: 'nearest' });
+    }, { injector: this.injector });
+  }
   protected personDraft!: ReturnType<typeof writerDraft>;
   protected engageDraft!: ReturnType<typeof writerDraft>;
   protected readonly paging = pagedList<WageBalanceRow>('people');
@@ -143,13 +178,16 @@ export class PeopleList {
       states: [this.engageState],
     });
 
+    if (inject(ActivatedRoute).snapshot.fragment === 'add-person') this.openPanel('person');
     void this.load();
   }
 
   private async load(): Promise<void> {
     this.paging.refresh();
     try {
-      this.rows.set(await this.api.people(farmToday()));
+      const people = await this.api.people(farmToday());
+      this.rows.set(people);
+      if (people.length === 0 && this.panel() === 'none') this.panel.set('person');
       this.loadError.set(null);
     } catch (e) {
       this.loadError.set(e instanceof Error ? e.message : String(e));
@@ -211,6 +249,10 @@ export class PeopleList {
       this.contact.set('');
       this.personDraft.accept();
       await this.load();
+      // The success message says "open a stint" -- so open it, for this person.
+      this.engagePerson.set(result.id);
+      this.panel.set('stint');
+      this.focusFirst('#open-stint');
     }
   }
 
@@ -239,6 +281,7 @@ export class PeopleList {
       );
       this.engageRole.set('');
       this.engageDraft.accept();
+      this.panel.set('none');
       await this.load();
     }
   }

@@ -19,7 +19,7 @@ import { StatusBadge } from "../../ui/surface";
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import type { TimelineEvent } from "../types";
 import { Certainty, Qualifier } from "../../ui/certainty";
-import { precisionParts } from "../precision-display";
+import { precisionParts, readableParts } from "../precision-display";
 import type { PrecisionParts } from "../precision-display";
 
 @Component({
@@ -32,10 +32,34 @@ import type { PrecisionParts } from "../precision-display";
 export class EventList {
   /** The event's date at the precision it was known to. See precision-display.ts. */
   protected when(e: TimelineEvent): PrecisionParts {
-    return precisionParts(e.occurred_on, e.date_precision);
+    return readableParts(e.occurred_on, e.date_precision);
   }
 
   readonly events = input.required<TimelineEvent[]>();
+  /** The animal page reads newest first; the correction view keeps the log's order. */
+  readonly newestFirst = input(false);
+  protected readonly ordered = computed(() => {
+    const e = this.events();
+    return this.newestFirst()
+      ? [...e].sort((a, b) => (a.occurred_on === b.occurred_on ? (b.occurred_time ?? '').localeCompare(a.occurred_time ?? '') : a.occurred_on < b.occurred_on ? 1 : -1))
+      : e;
+  });
+  /** "Cycle card" rather than cycle_card -- the same words the session panel uses. */
+  protected source(form: string): string {
+    return ({ daily_herd_sheet: 'Daily herd sheet', cycle_card: 'Cycle card', direct_entry: 'Direct entry', import: 'Import', recall: 'Recall' } as Record<string, string>)[form] ?? form;
+  }
+
+  /**
+   * The source's own reference. A daily sheet's reference is its date: shown in
+   * words, and dropped when it is the event's own day, where it says nothing new.
+   */
+  protected sourceRef(e: TimelineEvent): string | null {
+    const ref = e.source_ref;
+    if (!ref) return null;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ref)) return ref;
+    if (ref === e.occurred_on && e.date_precision === 'day') return null;
+    return 'sheet of ' + readableParts(ref, 'day').figure;
+  }
 
   /**
    * The override record on an event, when a guard was stepped past to write it.

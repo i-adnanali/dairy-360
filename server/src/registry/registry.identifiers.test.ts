@@ -23,6 +23,7 @@ test('an empty registry offers empty lists, not an error', () => {
     observed_by: [],
     acquired_from: [],
     sire_ref: [],
+    recorded_by: [],
   });
 });
 
@@ -155,4 +156,19 @@ test('a name on a SUPERSEDED event is still suggested', () => {
 
   // `abdul` is now only on a superseded event, and must still be offered.
   assert.deepEqual(identifierValues(db).observed_by, ['abdul', 'adnan', 'rashid']);
+});
+
+test('recorded_by offers who has typed here, most-used first', () => {
+  const db = freshDb();
+  addAcquired(db, {
+    id: 'BD-0001', sex: 'female', acquired_on: '2019-01-01', acquired_precision: 'year',
+    provenance: { source_form: 'recall', recorded_by: 'zainab', observed_by: null },
+  });
+  for (const text of ['one', 'two'])
+    appendLifeEvent(db, {
+      animal_id: 'BD-0001', type: 'note', text, occurred_on: '2024-03-01', date_precision: 'month',
+      provenance: { source_form: 'direct_entry', recorded_by: 'adnan', observed_by: null },
+      asOf: AS_OF,
+    });
+  assert.deepEqual(identifierValues(db).recorded_by, ['adnan', 'zainab']);
 });

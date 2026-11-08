@@ -1,16 +1,17 @@
 
     <div class="flex h-full flex-col bg-surface-page text-content-primary">
       <header
-        [inert]="assistant.modal()"
-        class="border-b border-line-subtle bg-surface-raised px-4"
+        [inert]="assistant.modal() || setupPanel()"
+        class="shell-band bg-shell px-4 text-shell-fg"
+        data-role="shell-band"
       >
         <div class="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 py-3">
           <div class="flex flex-wrap items-center gap-3">
-            <h1 class="text-base font-semibold tracking-tight">Dairy 360</h1>
+            <h1 class="text-lg font-bold tracking-tight">Dairy 360</h1>
             <app-session-bar mode="storage" />
             <app-session-bar mode="session" />
           </div>
-          <div class="shell-utilities flex flex-wrap items-center gap-3">
+          <div class="shell-utilities flex flex-wrap items-center gap-4">
         <button appButton variant="secondary" class="mobile-menu-toggle" [attr.aria-label]="'Menu · ' + activeSection().label" [attr.aria-expanded]="menuOpen()" aria-controls="section-navigation" (keydown.escape)="closeMenu($event)" (click)="menuOpen.set(!menuOpen())">Menu<span class="menu-current-section"> · {{ activeSection().label }}</span></button>
             <button type="button" appTextLink (click)="palette.show()" data-role="search-toggle">
               Search <kbd>{{ palette.chordLabel }}</kbd>
@@ -25,6 +26,11 @@
               data-role="assistant-toggle"
             >
               Assistant
+              @if (pendingApprovals(); as n) {
+                <span class="approval-count" data-role="approval-count"
+                  >{{ n }}<span class="sr-only"> {{ n === 1 ? 'action' : 'actions' }} awaiting your approval</span></span
+                >
+              }
             </button>
           </div>
         </div>
@@ -47,20 +53,21 @@
               >{{ section.label }}</a>
             @if (menuOpen()) {
               <div class="mobile-section-links">
-                @for (view of section.views; track view.path) { <a [routerLink]="view.path" routerLinkActive="font-semibold" [routerLinkActiveOptions]="{exact: true}">{{ view.label }}</a> }
+                @for (view of section.views; track view.path) { <a [routerLink]="view.path" [class.font-semibold]="activeView() === view.path" [attr.aria-current]="activeView() === view.path ? 'page' : null">{{ view.label }}</a> }
               </div>
             }
             </div>
           }
         </nav>
+        <div class="mx-auto max-w-[1400px] pb-3 pt-2">
+          <app-session-board />
+        </div>
       </header>
-      @if (
-        activeSection().views.length ||
-        activeSection().label === 'Today' ||
-        activeSection().label === 'Check'
-      ) {
+      <!-- No bar on Today: it held a lone "Start a recording session" button,
+           which now lives in the header on every page. -->
+      @if (activeSection().views.length || activeSection().label === 'Check') {
         <div
-          [inert]="assistant.modal()"
+          [inert]="assistant.modal() || setupPanel()"
           class="border-b border-line-subtle bg-surface-sunken px-4"
           data-role="section-bar"
         >
@@ -72,37 +79,15 @@
                 @for (view of activeSection().views; track view.path) {
                   <a
                     [routerLink]="view.path"
-                    routerLinkActive="font-medium !text-content-primary"
-                    [routerLinkActiveOptions]="{ exact: true }"
+                    data-role="section-view"
+                    [attr.aria-current]="activeView() === view.path ? 'page' : null"
                     appTextLink
                     >{{ view.label }}</a
                   >
                 }
               </nav>
             }
-            <div class="flex flex-wrap gap-3">
-              @if (activeSection().label === 'Check') {
-                <button
-                  type="button"
-                  appButton
-                  variant="secondary"
-                  (click)="actions.refresh()"
-                  data-role="section-recheck"
-                >
-                  Recheck
-                </button>
-              } @else if (activeSection().label === 'Today') {
-                <button
-                  type="button"
-                  appButton
-                  variant="secondary"
-                  (click)="session.requestSetup()"
-                  data-role="section-start-session"
-                >
-                  {{ session.ready() ? 'Change recording session' : 'Start a recording session' }}
-                </button>
-              }
-            </div>
+            <!-- Check's Recheck now sits in that page's own header. -->
           </div>
         </div>
       }
@@ -149,24 +134,33 @@
            the screen STAYS MOUNTED. Swapping the outlet for it would destroy
            the routed component and take any half-typed figure with it, which is
            precisely the moment somebody reaches for this. -->
-      @if (session.setupOpen() && (session.ready() || !writeOnlyRoute())) {
-        <div
-          class="max-h-[70vh] overflow-y-auto border-b border-line-subtle bg-surface-raised"
-          [inert]="assistant.modal()"
+      @if (setupPanel()) {
+        <!-- A side panel over the page: full height, one scroll, Start always in
+             view. The page behind is dimmed and inert but STAYS MOUNTED, so a
+             half-typed form survives. Escape, the scrim, Close and Cancel all
+             close it, and focus returns to the control that opened it. -->
+        <div class="session-scrim" aria-hidden="true" (click)="session.dismissSetup()"></div>
+        <aside
+          class="session-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="session-panel-title"
           data-role="session-setup"
+          [inert]="assistant.modal()"
+          (keydown.escape)="session.dismissSetup()"
         >
-          <button type="button" class="m-3 text-sm underline" (click)="session.dismissSetup()">
-            Cancel session setup
-          </button>
-          <app-session-gate />
-        </div>
+          <app-session-gate [purpose]="session.purpose()" (cancelled)="session.dismissSetup()" />
+        </aside>
       }
 
       <!-- B5: reserve the nonmodal desktop dock in the content grid. -->
       <div class="assistant-layout min-h-0 flex-1" [class.has-assistant]="assistant.open()">
-        <main [inert]="assistant.modal()" class="phase7-content flex-1 overflow-y-auto px-4 py-6">
+        <main [inert]="assistant.modal() || setupPanel()" class="phase7-content flex-1 overflow-y-auto px-4 py-6">
           @if (writeOnlyRoute() && !session.ready()) {
-            <app-session-gate />
+            <!-- A page that is nothing but a form asks first, and says what for. -->
+            <div class="session-inline">
+              <app-session-gate [dismissible]="false" [purpose]="writeOnlyPurpose()" (cancelled)="leaveWriteOnly()" />
+            </div>
           } @else {
             <router-outlet />
           }

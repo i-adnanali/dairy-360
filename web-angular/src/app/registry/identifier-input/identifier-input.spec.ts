@@ -57,14 +57,15 @@ describe('IdentifierInput', () => {
     );
   });
 
-  it('tells every identifier field to be a stable identifier', () => {
+  it('tells every identifier field to keep one spelling, in plain words', () => {
     // The guidance that prevents abdul/Abdul/abdul_r was on `recorded_by`
     // alone. It belongs on every free-text identifier, and living in one
     // constant is what stops three forms drifting apart again.
     for (const field of ['observed_by', 'acquired_from', 'sire_ref'] as IdentifierField[]) {
       const { el } = make(field);
       const hint = el.querySelector(`[data-role="${field}-hint"]`)!;
-      expect(hint.textContent).toContain('stable identifier, not a display name');
+      expect(hint.textContent).toMatch(/spelled the same|same spelling/);
+      expect(hint.textContent).not.toContain('stable identifier');
     }
   });
 

@@ -39,6 +39,8 @@ for (const component of [DestinationDetail, PersonDetail]) {
     });
     for (const field of ['amount_minor', 'method', 'note', 'occurred_on']) {
       it(`shows a payment refusal for ${field}`, async () => {
+        // Person detail opens its payment form on demand; a refusal only ever answers an open form.
+        view.paying?.set(true);
         view.payState.error.set(new ApiError({ error: 'refused', field, message: `Refused ${field}` }, true));
         await fixture.whenStable();
         expect(fixture.nativeElement.textContent).toContain(`Refused ${field}`);

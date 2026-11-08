@@ -414,6 +414,20 @@ export function allFarmEvents(): FarmEvent[] {
   return rows.map(toFarmEvent);
 }
 
+/** Farm events in [from, to), oldest first, without the raw payload: the
+ * Farm Monitor screen's read (farm/monitorRoutes.ts). */
+export function farmEventsBetween(fromIso: string, toIso: string): Omit<FarmEvent, 'raw_payload'>[] {
+  const rows = db
+    .prepare(
+      `SELECT * FROM farm_events WHERE occurred_at >= ? AND occurred_at < ? ORDER BY occurred_at ASC, id ASC`,
+    )
+    .all(fromIso, toIso) as FarmEventRow[];
+  return rows.map((r) => {
+    const { raw_payload: _omit, ...rest } = toFarmEvent(r);
+    return rest;
+  });
+}
+
 /** Farm events for one camera, oldest first (used by the absence assertions in
  * the camera-dropout scenario). */
 export function farmEventsForCamera(cameraId: string): FarmEvent[] {

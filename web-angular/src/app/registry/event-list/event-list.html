@@ -8,7 +8,7 @@
       </p>
     } @else {
       <ol class="space-y-2" data-role="events">
-        @for (e of events(); track e.id) {
+        @for (e of ordered(); track e.id) {
           <li
             [attr.data-event]="e.id"
             [attr.data-effective]="e.effective"
@@ -62,26 +62,13 @@
 
               @if (!e.effective) {
                 <span appBadge tone="ended" data-role="superseded-badge">superseded</span>
+                <span class="text-xs text-content-subtle" data-role="superseded-note">replaced by a later correction</span>
+              } @else if (e.supersedes_id) {
+                <span class="text-xs text-content-subtle" data-role="correction-note">corrects an earlier entry</span>
               }
 
             </div>
 
-            <details class="mt-1 text-xs text-content-subtle">
-              <summary>Technical event details</summary>
-              <p class="break-all font-mono" data-role="id">{{ e.id }}</p>
-              @if (e.payload['calving_event_id']) { <p class="break-all">Linked calving event: {{ e.payload['calving_event_id'] }}</p> }
-              @if (e.payload['estimated_birth_on']) { <p>Stored birth date: {{ e.payload['estimated_birth_on'] }} · {{ e.payload['estimated_birth_precision'] ?? 'precision unknown' }}</p> }
-              @if (!e.effective && e.superseded_by_id) {
-                <p class="break-all" data-role="replaced-by">
-                  replaced by <span class="font-mono">{{ e.superseded_by_id }}</span>
-                </p>
-              }
-              @if (e.supersedes_id) {
-                <p class="break-all" data-role="replaces">
-                  replaces <span class="font-mono">{{ e.supersedes_id }}</span>
-                </p>
-              }
-            </details>
 
             @if (summary(e); as s) {
               <p
@@ -110,7 +97,7 @@
             }
 
             <p class="mt-1.5 text-xs text-content-subtle" data-role="provenance">
-              {{ e.source_form }}{{ e.source_ref ? ' · ' + e.source_ref : '' }} · recorded by
+              {{ source(e.source_form) }}{{ sourceRef(e) ? ' · ' + sourceRef(e) : '' }} · recorded by
               {{ e.recorded_by }}
               @if (e.observed_by) {
                 · observed by {{ e.observed_by }}
@@ -118,6 +105,25 @@
                 · <span class="italic">no witness recorded</span>
               }
             </p>
+
+            <!-- Ids last: they are what a correction targets and how you
+                 match a row to the export, but nobody reads the card for them. -->
+            <details class="mt-1 text-xs text-content-subtle">
+              <summary class="w-max cursor-pointer">Record ids</summary>
+              <p class="break-all font-mono" data-role="id">{{ e.id }}</p>
+              @if (e.payload['calving_event_id']) { <p class="break-all">Linked calving event: {{ e.payload['calving_event_id'] }}</p> }
+              @if (e.payload['estimated_birth_on']) { <p>Stored birth date: {{ e.payload['estimated_birth_on'] }} · {{ e.payload['estimated_birth_precision'] ?? 'precision unknown' }}</p> }
+              @if (!e.effective && e.superseded_by_id) {
+                <p class="break-all" data-role="replaced-by">
+                  replaced by <span class="font-mono">{{ e.superseded_by_id }}</span>
+                </p>
+              }
+              @if (e.supersedes_id) {
+                <p class="break-all" data-role="replaces">
+                  replaces <span class="font-mono">{{ e.supersedes_id }}</span>
+                </p>
+              }
+            </details>
           </li>
         }
       </ol>

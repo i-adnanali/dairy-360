@@ -1,3 +1,6 @@
+import { IdentifierLink } from '../../ui/navigation';
+import { dayText, periodText } from '../labour-format';
+import { SOURCE_FORMS, feedLabel } from '../feed-format';
 import { RouterLink } from '@angular/router';
 import { labourPresentation } from "../check-presentation";
 import { ScrollRegion } from "../../ui/scroll-region";
@@ -47,7 +50,6 @@ import { HelpText } from "../../ui/text";
 import { PageHeading } from "../../ui/heading";
 import { RowDivider } from "../../ui/surface";
 import { SectionHeading } from "../../ui/heading";
-import { SectionLabel } from "../../ui/text";
 import { SubHeading } from "../../ui/heading";
 
 @Component({
@@ -65,13 +67,26 @@ import { SubHeading } from "../../ui/heading";
     PageHeading,
     RowDivider,
     SectionHeading,
-    SectionLabel,
+    IdentifierLink,
     SubHeading,
   ],
   templateUrl: './verification-panel.html',
   styleUrl: './verification-panel.css',
 })
 export class VerificationPanel {
+  // Words, not stored values (UI_SYSTEM §6.1): "8 Nov 2026", "31 animals",
+  // "Cycle card", "Evening".
+  protected readonly day = dayText;
+  protected readonly period = periodText;
+  protected count(n: number, noun: string) {
+    return `${n} ${n === 1 ? noun : noun + 's'}`;
+  }
+  protected word(v: string | null | undefined) {
+    return feedLabel(v ?? '');
+  }
+  protected source(form: string) {
+    return SOURCE_FORMS[form] ?? feedLabel(form);
+  }
   /** §6's no-record glyph, for the template. An en dash. */
   protected readonly noRecord = NO_RECORD;
 

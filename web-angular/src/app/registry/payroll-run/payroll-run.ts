@@ -1,3 +1,5 @@
+import { Identifiers } from "../identifiers";
+import { dayText, periodText } from "../labour-format";
 import { ElementRef } from '@angular/core';
 import { Pagination } from "../../ui/pagination/pagination";
 import { ScrollRegion } from "../../ui/scroll-region";
@@ -63,7 +65,7 @@ import { Card } from "../../ui/surface";
 import { Certainty } from "../../ui/certainty";
 import { NO_RECORD } from "../precision-display";
 import { ErrorPanel } from "../../ui/surface";
-import { HelpText } from "../../ui/text";
+import { FieldLabel, HelpText } from "../../ui/text";
 import { TextInput } from "../../ui/input";
 import { PageHeading } from "../../ui/heading";
 import { SectionHeading } from "../../ui/heading";
@@ -87,6 +89,7 @@ interface DihariDraft {
   selector: 'app-payroll-run',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FieldLabel,
     Pagination,
     ScrollRegion,
     RowDivider,
@@ -107,6 +110,9 @@ interface DihariDraft {
   styleUrl: './payroll-run.css',
 })
 export class PayrollRunScreen {
+  protected readonly identifiers = inject(Identifiers);
+  protected readonly day = dayText;
+  protected readonly period = periodText;
   protected readonly tablePage = signal(1);
   protected readonly tableSize = signal(25);
   private readonly element: ElementRef<HTMLElement> = inject(ElementRef);
@@ -179,6 +185,7 @@ export class PayrollRunScreen {
   protected readonly formatMinor = formatMinor;
 
   constructor() {
+    void this.identifiers.refresh();
     this.writer = writerDraft({
       name: 'Payroll',
       description: () => 'Payroll · ' + this.from() + ' to ' + this.to(),

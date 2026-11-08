@@ -477,12 +477,19 @@ export function analytics(
         ? result.buckets
         : days(range.from, range.to)
             .filter((d) => d <= today)
-            .map((d) => ({
-              key: d,
-              on: d,
-              session: "all",
-              ...aggregate(result.buckets.filter((b) => b.on === d)),
-            }));
+            .map((d) => {
+              const day = result.buckets.filter((b) => b.on === d);
+              return {
+                key: d,
+                on: d,
+                session: "all",
+                ...aggregate(day),
+                missingSessions: {
+                  milking: day.filter((b) => b.coverage.missing + b.coverage.pending > 0).map((b) => b.session),
+                  dispatch: day.filter((b) => b.dispatchMissing + b.dispatchPending > 0).map((b) => b.session),
+                },
+              };
+            });
     return {
       metricVersion: 1,
       generatedAt: now.toISOString(),

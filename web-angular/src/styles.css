@@ -1,4 +1,6 @@
 @import "@angular/cdk/overlay-prebuilt.css";
+/* Self-hosted: the app runs on localhost and must not depend on a font CDN. */
+@import "@fontsource-variable/archivo/index.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -45,25 +47,41 @@
  */
 :root {
   /* --- surfaces ------------------------------------------------------- */
-  --surface-page: 247 247 245;  /* #F7F7F5 */
+  /*
+   * SESSION BOARD (6 Nov 2026 redesign). The neutral ground below carries a
+   * faint green cast so the green shell band belongs to it; the clay accent
+   * is retired. Direction contract: web-angular/.impeccable/surfaces/.
+   */
+  --surface-page: 246 246 243;  /* #F6F6F3 */
   --surface-raised: 255 255 255;  /* #FFFFFF */
-  --surface-sunken: 239 238 235;  /* #EFEEEB */
+  --surface-sunken: 237 238 233;  /* #EDEEE9 */
 
   /* --- text ----------------------------------------------------------- */
-  --text-primary: 26 25 23;  /* #1A1917 */
-  --text-heading: 46 45 42;  /* #2E2D2A */
-  --text-secondary: 74 72 68;  /* #4A4844 */
-  --text-muted: 99 97 92;  /* #63615C */
-  --text-subtle: 108 106 100;
-  --text-disabled: 168 166 158;  /* #A8A69E */
+  --text-primary: 20 22 19;  /* #141613 */
+  --text-heading: 20 22 19;  /* #141613 */
+  --text-secondary: 66 70 63;  /* #42463F */
+  --text-muted: 88 92 84;  /* #585C54 */
+  --text-subtle: 95 99 91;  /* #5F635B */
+  --text-disabled: 160 163 155;  /* #A0A39B */
   --text-on-fill: 255 255 255;  /* #FFFFFF */
+  /* Placeholders carry real hints (date formats), so they meet 4.5:1. */
+  --text-placeholder: 104 108 99;  /* #686C63 */
 
   /* --- lines ---------------------------------------------------------- */
-  --border-hairline: 239 238 235;  /* #EFEEEB */
-  --border-subtle: 227 226 222;  /* #E3E2DE */
-  --border-control: 128 122 111; /* necessary control boundary */
-  --border-default: 203 201 195;  /* #CBC9C3 */
-  --border-strong: 168 166 158;  /* #A8A69E */
+  --border-hairline: 237 238 233;  /* #EDEEE9 */
+  --border-subtle: 225 227 220;  /* #E1E3DC */
+  --border-control: 117 122 112; /* #757A70, necessary control boundary */
+  --border-default: 201 204 195;  /* #C9CCC3 */
+  --border-strong: 158 162 152;  /* #9EA298 */
+
+  /* --- the shell band and the session board --------------------------- */
+  --shell-bg: 15 61 46;  /* #0F3D2E */
+  --shell-bg-deep: 11 47 35;  /* #0B2F23 */
+  --shell-fg: 255 255 255;
+  --shell-muted: 185 210 199;  /* #B9D2C7 */
+  --shell-line: 44 106 82;  /* #2C6A52 */
+  --session-lit: 212 167 44;  /* #D4A72C, the current session */
+  --session-lit-fg: 20 22 19;
   /*
    * A STATE, NOT A BRAND FILL. border-farm-600 is the selected chip, the
    * selected card and the active tab, at 8 sites across chip-group,
@@ -71,16 +89,16 @@
    * animal-detail. It shares a value with --fill-brand today and must not
    * share a name, or phase 4 cannot move one without the other.
    */
-  --border-selected: 169 96 60;  /* #A9603C */
+  --border-selected: 26 86 64;  /* #1A5640 */
 
   /* --- brand fill ----------------------------------------------------- */
-  --fill-brand: 169 96 60;  /* #A9603C */
-  --fill-brand-hover: 142 78 48;  /* #8E4E30 */
-  --fill-brand-disabled: 227 226 222;  /* #E3E2DE */
-  --fill-badge: 239 238 235;  /* #EFEEEB */
+  --fill-brand: 26 86 64;  /* #1A5640, the shell green one step lighter */
+  --fill-brand-hover: 15 61 46;  /* #0F3D2E */
+  --fill-brand-disabled: 225 227 220;  /* #E1E3DC */
+  --fill-badge: 237 238 233;  /* #EDEEE9 */
 
-  --focus-ring: 169 96 60;  /* #A9603C */
-  --divider: 239 238 235;  /* #EFEEEB */
+  --focus-ring: 26 86 64;  /* #1A5640 */
+  --divider: 237 238 233;  /* #EDEEE9 */
 
   /* --- roles ---------------------------------------------------------- */
   /*
@@ -193,11 +211,11 @@
    * "Unanswered" deliberately has no token: section 5 assigns it the warning
    * role, and a second name for one value is how the two drift apart.
    */
-  --certainty-known: 26 25 23;  /* #1A1917 */
-  --certainty-approx: 108 106 100;  /* #6C6A64 */
-  --certainty-rule: 130 128 122;
-  --certainty-absent: 108 106 100;
-  --certainty-no-record: 108 106 100;
+  --certainty-known: 20 22 19;  /* #141613 */
+  --certainty-approx: 95 99 91;  /* #5F635B */
+  --certainty-rule: 126 130 120;
+  --certainty-absent: 95 99 91;
+  --certainty-no-record: 95 99 91;
 }
 
 /*
@@ -224,31 +242,41 @@
  */
 .dark {
   /* --- surfaces --- */
-  --surface-page: 20 20 19;       /* #141413 */
-  --surface-raised: 28 27 26;     /* #1C1B1A */
-  --surface-sunken: 35 34 32;     /* #232220 */
+  /* A green-tinted near-black, not neutral grey: the shell band's ground. */
+  --surface-page: 14 19 17;       /* #0E1311 */
+  --surface-raised: 20 27 24;     /* #141B18 */
+  --surface-sunken: 26 35 31;     /* #1A231F */
   /* --- text --- */
-  --text-primary: 240 239 234;    /* #F0EFEA */
-  --text-heading: 232 230 224;    /* #E8E6E0 */
-  --text-secondary: 196 194 185;  /* #C4C2B9 */
-  --text-muted: 158 156 147;      /* #9E9C93 */
-  --text-subtle: 158 156 147;
-  --text-disabled: 87 86 79;      /* #57564F */
-  --text-on-fill: 32 18 10;       /* #20120A */
+  --text-primary: 236 240 235;    /* #ECF0EB */
+  --text-heading: 236 240 235;    /* #ECF0EB */
+  --text-secondary: 195 202 192;  /* #C3CAC0 */
+  --text-muted: 156 165 154;      /* #9CA59A */
+  --text-subtle: 156 165 154;
+  --text-disabled: 86 96 90;      /* #56605A */
+  --text-on-fill: 7 20 14;        /* #07140E */
+  --text-placeholder: 140 150 139; /* #8C968B */
   /* --- lines --- */
-  --border-hairline: 35 34 32;    /* #232220 */
-  --border-subtle: 44 43 40;      /* #2C2B28 */
-  --border-control: 139 133 121; /* necessary control boundary */
-  --border-default: 58 57 52;     /* #3A3934 */
-  --border-strong: 74 72 68;      /* #4A4844 */
-  --border-selected: 200 131 86;  /* #C88356 */
+  --border-hairline: 26 35 31;    /* #1A231F */
+  --border-subtle: 34 45 40;      /* #222D28 */
+  --border-control: 127 140 132;  /* #7F8C84, necessary control boundary */
+  --border-default: 47 59 53;     /* #2F3B35 */
+  --border-strong: 68 82 75;      /* #44524B */
+  --border-selected: 90 167 132;  /* #5AA784 */
+  /* --- shell band --- */
+  --shell-bg: 12 42 32;           /* #0C2A20 */
+  --shell-bg-deep: 8 32 26;       /* #08201A */
+  --shell-fg: 236 240 235;
+  --shell-muted: 169 198 185;     /* #A9C6B9 */
+  --shell-line: 29 74 58;         /* #1D4A3A */
+  --session-lit: 212 167 44;      /* #D4A72C */
+  --session-lit-fg: 20 22 19;
   /* --- brand fill --- */
-  --fill-brand: 200 131 86;       /* #C88356 */
-  --fill-brand-hover: 217 151 108; /* #D9976C */
-  --fill-brand-disabled: 44 43 40; /* #2C2B28 */
-  --fill-badge: 44 43 40;         /* #2C2B28 */
-  --focus-ring: 200 131 86;       /* #C88356 */
-  --divider: 35 34 32;            /* #232220 */
+  --fill-brand: 90 167 132;       /* #5AA784 */
+  --fill-brand-hover: 111 184 148; /* #6FB894 */
+  --fill-brand-disabled: 34 45 40; /* #222D28 */
+  --fill-badge: 34 45 40;         /* #222D28 */
+  --focus-ring: 212 167 44;       /* #D4A72C */
+  --divider: 26 35 31;            /* #1A231F */
   /* --- roles --- */
   --danger-bg: 42 20 20;          /* #2A1414 */
   --danger-fg: 244 169 160;       /* #F4A9A0 */
@@ -276,11 +304,11 @@
   --writelog-fg: 143 211 166;     /* #8FD3A6 */
   --writelog-line: 34 69 47;      /* #22452F */
   /* --- certainty --- */
-  --certainty-known: 240 239 234; /* #F0EFEA */
-  --certainty-approx: 158 156 147; /* #9E9C93 */
-  --certainty-rule: 124 123 116;
-  --certainty-absent: 158 156 147;
-  --certainty-no-record: 158 156 147;
+  --certainty-known: 236 240 235; /* #ECF0EB */
+  --certainty-approx: 156 165 154; /* #9CA59A */
+  --certainty-rule: 120 132 124;
+  --certainty-absent: 156 165 154;
+  --certainty-no-record: 156 165 154;
 
   /*
    * NO DARK COLUMN IN THE DOCUMENT. These seven were added during the token
@@ -310,8 +338,34 @@ app-root {
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
-    Helvetica, Arial, sans-serif;
+  font-family: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+  /* Every litre, rupee, count and date lines up in its column. */
+  font-variant-numeric: tabular-nums;
+  caret-color: rgb(var(--fill-brand));
+  accent-color: rgb(var(--fill-brand));
+  scrollbar-color: rgb(var(--border-strong)) transparent;
+}
+
+::selection {
+  background: rgb(var(--session-lit) / 0.45);
+  color: rgb(var(--text-primary));
+}
+
+::placeholder {
+  color: rgb(var(--text-placeholder));
+  opacity: 1;
+}
+
+/*
+ * PROGRAMMATIC HEADING FOCUS IS INVISIBLE ON PURPOSE. The shell moves focus to
+ * the page heading after each navigation so a screen reader announces the new
+ * page; that is not a keyboard target, and the browser's default outline drew
+ * a full-width box that read as a selected input (audit F04).
+ */
+h1[tabindex='-1']:focus,
+h2[tabindex='-1']:focus {
+  outline: none;
 }
 
 app-root {
@@ -348,6 +402,7 @@ app-root {
  */
 app-calf-picker,
 app-chip-group,
+app-milk-session-nav,
 app-correction-form,
 app-duplicate-warning,
 app-event-form,
@@ -413,6 +468,7 @@ app-session-required,
  * app-session-required off the list for its whole life.
  */
 app-field,
+app-session-board,
 app-command-palette,
 app-assistant-panel,
 app-pagination,
@@ -673,8 +729,44 @@ app-chat-panel {
 }
 
 /* Phase 7 shell and table affordances. Resting border token deliberately held. */
-.phase7-nav a { padding: 0.6rem 0; white-space: nowrap; border-bottom: 2px solid transparent; color: rgb(var(--text-muted)); }
-.phase7-nav a.active { color: rgb(var(--text-primary)); border-bottom-color: currentColor; }
+.phase7-nav a { padding: 0.6rem 0; white-space: nowrap; border-bottom: 3px solid transparent; color: rgb(var(--text-muted)); font-weight: 500; }
+.phase7-nav a:hover { color: rgb(var(--text-primary)); }
+.phase7-nav a.active { color: rgb(var(--text-primary)); border-bottom-color: rgb(var(--session-lit)); font-weight: 600; }
+
+/*
+ * THE SHELL BAND RE-SCOPES THE TOKENS, so everything nested in it -- the
+ * session pills, the theme toggle, text links, the nav -- reads on green
+ * without each component learning about a dark ground. Only the popover that
+ * floats out of the band onto the page resets to page colours.
+ */
+.shell-band {
+  --text-primary: var(--shell-fg);
+  --text-heading: var(--shell-fg);
+  --text-secondary: var(--shell-muted);
+  --text-muted: var(--shell-muted);
+  --text-subtle: var(--shell-muted);
+  --border-hairline: var(--shell-line);
+  --border-subtle: var(--shell-line);
+  --border-default: var(--shell-line);
+  --border-strong: var(--shell-muted);
+  --surface-sunken: var(--shell-bg-deep);
+  --surface-page: var(--shell-bg);
+  --focus-ring: var(--session-lit);
+}
+/* The phone Menu button is a secondary button, whose raised white ground the
+   band does not re-scope -- so its re-scoped white text vanished on it. */
+.shell-band .mobile-menu-toggle {
+  background: rgb(var(--shell-bg-deep));
+  border-color: rgb(var(--shell-line));
+  color: rgb(var(--shell-fg));
+}
+.shell-band .storage-path { color: rgb(20 22 19); background: rgb(255 255 255); border-color: rgb(201 204 195); }
+.shell-band .approval-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.375rem; height: 1.375rem; margin-left: 0.375rem; padding: 0 0.375rem;
+  border-radius: 999px; background: rgb(var(--session-lit)); color: rgb(var(--session-lit-fg));
+  font-size: 0.8125rem; font-weight: 700; text-decoration: none;
+}
 .phase7-nav a:focus-visible, .identifier-link:focus-visible, .navigable-row:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; }
 [data-page-layout] { margin-inline: auto; width: 100%; min-width: 0; }
 [data-page-layout="entry"] { max-width: 720px; }
@@ -758,9 +850,9 @@ app-draft-dialog { display: block; }
   .entry-save-bar { font-size: 14px; }
 }
 
-.health-task { border-inline-start-width: 4px; overflow-wrap: anywhere; }
-.health-task[data-status="overdue"] { border-inline-start-color: rgb(var(--danger-fg)); }
-.health-task[data-status="due"] { border-inline-start-color: rgb(var(--warning-fg)); }
+.health-task { overflow-wrap: anywhere; }
+/* The due state is the badge in each row; a coloured edge stripe is banned
+   (craft floor) and said the same thing again. */
 .task-status { border: 1px solid rgb(var(--border-default)); border-radius: 999px; padding: 2px 8px; font-size: 12px; }
 .health-task[data-status="completed"] .task-status { color: rgb(var(--success-fg)); background: rgb(var(--success-bg)); }
 @media (max-width: 767px) { app-health-page button, app-health-page summary { min-height: 44px; } }
@@ -877,6 +969,8 @@ app-health-page .rows[hidden] { display: none; }
   .shell-utilities [data-role="search-toggle"] kbd { display: none; }
   .shell-utilities > button { padding-inline: 6px; }
 }
+/* A flex item drops the leading space of " · Feed"; pre keeps it. */
+.menu-current-section { white-space: pre; }
 @media (max-width: 380px) { .menu-current-section { display: none; } }
 
 /* A hidden exception keeps its native model without remaining in the layout. */
@@ -888,6 +982,17 @@ app-health-page .rows[hidden] { display: none; }
   .entry-sheet [appScrollRegion] { max-height: 65vh; overflow: auto; scroll-padding-block-start: 64px; }
   .entry-sheet thead { position: sticky; top: 0; z-index: 2; background: rgb(var(--surface-sunken)); }
   .entry-sheet [appScrollRegion] :is(input, select, button, a) { scroll-margin-block-start: 64px; }
+}
+
+/* Milking and Dispatch scroll with the page: one scrollbar, every row
+   reachable, the header row sticking to the top of the page scroller (whose
+   1.5rem padding is why the offset is negative). Below 1024px the table may
+   be wider than the screen, so it keeps its sideways scroll there. */
+@media (min-width: 1024px) {
+  .milk-sheet [appScrollRegion] { max-height: none; overflow: visible; }
+  .milk-sheet thead { top: -1.5rem; }
+  .milk-sheet thead th:first-child { border-top-left-radius: 0.75rem; }
+  .milk-sheet thead th:last-child { border-top-right-radius: 0.75rem; }
 }
 
 /* Measured print sheets stay offscreen while being laid out, and become the
@@ -903,7 +1008,7 @@ app-health-page .rows[hidden] { display: none; }
 .life-print-content { flex: 1; min-height: 0; display: flow-root; }
 .life-print-content p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .life-print-content pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 8pt; }
-.life-print-content article { border-top: 1px solid #999; padding-top: 3mm; }
+.life-print-content article { border-top: 1px solid #999; padding-top: 1.5mm; padding-bottom: 1mm; }
 .life-print-content h3, .life-print-content h4 { font-weight: 600; }
 @media print {
   body:has(> .life-print-pages) > :not(.life-print-pages) { display: none !important; }
@@ -915,3 +1020,190 @@ app-health-page .rows[hidden] { display: none; }
 
 .life-print-content table { width: 100%; table-layout: fixed; }
 .life-print-content th, .life-print-content td { white-space: normal !important; overflow-wrap: anywhere; }
+
+/* The section view you are inside -- a list, or any record under it. */
+[data-role="section-view"][aria-current="page"] { font-weight: 600; color: rgb(var(--text-primary)); }
+
+/* ---- MILK: Milking and Dispatch share one page shape ----------------- */
+/* The footer stays pinned on desktop even while a litres box has focus. The
+   shared rule releases it on focus (for phone keyboards), and on these pages
+   that made the bar jump between mouse-down and mouse-up on Save: the click
+   left the input, the bar moved, and the save never happened. */
+@media (min-width: 768px) {
+  .milk-sheet:has(input:focus, select:focus, textarea:focus) .entry-save-bar { position: sticky; }
+}
+.milk-sheet { display: grid; gap: 1rem; }
+
+.milk-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0.5rem 1rem; }
+.milk-sheet kbd {
+  display: inline-block; min-width: 1.25rem; padding: 0 0.3125rem; border-radius: 0.25rem;
+  border: 1px solid rgb(var(--border-default)); background: rgb(var(--surface-raised));
+  font-family: ui-monospace, monospace; font-size: 0.75rem; text-align: center;
+  color: rgb(var(--text-primary));
+}
+
+.milk-status {
+  flex: none; padding: 0.1875rem 0.625rem; border-radius: 999px; font-size: 0.8125rem; font-weight: 600;
+  border: 1px solid rgb(var(--border-default)); color: rgb(var(--text-secondary)); background: rgb(var(--surface-raised));
+}
+.milk-status[data-state='saved'] { border-color: transparent; background: rgb(var(--success-bg)); color: rgb(var(--success-fg)); }
+.milk-status[data-state='correcting'] { border-color: transparent; background: rgb(var(--warning-bg)); color: rgb(var(--warning-fg)); }
+
+.milk-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem;
+  padding: 0.625rem 0.75rem; border-radius: 0.75rem;
+  border: 1px solid rgb(var(--border-subtle)); background: rgb(var(--surface-sunken));
+}
+.milk-by { flex: 0 1 22rem; min-width: 0; }
+
+.milk-saved {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1.5rem;
+  padding: 0.875rem 1rem; border-radius: 0.75rem;
+  border: 1px solid rgb(var(--border-subtle)); background: rgb(var(--success-bg));
+}
+.milk-saved-title { font-weight: 650; color: rgb(var(--success-fg)); }
+.milk-saved-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.milk-saved-actions a { white-space: nowrap; display: inline-flex; align-items: center; }
+.milk-arrow { width: 1rem; height: 1rem; margin-left: 0.375rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+.milk-table {
+  border: 1px solid rgb(var(--border-default)); border-radius: 0.75rem; background: rgb(var(--surface-raised));
+}
+.milk-table thead th { font-size: 0.8125rem; font-weight: 600; color: rgb(var(--text-secondary)); }
+.milk-animal { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
+.milk-tag {
+  display: inline-block; margin-top: 0.25rem; margin-left: 0.5rem; margin-right: 0.375rem; padding: 0 0.4375rem; border-radius: 999px;
+  font-size: 0.75rem; line-height: 1.25rem; color: rgb(var(--text-secondary));
+  border: 1px solid rgb(var(--border-default)); background: rgb(var(--surface-sunken)); text-decoration: none;
+}
+.milk-tag:hover { color: rgb(var(--text-primary)); border-color: rgb(var(--border-strong)); }
+.milk-answer { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.anomaly-notice {
+  padding: 0.125rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem;
+  background: rgb(var(--warning-bg)); color: rgb(var(--warning-fg));
+}
+.milk-saved-value { font-size: 0.9375rem; }
+.milk-legend { font-size: 0.75rem; color: rgb(var(--text-muted)); }
+
+.milk-foot { gap: 0.75rem 1.5rem; }
+.milk-foot-facts { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1.25rem; min-width: 0; }
+.milk-foot-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+.milk-blocked { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
+.milk-jump { font-size: 0.875rem; font-weight: 600; text-decoration: underline; color: rgb(var(--text-primary)); }
+.milk-jump:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px; }
+
+@media (max-width: 767px) {
+  .milk-bar { padding: 0.5rem; }
+  .milk-by { flex-basis: 100%; }
+  /* The card labels are words, not figures: they inherit monospace from the
+     numeric cells, so they get the body face back. */
+  .milk-sheet .mobile-entry-label { font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif; }
+  .milk-sheet .milk-table { border: 0; background: transparent; }
+}
+
+/* Dispatch: milk in before milk out, the hold list, and the two groups. */
+.milk-head-side { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.milk-ext { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.875rem; font-weight: 500; color: rgb(var(--text-primary)); text-decoration: underline; text-underline-offset: 2px; }
+.milk-ext svg { width: 0.875rem; height: 0.875rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.milk-balance {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1.5rem;
+  padding: 0.75rem 1rem; border-radius: 0.75rem; font-size: 0.9375rem;
+  border: 1px solid rgb(var(--border-subtle)); background: rgb(var(--surface-raised));
+}
+.milk-balance a { margin-left: auto; font-size: 0.875rem; }
+.milk-note { font-size: 0.8125rem; color: rgb(var(--text-secondary)); }
+.milk-hold {
+  display: grid; gap: 0.25rem; padding: 0.75rem 1rem; border-radius: 0.75rem;
+  border: 1px solid rgb(var(--danger-line)); background: rgb(var(--danger-bg)); color: rgb(var(--danger-fg));
+}
+.milk-hold ul { margin: 0; padding-left: 1.125rem; list-style: disc; font-size: 0.9375rem; }
+.milk-group-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem;
+  padding: 0.625rem 0.875rem; border-bottom: 1px solid rgb(var(--border-subtle));
+}
+.milk-group-head h3 { font-size: 0.9375rem; font-weight: 650; color: rgb(var(--text-heading)); }
+.milk-group-head span { font-size: 0.8125rem; color: rgb(var(--text-muted)); }
+.milk-table-optional { border-style: dashed; }
+.milk-table-optional .entry-answer { text-align: right; }
+.milk-table-optional .entry-answer > div { justify-content: flex-end; }
+@media (max-width: 767px) {
+  .milk-balance a { margin-left: 0; }
+  .milk-table-optional .entry-answer { text-align: left; }
+  .milk-table-optional .entry-answer > div { justify-content: flex-start; }
+}
+
+/* ==== HEALTH: the side panel, a saved record read in words, the round ====
+   Moved out of health-page.css (component budget); every rule is scoped to
+   a health-only class. */
+/* ---- The panel ----------------------------------------------------------- */
+.health-panel {
+  display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0;
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem; background: rgb(var(--surface-raised));
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.10);
+}
+.panel-head {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 0.75rem;
+  padding: 0.875rem 1rem 0.75rem 1.25rem; border-bottom: 1px solid rgb(var(--border-hairline));
+}
+.panel-head h3 { font-size: 1.0625rem; font-weight: 650; color: rgb(var(--text-heading)); }
+.panel-head h3:focus { outline: none; }
+.panel-subject { margin-top: 0.125rem; font-size: 0.875rem; color: rgb(var(--text-secondary)); }
+.panel-back { display: none !important; }
+.panel-close { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 0.5rem; color: rgb(var(--text-secondary)); }
+.panel-close:hover { background: rgb(var(--surface-sunken)); color: rgb(var(--text-primary)); }
+.panel-close:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 1px; }
+.panel-close svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; }
+.panel-body { display: grid; gap: 1rem; align-content: start; padding: 1rem 1.25rem 1.25rem; overflow-y: auto; min-height: 0; }
+.panel-card { display: grid; gap: 0.125rem; padding: 0.625rem 0.75rem; border-radius: 0.5rem; background: rgb(var(--surface-sunken)); }
+.panel-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-top: 0.25rem; }
+.panel-body .rows { grid-template-columns: minmax(0, 1fr); }
+.date-today { margin-top: -0.5rem; justify-self: start; }
+
+/* A saved record, read. */
+.hv-facts { display: grid; gap: 0.5rem; margin: 0; }
+.hv-facts > div { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.75rem; }
+.hv-facts dt { font-size: 0.8125rem; color: rgb(var(--text-secondary)); }
+.hv-facts dd { margin: 0; font-size: 0.9375rem; color: rgb(var(--text-primary)); overflow-wrap: anywhere; white-space: pre-wrap; }
+.hv-withdrawals { display: grid; gap: 0.25rem; margin: 0; padding: 0; list-style: none; font-size: 0.875rem; }
+.hv-recorded { font-size: 0.8125rem; color: rgb(var(--text-muted)); }
+.hv-ids { font-size: 0.75rem; color: rgb(var(--text-muted)); }
+.hv-ids summary { cursor: pointer; width: max-content; }
+.hv-ids p { overflow-wrap: anywhere; }
+.hv-rev { display: grid; gap: 0.25rem; padding-top: 0.75rem; border-top: 1px solid rgb(var(--border-hairline)); }
+.hv-rev:first-child { padding-top: 0; border-top: 0; }
+.hv-changes { margin: 0; padding-left: 1.125rem; list-style: disc; font-size: 0.875rem; color: rgb(var(--text-secondary)); }
+
+/* Defer / Missed / Cancelled as one choice. */
+.action-seg { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+.action-seg button {
+  padding: 0.4375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500;
+  border: 1px solid rgb(var(--border-default)); color: rgb(var(--text-primary)); background: rgb(var(--surface-raised));
+}
+.action-seg button[aria-pressed='true'] { background: rgb(var(--fill-brand)); border-color: transparent; color: rgb(var(--text-on-fill)); }
+.action-seg button:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px; }
+#health-action label, .health-round label { display: grid; gap: 0.25rem; }
+
+.health-back {
+  display: inline-flex; align-items: center; gap: 0.25rem; width: max-content;
+  font-size: 0.875rem; color: rgb(var(--text-secondary)); text-decoration: underline; text-underline-offset: 2px;
+}
+.health-back:hover { color: rgb(var(--text-primary)); }
+.health-back svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---- The vaccination round, its own view ---------------------------------- */
+.health-round {
+  display: grid; gap: 0.75rem; padding: 1.25rem; border-radius: 0.75rem;
+  border: 1px solid rgb(var(--border-subtle)); background: rgb(var(--surface-raised));
+}
+.round-shared { display: grid; gap: 0.875rem 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); }
+.round-find { display: grid; gap: 0.375rem; max-width: 24rem; }
+.round-rows { display: grid; margin: 0; padding: 0; list-style: none; border-top: 1px solid rgb(var(--border-hairline)); }
+.round-row {
+  display: grid; grid-template-columns: 12rem minmax(10rem, 14rem) repeat(2, minmax(0, 14rem)); gap: 0.5rem 1rem; align-items: end;
+  padding: 0.5rem 0; border-bottom: 1px solid rgb(var(--border-hairline));
+}
+.round-row[hidden] { display: none; }
+.round-animal { align-self: center; font-weight: 500; }
+.round-confirm { display: flex !important; gap: 0.5rem; align-items: baseline; }
+
+.health-round label > input:not([type="checkbox"]), .health-round label > select { width: 100%; }

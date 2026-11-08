@@ -18,12 +18,16 @@ describe('lifeStage — the farm words, displayed only', () => {
     expect(lifeStage('dry', 'female')!.qualifier).toBe('dry');
   });
 
-  it('LEAVES THE MALE SIDE ALONE, because katta / jhota is unconfirmed', () => {
-    // A guessed local term is worse than the English one: it reads as
-    // authoritative to the next person who sees the screen.
-    expect(lifeStageLabel('male', 'male')).toBe('male');
-    expect(lifeStageLabel('calf', 'male')).toBe('calf');
-    expect(lifeStage('calf', 'male')!.term).toBe('calf');
+  it('maps the male stages onto katta / sandda, as the owner confirmed', () => {
+    expect(lifeStageLabel('calf', 'male')).toBe('katta');
+    expect(lifeStageLabel('male', 'male')).toBe('sandda');
+    expect(lifeStage('calf', 'male')!.stored).toBe('calf');
+    expect(lifeStage('male', 'male')!.stored).toBe('male');
+  });
+
+  it('shows a female-only status on a male in English, so the data error stays visible', () => {
+    expect(lifeStageLabel('lactating', 'male')).toBe('lactating');
+    expect(lifeStageLabel('heifer', 'male')).toBe('heifer');
   });
 
   it('reports departed as departed — it is the end of the record, not a stage', () => {

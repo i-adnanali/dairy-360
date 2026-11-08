@@ -1,396 +1,526 @@
-
-    <div data-page-layout="review" class="space-y-5">
-      <header>
+<div data-page-layout="review" class="feed space-y-6" [attr.data-feed-mode]="mode">
+  <!-- HEADER. A record page names the record and how to get back to its list;
+       a list names itself in one sentence and carries its own one action. -->
+  <header class="feed-head">
+    <div class="min-w-0 space-y-1">
+      @if (id) {
+        <a appTextLink class="text-sm" data-role="feed-back" [routerLink]="['/feed', mode]">
+          Back to {{ mode === 'crops' ? 'crops' : 'purchases' }}
+        </a>
+      }
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
         <h2 appPageHeading>{{ title() }}</h2>
-        <p appHelp>
-          Own fodder, recorded acquisitions and one daily account. Quantities may be unmeasured;
-          recorded costs are not cash paid or feed consumed cost.
-        </p>
-      <div class="flex flex-wrap gap-2">
-        @if (!id && (mode === 'overview' || mode === 'crops')) {
-        <a appButton variant="secondary" routerLink="/feed/crops/new">Add crop</a
-        > } @if (!id && (mode === 'overview' || mode === 'purchases')) { <a appButton variant="secondary" routerLink="/feed/purchases/new">Record purchase</a
-        > } @if (mode === 'overview' || mode === 'daily') { <a appButton [routerLink]="['/feed/daily', today]">Record feeding</a
-        > } <button appButton variant="secondary" [attr.aria-expanded]="catalogue" (click)="catalogue = !catalogue">
-          Feed catalogue
-        </button>
-      </div>
-      </header>
-      @if (error()) {
-        <p appErrorPanel role="alert">{{ error() }}</p>
-        <button appButton variant="secondary" (click)="load()">Retry</button>
-      }
-      @if (loading()) {
-        <p appHelp>Loading feed records…</p>
-      }
-
-      @if (catalogue) {
-        <section appCard class="space-y-3">
-          <h3 class="font-medium">Feed items</h3>
-          <button appButton variant="secondary" (click)="openEditor('item', null)">
-            Create item
-          </button>
-          @for (i of items(); track i.id) {
-            <div class="flex flex-wrap gap-3">
-              <span
-                >{{ i.label }} · {{ words(i.category) }}{{ i.archived ? ' · archived' : '' }}</span
-              ><button appButton variant="secondary" (click)="openEditor('item', i)">
-                Edit / archive
-              </button>
-            </div>
-          }
-        </section>
-      }
-      @if (mode === 'overview' || mode === 'daily') {
-        <form class="flex flex-wrap items-end gap-3" (ngSubmit)="loadRange()">
-          <label
-            ><span appFieldLabel>From</span
-            ><input appInput type="date" name="from" [(ngModel)]="from" /></label
-          ><label
-            ><span appFieldLabel>Through</span
-            ><input appInput type="date" name="to" [(ngModel)]="to" /></label
-          ><button appButton variant="secondary" type="submit">Show range</button>
-        </form>
-        <p appHelp>
-          Default coverage begins at the first saved summary. A missing day means not recorded,
-          never not fed.
-        </p>
-        @if (rangeLoading()) {
-          <p role="status" appHelp>Loading selected feed range…</p>
-        }
-        @if (overview(); as o) {
-          @if (mode === 'overview') {
-            <div class="grid gap-4 sm:grid-cols-3">
-              <section appCard>
-                <h3 class="font-medium">Daily coverage</h3>
-                <p>
-                  {{ o.recorded }} recorded · {{ o.partial }} partial ·
-                  {{ o.unrecorded }} unrecorded
-                </p>
-              </section>
-              <section appCard>
-                <h3 class="font-medium">Recorded purchase costs</h3>
-                <p>{{ money(o.purchase_cost_minor) }}</p>
-                <p appHelp>{{ o.unknown_costs }} unknown totals excluded</p>
-                <a class="underline" routerLink="/feed/purchases" [queryParams]="{from: from, to: to}">Review purchases in this range</a>
-              </section>
-              <section appCard>
-                <h3 class="font-medium">Recorded crop expenses</h3>
-                <a class="underline" routerLink="/feed/crops">Review crops and expenses</a>
-                <p>{{ money(o.expense_cost_minor) }}</p>
-              </section>
-            </div>
-            <details appCard class="space-y-3">
-              <summary class="font-medium cursor-pointer">Fresh-fodder supply</summary>
-              @for (a of assessmentKeys; track a) {
-                <p>
-                  {{ words(a) }}: {{ o.assessments[a].length }}
-                  @for (on of o.assessments[a]; track on) {
-                    <a class="underline ml-2" [routerLink]="['/feed/daily', on]">{{ on }}</a>
-                  }
-                </p>
-              }
-              <p appHelp>
-                Own-source days {{ o.own_days }} · purchased-source days {{ o.purchased_days }} ·
-                mixed-source days {{ o.mixed_days }}. Counts overlap; do not add them.
-              </p>
-            </details>
-            <details appCard>
-              <summary class="font-medium cursor-pointer">Purchase quantities by original unit</summary>
-              @for (q of o.quantities; track q.item_id + q.unit) {
-                <p>
-                  {{ itemName(q.item_id) }}:
-                  {{
-                    q.quantity > 0
-                      ? q.quantity + ' ' + q.unit + ' measured'
-                      : 'No measured quantity'
-                  }}
-                  · {{ q.unmeasured }} unmeasured purchases excluded
-                </p>
-              } @empty {
-                <p appHelp>No purchases in this range.</p>
-              }
-            </details>
-            <details appCard class="space-y-3">
-              <summary class="font-medium cursor-pointer">Crop cycles — currently recorded lifecycle</summary>
-              <p appHelp>
-                Status is the latest recorded state, not a reconstructed range history. Dates may be
-                unknown or approximate.
-              </p>
-              @for (c of o.crops; track c.id) {
-                <p>
-                  <a class="underline" [routerLink]="['/feed/crops', c.id]">{{ c.label }}</a> ·
-                  {{ c.status }}{{ c.archived ? ' · archived' : '' }} ·
-                  {{ c.acreage ?? 'unknown' }} acres · {{ money(c.expense_minor ?? 0) }} expenses to
-                  date · {{ c.supply_days?.length ?? 0 }} distinct recorded supply dates
-                </p>
-              } @empty {
-                <p appHelp>
-                  No crops recorded. Add a growing or already-cutting crop; unknown dates are valid.
-                </p>
-              }
-            </details>
-          }
-          <section appCard>
-            <h3 class="font-medium">Recorded days</h3>
-            <app-local-pagination
-              label="Feeding days"
-              #pages0="localPagination"
-              [total]="o.days.length"
-            />
-            @for (d of pages0.rows(o.days); track d.on) {
-              <div class="flex flex-wrap justify-between gap-2 border-b border-line-subtle py-2">
-                <a class="underline" [routerLink]="['/feed/daily', d.on]">{{ d.on }}</a
-                ><span>{{
-                  d.summary
-                    ? d.summary.completeness === 'partial'
-                      ? 'Partially recorded'
-                      : 'Recorded'
-                    : 'Not recorded'
-                }}</span>
-              </div>
-            }
-          </section>
-        }
-      }
-      @if (mode === 'crops' || mode === 'purchases') {
-        @if (!id || id === 'new') {
-          @if (id === 'new') {
-            <div class="max-w-[720px]">
-              <app-feed-editor
-                #primaryEditor
-                [entity]="mode"
-                [items]="items()"
-                (saved)="saved($event, 'primary')"
-                (cancelled)="cancelEditor()"
-                (addItem)="openEditor('item', null)"
-              />
-            </div>
-          }
-          @if (!id) {
+        @if (id && id !== 'new' && detail(); as d) {
           @if (mode === 'crops') {
-            <div class="flex flex-wrap gap-3">
-              <label><span appFieldLabel>Find crop</span><input appInput type="search" [(ngModel)]="cropSearch" /></label>
-              <label><span appFieldLabel>Lifecycle</span><select appInput [(ngModel)]="cropStatus"><option value="">All statuses</option><option value="growing">Growing</option><option value="cutting">Cutting</option><option value="finished">Finished</option><option value="archived">Archived</option></select></label>
-              @if ((cropSearch || cropStatus) && filtered().length) { <button appButton variant="secondary" (click)="cropSearch = ''; cropStatus = ''">Clear filters</button> }
-            </div>
-          }
-          @if (mode === 'purchases') {
-            <div class="flex flex-wrap gap-3">
-              <label
-                ><span appFieldLabel>Item filter</span
-                ><select appInput [(ngModel)]="itemFilter">
-                  <option value="">All items</option>
-                  @for (i of items(); track i.id) {
-                    <option [value]="i.id">{{ i.label }}</option>
-                  }
-                </select></label
-              ><label
-                ><span appFieldLabel>From</span
-                ><input appInput type="date" [(ngModel)]="from" /></label
-              ><label
-                ><span appFieldLabel>Through</span><input appInput type="date" [(ngModel)]="to"
-              /></label>
-            </div>
-          }
-          <section appCard class="space-y-3">
-            <app-local-pagination
-              label="Feed records"
-              #pages1="localPagination"
-              [total]="filtered().length"
-            />
-            @for (r of pages1.rows(filtered()); track r.id) {
-              <div class="border-b border-line-subtle py-3">
-                <a class="underline font-medium" [routerLink]="['/feed', mode, r.id]">{{
-                  mode === 'crops' ? r.label : itemName(r.item_id) + ' · ' + r.on
-                }}</a>
-                @if (mode === 'crops') {
-                  <p>
-                    {{ r.status }}{{ r.archived ? ' · archived' : '' }} ·
-                    {{ r.acreage ?? 'unknown' }} acres
-                  </p>
-                } @else {
-                  <p>
-                    {{ r.quantity === null ? 'Unmeasured' : r.quantity + ' ' + r.unit }} ·
-                    {{ money(r.total_minor) }}
-                  </p>
-                  <p appHelp>{{ agreement(r) }}</p>
-                }
-              </div>
-            } @empty {
-              @if (records().length) {
-                <p appHelp>No {{ mode }} match these filters.</p>
-                <button appButton variant="secondary" (click)="itemFilter = ''; from = ''; to = ''; cropSearch = ''; cropStatus = ''">Clear filters</button>
-              } @else {
-                <p appHelp>No {{ mode }} recorded. Use the actions above to record the first one.</p>
-              }
-            }
-          </section>
-          }
-        } @else {
-          @if (detail(); as d) {
-            <section appCard class="space-y-3">
-              <h3 class="font-medium">{{ mode === 'crops' ? d.label : itemName(d.item_id) }}</h3>
-              <p appHelp>
-                Revision {{ d.revision }} · {{ d.source_form }} · {{ d.recorded_by }} ·
-                {{ d.source_ref || 'no source reference' }} · {{ d.recorded_at }}
-              </p>
-              @if (mode === 'crops') {
-                <p appHelp>Current recorded lifecycle; expenses and supply dates below retain their history.</p>
-                <p>
-                  {{ d.status }}{{ d.archived ? ' · archived' : '' }} ·
-                  {{ d.plot || 'plot unspecified' }} · {{ d.acreage ?? 'unknown' }} acres
-                </p>
-                @for (k of dateKeys; track k) {
-                  <p>{{ words(k) }}: {{ cropDate(d, k) }}</p>
-                }
-              } @else {
-                <p>Delivered {{ d.on }} · {{ d.supplier || 'supplier unspecified' }}</p>
-                <p>
-                  {{ d.quantity === null ? 'Unmeasured' : d.quantity + ' ' + d.unit }} ·
-                  {{ agreement(d) }}
-                </p>
-                <p>
-                  Goods {{ money(d.goods_minor) }} + transport {{ money(d.transport_minor) }} +
-                  other {{ money(d.other_minor) }} = {{ money(d.total_minor) }}
-                </p>
-              }
-              <p>{{ d.notes }}</p>
-              <button appButton variant="secondary" (click)="openEditor('primary', d)">
-                Correct{{ mode === 'crops' ? ' / finish / archive' : '' }}
-              </button>
-              @if (mode === 'purchases') {
-                <button appButton variant="secondary" (click)="startRemoval(d)">
-                  Remove purchase
-                </button>
-              }
-              <button appButton variant="secondary" (click)="showRevisions(d)">
-                Correction history
-              </button>
-            </section>
-            @if (editor) {
-              <div class="max-w-[720px]">
-                <app-feed-editor
-                  #primaryEditor
-                  [entity]="mode"
-                  [record]="editRecord"
-                  [items]="items()"
-                  (saved)="saved($event, 'primary')"
-                  (cancelled)="cancelEditor()"
-                  (addItem)="openEditor('item', null)"
-                />
-              </div>
-            }
-            @if (mode === 'crops') {
-              <section appCard class="space-y-3">
-                <h3 class="font-medium">Expenses recorded so far — {{ money(expenseTotal(d)) }}</h3>
-                <p appHelp>Do not duplicate existing payroll salaries.</p>
-                <button appButton variant="secondary" (click)="openEditor('expense', null)">
-                  Add expense
-                </button>
-                <app-local-pagination
-                  label="Expenses"
-                  #pages2="localPagination"
-                  [total]="(d.expenses ?? []).length"
-                />
-                @for (e of pages2.rows(d.expenses ?? []); track e.id) {
-                  <div class="flex flex-wrap gap-3">
-                    <span
-                      >{{ e.on }} · {{ words(e.category) }} · {{ money(e.amount_minor) }} ·
-                      {{ e.notes }}</span
-                    ><button appButton variant="secondary" (click)="openEditor('expense', e)">
-                      Correct expense</button
-                    ><button appButton variant="secondary" (click)="startRemoval(e)">
-                      Remove expense
-                    </button>
-                    <button appButton variant="secondary" (click)="showRevisions(e, 'expenses')">
-                      Expense history
-                    </button>
-                  </div>
-                }
-              </section>
-              @if (expenseOpen) {
-                <div class="max-w-[720px]">
-                  <app-feed-editor
-                    #expenseEditor
-                    entity="expenses"
-                    [cropId]="d.id"
-                    [record]="expenseEdit"
-                    (saved)="saved($event, 'expense')"
-                    (cancelled)="expenseOpen = false"
-                  />
-                </div>
-              }
-              <section appCard>
-                <h3 class="font-medium">Recorded supply days</h3>
-                @for (on of d.supply_days; track on) {
-                  <a class="underline mr-3" [routerLink]="['/feed/daily', on]">{{ on }}</a>
-                } @empty {
-                  <p appHelp>
-                    No linked supply days recorded. This does not mean no fodder was cut.
-                  </p>
-                }
-              </section>
-            }
+            <span appBadge [tone]="cropTone(d)">{{ cropStatusLabel(d) }}</span>
           }
         }
-      }
-      @if (itemOpen) {
-        <div class="max-w-[720px]">
-          <app-feed-editor
-            #itemEditor
-            entity="items"
-            [record]="itemEdit"
-            (saved)="saved($event, 'item')"
-            (cancelled)="itemOpen = false"
-          />
-        </div>
-      }
-      @if (revisions().length) {
-        <section appCard class="space-y-3">
-          <h3 class="font-medium">Recoverable correction history</h3>
-          <app-local-pagination
-            label="Revision history"
-            #pages3="localPagination"
-            [total]="revisions().length"
-          />
-          @for (r of pages3.rows(revisions()); track r.id) {
-            <details>
-              <summary>{{ r.operation }} · revision {{ r.revision }} · {{ r.recorded_at }}</summary>
-              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.before_json }}</pre>
-              <pre class="whitespace-pre-wrap break-all text-xs">{{ r.after_json }}</pre>
-              <p>{{ r.provenance }}</p>
-            </details>
-          }
-        </section>
-      }
-      @if (removeTarget) {
-        <section appCard>
-          @if (state.uncertain()) {
-            <p role="status">Removal outcome unknown. Retry the same removal before leaving.</p>
-          }
-          <p>
-            Remove this {{ removeTarget.crop_id ? 'expense' : 'purchase' }}? The audit trail
-            remains. A linked purchase cannot be removed.
-          </p>
-          @if (session.ready()) {
-            <button appButton (click)="remove()" [appButtonDisabled]="state.submitting()">
-              Confirm removal
-            </button>
-          } @else {
-            <app-session-required what="this removal" />
-          }
-          <button
-            appButton
-            variant="secondary"
-            [disabled]="state.locked()"
-            (click)="removeTarget = null"
-          >
-            Keep record
-          </button>
-          @if (state.error(); as e) {
-            <p appErrorPanel>{{ e.message }}</p>
-          }
-        </section>
+      </div>
+      @if (!id) {
+        <p appHelp class="max-w-[65ch]">{{ intro() }}</p>
+      } @else if (id !== 'new' && detail(); as d) {
+        <p appHelp size="xs" data-role="feed-provenance">{{ provenance(d) }}</p>
       }
     </div>
+    <div class="flex flex-wrap gap-2">
+      @switch (mode) {
+        @case ('overview') {
+          <a appButton variant="secondary" routerLink="/feed/purchases/new">Record purchase</a>
+          <a appButton [routerLink]="['/feed/daily', today]">Record today's feeding</a>
+        }
+        @case ('daily') {
+          <a appButton [routerLink]="['/feed/daily', today]">Record today's feeding</a>
+        }
+        @case ('crops') {
+          @if (!id) {
+            <a appButton routerLink="/feed/crops/new">Add crop</a>
+          }
+        }
+        @case ('purchases') {
+          @if (!id) {
+            <a appButton routerLink="/feed/purchases/new">Record purchase</a>
+          }
+        }
+        @case ('items') {
+          <button appButton type="button" data-role="create-item" (click)="openEditor('item', null)">
+            Create item
+          </button>
+        }
+      }
+      @if (id && id !== 'new' && detail(); as d) {
+        @if (!editor) {
+          <button appButton variant="secondary" type="button" data-role="correct-record" (click)="openEditor('primary', d)">
+            {{ mode === 'crops' ? 'Correct, finish or archive' : 'Correct' }}
+          </button>
+        }
+        @if (mode === 'purchases') {
+          <button appButton variant="secondary" type="button" (click)="startRemoval(d)">Remove purchase</button>
+        }
+        <button
+          appButton
+          variant="secondary"
+          type="button"
+          [attr.aria-expanded]="historyFor() === d.id"
+          (click)="historyFor() === d.id ? closeHistory() : showRevisions(d)"
+        >
+          Correction history
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="space-y-2">
+      <p appErrorPanel role="alert">{{ error() }}</p>
+      <button appButton variant="secondary" type="button" (click)="load()">Retry</button>
+    </div>
+  }
+  @if (loading()) {
+    <p appHelp role="status">Loading feed records…</p>
+  }
+
+  <!-- Removal that is still in flight or uncertain stays next to the record it removes. -->
+  @if (removeTarget) {
+    <ng-container *ngTemplateOutlet="removal" />
+  }
+
+  <!-- ============================== OVERVIEW / DAYS ============================== -->
+  @if (mode === 'overview' || mode === 'daily') {
+    <form class="feed-range" (ngSubmit)="loadRange()" data-role="feed-range">
+      <p class="text-sm text-content-secondary">
+        @if (overview(); as o) {
+          Showing <strong class="font-semibold text-content-primary">{{ day(o.from) }} – {{ day(o.to) }}</strong>
+        } @else {
+          Choose a range
+        }
+      </p>
+      <div class="flex flex-wrap items-end gap-2">
+        <label><span appFieldLabel>From</span><input appInput type="date" name="from" [(ngModel)]="from" /></label>
+        <label><span appFieldLabel>Through</span><input appInput type="date" name="to" [(ngModel)]="to" /></label>
+        <button appButton variant="secondary" type="submit">Show range</button>
+      </div>
+    </form>
+    @if (rangeLoading()) {
+      <p role="status" appHelp>Loading the selected range…</p>
+    }
+
+    @if (overview(); as o) {
+      @if (mode === 'overview') {
+        <section class="feed-figures" aria-label="Range summary">
+          <div class="figure">
+            <p class="figure-label">Days with a feeding account</p>
+            <p class="figure-value">{{ o.recorded + o.partial }}<span class="figure-of"> of {{ o.days.length }}</span></p>
+            <p class="figure-note">
+              {{ o.recorded }} recorded · {{ o.partial }} partial · {{ o.unrecorded }} not recorded
+            </p>
+          </div>
+          <div class="figure">
+            <p class="figure-label">Recorded purchase costs</p>
+            <p class="figure-value">{{ money(o.purchase_cost_minor) }}</p>
+            <p class="figure-note">
+              {{ o.unknown_costs ? o.unknown_costs + (o.unknown_costs === 1 ? ' purchase' : ' purchases') + ' with an unknown total, not included' : 'Every purchase total is known' }}
+            </p>
+            <a appTextLink tone="strong" class="figure-link" routerLink="/feed/purchases" [queryParams]="{ from: from, to: to }">Purchases in this range</a>
+          </div>
+          <div class="figure">
+            <p class="figure-label">Recorded crop expenses</p>
+            <p class="figure-value">{{ money(o.expense_cost_minor) }}</p>
+            <p class="figure-note">Across {{ o.crops.length }} {{ o.crops.length === 1 ? 'crop' : 'crops' }}</p>
+            <a appTextLink tone="strong" class="figure-link" routerLink="/feed/crops">Crops and expenses</a>
+          </div>
+        </section>
+
+        <div class="feed-split">
+          <section class="space-y-3" aria-labelledby="recent-days">
+            <div class="flex items-baseline justify-between gap-3">
+              <h3 appSectionHeading id="recent-days">Recent days</h3>
+              <a appTextLink class="text-sm" routerLink="/feed/daily">All days</a>
+            </div>
+            <ng-container *ngTemplateOutlet="dayTable; context: { $implicit: days(o).slice(0, 7) }" />
+          </section>
+
+          <aside class="space-y-6">
+            <section class="space-y-2" aria-labelledby="supply-heading">
+              <h3 appSectionHeading id="supply-heading">Fresh-fodder supply</h3>
+              <ul class="feed-list">
+                @for (a of assessmentKeys; track a) {
+                  @if (o.assessments[a]?.length) {
+                    <li>
+                      <span class="font-medium">{{ label(a) }}</span>
+                      <span class="tabular-nums text-content-secondary">{{ o.assessments[a].length }} {{ o.assessments[a].length === 1 ? 'day' : 'days' }}</span>
+                      <span class="feed-dates">
+                        @for (on of o.assessments[a]; track on) {
+                          <a appTextLink [routerLink]="['/feed/daily', on]">{{ day(on) }}</a>
+                        }
+                      </span>
+                    </li>
+                  }
+                }
+              </ul>
+              @if (!(o.recorded + o.partial)) {
+                <p appHelp>No assessments in this range.</p>
+              }
+              <p appHelp size="xs">
+                Own fodder on {{ o.own_days }} · bought in on {{ o.purchased_days }} · both on {{ o.mixed_days }}
+                {{ o.mixed_days === 1 ? 'day' : 'days' }}. These overlap; do not add them.
+              </p>
+            </section>
+
+            <section class="space-y-2" aria-labelledby="crops-heading">
+              <div class="flex items-baseline justify-between gap-3">
+                <h3 appSectionHeading id="crops-heading">Crops</h3>
+                <a appTextLink class="text-sm" routerLink="/feed/crops">All crops</a>
+              </div>
+              <ul class="feed-list">
+                @for (c of o.crops; track c.id) {
+                  <li>
+                    <a appTextLink tone="strong" [routerLink]="['/feed/crops', c.id]">{{ c.label }}</a>
+                    <span appBadge [tone]="cropTone(c)">{{ cropStatusLabel(c) }}</span>
+                    <span class="feed-meta">
+                      {{ c.acreage === null || c.acreage === undefined ? 'Acres unknown' : c.acreage + ' acres' }} ·
+                      {{ money(c.expense_minor ?? 0) }} spent · {{ c.supply_days?.length ?? 0 }} supply
+                      {{ (c.supply_days?.length ?? 0) === 1 ? 'day' : 'days' }}
+                    </span>
+                  </li>
+                } @empty {
+                  <li class="text-sm text-content-muted">No crops recorded. Unknown dates are fine when you add one.</li>
+                }
+              </ul>
+            </section>
+
+            <section class="space-y-2" aria-labelledby="qty-heading">
+              <h3 appSectionHeading id="qty-heading">Bought in, by unit</h3>
+              <ul class="feed-list">
+                @for (q of o.quantities; track q.item_id + q.unit) {
+                  <li>
+                    <span class="font-medium">{{ itemName(q.item_id) }}</span>
+                    <span class="tabular-nums">{{ q.quantity > 0 ? q.quantity + ' ' + q.unit : 'Not measured' }}</span>
+                    @if (q.unmeasured) {
+                      <span class="feed-meta">{{ q.unmeasured }} unmeasured {{ q.unmeasured === 1 ? 'purchase' : 'purchases' }} not counted</span>
+                    }
+                  </li>
+                } @empty {
+                  <li class="text-sm text-content-muted">No purchases in this range.</li>
+                }
+              </ul>
+            </section>
+          </aside>
+        </div>
+      } @else {
+        <section class="space-y-3">
+          <app-local-pagination label="Feeding days" #pages0="localPagination" [total]="o.days.length" />
+          <ng-container *ngTemplateOutlet="dayTable; context: { $implicit: pages0.rows(days(o)) }" />
+        </section>
+      }
+    }
+  }
+
+  <!-- ============================== LISTS ============================== -->
+  @if ((mode === 'crops' || mode === 'purchases' || mode === 'items') && !id) {
+    @if (mode === 'items' && itemOpen) {
+      <div class="max-w-[720px]" data-editor-slot="item">
+        <app-feed-editor #itemEditor entity="items" [record]="itemEdit" (saved)="saved($event, 'item')" (cancelled)="itemOpen = false" />
+      </div>
+    }
+    @if (mode === 'crops') {
+      <div class="feed-filters">
+        <label><span appFieldLabel>Find crop</span><input appInput type="search" [(ngModel)]="cropSearch" /></label>
+        <label><span appFieldLabel>Lifecycle</span><select appInput [(ngModel)]="cropStatus"><option value="">All</option><option value="growing">Growing</option><option value="cutting">Cutting</option><option value="finished">Finished</option><option value="archived">Archived</option></select></label>
+        @if (cropSearch || cropStatus) {
+          <button appButton variant="secondary" type="button" (click)="cropSearch = ''; cropStatus = ''">Clear filters</button>
+        }
+      </div>
+    }
+    @if (mode === 'purchases') {
+      <div class="feed-filters">
+        <label><span appFieldLabel>Item</span><select appInput [(ngModel)]="itemFilter"><option value="">All items</option>@for (i of items(); track i.id) {<option [value]="i.id">{{ i.label }}</option>}</select></label>
+        <label><span appFieldLabel>From</span><input appInput type="date" [(ngModel)]="from" /></label>
+        <label><span appFieldLabel>Through</span><input appInput type="date" [(ngModel)]="to" /></label>
+        @if (itemFilter || from) {
+          <button appButton variant="secondary" type="button" (click)="itemFilter = ''; from = ''; to = today">Clear filters</button>
+        }
+      </div>
+    }
+
+    @if (!loading()) {
+      @if (filtered().length) {
+        <section class="space-y-3">
+          <app-local-pagination [label]="title()" #pages1="localPagination" [total]="filtered().length" />
+          <div [appScrollRegion]="title()">
+            <table class="feed-table" [attr.data-role]="'feed-table-' + mode">
+              <thead>
+                <tr>
+                  @switch (mode) {
+                    @case ('crops') {
+                      <th appCell>Crop</th><th appCell>Plot</th><th appCell numeric>Acres</th><th appCell>Status</th>
+                    }
+                    @case ('purchases') {
+                      <th appCell>Delivered</th><th appCell>Item</th><th appCell>Supplier</th><th appCell numeric>Quantity</th><th appCell numeric>Total</th>
+                    }
+                    @default {
+                      <th appCell>Item</th><th appCell>Category</th><th appCell>Status</th><th appCell><span class="sr-only">Actions</span></th>
+                    }
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of pages1.rows(filtered()); track r.id) {
+                    <tr [attr.data-editing]="itemOpen && itemEdit?.id === r.id ? 'true' : null">
+                      @switch (mode) {
+                        @case ('crops') {
+                          <td appCell><a appTextLink tone="strong" [routerLink]="['/feed/crops', r.id]">{{ r.label }}</a></td>
+                          <td appCell tone="secondary">{{ r.plot || '—' }}</td>
+                          <td appCell numeric>{{ r.acreage ?? '—' }}</td>
+                          <td appCell><span appBadge [tone]="cropTone(r)">{{ cropStatusLabel(r) }}</span></td>
+                        }
+                        @case ('purchases') {
+                          <td appCell class="whitespace-nowrap">{{ day(r.on) }}</td>
+                          <td appCell><a appTextLink tone="strong" [routerLink]="['/feed/purchases', r.id]">{{ itemName(r.item_id) }}</a></td>
+                          <td appCell tone="secondary">{{ r.supplier || '—' }}</td>
+                          <td appCell numeric>{{ r.quantity === null ? 'Unmeasured' : r.quantity + ' ' + r.unit }}</td>
+                          <td appCell numeric>{{ money(r.total_minor) }}</td>
+                        }
+                        @default {
+                          <td appCell class="font-medium">{{ r.label }}</td>
+                          <td appCell tone="secondary">{{ label(r.category) }}</td>
+                          <td appCell>
+                            @if (r.archived) { <span appBadge tone="ended">Archived</span> } @else { <span class="text-content-secondary">In use</span> }
+                          </td>
+                          <td appCell class="text-right">
+                            <button appButton variant="secondary" size="sm" type="button" (click)="openEditor('item', r)">Edit or archive</button>
+                          </td>
+                        }
+                      }
+                    </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      } @else if (records().length) {
+        <p appHelp>No {{ mode === 'items' ? 'items' : mode }} match these filters.</p>
+      } @else {
+        <p appHelp>
+          {{ mode === 'crops' ? 'No crops recorded yet.' : mode === 'purchases' ? 'No purchases recorded yet.' : 'No feed items yet.' }}
+        </p>
+      }
+    }
+  }
+
+  <!-- ============================== NEW ============================== -->
+  @if ((mode === 'crops' || mode === 'purchases') && id === 'new') {
+    @if (itemOpen) {
+      <div class="max-w-[720px] space-y-2" data-editor-slot="item">
+        <p appHelp>Create the item here; it is then available to choose in the {{ mode === 'crops' ? 'crop' : 'purchase' }} below.</p>
+        <app-feed-editor #itemEditor entity="items" [record]="itemEdit" (saved)="saved($event, 'item')" (cancelled)="itemOpen = false" />
+      </div>
+    }
+    <div class="max-w-[720px]" data-editor-slot="primary">
+      <app-feed-editor
+        #primaryEditor
+        [entity]="mode"
+        [items]="items()"
+        [titled]="false"
+        (saved)="saved($event, 'primary')"
+        (cancelled)="cancelEditor()"
+        (addItem)="openEditor('item', null)"
+      />
+    </div>
+  }
+
+  <!-- ============================== DETAIL ============================== -->
+  @if ((mode === 'crops' || mode === 'purchases') && id && id !== 'new') {
+    @if (detail(); as d) {
+      @if (historyFor() === d.id) {
+        <ng-container *ngTemplateOutlet="history; context: { $implicit: 'Correction history' }" />
+      }
+      @if (itemOpen) {
+        <div class="max-w-[720px] space-y-2" data-editor-slot="item">
+          <p appHelp>Create the item here; it is then available to choose in the correction below.</p>
+          <app-feed-editor #itemEditor entity="items" [record]="itemEdit" (saved)="saved($event, 'item')" (cancelled)="itemOpen = false" />
+        </div>
+      }
+      @if (editor) {
+        <div class="max-w-[720px]" data-editor-slot="primary">
+          <app-feed-editor
+            #primaryEditor
+            [entity]="mode"
+            [record]="editRecord"
+            [items]="items()"
+            (saved)="saved($event, 'primary')"
+            (cancelled)="cancelEditor()"
+            (addItem)="openEditor('item', null)"
+          />
+        </div>
+      } @else {
+        <dl class="feed-facts" data-role="feed-facts">
+          @if (mode === 'crops') {
+            <div><dt>Plot</dt><dd>{{ d.plot || 'Not specified' }}</dd></div>
+            <div><dt>Acres</dt><dd class="tabular-nums">{{ d.acreage ?? 'Unknown' }}</dd></div>
+            @for (k of dateKeys; track k) {
+              <div><dt>{{ label(k) }}</dt><dd>{{ cropDate(d, k) }}</dd></div>
+            }
+          } @else {
+            <div><dt>Delivered</dt><dd>{{ day(d.on) }}</dd></div>
+            <div><dt>Supplier</dt><dd>{{ d.supplier || 'Not specified' }}</dd></div>
+            <div><dt>Quantity</dt><dd class="tabular-nums">{{ d.quantity === null ? 'Unmeasured' : d.quantity + ' ' + d.unit }}</dd></div>
+            <div><dt>Price agreement</dt><dd>{{ agreement(d) }}</dd></div>
+            <div><dt>Goods</dt><dd class="tabular-nums">{{ money(d.goods_minor) }}</dd></div>
+            <div><dt>Transport</dt><dd class="tabular-nums">{{ money(d.transport_minor) }}</dd></div>
+            <div><dt>Other charges</dt><dd class="tabular-nums">{{ money(d.other_minor) }}</dd></div>
+            <div class="is-total"><dt>Total</dt><dd class="tabular-nums">{{ money(d.total_minor) }}</dd></div>
+          }
+          @if (d.notes) {
+            <div class="is-wide"><dt>Notes</dt><dd>{{ d.notes }}</dd></div>
+          }
+        </dl>
+        @if (mode === 'crops') {
+          <p appHelp size="xs">The lifecycle shown is the latest recorded; expenses and supply days below keep their own history.</p>
+        }
+      }
+
+      @if (mode === 'crops') {
+        <section class="space-y-3" aria-labelledby="expenses-heading">
+          <div class="flex flex-wrap items-baseline justify-between gap-3">
+            <h3 appSectionHeading id="expenses-heading">
+              Expenses <span class="tabular-nums text-content-secondary">· {{ money(expenseTotal(d)) }}</span>
+            </h3>
+            @if (!(expenseOpen && !expenseEdit)) {
+              <button appButton variant="secondary" type="button" data-role="add-expense" (click)="openEditor('expense', null)">Add expense</button>
+            }
+          </div>
+          <p appHelp size="xs">Do not enter salaries already recorded in payroll.</p>
+          @if (expenseOpen) {
+            <div class="max-w-[720px]" data-editor-slot="expense">
+              <app-feed-editor #expenseEditor entity="expenses" [cropId]="d.id" [record]="expenseEdit" (saved)="saved($event, 'expense')" (cancelled)="expenseOpen = false" />
+            </div>
+          }
+          @if ((d.expenses ?? []).length) {
+            <app-local-pagination label="Expenses" #pages2="localPagination" [total]="(d.expenses ?? []).length" />
+            <div appScrollRegion="Expenses">
+              <table class="feed-table" data-role="feed-expenses">
+                <thead>
+                  <tr><th appCell>Date</th><th appCell>Category</th><th appCell numeric>Amount</th><th appCell>Notes</th><th appCell><span class="sr-only">Actions</span></th></tr>
+                </thead>
+                <tbody>
+                  @for (e of pages2.rows(d.expenses ?? []); track e.id) {
+                      <tr [attr.data-editing]="expenseOpen && expenseEdit?.id === e.id ? 'true' : null">
+                        <td appCell class="whitespace-nowrap">{{ day(e.on) }}</td>
+                        <td appCell>{{ label(e.category) }}</td>
+                        <td appCell numeric>{{ money(e.amount_minor) }}</td>
+                        <td appCell tone="secondary">{{ e.notes || '—' }}</td>
+                        <td appCell>
+                          <div class="flex flex-wrap justify-end gap-2">
+                            <button appButton variant="secondary" size="sm" type="button" (click)="openEditor('expense', e)">Correct</button>
+                            <button appButton variant="secondary" size="sm" type="button" (click)="startRemoval(e)">Remove</button>
+                            <button appButton variant="secondary" size="sm" type="button" [attr.aria-expanded]="historyFor() === e.id" (click)="historyFor() === e.id ? closeHistory() : showRevisions(e, 'expenses')">History</button>
+                          </div>
+                        </td>
+                      </tr>
+                      @if (historyFor() === e.id) {
+                        <tr><td colspan="5" class="p-3"><ng-container *ngTemplateOutlet="history; context: { $implicit: 'Expense history' }" /></td></tr>
+                      }
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (!expenseOpen) {
+            <p appHelp>No expenses recorded for this crop.</p>
+          }
+        </section>
+
+        <section class="space-y-2" aria-labelledby="supply-days-heading">
+          <h3 appSectionHeading id="supply-days-heading">Supply days</h3>
+          @if (d.supply_days?.length) {
+            <p class="feed-dates">
+              @for (on of d.supply_days; track on) {
+                <a appTextLink [routerLink]="['/feed/daily', on]">{{ day(on) }}</a>
+              }
+            </p>
+          } @else {
+            <p appHelp>No feeding day links this crop yet. That does not mean none was cut.</p>
+          }
+        </section>
+      }
+    }
+  }
+</div>
+
+<!-- One table of days, used by the overview (last seven) and by Days (all). -->
+<ng-template #dayTable let-rows>
+  <div appScrollRegion="Feeding days">
+    <table class="feed-table" data-role="feed-days">
+      <thead>
+        <tr><th appCell>Day</th><th appCell>Account</th><th appCell>Fresh-fodder supply</th><th appCell><span class="sr-only">Action</span></th></tr>
+      </thead>
+      <tbody>
+        @for (d of rows; track d.on) {
+          <tr [attr.data-today]="d.on === today ? 'true' : null">
+            <td appCell class="whitespace-nowrap">
+              <span class="font-medium">{{ relDay(d.on) }}</span>
+              <span class="ml-2 text-content-muted">{{ weekday(d.on) }}{{ relDay(d.on) === day(d.on) ? '' : ' ' + day(d.on) }}</span>
+            </td>
+            <td appCell><span appBadge [tone]="standing(d.summary).tone">{{ standing(d.summary).label }}</span></td>
+            <td appCell tone="secondary">{{ d.summary?.assessment ? label(d.summary.assessment) : '—' }}</td>
+            <td appCell class="text-right">
+              <a appTextLink [tone]="d.summary ? 'quiet' : 'strong'" [routerLink]="['/feed/daily', d.on]">{{ d.summary ? 'Open' : 'Record' }}</a>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td appCell colspan="4" tone="muted">No days in this range.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p appHelp size="xs" class="mt-2">A day without an account means not recorded, never not fed.</p>
+</ng-template>
+
+<!-- Correction history opens where it was asked for. -->
+<ng-template #history let-heading>
+  <section appCard class="space-y-3" data-role="feed-history">
+    <div class="flex items-baseline justify-between gap-3">
+      <h3 appSectionHeading>{{ heading }}</h3>
+      <button appButton variant="secondary" size="sm" type="button" (click)="closeHistory()">Close</button>
+    </div>
+    @if (revisions().length) {
+      <app-local-pagination label="Revision history" #pages3="localPagination" [total]="revisions().length" />
+      @for (r of pages3.rows(revisions()); track r.id) {
+        <details class="border-t border-line-subtle pt-2">
+          <summary class="cursor-pointer text-sm">
+            <span class="font-medium">{{ label(r.operation) }}</span> · revision {{ r.revision }} · {{ provenance({ recorded_at: r.recorded_at }) }}
+          </summary>
+          <p appHelp size="xs" class="mt-2">Before</p>
+          <pre class="whitespace-pre-wrap break-all text-xs">{{ r.before_json }}</pre>
+          <p appHelp size="xs">After</p>
+          <pre class="whitespace-pre-wrap break-all text-xs">{{ r.after_json }}</pre>
+          <p appHelp size="xs">{{ r.provenance }}</p>
+        </details>
+      }
+    } @else {
+      <p appHelp role="status">Loading history…</p>
+    }
+  </section>
+</ng-template>
+
+<ng-template #removal>
+  <section appCard class="space-y-3" data-role="feed-removal">
+    @if (state.uncertain()) {
+      <p role="status">Removal outcome unknown. Retry the same removal before leaving.</p>
+    }
+    <p>
+      Remove this {{ removeTarget?.crop_id ? 'expense' : 'purchase' }}? The audit trail remains. A
+      purchase linked to a feeding day cannot be removed.
+    </p>
+    <div class="flex flex-wrap gap-2">
+      @if (session.ready()) {
+        <button appButton type="button" (click)="remove()" [appButtonDisabled]="state.submitting()">Confirm removal</button>
+      } @else {
+        <app-session-required what="this removal" />
+      }
+      <button appButton variant="secondary" type="button" [disabled]="state.locked()" (click)="removeTarget = null">Keep record</button>
+    </div>
+    @if (state.error(); as e) {
+      <p appErrorPanel>{{ e.message }}</p>
+    }
+  </section>
+</ng-template>

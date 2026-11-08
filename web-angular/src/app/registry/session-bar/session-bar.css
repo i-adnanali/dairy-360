@@ -1,1 +1,37 @@
-/* This component uses shared styles; no local rules are needed. */
+/*
+ * Recording state in the header. Not recording: a clear "Start recording"
+ * button (it was a faint "browsing" pill that did not read as clickable).
+ * Recording: a chip with a live dot that opens Change / Stop -- there was no
+ * way to stop short of reloading the page.
+ */
+:host { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+.rec-start, .rec-chip {
+  display: inline-flex; align-items: center; gap: 0.4375rem;
+  padding: 0.3125rem 0.75rem; border-radius: 999px;
+  font-size: 0.8125rem; font-weight: 600; line-height: 1.125rem;
+  border: 1px solid rgb(var(--shell-fg) / 0.55); color: rgb(var(--shell-fg));
+}
+.rec-start:hover, .rec-chip:hover { background: rgb(var(--shell-bg-deep)); border-color: rgb(var(--shell-fg)); }
+.rec-start:focus-visible, .rec-chip:focus-visible, .rec-menu button:focus-visible {
+  outline: 2px solid rgb(var(--session-lit)); outline-offset: 2px;
+}
+.rec-chip { border-color: rgb(var(--session-lit)); }
+.rec-dot {
+  width: 0.5rem; height: 0.5rem; border-radius: 999px; background: rgb(var(--session-lit));
+  box-shadow: 0 0 0 3px rgb(var(--session-lit) / 0.25);
+}
+
+.rec { position: relative; display: inline-flex; }
+.rec-menu {
+  position: absolute; top: calc(100% + 0.375rem); left: 0; z-index: 50;
+  display: grid; min-width: 13rem; padding: 0.25rem;
+  border: 1px solid rgb(201 204 195); border-radius: 0.625rem;
+  background: rgb(255 255 255); box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+.rec-menu button {
+  padding: 0.5rem 0.75rem; border-radius: 0.375rem; text-align: left;
+  font-size: 0.875rem; color: rgb(20 22 19);
+}
+.rec-menu button:hover { background: rgb(240 241 236); }
+.rec-menu [data-role='recording-stop'] { color: rgb(153 27 27); font-weight: 600; }

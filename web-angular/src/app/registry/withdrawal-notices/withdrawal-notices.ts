@@ -1,5 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { farmMoment } from '../today';
 
 export interface WithdrawalNotice {
   animal_id?: string;
@@ -45,6 +46,7 @@ export function groupWithdrawals(notices: WithdrawalNotice[]) {
   styleUrl: './withdrawal-notices.css',
 })
 export class WithdrawalNotices {
+  protected readonly farmMoment = farmMoment;
   protected unknownEnds(records: WithdrawalNotice[]) {
     return records.filter((w) => !w.until).length;
   }

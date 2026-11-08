@@ -15,10 +15,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
+  HostListener,
   OnInit,
   inject,
   input,
+  signal,
 } from '@angular/core';
+import { WriteLog } from "../after-write";
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -68,8 +72,33 @@ export class SessionBar implements OnInit {
   }
 
   private readonly drafts = inject(DraftRegistry);
-  protected async change(): Promise<void> {
+  private readonly writeLog = inject(WriteLog);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  protected readonly menuOpen = signal(false);
+
+  protected closeMenu(refocus = false): void {
+    if (!this.menuOpen()) return;
+    this.menuOpen.set(false);
+    if (refocus) this.host.querySelector<HTMLElement>('[data-role="change-session"]')?.focus();
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(e: Event): void {
+    if (!this.host.contains(e.target as Node)) this.closeMenu();
+  }
+
+  protected change(): void {
+    this.menuOpen.set(false);
+    // Opened from the chip, so focus returns to the chip when the panel closes.
+    this.host.querySelector<HTMLElement>('[data-role="change-session"]')?.focus();
+    this.session.requestSetup();
+  }
+
+  /** Back to browsing. A half-typed form is asked about first, like any other leave. */
+  protected async stop(): Promise<void> {
+    this.menuOpen.set(false);
     if (this.drafts.hasChanges() && !(await this.drafts.request())) return;
-    this.session.clear();
+    this.session.stop();
+    this.writeLog.announce('Recording stopped. Nothing more will be saved until you start again.');
   }
 }

@@ -1,8 +1,7 @@
-import { attachmentBase64, revisionLines, vaccinationRows, type HealthBoard, type HealthRevision, type VaccinationRound, type VaccinationRow } from '../health-workflows';
+import { attachmentBase64, vaccinationRows, type HealthTask, type HealthBoard, type HealthRevision, type VaccinationRound, type VaccinationRow } from '../health-workflows';
 import type { HerdRow } from '../types';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WithdrawalNotices } from "../withdrawal-notices/withdrawal-notices";
-import { precisionParts } from "../precision-display";
 import { FormState } from "../form-state";
 import { PrecisionDateControl, DateEntry, PrecisionDate, dateBlocker } from "../precision-date/precision-date";
 import { DraftRegistry } from "../draft-registry";
@@ -25,9 +24,17 @@ import { farmToday } from "../today";
 import { HEALTH_FIELDS, healthLabel, healthWords, type HealthRecord, type HealthEntityRecord, type HealthEditorDraft } from "../health-model";
 import { Button } from "../../ui/button";
 import { TextInput } from "../../ui/input";
-import { Card, ErrorPanel } from "../../ui/surface";
+import { Card, ErrorPanel, StatusBadge } from "../../ui/surface";
+import { IdentifierLink } from "../../ui/navigation";
+import { NgTemplateOutlet } from '@angular/common';
+import { feedDay } from "../feed-format";
 import { PageHeading } from "../../ui/heading";
 import { FieldLabel, HelpText } from "../../ui/text";
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
+import { HostListener } from '@angular/core';
+import { healthDate, healthView, recordedText, revisionView, type HealthView, type RevisionView } from "../health-view";
+import { SOURCE_FORMS, feedLabel } from "../feed-format";
 
 @Component({
   selector: 'app-health-page',
@@ -46,6 +53,9 @@ import { FieldLabel, HelpText } from "../../ui/text";
     PageHeading,
     FieldLabel,
     HelpText,
+    NgTemplateOutlet,
+    IdentifierLink,
+    StatusBadge,
   ],
 
   templateUrl: './health-page.html',
@@ -75,6 +85,244 @@ export class HealthPage {
     return true;
   }
   protected entities = Object.keys(HEALTH_FIELDS);
+
+  /**
+   * THREE VIEWS instead of one 3,000px page: what to do now, the history of
+   * what was done, and the reference lists (medicines and plans). Carried in
+   * the URL so a link from an animal lands on the right one.
+   */
+  protected readonly tabs = [
+    { id: 'todo', label: 'To do' },
+    { id: 'records', label: 'Records' },
+    { id: 'reference', label: 'Medicines & plans' },
+  ] as const;
+  protected tab: 'todo' | 'records' | 'reference' = 'todo';
+  private static readonly REFERENCE = ['products', 'plans'];
+  protected tabEntities(): string[] {
+    return this.tab === 'reference'
+      ? this.entities.filter((e) => HealthPage.REFERENCE.includes(e))
+      : this.entities.filter((e) => !HealthPage.REFERENCE.includes(e) && e !== 'tasks');
+  }
+  protected setTab(tab: 'todo' | 'records' | 'reference') {
+    if (tab === this.tab) return;
+    this.tab = tab;
+    const list = this.tabEntities();
+    if (tab !== 'todo' && !list.includes(this.entity)) {
+      this.entity = list[0];
+      this.loadRecords();
+    }
+    this.writeUrl();
+    this.changeDetector.markForCheck();
+  }
+
+  /** The row whose view or form is open in the panel, marked in the list. */
+  protected activeRow: string | null = null;
+  private linkedTask: string | null = null;
+  private linkedNew: 'visits' | 'administrations' | 'round' | null = null;
+  private showLinkedTask() {
+    const id = this.linkedTask;
+    if (!id) return;
+    this.linkedTask = null;
+    this.activeRow = id;
+    this.changeDetector.markForCheck();
+    setTimeout(() => {
+      const row = document.querySelector<HTMLElement>(`[data-task="${CSS.escape(id)}"]`);
+      row?.scrollIntoView?.({ block: 'center' });
+      row?.querySelector<HTMLElement>('[data-role="complete-task"]')?.focus({ preventScroll: true });
+    });
+  }
+  /** The task whose "More" menu is open. */
+  protected menuFor: string | null = null;
+  protected toggleMenu(id: string) {
+    this.menuFor = this.menuFor === id ? null : id;
+  }
+  @HostListener('document:click', ['$event'])
+  protected closeMenu(event: Event) {
+    if (this.menuFor && !(event.target as HTMLElement | null)?.closest?.('.task-more')) {
+      this.menuFor = null;
+      this.changeDetector.markForCheck();
+    }
+  }
+  /** Phone: the five filters fold behind one button. */
+  protected filtersOpen = false;
+  protected activeFilters() {
+    return [this.animalFilter, this.taskFilter, this.standingFilter, this.assigneeFilter, this.on !== farmToday() ? this.on : ''].filter(Boolean).length;
+  }
+  protected readonly today = farmToday();
+  protected asOfText() {
+    return this.on === this.today ? 'Today' : healthDate(this.on);
+  }
+  /** Whose correction history is open; it shows in the panel. */
+  protected historyFor: string | null = null;
+  private historyRecord: HealthRecord | null = null;
+  protected closeHistory() {
+    this.historyFor = null;
+    this.historyRecord = null;
+    this.revisions.set([]);
+    this.activeRow = null;
+    this.returnFocus();
+  }
+  protected revisionViews(): RevisionView[] {
+    const list = [...this.revisions()].sort((a, b) => a.revision - b.revision);
+    const entity = this.historyRecord?.entity ?? this.editEntity;
+    return list.map((v, i) => revisionView(v, i ? list[i - 1] : null, entity, this.lookup)).reverse();
+  }
+
+  // ---- The panel --------------------------------------------------------
+  protected panelMode(): 'editor' | 'action' | 'history' | null {
+    if (this.editorOpen) return 'editor';
+    if (this.actionTask) return 'action';
+    if (this.historyFor) return 'history';
+    return null;
+  }
+  protected panelTitle(): string {
+    const mode = this.panelMode();
+    if (mode === 'history') return 'Correction history';
+    if (mode === 'action') return 'Change task status';
+    const what = this.editEntity === 'administrations' ? 'dose' : this.entityLabel(this.editEntity, true);
+    if (this.savedView) return feedLabel(this.editEntity === 'administrations' ? 'recorded dose' : what);
+    if (this.editing) return 'Correct ' + what;
+    return this.form.task_id ? 'Record completion' : 'Record ' + what;
+  }
+  /** "BD-0001 Noori · Observation requiring follow-up": what the panel is about. */
+  protected panelSubject(): string {
+    const r: Partial<HealthRecord> | null =
+      this.panelMode() === 'history' ? this.historyRecord : this.panelMode() === 'action' ? this.actionTask : this.savedView || this.editing ? this.editing : this.form;
+    if (!r) return '';
+    const animal = r.animal_id ? this.animalLine(r.animal_id) : '';
+    const title = r.title ?? r.name ?? r.product_name ?? r.reason ?? r.instructions;
+    return [animal, this.panelMode() === 'editor' && !this.editing ? '' : title].filter(Boolean).join(' · ');
+  }
+  protected closePanel() {
+    if (this.panelMode() === 'history') return this.closeHistory();
+    return this.closeDrafts();
+  }
+  protected readonly actions = [
+    { id: 'defer', label: 'Defer to a new date' },
+    { id: 'miss', label: 'Missed' },
+    { id: 'cancel', label: 'Cancelled' },
+  ];
+  /** The task a completion form is for, shown at the top of the form. */
+  protected completingTask(): HealthTask | null {
+    if (!this.form.task_id || this.editing) return null;
+    return (this.board()?.tasks ?? []).find((t) => t.id === this.form.task_id) ?? null;
+  }
+  protected setToday() {
+    this.form.occurred_on = this.today;
+    this.form.date_precision = 'day';
+    this.form.occurred_time = null;
+    this.setDate();
+    this.changeDetector.markForCheck();
+  }
+
+  // ---- Reading records in words ----------------------------------------
+  protected readonly lookup = (ref: string, id: string): string | null => {
+    if (ref === 'animals') return this.animalLine(id);
+    const r = (this.catalog()[ref] ?? []).find((x) => x.id === id) ?? (ref === 'tasks' ? (this.board()?.tasks ?? []).find((t) => t.id === id) : null);
+    return r ? this.label(r) : null;
+  };
+  protected view(r: HealthRecord): HealthView {
+    return healthView(r, this.lookup);
+  }
+  protected recorded(r: HealthRecord) {
+    return recordedText(r);
+  }
+  protected sourceName() {
+    const f = this.session.sourceForm();
+    return f ? (SOURCE_FORMS[f] ?? feedLabel(f)) : '';
+  }
+  protected date(on: unknown, precision: unknown) {
+    return healthDate(on, precision);
+  }
+  protected statusWord(s: unknown) {
+    return s ? feedLabel(String(s)) : 'Open';
+  }
+  protected animalName(id: string | undefined | null) {
+    return this.animals().find((a) => a.id === id)?.name ?? '';
+  }
+  protected animalLine(id: string) {
+    const n = this.animalName(id);
+    return n ? id + ' ' + n : id;
+  }
+  protected recordMeta(r: HealthRecord) {
+    return [r.status || r.kind ? feedLabel(String(r.status || r.kind)) : '', r.recorded_by ? 'Recorded by ' + r.recorded_by : '', 'revision ' + r.revision]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
+  // ---- The To do summary -----------------------------------------------
+  protected dueCount(b: HealthBoard) {
+    return this.forAnimalTasks(b).filter((t) => t.status === 'pending' && (t.standing === 'overdue' || t.standing === 'due')).length;
+  }
+  private forAnimalTasks(b: HealthBoard) {
+    return b.tasks.filter((t) => !this.animalFilter || t.animal_id === this.animalFilter);
+  }
+  protected openCases(b: HealthBoard) {
+    return b.open_cases.filter((c) => !this.animalFilter || c.animal_id === this.animalFilter);
+  }
+  protected summaryParts(b: HealthBoard): { text: string; tone: string }[] {
+    const tasks = this.forAnimalTasks(b).filter((t) => t.status === 'pending');
+    const n = (s: string) => tasks.filter((t) => t.standing === s).length;
+    const parts: { text: string; tone: string }[] = [];
+    if (n('overdue')) parts.push({ text: `${n('overdue')} overdue`, tone: 'danger' });
+    if (n('due')) parts.push({ text: `${n('due')} due today`, tone: 'warning' });
+    if (n('upcoming')) parts.push({ text: `${n('upcoming')} upcoming`, tone: 'neutral' });
+    if (!tasks.length) parts.push({ text: 'No tasks outstanding', tone: 'neutral' });
+    const w = this.milkWithdrawals(b).length + this.otherWithdrawals(b).length;
+    const milk = this.milkWithdrawals(b).length;
+    if (w) parts.push({ text: `${w} ${w === 1 ? 'withdrawal' : 'withdrawals'} needing attention${milk ? ` (${milk} milk)` : ''}`, tone: milk ? 'danger' : 'warning' });
+    const c = this.openCases(b).length;
+    if (c) parts.push({ text: `${c} open ${c === 1 ? 'case' : 'cases'}`, tone: 'neutral' });
+    return parts;
+  }
+
+  // ---- The URL carries the view, so a reload or a link keeps it ---------
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
+  protected writeUrl() {
+    try {
+      if (typeof window === 'undefined' || !window.location.pathname.endsWith('/animals/health')) return;
+      const q: Record<string, string> = {};
+      if (this.tab !== 'todo') q['tab'] = this.tab;
+      if (this.animalFilter) q['animal'] = this.animalFilter;
+      if (this.taskFilter) q['type'] = this.taskFilter;
+      if (this.standingFilter) q['due'] = this.standingFilter;
+      if (this.assigneeFilter) q['assignee'] = this.assigneeFilter;
+      if (this.on !== this.today) q['on'] = this.on;
+      if (this.tab !== 'todo') q['show'] = this.entity;
+      this.location.replaceState(this.router.createUrlTree(['/animals/health'], { queryParams: q }).toString());
+    } catch {
+      /* a test route without a router tree */
+    }
+  }
+  protected clearAnimal() {
+    this.animalFilter = '';
+    this.writeUrl();
+    this.changeDetector.markForCheck();
+  }
+  protected chooseEntity(e: string) {
+    this.entity = e;
+    this.loadRecords();
+    this.writeUrl();
+  }
+  protected countFor(e: string) {
+    return (this.catalog()[e] ?? []).filter((r) => !this.animalFilter || !r.animal_id || r.animal_id === this.animalFilter).length;
+  }
+
+  /** Follows the Animal filter too, so ?animal=BD-0001 shows only her withdrawals. */
+  private forAnimal(b: HealthBoard) {
+    return b.withdrawals.filter((w) => !this.animalFilter || w.animal_id === this.animalFilter);
+  }
+  protected milkWithdrawals(b: HealthBoard) {
+    return this.forAnimal(b).filter((w) => w.target === 'milk');
+  }
+  protected otherWithdrawals(b: HealthBoard) {
+    return this.forAnimal(b).filter((w) => w.target !== 'milk');
+  }
+  /** "7 Nov" for a due date. */
+  protected day(on: string | null | undefined) {
+    return feedDay(on ?? '');
+  }
   protected entity = 'visits';
   protected editEntity = 'visits';
   protected form: HealthEditorDraft = {};
@@ -97,7 +345,7 @@ export class HealthPage {
   protected readonly standings = ['overdue', 'due', 'upcoming'] as const;
   protected assigneeFilter = '';
   protected targets = ['milk_withdrawal', 'meat_withdrawal'] as const;
-  protected actionTask: HealthRecord | null = null;
+  protected actionTask: HealthTask | null = null;
   protected action = 'defer';
   protected actionReason = '';
   protected newDue = '';
@@ -213,7 +461,27 @@ export class HealthPage {
       },
       inject(DestroyRef),
     );
-    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(() => { void this.load(); });
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((q) => {
+      // ?animal=BD-0001 from an animal's page: the board opens filtered to her.
+      const animal = q.get('animal');
+      if (animal) this.animalFilter = animal;
+      const tab = q.get('tab');
+      if (tab === 'records' || tab === 'reference' || tab === 'todo') this.tab = tab;
+      this.taskFilter = q.get('type') ?? this.taskFilter;
+      this.standingFilter = q.get('due') ?? this.standingFilter;
+      this.assigneeFilter = q.get('assignee') ?? this.assigneeFilter;
+      const on = q.get('on');
+      if (on && /^\d{4}-\d{2}-\d{2}$/.test(on)) this.on = on;
+      // ?new= from Search: open that form, once.
+      const fresh = q.get('new');
+      if (fresh === 'visits' || fresh === 'administrations' || fresh === 'round') this.linkedNew = fresh;
+      // ?task= from Today: that task is marked and brought into view.
+      this.linkedTask = q.get('task');
+      if (this.linkedTask) this.tab = 'todo';
+      const show = q.get('show');
+      if (show && this.tabEntities().includes(show)) this.entity = show;
+      void this.load();
+    });
   }
   ngDoCheck() {
     this.drafts.syncUnload();
@@ -245,6 +513,14 @@ export class HealthPage {
       if (!record) this.sourceOpened = null;
       if (generation !== this.loadGeneration) return;
       for (const animal of a) this.roundRows[animal.id] ??= { disposition: '' };
+      this.showLinkedTask();
+      const fresh = this.linkedNew;
+      this.linkedNew = null;
+      if (fresh === 'round') void this.openRound();
+      else if (fresh) void this.create(fresh);
+      // Once used, ?new= and ?task= leave the address: a reload should not
+      // open the form again. writeUrl keeps only the view's own filters.
+      if (fresh || this.route.snapshot.queryParamMap.has('task')) this.writeUrl();
     } catch (e) {
       if (generation !== this.loadGeneration) return;
       this.error.set(String(e));
@@ -295,12 +571,9 @@ export class HealthPage {
     };
     return labels[entity]?.[singular ? 1 : 0] ?? this.words(entity);
   }
-  protected taskKind(kind: string) {
-    return (
-      ({ administration: 'Dose', recheck: 'Recheck', test: 'Test' } as Record<string, string>)[
-        kind
-      ] ?? this.words(kind)
-    );
+  protected taskKind(kind: string | null | undefined) {
+    if (!kind) return 'Task';
+    return ({ administration: 'Dose', recheck: 'Recheck', test: 'Test' } as Record<string, string>)[kind] ?? feedLabel(kind);
   }
   protected taskStatus(status: string) {
     return (
@@ -341,6 +614,7 @@ export class HealthPage {
   protected async create(entity: string, initial: HealthEditorDraft = {}) {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return false;
     this.resetDrafts();
+    this.dropHistory();
     this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = entity;
@@ -367,6 +641,7 @@ export class HealthPage {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return false;
     if (!stillCurrent()) return false;
     this.resetDrafts();
+    this.dropHistory();
     this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.editEntity = r.entity;
@@ -419,22 +694,42 @@ export class HealthPage {
 
     this.changeDetector.markForCheck();
   }
+  /** The panel's title takes focus, so a screen reader hears what opened. */
   private focusEditor() {
-    const editor = document.getElementById('health-editor');
-    editor?.scrollIntoView?.({ block: 'nearest' });
-    const target =
-      editor?.querySelector<HTMLElement>('h3') ??
-      editor?.querySelector<HTMLElement>('input, select, textarea');
-    if (target) {
-      if (target.tagName === 'H3') target.tabIndex = -1;
-      target.focus();
-    }
+    this.sizePanel();
+    const title = document.getElementById('health-panel-title');
+    if (title) return title.focus();
+    document.getElementById('health-editor')?.querySelector<HTMLElement>('input, select, textarea')?.focus();
+  }
+  private dropHistory() {
+    this.historyFor = null;
+    this.historyRecord = null;
+    this.revisions.set([]);
+  }
+  /**
+   * The panel sticks beside the list on a wide screen, so it is never taller
+   * than the scrolling area it sits in.
+   */
+  @HostListener('window:resize')
+  protected sizePanel() {
+    const main = document.querySelector('main');
+    const host = document.querySelector<HTMLElement>('app-health-page');
+    if (main && host) host.style.setProperty('--panel-max', Math.max(320, main.clientHeight - 24) + 'px');
   }
   protected async closeDrafts() {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
     this.showDoseExceptions = false;
-    this.editorOrigin?.focus();
+    this.activeRow = null;
+    this.returnFocus();
+  }
+  /** Back to the row that opened the panel, once the panel has gone. */
+  private returnFocus() {
+    const origin = this.editorOrigin;
+    this.changeDetector.markForCheck();
+    setTimeout(() => {
+      if (origin?.isConnected) origin.focus();
+    });
   }
   protected closeEditor() {
     return this.closeDrafts();
@@ -442,18 +737,22 @@ export class HealthPage {
   protected async openRound() {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
+    this.dropHistory();
     this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.roundOpen = true;
+    this.changeDetector.markForCheck();
     setTimeout(() => document.querySelector<HTMLElement>('#health-round select')?.focus());
   }
-  protected async openAction(t: HealthRecord) {
+  protected async openAction(t: HealthTask) {
     if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
     this.resetDrafts();
+    this.dropHistory();
     this.showDoseExceptions = false;
     this.editorOrigin = document.activeElement as HTMLElement;
     this.actionTask = t;
-    setTimeout(() => document.querySelector<HTMLElement>('#health-action select')?.focus());
+    this.changeDetector.markForCheck();
+    setTimeout(() => this.focusEditor());
   }
   protected referenceChanged(key: string) {
     if (key === 'product_id') {
@@ -583,22 +882,6 @@ export class HealthPage {
       await this.load();
     });
   }
-  protected recordObjects(r: HealthRecord) {
-    return Object.entries(r)
-      .filter(([, value]) => value !== null && typeof value === 'object')
-      .map(([key, value]) => ({ key, value: JSON.stringify(value, null, 2) }));
-  }
-  protected recordLines(r: HealthRecord) {
-    return Object.entries(r)
-      .filter(([k, v]) => v !== null && typeof v !== 'object' && k !== 'date_precision')
-      .map(([k, v]) => {
-        if (k === 'occurred_on') {
-          const date = precisionParts(v as string, r.date_precision ?? null);
-          return 'Date: ' + date.figure + (date.qualifier ? ' ' + date.qualifier : '');
-        }
-        return `${healthWords(k)}: ${v}`;
-      });
-  }
   protected async reviewConflict() {
     if (!this.editing) return;
     const entity = this.editEntity,
@@ -619,15 +902,23 @@ export class HealthPage {
     this.notice.set('Latest saved revision loaded.');
   }
   protected async history(r: HealthRecord) {
+    if (this.drafts.hasChanges((p) => p.owner === 'health') && !(await this.canLeave())) return;
+    if (!this.editorOpen) this.editorOrigin = document.activeElement as HTMLElement;
+    this.resetDrafts();
+    this.historyFor = r.id;
+    this.historyRecord = r;
+    this.revisions.set([]);
+    this.changeDetector.markForCheck();
+    setTimeout(() => this.focusEditor());
     try {
       this.revisions.set(
         await this.api.healthGet<HealthRevision[]>('health/' + r.entity + '/' + r.id + '/revisions'),
       );
+      this.changeDetector.markForCheck();
     } catch (e) {
       this.error.set(String(e));
     }
   }
-  protected readonly revisionLines = revisionLines;
   protected async upload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file || this.locked()) return;

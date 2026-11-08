@@ -10,9 +10,10 @@ import { EventEncoder } from '@ag-ui/encoder';
 import cors from 'cors';
 import express from 'express';
 import type { AgentRunForwardedProps } from '@dairy/shared';
-import { db, isSeeded } from './db';
+import { db, farmEventsBetween, isSeeded } from './db';
 import { runAgentStream } from './agent/stream';
 import { farmRouter } from './farm/routes';
+import { farmMonitorRouter } from './farm/monitorRoutes';
 import { registryRouter } from './registry/routes';
 
 const app = express();
@@ -29,6 +30,7 @@ const SEED_HINT =
 // behind the isSeeded() guard: farm_events lives outside the dairy seed
 // lifecycle, so ingestion works against an unseeded database.
 app.use('/api/webhooks', farmRouter);
+app.use('/api/farm', farmMonitorRouter(farmEventsBetween));
 
 // Animal registry (see docs/records/REGISTRY.md). Also outside the isSeeded() guard:
 // the registry has nothing to do with the demo seed, and an unseeded database

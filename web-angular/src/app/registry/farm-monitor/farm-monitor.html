@@ -1,0 +1,71 @@
+
+    <div data-page-layout="review" class="mx-auto">
+      <header class="mb-5">
+        <h2 appPageHeading>Farm monitor</h2>
+        <p appHelp class="mt-1">What the cameras saw, and which events were flagged. To flag or re-grade an event, ask the assistant; nothing is written until you approve it.</p>
+      </header>
+
+      <div class="toolbar" role="group" aria-label="Filters">
+        <div class="seg" role="group" aria-label="Window">
+          @for (w of windows; track w.id) {
+            <button type="button" [attr.aria-pressed]="window() === w.id" (click)="setWindow(w.id)">{{ w.label }}</button>
+          }
+        </div>
+        <div class="seg" role="group" aria-label="Show">
+          <button type="button" [attr.aria-pressed]="show() === 'all'" (click)="setShow('all')">All events</button>
+          <button type="button" [attr.aria-pressed]="show() === 'flagged'" (click)="setShow('flagged')">Flagged only</button>
+        </div>
+      </div>
+
+      @if (error(); as e) {
+        <div class="mt-4">
+          <p appErrorPanel data-role="monitor-error">{{ e }}</p>
+          <button type="button" class="retry" (click)="retry()">Try again</button>
+        </div>
+      } @else if (data(); as d) {
+        <p class="summary" data-role="monitor-summary">
+          <b>{{ counts().all }}</b> {{ counts().all === 1 ? 'event' : 'events' }}
+          @if (counts().urgent) { · <span class="sev" data-sev="urgent">{{ counts().urgent }} urgent</span> }
+          @if (counts().notable) { · <span class="sev" data-sev="notable">{{ counts().notable }} notable</span> }
+          @if (d.synthetic) { · <span class="synthetic">synthetic test events</span> }
+        </p>
+
+        @if (rows().length === 0) {
+          <p class="empty" data-role="monitor-empty">
+            {{ show() === 'flagged' ? 'Nothing was flagged in this window.' : 'No camera events in this window.' }}
+          </p>
+        } @else {
+          <table class="events" data-role="monitor-table">
+            <thead>
+              <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Where</th>
+                <th scope="col">What</th>
+                <th scope="col" class="num">Confidence</th>
+                <th scope="col">Verdict</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of rows(); track e.id) {
+                <tr [attr.data-sev]="e.flag_severity ?? 'routine'" [attr.data-event]="e.id" [attr.data-current]="marked() === e.id || null" [attr.aria-current]="marked() === e.id ? 'true' : null">
+                  <td class="time">{{ when(e) }}</td>
+                  <td data-label="Where">{{ where(e) }}</td>
+                  <td data-label="What">{{ what(e) }}</td>
+                  <td class="num" data-label="Confidence">{{ confidence(e) }}</td>
+                  <td>
+                    @if (e.flagged) {
+                      <span class="sev" [attr.data-sev]="e.flag_severity">{{ e.flag_severity === 'urgent' ? 'Urgent' : 'Notable' }}</span>
+                      <span class="reason">{{ e.flag_reason }}</span>
+                    } @else {
+                      <span class="routine">Routine</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      } @else if (loading()) {
+        <p appHelp tone="subtle" class="mt-4">Loading…</p>
+      }
+    </div>

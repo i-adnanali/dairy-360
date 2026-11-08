@@ -1,3 +1,4 @@
+import { periodText } from './labour-format';
 import type { LabourReportLine } from '@dairy/shared';
 import { formatMinor } from './money';
 
@@ -41,7 +42,7 @@ export function labourPresentation(line: LabourReportLine): {
       )
     )
       return fallback;
-    const period = `${c.fromOn} through ${c.toOn}`;
+    const period = periodText(c.fromOn, c.toOn);
     if (c.kind === 'wage_period_outside_engagement')
       return { heading: 'Wage period outside engagement', context: period, link };
     if (!Number.isSafeInteger(c.amountMinor) || !Number.isSafeInteger(c.agreementMinor))

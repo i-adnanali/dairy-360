@@ -4,9 +4,7 @@
         <h2 appPageHeading>Payroll</h2>
         <div class="entry-context flex flex-wrap items-end gap-4">
           <label class="space-y-1">
-            <span class="block text-xs font-medium uppercase tracking-wide text-content-muted"
-              >From</span
-            >
+            <span appFieldLabel>From</span>
             <input
               type="date"
               [value]="from()"
@@ -17,9 +15,7 @@
             />
           </label>
           <label class="space-y-1">
-            <span class="block text-xs font-medium uppercase tracking-wide text-content-muted"
-              >To</span
-            >
+            <span appFieldLabel>Through</span>
             <input
               type="date"
               [value]="to()"
@@ -31,7 +27,8 @@
           </label>
           <div class="space-y-1">
             <app-identifier-input
-              help="Person associated with this record, if known. Use a stable identifier, not a display name."
+              help="Who handed over the wages, if you know. Pick the name from the list, so it is spelled the same on every record."
+              [suggestions]="identifiers.values().observed_by"
               field="observed_by"
               label="Paid out by"
               name="observed_by"
@@ -84,15 +81,15 @@
                       [attr.data-engagement]="row.engagement.id"
                     >
                       <td>
-                        <span class="font-mono whitespace-nowrap text-sm text-content-primary">{{
-                          row.person.identifier
+                        <span class="whitespace-nowrap text-sm font-medium text-content-primary">{{
+                          row.person.name || row.person.identifier
                         }}</span>
                         @if (row.engagement.role) {
                           <span class="ml-2 text-xs text-content-subtle">{{
                             row.engagement.role
                           }}</span>
                         }
-                        <p class="text-xs text-content-muted">{{ from() }} – {{ to() }}</p>
+                        <p class="text-xs text-content-muted">{{ period(from(), to()) }}</p>
                         @if (!validAmount(row)) {
                           <p class="text-sm">Not answered — enter a valid wage</p>
                         }
@@ -153,7 +150,7 @@
                               {{ m.taken_litres }} L taken
                             </span>
                             @if (m.partial) {
-                              <span class="text-content-subtle">(through {{ m.through_on }})</span>
+                              <span class="text-content-subtle">(through {{ day(m.through_on) }})</span>
                             }
                           </p>
                         }
@@ -198,8 +195,8 @@
                   class="flex items-baseline justify-between rounded-lg bg-surface-raised px-3 py-2"
                 >
                   <span
-                    ><span class="font-mono text-xs">{{ d.person.identifier }}</span> —
-                    {{ d.from_on }}</span
+                    ><span class="font-medium">{{ d.person.name || d.person.identifier }}</span> ·
+                    {{ day(d.from_on) }}</span
                   >
                   <span class="font-mono tabular-nums">{{ formatMinor(d.amount_minor) }}</span>
                 </li>
@@ -276,6 +273,8 @@
         <!-- Footer: what this run costs, and whether it can be saved. -->
         <footer class="space-y-3">
           <div class="flex flex-wrap items-baseline justify-between gap-3 text-sm">
+            <!-- The total says what it is: it floated unlabelled above the bar. -->
+            <span class="text-content-secondary">Wages in this run</span>
             <span class="font-mono tabular-nums text-content-primary" data-role="total">
               {{ formatMinor(draftTotalMinor()) }}
             </span>

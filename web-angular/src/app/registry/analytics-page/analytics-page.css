@@ -1,17 +1,155 @@
+/*
+ * MILK ANALYTICS. One period control at the top, one strip of figures, the
+ * chart beside what is still to record, then the detail tables. A day picked
+ * on the chart applies to the whole page and the selection bar says so.
+ */
+:host { display: block; }
 
-      .analytics-summary {
-        display: grid;
-        gap: 1rem;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-      }
-      @media (min-width: 768px) {
-        .analytics-summary {
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-      }
-      canvas {
-        max-width: 100%;
-      }
-      td {
-        vertical-align: top;
-      }
+/* ---- Period bar -------------------------------------------------------- */
+.period-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem;
+  background: rgb(var(--surface-sunken));
+}
+.period-meta { margin-left: auto; font-size: 0.8125rem; color: rgb(var(--text-muted)); }
+
+.seg, .tabs {
+  display: inline-flex; padding: 0.1875rem; gap: 0.125rem;
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.5rem;
+  background: rgb(var(--surface-raised));
+}
+.seg button, .tabs button {
+  padding: 0.3125rem 0.75rem; border-radius: 0.375rem;
+  font-size: 0.875rem; font-weight: 500; color: rgb(var(--text-secondary));
+  transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.seg button:hover, .tabs button:hover { color: rgb(var(--text-primary)); background: rgb(var(--surface-sunken)); }
+.seg button[aria-pressed='true'], .tabs button[aria-pressed='true'] {
+  background: rgb(var(--fill-brand)); color: rgb(var(--text-on-fill));
+}
+.seg button:focus-visible, .tabs button:focus-visible, .step:focus-visible, .sort:focus-visible, .bucket-chips button:focus-visible {
+  outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px;
+}
+
+.stepper { display: inline-flex; align-items: center; gap: 0.25rem; }
+.step {
+  display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem;
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.5rem;
+  background: rgb(var(--surface-raised)); color: rgb(var(--text-primary));
+}
+.step:hover { background: rgb(var(--surface-sunken)); }
+.step svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The label IS the date picker: the native input sits invisibly over it. */
+.period-name {
+  position: relative; display: inline-flex; align-items: center; min-width: 11rem; justify-content: center;
+  padding: 0.375rem 0.75rem; border-radius: 0.5rem; cursor: pointer;
+  font-size: 1rem; color: rgb(var(--text-heading));
+}
+.period-name:hover { background: rgb(var(--surface-raised)); }
+.period-name:focus-within { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 1px; }
+.period-name input {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+}
+.period-name input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+
+/* ---- Selection --------------------------------------------------------- */
+.selection-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem;
+  padding: 0.625rem 0.875rem; border-radius: 0.75rem;
+  border: 1px solid rgb(var(--fill-brand));
+  background: rgb(var(--surface-raised));
+  font-size: 0.9375rem;
+}
+
+/* ---- Figures ----------------------------------------------------------- */
+.figures {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem;
+  background: rgb(var(--surface-raised));
+}
+.figure { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.figure + .figure { border-left: 1px solid rgb(var(--border-subtle)); }
+.figure h2 { font-size: 0.8125rem; line-height: 1.125rem; font-weight: 500; color: rgb(var(--text-secondary)); }
+.figure-value {
+  font-size: 1.75rem; line-height: 2.25rem; font-weight: 650; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums; color: rgb(var(--text-heading));
+  overflow-wrap: anywhere;
+}
+.figure-of { font-size: 1rem; font-weight: 500; letter-spacing: 0; color: rgb(var(--text-secondary)); }
+.figure-note { font-size: 0.8125rem; line-height: 1.125rem; color: rgb(var(--text-muted)); }
+
+.caveats {
+  padding: 0.625rem 0.875rem; border-radius: 0.75rem;
+  border: 1px solid rgb(var(--border-subtle));
+}
+.caveats summary { cursor: pointer; font-size: 0.875rem; }
+
+/* ---- Chart + review ---------------------------------------------------- */
+.analytics-split {
+  display: grid; gap: 1.5rem; align-items: start;
+  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+}
+.legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0; list-style: none; font-size: 0.8125rem; color: rgb(var(--text-secondary)); }
+.legend li { display: inline-flex; align-items: center; gap: 0.375rem; }
+.key { display: inline-block; width: 0.875rem; height: 0.625rem; border-radius: 2px; }
+.key-bar { background: rgb(var(--fill-brand)); }
+.key-open { background: rgb(var(--fill-brand) / 0.25); box-shadow: inset 0 0 0 1.5px rgb(var(--fill-brand)); }
+.key-line { height: 0; border-top: 2px dashed rgb(var(--text-secondary)); border-radius: 0; }
+
+/* The bars' keyboard route. The axis already shows the days, so the chips stay
+   out of sight until a keyboard reaches them. */
+.bucket-chips { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+.bucket-chips:not(:focus-within) {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.bucket-chips button {
+  padding: 0.1875rem 0.5rem; border-radius: 999px; font-size: 0.8125rem;
+  border: 1px solid rgb(var(--border-subtle)); color: rgb(var(--text-secondary));
+}
+.bucket-chips button:hover { color: rgb(var(--text-primary)); border-color: rgb(var(--border-strong)); }
+.bucket-chips button[aria-pressed='true'] { background: rgb(var(--fill-brand)); border-color: rgb(var(--fill-brand)); color: rgb(var(--text-on-fill)); }
+
+.review-list { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem; background: rgb(var(--surface-raised)); }
+.review-list li { padding: 0.625rem 0.875rem; }
+.review-list li + li { border-top: 1px solid rgb(var(--border-hairline)); }
+.review-links { display: grid; gap: 0.125rem; margin: 0.25rem 0 0; font-size: 0.875rem; }
+.review-links > div { display: flex; gap: 0.75rem; }
+.review-links dt { width: 4.5rem; color: rgb(var(--text-muted)); }
+.review-links dd { display: flex; gap: 0.875rem; margin: 0; }
+
+/* ---- Tables ------------------------------------------------------------ */
+.data-table {
+  width: 100%; font-size: 0.9375rem; text-align: left;
+  border-collapse: separate; border-spacing: 0;
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem; overflow: hidden;
+  background: rgb(var(--surface-raised));
+}
+.data-table thead { background: rgb(var(--surface-sunken)); }
+.data-table thead th { font-size: 0.8125rem; font-weight: 600; color: rgb(var(--text-secondary)); }
+.data-table tbody tr + tr td { border-top: 1px solid rgb(var(--border-hairline)); }
+.data-table td { vertical-align: top; }
+
+.sort { display: inline-flex; align-items: center; gap: 0.25rem; font: inherit; color: inherit; border-radius: 0.25rem; }
+.sort:hover { color: rgb(var(--text-primary)); }
+.sort-mark { width: 0; height: 0; border-inline: 4px solid transparent; opacity: 0; }
+.sort-mark[data-dir='asc'] { border-bottom: 5px solid currentColor; opacity: 1; }
+.sort-mark[data-dir='desc'] { border-top: 5px solid currentColor; opacity: 1; }
+
+canvas { max-width: 100%; }
+
+@media (max-width: 1023px) {
+  .analytics-split { grid-template-columns: minmax(0, 1fr); }
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .figure:nth-child(3) { border-left: 0; }
+  .figure:nth-child(n + 3) { border-top: 1px solid rgb(var(--border-subtle)); }
+  .period-meta { margin-left: 0; flex-basis: 100%; }
+}
+@media (max-width: 639px) {
+  .figure { padding: 0.75rem 0.875rem; }
+  .figure-value { font-size: 1.375rem; line-height: 1.75rem; }
+  .period-bar { padding: 0.5rem; }
+  .stepper { flex: 1 1 100%; justify-content: space-between; }
+  .period-name { flex: 1; min-width: 0; }
+}
