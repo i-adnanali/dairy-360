@@ -243,8 +243,10 @@ export function calculate(
         session: s,
         coverage: finishCoverage(c),
         produced,
-        sold,
-        nonSale,
+        // No dispatch rows means no answer about where the milk went: a
+        // missing record, never "0 L sold".
+        sold: out.length ? sold : null,
+        nonSale: out.length ? nonSale : null,
         dispatched,
         difference,
         differencePct:
@@ -295,15 +297,13 @@ export function calculate(
 export function aggregate(buckets: AnalyticsBucket[]): MilkMetrics {
   const sum = (
     k:
-      | "sold"
-      | "nonSale"
       | "dispatchExpected"
       | "dispatchRecorded"
       | "dispatchMissing"
       | "dispatchPending"
       | "dispatchRows",
   ) => buckets.reduce((n, b) => n + b[k], 0);
-  const values = (k: "produced" | "dispatched") => {
+  const values = (k: "produced" | "dispatched" | "sold" | "nonSale") => {
     const bs = buckets.filter((b) => b[k] !== null);
     return bs.length ? bs.reduce((n, b) => n + b[k]!, 0) : null;
   };
@@ -327,8 +327,8 @@ export function aggregate(buckets: AnalyticsBucket[]): MilkMetrics {
   return {
     coverage: combine(buckets.map((b) => b.coverage)),
     produced,
-    sold: sum("sold"),
-    nonSale: sum("nonSale"),
+    sold: values("sold"),
+    nonSale: values("nonSale"),
     dispatched,
     difference,
     differencePct:

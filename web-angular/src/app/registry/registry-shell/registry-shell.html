@@ -155,7 +155,11 @@
 
       <!-- B5: reserve the nonmodal desktop dock in the content grid. -->
       <div class="assistant-layout min-h-0 flex-1" [class.has-assistant]="assistant.open()">
-        <main [inert]="assistant.modal() || setupPanel()" class="phase7-content flex-1 overflow-y-auto px-4 py-6">
+        <!-- `relative` makes the scroller the containing block, so visually
+             hidden absolute elements (sr-only captions, the chart's keyboard
+             day buttons) stay inside it instead of stretching the document,
+             which let the window scroll past the app into white. -->
+        <main [inert]="assistant.modal() || setupPanel()" class="phase7-content relative flex-1 overflow-y-auto px-4 py-6">
           @if (writeOnlyRoute() && !session.ready()) {
             <!-- A page that is nothing but a form asks first, and says what for. -->
             <div class="session-inline">

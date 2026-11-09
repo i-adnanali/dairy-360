@@ -75,9 +75,14 @@ export function urlParams<K extends string>(defaults: Record<K, string>): UrlPar
   });
 
   const set = (patch: Partial<Record<K, string>>): Promise<boolean> => {
+    // An empty value is read as absent (above), so it is written as absent
+    // too: `?detailOn=&detailSession=` left the URL longer and meant nothing.
+    const queryParams: Record<string, string | null> = {};
+    for (const [k, v] of Object.entries(patch) as [string, string | undefined][])
+      queryParams[k] = v === undefined || v === '' ? null : v;
     return router.navigate([], {
       relativeTo: route,
-      queryParams: patch,
+      queryParams,
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });

@@ -14,8 +14,9 @@ export interface Coverage {
 export interface MilkMetrics {
   coverage: Coverage;
   produced: number | null;
-  sold: number;
-  nonSale: number;
+  /** Null when no dispatch was recorded: missing, not zero. */
+  sold: number | null;
+  nonSale: number | null;
   dispatched: number | null;
   difference: number | null;
   differencePct: number | null;

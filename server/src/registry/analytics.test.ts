@@ -341,3 +341,15 @@ test("HTTP exposes reports and validates query errors without opening live datab
     db.close();
   }
 });
+test("no dispatch rows leave sold and not sold missing, never 0 L", () => {
+  const d = data();
+  let r = calc(d);
+  assert.equal(r.metrics.dispatched, null);
+  assert.equal(r.metrics.sold, null);
+  assert.equal(r.metrics.nonSale, null);
+  assert.ok(r.buckets.every((b) => b.sold === null && b.nonSale === null));
+  dispatches(d);
+  r = calc(d);
+  assert.equal(typeof r.metrics.sold, "number");
+  assert.equal((r.metrics.sold ?? 0) + (r.metrics.nonSale ?? 0), r.metrics.dispatched);
+});

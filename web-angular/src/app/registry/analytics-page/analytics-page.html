@@ -1,3 +1,10 @@
+<!-- One figure at one certainty: a dash for no record, italic words for an
+     answer that is not a number, a dotted rule and "partial" for a total built
+     from incomplete records. -->
+<ng-template #amount let-a>
+  <span [appCertainty]="a.state" [certaintyLabel]="a.label">{{ a.text }}</span>@if (a.qualifier) {<span appQualifier>{{ a.qualifier }}</span>}
+</ng-template>
+
 <div data-page-layout="review" class="analytics space-y-6">
   <!-- HEADER + PERIOD. The period is one control that names what you are
        looking at ("Week of 2–8 Nov"), with Day / Week / Month beside it. -->
@@ -14,7 +21,7 @@
         }
       </div>
       <div class="stepper">
-        <button type="button" class="step" [attr.aria-label]="'Previous ' + periodNoun()" (click)="step(-1)">
+        <button type="button" class="step" [attr.aria-label]="'Previous ' + periodNoun()" [title]="'Previous ' + periodNoun() + ' ( [ )'" aria-keyshortcuts="[" (click)="step(-1)">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
         </button>
         <label class="period-name">
@@ -22,7 +29,7 @@
           <strong data-role="period-label">{{ periodLabel() }}</strong>
           <input type="date" [value]="q().on" (change)="change({ on: $any($event.target).value })" />
         </label>
-        <button type="button" class="step" [attr.aria-label]="'Next ' + periodNoun()" (click)="step(1)">
+        <button type="button" class="step" [attr.aria-label]="'Next ' + periodNoun()" [title]="'Next ' + periodNoun() + ' ( ] )'" aria-keyshortcuts="]" (click)="step(1)">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
         </button>
       </div>
@@ -31,12 +38,14 @@
           <button type="button" [attr.aria-pressed]="q().session === s.value" (click)="change({ session: s.value })">{{ s.label }}</button>
         }
       </div>
-      @if (report(); as r) {
-        <p class="period-meta">
+      <p class="period-meta" role="status">
+        @if (loading()) {
+          Updating…
+        } @else if (report(); as r) {
           @if (r.scope.inProgress) { In progress · }
           Updated {{ updated(r.generatedAt) }}
-        </p>
-      }
+        }
+      </p>
     </div>
   </header>
 
@@ -49,16 +58,17 @@
       <button appButton variant="secondary" type="button" (click)="refresh()" [disabled]="loading()">Retry</button>
     </div>
   }
-  @if (loading()) {
-    <p role="status" appHelp>
-      Loading… {{ report() ? 'Previous results are stale while refreshing.' : '' }}
-    </p>
+  @if (loading() && !report()) {
+    <p appHelp>Loading…</p>
   }
 
   @if (report(); as r) {
+    <!-- The last results stay while the next load: dimmed and busy, never
+         collapsed, so a sort or a page click keeps your place. -->
+    <div class="analytics-body space-y-6" [class.is-stale]="loading()" [attr.aria-busy]="loading()">
     <!-- A day picked on the chart applies to the whole page, and says so here. -->
     @if (selected(); as b) {
-      <div class="selection-bar" role="status" data-role="selection-bar">
+      <div class="selection-bar" data-role="selection-bar">
         <p>Showing <strong>{{ bucketName(b) }}</strong> only</p>
         <div class="flex flex-wrap gap-2">
           <button appButton variant="secondary" size="sm" type="button" [disabled]="bucketIndex() <= 0" (click)="moveBucket(-1)">Previous</button>
@@ -69,44 +79,43 @@
     }
 
     @if (shown(); as m) {
-      <section class="figures" aria-label="Period totals">
+      <section aria-label="Period totals">
+        <dl class="figures">
         <div class="figure">
-          <h2>Measured production</h2>
-          <p class="figure-value">
-            <span [certaintyLabel]="production(m.produced, m.coverage)" [appCertainty]="m.produced === null ? 'no-record' : 'known'">{{ production(m.produced, m.coverage) }}</span>
-          </p>
-          <p class="figure-note">
-            {{ productionNote(m.coverage, m.produced) }}
+          <dt>Measured production</dt>
+          <dd class="figure-value"><ng-container *ngTemplateOutlet="amount; context: { $implicit: producedAmount(m.produced, m.coverage) }" /></dd>
+          <dd class="figure-note">
+            {{ m.coverage.measured }} of {{ m.coverage.expected }} milkings measured
             @if (!selected() && r.comparison.percent !== null) {
               · {{ r.comparison.percent > 0 ? '+' : '' }}{{ r.comparison.percent | number: '1.0-1' }}% on the previous {{ periodNoun() }}
             }
-          </p>
+          </dd>
         </div>
         <div class="figure">
-          <h2>Recorded dispatch</h2>
-          <p class="figure-value">
-            <span [certaintyLabel]="dispatch(m)" [appCertainty]="m.dispatched === null ? 'no-record' : 'known'">{{ dispatch(m) }}</span>
-          </p>
-          <p class="figure-note">Sold {{ m.sold | number: '1.0-2' }} L · not sold {{ m.nonSale | number: '1.0-2' }} L</p>
+          <dt>Recorded dispatch</dt>
+          <dd class="figure-value"><ng-container *ngTemplateOutlet="amount; context: { $implicit: dispatchAmount(m) }" /></dd>
+          <dd class="figure-note">{{ soldNote(m) }}{{ dispatchGap(m) }}</dd>
         </div>
         <div class="figure">
-          <h2>Difference</h2>
-          <p class="figure-value">
-            <span [appCertainty]="m.difference === null ? 'absent' : 'known'">{{ litres(m.difference) }}</span>
-          </p>
-          <p class="figure-note">
-            Measured minus dispatched@if (m.differencePct !== null) { · {{ m.differencePct | number: '1.0-1' }}% }. Not a wastage measure.
-          </p>
+          <dt>Difference</dt>
+          <dd class="figure-value"><ng-container *ngTemplateOutlet="amount; context: { $implicit: differenceAmount(m) }" /></dd>
+          <dd class="figure-note">
+            Measured minus dispatched@if (m.differencePct !== null) { · {{ m.differencePct | number: '1.0-1' }}% }. Not&nbsp;a&nbsp;wastage&nbsp;measure.
+          </dd>
         </div>
         <div class="figure">
-          <h2>Coverage</h2>
-          <p class="figure-value">{{ m.coverage.measured }}<span class="figure-of"> of {{ m.coverage.expected }}</span></p>
-          <p class="figure-note">Expected milkings measured</p>
+          <dt>Coverage</dt>
+          <dd class="figure-value"><span appCertainty="known">{{ m.coverage.measured }}</span><span class="figure-of"> of {{ m.coverage.expected }}</span></dd>
+          <dd class="figure-note">
+            Expected milkings measured
+            @if (m.coverage.uncertain) { · some expected counts rest on approximate roster dates }
+          </dd>
         </div>
+        </dl>
       </section>
 
-      <!-- Every caveat, once. They used to repeat in four places. -->
-      <details class="caveats" data-role="caveats" [open]="false">
+      <!-- Every caveat, once. -->
+      <details class="caveats" data-role="caveats">
         <summary>
           <span class="font-medium">Why some figures are partial</span>
           <span class="text-content-muted"> · {{ coverageText(m.coverage) }}</span>
@@ -120,13 +129,19 @@
               {{ m.dispatchPending }} not yet recorded.
             </p>
           }
+          @if (m.coverage.uncertain) {
+            <p>
+              {{ m.coverage.uncertain }} expected {{ m.coverage.uncertain === 1 ? 'milking falls' : 'milkings fall' }} on animals whose
+              roster dates are approximate, so whether they were due is itself uncertain.
+            </p>
+          }
           @if (r.comparison.percent === null) {
             <p>No comparison with the previous {{ periodNoun() }}: {{ r.comparison.reason }}</p>
           } @else if (r.comparison.from) {
             <p>
-              Compared {{ r.comparison.from }}–{{ r.comparison.to }} ({{ litres(r.comparison.current) }}, {{ r.comparison.currentDays }} days)
-              with {{ r.comparison.previousFrom }}–{{ r.comparison.previousTo }} ({{ litres(r.comparison.previous) }},
-              {{ r.comparison.previousDays }} days); daily averages {{ litres(r.comparison.currentDailyAverage) }} vs
+              Compared {{ span(r.comparison.from, r.comparison.to) }} ({{ litres(r.comparison.current) }}, {{ r.comparison.currentDays }} days)
+              with {{ span(r.comparison.previousFrom, r.comparison.previousTo) }} ({{ litres(r.comparison.previous) }},
+              {{ r.comparison.previousDays }} days); daily averages {{ litres(r.comparison.currentDailyAverage) }} against
               {{ litres(r.comparison.previousDailyAverage) }}.
             </p>
           }
@@ -145,17 +160,17 @@
     }
 
     <div class="analytics-split">
-      <!-- CHART -->
-      <section appChartPanel class="space-y-3">
+      <!-- CHART, and the same days as a table with where the milk went. -->
+      <section appChartPanel class="space-y-3" aria-labelledby="chart-heading">
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 appSectionHeading>Production and dispatch</h2>
+          <h2 appSectionHeading id="chart-heading">Production and dispatch</h2>
           <ul class="legend" aria-label="Legend">
             <li><span class="key key-bar"></span>Measured</li>
             <li><span class="key key-open"></span>Partial</li>
             <li><span class="key key-line"></span>Dispatched</li>
           </ul>
         </div>
-        <p appHelp size="xs">
+        <p appHelp size="xs" class="text-pretty">
           Litres by {{ q().view === 'day' ? 'session' : 'day' }}. A gap means no measurement. Select a bar to show that
           {{ q().view === 'day' ? 'session' : 'day' }} across the page.
         </p>
@@ -186,26 +201,35 @@
           aria-controls="analytics-chart-data"
           (click)="showData.set(!showData())"
         >
-          {{ showData() ? 'Hide' : 'Show' }} the chart as a table
+          {{ showData() ? 'Hide' : 'Show' }} the {{ q().view === 'day' ? 'sessions' : 'days' }} as a table
         </button>
-        <div id="analytics-chart-data" [hidden]="!showData()" appScrollRegion="Production and dispatch chart data">
-          <table appChartDataTable class="data-table">
-            <caption class="sr-only">Production and dispatch by date and session</caption>
+        <div id="analytics-chart-data" [hidden]="!showData()" appScrollRegion="Production and dispatch by {{ q().view === 'day' ? 'session' : 'day' }}">
+          <table appChartDataTable class="data-table days-table">
+            <caption class="sr-only">Production, dispatch and records by {{ q().view === 'day' ? 'session' : 'day' }}</caption>
             <thead>
               <tr>
                 <th appCell scope="col">{{ q().view === 'day' ? 'Session' : 'Day' }}</th>
                 <th appCell numeric scope="col">Measured</th>
-                <th appCell numeric scope="col">Dispatched</th>
+                <th appCell numeric scope="col">Sold</th>
+                <th appCell numeric scope="col">Not sold</th>
                 <th appCell numeric scope="col">Difference</th>
+                <th appCell scope="col">Records</th>
               </tr>
             </thead>
             <tbody>
               @for (b of r.buckets; track b.key) {
-                <tr>
-                  <td appCell>{{ bucketName(b) }}</td>
-                  <td appCell numeric>{{ production(b.produced, b.coverage) }}</td>
-                  <td appCell numeric>{{ dispatch(b) }}</td>
-                  <td appCell numeric>{{ litres(b.difference) }}</td>
+                <tr [class.is-picked]="selected()?.key === b.key">
+                  <th appCell scope="row" class="whitespace-nowrap font-normal">{{ bucketName(b) }}</th>
+                  <td appCell numeric><ng-container *ngTemplateOutlet="amount; context: { $implicit: producedAmount(b.produced, b.coverage) }" /></td>
+                  <td appCell numeric><ng-container *ngTemplateOutlet="amount; context: { $implicit: partAmount(b.sold, b) }" /></td>
+                  <td appCell numeric><ng-container *ngTemplateOutlet="amount; context: { $implicit: partAmount(b.nonSale, b) }" /></td>
+                  <td appCell numeric><ng-container *ngTemplateOutlet="amount; context: { $implicit: differenceAmount(b) }" /></td>
+                  <td appCell>
+                    <span appBadge [tone]="standing(b).tone">{{ standing(b).label }}</span>
+                    @if (standing(b).tone !== 'success') {
+                      <span class="block pt-1 text-xs text-content-muted">{{ coverageText(b.coverage) }}</span>
+                    }
+                  </td>
                 </tr>
               }
             </tbody>
@@ -218,7 +242,7 @@
         <h2 appSectionHeading id="review-heading">Still to record</h2>
         @if (toReview().length) {
           <ul class="review-list">
-            @for (x of toReview().slice(0, 6); track x.b.key) {
+            @for (x of reviewShown(); track x.b.key) {
               <li>
                 <p class="flex flex-wrap items-baseline justify-between gap-x-3">
                   <span class="font-medium">{{ bucketName(x.b) }}</span>
@@ -234,7 +258,7 @@
                       <dt>Milking</dt>
                       <dd>
                         @for (s of sessionsFor(x.b, 'milking'); track s) {
-                          <a appTextLink tone="strong" routerLink="/milk/milking" [queryParams]="{ on: x.b.on, session: s }" [attr.aria-label]="(s === 'morning' ? 'Morning' : 'Evening') + ' milking, ' + bucketName(x.b)">{{ s === 'morning' ? 'Morning' : 'Evening' }}</a>
+                          <a appTextLink tone="strong" routerLink="/milk/milking" [queryParams]="{ on: x.b.on, session: s }" [attr.aria-label]="sheetLabel(s, 'milking', x.b)">{{ s === 'morning' ? 'Morning' : 'Evening' }}</a>
                         }
                       </dd>
                     </div>
@@ -244,7 +268,7 @@
                       <dt>Dispatch</dt>
                       <dd>
                         @for (s of sessionsFor(x.b, 'dispatch'); track s) {
-                          <a appTextLink tone="strong" routerLink="/milk/dispatch" [queryParams]="{ on: x.b.on, session: s }" [attr.aria-label]="(s === 'morning' ? 'Morning' : 'Evening') + ' dispatch, ' + bucketName(x.b)">{{ s === 'morning' ? 'Morning' : 'Evening' }}</a>
+                          <a appTextLink tone="strong" routerLink="/milk/dispatch" [queryParams]="{ on: x.b.on, session: s }" [attr.aria-label]="sheetLabel(s, 'dispatch', x.b)">{{ s === 'morning' ? 'Morning' : 'Evening' }}</a>
                         }
                       </dd>
                     </div>
@@ -254,124 +278,75 @@
             }
           </ul>
           @if (toReview().length > 6) {
-            <p appHelp size="xs">And {{ toReview().length - 6 }} more {{ q().view === 'day' ? 'sessions' : 'days' }} in this {{ periodNoun() }}.</p>
+            <button appButton variant="link" type="button" [attr.aria-expanded]="showAllReview()" (click)="showAllReview.set(!showAllReview())">
+              {{ showAllReview() ? 'Show the latest 6' : 'Show all ' + toReview().length + ' ' + (q().view === 'day' ? 'sessions' : 'days') }}
+            </button>
           }
         } @else {
-          <p appHelp>Every expected milking and dispatch in this {{ periodNoun() }} has an answer.</p>
+          <p appHelp>Every expected milking and dispatch in {{ selected() ? bucketName(selected()!) : 'this ' + periodNoun() }} has an answer.</p>
         }
       </section>
     </div>
 
-    <!-- DETAIL TABLES -->
-    <section class="space-y-3" aria-labelledby="detail-heading">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <div class="space-y-2">
-          <h2 appSectionHeading id="detail-heading" class="sr-only">Details</h2>
-          <div class="tabs" role="group" aria-label="Detail table">
-            <button type="button" [attr.aria-pressed]="q().table === 'production'" (click)="table('production')">By animal</button>
-            <button type="button" [attr.aria-pressed]="q().table === 'reconciliation'" (click)="table('reconciliation')">By session</button>
-          </div>
-        </div>
-        @if (q().table === 'production') {
-          <form class="flex flex-wrap items-end gap-2" (submit)="$event.preventDefault()">
-            <label>
-              <span class="block text-sm text-content-secondary">Find animal</span>
-              <input appInput type="search" maxlength="100" [value]="q().search" (change)="change({ search: $any($event.target).value }, false)" />
-            </label>
-            @if (q().search) {
-              <button appButton variant="secondary" type="button" (click)="change({ search: '' }, false)">Clear</button>
-            }
-          </form>
-        }
+    <!-- BY ANIMAL. Its own heading says what it covers, including a picked day. -->
+    <section class="space-y-3" aria-labelledby="animals-heading" data-role="by-animal">
+      <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 appSectionHeading id="animals-heading">By animal</h2>
+        <p class="text-sm text-content-secondary" data-role="animals-scope">
+          {{ detailScope() }} · {{ r.production.totalItems }} {{ r.production.totalItems === 1 ? 'animal' : 'animals' }} expected in milk
+        </p>
       </div>
 
-      <div [appScrollRegion]="q().table === 'production' ? 'Animal production details' : 'Session reconciliation details'">
-        <table class="data-table">
-          <caption class="sr-only">{{ q().table === 'production' ? 'Animal production' : 'Session reconciliation' }} details</caption>
-          @if (q().table === 'production') {
-            <thead>
+      <div appScrollRegion="Milk by animal">
+        <table class="data-table animal-table">
+          <caption class="sr-only">Milk by animal, {{ detailScope() }}</caption>
+          <thead>
+            <tr>
+              <th appCell scope="col" [attr.aria-sort]="ariaSort('identifier')">
+                <button type="button" class="sort" (click)="sortBy('identifier')">Animal<span class="sort-mark" [attr.data-dir]="q().sort === 'identifier' ? q().direction : null"></span></button>
+              </th>
+              <th appCell numeric scope="col" [attr.aria-sort]="ariaSort('litres')">
+                <button type="button" class="sort" (click)="sortBy('litres')">Measured milk<span class="sort-mark" [attr.data-dir]="q().sort === 'litres' ? q().direction : null"></span></button>
+              </th>
+              <th appCell numeric scope="col">Per milking</th>
+              <th appCell scope="col">Milkings measured</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of r.production.items; track a.id) {
               <tr>
-                <th appCell scope="col" [attr.aria-sort]="ariaSort('identifier')">
-                  <button type="button" class="sort" (click)="sortBy('identifier')">Animal<span class="sort-mark" [attr.data-dir]="q().sort === 'identifier' ? q().direction : null"></span></button>
-                </th>
-                <th appCell numeric scope="col" [attr.aria-sort]="ariaSort('litres')">
-                  <button type="button" class="sort" (click)="sortBy('litres')">Measured milk<span class="sort-mark" [attr.data-dir]="q().sort === 'litres' ? q().direction : null"></span></button>
-                </th>
-                <th appCell scope="col">Milkings measured</th>
-                <th appCell numeric scope="col">Fully measured days</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (a of r.production.items; track a.id) {
-                <tr>
-                  <td appCell>
-                    <a class="identifier-link whitespace-nowrap" [routerLink]="['/animals', a.id]">{{ a.identifier }}</a>
-                    {{ a.name }}
-                    @if (a.tag) { <span class="text-content-muted"> · {{ a.tag }}</span> }
-                  </td>
-                  <td appCell numeric>
-                    <span [certaintyLabel]="production(a.litres, a.coverage)" [appCertainty]="a.litres === null ? 'no-record' : 'known'">{{ production(a.litres, a.coverage) }}</span>
-                  </td>
-                  <td appCell>
-                    {{ a.coverage.measured }} of {{ a.coverage.expected }}
+                <td appCell data-label="Animal">
+                  <a class="identifier-link whitespace-nowrap" [routerLink]="['/animals', a.id]">{{ a.identifier }}</a>
+                  {{ a.name }}
+                  @if (a.tag) { <span class="text-content-muted"> · {{ a.tag }}</span> }
+                </td>
+                <td appCell numeric data-label="Measured milk"><ng-container *ngTemplateOutlet="amount; context: { $implicit: producedAmount(a.litres, a.coverage) }" /></td>
+                <td appCell numeric data-label="Per milking"><ng-container *ngTemplateOutlet="amount; context: { $implicit: perMilking(a) }" /></td>
+                <td appCell data-label="Milkings measured">
+                  {{ a.coverage.measured }} of {{ a.coverage.expected }}
+                  @if (coverageText(a.coverage) !== 'Nothing missing') {
                     <span class="block text-xs text-content-muted">{{ coverageText(a.coverage) }}</span>
-                  </td>
-                  <td appCell numeric>{{ q().session === 'all' ? a.eligibleAnimalDays : '—' }}</td>
-                </tr>
-              } @empty {
-                <tr><td appCell colspan="4" tone="muted">No matching animal records for this {{ selected() ? 'selection' : periodNoun() }}.</td></tr>
-              }
-            </tbody>
-          } @else {
-            <thead>
-              <tr>
-                <th appCell scope="col" [attr.aria-sort]="ariaSort('date')">
-                  <button type="button" class="sort" (click)="sortBy('date')">Session<span class="sort-mark" [attr.data-dir]="q().sort === 'date' ? q().direction : null"></span></button>
-                </th>
-                <th appCell numeric scope="col">Measured</th>
-                <th appCell numeric scope="col">Sold</th>
-                <th appCell numeric scope="col">Not sold</th>
-                <th appCell numeric scope="col" [attr.aria-sort]="ariaSort('difference')">
-                  <button type="button" class="sort" (click)="sortBy('difference')">Difference<span class="sort-mark" [attr.data-dir]="q().sort === 'difference' ? q().direction : null"></span></button>
-                </th>
-                <th appCell scope="col">Records</th>
+                  }
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              @for (b of r.reconciliation.items; track b.key) {
-                <tr>
-                  <td appCell class="whitespace-nowrap">{{ bucketName(b) }}</td>
-                  <td appCell numeric>{{ production(b.produced, b.coverage) }}</td>
-                  <td appCell numeric>{{ litres(b.sold) }}</td>
-                  <td appCell numeric>{{ litres(b.nonSale) }}</td>
-                  <td appCell numeric>{{ litres(b.difference) }}</td>
-                  <td appCell>
-                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span appBadge [tone]="standing(b).tone">{{ standing(b).label }}</span>
-                      <a appTextLink routerLink="/milk/milking" [queryParams]="{ on: b.on, session: b.session }">Milking</a>
-                      <a appTextLink routerLink="/milk/dispatch" [queryParams]="{ on: b.on, session: b.session }">Dispatch</a>
-                    </div>
-                    @if (standing(b).tone !== 'success') {
-                      <span class="block pt-1 text-xs text-content-muted">{{ coverageText(b.coverage) }}</span>
-                    }
-                  </td>
-                </tr>
-              } @empty {
-                <tr><td appCell colspan="6" tone="muted">No sessions have finished in this {{ periodNoun() }} yet.</td></tr>
-              }
-            </tbody>
-          }
+            } @empty {
+              <tr><td appCell colspan="4" tone="muted">No animal was expected in milk in {{ selected() ? bucketName(selected()!) : 'this ' + periodNoun() }}.</td></tr>
+            }
+          </tbody>
         </table>
       </div>
-      <app-pagination
-        label="Analytics details"
-        [page]="visiblePage().page"
-        [pageSize]="visiblePage().pageSize"
-        [total]="visiblePage().totalItems"
-        [disabled]="loading()"
-        (pageChange)="url.set({ page: '' + $event })"
-        (sizeChange)="change({ pageSize: '' + $event }, false)"
-      />
+      @if (visiblePage().totalItems > visiblePage().pageSize) {
+        <app-pagination
+          label="Animals"
+          [page]="visiblePage().page"
+          [pageSize]="visiblePage().pageSize"
+          [total]="visiblePage().totalItems"
+          [disabled]="loading()"
+          (pageChange)="url.set({ page: '' + $event })"
+          (sizeChange)="change({ pageSize: '' + $event }, false)"
+        />
+      }
     </section>
+    </div>
   }
 </div>

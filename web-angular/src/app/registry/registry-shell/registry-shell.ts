@@ -75,6 +75,8 @@ export class RegistryShell {
   protected readonly sections = SECTIONS;
   protected readonly actions = inject(ShellActions);
   private readonly url = signal(this.router.url);
+  /** The path (no query) of the last page focused, so a query-only change keeps focus. */
+  private lastPath: string | null = null;
   protected readonly activeSection = computed(() => sectionFor(this.url()));
   protected readonly activeView = computed(() => activeViewPath(this.activeSection(), this.url()));
 
@@ -133,9 +135,22 @@ export class RegistryShell {
         takeUntilDestroyed(),
       )
       .subscribe(() => {
+        // A new PAGE moves focus to its heading. A filter, sort or picked day
+        // only rewrites the query string: that is the same page, and pulling
+        // focus to the heading (and scroll to the top) from the control just
+        // used threw the reader out of /analytics' table on every click.
+        // urlParams() writes filters with replaceUrl; a link the reader follows
+        // (the session strip, a sheet link) pushes, and still lands on a heading.
+        const path = this.router.url.split(/[?#]/)[0];
+        const samePage =
+          path === this.lastPath &&
+          !this.router.url.includes('#') &&
+          this.router.getCurrentNavigation()?.extras.replaceUrl === true;
+        this.lastPath = path;
         this.url.set(this.router.url);
         afterNextRender(
           () => {
+            if (samePage) return;
             if (this.router.url.endsWith('#add-person')) {
               this.focusAction('add-person');
             } else {

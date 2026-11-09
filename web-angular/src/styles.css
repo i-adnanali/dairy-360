@@ -1207,3 +1207,20 @@ app-health-page .rows[hidden] { display: none; }
 .round-confirm { display: flex !important; gap: 0.5rem; align-items: baseline; }
 
 .health-round label > input:not([type="checkbox"]), .health-round label > select { width: 100%; }
+
+/* ---- Milk analytics, phone: one card per animal ---------------------------
+   Here and not in analytics-page.css, which sits against the 8 kB component
+   budget. A four-column table broke "Fully measured days" into four lines at
+   390px; a card keeps each figure beside its own label. */
+@media (max-width: 639px) {
+  app-analytics-page .animal-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  app-analytics-page .animal-table, app-analytics-page .animal-table tbody { display: block; }
+  app-analytics-page .animal-table tr { display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem 1rem; padding: 0.75rem 0.875rem; }
+  app-analytics-page .animal-table tbody tr + tr { border-top: 1px solid rgb(var(--border-hairline)); }
+  app-analytics-page .animal-table td { display: block; padding: 0; text-align: left; }
+  app-analytics-page .animal-table td:first-child { grid-column: 1 / -1; font-weight: 500; }
+  app-analytics-page .animal-table td[data-label]:not(:first-child)::before {
+    content: attr(data-label); display: block; font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif; font-size: 0.75rem; color: rgb(var(--text-muted));
+  }
+  app-analytics-page .animal-table td[colspan] { grid-column: 1 / -1; }
+}

@@ -72,7 +72,7 @@ function toApiError(e: unknown): ApiError {
         message:
           e.status === 0
             ? 'Could not reach the server. Is it running?'
-            : `The server failed with HTTP ${e.status}. This is a bug, not something to fix in the form.`,
+            : `The server failed with HTTP ${e.status}. This is a bug in the app, not a problem with anything you entered.`,
       },
       false,
     );

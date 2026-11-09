@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import type { AnalyticsReport } from '@dairy/shared';
-import { AnalyticsPage } from "./analytics-page/analytics-page";
+import { AnalyticsPage, defaultAnalyticsDay } from "./analytics-page/analytics-page";
 import { RegistryApi } from './api';
 
 function report(): AnalyticsReport {
@@ -134,7 +134,7 @@ describe('Owner analytics', () => {
     // The pick applies to the whole page: the bar names it and the figures follow it.
     expect(f.nativeElement.querySelector('[data-role="selection-bar"]')?.textContent).toContain('Evening');
     expect(f.componentInstance.shown()?.produced).toBeNull();
-    expect(f.nativeElement.querySelector('[aria-pressed="true"][aria-label^="2026-09-14, evening"]')).not.toBeNull();
+    expect(f.nativeElement.querySelector('[aria-pressed="true"][aria-label^="Mon 14 Sep · Evening"]')).not.toBeNull();
     (f.componentInstance as any).moveBucket(1);
     await f.whenStable();
     expect(router.url).toContain('detailSession=evening');
@@ -151,11 +151,11 @@ describe('Owner analytics', () => {
     f.detectChanges();
     expect(api.mock.calls.at(-1)?.[0]['page']).toBe('2');
     expect(f.componentInstance.report()?.metrics.produced).toBe(30);
-    f.componentInstance.change({ search: 'Noor' }, false);
+    f.componentInstance.change({ session: 'morning' }, false);
     await new Promise((r) => setTimeout(r, 0));
     f.detectChanges();
     expect(api.mock.calls.at(-1)?.[0]['page']).toBe('1');
-    expect(api.mock.calls.at(-1)?.[0]['search']).toBe('Noor');
+    expect(api.mock.calls.at(-1)?.[0]['session']).toBe('morning');
   });
   it('does not label old results with new filters if a request fails', async () => {
     const f = await mount(async (q) => {
@@ -206,7 +206,7 @@ describe('B4 analytics semantics and filter matrix', () => {
         expect(f.componentInstance.q().session).toBe(session);
         expect(f.componentInstance.report()!.metrics).toEqual(report().metrics);
         const headings = Array.from(
-          f.nativeElement.querySelectorAll('section[aria-label="Period totals"] h2'),
+          f.nativeElement.querySelectorAll('section[aria-label="Period totals"] dt'),
         ).map((h: any) => h.textContent.trim());
         expect(headings).toEqual([
           'Measured production',
@@ -233,7 +233,7 @@ describe('B4 analytics semantics and filter matrix', () => {
     expect(a.production(null, c)).toBe('No records');
     expect(a.production(null, { ...c, unmeasured: 1 })).toBe('No measurements');
     expect(a.production(null, { ...c, unexpected: 1 })).toBe('No measurements');
-    expect(a.litres(-1.235)).toBe('-1.24 L');
+    expect(a.litres(-1.235)).toBe('\u22121.24 L');
     expect(a.litres(null)).toBe('Not available');
     expect(a.differenceNote(report().metrics)).toContain('Partial coverage');
     expect(a.differenceNote({ ...report().metrics, difference: null })).toContain(
@@ -242,7 +242,8 @@ describe('B4 analytics semantics and filter matrix', () => {
     expect(a.differenceNote({...report().metrics, coverage: {...c, measured:4, expected:4, missing:0, pending:0, uncertain:0}, dispatchMissing:0, dispatchPending:0, unavailableReasons:[]})).toContain('Recorded coverage only');
     expect(a.dispatch({...report().metrics,dispatched:null,dispatchRows:0})).toBe('No records');
     expect(a.dispatch({...report().metrics,dispatched:null,dispatchRows:1})).toBe('Not available');
-    expect(a.bucketLabel(report().buckets[0])).toContain('2026-09-14');
+    expect(a.bucketLabel(report().buckets[0])).toContain('Mon 14 Sep · Morning');
+    expect(a.bucketLabel(report().buckets[0])).not.toMatch(/\d{4}-\d{2}-\d{2}/);
   });
   it('retry retains selected filters and distinguishes an in-flight refresh from fresh data', async () => {
     let fail = true;
@@ -315,3 +316,71 @@ describe('analytics arrangement', () => {
     expect(a.q().detailOn).toBe('');
   });
 });
+
+describe('analytics restructure', () => {
+  it('shows sold and not sold as missing, never 0 L, when no dispatch was recorded', async () => {
+    const r = report();
+    r.metrics = { ...r.metrics, sold: null, nonSale: null, dispatched: null, dispatchRows: 0, difference: null };
+    r.buckets = r.buckets.map((b) => ({ ...b, sold: null, nonSale: null, dispatched: null, dispatchRows: 0, difference: null }));
+    const f = await mount(async () => r);
+    f.componentInstance.showData.set(true);
+    f.detectChanges();
+    const el = f.nativeElement as HTMLElement;
+    expect(el.querySelector('section[aria-label="Period totals"]')?.textContent).toContain('No dispatch recorded');
+    const cells = Array.from(el.querySelectorAll('#analytics-chart-data tbody td')).map((td) => td.textContent!.trim());
+    expect(cells).not.toContain('0 L');
+    expect(el.querySelectorAll('#analytics-chart-data span[aria-label="No dispatch recorded"]').length).toBe(4);
+  });
+  it('marks a total built from incomplete milkings as partial, not known', async () => {
+    const f = await mount(async () => report());
+    const a = f.componentInstance as any;
+    const m = report().metrics;
+    expect(a.producedAmount(30, m.coverage)).toEqual(jasmineLike({ state: 'approximate', qualifier: 'partial' }));
+    expect(a.producedAmount(30, { ...m.coverage, missing: 0 })).toEqual(jasmineLike({ state: 'known', qualifier: '' }));
+    expect(a.producedAmount(null, { ...m.coverage, measured: 0 }).state).toBe('no-record');
+  });
+  it('keeps the last results on screen while the next query loads', async () => {
+    let release!: () => void;
+    let hold = false;
+    const f = await mount(async () => {
+      if (hold) await new Promise<void>((r) => (release = r));
+      return report();
+    });
+    hold = true;
+    f.componentInstance.change({ sort: 'litres', direction: 'desc' }, false);
+    await new Promise((r) => setTimeout(r, 0));
+    f.detectChanges();
+    expect(f.componentInstance.loading()).toBe(true);
+    expect(f.componentInstance.report()).not.toBeNull();
+    expect(f.nativeElement.querySelector('.analytics-body')?.getAttribute('aria-busy')).toBe('true');
+    release();
+  });
+  it('narrows Still to record to a picked day', async () => {
+    const r = report();
+    r.buckets[1] = { ...r.buckets[1], on: '2026-09-13', key: '2026-09-13/evening' };
+    const f = await mount(async () => r);
+    const a = f.componentInstance as any;
+    expect(a.toReview().length).toBe(2);
+    await TestBed.inject(Router).navigate([], { queryParams: { detailOn: '2026-09-13', detailSession: 'evening' } });
+    await f.whenStable();
+    expect(a.toReview().map((x: any) => x.b.on)).toEqual(['2026-09-13']);
+  });
+  it('opens on the week just ended on a Monday, and on this week otherwise', () => {
+    expect(defaultAnalyticsDay('2026-11-09')).toBe('2026-11-08');
+    expect(defaultAnalyticsDay('2026-11-10')).toBe('2026-11-10');
+  });
+  it('writes no empty params and steps the period with [ and ]', async () => {
+    const f = await mount(async () => report());
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { view: 'week', on: '2026-09-14' } });
+    await f.whenStable();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '[' }));
+    await f.whenStable();
+    expect(f.componentInstance.q().on).toBe('2026-09-07');
+    expect(router.url).not.toMatch(/=(&|$)/);
+  });
+});
+
+function jasmineLike(o: Record<string, unknown>) {
+  return expect.objectContaining(o);
+}
