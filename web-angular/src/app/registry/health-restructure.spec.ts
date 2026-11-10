@@ -152,5 +152,10 @@ describe('arriving on Health from a link', () => {
     expect((f.componentInstance as any).tab).toBe('todo');
     expect(el.querySelector('[data-task="t2"]')!.hasAttribute('data-current')).toBe(true);
     expect(el.querySelector('[data-task="t1"]')!.hasAttribute('data-current')).toBe(false);
+    // The deferred focus runs without CSS.escape (jsdom has none) and lands on
+    // the linked task's own action. It used to throw after the test ended,
+    // which failed CI as an unhandled error while every test passed.
+    await new Promise((r) => setTimeout(r, 0));
+    expect(document.activeElement).toBe(el.querySelector('[data-task="t2"] [data-role="complete-task"]'));
   });
 });

@@ -8,7 +8,7 @@ Run on 10 November 2026 against `659dc3f`:
 
 | Check | Result |
 |---|---|
-| Frontend tests (`npm test -w web-angular -- --watch=false`) | 620 passed in 63 files. The run exits non-zero on one intermittent unhandled `CSS.escape` error from a Health page timer after tests finish; no test fails. |
+| Frontend tests (`npm test -w web-angular -- --watch=false`) | 621 passed in 64 files, exit 0, no unhandled errors (rerun after the Health and Monitor deferred-scroll fix) |
 | Server tests (`npm test -w server`) | 793 passed, 0 failed, 0 skipped |
 | Typecheck, `check:templates`, `check:contrast`, `check:docs` | Pass |
 | Production build (`npm run build:angular`) | Builds. Warnings: initial bundle 712.03 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |

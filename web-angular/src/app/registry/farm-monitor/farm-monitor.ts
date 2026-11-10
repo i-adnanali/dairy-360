@@ -9,7 +9,7 @@
 // are about -- the restricted-zone rule is an overnight rule.
 
 import { Segmented } from "../../ui/selection";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal } from '@angular/core';
 import { RegistryApi, type FarmEventRow, type FarmEventsWindow } from '../api';
 import { urlParams } from '../url-state';
 import { farmMoment, farmToday } from '../today';
@@ -46,6 +46,7 @@ const WHAT: Record<FarmEventRow['event_type'], string> = {
 })
 export class FarmMonitor {
   private readonly api = inject(RegistryApi);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly url = urlParams({ window: 'night', show: 'all', event: '' });
   /** ?event= from Today: that event is marked and brought into view. */
   protected readonly marked = computed(() => this.url.value().event);
@@ -91,7 +92,13 @@ export class FarmMonitor {
       this.data.set(d);
       const id = this.marked();
       if (id)
-        setTimeout(() => document.querySelector<HTMLElement>(`[data-event="${CSS.escape(id)}"]`)?.scrollIntoView?.({ block: 'center' }));
+        // By attribute value inside this page: no CSS.escape (absent in jsdom), and
+        // nothing to find once the page is gone.
+        setTimeout(() =>
+          Array.from(this.host.querySelectorAll<HTMLElement>('[data-event]'))
+            .find((r) => r.dataset['event'] === id)
+            ?.scrollIntoView?.({ block: 'center' }),
+        );
     } catch (e) {
       if (n !== this.sequence) return;
       this.data.set(null);

@@ -13,6 +13,7 @@ import {
   ChangeDetectorRef,
   ChangeDetectionStrategy,
   DestroyRef,
+  ElementRef,
   inject,
   signal,
 } from '@angular/core';
@@ -126,8 +127,11 @@ export class HealthPage {
     this.linkedTask = null;
     this.activeRow = id;
     this.changeDetector.markForCheck();
+    // Matched by attribute value, inside this page only: no selector string to
+    // escape (CSS.escape is missing in jsdom, and this timer used to throw there
+    // after the test ended), and nothing found once the page is gone.
     setTimeout(() => {
-      const row = document.querySelector<HTMLElement>(`[data-task="${CSS.escape(id)}"]`);
+      const row = Array.from(this.host.querySelectorAll<HTMLElement>('[data-task]')).find((r) => r.dataset['task'] === id);
       row?.scrollIntoView?.({ block: 'center' });
       row?.querySelector<HTMLElement>('[data-role="complete-task"]')?.focus({ preventScroll: true });
     });
@@ -432,6 +436,7 @@ export class HealthPage {
   protected words = healthWords;
   private readonly drafts = inject(DraftRegistry);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private loadGeneration = 0;
   private sourceOpened: string | null = null;
   private editorOrigin: HTMLElement | null = null;
