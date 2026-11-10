@@ -68,7 +68,9 @@
       </header>
       <!-- No bar on Today: it held a lone "Start a recording session" button,
            which now lives in the header on every page. -->
-      @if (activeSection().views.length || activeSection().label === 'Check') {
+      <!-- Only sections with views get the bar: Check's Recheck moved into its
+           own header, and the bar left behind was an empty grey band. -->
+      @if (activeSection().views.length) {
         <div
           [inert]="assistant.modal() || setupPanel()"
           class="border-b border-line-subtle bg-surface-sunken px-4"
@@ -90,7 +92,6 @@
                 }
               </nav>
             }
-            <!-- Check's Recheck now sits in that page's own header. -->
           </div>
         </div>
       }

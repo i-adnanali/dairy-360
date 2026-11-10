@@ -2,7 +2,12 @@ import { IdentifierLink } from '../../ui/navigation';
 import { dayText, periodText } from '../labour-format';
 import { SOURCE_FORMS, feedLabel } from '../feed-format';
 import { RouterLink } from '@angular/router';
-import { labourPresentation } from "../check-presentation";
+import { errorText, labourPresentation, precisionWords, sentence, violationHeading } from "../check-presentation";
+import { readableParts } from "../precision-display";
+import { farmMoment } from "../today";
+import { Button } from "../../ui/button";
+import { Router } from '@angular/router';
+import type { DatePrecision, Violation } from "../types";
 import { ScrollRegion } from "../../ui/scroll-region";
 import { LocalPagination } from "../../ui/local-pagination/local-pagination";
 import { ShellActions } from "../navigation";
@@ -31,6 +36,9 @@ import { ShellActions } from "../navigation";
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  Injector,
+  afterNextRender,
   effect,
   computed,
   inject,
@@ -46,7 +54,7 @@ import { NO_RECORD } from "../precision-display";
 import { Cell } from "../../ui/cell";
 import { Card } from "../../ui/surface";
 import { ErrorPanel } from "../../ui/surface";
-import { HelpText } from "../../ui/text";
+import { HelpText, TextLink } from "../../ui/text";
 import { PageHeading } from "../../ui/heading";
 import { RowDivider } from "../../ui/surface";
 import { SectionHeading } from "../../ui/heading";
@@ -56,6 +64,7 @@ import { SubHeading } from "../../ui/heading";
   selector: 'app-verification-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    Button,
     LocalPagination,
     RouterLink,
     ScrollRegion,
@@ -69,6 +78,7 @@ import { SubHeading } from "../../ui/heading";
     SectionHeading,
     IdentifierLink,
     SubHeading,
+    TextLink,
   ],
   templateUrl: './verification-panel.html',
   styleUrl: './verification-panel.css',
@@ -94,13 +104,13 @@ export class VerificationPanel {
 
   protected readonly metadata = (context: unknown) =>
     context ? JSON.stringify(context, null, 2) : 'No structured context supplied';
-  protected readonly humanCode = (code: string) =>
-    code
-      .replaceAll('_', ' ')
-      .replaceAll('-', ' ')
-      .replace(/^./, (s) => s.toUpperCase());
   protected readonly labour = labourPresentation;
+  protected readonly heading = violationHeading;
+  protected readonly sentence = sentence;
+  protected readonly precisionWords = precisionWords;
   protected readonly loading = signal(false);
+  /** When the results on screen were read: "9 Nov, 14:05". */
+  protected readonly checkedAt = signal('');
   protected readonly reconcileError = signal('');
   private request = 0;
   protected readonly v = signal<Verification | null>(null);
@@ -113,6 +123,12 @@ export class VerificationPanel {
       this.actions.recheck();
       void this.load();
     });
+    // Recorded as the reader scrolls: by the time a destroy hook runs, this
+    // page's content is already gone and <main> has collapsed to the top.
+    const main = document.querySelector('main');
+    const onScroll = () => (savedScroll = main?.scrollTop ?? 0);
+    main?.addEventListener('scroll', onScroll, { passive: true });
+    inject(DestroyRef).onDestroy(() => main?.removeEventListener('scroll', onScroll));
   }
 
   /**
@@ -132,24 +148,121 @@ export class VerificationPanel {
     this.loading.set(true);
     this.loadError.set(null);
     this.reconcileError.set('');
+    // The previous results STAY on screen, dimmed and marked busy: clearing
+    // them collapsed the page and threw the reader back to the top on every
+    // Recheck. What may not stay is a CLEAN verdict -- "No contradictions",
+    // "Nothing needs an answer" -- which the template hides while loading or
+    // after a failure, because an old all-clear must never read as a current one.
+    const end = this.asOf() ?? farmToday();
     const [verification, reconciliation] = await Promise.allSettled([
       this.api.verification(this.asOf()),
-      this.api.reconcile(this.rangeStart(), farmToday()),
+      this.api.reconcile(this.rangeStart(end), end),
     ]);
     if (request !== this.request) return;
-    if (verification.status === 'fulfilled') this.v.set(verification.value);
-    else this.loadError.set(String(verification.reason));
+    if (verification.status === 'fulfilled') {
+      this.v.set(verification.value);
+      this.checkedAt.set(farmMoment(new Date().toISOString()));
+    } else this.loadError.set(errorText(verification.reason));
     if (reconciliation.status === 'fulfilled') this.reconciliation.set(reconciliation.value);
     else {
       this.reconciliation.set(null);
-      this.reconcileError.set(String(reconciliation.reason));
+      this.reconcileError.set(errorText(reconciliation.reason));
     }
     this.loading.set(false);
+    this.restoreScroll();
   }
 
+  // ---- Coming back keeps your place ------------------------------------
+  // The natural loop is: open the sheet a gap links to, answer it, press Back,
+  // Recheck. Back used to land at the top every time (the scroller is <main>,
+  // which the router's scroll restoration does not cover).
+  private readonly injector = inject(Injector);
+  private readonly back = inject(Router).getCurrentNavigation()?.trigger === 'popstate';
+  private restored = false;
+  private restoreScroll(): void {
+    if (this.restored) return;
+    this.restored = true;
+    if (!this.back || !savedScroll) return;
+    const top = savedScroll;
+    afterNextRender(() => document.querySelector('main')?.scrollTo({ top }), { injector: this.injector });
+  }
+
+  // ---- Needs an answer ----------------------------------------------------
+  /**
+   * Everything on this page that asks the owner to DO something, first, in
+   * words, each with the place to do it. It was spread over five cards, and the
+   * one real gap was an amber "4" three screens down.
+   */
+  protected readonly attention = computed(() => {
+    const data = this.v();
+    const r = this.reconciliation();
+    const items: { text: string; link: { path: string; query?: Record<string, string> } | null; label: string }[] = [];
+    for (const s of data?.milking?.recent ?? []) {
+      const missing = s.expected - s.recorded;
+      if (missing > 0)
+        items.push({
+          text: `${this.day(s.occurred_on)} ${this.word(s.session).toLowerCase()} milking: ${this.count(missing, 'animal')} not answered`,
+          link: { path: '/milk/milking', query: { on: s.occurred_on, session: s.session } },
+          label: 'Open the sheet',
+        });
+    }
+    for (const s of r?.incomplete ?? []) {
+      const missing = s.expected_standing - s.recorded_standing;
+      items.push({
+        text: `${this.day(s.occurred_on)} ${this.word(s.session).toLowerCase()} dispatch: ${this.count(missing, 'buyer')} not answered`,
+        link: { path: '/milk/dispatch', query: { on: s.occurred_on, session: s.session } },
+        label: 'Open the sheet',
+      });
+    }
+    return items;
+  });
+
+  /** Where a contradiction can be fixed, from the server's structured target. */
+  protected fixLink(x: Violation): { path: unknown[]; query?: Record<string, string>; label: string } | null {
+    const t = x.target;
+    if (!t) return null;
+    if (t.kind === 'animal') return { path: ['/animals', t.id], label: 'Open ' + t.id };
+    return {
+      path: [t.kind === 'milking' ? '/milk/milking' : '/milk/dispatch'],
+      query: { on: t.on, session: t.session },
+      label: `Open the ${this.day(t.on)} ${this.word(t.session).toLowerCase()} ${t.kind} sheet`,
+    };
+  }
+
+  /** In-page jump that keeps the URL (a bare `#id` would leave the app's base). */
+  protected jump(id: string): void {
+    const el = document.getElementById(id);
+    el?.scrollIntoView({ block: 'start' });
+    el?.querySelector<HTMLElement>('h3')?.setAttribute('tabindex', '-1');
+    el?.querySelector<HTMLElement>('h3')?.focus({ preventScroll: true });
+  }
+
+  /** A date at the precision it was known: "Jun 2021", not "1 Jun 2021". */
+  protected dated(on: string, precision: DatePrecision) {
+    return readableParts(on, precision);
+  }
+
+  /** "Recall: 5 of 45 dates give an exact day" -- the sum the reader used to do. */
+  protected readonly exactShare = computed(() => {
+    const rows = this.v()?.histogram ?? [];
+    const by = new Map<string, { exact: number; total: number }>();
+    for (const r of rows) {
+      const b = by.get(r.source_form) ?? { exact: 0, total: 0 };
+      b.total += r.count;
+      if (r.date_precision === 'day') b.exact += r.count;
+      by.set(r.source_form, b);
+    }
+    return [...by.entries()].map(([form, b]) => ({
+      source: this.source(form),
+      exact: b.exact,
+      total: b.total,
+      pct: b.total ? Math.round((100 * b.exact) / b.total) : null,
+    }));
+  });
+
   /** The trailing window the gap is reported over. */
-  private rangeStart(): string {
-    const [y, m, d] = farmToday().split('-').map(Number);
+  private rangeStart(end: string): string {
+    const [y, m, d] = end.split('-').map(Number);
     return new Date(Date.UTC(y, m - 1, d - RECONCILE_DAYS + 1)).toISOString().slice(0, 10);
   }
 
@@ -164,3 +277,6 @@ export class VerificationPanel {
 
 /** Trailing days the /check reconciliation covers. A diagnostic window. */
 const RECONCILE_DAYS = 30;
+
+/** Where /check was scrolled when the reader left it, for Back. */
+let savedScroll = 0;

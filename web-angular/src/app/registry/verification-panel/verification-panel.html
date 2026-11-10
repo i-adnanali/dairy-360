@@ -1,90 +1,136 @@
 
-    <div data-page-layout="review" class="mx-auto  space-y-5">
-      <!-- Recheck belongs to this page, beside its title; it sat in the
-           section bar where every other section keeps its views. -->
+    <!-- CHECK, ORDERED BY CONSEQUENCE. What needs an answer comes first, in
+         words, each with the place to answer it; contradictions and people
+         follow; the figures that show how complete and how certain the records
+         are come last, as reading. It used to follow the data model -- six equal
+         cards -- and the one real gap was an amber "4" three screens down. -->
+    <div data-page-layout="review" class="mx-auto space-y-5">
       <header class="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 appPageHeading>Check the records</h2>
           <p appHelp class="mt-1">
-            Read these; they are not assertions. Nothing in the rest of the app changes based on what
-            is here.
+            What needs an answer comes first. Below it are the figures that show how complete and
+            how certain the records are.
           </p>
         </div>
-        <button type="button" appButton variant="secondary" data-role="refresh" (click)="load()">Recheck</button>
+        <div class="flex flex-wrap items-center gap-3">
+          @if (checkedAt() && !loading()) {
+            <span class="text-sm text-content-muted" data-role="checked-at">Checked {{ checkedAt() }}</span>
+          }
+          <button type="button" appButton variant="secondary" data-role="refresh" [disabled]="loading()" (click)="load()">Recheck</button>
+        </div>
       </header>
+
       @if (loading()) {
-        <p role="status">Checking records… Previous results are not a current check.</p>
+        <p role="status" appHelp data-role="checking">
+          Checking the records…@if (v()) { The results below are from the last check. }
+        </p>
       }
       @if (loadError(); as e) {
-        <p appErrorPanel size="lg" data-role="load-error">{{ e }}</p>
-      } @else if (!loading() && v(); as data) {
-        <section appCard>
-          <h3 appSubHeading>Invariant violations</h3>
-          @if (data.violations.length === 0) {
-            <p class="mt-2 text-sm text-content-secondary" data-role="violations-none">
-              No violations across {{ count(data.counts.animals, 'animal') }},
-              {{ count(data.counts.events, 'event') }} and {{ count(data.counts.lactations, 'lactation') }}, as of
-              {{ day(data.as_of) }}.
-              @if (data.counts.animals === 0) {
-                <span class="italic">
-                  An empty registry passes every check vacuously — this says nothing yet.</span
-                >
+        <p appErrorPanel size="lg" role="alert" data-role="load-error">
+          The check could not run: {{ e }} Press Recheck to try again.@if (v()) { The results below are from an earlier check. }
+        </p>
+      }
+
+      @if (v(); as data) {
+        <div class="check-body space-y-5" [class.is-stale]="loading() || !!loadError()" [attr.aria-busy]="loading()">
+
+        <!-- NEEDS AN ANSWER --------------------------------------------- -->
+        <section appCard aria-labelledby="check-needs" data-role="needs-answer">
+          <h3 appSubHeading id="check-needs">Needs an answer</h3>
+          @if (attention().length) {
+            <ul class="check-list mt-2">
+              @for (a of attention(); track a.text) {
+                <li class="check-row" data-role="attention-item">
+                  <span>{{ a.text }}</span>
+                  @if (a.link) {
+                    <a appTextLink tone="strong" [routerLink]="a.link.path" [queryParams]="a.link.query" [attr.aria-label]="a.label + ': ' + a.text">{{ a.label }}</a>
+                  }
+                </li>
               }
+            </ul>
+          } @else if (!loading() && !loadError()) {
+            <p class="mt-2 text-sm text-content-secondary" data-role="attention-none">
+              No milking or dispatch session is waiting for an answer as of {{ day(data.as_of) }}.
             </p>
+          }
+          @if (data.violations.length || data.labour.length) {
+            <p class="mt-2 text-sm text-content-secondary">
+              @if (data.violations.length) { <button type="button" class="check-jump" (click)="jump('check-contradictions')">{{ count(data.violations.length, 'contradiction') }} in the records</button> }
+              @if (data.violations.length && data.labour.length) { · }
+              @if (data.labour.length) { <button type="button" class="check-jump" (click)="jump('check-people')">{{ count(data.labour.length, 'people item') }} worth a look</button> }
+              below.
+            </p>
+          }
+        </section>
+
+        <!-- CONTRADICTIONS (invariant violations) ------------------------- -->
+        <section appCard aria-labelledby="check-contradictions-h" id="check-contradictions">
+          <h3 appSubHeading id="check-contradictions-h">Contradictions in the records</h3>
+          @if (data.violations.length === 0) {
+            @if (!loading() && !loadError()) {
+              <p class="mt-2 text-sm text-content-secondary" data-role="violations-none">
+                None across {{ count(data.counts.animals, 'animal') }},
+                {{ count(data.counts.events, 'event') }} and {{ count(data.counts.lactations, 'lactation') }}, as of
+                {{ day(data.as_of) }}.
+                @if (data.counts.animals === 0) {
+                  <span class="italic">
+                    An empty registry passes every check, so this says nothing yet.</span
+                  >
+                }
+              </p>
+            }
           } @else {
             <app-local-pagination
-              label="Invariant violations"
+              label="Contradictions"
               #checkPages0="localPagination"
               [total]="data.violations.length"
             />
-            <ul class="mt-2 space-y-1" data-role="violations">
-              @for (x of checkPages0.rows(data.violations); track x.detail) {
-                <li appErrorPanel>
-                  <h4 class="font-semibold">{{ humanCode(x.name) }}</h4>
+            <ul class="mt-2 space-y-2" data-role="violations">
+              @for (x of checkPages0.rows(data.violations); track $index) {
+                <li appErrorPanel class="space-y-1">
+                  <h4 class="font-semibold">{{ heading(x.name) }}</h4>
+                  <p>{{ sentence(x.detail) }}</p>
+                  @if (fixLink(x); as fix) {
+                    <a class="underline" [routerLink]="fix.path" [queryParams]="fix.query">{{ fix.label }}</a>
+                  }
                   <details>
                     <summary>Technical details</summary>
                     <code>[{{ x.invariant }}] {{ x.name }}</code>
                   </details>
-                  <span class="ml-2">{{ x.detail }}</span>
                 </li>
               }
             </ul>
           }
         </section>
 
-        <!-- THE LABOUR REPORT, AND IT IS NOT A VIOLATIONS LIST.
-             Every line here fires on rows the farm ASKED to be able to write:
-             overlapping stints, a settlement paid after somebody left, a figure
-             that differs from the agreement because there was leave. So it is
-             rendered in amber and headed "worth a look", never in the red the
-             invariants use -- a report styled as a defect list is one people
-             learn to ignore, which costs more than the four lines are worth.
-             See docs/records/REGISTRY_PAYROLL.md §13. -->
-        <section appCard>
-          <h3 appSubHeading>Advisory worklist · People</h3>
+        <!-- PEOPLE: WORTH A LOOK. Every line here fires on rows the farm
+             ASKED to be able to write (overlapping stints, a settlement after
+             leaving, a wage that differs because of leave). Not red, and not
+             amber either: amber means "needs an answer from you" (UI_SYSTEM
+             §4.2.1), and these often need none. REGISTRY_PAYROLL.md §13. -->
+        <section appCard aria-labelledby="check-people-h" id="check-people">
+          <h3 appSubHeading id="check-people-h">People: worth a look</h3>
           @if (data.labour.length === 0) {
             <p class="mt-2 text-sm text-content-secondary" data-role="labour-none">
-              No issues found in this advisory check as of {{ day(data.as_of) }}. Wage differences are
-              advisory and do not establish payment.
+              Nothing about people to look at as of {{ day(data.as_of) }}. Wage differences are
+              listed here only to read; they do not record a payment.
             </p>
           } @else {
             <app-local-pagination
-              label="Labour advisories"
+              label="People worth a look"
               #checkPages1="localPagination"
               [total]="data.labour.length"
             />
-            <ul class="mt-2 space-y-1" data-role="labour">
-              @for (l of checkPages1.rows(data.labour); track l.detail) {
-                <li class="rounded-lg bg-warning-bg px-3 py-2 text-sm text-warning-strong">
+            <ul class="mt-2 space-y-2" data-role="labour">
+              @for (l of checkPages1.rows(data.labour); track $index) {
+                <li class="rounded-lg bg-surface-sunken px-3 py-2 text-sm space-y-1">
                   @let item = labour(l);
-                  <h4 class="font-semibold">{{ item.heading }}</h4>
-                  @if (item.context) {
-                    <p>{{ item.context }}</p>
-                  }
-                  <p>{{ l.detail }}</p>
+                  <h4 class="font-semibold text-content-primary">{{ item.heading }}</h4>
+                  <p class="text-content-secondary">{{ sentence(l.detail) }}</p>
                   @if (item.link) {
-                    <a class="underline" [routerLink]="item.link"
-                      >Review {{ l.kind === 'unknown_identifier' ? 'people' : 'person' }}</a
+                    <a appTextLink tone="strong" [routerLink]="item.link"
+                      >{{ l.kind === 'unknown_identifier' ? 'Open People' : 'Open this person' }}</a
                     >
                   }
                   <details>
@@ -98,24 +144,36 @@
           }
         </section>
 
-        <section appCard>
-          <h3 appSubHeading>Coverage · How the dates were known</h3>
+        <!-- READING THE RECORDS ------------------------------------------- -->
+        <div class="check-divider" role="presentation"></div>
+        <div class="space-y-1">
+          <h3 appSectionHeading>Reading the records</h3>
+          <p appHelp>How complete and how certain the records are. Nothing here needs an answer on its own.</p>
+        </div>
+
+        <section appCard aria-labelledby="check-dates-h">
+          <h3 appSubHeading id="check-dates-h">How the dates were known</h3>
           <p appHelp size="xs" class="mt-1">
-            Source against precision. Nothing can detect a date that is more precise than the memory
-            behind it — this is the number that shows it. A backfill coming out mostly exact-day
-            recall is the signal worth acting on.
+            Where each date came from, against how exactly it was known. Nothing can catch a date
+            written more exactly than the memory behind it; this table is where that shows. A
+            backfill from memory that comes out mostly as exact days is the thing to look at.
           </p>
           @if (data.histogram.length === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="histogram-empty">
               No events in this check as of {{ day(data.as_of) }}.
             </p>
           } @else {
-            <div appScrollRegion="histogram">
-              <table class="mt-2 w-full text-left text-sm" data-role="histogram">
+            <ul class="check-shares mt-2" data-role="exact-share">
+              @for (x of exactShare(); track x.source) {
+                <li><strong class="font-medium">{{ x.source }}:</strong> {{ x.exact }} of {{ count(x.total, 'date') }} give an exact day@if (x.pct !== null) { ({{ x.pct }}%)}</li>
+              }
+            </ul>
+            <div appScrollRegion="How the dates were known">
+              <table class="check-table mt-2 w-full text-left text-sm" data-role="histogram">
                 <thead class="text-xs font-semibold text-content-muted">
                   <tr>
                     <th scope="col" appCell>Source</th>
-                    <th scope="col" appCell>Precision</th>
+                    <th scope="col" appCell>Known to</th>
                     <th scope="col" appCell numeric>Events</th>
                   </tr>
                 </thead>
@@ -123,20 +181,14 @@
                   @for (c of data.histogram; track c.source_form + c.date_precision) {
                     <tr appRowDivider>
                       <td appCell tone="heading">{{ source(c.source_form) }}</td>
-                      <!-- THE ONE COLUMN IN THE APP WHOSE VALUES ARE THE
-                         VOCABULARY'S OWN WORDS. "day" is a known date and
-                         "month"/"year"/"estimated" are approximate ones, so the
-                         word is set in the state it names. This is where the
-                         vocabulary is learnable: a reader who has seen "month"
-                         dotted here reads a dotted "2017-03" on /animals
-                         without being told. -->
+                      <!-- The word is set in the state it names: an exact day is
+                           known, the rest are approximate (dotted). This is where
+                           the vocabulary is learnable. -->
                       <td appCell>
                         <span
                           [appCertainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
-                          [attr.data-certainty]="
-                            c.date_precision === 'day' ? 'known' : 'approximate'
-                          "
-                          >{{ c.date_precision }}</span
+                          [attr.data-certainty]="c.date_precision === 'day' ? 'known' : 'approximate'"
+                          >{{ precisionWords(c.date_precision) }}</span
                         >
                       </td>
                       <td appCell numeric emphasis tone="primary">{{ c.count }}</td>
@@ -148,8 +200,8 @@
           }
         </section>
 
-        <section appCard>
-          <h3 appSubHeading>Calving intervals</h3>
+        <section appCard aria-labelledby="check-intervals-h">
+          <h3 appSubHeading id="check-intervals-h">Calving intervals</h3>
           @if (data.intervals.intervals.length === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="intervals-empty">
               No animal has two or more calvings in this check as of {{ day(data.as_of) }}.
@@ -160,8 +212,8 @@
               #intervalPages="localPagination"
               [total]="data.intervals.intervals.length"
             />
-            <div appScrollRegion="intervals">
-              <table class="mt-2 w-full text-left text-sm" data-role="intervals">
+            <div appScrollRegion="Calving intervals">
+              <table class="check-table mt-2 w-full text-left text-sm" data-role="intervals">
                 <thead class="text-xs font-semibold text-content-muted">
                   <tr>
                     <th scope="col" appCell>Animal</th>
@@ -177,22 +229,21 @@
                     track i.animal_id + i.ordinal
                   ) {
                     <tr appRowDivider>
-                      <td appCell tone="heading"><a appIdentifier [routerLink]="['/animals', i.animal_id]">{{ i.animal_id }}</a></td>
-                      <td appCell tone="secondary">{{ day(i.from_on) }}</td>
-                      <td appCell tone="secondary">{{ day(i.to_on) }}</td>
-                      <!-- THE INTERVAL TAKES ITS OWN QUALITY, which is the
-                         typographic form of what intervalReport() refuses to do
-                         in arithmetic: an interval computed from two approximate
-                         calvings is not the same number as one computed from two
-                         exact days, and until now they were set identically. -->
-                      <td appCell numeric emphasis>
+                      <td appCell tone="heading" data-label="Animal"><a appIdentifier [routerLink]="['/animals', i.animal_id]">{{ i.animal_id }}</a></td>
+                      <!-- AT THE PRECISION IT WAS KNOWN. A month-only calving
+                           printed as "1 Jun 2021" claimed a day nobody knew. -->
+                      @let from = dated(i.from_on, i.from_precision);
+                      @let to = dated(i.to_on, i.to_precision);
+                      <td appCell tone="secondary" data-label="From" class="whitespace-nowrap"><span [appCertainty]="from.state">{{ from.figure }}</span></td>
+                      <td appCell tone="secondary" data-label="To" class="whitespace-nowrap"><span [appCertainty]="to.state">{{ to.figure }}</span></td>
+                      <td appCell numeric emphasis data-label="Days">
                         <span
                           [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'"
                           [attr.data-certainty]="i.quality === 'measured' ? 'known' : 'approximate'"
                           >{{ i.days }}</span
                         >
                       </td>
-                      <td appCell>
+                      <td appCell data-label="Quality">
                         <span [appCertainty]="i.quality === 'measured' ? 'known' : 'approximate'">{{
                           word(i.quality)
                         }}</span>
@@ -208,37 +259,35 @@
                 <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
                   <div class="text-sm font-medium text-content-secondary">{{ word(s.quality) }}</div>
                   @if (s.count === 0) {
-                    <!-- NO RECORD, NOT AN ABSENT ANSWER. Nobody said "there are
-                         no approximate intervals"; there simply are none yet, so
-                         this is §6's fifth state and it loses the italic it used
-                         to carry. It keeps the WORD rather than taking the en
-                         dash: §6's dash belongs in a value slot where a figure
-                         is expected, and a dash under a heading reads as a
-                         rendering fault. §15 rule 1 -- an absence is named. -->
                     <div appCertainty="no-record" data-certainty="no-record">none</div>
                   } @else {
                     <div>
                       <span
                         [appCertainty]="s.quality === 'measured' ? 'known' : 'approximate'"
                         [attr.data-certainty]="s.quality === 'measured' ? 'known' : 'approximate'"
-                        >n = {{ s.count }} · mean {{ s.mean_days }}d</span
+                        >{{ count(s.count, 'interval') }}, average {{ s.mean_days }} days</span
                       >
                     </div>
-                    <div appHelp size="xs">min {{ s.min_days }}d · max {{ s.max_days }}d</div>
+                    <div appHelp size="xs">shortest {{ s.min_days }} · longest {{ s.max_days }} days</div>
                   }
                 </div>
               }
             </div>
+            <p appHelp size="xs" class="mt-3" data-role="caveat">
+              Measured and approximate intervals are kept apart and never averaged together: an
+              interval between two calvings known only to the month can be off by about 60 days
+              either way, more than the difference between a good interval and a bad one. With a
+              herd this size these are individual cases, not a trend.
+            </p>
           }
-          <p appHelp size="xs" class="mt-3" data-role="caveat">{{ data.intervals.caveat }}</p>
         </section>
 
-        <section appCard>
-          <h3 appSubHeading>Coverage gaps · Milk records</h3>
+        <section appCard aria-labelledby="check-sessions-h">
+          <h3 appSubHeading id="check-sessions-h">Milking sessions answered</h3>
           <p appHelp size="xs" class="mt-1">
-            A session is complete when every animal in milk has a row — not when every row carries a
-            number. The two are separate on purpose: a session of all “not measured” is a complete
-            record and empty data, and one blended percentage would hide exactly that.
+            A session is answered when every animal in milk has a row, whether or not the row has
+            litres: a session where every animal was milked but not weighed is complete, with no
+            figures. Morning and evening are kept apart.
           </p>
           @if (data.milking.rows === 0) {
             <p class="mt-2 text-sm italic text-content-subtle" data-role="milking-empty">
@@ -247,218 +296,165 @@
           } @else {
             <div class="mt-2 grid gap-2 sm:grid-cols-3" data-role="milking-summary">
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                <div class="text-sm font-medium text-content-secondary">Sessions</div>
+                <div class="text-sm font-medium text-content-secondary">Sessions answered</div>
                 <div class="text-content-primary">
-                  {{ data.milking.complete_sessions }} complete of {{ data.milking.sessions }}
+                  <span appCertainty="known">{{ data.milking.complete_sessions }}</span> of {{ data.milking.sessions }} answered
                 </div>
                 <div appHelp size="xs">
-                  <span [appCertainty]="data.milking.first_on ? 'known' : 'no-record'">{{
-                    data.milking.first_on ? day(data.milking.first_on) : noRecord
-                  }}</span>
-                  to
-                  <span [appCertainty]="data.milking.last_on ? 'known' : 'no-record'">{{
-                    data.milking.last_on ? day(data.milking.last_on) : noRecord
-                  }}</span>
+                  {{ data.milking.first_on ? day(data.milking.first_on) : noRecord }} to
+                  {{ data.milking.last_on ? day(data.milking.last_on) : noRecord }}
                 </div>
               </div>
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                <div class="text-sm font-medium text-content-secondary">Measured</div>
-                <div class="text-content-primary">{{ count(data.milking.measured, 'record') }}</div>
-                <div appHelp size="xs">carry a number</div>
+                <div class="text-sm font-medium text-content-secondary">With litres</div>
+                <div class="text-content-primary"><span appCertainty="known">{{ data.milking.measured }}</span> {{ data.milking.measured === 1 ? 'row' : 'rows' }}</div>
               </div>
               <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                <div class="text-sm font-medium text-content-secondary">Not measured</div>
+                <div class="text-sm font-medium text-content-secondary">Without litres</div>
                 <div class="text-content-primary">
-                  {{ count(data.milking.milked_not_measured, 'record') }}
+                  <span appCertainty="known">{{ data.milking.milked_not_measured }}</span> milked, not weighed
                 </div>
-                <div appHelp size="xs">
-                  milked, unweighed · {{ data.milking.not_milked }} not milked
-                </div>
+                <div appHelp size="xs">{{ data.milking.not_milked }} not milked</div>
               </div>
             </div>
 
-            <div appScrollRegion="milking sessions">
-              <table class="mt-3 w-full text-left text-sm" data-role="milking-sessions">
+            <p appHelp size="xs" class="mt-3">The latest {{ count(data.milking.recent.length, 'session') }}, newest first.</p>
+            <div appScrollRegion="Milking sessions answered">
+              <table class="check-table mt-1 w-full text-left text-sm" data-role="milking-sessions">
                 <thead class="text-xs font-semibold text-content-muted">
                   <tr>
-                    <th scope="col" appCell>Date</th>
                     <th scope="col" appCell>Session</th>
-                    <th scope="col" appCell numeric>Recorded</th>
-                    <th scope="col" appCell numeric>In milk</th>
-                    <th scope="col" appCell numeric>Measured</th>
+                    <th scope="col" appCell>Answered</th>
+                    <th scope="col" appCell numeric>With litres</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (s of data.milking.recent; track s.occurred_on + s.session) {
                     <tr appRowDivider>
-                      <td appCell tone="secondary">{{ day(s.occurred_on) }}</td>
-                      <!-- The sheet that answers the gap, one click away. -->
-                      <td appCell tone="secondary"><a class="underline" routerLink="/milk/milking" [queryParams]="{ on: s.occurred_on, session: s.session }" data-role="gap-link">{{ word(s.session) }}</a></td>
-                      <!-- A session with fewer rows than animals in milk has
-                         animals nobody answered for, which is §6's fifth state.
-                         The colour is unchanged -- this was already amber, and
-                         it is one of the nine sites PHASE5_PRECHECK.md's census
-                         classifies as amber's PERMITTED first meaning. What
-                         changes is that it now says so in the vocabulary
-                         instead of in a ternary. -->
-                      <td appCell numeric emphasis>
+                      <!-- The sheet that answers the gap, one click away, named in full. -->
+                      <td appCell tone="secondary" data-label="Session" class="whitespace-nowrap">
+                        <a appTextLink tone="strong" routerLink="/milk/milking" [queryParams]="{ on: s.occurred_on, session: s.session }" data-role="gap-link">{{ day(s.occurred_on) }} · {{ word(s.session) }}</a>
+                      </td>
+                      <!-- An unanswered animal is §6's fifth state, said in words
+                           and not only in amber. -->
+                      <td appCell data-label="Answered">
                         <span
                           [appCertainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
                           [attr.data-certainty]="s.recorded >= s.expected ? 'known' : 'unanswered'"
-                          >{{ s.recorded }}</span
+                          >{{ s.recorded }} of {{ s.expected }}@if (s.recorded < s.expected) { · {{ s.expected - s.recorded }} not answered }</span
                         >
                       </td>
-                      <td appCell numeric tone="secondary">{{ s.expected }}</td>
-                      <td appCell numeric tone="secondary">{{ s.measured }}</td>
+                      <td appCell numeric tone="secondary" data-label="With litres">{{ s.measured }}</td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
           }
-          <p appHelp size="xs" class="mt-3" data-role="milking-caveat">{{ data.milking.caveat }}</p>
         </section>
+        </div>
+      }
 
-        <!-- ---------------------------------------------------------------
-             Produced against dispatched.
+      <!-- Where the milk went. Outside the verification block on purpose: if
+           the check fails, these figures and their own error still show.
+           NOT AN ALERT -- more milk out than recorded in is what an unweighed
+           milking means. docs/records/REGISTRY_SALES.md §11. -->
+      @if (reconcileError()) {
+        <p appErrorPanel role="alert">Where the milk went could not load: {{ reconcileError() }}</p>
+      }
+      @if (reconciliation(); as r) {
+        <section appCard aria-labelledby="check-milk-h" [class.is-stale]="loading()">
+          <h3 appSubHeading id="check-milk-h">Where the milk went</h3>
+          <p appHelp size="xs" class="mt-1">The last 30 days, {{ period(r.from, r.to) }}</p>
 
-             NOT AN ALERT, and nothing here is styled as one. More milk going
-             out than was recorded as produced is what 'milked_not_measured'
-             MEANS -- the milk existed, nobody weighed it -- and an alarm that
-             fires every day for months is trained away, taking the real signal
-             with it. See docs/records/REGISTRY_SALES.md §11.
-             --------------------------------------------------------------- -->
-        @if (reconcileError()) {
-          <p appErrorPanel role="alert">Milk reconciliation unavailable: {{ reconcileError() }}</p>
-        }
-        @if (reconciliation(); as r) {
-          <section appCard>
-            <h3 appSectionHeading>Where the milk went</h3>
-            <p appHelp size="xs" class="mt-1">{{ period(r.from, r.to) }}</p>
-
-            @if (
-              r.sessions === 0 &&
-              r.measured_rows === 0 &&
-              r.not_measured_rows === 0 &&
-              r.not_milked_rows === 0
-            ) {
-              <p class="mt-2 text-sm italic text-content-subtle" data-role="reconcile-empty">
-                Nothing recorded in this period.
-              </p>
-            } @else {
-              <div class="mt-2 grid gap-2 sm:grid-cols-4" data-role="reconcile-summary">
-                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div class="text-sm font-medium text-content-secondary">Measured</div>
-                  <div class="text-content-primary" data-role="produced">
-                    {{ r.produced_measured }} L
-                  </div>
-                  <div appHelp size="xs">from {{ count(r.measured_rows, 'record') }}</div>
-                </div>
-                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div class="text-sm font-medium text-content-secondary">Sold</div>
-                  <div class="text-content-primary" data-role="sold">{{ r.dispatched_sold }} L</div>
-                  <div appHelp size="xs">{{ money(r.billed_minor) }}</div>
-                </div>
-                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div class="text-sm font-medium text-content-secondary">Kept at home</div>
-                  <div class="text-content-primary" data-role="home">{{ r.dispatched_home }} L</div>
-                  <div appHelp size="xs">its own term, not the gap</div>
-                </div>
-                <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
-                  <div class="text-sm font-medium text-content-secondary">Gap</div>
-                  <div class="text-content-primary" data-role="gap">{{ r.gap_litres }} L</div>
-                  <div appHelp size="xs" data-role="gap-pct">
-                    @if (r.gap_pct !== null) {
-                      {{ r.gap_pct }}% of measured
-                    } @else {
-                      <!-- DELIBERATELY ABSENT, not no-record. The server
-                           withholds this percentage on purpose and says why in
-                           the panel below, so an answer WAS given -- §6's third
-                           state, italic and in words, never a dash. -->
-                      <span appCertainty="absent" data-certainty="absent">no percentage</span>
-                    }
-                  </div>
+          @if (
+            r.sessions === 0 &&
+            r.measured_rows === 0 &&
+            r.not_measured_rows === 0 &&
+            r.not_milked_rows === 0
+          ) {
+            <p class="mt-2 text-sm italic text-content-subtle" data-role="reconcile-empty">
+              Nothing recorded in this period.
+            </p>
+          } @else {
+            <div class="mt-2 grid gap-2 sm:grid-cols-4" data-role="reconcile-summary">
+              <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
+                <div class="text-sm font-medium text-content-secondary">Measured</div>
+                <div class="text-content-primary" data-role="produced"><span appCertainty="known">{{ r.produced_measured }} L</span></div>
+                <div appHelp size="xs">from {{ count(r.measured_rows, 'record') }}</div>
+              </div>
+              <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
+                <div class="text-sm font-medium text-content-secondary">Sold</div>
+                <div class="text-content-primary" data-role="sold"><span appCertainty="known">{{ r.dispatched_sold }} L</span></div>
+                <div appHelp size="xs">{{ money(r.billed_minor) }}</div>
+              </div>
+              <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
+                <div class="text-sm font-medium text-content-secondary">Kept at home</div>
+                <div class="text-content-primary" data-role="home"><span appCertainty="known">{{ r.dispatched_home }} L</span></div>
+                <div appHelp size="xs">counted on its own, not in the gap</div>
+              </div>
+              <div class="rounded-lg bg-surface-page px-3 py-2 text-sm">
+                <div class="text-sm font-medium text-content-secondary">Gap</div>
+                <div class="text-content-primary" data-role="gap"><span appCertainty="known">{{ r.gap_litres }} L</span></div>
+                <div appHelp size="xs" data-role="gap-pct">
+                  @if (r.gap_pct !== null) {
+                    {{ r.gap_pct }}% of measured
+                  } @else {
+                    <span appCertainty="absent" data-certainty="absent">no percentage</span>
+                  }
                 </div>
               </div>
+            </div>
 
-              <!-- The withheld percentage says WHY rather than showing a dash:
-                   a missing number with no explanation reads as a bug. -->
-              @if (r.gap_pct_withheld_because; as why) {
-                <p
-                  class="mt-2 rounded-lg bg-warning-bg px-3 py-2 text-xs text-warning-strong"
-                  data-role="gap-withheld"
-                >
-                  No percentage, on purpose — {{ why }}
-                </p>
-              }
-
-              <p class="mt-2 text-sm text-content-secondary" data-role="reconcile-sessions">
-                {{ r.complete_sessions }} of {{ count(r.sessions, 'dispatch session') }} had every standing
-                destination answered.
+            @if (r.gap_pct_withheld_because; as why) {
+              <!-- An explanation, not a question: neutral, not amber. -->
+              <p class="mt-2 rounded-lg bg-surface-sunken px-3 py-2 text-xs text-content-secondary" data-role="gap-withheld">
+                No percentage, on purpose: {{ why }}
               </p>
-
-              @if (r.incomplete.length > 0) {
-                <app-local-pagination
-                  label="Incomplete milk sessions"
-                  #checkPages2="localPagination"
-                  [total]="r.incomplete.length"
-                />
-                <div appScrollRegion="reconcile incomplete">
-                  <table class="mt-2 w-full text-left text-sm" data-role="reconcile-incomplete">
-                    <thead class="text-xs font-semibold text-content-muted">
-                      <tr>
-                        <th scope="col" appCell>Session</th>
-                        <th scope="col" appCell numeric>Answered</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (s of checkPages2.rows(r.incomplete); track s.occurred_on + s.session) {
-                        <tr appRowDivider>
-                          <td appCell tone="secondary"><a class="underline" routerLink="/milk/dispatch" [queryParams]="{ on: s.occurred_on, session: s.session }" data-role="dispatch-gap-link">{{ day(s.occurred_on) }} · {{ word(s.session) }}</a></td>
-                          <td appCell numeric tone="secondary">
-                            {{ s.recorded_standing }} of {{ s.expected_standing }}
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              }
-
-              <!-- A LIST TO READ, never a violation: a deliberate discount and
-                   a stale default look identical from here. -->
-              @if (r.off_schedule.length > 0) {
-                <div class="mt-3" data-role="off-schedule">
-                  <h4 class="text-sm font-semibold text-content-secondary">
-                    Billed at something other than the agreed rate
-                  </h4>
-                  <app-local-pagination
-                    label="Off-schedule milk records"
-                    #checkPages3="localPagination"
-                    [total]="r.off_schedule.length"
-                  />
-                  <ul class="mt-1 space-y-1 text-sm text-content-secondary">
-                    @for (o of checkPages3.rows(r.off_schedule); track o.dispatch_id) {
-                      <li>
-                        {{ day(o.occurred_on) }} · {{ word(o.session) }} · {{ o.name }} — billed
-                        {{ rate(o.captured_minor, o.captured_unit_litres) }}, agreed
-                        {{ rate(o.agreed_minor, o.agreed_unit_litres) }}
-                      </li>
-                    }
-                  </ul>
-                  <p appHelp size="xs" class="mt-1">
-                    Not necessarily wrong — a one-off discount looks exactly like a stale default.
-                  </p>
-                </div>
-              }
             }
 
-            <p appHelp size="xs" class="mt-3" data-role="reconcile-interpretation">
-              {{ r.interpretation }}
+            <p class="mt-2 text-sm text-content-secondary" data-role="reconcile-sessions">
+              Dispatch: {{ r.complete_sessions }} of {{ count(r.sessions, 'session') }} had every regular
+              buyer answered.
             </p>
-          </section>
-        }
-      } @else {
+
+            @if (r.off_schedule.length > 0) {
+              <div class="mt-3" data-role="off-schedule">
+                <h4 class="text-sm font-semibold text-content-secondary">
+                  Billed at something other than the agreed rate
+                </h4>
+                <app-local-pagination
+                  label="Off-schedule milk records"
+                  #checkPages3="localPagination"
+                  [total]="r.off_schedule.length"
+                />
+                <ul class="mt-1 space-y-1 text-sm text-content-secondary">
+                  @for (o of checkPages3.rows(r.off_schedule); track o.dispatch_id) {
+                    <li>
+                      {{ day(o.occurred_on) }} · {{ word(o.session) }} · {{ o.name }}: billed
+                      {{ rate(o.captured_minor, o.captured_unit_litres) }}, agreed
+                      {{ rate(o.agreed_minor, o.agreed_unit_litres) }}
+                    </li>
+                  }
+                </ul>
+                <p appHelp size="xs" class="mt-1">
+                  Not necessarily wrong: a one-off discount looks exactly like an old rate left in place.
+                </p>
+              </div>
+            }
+          }
+
+          <p appHelp size="xs" class="mt-3" data-role="reconcile-interpretation">
+            The gap is measured minus dispatched, and it mixes two unknowns that pull opposite ways:
+            milk taken but never weighed makes it negative, and a sale nobody recorded makes it
+            positive. A negative gap is normal while any milking is unweighed, and it is not an
+            alert. Occasional buyers have no row when they take nothing, so this gap is the only
+            place an unrecorded household sale shows. Read it with the counts beside it.
+          </p>
+        </section>
+      }
+
+      @if (!v() && !loadError() && !loading()) {
         <p appHelp data-role="loading">Loading…</p>
       }
     </div>

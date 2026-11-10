@@ -1094,3 +1094,26 @@ test('advisory periods read in words, not ISO ranges', async () => {
   assert.equal(periodWords('2026-11-01', '2026-11-15'), '1–15 Nov 2026');
   assert.equal(periodWords('2026-09-28', '2026-10-03'), '28 Sep 2026 to 3 Oct 2026');
 });
+
+test('a violation about one animal says which, as data, so /check can link to it', () => {
+  const db = cleanHerd();
+  const s = clone(snapshot(db));
+  db.close();
+  const acquired = s.events.find((e) => e.type === 'acquired')!;
+  s.events = s.events.filter((e) => e.id !== acquired.id);
+  const found = violations(s).filter((x) => x.name === 'one-origin-event');
+  assert.ok(found.length > 0);
+  assert.deepEqual(found[0].target, { kind: 'animal', id: acquired.animal_id });
+});
+
+test('labour report lines give stints and periods in words, never ISO', () => {
+  const s = labourSnapshot();
+  s.engagements.push({
+    ...s.engagements[0], id: 'eng_imran_night', kind: 'daily',
+    role: 'night watchman', started_on: '2026-06-01',
+  });
+  const lines = labourReport(s, '2026-09-07').map((l) => l.detail);
+  assert.ok(lines.length > 0);
+  for (const d of lines) assert.doesNotMatch(d, /\d{4}-\d{2}-\d{2}/, d);
+  assert.ok(lines.some((d) => /onwards/.test(d)), lines.join('\n'));
+});

@@ -109,10 +109,16 @@ export interface LinkCandidate {
   within_match_window: boolean;
 }
 
+/** Where a violation can be fixed, sent as data (server invariants.ts). */
+export type ViolationTarget =
+  | { kind: 'animal'; id: string }
+  | { kind: 'milking' | 'dispatch'; on: string; session: MilkingSession };
+
 export interface Violation {
   invariant: number;
   name: string;
   detail: string;
+  target?: ViolationTarget;
 }
 
 export interface IntervalSummary {
@@ -218,6 +224,7 @@ export interface Verification {
   intervals: {
     intervals: {
       animal_id: string; ordinal: number; from_on: string; to_on: string;
+      from_precision: DatePrecision; to_precision: DatePrecision;
       days: number; quality: 'measured' | 'approximate';
     }[];
     measured: IntervalSummary;

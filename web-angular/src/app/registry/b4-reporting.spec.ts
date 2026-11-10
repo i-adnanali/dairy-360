@@ -307,14 +307,18 @@ describe('B4 Check loading and failures', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     f.detectChanges();
     expect(f.nativeElement.textContent).toContain(
-      'No issues found in this advisory check as of 17 Sep 2026',
+      'Nothing about people to look at as of 17 Sep 2026',
     );
-    expect(f.nativeElement.textContent).toContain('Milk reconciliation unavailable');
+    expect(f.nativeElement.textContent).toContain('Where the milk went could not load');
+    expect(f.nativeElement.textContent).not.toContain('Error:');
+    expect(f.nativeElement.querySelector('[data-role=violations-none]')).not.toBeNull();
     pending = true;
     const checking = (f.componentInstance as any).load();
     f.detectChanges();
-    expect(f.nativeElement.textContent).toContain('Checking records');
+    expect(f.nativeElement.textContent).toContain('Checking the records');
+    // The old results stay, dimmed and busy -- but never an old all-clear.
     expect(f.nativeElement.querySelector('[data-role=violations-none]')).toBeNull();
+    expect(f.nativeElement.querySelector('.check-body')?.getAttribute('aria-busy')).toBe('true');
     rejectCheck(Error('verification offline'));
     await checking;
     f.detectChanges();

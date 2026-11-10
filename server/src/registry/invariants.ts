@@ -42,18 +42,25 @@ import type {
   RegistrySnapshot,
 } from './types';
 
+/**
+ * Where a violation can be fixed, as data -- never read back out of `detail`.
+ * /check links an animal to its page and a milking or dispatch row to its
+ * sheet; anything else has no target and says so.
+ */
+export type ViolationTarget =
+  | { kind: 'animal'; id: string }
+  | { kind: 'milking' | 'dispatch'; on: string; session: string };
+
 export interface Violation {
   /** Invariant number from decision doc §10, for cross-referencing. */
   invariant: number;
   name: string;
   detail: string;
+  target?: ViolationTarget;
 }
 
-const v = (invariant: number, name: string, detail: string): Violation => ({
-  invariant,
-  name,
-  detail,
-});
+const v = (invariant: number, name: string, detail: string, target?: ViolationTarget): Violation =>
+  target ? { invariant, name, detail, target } : { invariant, name, detail };
 
 /** Group events by animal, preserving canonical order. */
 function byAnimal(events: RegistryEvent[]): Map<string, RegistryEvent[]> {
@@ -124,7 +131,7 @@ function checkOrigin(s: RegistrySnapshot): Violation[] {
     const origins = mine.filter((e) => e.type === 'birth' || e.type === 'acquired');
     if (origins.length === 0) {
       out.push(
-        v(3, 'one-origin-event', `animal ${a.id} has no birth or acquired event`),
+        v(3, 'one-origin-event', `animal ${a.id} has no birth or acquired event`, { kind: 'animal', id: a.id }),
       );
     } else if (origins.length > 1) {
       out.push(
@@ -132,8 +139,7 @@ function checkOrigin(s: RegistrySnapshot): Violation[] {
           3,
           'one-origin-event',
           `animal ${a.id} has ${origins.length} origin events: ` +
-            origins.map((e) => `${e.type}@${e.occurred_on}(${e.id})`).join(', '),
-        ),
+            origins.map((e) => `${e.type}@${e.occurred_on}(${e.id})`).join(', '), { kind: 'animal', id: a.id }),
       );
     }
   }
@@ -142,7 +148,7 @@ function checkOrigin(s: RegistrySnapshot): Violation[] {
   for (const e of s.events) {
     if (!known.has(e.animal_id)) {
       out.push(
-        v(3, 'one-origin-event', `event ${e.id} references unknown animal ${e.animal_id}`),
+        v(3, 'one-origin-event', `event ${e.id} references unknown animal ${e.animal_id}`, { kind: 'animal', id: e.animal_id }),
       );
     }
   }
@@ -167,8 +173,7 @@ function checkOrigin(s: RegistrySnapshot): Violation[] {
           3,
           'one-origin-event',
           `animal ${a.id}: registry_animals.origin='${a.origin}' but its effective origin ` +
-            `event is a '${origin.type}', which implies '${expected}'`,
-        ),
+            `event is a '${origin.type}', which implies '${expected}'`, { kind: 'animal', id: a.id }),
       );
     }
   }
@@ -197,8 +202,7 @@ function checkTimeline(s: RegistrySnapshot): Violation[] {
               'nothing-before-origin',
               `animal ${a.id}: ${e.type}@${e.occurred_on} (${e.date_precision}) precedes ` +
                 `its ${origin.event.type} origin@${origin.event.occurred_on} ` +
-                `(${origin.event.date_precision})`,
-            ),
+                `(${origin.event.date_precision})`, { kind: 'animal', id: a.id }),
           );
         }
       }
@@ -215,8 +219,7 @@ function checkTimeline(s: RegistrySnapshot): Violation[] {
               5,
               'nothing-after-departure',
               `animal ${a.id}: ${e.type}@${e.occurred_on} follows its ` +
-                `departure@${departure.occurred_on}`,
-            ),
+                `departure@${departure.occurred_on}`, { kind: 'animal', id: a.id }),
           );
         }
       }
@@ -246,7 +249,7 @@ function checkCalvings(s: RegistrySnapshot): Violation[] {
     const calf = animals.get(calfId);
     if (!calf) {
       out.push(
-        v(6, 'calving-names-calf', `calving ${c.id} names calf ${calfId}, which does not exist`),
+        v(6, 'calving-names-calf', `calving ${c.id} names calf ${calfId}, which does not exist`, { kind: 'animal', id: calfId }),
       );
       continue;
     }
@@ -256,14 +259,13 @@ function checkCalvings(s: RegistrySnapshot): Violation[] {
           6,
           'calving-names-calf',
           `calving ${c.id} names calf ${calfId}, whose origin is '${calf.origin}' ` +
-            `rather than 'born_on_farm'`,
-        ),
+            `rather than 'born_on_farm'`, { kind: 'animal', id: calfId }),
       );
     }
     const birth = birthsByAnimal.get(calfId);
     if (!birth) {
       out.push(
-        v(6, 'calving-names-calf', `calf ${calfId} has no birth event`),
+        v(6, 'calving-names-calf', `calf ${calfId} has no birth event`, { kind: 'animal', id: calfId }),
       );
       continue;
     }
@@ -274,8 +276,7 @@ function checkCalvings(s: RegistrySnapshot): Violation[] {
           'calving-names-calf',
           `calf ${calfId}: birth@${birth.occurred_on}(${birth.date_precision}) does not ` +
             `match calving@${c.occurred_on}(${c.date_precision}). These are the same ` +
-            `physical fact; divergent dates mean the timeline lies.`,
-        ),
+            `physical fact; divergent dates mean the timeline lies.`, { kind: 'animal', id: calfId }),
       );
     }
     // The calving payload and the animal row must agree on sex; they are two
@@ -287,8 +288,7 @@ function checkCalvings(s: RegistrySnapshot): Violation[] {
           6,
           'calving-names-calf',
           `calf ${calfId}: registry_animals.sex='${calf.sex}' but calving ${c.id} ` +
-            `records calf_sex='${calvingSex}'`,
-        ),
+            `records calf_sex='${calvingSex}'`, { kind: 'animal', id: calfId }),
       );
     }
     if (birth.payload.calving_event_id !== c.id) {
@@ -297,8 +297,7 @@ function checkCalvings(s: RegistrySnapshot): Violation[] {
           6,
           'calving-names-calf',
           `calf ${calfId}: its birth event points at calving ` +
-            `'${String(birth.payload.calving_event_id)}' but calving ${c.id} claims it`,
-        ),
+            `'${String(birth.payload.calving_event_id)}' but calving ${c.id} claims it`, { kind: 'animal', id: calfId }),
       );
     }
   }
@@ -317,7 +316,7 @@ function checkParentage(s: RegistrySnapshot): Violation[] {
   for (const a of s.animals) {
     if (a.origin === 'born_on_farm' && !dams.has(a.id)) {
       out.push(
-        v(7, 'born-on-farm-has-dam', `animal ${a.id} is born_on_farm but has no dam edge`),
+        v(7, 'born-on-farm-has-dam', `animal ${a.id} is born_on_farm but has no dam edge`, { kind: 'animal', id: a.id }),
       );
     }
   }
@@ -333,8 +332,7 @@ function checkParentage(s: RegistrySnapshot): Violation[] {
         v(
           7,
           'born-on-farm-has-dam',
-          `animal ${p.child_id} names dam ${p.parent_ref}, which is not a registry animal`,
-        ),
+          `animal ${p.child_id} names dam ${p.parent_ref}, which is not a registry animal`, { kind: 'animal', id: p.child_id }),
       );
     }
   }
@@ -361,8 +359,7 @@ function checkLactations(s: RegistrySnapshot): Violation[] {
           8,
           'one-open-lactation',
           `animal ${animalId} has ${list.length} open lactations: ` +
-            list.map((l) => l.id).join(', '),
-        ),
+            list.map((l) => l.id).join(', '), { kind: 'animal', id: animalId }),
       );
     }
   }
@@ -443,8 +440,7 @@ function checkSuperseded(s: RegistrySnapshot): Violation[] {
         v(
           9,
           'superseded-excluded',
-          `event ${e.id} supersedes ${e.supersedes_id}, which does not exist`,
-        ),
+          `event ${e.id} supersedes ${e.supersedes_id}, which does not exist`, { kind: 'animal', id: e.animal_id }),
       );
     }
     if (e.supersedes_id) {
@@ -455,8 +451,7 @@ function checkSuperseded(s: RegistrySnapshot): Violation[] {
             9,
             'superseded-excluded',
             `event ${e.id} (animal ${e.animal_id}) supersedes an event on a DIFFERENT ` +
-              `animal ${target.animal_id}`,
-          ),
+              `animal ${target.animal_id}`, { kind: 'animal', id: e.animal_id }),
         );
       }
       if (target && target.type !== e.type && !isOriginPromotion(e.type, target.type)) {
@@ -465,8 +460,7 @@ function checkSuperseded(s: RegistrySnapshot): Violation[] {
             9,
             'superseded-excluded',
             `event ${e.id} (${e.type}) supersedes an event of a different type ` +
-              `(${target.type})`,
-          ),
+              `(${target.type})`, { kind: 'animal', id: e.animal_id }),
         );
       }
     }
@@ -494,15 +488,14 @@ function checkSerials(s: RegistrySnapshot): Violation[] {
         v(
           10,
           'serials-unique-monotonic',
-          `animal id '${a.id}' does not use the '${SERIAL_PREFIX}' prefix`,
-        ),
+          `animal id '${a.id}' does not use the '${SERIAL_PREFIX}' prefix`, { kind: 'animal', id: a.id }),
       );
       continue;
     }
     const n = Number(a.id.slice(SERIAL_PREFIX.length));
     if (!Number.isInteger(n) || n < 1) {
       out.push(
-        v(10, 'serials-unique-monotonic', `animal id '${a.id}' has a non-numeric serial`),
+        v(10, 'serials-unique-monotonic', `animal id '${a.id}' has a non-numeric serial`, { kind: 'animal', id: a.id }),
       );
       continue;
     }
@@ -511,8 +504,7 @@ function checkSerials(s: RegistrySnapshot): Violation[] {
         v(
           10,
           'serials-unique-monotonic',
-          `animal id '${a.id}' is not canonically padded (expected ${formatSerial(n)})`,
-        ),
+          `animal id '${a.id}' is not canonically padded (expected ${formatSerial(n)})`, { kind: 'animal', id: a.id }),
       );
     }
     maxIssued = Math.max(maxIssued, n);
@@ -544,8 +536,7 @@ function checkPrecision(s: RegistrySnapshot): Violation[] {
           11,
           'precision-date-conventions',
           `event ${e.id} is month-precision but dated ${e.occurred_on}; a month row ` +
-            `dated mid-month means a known date was silently downgraded`,
-        ),
+            `dated mid-month means a known date was silently downgraded`, { kind: 'animal', id: e.animal_id }),
       );
     }
     if (e.date_precision === 'year' && !e.occurred_on.endsWith('-01-01')) {
@@ -553,8 +544,7 @@ function checkPrecision(s: RegistrySnapshot): Violation[] {
         v(
           11,
           'precision-date-conventions',
-          `event ${e.id} is year-precision but dated ${e.occurred_on}, not January 1`,
-        ),
+          `event ${e.id} is year-precision but dated ${e.occurred_on}, not January 1`, { kind: 'animal', id: e.animal_id }),
       );
     }
     if (e.date_precision === 'estimated' && !e.occurred_on.endsWith('-01-01')) {
@@ -563,8 +553,7 @@ function checkPrecision(s: RegistrySnapshot): Violation[] {
           11,
           'precision-date-conventions',
           `event ${e.id} is estimated-precision but dated ${e.occurred_on}, not January 1; ` +
-            `a specific day at estimated precision is a fabricated day wearing a humility label`,
-        ),
+            `a specific day at estimated precision is a fabricated day wearing a humility label`, { kind: 'animal', id: e.animal_id }),
       );
     }
     if (e.occurred_time !== null && e.date_precision !== 'day') {
@@ -573,8 +562,7 @@ function checkPrecision(s: RegistrySnapshot): Violation[] {
           12,
           'time-only-at-day-precision',
           `event ${e.id} has occurred_time=${e.occurred_time} at ` +
-            `${e.date_precision} precision`,
-        ),
+            `${e.date_precision} precision`, { kind: 'animal', id: e.animal_id }),
       );
     }
   }
@@ -627,7 +615,7 @@ function checkMilkings(s: RegistrySnapshot): Violation[] {
     // 14 -- the animal exists at all.
     if (!known.has(m.animal_id)) {
       out.push(
-        v(14, 'milking-inside-lactation', `milking ${m.id} references unknown animal ${m.animal_id}`),
+        v(14, 'milking-inside-lactation', `milking ${m.id} references unknown animal ${m.animal_id}`, { kind: 'animal', id: m.animal_id }),
       );
       continue;
     }
@@ -642,8 +630,7 @@ function checkMilkings(s: RegistrySnapshot): Violation[] {
           'milking-inside-lactation',
           `animal ${m.animal_id} has a ${m.session} milking on ${m.occurred_on} but no lactation ` +
             `covering that date -- she was not in milk then. Either the row's date is wrong, or a ` +
-            `calving or dry-off has moved underneath it.`,
-        ),
+            `calving or dry-off has moved underneath it.`, { kind: 'animal', id: m.animal_id }),
       );
     }
 
@@ -660,8 +647,7 @@ function checkMilkings(s: RegistrySnapshot): Violation[] {
           15,
           'no-milking-after-departure',
           `animal ${m.animal_id} has a ${m.session} milking on ${m.occurred_on}, after its ` +
-            `departure on ${dep.occurred_on}`,
-        ),
+            `departure on ${dep.occurred_on}`, { kind: 'animal', id: m.animal_id }),
       );
     }
 
@@ -674,8 +660,7 @@ function checkMilkings(s: RegistrySnapshot): Violation[] {
           16,
           'one-milking-per-session',
           `animal ${m.animal_id} has more than one ${m.session} row on ${m.occurred_on}, which ` +
-            `makes the session's completeness uncountable`,
-        ),
+            `makes the session's completeness uncountable`, { kind: 'animal', id: m.animal_id }),
       );
     }
     seen.add(key);
@@ -688,13 +673,12 @@ function checkMilkings(s: RegistrySnapshot): Violation[] {
           17,
           'milking-status-matches-yield',
           `milking ${m.id} is '${m.status}' with yield_litres ${JSON.stringify(m.yield_litres)}. ` +
-            `'measured' means a number was taken and every other status means one was not.`,
-        ),
+            `'measured' means a number was taken and every other status means one was not.`, { kind: 'milking', on: m.occurred_on, session: m.session }),
       );
     }
     if (m.yield_litres !== null && m.yield_litres < 0) {
       out.push(
-        v(17, 'milking-status-matches-yield', `milking ${m.id} has a negative yield ${m.yield_litres}`),
+        v(17, 'milking-status-matches-yield', `milking ${m.id} has a negative yield ${m.yield_litres}`, { kind: 'milking', on: m.occurred_on, session: m.session }),
       );
     }
     if (m.reason !== null && m.status !== 'not_milked') {
@@ -703,8 +687,7 @@ function checkMilkings(s: RegistrySnapshot): Violation[] {
           17,
           'milking-status-matches-yield',
           `milking ${m.id} carries a reason with status '${m.status}'; a reason only belongs with ` +
-            `'not_milked'`,
-        ),
+            `'not_milked'`, { kind: 'milking', on: m.occurred_on, session: m.session }),
       );
     }
   }
@@ -859,8 +842,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
           19,
           'dispatch_status_disagrees',
           `dispatch ${d.id} is '${d.status}' with litres=${JSON.stringify(d.litres)}. ` +
-            `'taken' means a number and 'none' means no milk left the bulk.`,
-        ),
+            `'taken' means a number and 'none' means no milk left the bulk.`, { kind: 'dispatch', on: d.occurred_on, session: d.session }),
       );
     }
     if ((d.price_minor === null) !== (d.price_unit_litres === null)) {
@@ -869,8 +851,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
           19,
           'dispatch_half_a_price',
           `dispatch ${d.id} carries ${d.price_minor === null ? 'a lot size with no rate' : 'a rate with no lot size'}. ` +
-            `A figure without its unit is not a price -- it is a factor-of-forty error waiting to happen.`,
-        ),
+            `A figure without its unit is not a price -- it is a factor-of-forty error waiting to happen.`, { kind: 'dispatch', on: d.occurred_on, session: d.session }),
       );
     }
     if (dest !== undefined) {
@@ -881,8 +862,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
             19,
             'billable_dispatch_unpriced',
             `dispatch ${d.id} to ${dest.name} took ${d.litres} L and captured no price, so it ` +
-              `is billed at nothing.`,
-          ),
+              `is billed at nothing.`, { kind: 'dispatch', on: d.occurred_on, session: d.session }),
         );
       }
       if (!dest.billable && d.price_minor !== null) {
@@ -891,8 +871,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
             19,
             'unbillable_dispatch_priced',
             `dispatch ${d.id} to ${dest.name} carries a price, but ${dest.name} is not billed. ` +
-              `Milk kept for the house must never reach anyone's balance.`,
-          ),
+              `Milk kept for the house must never reach anyone's balance.`, { kind: 'dispatch', on: d.occurred_on, session: d.session }),
         );
       }
     }
@@ -900,7 +879,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
     // --- 20. Nothing outside the destination's active range ---------------
     if (dest === undefined) {
       out.push(
-        v(20, 'dispatch_unknown_destination', `dispatch ${d.id} names unknown destination '${d.destination_id}'`),
+        v(20, 'dispatch_unknown_destination', `dispatch ${d.id} names unknown destination '${d.destination_id}'`, { kind: 'dispatch', on: d.occurred_on, session: d.session }),
       );
     } else if (!activeOn(dest, d.occurred_on)) {
       out.push(
@@ -908,8 +887,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
           20,
           'dispatch_outside_range',
           `dispatch ${d.id} is dated ${d.occurred_on}, outside ${dest.name}'s range ` +
-            `(${dest.started_on} to ${dest.ended_on ?? 'open'}). Either the row or the range is wrong.`,
-        ),
+            `(${dest.started_on} to ${dest.ended_on ?? 'open'}). Either the row or the range is wrong.`, { kind: 'dispatch', on: d.occurred_on, session: d.session }),
       );
     }
 
@@ -921,8 +899,7 @@ function checkSales(s: RegistrySnapshot): Violation[] {
             21,
             'no_price_agreement',
             `dispatch ${d.id} to ${dest.name} on ${d.occurred_on} was billed, but no price ` +
-              `agreement covers that date. The figure on the row is one nobody can point at.`,
-          ),
+              `agreement covers that date. The figure on the row is one nobody can point at.`, { kind: 'dispatch', on: d.occurred_on, session: d.session }),
         );
       }
     }
@@ -1339,8 +1316,8 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
       if (prevEnd === null || prevEnd >= cur.started_on) {
         line(
           'overlapping_engagements',
-          `${who} has overlapping stints (${prev.started_on}..${prevEnd ?? 'open'} and ` +
-            `${cur.started_on}..${cur.ended_on ?? 'open'}). Legitimate if they hold two roles.`,
+          `${who} has overlapping stints (${stintWords(prev.started_on, prevEnd)} and ` +
+            `${stintWords(cur.started_on, cur.ended_on)}). Legitimate if they hold two roles.`,
           { kind: 'overlapping_engagements', personId, engagementIds: [prev.id, cur.id] },
         );
       }
@@ -1351,7 +1328,7 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
     if (open.length > 1) {
       line(
         'multiple_open_engagements',
-        `${who} has ${open.length} stints open on ${asOf}. A wage period has to name which one.`,
+        `${who} has ${open.length} stints open on ${periodWords(asOf, asOf)}. A wage period has to name which one.`,
         { kind: 'multiple_open_engagements', personId, engagementIds: open.map(e => e.id), asOf },
       );
     }
@@ -1373,8 +1350,8 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
     if (w.from_on < e.started_on || (e.ended_on !== null && w.to_on > e.ended_on)) {
       line(
         'wage_period_outside_engagement',
-        `${who} has a period ${w.from_on}..${w.to_on} outside the stint ` +
-          `(${e.started_on}..${e.ended_on ?? 'open'}). A final settlement after leaving looks ` +
+        `${who} has a wage for ${periodWords(w.from_on, w.to_on)} outside the stint ` +
+          `(${stintWords(e.started_on, e.ended_on)}). A final settlement after leaving looks ` +
           `exactly like this and is legitimate.`,
         { kind: 'wage_period_outside_engagement', personId: e.person_id, wageId: w.id, engagementId: e.id, fromOn: w.from_on, toOn: w.to_on },
       );
@@ -1438,7 +1415,7 @@ export function checkProjectionAgreement(
     const stored = storedStatus.get(animal.id);
     if (!stored) {
       out.push(
-        v(1, 'rebuild-fidelity', `animal ${animal.id} has no stored status row`),
+        v(1, 'rebuild-fidelity', `animal ${animal.id} has no stored status row`, { kind: 'animal', id: animal.id }),
       );
     } else if (JSON.stringify(sortKeys(stored)) !== JSON.stringify(sortKeys(p.status))) {
       out.push(
@@ -1446,8 +1423,7 @@ export function checkProjectionAgreement(
           1,
           'rebuild-fidelity',
           `animal ${animal.id} status: stored ${JSON.stringify(sortKeys(stored))} ` +
-            `!= derived ${JSON.stringify(sortKeys(p.status))}`,
-        ),
+            `!= derived ${JSON.stringify(sortKeys(p.status))}`, { kind: 'animal', id: animal.id }),
       );
     }
 
@@ -1459,8 +1435,7 @@ export function checkProjectionAgreement(
           1,
           'rebuild-fidelity',
           `animal ${animal.id} lactations: ${mine.length} stored vs ` +
-            `${derived.length} derived, or contents differ`,
-        ),
+            `${derived.length} derived, or contents differ`, { kind: 'animal', id: animal.id }),
       );
     }
   }
@@ -1534,6 +1509,11 @@ export function diffRowSets(
 
 const MONTH_WORDS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /** "Oct 2026" for a whole month, "1–15 Nov 2026" within one, else both days in words. */
+/** "12 Jul 2026 onwards" or "12 Jul to 30 Sep 2026": a stint in words, open or closed. */
+function stintWords(from: string, to: string | null | undefined): string {
+  return to ? periodWords(from, to) : `${periodWords(from, from)} onwards`;
+}
+
 export function periodWords(from: string, to: string): string {
   const [fy, fm, fd] = from.split('-').map(Number);
   const [ty, tm, td] = to.split('-').map(Number);

@@ -1,1 +1,24 @@
-/* This component uses shared styles; no local rules are needed. */
+:host { display: block; }
+/* Results stay on screen while a Recheck runs, dimmed and aria-busy. */
+.is-stale { opacity: 0.55; transition: opacity 120ms ease-out; }
+.check-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.check-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.25rem 1rem; padding: 0.5rem 0; font-size: 0.9375rem; }
+.check-row + .check-row { border-top: 1px solid rgb(var(--border-hairline)); }
+.check-jump { font: inherit; color: rgb(var(--text-heading)); font-weight: 500; text-decoration: underline; text-underline-offset: 2px; }
+.check-divider { border-top: 1px solid rgb(var(--border-subtle)); }
+.check-shares { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin: 0; padding: 0; list-style: none; font-size: 0.875rem; color: rgb(var(--text-secondary)); }
+/* Phones: each row becomes a short card, so no column hides off the edge and
+   dates do not wrap onto three lines. */
+@media (max-width: 639px) {
+  .check-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .check-table, .check-table tbody, .check-table tr { display: block; }
+  .check-table tr { padding: 0.5rem 0; }
+  .check-table td { display: flex; justify-content: space-between; gap: 1rem; padding: 0.125rem 0; text-align: left; }
+  .check-table td[data-label]::before { content: attr(data-label); color: rgb(var(--text-muted)); font-family: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif; }
+  .check-row a { min-height: 2.75rem; display: inline-flex; align-items: center; }
+}
+/* Help text near 65 characters a line (68ch measured ~88 in this face), and
+   no lone last word. */
+[appHelp], .check-row, [data-role="gap-withheld"], section p { text-wrap: pretty; }
+[appHelp] { max-width: 60ch; }
+.check-shares li { white-space: nowrap; }

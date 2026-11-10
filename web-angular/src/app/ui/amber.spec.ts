@@ -138,7 +138,9 @@ const NEEDS_AN_ANSWER = [
   // counters moved to the shell's session board (gold = the current session,
   // not amber), and its "needs an answer" rows take the warning role from
   // today-board.css, which this utility census does not scan.
-  'src/app/registry/verification-panel/verification-panel.html', // /check findings and notes
+  // verification-panel.html left this list on 9 Nov 2026: its people items
+  // and the "no percentage" note were explanations, not questions, and are
+  // neutral now; its one unanswered cell takes Certainty's unanswered state.
   'src/app/registry/session-required/session-required.html', // no session: answer the gate first
 ];
 
