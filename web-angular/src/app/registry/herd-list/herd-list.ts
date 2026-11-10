@@ -1,3 +1,4 @@
+import { Segmented } from "../../ui/selection";
 import { ScrollRegion } from "../../ui/scroll-region";
 import { TextInput } from "../../ui/input";
 import { pagedList } from "../paged-list";
@@ -31,7 +32,7 @@ import { StatusBadge } from "../../ui/surface";
 @Component({
   selector: 'app-herd-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ScrollRegion,TextInput,Pagination,
+  imports: [Segmented, ScrollRegion,TextInput,Pagination,
     IdentifierLink,
     RowLink,
     Button,

@@ -1,3 +1,4 @@
+import { Segmented } from "../../ui/selection";
 import { reportPrintPages } from './print-pages';
 import { ElementRef, computed } from '@angular/core';
 import { DestroyRef } from '@angular/core';
@@ -45,7 +46,7 @@ type RangePreset = 'all' | 'lactation' | 'year' | 'custom';
 @Component({
   selector: 'app-life-report',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Segmented, 
     LocalPagination,
     RouterLink,
     FormsModule,

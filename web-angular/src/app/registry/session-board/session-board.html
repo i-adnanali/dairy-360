@@ -8,11 +8,11 @@
             [attr.data-state]="s.state"
             [attr.data-slot]="s.key"
             [attr.data-selected]="selected() === s.key ? 'true' : null"
-            [attr.aria-current]="selected() === s.key ? 'page' : s.state === 'lit' ? 'step' : null"
+            [attr.aria-current]="selected() === s.key ? 'true' : null"
             [routerLink]="s.link"
             [queryParams]="s.query"
           >
-            <span class="slot-label">{{ s.label }}</span>
+            <span class="slot-label">{{ s.label }}@if (selected() === s.key) {<span class="slot-viewing"> · Viewing</span>}</span>
             <span class="slot-figure">{{ s.figure }}</span>
             <span class="slot-caption">
               @if (s.state === 'lit') {<span class="slot-now">Now</span><span class="slot-sep"> · </span>}<span class="slot-cap">{{ s.caption }}</span>

@@ -29,7 +29,7 @@
 
   <!-- THE RANGE, AS THE QUESTIONS PEOPLE ASK. Custom opens the two dates. -->
   <div class="report-bar no-print">
-    <div class="report-seg" role="group" aria-label="Report range">
+    <div class="report-seg" appSegmented role="group" aria-label="Report range">
       <button type="button" data-role="range-all" [attr.aria-pressed]="preset() === 'all'" (click)="choose('all')">All life</button>
       @if (lactationStart()) {
         <button type="button" data-role="range-lactation" [attr.aria-pressed]="preset() === 'lactation'" (click)="choose('lactation')">This lactation</button>

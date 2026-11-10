@@ -15,7 +15,7 @@
     </div>
 
     <div class="period-bar" role="group" aria-label="Review period" data-role="period-bar">
-      <div class="seg" role="group" aria-label="Period length">
+      <div appSegmented role="group" aria-label="Period length">
         @for (v of views; track v.value) {
           <button type="button" [attr.aria-pressed]="q().view === v.value" (click)="change({ view: v.value })">{{ v.label }}</button>
         }
@@ -33,7 +33,7 @@
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
         </button>
       </div>
-      <div class="seg" role="group" aria-label="Session">
+      <div appSegmented role="group" aria-label="Session">
         @for (s of sessions; track s.value) {
           <button type="button" [attr.aria-pressed]="q().session === s.value" (click)="change({ session: s.value })">{{ s.label }}</button>
         }

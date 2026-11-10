@@ -1,5 +1,8 @@
 
     <div class="flex h-full flex-col bg-surface-page text-content-primary">
+      <!-- 21 Tab stops (header, nav, session board, section bar) came before
+           any page content. The first one now skips them. -->
+      <a href="#main" class="skip-link" (click)="skipToContent($event)">Skip to content</a>
       <header
         [inert]="assistant.modal() || setupPanel()"
         class="shell-band bg-shell px-4 text-shell-fg"

@@ -11,6 +11,7 @@
 // night's evening. Next stops at today's evening; there is nothing to record
 // after that yet.
 
+import { Segmented } from '../../ui/selection';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { farmToday } from '../today';
 import { feedDay, feedRelativeDay, feedWeekday } from '../feed-format';
@@ -46,6 +47,7 @@ function shiftDay(on: string, days: number): string {
 @Component({
   selector: 'app-milk-session-nav',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Segmented],
   templateUrl: './milk-session-nav.html',
   styleUrl: './milk-session-nav.css',
 })

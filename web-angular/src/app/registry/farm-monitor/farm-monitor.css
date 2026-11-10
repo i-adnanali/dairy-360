@@ -1,16 +1,5 @@
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; }
 
-/* Segmented filters: one choice per group, standard radio semantics. */
-.seg { display: inline-flex; border: 1px solid rgb(var(--border-control)); border-radius: 6px; overflow: hidden; }
-.seg button {
-  padding: 0.4375rem 0.875rem; font: inherit; font-size: 0.9375rem; font-weight: 500;
-  background: rgb(var(--surface-raised)); color: rgb(var(--text-secondary)); border: 0;
-  border-left: 1px solid rgb(var(--border-default)); cursor: pointer;
-}
-.seg button:first-child { border-left: 0; }
-.seg button:hover { color: rgb(var(--text-primary)); background: rgb(var(--surface-sunken)); }
-.seg button[aria-pressed='true'] { background: rgb(var(--fill-brand)); color: rgb(var(--text-on-fill)); font-weight: 600; }
-.seg button:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; }
 
 .summary { margin: 1.25rem 0 0.75rem; font-size: 0.9375rem; color: rgb(var(--text-secondary)); }
 .summary b { color: rgb(var(--text-primary)); }

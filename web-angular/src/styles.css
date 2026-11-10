@@ -82,6 +82,8 @@
   --shell-line: 44 106 82;  /* #2C6A52 */
   --session-lit: 212 167 44;  /* #D4A72C, the current session */
   --session-lit-fg: 20 22 19;
+  --shell-late: 248 113 113;       /* #F87171, a missed session on the green band */
+  --shell-late-fg: 254 202 202;    /* #FECACA */
   /*
    * A STATE, NOT A BRAND FILL. border-farm-600 is the selected chip, the
    * selected card and the active tab, at 8 sites across chip-group,
@@ -97,7 +99,9 @@
   --fill-brand-disabled: 225 227 220;  /* #E1E3DC */
   --fill-badge: 237 238 233;  /* #EDEEE9 */
 
-  --focus-ring: 26 86 64;  /* #1A5640 */
+  /* Focus is the ink colour, never amber (which means "due now") and never
+     the selected fill: green on green made the Monitor toggle's ring vanish. */
+  --focus-ring: 20 22 19;  /* #141613 */
   --divider: 237 238 233;  /* #EDEEE9 */
 
   /* --- roles ---------------------------------------------------------- */
@@ -270,12 +274,14 @@
   --shell-line: 29 74 58;         /* #1D4A3A */
   --session-lit: 212 167 44;      /* #D4A72C */
   --session-lit-fg: 20 22 19;
+  --shell-late: 248 113 113;       /* #F87171, a missed session on the green band */
+  --shell-late-fg: 254 202 202;    /* #FECACA */
   /* --- brand fill --- */
   --fill-brand: 90 167 132;       /* #5AA784 */
   --fill-brand-hover: 111 184 148; /* #6FB894 */
   --fill-brand-disabled: 34 45 40; /* #222D28 */
   --fill-badge: 34 45 40;         /* #222D28 */
-  --focus-ring: 212 167 44;       /* #D4A72C */
+  --focus-ring: 236 240 235;      /* #ECF0EB, the ink -- never amber */
   --divider: 26 35 31;            /* #1A231F */
   /* --- roles --- */
   --danger-bg: 42 20 20;          /* #2A1414 */
@@ -348,14 +354,32 @@ body {
 }
 
 ::selection {
-  background: rgb(var(--session-lit) / 0.45);
+  /* Not amber: amber means only "due now" (UI_SYSTEM §4.8). */
+  background: rgb(var(--fill-brand) / 0.25);
   color: rgb(var(--text-primary));
 }
 
-::placeholder {
+::placeholder,
+/* Preflight sets input/textarea placeholders to #9CA3AF (2.5:1); this wins. */
+input::placeholder, textarea::placeholder {
   color: rgb(var(--text-placeholder));
   opacity: 1;
 }
+
+/* ONE focus ring for anything a component did not style itself: <summary>,
+   the milking roster's status buttons and others fell back to the browser's
+   blue, a fourth focus colour. Zero specificity, so component rules win. */
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute; left: 0.75rem; top: 0.5rem; z-index: 60;
+  padding: 0.5rem 0.875rem; border-radius: 0.375rem;
+  background: rgb(var(--surface-raised)); color: rgb(var(--text-primary)); font-weight: 600;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible { transform: none; }
 
 /*
  * PROGRAMMATIC HEADING FOCUS IS INVISIBLE ON PURPOSE. The shell moves focus to
@@ -730,8 +754,13 @@ app-chat-panel {
 
 /* Phase 7 shell and table affordances. Resting border token deliberately held. */
 .phase7-nav a { padding: 0.6rem 0; white-space: nowrap; border-bottom: 3px solid transparent; color: rgb(var(--text-muted)); font-weight: 500; }
-.phase7-nav a:hover { color: rgb(var(--text-primary)); }
-.phase7-nav a.active { color: rgb(var(--text-primary)); border-bottom-color: rgb(var(--session-lit)); font-weight: 600; }
+/* Hover hints the underline; only WHERE YOU ARE gets it solid. Hover used to
+   turn the text white, exactly like the active link. */
+.phase7-nav a:hover { color: rgb(var(--text-primary)); border-bottom-color: rgb(var(--text-primary) / 0.3); }
+/* Where you are: an underline in the band's text colour. It was amber, the
+   colour of the session due NOW forty pixels below it, so "Milk" and
+   "Evening milking · Now" read as one signal. Amber now means only that. */
+.phase7-nav a.active { color: rgb(var(--text-primary)); border-bottom-color: rgb(var(--text-primary)); font-weight: 600; }
 
 /*
  * THE SHELL BAND RE-SCOPES THE TOKENS, so everything nested in it -- the
@@ -751,7 +780,7 @@ app-chat-panel {
   --border-strong: var(--shell-muted);
   --surface-sunken: var(--shell-bg-deep);
   --surface-page: var(--shell-bg);
-  --focus-ring: var(--session-lit);
+  --focus-ring: var(--shell-fg);
 }
 /* The phone Menu button is a secondary button, whose raised white ground the
    band does not re-scope -- so its re-scoped white text vanished on it. */
@@ -767,7 +796,8 @@ app-chat-panel {
   border-radius: 999px; background: rgb(var(--session-lit)); color: rgb(var(--session-lit-fg));
   font-size: 0.8125rem; font-weight: 700; text-decoration: none;
 }
-.phase7-nav a:focus-visible, .identifier-link:focus-visible, .navigable-row:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; }
+.phase7-nav a:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px; border-radius: 2px; }
+.identifier-link:focus-visible, .navigable-row:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; }
 [data-page-layout] { margin-inline: auto; width: 100%; min-width: 0; }
 [data-page-layout="entry"] { max-width: 720px; }
 [data-page-layout="review"] { max-width: 1400px; }
@@ -955,6 +985,12 @@ app-animal-form form > .space-y-4, app-calving-form form { row-gap: 24px; }
   .navigation-group { display: flex; flex-direction: column; min-width: 0; }
   .mobile-section-links { display: flex; flex-direction: column; padding-inline-start: 8px; }
   .mobile-section-links a { font-size: 14px; border-bottom: 0; }
+  /* The current view: `font-semibold` lost to `.phase7-nav a`, so it looked
+     exactly like its siblings. Weight, ink and an underline, as on desktop. */
+  .phase7-nav .mobile-section-links a[aria-current="page"] {
+    font-weight: 600; color: rgb(var(--text-primary));
+    text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.35em;
+  }
   .phase7-nav.menu-open { max-height: 60dvh; overflow-y: auto; }
 }
 app-health-page .rows[hidden] { display: none; }
@@ -1021,8 +1057,40 @@ app-health-page .rows[hidden] { display: none; }
 .life-print-content table { width: 100%; table-layout: fixed; }
 .life-print-content th, .life-print-content td { white-space: normal !important; overflow-wrap: anywhere; }
 
-/* The section view you are inside -- a list, or any record under it. */
-[data-role="section-view"][aria-current="page"] { font-weight: 600; color: rgb(var(--text-primary)); }
+/* The section view you are inside -- a list, or any record under it. The same
+   SHAPE as the nav above it (an underline in the ink colour), one step lighter.
+   Bold alone was 2.66:1 from its neighbours and the weakest marker on the page,
+   while the tabs and filters below it were louder. */
+[data-role="section-view"] { padding-block: 0.375rem; border-bottom: 2px solid transparent; }
+[data-role="section-view"]:hover { border-bottom-color: rgb(var(--text-primary) / 0.25); }
+[data-role="section-view"][aria-current="page"] { font-weight: 600; color: rgb(var(--text-primary)); border-bottom-color: rgb(var(--text-primary)); }
+
+/* ---- SELECTION: ui/selection.ts ---------------------------------------
+   TabBar: what the page below shows. The same underline as the section bar,
+   in the ink colour -- it was brand green, so "Records" outranked "Health". */
+.tab-bar { display: flex; gap: 0.25rem; border-bottom: 1px solid rgb(var(--border-subtle)); overflow-x: auto; }
+.tab-bar > [role="tab"] {
+  margin-bottom: -1px; padding: 0.5rem 0.875rem; font-size: 0.9375rem; white-space: nowrap;
+  color: rgb(var(--text-secondary)); border-bottom: 2px solid transparent;
+}
+.tab-bar > [role="tab"]:hover { color: rgb(var(--text-primary)); border-bottom-color: rgb(var(--border-strong)); }
+.tab-bar > [role="tab"][aria-selected="true"] { color: rgb(var(--text-primary)); font-weight: 600; border-bottom-color: rgb(var(--text-primary)); }
+.tab-bar > [role="tab"]:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: -2px; border-radius: 4px; }
+
+/* Segmented: one value from a few. The ONLY filled selection in the app
+   (with single-choice chips), and one copy where there were eight. */
+.segmented {
+  display: inline-flex; flex-wrap: wrap; gap: 0.125rem; padding: 0.1875rem;
+  border: 1px solid rgb(var(--border-control)); border-radius: 0.5rem; background: rgb(var(--surface-raised));
+}
+.segmented > button {
+  padding: 0.3125rem 0.75rem; border-radius: 0.375rem; white-space: nowrap;
+  font-size: 0.875rem; font-weight: 500; color: rgb(var(--text-secondary));
+  transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.segmented > button:hover:not([aria-pressed="true"]) { color: rgb(var(--text-primary)); background: rgb(var(--surface-sunken)); }
+.segmented > button[aria-pressed="true"] { background: rgb(var(--fill-brand)); color: rgb(var(--text-on-fill)); font-weight: 600; }
+.segmented > button:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px; }
 
 /* ---- MILK: Milking and Dispatch share one page shape ----------------- */
 /* The footer stays pinned on desktop even while a litres box has focus. The
@@ -1179,7 +1247,7 @@ app-health-page .rows[hidden] { display: none; }
   padding: 0.4375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500;
   border: 1px solid rgb(var(--border-default)); color: rgb(var(--text-primary)); background: rgb(var(--surface-raised));
 }
-.action-seg button[aria-pressed='true'] { background: rgb(var(--fill-brand)); border-color: transparent; color: rgb(var(--text-on-fill)); }
+.action-seg button[aria-pressed='true'] { background: rgb(var(--fill-brand)); border-color: transparent; color: rgb(var(--text-on-fill)); font-weight: 600; }
 .action-seg button:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px; }
 #health-action label, .health-round label { display: grid; gap: 0.25rem; }
 

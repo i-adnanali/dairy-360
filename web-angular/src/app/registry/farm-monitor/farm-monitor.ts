@@ -8,6 +8,7 @@
 // farm time (UTC+5, no DST), because that is the window the overnight flags
 // are about -- the restricted-zone rule is an overnight rule.
 
+import { Segmented } from "../../ui/selection";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { RegistryApi, type FarmEventRow, type FarmEventsWindow } from '../api';
 import { urlParams } from '../url-state';
@@ -39,7 +40,7 @@ const WHAT: Record<FarmEventRow['event_type'], string> = {
 @Component({
   selector: 'app-farm-monitor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeading, HelpText, ErrorPanel],
+  imports: [Segmented, PageHeading, HelpText, ErrorPanel],
   templateUrl: './farm-monitor.html',
   styleUrl: './farm-monitor.css',
 })

@@ -31,7 +31,7 @@
   border: 1px solid rgb(var(--border-default)); color: rgb(var(--text-primary)); background: rgb(var(--surface-raised));
 }
 .names button:hover { border-color: rgb(var(--border-strong)); }
-.names button[aria-pressed='true'] { background: rgb(var(--fill-brand)); border-color: rgb(var(--fill-brand)); color: rgb(var(--text-on-fill)); }
+.names button[aria-pressed='true'] { background: rgb(var(--fill-brand)); border-color: rgb(var(--fill-brand)); color: rgb(var(--text-on-fill)); font-weight: 600; }
 .names button:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px; }
 
 .gate-target { display: grid; gap: 0.5rem; padding-top: 1.25rem; border-top: 1px solid rgb(var(--border-hairline)); }

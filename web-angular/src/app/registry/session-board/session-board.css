@@ -33,8 +33,10 @@
   text-decoration: none;
   transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1), border-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.slot:hover { background: rgb(var(--shell-bg-deep)); }
-.slot:focus-visible { outline: 2px solid rgb(var(--session-lit)); outline-offset: 2px; }
+.slot:hover { background: rgb(var(--shell-fg) / 0.06); }
+/* The band's focus ring is its ink (white): amber on the amber "Now" frame
+   changed nothing you could see. */
+.slot:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset: 2px; }
 
 .slot-label { grid-area: label; font-size: 0.8125rem; line-height: 1.125rem; font-weight: 500; color: rgb(var(--shell-muted)); }
 .slot-figure { grid-area: figure; font-size: 1.5rem; line-height: 1.875rem; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
@@ -50,16 +52,19 @@
 .slot[data-state='done'] .slot-caption, .slot[data-state='none'] .slot-caption { color: rgb(var(--shell-muted)); font-weight: 500; }
 
 /*
- * TWO SIGNALS, NEVER CONFUSED.
+ * A STATUS BOARD, NOT A SECOND NAV. docs/records/UI_SYSTEM.md §4.8.
  *
- * WHERE YOU ARE is the fill: the slot for the section you are in turns solid
- * light, like a selected tab. Anywhere in Feed fills Feeding.
+ * NOW is the only amber in the header: a "Now" tag and a 2px amber frame on
+ * the session due at this hour. (The nav's "where you are" underline used to
+ * be amber too, forty pixels above it, and read as the same signal.) No inset
+ * stripe -- the frame and the word carry it.
  *
- * NOW is a small gold tag (and a gold edge) on the session due at this hour.
- * It used to be the gold FILL, which read as "selected" -- on the Feed page the
- * gold sat on Morning milking and looked like the wrong tab was chosen.
+ * VIEWING is quiet: a white frame and the word "Viewing", only on the exact
+ * sheet that is open today. It used to be a solid white fill on anything in
+ * the section -- the brightest object on the page, louder than the title and
+ * than "Now", so on the morning sheet at evening time two tiles looked chosen.
  */
-.slot[data-state='lit'] { border-color: rgb(var(--session-lit)); box-shadow: inset 0 3px 0 rgb(var(--session-lit)); }
+.slot[data-state='lit'] { border-color: rgb(var(--session-lit)); box-shadow: 0 0 0 1px rgb(var(--session-lit)); }
 .slot-now {
   display: inline-block; margin-right: 0.375rem; padding: 0 0.375rem; border-radius: 999px;
   background: rgb(var(--session-lit)); color: rgb(var(--session-lit-fg));
@@ -67,21 +72,12 @@
 }
 .slot[data-state='lit'] .slot-sep { display: none; }
 
-.slot[data-selected='true'] {
-  background: rgb(var(--shell-fg)); border-color: rgb(var(--shell-fg));
-  color: rgb(var(--shell-bg));
-}
-.slot[data-selected='true']:hover { background: rgb(var(--shell-fg) / 0.92); }
-.slot[data-selected='true'] .slot-label,
-.slot[data-selected='true'] .slot-figure,
-.slot[data-selected='true'] .slot-caption { color: rgb(var(--shell-bg)); }
-.slot[data-selected='true'][data-state='lit'] { box-shadow: inset 0 3px 0 rgb(var(--session-lit)); }
-.slot[data-selected='true']:focus-visible { outline-color: rgb(var(--session-lit)); }
+.slot[data-selected='true']:not([data-state='lit']) { border-color: rgb(var(--shell-fg)); box-shadow: 0 0 0 1px rgb(var(--shell-fg)); }
+.slot-viewing { color: rgb(var(--shell-fg)); font-weight: 600; }
 
 /* A missed session says so in words, on a red mark the eye catches. */
-.slot[data-state='late'] { border-color: rgb(248 113 113 / 0.7); }
-.slot[data-state='late'] .slot-caption { color: rgb(254 202 202); }
-.slot[data-selected='true'][data-state='late'] .slot-caption { color: rgb(185 28 28); }
+.slot[data-state='late'] { border-color: rgb(var(--shell-late)); }
+.slot[data-state='late'] .slot-caption { color: rgb(var(--shell-late-fg)); }
 
 .slot-all { margin: 0.5rem 0 0; font-size: 0.8125rem; color: rgb(var(--shell-muted)); }
 

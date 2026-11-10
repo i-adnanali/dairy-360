@@ -1,3 +1,4 @@
+import { Segmented, TabBar } from "../../ui/selection";
 import { attachmentBase64, vaccinationRows, type HealthTask, type HealthBoard, type HealthRevision, type VaccinationRound, type VaccinationRow } from '../health-workflows';
 import type { HerdRow } from '../types';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -39,7 +40,7 @@ import { SOURCE_FORMS, feedLabel } from "../feed-format";
 @Component({
   selector: 'app-health-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [Segmented, TabBar, 
     WithdrawalNotices,
     PrecisionDateControl,
     LocalPagination,

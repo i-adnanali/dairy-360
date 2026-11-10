@@ -6,12 +6,12 @@
       </header>
 
       <div class="toolbar" role="group" aria-label="Filters">
-        <div class="seg" role="group" aria-label="Window">
+        <div appSegmented role="group" aria-label="Window">
           @for (w of windows; track w.id) {
             <button type="button" [attr.aria-pressed]="window() === w.id" (click)="setWindow(w.id)">{{ w.label }}</button>
           }
         </div>
-        <div class="seg" role="group" aria-label="Show">
+        <div appSegmented role="group" aria-label="Show">
           <button type="button" [attr.aria-pressed]="show() === 'all'" (click)="setShow('all')">All events</button>
           <button type="button" [attr.aria-pressed]="show() === 'flagged'" (click)="setShow('flagged')">Flagged only</button>
         </div>

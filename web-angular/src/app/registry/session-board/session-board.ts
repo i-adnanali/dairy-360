@@ -107,20 +107,27 @@ export function buildSlots(b: DayBoard, half: 'morning' | 'evening'): Slot[] {
 }
 
 /**
- * Pure: which slot is WHERE YOU ARE -- the filled slot. By section, not by
- * exact page: anywhere in Feed fills Feeding, a milking or dispatch sheet fills
- * its session. It used to match only today's exact sheet, so the Feed overview
- * filled nothing while the gold "Now" slot looked like the selected tab.
- * A sheet opened without `?session=` shows the likely session, so it fills that one.
+ * Pure: which slot is the sheet you are VIEWING -- marked quietly ("Viewing"),
+ * never filled. Only that exact sheet, today: the board is today's status, so
+ * the Feed overview, a crop, or 3 Nov's milking sheet is not "Feeding" or
+ * "Morning milking" and must not claim to be. It used to fill by section, and
+ * the solid tile outshone the page title and the "Now" session beside it.
+ * A sheet opened without `?session=` shows the likely session, so it marks that one.
  */
-export function selectedSlotKey(url: string, half: 'morning' | 'evening'): string | null {
+export function selectedSlotKey(
+  url: string,
+  half: 'morning' | 'evening',
+  today: string = farmToday(),
+): string | null {
   const [path, query = ''] = url.split('#')[0].split('?');
-  const s = new URLSearchParams(query).get('session');
+  const params = new URLSearchParams(query);
+  const s = params.get('session');
   const session = s === 'morning' || s === 'evening' ? s : half;
-  const within = (root: string) => path === root || path.startsWith(root + '/');
-  if (within('/milk/milking')) return `milk-${session}`;
-  if (within('/milk/dispatch')) return `dispatch-${session}`;
-  if (within('/feed')) return 'feed';
+  const on = params.get('on');
+  if (on && on !== today) return null;
+  if (path === '/milk/milking') return `milk-${session}`;
+  if (path === '/milk/dispatch') return `dispatch-${session}`;
+  if (path === '/feed/daily' || path === `/feed/daily/${today}`) return 'feed';
   return null;
 }
 
@@ -157,13 +164,14 @@ export class SessionBoard {
       this.writeLog.last();
       void this.load();
     });
-    // On a phone the board is one sideways-scrolling row; keep the slot for
-    // this page in view, or else the session due NOW. On Today nothing is
-    // selected, and "Evening dispatch · Now" sat off the right edge.
+    // On a phone the board is one sideways-scrolling row; keep the session due
+    // NOW in view, or else the sheet you are viewing.
     const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     const injector = inject(Injector);
     effect(() => {
-      const key = this.selected() ?? this.slots().find((s) => s.state === 'lit')?.key;
+      // The session due NOW first: scrolling to the viewed sheet pushed "Now"
+      // off the right edge of a phone.
+      const key = this.slots().find((s) => s.state === 'lit')?.key ?? this.selected();
       if (!key) return;
       afterNextRender(() => {
         const el = host.querySelector<HTMLElement>(`[data-slot="${key}"]`);

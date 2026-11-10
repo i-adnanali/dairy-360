@@ -13,7 +13,7 @@
       <label><span class="tool-label">Find</span>
         <input appInput type="search" maxlength="100" placeholder="ID, name or tag" [value]="paging.url.value().search" (change)="setFilter({ search: $any($event.target).value })" />
       </label>
-      <div class="seg" role="group" aria-label="Which animals">
+      <div appSegmented role="group" aria-label="Which animals">
         @for (g of groups; track g.value) {
           <button type="button" [attr.aria-pressed]="q('group') === g.value" (click)="setFilter({ group: g.value })">{{ g.label }}</button>
         }

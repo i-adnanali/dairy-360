@@ -97,8 +97,9 @@ describe('SessionBoard', () => {
     expect(nav.getAttribute('aria-label')).toBe("Today's sessions");
     const links = nav.querySelectorAll('a');
     expect(links.length).toBe(5);
-    const current = el.querySelectorAll('[aria-current="step"]');
-    expect(current.length).toBeLessThanOrEqual(1);
+    // "Now" is a word, not a current-page claim; nothing is "current" on Today.
+    expect(el.querySelectorAll('[aria-current]').length).toBe(0);
+    expect(el.querySelectorAll('.slot-now').length).toBeLessThanOrEqual(1);
     const href = el.querySelector('[data-slot="dispatch-evening"]')!.getAttribute('href')!;
     expect(href).toContain('/milk/dispatch');
     expect(href).toContain('session=evening');
@@ -106,23 +107,25 @@ describe('SessionBoard', () => {
 });
 
 describe('selectedSlotKey', () => {
-  it('fills the slot for the section you are in, separately from the "Now" session', () => {
-    expect(selectedSlotKey('/milk/dispatch?on=2026-09-07&session=evening', 'morning')).toBe('dispatch-evening');
-    expect(selectedSlotKey('/milk/milking?session=morning', 'evening')).toBe('milk-morning');
-    expect(selectedSlotKey('/feed/daily/2026-09-07', 'morning')).toBe('feed');
+  const today = '2026-09-07';
+  it('marks the exact sheet open today, separately from the "Now" session', () => {
+    expect(selectedSlotKey('/milk/dispatch?on=2026-09-07&session=evening', 'morning', today)).toBe('dispatch-evening');
+    expect(selectedSlotKey('/milk/milking?session=morning', 'evening', today)).toBe('milk-morning');
+    expect(selectedSlotKey('/feed/daily/2026-09-07', 'morning', today)).toBe('feed');
   });
-  it('anywhere in Feed is Feeding -- the overview, a crop, another day', () => {
-    expect(selectedSlotKey('/feed', 'morning')).toBe('feed');
-    expect(selectedSlotKey('/feed/crops/abc', 'morning')).toBe('feed');
-    expect(selectedSlotKey('/feed/daily/2026-09-01', 'evening')).toBe('feed');
+  it('claims nothing for another day or for the rest of Feed', () => {
+    expect(selectedSlotKey('/milk/milking?on=2026-09-01&session=morning', 'morning', today)).toBeNull();
+    expect(selectedSlotKey('/feed', 'morning', today)).toBeNull();
+    expect(selectedSlotKey('/feed/crops/abc', 'morning', today)).toBeNull();
+    expect(selectedSlotKey('/feed/daily/2026-09-01', 'evening', today)).toBeNull();
   });
   it('reads a sheet opened without a session as the likely one', () => {
-    expect(selectedSlotKey('/milk/milking', 'evening')).toBe('milk-evening');
+    expect(selectedSlotKey('/milk/milking', 'evening', today)).toBe('milk-evening');
   });
-  it('fills nothing outside the sessions', () => {
-    expect(selectedSlotKey('/milk/buyers', 'morning')).toBeNull();
-    expect(selectedSlotKey('/feedback', 'morning')).toBeNull();
-    expect(selectedSlotKey('/animals', 'morning')).toBeNull();
-    expect(selectedSlotKey('/', 'morning')).toBeNull();
+  it('marks nothing outside the sessions', () => {
+    expect(selectedSlotKey('/milk/buyers', 'morning', today)).toBeNull();
+    expect(selectedSlotKey('/feedback', 'morning', today)).toBeNull();
+    expect(selectedSlotKey('/animals', 'morning', today)).toBeNull();
+    expect(selectedSlotKey('/', 'morning', today)).toBeNull();
   });
 });

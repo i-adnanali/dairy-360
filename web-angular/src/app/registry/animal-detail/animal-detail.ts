@@ -1,3 +1,4 @@
+import { TabBar } from "../../ui/selection";
 import { subjectTitle } from '../page-title';
 import { DestroyRef } from '@angular/core';
 import { DraftRegistry } from "../draft-registry";
@@ -29,7 +30,7 @@ type Tab = 'events' | 'add-event' | 'correct';
 @Component({
   selector: 'app-animal-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
+  imports: [TabBar, 
     RouterLink,
     Button,
     Certainty,

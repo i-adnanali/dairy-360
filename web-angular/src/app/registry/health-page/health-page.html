@@ -119,15 +119,15 @@
         }
       </section>
     } @else {
-      <nav class="health-tabs" aria-label="Health views">
+      <div appTabBar class="health-tabs" aria-label="Health views">
         @for (t of tabs; track t.id) {
-          <button type="button" [attr.aria-pressed]="tab === t.id" (click)="setTab(t.id)">
+          <button type="button" role="tab" [attr.data-tab]="t.id" [attr.aria-selected]="tab === t.id" [attr.tabindex]="tab === t.id ? 0 : -1" (click)="setTab(t.id)">
             {{ t.label }}@if (t.id === 'todo' && board(); as b) {
               <span class="tab-n" [attr.aria-label]="dueCount(b) + ' due or overdue'">{{ dueCount(b) }}</span>
             }
           </button>
         }
-      </nav>
+      </div>
 
       <!-- Which animal this is filtered to, on every view, with a way out.
            The filter used to apply on Records without saying so. -->
@@ -334,7 +334,7 @@
           <div class="records-bar">
             <!-- The record types as visible choices with counts, not a
                  dropdown that hid seven of them. -->
-            <div class="record-types" role="group" [attr.aria-label]="tab === 'records' ? 'Record type' : 'List'">
+            <div class="record-types" appSegmented role="group" [attr.aria-label]="tab === 'records' ? 'Record type' : 'List'">
               @for (e of tabEntities(); track e) {
                 <button type="button" [attr.aria-pressed]="entity === e" [attr.data-entity]="e" (click)="chooseEntity(e)">
                   {{ entityLabel(e) }} <span class="type-n">{{ countFor(e) }}</span>

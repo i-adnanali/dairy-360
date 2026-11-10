@@ -280,29 +280,31 @@ modifiers working.
 
 ### 4.1 Core
 
+Values re-read from `styles.css` on 9 Nov 2026: this table still showed the terracotta palette (`#A9603C`) after the shell went green.
+
 | Token | Light | Dark | Tailwind name |
 |---|---|---|---|
-| `--surface-page` | `#F7F7F5` | `#141413` | `surface-page` |
-| `--surface-raised` | `#FFFFFF` | `#1C1B1A` | `surface-raised` |
-| `--surface-sunken` | `#EFEEEB` | `#232220` | `surface-sunken` |
-| `--text-primary` | `#1A1917` | `#F0EFEA` | `content-primary` |
-| `--text-heading` | `#2E2D2A` | `#E8E6E0` | `content-heading` |
-| `--text-secondary` | `#4A4844` | `#C4C2B9` | `content-secondary` |
-| `--text-muted` | `#63615C` | `#9E9C93` | `content-muted` |
-| `--text-subtle` | `#6C6A64` | `#9E9C93` | `content-subtle` |
-| `--text-disabled` | `#A8A69E` | `#57564F` | `content-disabled` |
-| `--text-on-fill` | `#FFFFFF` | `#20120A` | `content-onFill` |
-| `--border-hairline` | `#EFEEEB` | `#232220` | `line-hairline` |
-| `--border-subtle` | `#E3E2DE` | `#2C2B28` | `line-subtle` |
-| `--border-default` | `#CBC9C3` | `#3A3934` | `line` (DEFAULT) |
-| `--border-strong` | `#A8A69E` | `#4A4844` | `line-strong` |
-| `--border-selected` | `#A9603C` | `#C88356` | `line-selected` |
-| `--fill-brand` | `#A9603C` | `#C88356` | `brand` (DEFAULT) |
-| `--fill-brand-hover` | `#8E4E30` | `#D9976C` | `brand-hover` |
-| `--fill-brand-disabled` | `#E3E2DE` | `#2C2B28` | `brand-disabled` |
-| `--fill-badge` | `#EFEEEB` | `#2C2B28` | `brand-badge` |
-| `--focus-ring` | `#A9603C` | `#C88356` | `focus` |
-| `--divider` | `#EFEEEB` | `#232220` | `divider` |
+| `--surface-page` | `#F6F6F3` | `#0E1311` | `surface-page` |
+| `--surface-raised` | `#FFFFFF` | `#141B18` | `surface-raised` |
+| `--surface-sunken` | `#EDEEE9` | `#1A231F` | `surface-sunken` |
+| `--text-primary` | `#141613` | `#ECF0EB` | `content-primary` |
+| `--text-heading` | `#141613` | `#ECF0EB` | `content-heading` |
+| `--text-secondary` | `#42463F` | `#C3CAC0` | `content-secondary` |
+| `--text-muted` | `#585C54` | `#9CA59A` | `content-muted` |
+| `--text-subtle` | `#5F635B` | `#9CA59A` | `content-subtle` |
+| `--text-disabled` | `#A0A39B` | `#56605A` | `content-disabled` |
+| `--text-on-fill` | `#FFFFFF` | `#07140E` | `content-onFill` |
+| `--border-hairline` | `#EDEEE9` | `#1A231F` | `line-hairline` |
+| `--border-subtle` | `#E1E3DC` | `#222D28` | `line-subtle` |
+| `--border-default` | `#C9CCC3` | `#2F3B35` | `line` (DEFAULT) |
+| `--border-strong` | `#9EA298` | `#44524B` | `line-strong` |
+| `--border-selected` | `#1A5640` | `#5AA784` | `line-selected` |
+| `--fill-brand` | `#1A5640` | `#5AA784` | `brand` (DEFAULT) |
+| `--fill-brand-hover` | `#0F3D2E` | `#6FB894` | `brand-hover` |
+| `--fill-brand-disabled` | `#E1E3DC` | `#222D28` | `brand-disabled` |
+| `--fill-badge` | `#EDEEE9` | `#222D28` | `brand-badge` |
+| `--focus-ring` | `#141613` | `#ECF0EB` | `focus` |
+| `--divider` | `#EDEEE9` | `#1A231F` | `divider` |
 | `--mark-pending` | `#A8A69E` | `#57564F` | `mark-pending` |
 
 `--border-selected` is a **state, not a brand fill**: `border-farm-600` at 8
@@ -360,6 +362,9 @@ facts are not unanswered questions and no longer borrow the warning role.
 |---|---|---|
 | **This needs an answer from you** | `warning` role | unanswered rows and list items, incomplete session counters, `/check` findings |
 | **This is not the real registry, or the target is unknown** | `warning-fill` | the storage chip in the header (§12.2) |
+| **This session is due now** (9 Nov 2026) | `--session-lit` | the "Now" tag and 2px frame on the session board (§4.8), and the approval count, which is "needs an answer from you" |
+
+The shell nav's "where you are" underline, the dark-mode focus ring, the band's focus ring and `::selection` were also amber until 9 Nov 2026. None of them is one of these meanings, and the nav underline sat forty pixels above "Evening milking · Now", so the two read as one signal. They are now the ink colour (§4.8).
 
 `ui/amber.spec.ts` classifies the remaining source files into these two groups.
 It rejects unclassified files and stale entries, not every new use inside an
@@ -472,6 +477,23 @@ A remembered theme cannot. Pinned in
 stored value is refused rather than passed through to `classList.toggle`.
 
 ---
+
+### 4.8 Selection, location, now and focus — 9 Nov 2026
+
+The app showed "selected" seven ways plus one invisible: an amber underline (nav), an inverted white tile (session board), an amber frame and inset stripe (Now), bold alone (section bar), a green fill (filters), a green underline (Health and animal tabs) and a grey tint (report contents); the phone menu's current view had no visible mark at all. The deepest level was the loudest. **Shape now says what kind of state it is; colour only accents.**
+
+| State | Treatment | Where |
+|---|---|---|
+| **Where you are** | An underline in the ink colour (`--text-primary`), weight 600 | Nav 3px (white in the band), section bar 2px, `TabBar` 2px, phone menu, report contents |
+| **What is chosen** | A filled segment: `--fill-brand` with `--text-on-fill`, weight 600 | `Segmented` (Day/Week/Month, Morning/Evening, herd, monitor, report range, record types), single-choice chips, `.action-seg` |
+| **Due now** | Amber, and nothing else in the header is amber | The session board's "Now" tag and 2px frame |
+| **Keyboard focus** | One 2px ring at a 2px offset in `--focus-ring`: the ink (`#141613` / `#ECF0EB`), white in the band. Never amber, never the selected fill | Every control; `:where(a, button, summary, [tabindex])` catches what a component did not style |
+
+`ui/selection.ts` holds the two primitives. `TabBar` (`role="tablist"`, children `role="tab"` with `aria-selected` and roving tabindex) is on Health's To do / Records / Medicines and an animal's Timeline / Add an event / Correct. `Segmented` keeps `aria-pressed` buttons in a labelled group and replaces eight local copies (`.seg` ×3, `.report-seg`, `.record-types`, `.msn-seg` kept only as layout hooks). Both own the arrow keys and Home/End: one Tab stop reaches the group, arrows move and select.
+
+The session board is a status board, not a second nav. The sheet you have open gets a white frame and the word "Viewing", only when it is today's exact sheet (`selectedSlotKey`): the Feed overview, a crop, or another day's sheet claims nothing. It used to fill solid white by section, the brightest object on the page, so the morning sheet at evening time showed two tiles that looked chosen. Its `aria-current` is `true`, not a second `page`; "Now" is a word, not `aria-current="step"`. On a phone the row scrolls to "Now" first. A missed session uses `--shell-late` tokens. A skip link ("Skip to content") is the first Tab stop.
+
+Still open: the nested-card findings on the milk sheet (`section.withdrawal`, the session toggle inside the session card) and on `app-session-required` are older and not selection states.
 
 ## 5. Type, density and figures
 

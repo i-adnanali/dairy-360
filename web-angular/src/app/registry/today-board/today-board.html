@@ -136,13 +136,15 @@
               @if (g.lowest) { · lowest {{ g.lowest.label }} ({{ litres(g.lowest.litres) }}) }
               · open bars are partial days, gaps have no record
             </p>
-            <table class="sr-only">
+            <!-- The wrapper does the hiding: a table grows to its content and
+                 ignored sr-only's 1px box, so it sat 147x232 behind the card. -->
+            <div class="sr-only"><table>
               <caption>Milk by day</caption>
               <tr><th scope="col">Day</th><th scope="col">Litres</th></tr>
               @for (d of g.days; track d.on) {
                 <tr><td>{{ d.label }}</td><td>{{ d.litres === null ? 'no record' : litres(d.litres) + (d.partial ? ' (partial)' : '') }}</td></tr>
               }
-            </table>
+            </table></div>
           } @else {
             <p class="side-note">No milk figures available.</p>
           }

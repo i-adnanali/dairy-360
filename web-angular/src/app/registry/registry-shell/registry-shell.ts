@@ -181,6 +181,11 @@ export class RegistryShell {
    * mistaken for animal IDs. Questions must include their own record identity.
    */
   private headingObserver?: MutationObserver;
+  protected skipToContent(e: Event): void {
+    e.preventDefault();
+    this.focusPageHeading();
+  }
+
   private focusPageHeading(): void {
     this.headingObserver?.disconnect();
     if (this.assistant.modal()) return;

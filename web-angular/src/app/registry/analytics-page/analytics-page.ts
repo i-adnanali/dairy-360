@@ -1,3 +1,4 @@
+import { Segmented } from "../../ui/selection";
 import { ChartPanel, ChartDataTable } from "../../ui/reporting";
 import { Cell } from "../../ui/cell";
 import { Certainty, Qualifier, type CertaintyState } from "../../ui/certainty";
@@ -51,7 +52,7 @@ export function defaultAnalyticsDay(today: string = farmToday()): string {
 @Component({
   selector: 'app-analytics-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChartPanel, ChartDataTable,
+  imports: [Segmented, ChartPanel, ChartDataTable,
     Cell,
     Certainty,
     Qualifier,
