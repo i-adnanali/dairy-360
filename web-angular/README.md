@@ -32,15 +32,12 @@ covered in [testing guide](../docs/guides/testing.md).
 
 ## Read next
 
-- [Current UI reference](../docs/reference/ui/design-system.md): current contracts and state specimen.
-- [Application interactions](../docs/reference/ui/application-interactions.md): navigation, drafts and recovery.
-- [Recorded gallery](../docs/images/current/README.md): 1 October screenshots of `a56400a`, predating remediation.
-- [Acceptance status](../docs/reference/ui/acceptance-status.md): performed browser/PDF checks and explicitly skipped platform checks.
-- [Phase 7 gallery](../docs/images/phase7/README.md): historical routes and shell states.
-- [Feed gallery](../docs/images/feed/README.md): historical September feed/Today captures and mobile checks.
+- [Design system](../docs/reference/ui/design-system.md): palette, selection states, certainty and the shell.
+- [Application interactions](../docs/reference/ui/application-interactions.md): navigation, recording, drafts, keys and recovery.
+- [Screenshot gallery](../docs/images/current/README.md): current captures and how to refresh them.
+- [Acceptance status](../docs/reference/ui/acceptance-status.md): latest recorded results and explicitly skipped platform checks.
 - [Feed implementation](../docs/reference/registry/feed.md): daily entry, purchases, crops and corrections.
-- [Frontend architecture](../docs/architecture/frontend.md): chat state and component architecture.
-- [Entry UX](../docs/reference/ui/application-interactions.md): form behavior and the outstanding farm trial.
+- [Frontend architecture](../docs/architecture/frontend.md): state, rendering and shared primitives.
 
 Health entry and due work live at `/animals/health` within Herd. Animal profiles
 link to `/animals/:id/report` for the life report and vaccination card. Report
@@ -68,11 +65,3 @@ See [analytics specification](../docs/reference/registry/analytics.md) for formu
 implementation limits and the scenario review checklist. Analytics and main lists
 use server pagination; composite histories and editable session sheets page their
 already-loaded data. Analytics exports and scheduled reporting are future work.
-
-[Analytics screen gallery](../docs/images/analytics/README.md): daily, weekly and monthly reviews,
-light/dark themes, production pagination, reconciliation and mobile captures
-from the dedicated fixture harness (2026-09-16).
-
-## Screen-specific audit delivery — 1 October 2026
-
-Commit `a56400a` completes People/Feed task and form/table improvements, precision-aware animal history and correction comparisons, operational continuation/draft context, Health exception groups, analytics inspector synchronization, assistant outcome receipts and unknown-route recovery. Native controls, domain calculations, API contracts, snapshots, historical rates, guards and exact-request retries are preserved. See the [reconciliation ledger](../docs/implementation/GEIST-IMPLEMENTATION.md). Subsequent remediation is recorded in the [Angular ledger](../docs/implementation/angular-remediation-2026-10-02.md). The [current acceptance status](../docs/reference/ui/acceptance-status.md) distinguishes completed checks and the owner-approved exclusions from unrelated operator/live-service follow-ups.

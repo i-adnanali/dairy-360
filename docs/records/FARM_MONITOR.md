@@ -93,7 +93,7 @@ mechanical, synthesis is instructed.
 
 This matters beyond style. `runReads()` in
 [`agent/stream.ts`](../../server/src/agent/stream.ts) is **synchronous** —
-`READ_EXECUTORS[r.name](../input)` is called and its `modelDigest` consumed
+`READ_EXECUTORSr.name` is called and its `modelDigest` consumed
 inline. A read executor physically cannot `await` an SDK call without making
 `runReads` async and reworking the tool loop. A tool that "writes the digest"
 by calling the model is not a stylistic preference to be traded off; it does

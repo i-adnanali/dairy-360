@@ -4,7 +4,7 @@
 > Original status statements and measurements apply to their named baselines.
 > Use the [current documentation index](../README.md) for maintained contracts and procedures.
 
-Current concise reference: [UI-CURRENT.md](UI-CURRENT.md). Screen-specific reconciliation: [implementation checklist](../implementation/GEIST-IMPLEMENTATION.md). Historical phase boxes do not prove every screen recommendation is complete.
+Current concise reference: [UI-CURRENT.md](UI-CURRENT.md). Screen-specific reconciliation: implementation checklist. Historical phase boxes do not prove every screen recommendation is complete.
 
 *Status: **phases 0–7 built**. Phase 7 was explicitly authorized before the
 five-animal trial; that trial has not run. The original phase-0–6 measurements
@@ -902,7 +902,7 @@ relevant wherever two colour utilities can coexist.
 Two sets of rules are invisible to the fourteen-screen baseline, so they must be
 verified deliberately or not at all:
 
-- **Assistant confirmation and markdown states:** B5 now supplies a database-free AG-UI fixture and browser captures for pending/approved/rejected decisions, rich markdown and charts. See [B5 evidence](../implementation/b5-evidence/README.md); the phase-5 baseline limitation is historical.
+- **Assistant confirmation and markdown states:** B5 now supplies a database-free AG-UI fixture and browser captures for pending/approved/rejected decisions, rich markdown and charts. See B5 evidence; the phase-5 baseline limitation is historical.
 
 ### 8.3 The backtick guard could not fire, and now can
 
@@ -1050,7 +1050,7 @@ Verification: frontend **339/339 in 32 files**, server **726/726**, server
 TypeScript check, template/host guard and production build. Contrast remains
 **30 failures across 122 graded checks**, with the resting border intentionally
 unfixed. Browser verification covers palette search/navigation, session setup
-and preservation of an unfinished form. [Capture index](../images/phase7/README.md)
+and preservation of an unfinished form. Capture index
 contains desktop and narrow-screen viewport images plus desaturated copies;
 these are not full-page captures or a separate live `--grey` run. The initial bundle is about **584 kB**, above the existing 500 kB
 warning budget; the CommonJS shared-package warning also remains.
@@ -1203,8 +1203,8 @@ modifiers specifically: `rgb(var(--surface-page) / 0.8)`,
 
 ### 10.5 Screenshots
 
-The historical [Phase 7 gallery](../images/phase7/README.md) covers its 15 routes
-in both themes, plus session setup and shell overlays. The [feed gallery](../images/feed/README.md)
+The historical Phase 7 gallery covers its 15 routes
+in both themes, plus session setup and shell overlays. The feed gallery
 adds the feed routes, updated Today and representative light/dark/mobile checks. It uses fixed desktop
 viewport captures and a small set of mobile and grayscale checks. The legacy
 script below still enumerates 14 routes: it omits `/animals/calvings`, and it
@@ -1508,7 +1508,7 @@ Linux is worse than showing nothing.
 
 ## 13. Dairy 360 assistant — B5
 
-B5 supersedes phase 6b's overlay, dim, 320px width and 1100px breakpoint. See [B5 progress](../implementation/B5-PROGRESS.md) and [reproducible synthetic evidence](../implementation/b5-evidence/README.md). The historical phase sections retain their dated measurements; they are not the current assistant geometry contract.
+B5 supersedes phase 6b's overlay, dim, 320px width and 1100px breakpoint. See B5 progress and reproducible synthetic evidence. The historical phase sections retain their dated measurements; they are not the current assistant geometry contract.
 
 ### 13.1 Geometry, focus and ownership
 
@@ -1719,7 +1719,7 @@ from what the app already does:
 
 Feed adds one section between Milk and Labour, its contextual views/actions and command-palette entries. Existing cards, inputs, buttons, date parsing, recording setup and write announcements are reused. Daily entry and new crop/purchase routes use the shell’s compact form layout. Saved daily lines collapse for correction; review spells out sources, snapshots, preparation and unknown quantities. Partial and absent accounts use words, not colour alone.
 
-Desktop light/dark and 390px checks are in the [feed gallery](../images/feed/README.md); the Phase 7 gallery remains historical. The five-animal farm trial is still outstanding. No resting border or other colour tokens changed; that historical contrast report had 30 token failures; B1 then reduced the held set to six; §26 later removed those exceptions. [Feed semantics and verification](REGISTRY_FEED.md).
+Desktop light/dark and 390px checks are in the feed gallery; the Phase 7 gallery remains historical. The five-animal farm trial is still outstanding. No resting border or other colour tokens changed; that historical contrast report had 30 token failures; B1 then reduced the held set to six; §26 later removed those exceptions. [Feed semantics and verification](REGISTRY_FEED.md).
 
 ## 18. Health extension — 2026-09-15
 
@@ -1761,7 +1761,7 @@ See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md) for validation and remaining limitati
 
 ## 20. Design improvements — Batch B1, 2026-09-21
 
-Implemented against `f3c2373` under implementation specification v1.1 (local-only record: `docs/reviews/design-spec-2026-09-17/IMPLEMENTATION_SPEC.md`; intentionally not included in repository checkouts). [Progress and verification](../implementation/B1-PROGRESS.md) records the historical B1 boundary and remaining acceptance work. See §21 for B2.
+Implemented against `f3c2373` under implementation specification v1.1 (local-only record: `docs/reviews/design-spec-2026-09-17/IMPLEMENTATION_SPEC.md`; intentionally not included in repository checkouts). Progress and verification records the historical B1 boundary and remaining acceptance work. See §21 for B2.
 
 - Meaningful subtle/absent/no-record text now meets 4.5:1 across page, raised and sunken surfaces in both themes; certainty rules meet 3:1. Superseded event content uses readable subtle text. The contrast command now fails for unexpected failures or unreviewed disabled-text consumers, allowing only six exact held resting-border pairs. Write-log values and border-default are unchanged.
 - Shared Button retains variants and sizes, adds orthogonal danger intent and busy semantics, and gives native disabled controls the same muted treatment. Capture-phase activation blocking prevents custom-disabled/busy buttons and anchors reaching template click handlers. Callers retain save/shortcut guards; this does not replace domain validation.
@@ -1777,7 +1777,7 @@ Full writer enrollment, saved-view/correction flow, uncertain-write outcome reso
 
 ## 21. Design improvements — Batch B2, 2026-09-23
 
-Implemented against B1 commit `9227928`. [B2 progress and verification](../implementation/B2-PROGRESS.md) records changed files, evidence and remaining acceptance checks. B3 was not started at that batch boundary; it is delivered in §22.
+Implemented against B1 commit `9227928`. B2 progress and verification records changed files, evidence and remaining acceptance checks. B3 was not started at that batch boundary; it is delivered in §22.
 
 All rendered writers now participate in shared draft navigation/context/session checks. Shared request snapshots retain the original endpoint, body and idempotency key after an unknown outcome; editing remains locked until retry resolves. Definite refusals preserve draft inputs and server prose. Latest revisions are compared separately and never silently rebased into the local draft.
 
@@ -1787,7 +1787,7 @@ Animal/calving field order/count/treatment, write-log prominence, held resting b
 
 ## 22. Design improvements — Batch B3, 2026-09-25
 
-B3 operational layouts are implemented against B2 `450045c`. [Progress and verification](../implementation/B3-PROGRESS.md) supersedes the prior “B3 has not started” statements. B4/B5 were still unstarted at that batch boundary; §§23–24 record their delivery.
+B3 operational layouts are implemented against B2 `450045c`. Progress and verification supersedes the prior “B3 has not started” statements. B4/B5 were still unstarted at that batch boundary; §§23–24 record their delivery.
 
 Pages now declare entry (720px), review (1400px) or report (1100px) measures; inline editors declare entry measures. Main padding is 16px below 768px and 24px above. The old implicit first-child width rule is removed. Page headers own contextual create actions. The shell keeps section navigation, recording-session actions and Recheck, and omits genuinely empty bands. Protected animal/calving controls and their 720px measure remain unchanged.
 
@@ -1799,7 +1799,7 @@ Final checks: 418 frontend and 778 server tests pass, build/typecheck/template c
 
 ## 23. Design improvements — Batch B4, 2026-09-26
 
-B4 review/reporting is implemented against B3 `75f9eed`. [Progress, verification and limits](../implementation/B4-PROGRESS.md) supersedes the earlier statement that B4 is unstarted. B5 was unstarted at that boundary and is delivered in §24; operator and native output acceptance remain open.
+B4 review/reporting is implemented against B3 `75f9eed`. Progress, verification and limits supersedes the earlier statement that B4 is unstarted. B5 was unstarted at that boundary and is delivered in §24; operator and native output acceptance remain open.
 
 Buyer statement Deliveries and Payments are separate sections, with appropriate column headers, month-qualified independent pagers and named local scrolling. Full-period/month totals remain above both and never depend on a visible page. Taken deliveries without prices qualify the billed total/balance explicitly. Empty collections do not remove the other section.
 
@@ -1815,12 +1815,12 @@ All B1–B3 draft/write/date, protected-form, responsive-entry, provenance and H
 
 ## 24. Batch B5 — assistant consistency, 2026-09-27
 
-Current assistant behavior is specified in §13; it supersedes phase 6b's historical overlay and dual-view behavior. [B5 progress and evidence](../implementation/B5-PROGRESS.md) record 450 frontend tests, 779 server tests, both-theme responsive/keyboard checks and the isolated AG-UI fixture. Shared ScrollRegion also responds to streamed child replacement so new wide tables gain a local keyboard scroll stop. At B5, the six held borders were unchanged (superseded by §26); meaningful composer text no longer uses the disabled-text exemption. B1–B4 domain/draft/write contracts are preserved. B6 and the carried-forward native output, operator, assistive-device, phone, zoom and live-assistant limits remain outstanding.
+Current assistant behavior is specified in §13; it supersedes phase 6b's historical overlay and dual-view behavior. B5 progress and evidence record 450 frontend tests, 779 server tests, both-theme responsive/keyboard checks and the isolated AG-UI fixture. Shared ScrollRegion also responds to streamed child replacement so new wide tables gain a local keyboard scroll stop. At B5, the six held borders were unchanged (superseded by §26); meaningful composer text no longer uses the disabled-text exemption. B1–B4 domain/draft/write contracts are preserved. B6 and the carried-forward native output, operator, assistive-device, phone, zoom and live-assistant limits remain outstanding.
 
 
 ## 25. Batch B6 — release verification, 2026-09-28
 
-[B6 progress](../implementation/B6-PROGRESS.md) and its [acceptance matrix](../implementation/b6-evidence/ACCEPTANCE.md) distinguish fresh checks, prior evidence, held exceptions and unverified cases. B1–B5 are implemented; earlier statements that later batches have not started describe their historical batch boundary. B6 does not declare release readiness while required acceptance remains open.
+B6 progress and its acceptance matrix distinguish fresh checks, prior evidence, held exceptions and unverified cases. B1–B5 are implemented; earlier statements that later batches have not started describe their historical batch boundary. B6 does not declare release readiness while required acceptance remains open.
 
 B6 separates the People identifier's concise label from its help and validation error with `aria-describedby` and `aria-invalid`. Route navigation focuses the first main `h1` or `h2`, including Analytics' page title (a new page only: a filter written with replaceUrl keeps focus where it is, 9 Nov 2026). Animal event history retains internal record/replacement IDs inside a keyboard-operable "Record ids" disclosure, last on each card (renamed and moved 8 Nov 2026); summaries, provenance, superseded badges and a plain-words correction note remain visible. A daily sheet's date reference is written in words, or dropped when it is the event's own day. The inline event observer help refers to witnessing that event. Person-payment Handed over by has one label and payment-specific help. Protected animal/calving forms, precision-date defaults, write-log styling and financial/clinical calculations are unchanged.
 
@@ -1831,7 +1831,7 @@ Actual native PDF/print, completed JSON download, 200% native browser zoom, scre
 
 ## 26. Audit implementation — 30 September 2026
 
-[Implementation and route checklist](../implementation/GEIST-IMPLEMENTATION.md) and [fresh acceptance evidence](../implementation/geist-evidence/ACCEPTANCE.md) supersede the held visual baselines in §§23–25. Historical evidence remains historical. This revision was explicitly authorized; the warm palette, native controls, field meanings and all domain/write safeguards remain.
+Implementation and route checklist and fresh acceptance evidence supersede the held visual baselines in §§23–25. Historical evidence remains historical. This revision was explicitly authorized; the warm palette, native controls, field meanings and all domain/write safeguards remain.
 
 Necessary native input boundaries use `border-control`, distinct from decorative `border-default`. The control role passes 3:1 against page, raised and sunken surfaces in both themes; the six held border failures are no longer accepted exceptions. Invalid and focus states retain semantic danger/focus roles. Readonly/disabled fields use a sunken surface; busy actions retain their identity with a reduced-motion-aware progress mark.
 
@@ -1849,7 +1849,7 @@ Validation is scoped in the linked acceptance evidence. Real-device, screen-read
 
 ## 27. Screen-specific audit completion — 1 October 2026
 
-Commit `a56400a` completes the remaining recommendations reconciled after the shared-foundation delivery. [Implementation ledger](../implementation/GEIST-IMPLEMENTATION.md) maps the initial gaps to source changes; [acceptance](../implementation/geist-screen-evidence/ACCEPTANCE.md) separates 144 captured browser states from source/test coverage. The latest recorded validation is 458 frontend tests / 44 files, 779 server tests, production build/typecheck/templates and 122 contrast checks with no held or unexpected failures.
+Commit `a56400a` completes the remaining recommendations reconciled after the shared-foundation delivery. Implementation ledger maps the initial gaps to source changes; acceptance separates 144 captured browser states from source/test coverage. The latest recorded validation is 458 frontend tests / 44 files, 779 server tests, production build/typecheck/templates and 122 contrast checks with no held or unexpected failures.
 
 People exposes Add person/Open stint and prioritizes payment before history. Feed has route-specific actions, focused new forms, crop lifecycle filters and compact disclosures. Herd combines serial/name; animal correction and acquired-birth summaries preserve precision. Today separates outstanding answers and recorded review. Successful milking offers same-date/session Dispatch; buyer maintenance preserves the original sheet in a separate tab. Entry headers stick within their local desktop scroll regions; mobile retains one native control tree.
 

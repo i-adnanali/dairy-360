@@ -16,7 +16,7 @@ this document and those files disagree, they are right and this is stale.
 
 **Current entry points (1 October 2026):** the root [README](../../README.md) owns the quick start and product overview. This guide owns detailed setup, run loops, tests, registry CLI and backups. [OPERATIONS.md](OPERATIONS.md) owns optional camera simulation/classification and Langfuse commands. [Current screenshots](../images/current/README.md) replace historical galleries for the README.
 
-**Latest recorded validation:** [screen-specific evidence](../implementation/geist-screen-evidence/ACCEPTANCE.md) at `a56400a`: 458 frontend tests / 44 files, 779 server tests, typecheck, production build, templates and contrast pass; initial bundle 673.73 kB. This documentation refresh does not rerun native-device, live-model, camera or operator acceptance. The older run notes below are historical measurements.
+**Latest recorded validation:** screen-specific evidence at `a56400a`: 458 frontend tests / 44 files, 779 server tests, typecheck, production build, templates and contrast pass; initial bundle 673.73 kB. This documentation refresh does not rerun native-device, live-model, camera or operator acceptance. The older run notes below are historical measurements.
 
 **Re-run on 2026-09-03 at `06034d9`:** § 6's new one-command subsection in full,
 plus `npm install`, `build:shared`, `typecheck`, `build -w server`,
@@ -163,7 +163,7 @@ The latest recorded Angular build (1 October 2026, `a56400a`) passed with two wa
 - Initial bundle **673.73 kB**, above the existing **500 kB warning** budget and below the 1 MB error budget.
 - `@dairy/shared` emits CommonJS, so Angular reports an optimization bailout.
 
-The earlier unused `SummaryBar` warning is absent from this run. [Build log](../implementation/geist-screen-evidence/build.txt). These dated results do not guarantee future build sizes.
+The earlier unused `SummaryBar` warning is absent from this run. Build log. These dated results do not guarantee future build sizes.
 
 ---
 
@@ -997,7 +997,7 @@ invariant 13 as a source-level check.
 
 ## Feed development (2026-09-10)
 
-Feed is included in the injected registry harness and guarded HTTP harness seed. Run `npm run harness:app` for disposable development; never run root `seed` for feed testing. The HTTP seed verifies harness identity before writes and can be replayed. Feed fixtures include unknown-date crops, expenses, original-unit purchases, mixed daily supply and partial accounts. [Implementation, checks and the corrected CLI-import isolation defect](REGISTRY_FEED.md). Use the feed [gallery](../images/feed/README.md) alongside Phase 7 captures.
+Feed is included in the injected registry harness and guarded HTTP harness seed. Run `npm run harness:app` for disposable development; never run root `seed` for feed testing. The HTTP seed verifies harness identity before writes and can be replayed. Feed fixtures include unknown-date crops, expenses, original-unit purchases, mixed daily supply and partial accounts. [Implementation, checks and the corrected CLI-import isolation defect](REGISTRY_FEED.md). Use the feed gallery alongside Phase 7 captures.
 
 ## Health extension — 2026-09-15
 

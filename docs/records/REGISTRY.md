@@ -4,7 +4,7 @@
 > Original status statements and measurements apply to their named baselines.
 > Use the [current documentation index](../README.md) for maintained contracts and procedures.
 
-**Implements:** [ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md](../archive/ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md) · **Baseline tag:** `v0.10.0`
+**Implements:** ANIMAL_REGISTRY_DECISION_DOCUMENT_V2.md · **Baseline tag:** `v0.10.0`
 **Scope:** animals, parentage, status projection (step 1); lactations and calvings (step 2)
 
 Two siblings carry what came after: the entry surface is

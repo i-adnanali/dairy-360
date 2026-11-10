@@ -4,7 +4,7 @@
 > Original status statements and measurements apply to their named baselines.
 > Use the [current documentation index](../README.md) for maintained contracts and procedures.
 
-> Presentation update (1 October 2026, `a56400a`): the opened editor precedes the board; dose fields are grouped by identity/date, administration, historical exceptions, withdrawal and evidence. Blank irrelevant explanations can be disclosed; existing values and errors remain visible. Search and round-selection summaries, human draft consequences and non-stretching field layout preserve native controls and write contracts. [Current evidence and limits](../implementation/geist-screen-evidence/ACCEPTANCE.md).
+> Presentation update (1 October 2026, `a56400a`): the opened editor precedes the board; dose fields are grouped by identity/date, administration, historical exceptions, withdrawal and evidence. Blank irrelevant explanations can be disclosed; existing values and errors remain visible. Search and round-selection summaries, human draft consequences and non-stretching field layout preserve native controls and write contracts. Current evidence and limits.
 
 Status: implemented 2026-09-15, extending baseline
 `b5a7064fe2758e877cc750e4b3a01f1fcd55a659`. Migration 9. The requirements and

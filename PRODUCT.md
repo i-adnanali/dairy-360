@@ -80,11 +80,8 @@ A record that shows its own uncertainty and provenance. Approximate dates stay a
 - Synthetic, memory-only fixtures:
   - `npm run harness:app`: 31 animals with milk, health, feed and payroll records.
   - `npm run harness:analytics`
-- Screenshots:
-  - docs/images/current/
-  - docs/ui-audit-2026-11/
-- Earlier design reviews in docs/reviews/ (untracked).
-- The UI audit of 6 Nov 2026: docs/ui-audit-2026-11.md.
+- Screenshots: docs/images/current/ (10 Nov 2026, after the section restructure).
+- Earlier design reviews in docs/reviews/ (untracked). The 6 Nov 2026 UI audit was acted on by the November restructure and removed from the tree; git history has it.
 - **No real herd data is entered yet.** The persistent registry is empty. Future work must not present synthetic animals, figures, people or testimonials as real farm data.
 
 ## Product Principles

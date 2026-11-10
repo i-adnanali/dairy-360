@@ -32,7 +32,7 @@ Reads work without a recording session; writes retain recorder/source and target
 - [routes.ts](../../../server/src/registry/routes.ts): HTTP requests, validation and error mapping.
 - [CLI guide](../../guides/registry-cli.md): explicit add/event/calving/correction/rebuild commands.
 
-The API returns superseded history where needed and structured errors rather than hiding invalid candidates or fabricating missing values. [Check](../../OPEN.md) and source invariant tests distinguish hard violations from incomplete history.
+The API returns superseded history where needed and structured errors rather than hiding invalid candidates or fabricating missing values. [Check](../ui/application-interactions.md#check) and source invariant tests distinguish hard violations from incomplete history.
 
 ## Limits and evidence
 

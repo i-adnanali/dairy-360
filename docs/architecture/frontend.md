@@ -27,7 +27,7 @@ The dock/mobile assistant uses shared conversation and composer components. Cont
 
 Markdown passes through `marked` and a DOMPurify allowlist before HTML binding. Charts use Chart.js through `ng2-charts` with shared theme/presentation components. A semantic data table accompanies chart information. Native inputs, labels and table structure remain accessible to browser and keyboard behavior; a screenshot does not prove assistive-technology acceptance.
 
-Styles use semantic roles and the warm palette defined in the [UI reference](../reference/ui/design-system.md). Components should not copy raw palette values to bypass those roles.
+Styles use the semantic roles defined in the [design system](../reference/ui/design-system.md); components never copy raw palette values. Selection states come from the `TabBar` and `Segmented` directives in [ui/selection.ts](../../web-angular/src/app/ui/selection.ts), and figures take their certainty treatment from [ui/certainty.ts](../../web-angular/src/app/ui/certainty.ts).
 
 ## Development and limits
 

@@ -15,7 +15,7 @@ Current reference combining confirmed farm practice and delivered behavior. [Sha
 
 ## Workflows
 
-Feed has overview, crops, purchases and daily history views. Add a crop already cutting with unknown dates or acreage; record separately incurred expenses on its detail page. Finish/archive through Correct without fabricating a cutting-end date. Do not duplicate payroll salaries as crop expenses.
+Feed has Overview, Days, Crops, Purchases and Catalogue views; Record feeding is its primary action, and Today's Feeding tile opens the day's account. Add a crop already cutting with unknown dates or acreage; record separately incurred expenses on its detail page. Finish/archive through Correct without fabricating a cutting-end date. Do not duplicate payroll salaries as crop expenses.
 
 Purchases retain original quantities and pricing agreements. Unknown quantity is null, not zero. A 400 kg purchase at Rs 2,000 per 40 kg costs Rs 20,000 plus separately entered charges; a known-total trolley needs no weight. Only explicit mass units (g, kg, tonne) convert; custom units must match. Costs are incurred acquisition/expense amounts, not payments or consumed-feed costs.
 

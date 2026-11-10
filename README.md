@@ -3,13 +3,13 @@
 [![CI](https://github.com/i-adnanali/dairy-360/actions/workflows/ci.yml/badge.svg)](https://github.com/i-adnanali/dairy-360/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A local dairy-farm workspace for animal records, veterinary care, milk production and sales, feed, people and payroll—with an optional AI assistant for questions and proposed actions.
+A local dairy-farm workspace for animal records, veterinary care, milk production and sales, feed, people and payroll, with an optional AI assistant that answers questions about the records.
 
 Dairy 360 keeps uncertainty visible: approximate dates stay approximate, missing records stay distinct from zero, wages earned stay distinct from payments, and approval stays distinct from successful execution.
 
-![Current Today workspace with health tasks, recorded milking and dispatch, feeding status and payroll recording](docs/images/current/today-light.jpg)
+![The Today work board: overdue and due health work, milk withdrawals and flagged camera events ranked by consequence, with the session board in the header](docs/images/current/today-light.jpg)
 
-*Production UI at `a56400a`, captured 1 October 2026 using synthetic, memory-only records. [Screenshot provenance and gallery](docs/images/current/README.md).*
+*Today, from the production build with synthetic, memory-only records. [Gallery and capture details](docs/images/current/README.md).*
 
 [Quick start](#quick-start) · [Features](#features) · [Screenshots](#screenshots) · [Development](#development) · [Documentation](#documentation) · [Status and limitations](#status-and-limitations)
 
@@ -26,9 +26,9 @@ npm ci
 npm run harness:app
 ```
 
-Open **http://localhost:6420**. This starts Angular and a synthetic registry backend on port 6400. No API key or farm database is needed; fixture writes disappear when the harness stops. Press Ctrl+C to stop.
+Open **http://localhost:6420**. This starts Angular and a synthetic registry backend on port 6400. No API key or farm database is needed; anything saved disappears when the harness stops. Press Ctrl+C to stop.
 
-The harness supports registry workflows, but does **not** serve assistant responses. For a larger analytics scenario, stop it and run `npm run harness:analytics`, then open `/analytics`. Both commands share ports with the persistent app.
+The harness serves every registry workflow but not assistant responses. For a larger analytics scenario, stop it and run `npm run harness:analytics`, then open `/analytics`. Both commands share ports with the persistent app.
 
 ### Persistent app and AI assistant
 
@@ -43,54 +43,58 @@ npm run dev:angular
 
 The persistent server uses `server/dairy.db`; the registry and the assistant's demo tables are separate. `seed` resets the demo tables used by chat, preserves registry records, and is **not** a registry fixture loader. Registry agent tools are read-only; proposed agent writes target the demo domains, not registry records.
 
-Read [setup and data boundaries](docs/guides/development.md) before using persistent data. Browsing requires no recording session; registry writes require an explicit recorder and source. A root `.env` is needed only for optional camera Compose configuration. Langfuse is optional.
+Read [setup and data boundaries](docs/guides/development.md) before using persistent data. Browsing needs nothing; saving needs a recording session that names who is typing and where the records come from. A root `.env` is needed only for optional camera Compose configuration. Langfuse is optional.
 
 ## Features
 
 | Area | Capabilities |
 |---|---|
-| Today | Task entry points, outstanding versus recorded sessions, health due work and payroll recording status |
-| Animals | Herd search, calvings, event history, precision-aware corrections and provenance |
-| Health | Visits, examinations, cases, plans, actual administrations, vaccination rounds, withdrawal instructions and life reports |
-| Milk | Per-animal session recording, sale and non-sale dispatch, effective-dated rates, buyer balances and payments |
-| Feed | Crop lifecycles and expenses, purchases in original units, daily feeding and saved recipient snapshots |
-| People & payroll | Separate employment stints, package history, salaried/daily wages, payments and signed adjustments |
-| Analytics | Daily/weekly/monthly production and dispatch, qualified coverage, date inspection, data tables and source drilldowns |
-| Assistant | Streaming answers, contextual prompts, charts, expandable details and explicit approval/result receipts |
-| Data checks | Separate invariant violations, advisory work and coverage gaps |
+| Today | One work board ranked by consequence: overdue health work, milk withdrawals, urgent camera events and late sessions first, then due-today work, payroll and feeding; a session board in the header for today's five sessions |
+| Herd | Herd search and stage filters, calvings, event timelines, precision-aware corrections and provenance, lifetime reports |
+| Health | Visits, doses, vaccination rounds, tasks, cases, plans and withdrawal instructions, on To do, Records and Medicines tabs |
+| Milk | Per-animal session sheets answered by keyboard, sale and home dispatch, effective-dated rates, buyer balances and payments |
+| Feed | Daily feeding accounts, crop lifecycles and expenses, purchases in original units and a feed catalogue |
+| Labour | People, employment stints, salaried and daily wages, payments and signed adjustments |
+| Analytics | Daily, weekly and monthly production and dispatch with coverage, partial figures marked, and links to what is still to record |
+| Monitor | Camera events by window, flagged urgent or notable, with re-grading through the assistant on approval |
+| Check | What needs an answer first, contradictions in the records with links to fix them, people notes, and how complete and certain the records are |
+| Assistant | Streaming answers over the records, charts, expandable details and explicit approval and result receipts |
 
-### Recent improvements
-
-Angular remediation through `cb94fe9` adds request/context race guards, form and accessibility fixes, and complete A4 animal/buyer statement printing. [Remediation ledger](docs/implementation/angular-remediation-2026-10-02.md) · [Acceptance status and skipped checks](docs/reference/ui/acceptance-status.md).
-
-The screen-specific audit implementation landed in [`a56400a`](https://github.com/i-adnanali/dairy-360/commit/a56400a):
-
-- Clearer People actions and payment-before-history layout; focused Feed forms, crop filters and compact overview disclosures.
-- Combined animal identity, precision-aware history/correction summaries, clearer Today work groups and a Milking → Dispatch continuation after success.
-- Grouped Health entry with retained exception explanations, synchronized analytics date inspection and shared chart/data presentation.
-- Outcome-specific assistant receipts, complete mobile navigation, unknown-route recovery, and a concise UI reference/state specimen.
-
-Native semantics, APIs, calculations, historical rates, snapshots, provenance, draft guards, revision handling and exact-request retries were preserved. See the [implementation ledger](docs/implementation/GEIST-IMPLEMENTATION.md).
+Every screen uses one visual language: an underline for where you are, a filled segment for what is chosen, amber only for "needs your answer" or "due now", red for overdue or not for sale, and figures written to show how they were known. See the [design system](docs/reference/ui/design-system.md).
 
 ## Screenshots
 
-These browser captures show `a56400a` on 1 October 2026, before the subsequent Angular remediation. Desktop viewport: 1440×1000; narrow desktop-browser viewport: 390×844 (not native-device acceptance). All records are synthetic. Long pages continue below the viewport.
+Production build, synthetic records, desktop 1440×1000 and phone-width browser 390×844 (not native-device acceptance). Long pages continue below the viewport.
 
 <details>
-<summary>Monthly analytics — dark theme</summary>
+<summary>Milking sheet while recording</summary>
 
-![Monthly analytics with qualified production and dispatch metrics and a trend chart](docs/images/current/analytics-dark.jpg)
+![The evening milking sheet: answered rows, a milk withdrawal shown inside its row, and three amber rows still to answer above a footer that names them](docs/images/current/milking-light.jpg)
 
 </details>
 
 <details>
-<summary>Animal health — mobile light theme</summary>
+<summary>Check the records</summary>
 
-<img src="docs/images/current/health-mobile-light.jpg" alt="Mobile animal health workspace with record-dose actions and due work" width="390" />
+![Check: a needs-an-answer item linking to its sheet, no contradictions, and two people notes](docs/images/current/check-light.jpg)
 
 </details>
 
-[Current gallery and capture details](docs/images/current/README.md) · [Current UI reference](docs/reference/ui/design-system.md)
+<details>
+<summary>Weekly analytics, dark theme</summary>
+
+![Weekly milk analytics with partial figures, coverage and a still-to-record list](docs/images/current/analytics-dark.jpg)
+
+</details>
+
+<details>
+<summary>Today and Health at phone width</summary>
+
+<img src="docs/images/current/today-mobile-dark.jpg" alt="Today at phone width in the dark theme" width="300" /> <img src="docs/images/current/health-mobile-light.jpg" alt="Health To do tab at phone width" width="300" />
+
+</details>
+
+[All screenshots](docs/images/current/README.md)
 
 ## Architecture
 
@@ -100,12 +104,12 @@ dairy-360/
 ├── server/       Express, TypeScript, SQLite, agent loop and registry APIs
 ├── shared/       Shared domain and transport types
 ├── scripts/      Local harness, verification and capture utilities
-└── docs/         Reference guides, implementation evidence and dated records
+└── docs/         Guides, references, architecture and dated records
 ```
 
 The Angular app uses `/api/registry` for operational records and `/api/agent/run` for AG-UI streaming over SSE. The optional assistant routes each turn to dairy, vendor/sales, or both agents in one server process. Read tools run automatically; proposed writes pause for approval. Model-facing digests remain separate from chart datasets.
 
-Camera-event ingestion/classification and self-hosted Langfuse tracing are optional integrations. See [architecture](docs/architecture/system.md), [agent internals](docs/architecture/assistant.md) and [integration operations](docs/guides/camera-operations.md).
+Camera-event ingestion and classification and self-hosted Langfuse tracing are optional integrations. See [architecture](docs/architecture/system.md), [agent internals](docs/architecture/assistant.md) and [integration operations](docs/guides/camera-operations.md).
 
 ## Development
 
@@ -122,11 +126,9 @@ npm run check:contrast
 npm run build:angular
 ```
 
-The frontend build is written to `web-angular/dist/web-angular/browser`. To serve it against an already running memory harness on 6400, run `npm run harness:serve` and open http://localhost:6430.
+The frontend build is written to `web-angular/dist/web-angular/browser`. To serve it against a running memory harness on 6400, run `npm run harness:serve` and open http://localhost:6430.
 
-**Latest recorded validation (7–8 October 2026):** 529 frontend tests across 51 files and 779 server tests passed, along with production build, type/compiler, template, contrast and documentation checks. Existing bundle-size and shared CommonJS warnings remain. [Logs and browser/PDF evidence](docs/implementation/angular-acceptance-2026-10-07/ACCEPTANCE.md).
-
-Unit suites need no API key or farm database. Live-model regression tests are separate, require credentials, and can spend API tokens; a skipped live run is not a pass. See [testing](docs/guides/testing.md).
+Unit suites need no API key or farm database. Live-model regression tests are separate, need credentials and spend API tokens; a skipped live run is not a pass. See [testing](docs/guides/testing.md), and [acceptance status](docs/reference/ui/acceptance-status.md) for the latest recorded results.
 
 ## Documentation
 
@@ -134,7 +136,7 @@ Unit suites need no API key or farm database. Live-model regression tests are se
 |---|---|
 | Documentation map | [Docs index](docs/README.md) |
 | Setup, troubleshooting, CLI and backups | [Development](docs/guides/development.md), [CLI](docs/guides/registry-cli.md), [backup/restore](docs/guides/backup-restore.md) |
-| Current UI contracts | [UI reference](docs/reference/ui/design-system.md), [interaction contracts](docs/reference/ui/application-interactions.md) |
+| How the UI looks and behaves | [Design system](docs/reference/ui/design-system.md), [interaction contracts](docs/reference/ui/application-interactions.md) |
 | Animals and corrections | [Registry](docs/reference/registry/animals.md) |
 | Milk recording and sales | [Milking](docs/reference/registry/milking.md), [sales](docs/reference/registry/sales.md) |
 | Feed, health and labour | [Feed](docs/reference/registry/feed.md), [health](docs/reference/registry/health.md), [payroll](docs/reference/registry/payroll.md) |
@@ -144,13 +146,11 @@ Unit suites need no API key or farm database. Live-model regression tests are se
 
 ## Status and limitations
 
-This is a local application without authentication or multi-user tenancy. It is not documented as production-hardened. Registry HTTP retry protections do not provide cross-request replay protection for assistant demo writes.
-
-Angular remediation and its agreed acceptance scope are complete. On 9 October 2026, the owner chose to skip alternative print settings, Firefox/additional-report print coverage, spoken screen-reader and native-mobile checks. These are exclusions, not passes. A4 portrait/100% is the verified print configuration; the alternative-format limitation remains. [Acceptance status](docs/reference/ui/acceptance-status.md) separates verified work, skipped checks and unrelated backlog. Real-farm/operator and live assistant acceptance are not implied.
+This is a local, single-user application without authentication or multi-user tenancy, and it is not production-hardened. Registry HTTP retry protections do not provide cross-request replay protection for assistant demo writes. No real herd data has been entered yet, and real-farm operator trials and live assistant acceptance have not been run. Some platform checks were skipped by decision rather than passed; [acceptance status](docs/reference/ui/acceptance-status.md) lists them.
 
 ## Contributing
 
-Open an issue with a reproducible problem or proposed scope, then submit a focused pull request. Use synthetic data, retain domain uncertainty and write protections, run the relevant checks above, and update the owning reference guide. Never commit database files, uploads, credentials or real farm records. See [development conventions](docs/guides/development.md) and [UI contracts](docs/reference/ui/design-system.md).
+Open an issue with a reproducible problem or proposed scope, then submit a focused pull request. Use synthetic data, keep domain uncertainty and write protections, run the checks above, and update the owning reference page. Never commit database files, uploads, credentials or real farm records. See [development conventions](docs/guides/development.md) and the [design system](docs/reference/ui/design-system.md).
 
 ## License
 

@@ -49,6 +49,6 @@ An unknown quantity is not zero. An approximate date is not an exact day. A plan
 
 ## Limits and evidence
 
-The system has no production authentication/tenancy guarantee. Registry retry handling does not confer cross-request replay protection on assistant demo writes. Analytics reports qualified recorded facts, not inferred loss or clinical/nutritional advice. [Open work](../OPEN.md) and [acceptance evidence](../implementation/geist-screen-evidence/ACCEPTANCE.md) distinguish implementation from demonstrated acceptance.
+The system has no production authentication/tenancy guarantee. Registry retry handling does not confer cross-request replay protection on assistant demo writes. Analytics reports qualified recorded facts, not inferred loss or clinical/nutritional advice. [Open work](../OPEN.md) and [acceptance status](../reference/ui/acceptance-status.md) distinguish implementation from demonstrated acceptance.
 
 Original architecture discussions are retained in [the overview record](../records/PROJECT_OVERVIEW.md).

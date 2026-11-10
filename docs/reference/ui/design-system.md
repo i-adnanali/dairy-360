@@ -1,53 +1,83 @@
 # UI design system
 
-Current reference, consolidated 2 October 2026. This page owns presentation contracts; [application interactions](application-interactions.md) owns navigation and workflow behavior. Domain-specific meaning belongs to [registry references](../registry/README.md).
+Current reference for how the app looks and what each visual state means. [Application interactions](application-interactions.md) owns navigation and workflow behavior; [registry references](../registry/README.md) own domain meaning.
 
-## Foundations
+The values live in [styles.css](../../../web-angular/src/styles.css) as channel-triplet custom properties, exposed to Tailwind by semantic name in [tailwind.config.js](../../../web-angular/tailwind.config.js). Components consume the semantic names and the shared directives in [ui/](../../../web-angular/src/app/ui), never raw palette values.
 
-Preserve the warm palette in light and dark themes. Consume semantic CSS roles in [styles.css](../../../web-angular/src/styles.css) and shared directives/components in [ui/](../../../web-angular/src/app/ui), not copied palette literals. Theme switching follows the existing light/dark/system model.
+## Palette and themes
 
-Resting decorative borders and control boundaries have different purposes. Use the dedicated control-boundary role for necessary input boundaries. Disabled/no-record text remains legible; do not restore old held contrast exceptions. [Contrast tooling](../../../scripts/check-contrast.mjs) is an automated token/consumer gate, not full accessibility certification.
+A deep green header band over neutral surfaces with a slight green bias. Light and dark are designed separately (dark surfaces are closer together so they still read as distinct), and theme switching cycles System, Light and Dark ([theme.ts](../../../web-angular/src/app/core/theme.ts)) with `color-scheme` set so native pickers and scrollbars follow.
 
-Keep type, spacing and tabular figures consistent. Qualify approximate dates and uncertain quantities near their value. Colour is supplementary to text/shape; a badge cannot silently change the underlying meaning.
+| Role | Light | Dark | Use |
+|---|---|---|---|
+| Page / raised / sunken | `#F6F6F3` / `#FFFFFF` / `#EDEEE9` | `#0E1311` / `#141B18` / `#1A231F` | Page ground, cards and tables, bars and toolbars |
+| Ink / muted | `#141613` / `#585C54` | `#ECF0EB` / `#9CA59A` | Text and secondary text |
+| Brand | `#1A5640` | `#5AA784` | The main action button and the selected segment, nothing else |
+| Focus | `#141613` | `#ECF0EB` | The single keyboard-focus ring (white inside the band) |
+
+Role colours keep one meaning each:
+
+| Colour | Means | Where |
+|---|---|---|
+| **Amber** (`warning`, `--session-lit`) | This needs an answer from you, or it is due now | Unanswered sheet rows (pale fill and a 3px leading bar), "Due today" and "Notable" items, the session board's "Now" tag and frame, incomplete counters |
+| **Amber fill** (`warning-fill`) | This is not your real register, or the target is unknown | The storage chip only |
+| **Red** (`danger`) | Act on it, or keep it out | Overdue tasks, urgent camera events, late sessions, milk withdrawals ("Not for sale"), errors |
+| **Light green** (`success`, write log) | Something worked | "Recording started", save confirmations |
+| **Neutral** | A fact that needs no answer | Meat-withdrawal chips, "Not saved yet", Check's people notes, overrides and balances |
+
+[ui/amber.spec.ts](../../../web-angular/src/app/ui/amber.spec.ts) classifies every source file that uses amber, so a new use needs a reviewed meaning. Status never relies on colour alone: each state also has a word or a shape.
+
+## Selection, location, now and focus
+
+Shape says what kind of state something is; colour only accents. Implemented by `TabBar` and `Segmented` in [ui/selection.ts](../../../web-angular/src/app/ui/selection.ts) and the `.tab-bar`, `.segmented` and nav rules in styles.css.
+
+| State | Treatment | Where |
+|---|---|---|
+| **Where you are** | Underline in the text colour, weight 600 (3px in the band, 2px below it) | Section nav, section bar views, `TabBar` tabs, phone menu, report contents |
+| **What is chosen** | Filled segment in the brand colour, weight 600 | `Segmented` groups (Day/Week/Month, Morning/Evening, herd filters, report range), single-choice chips |
+| **Due now** | Amber, and nothing else in the band is amber | Session board "Now" tag and 2px frame |
+| **Viewing** | White 2px frame and the word "Viewing" | Session board tile for today's exact sheet only |
+| **Keyboard focus** | One 2px ring at 2px offset in `--focus-ring` | Every control; a zero-specificity `:where(a, button, summary, [tabindex]):focus-visible` rule catches the rest |
+
+`TabBar` is a `role="tablist"` with roving tabindex; `Segmented` keeps `aria-pressed` buttons in a labelled group. Both take one Tab stop and move with the arrow keys, Home and End, activating as they move. A "Skip to content" link is the first Tab stop on every page.
+
+## Certainty
+
+Every figure and date shows how it was known ([ui/certainty.ts](../../../web-angular/src/app/ui/certainty.ts), [precision-display.ts](../../../web-angular/src/app/registry/precision-display.ts)). The five states are distinguishable in greyscale, and [certainty.spec.ts](../../../web-angular/src/app/ui/certainty.spec.ts) fails if any two share every non-colour mark.
+
+| State | Treatment | Example |
+|---|---|---|
+| Known | Monospace, tabular figures, no ornament | `6.5 L`, `11 Feb 2021` |
+| Approximate | Monospace, dotted underline, a lowercase qualifier word | `Mar 2017 month`, `2016 year`, `~2018 est` |
+| Answered "none" | Italic words | *not measured*, *nothing taken* |
+| No record | En dash, labelled "No record" for screen readers | – |
+| Unanswered | Amber row ground and leading bar | A milking row nobody has answered |
+
+A date is truncated to its precision: a month-precision date never shows a day. Quantities use `~` for "about" or an average. Totals built from incomplete records carry "partial". Dates are written in words ("8 Nov 2026", "9 Nov, 01:22"), never as ISO strings.
+
+## The shell
+
+The band holds the app name, the storage chip, the recording chip, Search (`Cmd/Ctrl+K`), the theme control and the assistant toggle; the section nav (Today, Analytics, Herd, Milk, Feed, Labour, Monitor, and Check on the right); and the session board. Sections with more than one view get a sunken section bar with the views and at most one primary action. The session board's five tiles (morning milking and dispatch, feeding, evening milking and dispatch) show answered over expected; one size on every page, and on a phone it scrolls to Now first.
 
 ## Component contracts
 
-| Role | Contract | Native consumer / example |
+| Role | Contract | Consumer |
 |---|---|---|
 | Page | Title before filters; entry 720px, review 1400px, report 1100px | People, purchase entry, lifetime report |
-| Type | Page 24/32; section 18/24; body 16/24; help 14/20; metadata 12/16 | PageHeading, SectionHeading, HelpText; tabular numbers for quantities |
-| Field | Persistent label; 6px internal gap; 16px between groups; error/help IDs | Field projects native appInput; existing associated labels remain valid |
-| Input | Separate control boundary; mobile 16px text and 44px target | Input, PrecisionDate; raw input remains unchanged on refusal |
-| Actions | Label remains during busy state; repeated activation blocked | Button; approval remains distinct from execution |
-| Surfaces | Resting card, elevated menu and dialog roles; 16px mobile / 24px dialog inset | Card and shared dialog/menu CSS; never stack cards just for spacing |
-| Review table | Identity and critical values first; named local overflow and keyboard stop only when overflowing | ScrollRegion + Cell; People balance, Herd status |
-| Entry sheet | One native control tree; identity adjacent to entry; full collection validation | Milking, Dispatch, Payroll |
-| Metric | Number and qualification together; no invented zero or loss inference | Metric with domain-owned value/qualifier |
-| Chart | Responsive panel, adjacent qualification, equivalent semantic data table | ChartPanel, CoverageNotice, ChartDataTable in analytics and assistant |
-| Drilldown | Preserve period/session/filter scope and links to source | RecordDrilldown and analytics URL state |
-| Exceptions | Hide only blank irrelevant explanations; values/errors force visibility | Health historical reasons; hidden controls retain model values |
-| Navigation | Complete mobile Menu hierarchy; Escape restores trigger focus | Shell; unknown addresses show recovery instead of redirecting silently |
-
-## State gallery
-
-The [local specimen](../../implementation/geist-screen-evidence/ui-specimen.html) preserves the 1 October compiled stylesheet and synthetic examples. It demonstrates light/dark, normal/invalid/readonly/disabled inputs, a busy button, empty/error content, long text, numeric table overflow and narrow width. It is a presentation specimen, not proof of Angular directive behavior or device accessibility. Actual component interactions are separately recorded in [acceptance status and evidence](acceptance-status.md).
+| Type | Page 24/32; section 18/24; body 16/24; help 14/20; metadata 12/16; prose capped near 68ch | PageHeading, SectionHeading, HelpText |
+| Field | Persistent label; associated help and error IDs; placeholders are examples, not labels | Field with native `appInput` |
+| Input | Separate control boundary; mobile 16px text and 44px target | Input, PrecisionDate |
+| Actions | One primary per section; label stays during busy state; repeated activation blocked; a disabled action names its reason | Button |
+| Surfaces | Raised card, elevated menu and dialog roles; never nest cards for spacing | Card, shared dialog/menu CSS |
+| Review table | Identity and critical values first; a named keyboard stop only when it overflows | ScrollRegion, Cell |
+| Entry sheet | One native control tree; identity next to entry; whole-session validation | Milking, Dispatch, Payroll |
+| Metric | Number and qualification together; no invented zero | Metric |
+| Chart | Adjacent qualification and an equivalent data table | ChartPanel, ChartDataTable |
 
 ## Preserve these meanings
 
-Missing, unknown, unmeasured, not performed and explicit zero differ. Dates display only their recorded precision. Keep source/recorder and correction history discoverable. Historical rates and recipient snapshots belong to saved records. Pending/unknown writes lock editing and retry the same endpoint, payload and key. A planned dose is not administration; recorded wages are not payment; purchase cost is not consumed-feed cost. No presentation change may weaken those contracts.
+Missing, unknown, unmeasured, not performed and explicit zero differ. Dates display only their recorded precision. Source, recorder and correction history stay discoverable. Historical rates and recipient snapshots belong to saved records. Pending or unknown writes lock editing and retry the same request. A planned dose is not a given dose; recorded wages are not payment; purchase cost is not consumed-feed cost. No presentation change may weaken those contracts.
 
+## Validation
 
-## Implementation rules
-
-- Use native buttons, inputs, labels, headings and tables. Shared directives enhance rather than replace their semantics.
-- Keep shared semantic rules after the relevant utility layers so generic utilities do not accidentally override role styles.
-- Inputs need a visible focus indicator and associated errors; placeholders are examples, not labels.
-- Identifier links remain links. Row hover does not make a noninteractive row a button.
-- Copy describes observations and actions without inferring clinical efficacy, payment, successful execution or data completeness.
-- Theme-aware charts keep equivalent tabular data, units, qualifications and readable legends.
-
-## Validation and history
-
-Run template and contrast checks and inspect changed workflows in both themes and narrow layouts. Keyboard/focus, error recovery and long content require interaction checks beyond screenshots. See [testing](../../guides/testing.md).
-
-The full original phase narrative is preserved as [UI-system history](../../records/UI_SYSTEM.md). Historical phase completion does not establish current exhaustive acceptance. [Current screenshots](../../images/current/README.md) are separate from behavioral evidence.
+Run `npm run check:templates` and `npm run check:contrast` (a token and consumer gate, not full accessibility certification), and inspect changed screens in both themes and at phone width. Keyboard, error recovery and long content need interaction checks beyond screenshots; see [testing](../../guides/testing.md). [Current screenshots](../../images/current/README.md) show appearance only. The original phase-by-phase design record, including why each rule exists, is [UI_SYSTEM.md](../../records/UI_SYSTEM.md).

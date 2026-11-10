@@ -4,7 +4,7 @@
 > Original status statements and measurements apply to their named baselines.
 > Use the [current documentation index](../README.md) for maintained contracts and procedures.
 
-> Presentation update (1 October 2026, `a56400a`): Dispatch offers buyer/rate maintenance in a new tab so its draft stays open, with explicit reload guidance. Effective-dated prices, captured billed rates, absence/non-sale states and payment ledgers are unchanged. [Current UI reference](UI-CURRENT.md), [evidence](../implementation/geist-screen-evidence/ACCEPTANCE.md).
+> Presentation update (1 October 2026, `a56400a`): Dispatch offers buyer/rate maintenance in a new tab so its draft stays open, with explicit reload guidance. Effective-dated prices, captured billed rates, absence/non-sale states and payment ledgers are unchanged. [Current UI reference](UI-CURRENT.md), evidence.
 
 > Current extension (2026-09-16): Buyer lists use server pagination. Statements page loaded rows locally; dispatch sheets retain and save all draft rows across pages.
 > See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.

@@ -4,7 +4,7 @@
 > Original status statements and measurements apply to their named baselines.
 > Use the [current documentation index](../README.md) for maintained contracts and procedures.
 
-1 October 2026. Read this before the historical narrative in [UI_SYSTEM.md](UI_SYSTEM.md). The warm palette and certainty vocabulary remain authoritative. Screen completion and acceptance are tracked independently in [the recommendation checklist](../implementation/GEIST-IMPLEMENTATION.md).
+1 October 2026. Read this before the historical narrative in [UI_SYSTEM.md](UI_SYSTEM.md). The warm palette and certainty vocabulary remain authoritative. Screen completion and acceptance are tracked independently in the recommendation checklist.
 
 | Role | Contract | Native consumer / example |
 |---|---|---|
@@ -24,7 +24,7 @@
 
 ## State gallery
 
-The [local specimen](../implementation/geist-screen-evidence/ui-specimen.html) uses the current compiled stylesheet and synthetic examples. It demonstrates light/dark, normal/invalid/readonly/disabled inputs, a busy button, empty/error content, long text, numeric table overflow and narrow width. It is a presentation specimen, not proof of Angular directive behavior or device accessibility. Actual component interactions are separately recorded in [acceptance](../implementation/geist-screen-evidence/ACCEPTANCE.md).
+The local specimen uses the current compiled stylesheet and synthetic examples. It demonstrates light/dark, normal/invalid/readonly/disabled inputs, a busy button, empty/error content, long text, numeric table overflow and narrow width. It is a presentation specimen, not proof of Angular directive behavior or device accessibility. Actual component interactions are separately recorded in acceptance.
 
 ## Preserve these meanings
 

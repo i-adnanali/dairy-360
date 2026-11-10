@@ -4,7 +4,7 @@
 > Original status statements and measurements apply to their named baselines.
 > Use the [current documentation index](../README.md) for maintained contracts and procedures.
 
-> Presentation update (1 October 2026, `a56400a`): Feed uses route-specific actions, focused new-record forms, grouped purchase quantity/pricing/charges, crop search/lifecycle/reset, and native overview disclosures with scoped purchase links. Original units, unknown values, recipient snapshots and write/revision semantics are unchanged. [Implementation and evidence](../implementation/GEIST-IMPLEMENTATION.md).
+> Presentation update (1 October 2026, `a56400a`): Feed uses route-specific actions, focused new-record forms, grouped purchase quantity/pricing/charges, crop search/lifecycle/reset, and native overview disclosures with scoped purchase links. Original units, unknown values, recipient snapshots and write/revision semantics are unchanged. Implementation and evidence.
 
 > Current extension (2026-09-16): Feed history sections now page loaded records locally (25/50/100 rows); their API responses still contain the full collections.
 > See [analytics and pagination](ANALYTICS_SPEC.md). Earlier measurements below retain their stated baseline.
@@ -48,7 +48,7 @@ Authentication, tenancy, billing, stock balances/forecasting, nutrition recommen
 - Typecheck, template checks (72 component files) and production build pass. Existing build warnings remain: initial bundle budget, shared CommonJS dependency and unused payroll SummaryBar import. jsdom reports its existing missing canvas implementation during tests.
 - Contrast reporting: 122 graded checks, 30 existing token failures. No contrast token changes in this feature.
 - Guarded HTTP harness seed and immediate replay both pass against port 4110 with `:memory:` storage. The injected fixture set also includes unknown-cost wanda, targeted ginger, measured khall and silage, mixed supply and partial/missing days.
-- Browser checks use only isolated harnesses: crop with unknown dates, expense entry, daily correction, provenance preservation, independent nested purchase/cancellation, price agreement display, history distinctions, light/dark desktop and narrow layout. See the [feed gallery](../images/feed/README.md).
+- Browser checks use only isolated harnesses: crop with unknown dates, expense entry, daily correction, provenance preservation, independent nested purchase/cancellation, price agreement display, history distinctions, light/dark desktop and narrow layout. See the feed gallery.
 
 ## Database preservation incident and fix
 

@@ -81,7 +81,7 @@ Do not treat these as authorization to implement or as a preselected architectur
 ## Read first
 
 - [UI_SYSTEM.md](UI_SYSTEM.md): current UI and unresolved questions.
-- [Screen gallery](../images/phase7/README.md): all routes and representative overlays.
+- Screen gallery: all routes and representative overlays.
 - [DEVELOPMENT.md](DEVELOPMENT.md): local setup, harness isolation and testing.
 - [REGISTRY.md](REGISTRY.md), [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md): provenance and entry rules.
 - [REGISTRY_PAYROLL.md](REGISTRY_PAYROLL.md): sensitive labour data and the deferred agent-access question.

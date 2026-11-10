@@ -16,15 +16,14 @@ Start with the task you need to complete. Current guides and references describe
 | Look up integration contracts | [Integration references](reference/integrations/README.md) |
 | See recorded appearance | [Screenshot gallery](images/current/README.md) |
 | Find remaining work | [Open items](OPEN.md) |
-| Review completed work and acceptance limits | [Acceptance status](reference/ui/acceptance-status.md), [remediation ledger](implementation/angular-remediation-2026-10-02.md), [latest evidence](implementation/angular-acceptance-2026-10-07/ACCEPTANCE.md) |
-| Understand earlier decisions | [Decision index](decisions/README.md), [historical records](records/README.md) |
+| Review what was verified and what was skipped | [Acceptance status](reference/ui/acceptance-status.md) |
+| Understand why something is the way it is | [Decision index](decisions/README.md), [dated records](records/README.md) |
 
 ## Conventions
 
 - Each maintained page owns a clear topic. Link to its contract rather than copying evolving test counts or complete procedures.
 - Guides explain prerequisites, steps, expected outcomes and recovery. References state current behavior, invariants, interfaces, examples and limitations. Architecture pages explain boundaries and reasoning.
-- Original proposals, migrations and verification logs stay in records with their baselines. Do not rewrite old evidence to claim later acceptance.
+- Dated records keep original proposals, decisions and measurements; source comments cite them for the reasoning behind code. They are not current instructions. Bulky verification evidence (logs, PDFs, screenshot sets) is not kept in the tree; git history has the earlier sets.
 - [Documentation maintenance](guides/documentation.md) describes link checking, source citations and screenshot refresh requirements.
-- `UI_SYSTEM.md` is a compatibility pointer for an untouched local review link, not another current specification. Local untracked reviews remain preserved.
 
 The root [README](../README.md) owns the product introduction and quick start. This index routes readers to deeper material without repeating them.

@@ -52,6 +52,6 @@ CI gates the live suite on credential availability and manual/tag execution; ord
 
 ## Evidence ownership
 
-Dated suite totals, warnings, screenshots and remaining gates belong in [latest implementation evidence](../implementation/angular-acceptance-2026-10-07/ACCEPTANCE.md). Current guides link there instead of repeating moving counts. [Current README images](../images/current/README.md) document appearance and provenance, independently of interaction testing.
+The latest suite totals, warnings and skipped checks belong in [acceptance status](../reference/ui/acceptance-status.md). Other guides link there instead of repeating moving counts. [Current README images](../images/current/README.md) document appearance and provenance, independently of interaction testing.
 
-[Acceptance status](../reference/ui/acceptance-status.md) records the completed browser/PDF checks and the 9 October decision to skip remaining alternative-print, Firefox/additional-report, spoken-reader and native-mobile checks for this remediation. A skipped check is not a pass. Other deferred items in [OPEN](../OPEN.md), including real-farm and live executor acceptance, are unchanged.
+[Acceptance status](../reference/ui/acceptance-status.md) also records the 9 October 2026 decision to skip alternative-print, Firefox/additional-report, spoken-reader and native-mobile checks. A skipped check is not a pass. Other deferred items in [OPEN](../OPEN.md), including real-farm and live executor acceptance, are unchanged.

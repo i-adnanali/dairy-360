@@ -1,19 +1,23 @@
-# README screenshot gallery — 1 October 2026
+# Screenshot gallery
 
-Captured **1 October 2026** from the production build of **`a56400a`**. At capture time, the application source matched the [screen-specific source manifest](../../implementation/geist-screen-evidence/SOURCE_SHA256.txt). [Capture manifest](manifest.json) records the commit, loaded bundle, routes, dimensions and image hashes.
+Captured **10 November 2026** from the production build of the source at the commit recorded in [manifest.json](manifest.json), after the November restructure of every section, the shared selection language and the Check rework. All records are synthetic, from the memory-only harness; nothing was saved.
 
 | Image | Route / state | Theme | Viewport |
 |---|---|---|---|
-| [Today](today-light.jpg) | `/`, seeded work board | Light | 1440×1000 |
-| [Analytics](analytics-dark.jpg) | `/analytics`, September 2026 monthly review, all sessions | Dark | 1440×1000 |
-| [Health](health-mobile-light.jpg) | `/animals/health`, task board | Light | 390×844 |
+| [Today](today-light.jpg) | `/`, the work board with nothing being recorded | Light | 1440×1000 |
+| [Milking](milking-light.jpg) | `/milk/milking` while recording: three answered, three still amber, unsaved | Light | 1440×1000 |
+| [Check](check-light.jpg) | `/check` after a completed check | Light | 1440×1000 |
+| [Analytics](analytics-dark.jpg) | `/analytics`, the current week, both sessions | Dark | 1440×1000 |
+| [Herd](herd-dark.jpg) | `/animals`, on the farm, sorted by serial | Dark | 1440×1000 |
+| [Health](health-mobile-light.jpg) | `/animals/health`, To do | Light | 390×844 |
+| [Today, phone](today-mobile-dark.jpg) | `/` at phone width | Dark | 390×844 |
 
-These are unedited browser screenshots from the stated baseline, predating the Angular remediation through `cb94fe9`. They are not captures of the latest source. The narrow viewport was a desktop-browser capture, not native-mobile acceptance. Each has a sibling JSON rendered snapshot and geometry record. No document-level horizontal overflow was observed. Long pages continue below the viewport.
+Each image has a sibling JSON with its URL, accessibility snapshot and geometry; the manifest records the source commit, loaded bundle and image hashes, and `npm run check:docs` verifies them. The phone captures are a narrow desktop browser, not native-device acceptance. Long pages continue below the viewport.
 
-The built frontend at `localhost:6512` used the existing synthetic memory-only registry harness on 6510. This capture pass browsed only; it did not write records or open a farm database. The existing fixture includes disposable records from the preceding UI validation. Screenshots show the browsing state, and clinical examples are synthetic.
+## Refresh
 
-To reproduce against disposable data, build the app, start `npm run registry:harness -w server -- --port=6510`, then `npm run harness:serve -- --port=6512 --api=http://localhost:6510`. Open the routes above, choose the stated themes/viewports, and capture after the page settles. Fixture dates follow farm today, so future values and date labels will differ. Update this manifest when refreshing the README images.
+1. `npm run harness:app` (registry on 6400), then `npm run build:angular` and `npm run harness:serve` (production build on 6430).
+2. Capture each route above at its theme and viewport after the page settles, at device scale 1, as JPEG. For the milking image, start recording (adnan, Direct entry), type a litre figure for the first animal, then `m` and `n` for the next two, and scroll the sheet to its heading.
+3. Write each image's JSON (`url`, `snapshot`, `geometry`) and update `manifest.json` with the new commit and SHA-256 hashes. Fixture dates follow farm today, so dates in the images change between refreshes.
 
-This gallery documents appearance only. The [acceptance status](../../reference/ui/acceptance-status.md) separately records later tests and skipped checks. Historical [Phase 7](../phase7/README.md), [Feed](../feed/README.md) and [analytics](../analytics/README.md) galleries retain their original evidence.
-
-Documentation was reorganized on 2 October 2026. These captures retain their original 1 October source/bundle provenance; later behavior/style fixes are described in the [remediation ledger](../../implementation/angular-remediation-2026-10-02.md). The files and capture manifest retain their original provenance. Current presentation contracts are in [the UI reference](../../reference/ui/design-system.md).
+Screenshots document appearance only; [acceptance status](../../reference/ui/acceptance-status.md) records behavioral checks.

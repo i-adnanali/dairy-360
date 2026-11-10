@@ -4,7 +4,7 @@
 > Original status statements and measurements apply to their named baselines.
 > Use the [current documentation index](../README.md) for maintained contracts and procedures.
 
-> Presentation update (1 October 2026, `a56400a`): trend precedes comparison; a native date/session inspector supports previous/next, reflects URL selection, and retains filter/period context. Unavailable comparison is compact; qualifications and equivalent tables remain. Shared chart presentation is reused by the assistant without changing metric adapters or calculations. [Current evidence](../implementation/geist-screen-evidence/ACCEPTANCE.md).
+> Presentation update (1 October 2026, `a56400a`): trend precedes comparison; a native date/session inspector supports previous/next, reflects URL selection, and retains filter/period context. Unavailable comparison is compact; qualifications and equivalent tables remain. Shared chart presentation is reused by the assistant without changing metric adapters or calculations. Current evidence.
 
 Status: first release implemented; domain specification dated 2026-09-16, with the current presentation update above. Section 11 records delivery details and refinements; section 12 documents the dedicated analytics harness.
 
@@ -371,6 +371,6 @@ Harness verification, 2026-09-16: 778 server tests and server/shared typecheck
 pass. A fresh `--analytics` process returned the expected in-memory banner,
 monthly comparison and five production records on page 2 over HTTP.
 
-[Analytics screen gallery](../images/analytics/README.md): daily, weekly and monthly reviews,
+Analytics screen gallery: daily, weekly and monthly reviews,
 light/dark themes, production pagination, reconciliation and mobile captures
 from the dedicated fixture harness (2026-09-16).

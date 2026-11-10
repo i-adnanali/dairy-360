@@ -21,6 +21,7 @@ Use the maintained owner below for current behavior. Relative links were rebased
 | [OBSERVABILITY.md](OBSERVABILITY.md) | [guides/observability.md](../guides/observability.md) |
 | [OPERATIONS.md](OPERATIONS.md) | [guides/camera-operations.md](../guides/camera-operations.md) |
 | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | [architecture/system.md](../architecture/system.md) |
+| [PHASE5_PRECHECK.md](PHASE5_PRECHECK.md) | [reference/ui/design-system.md](../reference/ui/design-system.md) |
 | [REGISTRY.md](REGISTRY.md) | [reference/registry/animals.md](../reference/registry/animals.md) |
 | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | [reference/ui/application-interactions.md](../reference/ui/application-interactions.md) |
 | [REGISTRY_FEED.md](REGISTRY_FEED.md) | [reference/registry/feed.md](../reference/registry/feed.md) |
@@ -38,8 +39,8 @@ Use the maintained owner below for current behavior. Relative links were rebased
 
 ## Other retained evidence
 
-- [Earlier superseded proposals](../archive/README.md).
-- [Implementation evidence](../implementation/GEIST-IMPLEMENTATION.md) and its separately scoped acceptance ledgers.
+- Earlier superseded proposals.
+- Implementation evidence and its separately scoped acceptance ledgers.
 - [Current screenshots](../images/current/README.md); older galleries preserve their original captures.
 - Local untracked `reviews/` documents remain unchanged and are not implicitly published by these links.
 - [Reorganization record](documentation-reorganization-2026-10-02.md) describes this migration and checks.

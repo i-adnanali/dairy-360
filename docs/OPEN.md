@@ -319,11 +319,11 @@ for large composite histories; analytics report/export adapters; and later feed,
 health and financial analytics. Monthly payment practice alone does not define an
 overdue balance, and production-minus-dispatch is not established milk loss.
 
-## Screen-specific UI acceptance — scope decision
+## UI acceptance — scope decision
 
 <a id="open-060"></a>
 
-- **OPEN-060** — **Angular remediation closed within the agreed scope.** Screen implementation at `a56400a` and subsequent fixes through `cb94fe9` are delivered. Feed comparison races and native A4 animal/buyer PDF checks have recorded evidence. On 9 October 2026, the owner chose to skip alternative print formats, Firefox/additional reports, spoken-reader and native-mobile acceptance. Those exclusions no longer block this remediation and are not passes. Unrelated historical follow-ups—including operator/large-data walkthroughs, live assistant/unknown-write acceptance, exhaustive per-writer permutations and further zoom/text-spacing coverage—are unchanged. [Current decision and evidence](reference/ui/acceptance-status.md) · [original acceptance scope](implementation/geist-screen-evidence/ACCEPTANCE.md#remaining-acceptance--explicitly-open).
+- **OPEN-060** — **UI work is closed within the agreed scope.** The October Angular remediation and the November section restructure, selection language and Check rework are delivered. On 9 October 2026 the owner chose to skip alternative print formats, Firefox/additional reports, spoken-reader and native-mobile acceptance; those are exclusions, not passes. Operator and large-data walkthroughs, live assistant and unknown-write acceptance, and further zoom/text-spacing coverage remain open. [Acceptance status](reference/ui/acceptance-status.md).
 
 ## Camera finding carried forward
 

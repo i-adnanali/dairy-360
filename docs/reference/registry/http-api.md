@@ -32,7 +32,7 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | GET | `/engagements/:id/terms` | the package history for one stint, benefits included |
 | GET | `/payroll/run?from=&to=` | the run: who must be answered, and which dihari days are already in |
 | GET | `/storage` | which database this router writes to |
-| GET | `/verification?as_of=` | invariants, histogram, intervals, milk completeness, and the labour report |
+| GET | `/verification?as_of=` | invariant violations (each with an optional `target`: an animal, or a milking or dispatch sheet), histogram, intervals, milk completeness, and the labour report |
 | POST | `/animals` | `addAcquiredAnimal` |
 | POST | `/events` | `appendLifeEvent` |
 | POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |

@@ -81,7 +81,7 @@ flowchart TD
 
     Kind -- "read" --> GR["guardIds(input)"]
     GR -- "error" --> RErr["tool_result: ToolError (is_error=true)"]
-    GR -- "ok" --> Exec["READ_EXECUTORS[name](../input)"]
+    GR -- "ok" --> Exec["READ_EXECUTORSname"]
     Exec --> Dig["modelDigest -> tool_result"]
     Exec --> DS{"dataset produced?"}
     DS -- "yes" --> Coll["collect into datasets (client only)"]

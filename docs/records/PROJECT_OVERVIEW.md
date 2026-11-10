@@ -445,4 +445,4 @@ adapters are not built. See [ANALYTICS_SPEC.md](ANALYTICS_SPEC.md).
 
 ## Current screen delivery
 
-The screen-specific audit work is delivered in `a56400a` (1 October 2026): clearer People/Feed tasks and form groups, precision-aware animal history/corrections, operational save continuation, Health exceptions, analytics date inspection and assistant outcome receipts. [Implementation ledger](../implementation/GEIST-IMPLEMENTATION.md), [current screenshots](../images/current/README.md) and [validation limits](../implementation/geist-screen-evidence/ACCEPTANCE.md) describe the current frontend without altering the architecture or domain contracts above.
+The screen-specific audit work is delivered in `a56400a` (1 October 2026): clearer People/Feed tasks and form groups, precision-aware animal history/corrections, operational save continuation, Health exceptions, analytics date inspection and assistant outcome receipts. Implementation ledger, [current screenshots](../images/current/README.md) and validation limits describe the current frontend without altering the architecture or domain contracts above.

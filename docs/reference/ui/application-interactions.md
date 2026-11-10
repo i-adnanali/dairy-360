@@ -1,45 +1,49 @@
 # Application interaction contracts
 
-Current reference for behavior shared across domains. Individual fields, calculations and write APIs belong to the [domain references](../registry/README.md).
+Current reference for behavior shared across domains. Individual fields, calculations and write APIs belong to the [domain references](../registry/README.md); how states look belongs to the [design system](design-system.md).
 
-## Navigation and Today
+## Navigation
 
-The shell groups Today, Herd, Milk, Feed, Labour, Analytics and Check. Desktop navigation, mobile Menu and the command palette expose the same hierarchy from [navigation.ts](../../../web-angular/src/app/registry/navigation.ts). Unknown routes show a recovery screen instead of silently changing location. Escape closes the mobile menu and returns focus to its trigger.
+The shell groups Today, Analytics, Herd (Animals, Calvings, Health), Milk (Milking, Dispatch, Buyers), Feed (Overview, Days, Crops, Purchases, Catalogue), Labour (People, Payroll), Monitor and Check. Desktop navigation, the phone Menu and the command palette (`Cmd/Ctrl+K`) expose the same hierarchy from [navigation.ts](../../../web-angular/src/app/registry/navigation.ts). The section bar appears only for sections with views. An address under a section with no view of its own (an animal's page, one feeding day) marks its section's nearest view as current. Unknown routes show a recovery screen instead of silently changing location. Escape closes the phone menu and returns focus to its trigger. The first Tab stop is "Skip to content".
 
-Today is the operational entry point at `/`. Its selected farm-local date scopes milking, dispatch and feeding links. Outstanding, partially recorded and recorded sessions remain distinct. Health work links to the task board. Payroll summaries describe wage recording; they must not imply payments were made or that no money is owed.
+On a same-page navigation that only changes the query (a filter, a period, a session), focus stays where it was; a new page moves focus to its heading.
+
+## Today and the session board
+
+Today (`/`) collects work from every section, ranked by consequence. **Needs you now** holds danger items: overdue health tasks, milk withdrawals, urgent camera events, late sessions and approvals waiting. **Also open** holds due-today tasks, notable camera events, unentered payroll and the day's feeding account. Each item links to the place it is resolved. Side panels summarise milk today (seven-day bars: filled complete, open partial, gap no record), last night's camera events and the herd by stage.
+
+The session board in the header shows today's five sessions as answered over expected. In the evening half, an open morning milking or dispatch becomes **Late** and also appears on Today. One open session is lit **Now**; feeding is never late. The tile for the sheet you have open reads **Viewing**, only when it is today's exact sheet ([session-board.ts](../../../web-angular/src/app/registry/session-board/session-board.ts) `selectedSlotKey`).
 
 ## Browsing, recording and target safeguards
 
-Reads do not require a recording session. Write forms collect explicit recorder/source and retain the storage-target gate. Recorder is not automatically the witness, prescriber, administrator or milker. Provenance is evidence about a record, not authentication.
+Reads never require recording. To save, the operator starts recording from the header: who is typing (a previously used name or a new one) and where the records come from (Direct entry, Daily herd sheet, Cycle card, Recall, Import; never defaulted). The gate also states the storage target in words. Recording lasts until it is stopped from the header or the page reloads; opening the gate keeps the current draft. The recorder is not automatically the witness, prescriber, administrator or milker, and provenance is evidence about a record, not authentication.
 
-Opening provenance setup must retain the current draft. The target indicator must accurately distinguish the disposable harness from persistent storage; visual styling alone is not a storage guarantee.
+The storage chip distinguishes the disposable harness, the persistent registry and an unknown target; styling alone is not a storage guarantee.
 
 ## URL state and recovery
 
-Shareable date/session/filter/page state belongs in the URL where the screen supports it. Back navigation restores that scope. Filter, sort or page-size changes reset paging appropriately. A recovery/reset action clears the relevant filters rather than silently showing unrelated records. Analytics drilldowns retain selected period/session and resolve links to the matching source.
+Date, session, filter, period and page state belongs in the URL where the screen supports it, and Back restores it. Milk session and date steps replace the URL rather than adding history. Filter, sort or page-size changes reset paging. Analytics drilldowns keep the selected period and session. Check restores its scroll position when you come back from a linked sheet.
 
 ## Forms and drafts
 
-Native controls keep persistent labels, associated help/errors and keyboard behavior. Refusals keep entered values. Conditional sections may hide blank irrelevant fields, but existing values and errors force disclosure. Navigation guards state the consequences of losing unsaved edits. Refresh does not promise draft persistence across reloads.
+Native controls keep persistent labels, associated help and errors, and keyboard behavior. Refusals keep entered values. Identifier fields (animal, person, buyer, sire) are type-or-pick suggestion lists so spellings stay consistent. Dates are typed as known (`6 Jul 2023`, `jul 2023`, `2023`, plus a guess box for an estimate); precision is read from what was typed, shown back, and cannot be raised without typing more ([date-parse.ts](../../../web-angular/src/app/registry/date-parse.ts)). Numbered choice groups accept their digit or first letter. `Cmd/Ctrl+Enter` saves from a field when the form is ready.
 
-Editable session sheets retain one full model across locally paged rows. Completeness, validation and save operate on the entire intended session, never only the visible page. On error, reveal/navigate to the relevant field and preserve other entries.
+Session sheets (milking, dispatch, payroll) keep one model across locally paged rows; completeness, validation and save cover the whole session. On the milking sheet, Enter moves to the next animal, `m` records not measured and `n` not milked; bare keys never fire from other text fields. The footer names who is still unanswered and offers "Go to the first"; Save stays disabled with its reason until nothing blocks it. Unsaved sheets show "Not saved yet". Navigation guards state what unsaved edits would be lost; drafts do not survive a reload.
 
-A nested Feed purchase saves independently. Returning to the feeding draft requires explicit linking if the purchase was fed; cancelling the draft does not undo that purchase. Buyer maintenance can open separately while preserving the dispatch draft.
+A nested Feed purchase saves independently of the feeding draft. Buyer maintenance opens in a separate tab while the dispatch draft stays.
 
 ## Writes, conflicts and completion
 
-Pending or uncertain writes lock conflicting changes. Exact-request retries preserve endpoint, payload and key; domain guarantees differ as documented in [shared registry rules](../registry/shared-rules.md). Do not change a pending request into a different operation.
+Pending or uncertain writes lock conflicting changes, and retries preserve endpoint, payload and key; domain guarantees differ as documented in [shared registry rules](../registry/shared-rules.md). Feed and Health expected revisions reject stale edits and offer explicit review of the saved version. Success receipts require server confirmation. Milking can continue to Dispatch with the same date and session.
 
-Feed/Health expected revisions reject stale edits. Preserve the draft and offer explicit review/adoption of the saved version; never overwrite an occupied date or newer revision silently. Before/after summaries preserve date precision and uncertainty.
+## Check
 
-Success receipts require server confirmation. Milking can then continue to Dispatch with matching date/session. Assistant approval receipts record authorization separately from execution results.
+`/check` orders findings by consequence: **Needs an answer** (sessions missing answers, each linking to its sheet), **Contradictions in the records** (invariant violations, each with an owner-language heading, the server sentence, a link built from the violation's structured `target`, and the code under Technical details), **People: worth a look** (neutral), then **Reading the records** (date precision by source, calving intervals, milking sessions answered, where the milk went). Recheck keeps the previous results dimmed and `aria-busy`, and hides any clean verdict until the new result arrives.
 
 ## Tables, keyboard and assistant
 
-Only meaningful overflow regions receive a named keyboard stop. Keep identity and critical values visible without replacing native table semantics. Menus and dialogs restore focus appropriately; labels cannot depend on placeholders or hover alone.
+Only overflowing regions receive a named keyboard stop. Tabs and segmented choices take one Tab stop and move with the arrow keys, Home and End. Menus and dialogs restore focus. The assistant opens beside any page or at `/chat`, toggles with `Cmd/Ctrl+/`, shares one conversation across presentations, and keeps technical tool detail behind disclosures. It reads registry records; proposed writes wait for approval and never target registry records. See [frontend architecture](../../architecture/frontend.md).
 
-The command palette uses `Cmd/Ctrl+K`; shortcut handling must respect text-entry contexts and existing owners. The assistant shares conversation state across dock/mobile presentation, retains draft consequences and keeps technical details available through disclosures. See [frontend architecture](../../architecture/frontend.md).
+## Acceptance scope
 
-## Evidence and acceptance scope
-
-[Acceptance status](acceptance-status.md) links the performed synthetic browser and native PDF checks, including Feed comparison races and complete A4 animal/buyer reports. The owner chose to skip the remaining alternative-print, Firefox/additional-report, spoken-reader and native-mobile checks on 9 October 2026; they are not passes. Other operator/live-service acceptance remains separately tracked. Historical reasons for these contracts are in the [entry UX](../../records/REGISTRY_ENTRY_UX.md) and [payroll](../../records/REGISTRY_PAYROLL.md) records.
+[Acceptance status](acceptance-status.md) records what has been verified and which checks were skipped by decision. Historical reasons for these contracts are in the [entry UX](../../records/REGISTRY_ENTRY_UX.md) and [payroll](../../records/REGISTRY_PAYROLL.md) records.

@@ -1,47 +1,105 @@
 {
-  "capturedOn": "2026-10-01",
-  "sourceCommit": "a56400a801c3c8c14c97589a2baef838625403ea",
-  "sourceManifestMatches": true,
-  "data": "Existing synthetic memory-only harness; read-only screenshot pass",
+  "capturedOn": "2026-11-10",
+  "sourceCommit": "659dc3f0c8b0c228cc01ab75fd8e82ed1c9e0aef",
+  "data": "Synthetic memory-only harness (npm run harness:app); production build served by npm run harness:serve. Nothing was saved: the milking capture shows typed, unsaved answers.",
   "captures": [
+    {
+      "image": "today-light.jpg",
+      "snapshot": "today-light.json",
+      "state": "Today work board, nothing being recorded",
+      "url": "http://localhost:6430/",
+      "dark": false,
+      "documentWidth": 1440,
+      "height": 1000,
+      "scripts": [
+        "main-6UM4LTG7.js"
+      ],
+      "width": 1440,
+      "sha256": "89fbcbdbb54d73840684dd266828c3e64112138acbf779a40713f5a63878da64"
+    },
+    {
+      "image": "milking-light.jpg",
+      "snapshot": "milking-light.json",
+      "state": "Evening milking while recording: three animals answered, three unanswered (unsaved)",
+      "url": "http://localhost:6430/milk/milking",
+      "dark": false,
+      "documentWidth": 1440,
+      "height": 1000,
+      "scripts": [
+        "main-6UM4LTG7.js"
+      ],
+      "width": 1440,
+      "sha256": "b01c496fc5b6bde55fea0051336d3b533ccbd349fcc0e5e6ad78d85670e7cc9c"
+    },
+    {
+      "image": "check-light.jpg",
+      "snapshot": "check-light.json",
+      "state": "Check the records after a completed check",
+      "url": "http://localhost:6430/check",
+      "dark": false,
+      "documentWidth": 1440,
+      "height": 1000,
+      "scripts": [
+        "main-6UM4LTG7.js"
+      ],
+      "width": 1440,
+      "sha256": "416a90e4e12b7b321ba4eb1cc9702d67994866dfc078652467b1bc918881624a"
+    },
     {
       "image": "analytics-dark.jpg",
       "snapshot": "analytics-dark.json",
-      "url": "http://localhost:6512/analytics?view=month&page=1&detailOn=&detailSession=&on=2026-09-01",
+      "state": "Weekly milk analytics, both sessions",
+      "url": "http://localhost:6430/analytics",
       "dark": true,
       "documentWidth": 1440,
       "height": 1000,
       "scripts": [
-        "main-NGUMFTJF.js"
+        "main-6UM4LTG7.js"
       ],
       "width": 1440,
-      "sha256": "5fd3667df50485c39a62134c6126b1a74e03ebefdf0c3b3272c6c9fd76bba0cc"
+      "sha256": "cc661f2507781d170f1411bac0d275147b87de3af15a1c2d6b92e08515474de3"
+    },
+    {
+      "image": "herd-dark.jpg",
+      "snapshot": "herd-dark.json",
+      "state": "Animals on the farm, sorted by serial",
+      "url": "http://localhost:6430/animals",
+      "dark": true,
+      "documentWidth": 1440,
+      "height": 1000,
+      "scripts": [
+        "main-6UM4LTG7.js"
+      ],
+      "width": 1440,
+      "sha256": "d757989a29f589355b532bff9dc9b460c8de055ece2659fd2f02280b84555347"
     },
     {
       "image": "health-mobile-light.jpg",
       "snapshot": "health-mobile-light.json",
-      "url": "http://localhost:6512/animals/health",
+      "state": "Health To do tab",
+      "url": "http://localhost:6430/animals/health",
       "dark": false,
       "documentWidth": 390,
       "height": 844,
       "scripts": [
-        "main-NGUMFTJF.js"
+        "main-6UM4LTG7.js"
       ],
       "width": 390,
-      "sha256": "b3dfb89032a71f2e2627f51d4c29645b03cfde499f85e2cca102f1122178212a"
+      "sha256": "c253593dbad2569d1b4ce3db59e3d50e1374e50e746413069067eaefdd77e019"
     },
     {
-      "image": "today-light.jpg",
-      "snapshot": "today-light.json",
-      "url": "http://localhost:6512/",
-      "dark": false,
-      "documentWidth": 1440,
-      "height": 1000,
+      "image": "today-mobile-dark.jpg",
+      "snapshot": "today-mobile-dark.json",
+      "state": "Today on a narrow screen",
+      "url": "http://localhost:6430/",
+      "dark": true,
+      "documentWidth": 390,
+      "height": 844,
       "scripts": [
-        "main-NGUMFTJF.js"
+        "main-6UM4LTG7.js"
       ],
-      "width": 1440,
-      "sha256": "693ec600fd4b6cacbfa113ee3eb83d7fded5f2c7e9e49fc622ea7f9ad06856bb"
+      "width": 390,
+      "sha256": "e68ac9b1b749a2cc1de12ab9acc1baeace9c236b00034fe453cb4fc488741f5b"
     }
   ]
 }
