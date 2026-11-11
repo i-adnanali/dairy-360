@@ -22,6 +22,10 @@
 // (`registry:calve`) enters the calvings, oldest first, and the farm-born
 // animals appear as a consequence. That is the two-pass order decision doc §11
 // prescribes, enforced by which command exists rather than by a note.
+//
+// A farm-born animal whose dam nobody remembers is the exception, and it has
+// no command here: it is entered through the Add animal form ("Born here,
+// mother not known") or POST /animals/born-here, which call addFarmBornAnimal.
 
 import {
   CliError,

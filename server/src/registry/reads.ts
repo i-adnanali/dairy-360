@@ -587,6 +587,9 @@ export function linkCandidates(
         return 'this is the dam -- an animal cannot be its own calf';
       }
       if (!origin) return 'no effective origin event (run verify:registry)';
+      if (origin.type === 'birth' && origin.payload.dam_id === null) {
+        return 'recorded as born here with its mother not known -- linking it to a calving is not supported yet';
+      }
       if (origin.type === 'birth') return 'already has a birth event, so it already has a dam';
       if (opts.calfSex !== undefined && a.sex !== opts.calfSex) {
         return `recorded as ${a.sex}, but this calving says ${opts.calfSex}`;

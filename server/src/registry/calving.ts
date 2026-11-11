@@ -303,6 +303,16 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
             `supersede. Run verify:registry -- invariant 3 is already failing.`,
         );
       }
+      if (origin.type === 'birth' && origin.payload.dam_id === null) {
+        // Deliberately refused for now rather than superseding one birth with
+        // another: invariant 3's origin-promotion rule only allows birth over
+        // acquired, and widening it is its own change.
+        throw new CalvingError(
+          'already_has_birth',
+          `calf '${targetId}' is recorded as born on the farm with its mother not known ` +
+            `(${origin.id}). Linking it to a remembered calving is not supported yet.`,
+        );
+      }
       if (origin.type === 'birth') {
         throw new CalvingError(
         'already_has_birth',

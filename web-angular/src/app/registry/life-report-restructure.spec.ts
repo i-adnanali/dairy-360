@@ -90,6 +90,8 @@ describe('life report rows', () => {
   it('reads family from her side', () => {
     expect(familyLine({ child_id: 'BD-0018', parent_ref: 'BD-0001', relation: 'dam', certainty: 'known' }, 'BD-0001')).toBe('Mother of BD-0018');
     expect(familyLine({ child_id: 'BD-0001', parent_ref: 'BD-0003', relation: 'dam', certainty: 'estimated' }, 'BD-0001')).toBe('Dam: BD-0003 (estimated)');
+    // Born here, mother not known: an answer, not a gap.
+    expect(familyLine({ child_id: 'BD-0001', parent_ref: null, relation: 'dam', certainty: 'unknown' }, 'BD-0001')).toBe('Dam: not known');
   });
 
   it('counts in words', () => {

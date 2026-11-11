@@ -185,6 +185,13 @@ describe('EventList — the correction window', () => {
     );
   });
 
+  it('says born here, mother not known for a birth with no dam -- never "dam ?"', () => {
+    const el = render([ev({ id: 'u', type: 'birth', payload: { dam_id: null, sex: 'female', outcome: 'live' } })]);
+    const text = el.querySelector('[data-event="u"] [data-role="summary"]')!.textContent!;
+    expect(text).toContain('born here, mother not known');
+    expect(text).not.toContain('dam ?');
+  });
+
   it('has a built empty state', () => {
     const el = render([]);
     expect(el.querySelector('[data-role="empty"]')).not.toBeNull();

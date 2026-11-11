@@ -909,6 +909,59 @@ describe('AnimalForm', () => {
   });
 });
 
+describe('AnimalForm — born here, mother not known', () => {
+  function mount() {
+    const { http } = setup();
+    const fixture = TestBed.createComponent(AnimalForm);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    click(el, '[data-role="origin-group"] [data-chip="born_here"]');
+    fixture.detectChanges();
+    return { http, fixture, el };
+  }
+
+  it('swaps the arrival date and seller for one required birth date', () => {
+    const { el } = mount();
+    expect(el.querySelectorAll('app-precision-date').length).toBe(1);
+    expect(el.querySelector('app-precision-date')!.textContent).toContain('When was it born?');
+    expect(el.textContent).not.toContain('Acquired from');
+    expect(el.querySelector('[data-role="born-here-help"]')).not.toBeNull();
+  });
+
+  it('cannot submit without the birth date, because here it is the origin', () => {
+    const { el } = mount();
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
+    expect(el.querySelector('[data-role="blocked"]')!.textContent).toContain('birth date');
+  });
+
+  it('posts to /animals/born-here with the birth date and NO arrival fields', () => {
+    const { http, fixture, el } = mount();
+    enterDate(fixture, el, '2016');
+    (el.querySelector('[data-role="estimated"]') as HTMLInputElement).click();
+    fixture.detectChanges();
+    click(el, '[data-role="submit"]');
+
+    const req = http.expectOne(`${BASE}/animals/born-here`);
+    expect(req.request.body.birth_on).toBe('2016-01-01');
+    expect(req.request.body.birth_precision).toBe('estimated');
+    expect(req.request.body.acquired_on).toBeUndefined();
+    expect(req.request.body.from).toBeUndefined();
+    expect(req.request.body.recorded_by).toBe('adnan');
+    expect(req.request.headers.get('Idempotency-Key')).toBeTruthy();
+    http.expectNone(`${BASE}/animals`);
+  });
+
+  it('switching origin clears a date typed under the other one', () => {
+    const { fixture, el } = mount();
+    enterDate(fixture, el, '2016');
+    click(el, '[data-role="origin-group"] [data-chip="acquired"]');
+    fixture.detectChanges();
+    click(el, '[data-role="origin-group"] [data-chip="born_here"]');
+    fixture.detectChanges();
+    expect((el.querySelector('[data-role="submit"]') as HTMLButtonElement).getAttribute('aria-disabled')).toBe('true');
+  });
+});
+
 describe('EventForm', () => {
   function mount() {
     const ctx = setup();

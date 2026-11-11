@@ -105,7 +105,8 @@ export class EventList {
         return bits.join(' · ');
       }
       case 'birth': {
-        const bits = [`dam ${s('dam_id') ?? '?'}`];
+        // dam_id null is a statement, not a gap: born here, mother not known.
+        const bits = [p['dam_id'] === null ? 'born here, mother not known' : `dam ${s('dam_id') ?? '?'}`];
         const sire = s('sire_ref');
         if (sire) bits.push(`sire ${sire}`);
 

@@ -68,7 +68,9 @@ export interface AddAcquiredAnimalResult {
  * to its dam in the same transaction. Minting a `born_on_farm` animal here
  * would produce a calf with no dam edge and no calving on any dam, which
  * invariants 6 and 7 reject and which nothing could repair, because no event
- * would say who the dam was.
+ * would say who the dam was. The one exception, a farm-born animal whose dam
+ * nobody remembers, has its own function (addFarmBornAnimal below) that SAYS
+ * so -- a birth with `dam_id: null` -- rather than leaving it to be inferred.
  *
  * The transaction matters: an animal row without its origin event would violate
  * invariant 3 and could not be corrected, since there would be nothing to
@@ -143,6 +145,102 @@ export function addAcquiredAnimal(
         estimated_birth_on: birthOn,
         estimated_birth_precision: birthPrecision,
         notes: input.notes ?? null,
+      },
+      provenance: input.provenance,
+    });
+    rebuildAnimals(db, { asOf: input.asOf, animalIds: [id] });
+    return { animal_id: id, event_id: event.id };
+  }).immediate();
+}
+
+// ---------------------------------------------------------------------------
+// Adding a farm-born animal whose mother is not known
+// ---------------------------------------------------------------------------
+
+export interface AddFarmBornAnimalInput {
+  sex: RegistrySex;
+  name?: string | null;
+  species?: string | null;
+  /** The animal's birth date. REQUIRED: it is the date of the origin event. */
+  birth_on: string;
+  birth_precision: DatePrecision;
+  sire_ref?: string | null;
+  post_no?: string | null;
+  tag_no?: string | null;
+  provenance: Provenance;
+  asOf: string;
+}
+
+/**
+ * Create one `born_on_farm` animal whose mother nobody remembers, and its
+ * `birth` origin event with `dam_id: null`, in one transaction.
+ *
+ * ---------------------------------------------------------------------------
+ * WHY THIS EXISTS BESIDE recordCalving
+ * ---------------------------------------------------------------------------
+ * A farm's herd is mostly animals born on it, and a backfill reaches adults
+ * whose dams were sold, died or were never written down. Before this path the
+ * only honest-looking options were both false: enter the animal as `acquired`
+ * (it was not bought) or invent a dam (a phantom animal with phantom calvings,
+ * corrupting parity and interval figures). The registry already had the slot
+ * for the truthful answer -- parentage certainty 'unknown' -- with nothing
+ * writing it.
+ *
+ * What this does NOT do: create a calving. There is no dam to hang one on, so
+ * no lactation opens anywhere and no parity changes. It is the animal's origin
+ * and nothing else.
+ *
+ * Use recordCalving whenever the dam IS known, even roughly: a dam entered with
+ * a guessed arrival year and a departure is a better record than an unknown one.
+ */
+export function addFarmBornAnimal(
+  db: Db,
+  input: AddFarmBornAnimalInput,
+): AddAcquiredAnimalResult {
+  if (input.sex !== 'female' && input.sex !== 'male') {
+    throw new RegistryError(
+      'invalid_payload',
+      `sex must be 'female' or 'male', got '${String(input.sex)}'`,
+      'sex',
+    );
+  }
+  if (!input.birth_on) {
+    throw new RegistryError(
+      'invalid_payload',
+      'a farm-born animal needs its birth date -- an estimated year is fine, and honest',
+      'birth_on',
+    );
+  }
+  if (!input.birth_precision) {
+    throw new RegistryError(
+      'precision_not_defaulted',
+      'a birth date was given without its precision. Precision is never defaulted.',
+      'birth_precision',
+    );
+  }
+  assertDatePrecision({ occurred_on: input.birth_on, date_precision: input.birth_precision });
+
+  return db.transaction((): AddAcquiredAnimalResult => {
+    const id = allocateSerial(db);
+    insertAnimal(db, {
+      id,
+      name: input.name ?? null,
+      sex: input.sex,
+      species: input.species ?? 'buffalo',
+      origin: 'born_on_farm',
+      post_no: input.post_no ?? null,
+      tag_no: input.tag_no ?? null,
+    });
+    const event = appendEvent(db, {
+      animal_id: id,
+      type: 'birth',
+      occurred_on: input.birth_on,
+      date_precision: input.birth_precision,
+      payload: {
+        dam_id: null,
+        sire_ref: input.sire_ref ?? null,
+        sex: input.sex,
+        outcome: 'live',
       },
       provenance: input.provenance,
     });

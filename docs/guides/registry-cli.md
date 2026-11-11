@@ -11,6 +11,9 @@ npm run registry:add -w server -- --sex=female --name=Noor \
   --birth-on=2017-01-01 --birth-precision=year \
   --source-form=recall --recorded-by=adnan
 
+# (no command for a farm-born animal whose mother is not known: use the Add animal
+#  form, "Born here, mother not known", or POST /animals/born-here)
+
 # a calving: dam event + calf + birth event + parentage + lactation, one txn
 npm run registry:calve -w server -- --dam=BD-0001 --on=2023-04-01 --precision=month \
   --calf-sex=female --outcome=live --source-form=recall --recorded-by=adnan

@@ -304,6 +304,16 @@ export class RegistryApi {
     )));
   }
 
+  /** A farm-born animal whose mother is not known. */
+  addAnimalBornHere(
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<{ animal_id: string; animal: AnimalDetail }> {
+    return unwrap(firstValueFrom(this.http.post<{ animal_id: string; animal: AnimalDetail }>(
+      `${BASE}/animals/born-here`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
   addEvent(
     body: Record<string, unknown>,
     idempotencyKey: string,

@@ -131,13 +131,19 @@ Built when something needs them, not before.
   [FARM_EVENTS.md § Open items](records/FARM_EVENTS.md#open-items)
 <a id="open-023"></a>
 
-- **OPEN-023** — **`registry:add` cannot record an animal's dam**; the `certainty` column exists
-  and nothing writes it — [REGISTRY.md § Known fidelity gaps](records/REGISTRY.md#known-fidelity-gaps)
+- **OPEN-023** — **`registry:add` cannot record an acquired animal's dam**; the `certainty`
+  column's `unknown` value is written only for a farm-born animal whose mother is not known —
+  [REGISTRY.md § Known fidelity gaps](records/REGISTRY.md#known-fidelity-gaps)
 <a id="open-024"></a>
 
 - **OPEN-024** — **No first-class correction for non-calving events**; superseding a `dry_off`,
   `departure` or `note` means calling `appendEvent()` directly —
   [REGISTRY.md § Known fidelity gaps](records/REGISTRY.md#known-fidelity-gaps)
+<a id="open-061"></a>
+
+- **OPEN-061** — **A farm-born animal entered with its mother not known cannot be linked to her
+  calving later**; link mode refuses it because invariant 3 lets a `birth` supersede only an
+  `acquired` — [REGISTRY.md § Known fidelity gaps](records/REGISTRY.md#known-fidelity-gaps)
 <a id="open-025"></a>
 
 - **OPEN-025** — **`correctOutcome()` is deferred**, with a procedural workaround —

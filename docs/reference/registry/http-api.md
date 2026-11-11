@@ -34,6 +34,7 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | GET | `/storage` | which database this router writes to |
 | GET | `/verification?as_of=` | invariant violations (each with an optional `target`: an animal, or a milking or dispatch sheet), histogram, intervals, milk completeness, and the labour report |
 | POST | `/animals` | `addAcquiredAnimal` |
+| POST | `/animals/born-here` | `addFarmBornAnimal` — born on the farm, mother not known |
 | POST | `/events` | `appendLifeEvent` |
 | POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |
 | POST | `/calvings/:eventId/correction` | `correctCalving` |

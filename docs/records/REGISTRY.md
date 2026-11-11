@@ -738,6 +738,8 @@ Precision gives the animal every benefit of the doubt: the floor is measured fro
 
 `registry:add` handles **`acquired` only**. A `born_on_farm` animal is created *by* the calving that produced it, in the same transaction that allocates its serial and links its dam — so letting `registry:add` mint one would produce a calf with no dam edge and no calving on any dam, which nothing could repair because no event would say who the dam was. The two-pass backfill order is therefore enforced by which command exists, not by a note.
 
+*Added November 2026:* the one farm-born case with no dam to name — an adult born on the farm whose mother nobody remembers — has its own entry point, `addFarmBornAnimal` (`POST /animals/born-here`; *Born here, mother not known* on the Add animal form). It writes a `birth` origin with `dam_id: null` and no calving, which the projection turns into a dam edge of certainty `unknown`, so invariant 7 holds without inventing a dam. `registry:add` still handles `acquired` only, and there is no CLI command for this case. The ordering rule above is unchanged for every animal whose dam is known.
+
 `registry:event` also guards the terminal-departure rule up front: writing anything but a `note` after a departure is refused with `--allow-after-departure` offered for the genuine out-of-order case, so invariant 5 is not the first place an operator learns about it.
 
 ### The domain core, and why the CLI is thin
@@ -803,6 +805,7 @@ Mounted at `/api/registry` on the real server ([index.ts](../../server/src/index
 | GET | `/storage` | which database this router writes to |
 | GET | `/verification?as_of=` | invariants, histogram, intervals, milk completeness, and the labour report |
 | POST | `/animals` | `addAcquiredAnimal` |
+| POST | `/animals/born-here` | `addFarmBornAnimal` — born on the farm, mother not known |
 | POST | `/events` | `appendLifeEvent` |
 | POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |
 | POST | `/calvings/:eventId/correction` | `correctCalving` |
@@ -1265,6 +1268,7 @@ Blocking rules:
 - **Precision is never defaulted.** A missing precision is an error, not `day`.
 - **`source_form = 'recall'`** for anything reconstructed from memory. `recorded_by` is whoever remembered it; `observed_by` is null unless they saw it.
 - **Do not enter a date you do not have.** `estimated 2021` beats a fabricated `2021-04-12`, because only the first can be corrected without someone first discovering it was wrong.
+- **Farm-born, mother not remembered:** enter it with `addFarmBornAnimal` (`POST /animals/born-here`, or *Born here, mother not known* on the Add animal form) and an honest birth precision — `estimated` is normal. Never enter it as `acquired`, and never invent a dam. If the mother *is* known, even roughly, enter her and record the calving instead.
 - **Two passes.** Animals with origin events first; then calvings, oldest first, so `recordCalving` creates farm-born calves that pass one may already have entered as `acquired`. Correct the overlap by **superseding event**, never by delete-and-re-add.
 - ~20 animals and 10–20 historical calvings is small enough to enter by hand and check by eye. Do that once, carefully, rather than building an importer.
 
@@ -1274,7 +1278,8 @@ Blocking rules:
 
 - **Historical live-data check (Cycle 8): the registry was empty.** This is not a claim about the current farm database; this documentation audit did not open it. At that checkpoint, the schema, transaction, projections, entry points and verification are built and tested; no real animal has been entered, because the herd list does not exist yet. Every `verify:registry` run against the live database therefore passes vacuously. The full path — add, calve, correct, dry off, verify — has been exercised end to end against the live database with throwaway data, which was then removed by dropping the registry tables and letting the migration recreate them.
 - **The append-only guarantee is per-connection, not per-database.** See Decision 7. A `sqlite3` CLI session can bypass it; the boot assertion protects the application's own handle only.
-- **`registry:add` cannot record an animal's dam.** An acquired animal gets no parentage edges, so a bought-in animal whose dam is known on the farm cannot have that edge asserted yet. The `certainty` column exists for it; nothing writes it.
+- **`registry:add` cannot record an animal's dam.** An acquired animal gets no parentage edges, so a bought-in animal whose dam is known on the farm cannot have that edge asserted yet. The `certainty` column's `unknown` value is now written only for a farm-born animal whose mother is not known (see below); nothing writes an uncertain edge for an *acquired* animal.
+- **A farm-born animal entered with its mother not known cannot be linked later.** If the mother is remembered afterwards, link mode refuses the animal: invariant 3 lets a `birth` supersede only an `acquired`, so replacing a mother-unknown birth with the calving's birth needs that rule widened. Until then, enter the mother and record the calving whenever the mother is known even roughly.
 - **There is no way to correct a non-calving event through a command.** `registry:event` appends; superseding a `dry_off`, `departure` or `note` requires calling `appendEvent()` with `supersedes_id` directly. Only the calving pair, the one that is near-certain during a backfill, has a first-class correction API. (`acquired` is the exception: link mode supersedes it, though only into a `birth`.)
 
   **The concrete instance that will bite: a calf recorded as stillborn that actually lived.** The two directions are not symmetric.
@@ -1299,7 +1304,7 @@ Blocking rules:
 
   If the herd list turns out to have more than two or three uncertain calves, build `correctOutcome()` before entering anything rather than relying on the guess-live rule at scale.
 - **Status goes stale as animals age.** A consequence of the `calf` rule depending on the current date. The fix is a rebuild; `verify:registry` says so when invariant 1 fires.
-- **Parentage `certainty` is always `known` in this cycle**, because the only producer is the calving transaction. The column exists so the backfill can assert an uncertain edge without a schema change.
+- **Parentage `certainty` is `unknown` only for a farm-born animal whose mother is not known.** `addFarmBornAnimal` writes a `birth` origin with `dam_id: null` and no calving; the projection turns that into a dam edge with `certainty = 'unknown'` and a null `parent_ref`, which is what lets invariant 7 hold without inventing a dam. Everything the calving transaction writes is still `known`. Such an animal **cannot yet be linked** to a calving remembered later: link mode refuses it, because invariant 3 only lets a `birth` supersede an `acquired`.
 - **An `acquired` animal gets no parentage edges.** We did not witness its birth, and a fabricated `unknown` edge would add a row asserting nothing.
 - **Registry status words are not dispatcher keywords.** `heifer`, `male` and `departed` are absent from `DAIRY_KEYWORDS` in [dispatch.ts](../../server/src/agent/dispatch.ts), so a question phrased with them does not route to the dairy agent. No longer harmless-because-deferred, but still harmless in practice: the registry and sales tools are offered on **every** dispatcher branch, so a misrouted turn can still answer. See [REGISTRY_TOOLS.md](REGISTRY_TOOLS.md) §5.
 - **The target is re-checked on navigation, not on the write itself.** So one case survives: staying on a single form, having the server on that port replaced underneath, and submitting again without navigating. Everything else — a reload, reaching a form, moving between views — re-asks and sends you back to the gate if the answer changed. Closing it completely means a pre-flight probe inside the four write calls, which is a per-write request and would touch every existing form test; the trigger to build it is any real instance of the surviving case, or a second person entering data.

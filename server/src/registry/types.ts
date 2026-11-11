@@ -189,9 +189,14 @@ export type DryOffReason = 'scheduled' | 'low_yield' | 'health' | 'other';
 export type DepartureReason = 'sold' | 'died' | 'culled' | 'lost';
 
 export interface BirthPayload {
-  dam_id: string;
+  /**
+   * The dam, or null for a farm-born animal whose mother is not known
+   * (addFarmBornAnimal). Null exactly when calving_event_id is null.
+   */
+  dam_id: string | null;
   sire_ref?: string | null;
-  calving_event_id: string;
+  /** The calving that produced this animal; null exactly when dam_id is null. */
+  calving_event_id: string | null;
   sex: RegistrySex;
   outcome: CalvingOutcome;
 }

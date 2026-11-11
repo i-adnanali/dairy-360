@@ -508,5 +508,8 @@ export function familyLine(r: RecordData, animalId: string): string {
   if (r['parent_ref'] === animalId && r['child_id'])
     return `${relation === 'dam' ? 'Mother' : relation === 'sire' ? 'Father' : 'Parent'} of ${r['child_id']}${sure}`;
   const label = relation.charAt(0).toUpperCase() + relation.slice(1);
+  // An `unknown` edge with no parent is an ANSWER -- born here, mother not
+  // known (addFarmBornAnimal) -- not a missing record, so it reads as words.
+  if (r['parent_ref'] == null && r['certainty'] === 'unknown') return `${label}: not known`;
   return `${label}: ${r['parent_ref'] ?? 'not recorded'}${sure}`;
 }

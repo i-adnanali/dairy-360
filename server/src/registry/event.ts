@@ -117,7 +117,9 @@ export function main(argv: string[]): void {
         (type === 'acquired'
           ? '  Use: npm run registry:add -w server -- --help\n'
           : '  A birth event is written by the calving that produced the calf:\n' +
-            '    npm run registry:calve -w server -- --help\n') +
+            '    npm run registry:calve -w server -- --help\n' +
+            '  or, for a farm-born animal whose mother is not known, by the Add animal\n' +
+            '  form ("Born here, mother not known") / POST /animals/born-here.\n') +
         '  To correct an existing origin event, write a superseding event rather than a\n' +
         '  second one.',
     );

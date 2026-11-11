@@ -267,10 +267,12 @@ export function projectLactations(
  * animal gets no edges -- we did not witness its birth, and a fabricated
  * `unknown` edge would add a row that asserts nothing.
  *
- * `certainty` exists for the case where a dam is recorded but not witnessed.
- * Everything this cycle writes is 'known', because the only producer is the
- * calving transaction; the column is here so the backfill can assert an
- * uncertain edge without a schema change.
+ * A birth with `dam_id: null` is a farm-born animal whose mother nobody
+ * remembers (addFarmBornAnimal). It gets a dam edge with certainty 'unknown'
+ * and no parent_ref: the farm DOES assert something -- "born here, to a mother
+ * we cannot name" -- which is what separates it from an acquired animal, and
+ * what lets invariant 7 hold for it without inventing a dam. This is the
+ * backfill case the `certainty` column was added for.
  */
 export function projectParentage(
   animalId: string,
@@ -280,8 +282,16 @@ export function projectParentage(
   if (!birth) return [];
 
   const out: ParentageRow[] = [];
-  const damId = (birth.payload.dam_id as string | undefined) ?? null;
-  if (damId) {
+  const damId = (birth.payload.dam_id as string | null | undefined) ?? null;
+  if (birth.payload.dam_id === null) {
+    out.push({
+      child_id: animalId,
+      relation: 'dam',
+      parent_ref: null,
+      certainty: 'unknown',
+      source_event_id: birth.id,
+    });
+  } else if (damId) {
     out.push({
       child_id: animalId,
       relation: 'dam',

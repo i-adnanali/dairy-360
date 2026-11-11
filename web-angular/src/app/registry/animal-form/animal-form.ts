@@ -1,6 +1,7 @@
 import { writerDraft } from "../writer-draft";
 import { WriteLock } from "../write-lock";
-// Add an acquired animal. Pass one of the backfill.
+// Add an animal: one that arrived from elsewhere, or one born here whose
+// mother is not known. Pass one of the backfill.
 
 import {
   ChangeDetectionStrategy,
@@ -87,12 +88,23 @@ export class AnimalForm {
   private readonly dateControls = viewChildren(PrecisionDateControl);
 
   protected readonly fields = FIELDS;
+  protected readonly originChips = [
+    { value: 'acquired', label: 'Bought in' },
+    { value: 'born_here', label: 'Born here, mother not known' },
+  ];
   protected readonly sexChips = [
     { value: 'female', label: 'female' },
     { value: 'male', label: 'male' },
   ];
   protected readonly state = new FormState<{ animal_id: string; animal: AnimalDetail }>();
 
+  /**
+   * Where it came from. Two different records, not one with optional parts:
+   * an arrival date is required for one and meaningless for the other, and the
+   * birth date flips from optional to required. See addFarmBornAnimal.
+   */
+  protected readonly origin = signal<'acquired' | 'born_here'>('acquired');
+  protected readonly bornHere = computed(() => this.origin() === 'born_here');
   protected readonly sex = signal<RegistrySex>('female');
   protected readonly name = signal('');
   protected readonly from = signal('');
@@ -120,11 +132,25 @@ export class AnimalForm {
    * entered. A fabrication is visible to the next reader; a disappearance is
    * visible to nobody.
    */
-  protected readonly blockedReason = computed(
-    () =>
-      dateBlocker(this.acquired(), { label: 'arrival date', required: true }) ??
-      dateBlocker(this.birth(), { label: 'birth date', required: false }),
+  protected readonly blockedReason = computed(() =>
+    this.bornHere()
+      ? dateBlocker(this.birth(), { label: 'birth date', required: true })
+      : dateBlocker(this.acquired(), { label: 'arrival date', required: true }) ??
+        dateBlocker(this.birth(), { label: 'birth date', required: false }),
   );
+
+  /**
+   * Switching origin swaps which date controls are on screen, and a new
+   * control starts empty -- so the dates are cleared with it. Otherwise a birth
+   * date typed under one origin would still be sent from a control showing
+   * nothing.
+   */
+  protected setOrigin(v: 'acquired' | 'born_here'): void {
+    if (v === this.origin()) return;
+    this.origin.set(v);
+    this.acquired.set({ status: 'empty' });
+    this.birth.set({ status: 'empty' });
+  }
 
   protected readonly canSubmit = computed(
     () => this.blockedReason() === null && !this.state.submitting(),
@@ -134,6 +160,7 @@ export class AnimalForm {
     this.writer = writerDraft({
       name: 'New animal',
       fields: {
+        origin: this.origin,
         sex: this.sex,
         name: this.name,
         from: this.from,
@@ -153,6 +180,7 @@ export class AnimalForm {
   }
 
   protected async submit(): Promise<void> {
+    if (this.bornHere()) return this.submitBornHere();
     const a = this.acquired();
     const b = this.birth();
     // Belt and braces behind the disabled button: an incomplete optional date
@@ -184,11 +212,35 @@ export class AnimalForm {
     if (r) this.readyForNext(r.animal_id, r.animal.animal.name);
   }
 
+  private async submitBornHere(): Promise<void> {
+    const b = this.birth();
+    if (b.status !== 'complete') return;
+    const r = await this.state.runRequest(
+      () =>
+        [
+          {
+            sex: this.sex(),
+            name: blank(this.name()),
+            birth_on: b.value.occurred_on,
+            birth_precision: b.value.date_precision,
+            post_no: blank(this.postNo()),
+            tag_no: blank(this.tagNo()),
+            observed_by: blank(this.observedBy()),
+            ...this.session.provenance(),
+          },
+        ] as const,
+      (request, key) => this.api.addAnimalBornHere(request[0], key),
+    );
+    void this.identifiers.refresh();
+    this.writes.update((n) => n + 1);
+    if (r) this.readyForNext(r.animal_id, r.animal.animal.name);
+  }
+
   /**
    * The round trip, collapsed. See after-write.ts for why this is the item that
    * decides whether a separate roster screen is needed at all.
    *
-   * `sex` deliberately SURVIVES: it has a strong prior, consecutive animals in
+   * `sex` (and `origin`, for the same reason) deliberately SURVIVES: it has a strong prior, consecutive animals in
    * a backfill are usually the same sex, and re-answering it twenty times is
    * exactly the tax the defaults rule exists to avoid. Everything that is a
    * fact about THIS animal is cleared, because carrying it forward is how the

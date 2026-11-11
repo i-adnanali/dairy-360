@@ -65,7 +65,7 @@ import { checkFeed, feedList, feedGet, feedDaily, feedSave, feedRemove, feedReci
 import express from 'express';
 import type { Request, Response } from 'express';
 
-import { addAcquiredAnimal, appendLifeEvent } from './entry';
+import { addAcquiredAnimal, addFarmBornAnimal, appendLifeEvent } from './entry';
 import {
   addDestination,
   destinationList,
@@ -607,6 +607,31 @@ export function registryRouter(db: Db): express.Router {
         post_no: str(b, 'post_no'),
         tag_no: str(b, 'tag_no'),
         notes: str(b, 'notes'),
+        provenance: provenance(b),
+        asOf: asOfFrom(b),
+      });
+      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id) });
+    }),
+  );
+
+  /**
+   * A farm-born animal whose mother is not known. Its own route rather than a
+   * flag on /animals: the two take different required fields (an arrival date
+   * there, a birth date here), and a flag would let one body half-satisfy both.
+   */
+  router.post(
+    '/animals/born-here',
+    write(replays, (req, res) => {
+      const b = body(req);
+      const result = addFarmBornAnimal(db, {
+        sex: requireStr(b, 'sex') as RegistrySex,
+        name: str(b, 'name'),
+        species: str(b, 'species'),
+        birth_on: requireStr(b, 'birth_on'),
+        birth_precision: requirePrecision(b, 'birth_precision') as never,
+        sire_ref: str(b, 'sire_ref'),
+        post_no: str(b, 'post_no'),
+        tag_no: str(b, 'tag_no'),
         provenance: provenance(b),
         asOf: asOfFrom(b),
       });

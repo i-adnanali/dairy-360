@@ -302,13 +302,55 @@ export function assertEventPayload<T extends RegistryEventType>(
         'sex',
         'outcome',
       ]);
-      const out: BirthPayload = {
-        dam_id: str(type, p, 'dam_id'),
-        sire_ref: optStr(type, p, 'sire_ref'),
-        calving_event_id: str(type, p, 'calving_event_id'),
-        sex: enumOf(type, p, 'sex', SEXES),
-        outcome: enumOf(type, p, 'outcome', OUTCOMES),
-      };
+      // TWO SHAPES, and the mother is never left out by accident.
+      //
+      // A calving's birth names its dam and the calving that produced it. A
+      // farm-born animal whose mother nobody remembers says so: `dam_id: null`,
+      // present as a key, with no calving. An ABSENT dam_id is still refused --
+      // "mother unknown" is a statement someone made, and a payload that merely
+      // forgot the field must not read as one.
+      if (!Object.prototype.hasOwnProperty.call(p, 'dam_id')) {
+        fail(
+          'invalid_payload',
+          `${type}.dam_id: required -- a dam id, or null for a farm-born animal whose mother is not known`,
+          'dam_id',
+        );
+      }
+      const damUnknown = p.dam_id === null;
+      const out: BirthPayload = damUnknown
+        ? {
+            dam_id: null,
+            sire_ref: optStr(type, p, 'sire_ref'),
+            calving_event_id: null,
+            sex: enumOf(type, p, 'sex', SEXES),
+            outcome: enumOf(type, p, 'outcome', OUTCOMES),
+          }
+        : {
+            dam_id: str(type, p, 'dam_id'),
+            sire_ref: optStr(type, p, 'sire_ref'),
+            calving_event_id: str(type, p, 'calving_event_id'),
+            sex: enumOf(type, p, 'sex', SEXES),
+            outcome: enumOf(type, p, 'outcome', OUTCOMES),
+          };
+      if (damUnknown) {
+        // No dam means no calving to have produced it: a calving always names
+        // its dam. And an animal entered this way is one standing on the farm,
+        // so it was born alive -- a stillbirth only exists as a dam's calving.
+        if (p.calving_event_id !== undefined && p.calving_event_id !== null) {
+          fail(
+            'invalid_payload',
+            `${type}.calving_event_id: must be absent when dam_id is null -- a calving always names its dam`,
+            'calving_event_id',
+          );
+        }
+        if (out.outcome !== 'live') {
+          fail(
+            'invalid_payload',
+            `${type}.outcome: must be 'live' when dam_id is null, got '${out.outcome}'`,
+            'outcome',
+          );
+        }
+      }
       return out as PayloadFor<T>;
     }
     case 'acquired': {
