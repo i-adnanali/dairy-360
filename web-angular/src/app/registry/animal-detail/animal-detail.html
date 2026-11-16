@@ -70,7 +70,7 @@
         }
 
         <div appTabBar class="detail-tabs" aria-label="Record">
-          @for (t of tabs; track t.id) {
+          @for (t of tabs(); track t.id) {
             <button type="button" role="tab" [attr.data-tab]="t.id" [attr.aria-selected]="tab() === t.id" [attr.tabindex]="tab() === t.id ? 0 : -1" (click)="selectTab(t.id)">{{ t.label }}</button>
           }
         </div>
@@ -78,6 +78,42 @@
         @switch (tab()) {
           @case ('events') {
             <app-event-list [events]="d.events" [newestFirst]="true" />
+          }
+          @case ('breeding') {
+            <section data-role="breeding-tab" class="space-y-4">
+              @if (d.reproduction; as r) {
+                <div class="space-y-2" data-role="this-pregnancy">
+                  <h3 class="text-sm font-medium text-content-heading">This pregnancy</h3>
+                  <p class="flex flex-wrap items-center gap-2">
+                    <span appBadge [tone]="reproTone(r.state)">{{ reproLabel(r.state) }}</span>
+                    <span appQualifier>{{ basisWord(r.basis) }}</span>
+                  </p>
+                  @if (readable(r.service.occurred_on, r.service.date_precision); as s) {
+                    <p data-role="service">Served <span [appCertainty]="s.state">{{ s.figure }}</span>@if (s.qualifier) { <span appQualifier>{{ s.qualifier }}</span> } · {{ serviceWord(r.service.service_type) }}</p>
+                  }
+                  <p data-role="day">{{ dayRange(r) }} as of {{ readable(r.as_of).figure }}</p>
+                  @if (r.window; as w) {
+                    <p data-role="window"><span appCertainty="approximate">Calving window {{ readable(w.opens_on).figure }} to {{ readable(w.closes_on).figure }}</span></p>
+                  }
+                  @if (r.latest_check; as c) {
+                    <p data-role="latest-check">{{ methodWord(c.method) }} · {{ c.result === 'positive' ? 'Pregnant' : 'Not pregnant' }} · day {{ c.day }}@if (!c.reliable) { <span appQualifier>not relied on yet</span> }</p>
+                  }
+                </div>
+                @if (r.conception_latest !== r.conception_earliest) {
+                  <p appHelp data-role="range-note">She could have conceived on any day from {{ readable(r.conception_earliest).figure }} to {{ readable(r.conception_latest).figure }}. Every date worked out from this service is a range.</p>
+                }
+                @if (r.ambiguous_attribution) {
+                  <p appHelp data-role="ambiguous-note">{{ r.services_in_case }} services count as one case here; nothing recorded between them rules one out.</p>
+                }
+              } @else {
+                <p appHelp data-role="no-service">No service recorded.</p>
+              }
+              @if (d.breeding_entry) {
+                <app-breeding-form [animalId]="d.animal.id" [saved]="onSaved" />
+              } @else {
+                <p appHelp data-role="entry-closed">Breeding entry is open only for the animals in the pilot.</p>
+              }
+            </section>
           }
           @case ('add-event') {
             <app-event-form [animalId]="d.animal.id" [saved]="onSaved" />

@@ -21,18 +21,30 @@ import type { AnimalDetail as Detail } from "../types";
 import { Certainty, Qualifier } from "../../ui/certainty";
 import { NO_RECORD } from "../precision-display";
 import type { PrecisionParts } from "../precision-display";
+import type { DatePrecision } from "../types";
 import { ErrorPanel } from "../../ui/surface";
 import { HelpText, TextLink } from "../../ui/text";
 import { StatusBadge } from "../../ui/surface";
-import { basisWord, reproductionLabel, reproductionTone } from "../reproduction";
+import { basisWord, dayRange, reproductionLabel, reproductionTone, serviceWord } from "../reproduction";
+import { BreedingForm } from "../breeding-form/breeding-form";
+import type { CheckMethod } from "../types";
 
-type Tab = 'events' | 'add-event' | 'correct';
+type Tab = 'events' | 'breeding' | 'add-event' | 'correct';
+
+/** The entry form's words for each check method. */
+const METHOD_WORDS: Record<CheckMethod, string> = {
+  palpation: 'By hand',
+  ultrasound: 'Ultrasound',
+  pag: 'PAG blood',
+  progesterone: 'Progesterone',
+};
 
 @Component({
   selector: 'app-animal-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TabBar, 
     RouterLink,
+    BreedingForm,
     Button,
     Certainty,
     CorrectionForm,
@@ -57,6 +69,15 @@ export class AnimalDetailView {
   protected readonly reproLabel = reproductionLabel;
   protected readonly reproTone = reproductionTone;
   protected readonly basisWord = basisWord;
+  protected readonly serviceWord = serviceWord;
+  protected readonly dayRange = dayRange;
+  protected methodWord(m: CheckMethod): string {
+    return METHOD_WORDS[m];
+  }
+  /** A date at the precision it was known to, in the page's format. */
+  protected readable(on: string, precision: DatePrecision = 'day'): PrecisionParts {
+    return readableParts(on, precision);
+  }
 
   /** §6's no-record glyph, for the template. An en dash. */
   protected readonly noRecord = NO_RECORD;
@@ -117,11 +138,17 @@ export class AnimalDetailView {
   protected readonly detail = signal<Detail | null>(null);
   protected readonly loadError = signal<string | null>(null);
   protected readonly tab = signal<Tab>('events');
-  protected readonly tabs: { id: Tab; label: string }[] = [
-    { id: 'events', label: 'Timeline' },
-    { id: 'add-event', label: 'Add an event' },
-    { id: 'correct', label: 'Correct a calving' },
-  ];
+  /** Breeding only when the server sent a reproduction key and she is female. */
+  protected readonly tabs = computed<{ id: Tab; label: string }[]>(() => {
+    const d = this.detail();
+    const breeding = d !== null && 'reproduction' in d && d.animal.sex === 'female';
+    return [
+      { id: 'events', label: 'Timeline' },
+      ...(breeding ? [{ id: 'breeding' as const, label: 'Breeding' }] : []),
+      { id: 'add-event', label: 'Add an event' },
+      { id: 'correct', label: 'Correct a calving' },
+    ];
+  });
 
   /** Bound as an input rather than an output, so a child can hand back a fresh
    * detail without this component re-fetching on a signal it cannot see. */

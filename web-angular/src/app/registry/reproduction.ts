@@ -2,7 +2,7 @@
 // this only names and tones it.
 
 import type { BadgeTone } from '../ui/surface';
-import type { ReproductionBasis, ReproductiveState } from './types';
+import type { ReproductionBasis, ReproductionView, ReproductiveState, ServiceType } from './types';
 
 /** Same states, same order as the server's REPRODUCTIVE_STATES. */
 export const REPRODUCTIVE_STATES: readonly ReproductiveState[] = [
@@ -34,4 +34,20 @@ export function reproductionTone(state: ReproductiveState): BadgeTone {
 
 export function basisWord(basis: ReproductionBasis): 'recorded' | 'worked out' {
   return basis === 'observed' ? 'recorded' : 'worked out';
+}
+
+const SERVICE_WORDS: Record<ServiceType, string> = {
+  ai: 'AI',
+  natural_observed: 'Bull, seen',
+  bull_exposure: 'Bull running with her',
+};
+
+/** "AI" | "Bull, seen" | "Bull running with her" */
+export function serviceWord(t: ServiceType): string {
+  return SERVICE_WORDS[t];
+}
+
+/** "Day 35", or "Day 91 to 165" when day_min and day_max differ. */
+export function dayRange(v: ReproductionView): string {
+  return v.day_min === v.day_max ? `Day ${v.day_min}` : `Day ${v.day_min} to ${v.day_max}`;
 }
