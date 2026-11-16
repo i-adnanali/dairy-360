@@ -32,6 +32,7 @@ import express from 'express';
 import cors from 'cors';
 
 import { registryRouter } from './routes';
+import type { RegistryOptions } from './routes';
 import { farmMonitorRouter } from '../farm/monitorRoutes';
 import { syntheticFarmEvents } from '../farm/monitorFixtures';
 import { freshDb, staffedHerd } from './fixtures';
@@ -94,12 +95,12 @@ one -- a harness that saved its state would be a second registry.
 `.trim();
 
 /** Build the harness app over a caller-supplied handle. Exported for tests. */
-export function harnessApp(db: Db): express.Express {
+export function harnessApp(db: Db, opts: RegistryOptions = {}): express.Express {
   const app = express();
   app.use(cors());
   app.use('/api/registry/health/attachments', express.json({ limit: '14mb' }));
   app.use(express.json({ limit: '2mb' }));
-  app.use('/api/registry', registryRouter(db));
+  app.use('/api/registry', registryRouter(db, opts));
   // Synthetic farm events for the Farm Monitor screen (no cameras, no dairy.db).
   app.use(
     '/api/farm',

@@ -1,0 +1,104 @@
+# Breeding
+
+Current contract for the five breeding event types and the reproductive state derived from them. The decisions behind it are in [REGISTRY_BREEDING.md](../../records/REGISTRY_BREEDING.md). Events are written with the [registry CLI](../../guides/registry-cli.md#breeding-events). [Animals](animals.md) owns the rest of the event log.
+
+Breeding events are only ever added. The state is calculated on every read from an animal's effective events and is never stored; it is separate from the animal's status, which this feature does not change.
+
+## Event payloads
+
+All five are written to a female. Provenance, ordering and supersession work as for every other animal event.
+
+| Event type | Payload |
+|---|---|
+| `heat_observed` | `sign`: `standing`, `mucus`, `restless` or `other` |
+| `insemination` | `service_type`: `ai`, `natural_observed` or `bull_exposure`; `exposure_days`: whole days 1 to 365, required for `bull_exposure`, null otherwise |
+| `pregnancy_check` | `method`: `palpation`, `ultrasound`, `pag` or `progesterone`; `result`: `positive` or `negative` |
+| `abortion` | empty; who saw it is the provenance `observed_by` |
+| `null_observation` | `watched_for`: `heat` or `pregnancy_check` |
+
+Dates take `day` or `month` precision. A `pregnancy_check` takes `day` only.
+
+## Refusals
+
+The write path refuses exactly four things and offers no override:
+
+| Code | Meaning |
+|---|---|
+| `unknown_animal` | no such animal |
+| `not_female` | the animal is not female |
+| `breeding_precision` | a precision a breeding event cannot have (`year` or `estimated`; `month` for a check; a time of day on a `bull_exposure`) |
+| `event_before_origin` / `animal_departed` | dated before she arrived or was born, or after she left |
+
+## Constants
+
+All days are counted from the earliest possible conception.
+
+| Constant | Value |
+|---|---|
+| Gestation window opens | day 285 |
+| Gestation window closes | day 325 |
+| Expected calving | day 308 |
+| Close-up lead | 21 days, so close-up starts day 264 |
+| Dry-off lead | 60 days, so dry-off starts day 248 |
+| "Bred" lasts through | day 24 |
+
+The earliest day a check's result counts:
+
+| Check | Positive counts from | Negative counts from |
+|---|---|---|
+| Palpation | day 46 | day 46 |
+| Ultrasound | day 30 | day 30 |
+| PAG | day 28 | day 28 |
+| Progesterone | never | day 20 |
+
+`GESTATION_DAYS = 310` in `calving.ts` is a different thing (a floor on how soon after her own birth a calving may be recorded) and is not used here.
+
+## Which events count, and the case
+
+Events are taken in canonical order with superseded ones dropped, then any event dated after `as_of` is dropped. With no insemination left there is no view (`null`).
+
+The anchor is the last insemination. An earlier insemination joins the case when no calving, abortion, heat observation or negative check lies between it and the service after it; the walk stops at the first one that does not join. `services_in_case` counts them and `ambiguous_attribution` is true when there is more than one.
+
+For one service the earliest conception is its date. The latest is the last day of its month for `month` precision, otherwise its date, plus `exposure_days` for a `bull_exposure`. Across the case, `conception_earliest` is the smallest earliest and `conception_latest` the largest latest. Let W be the days between them and T the days from `conception_earliest` to `as_of`.
+
+## State rules
+
+The first row that matches wins. Rows 1 to 13 are the thirteen rules; eleven states result.
+
+| # | When | State | Basis |
+|---|---|---|---|
+| 1 | a calving follows the first service of the case | `calved` | observed |
+| 2 | an abortion follows it | `lost` | observed |
+| 3 | a reliable negative follows a positive | `lost` | inferred |
+| 4 | a positive is held and it is progesterone, or earlier than its method's positive day, or a heat is dated after it | `recheck` | inferred |
+| 5 | a positive is held and T > W + 325 | `overdue` | inferred |
+| 6 | a positive is held and T >= 285 | `window` | inferred |
+| 7 | a positive is held and T >= 264 | `close` | inferred |
+| 8 | a positive is held, she is in milk, and T >= 248 | `dryoff` | inferred |
+| 9 | a positive is held | `confirmed` | observed |
+| 10 | a reliable negative and no positive | `open` | observed; inferred when the anchor is a `bull_exposure` and the check's day is <= W |
+| 11 | a heat was observed, unless the anchor is a `bull_exposure` and the heat's day is <= W | `open` | inferred |
+| 12 | T <= W + 24 | `bred` | observed |
+| 13 | otherwise | `unconfirmed` | inferred |
+
+A later positive clears an earlier loss or open finding; a reliable negative after a held positive moves her to `lost`; a negative earlier than its method's negative day is ignored. "In milk" means one of her lactations has no end.
+
+The `window` is null for `calved`, `lost` and `open`; otherwise `opens_on` is `conception_earliest` + 285 and `closes_on` is `conception_latest` + 325. `day_max` is T and `day_min` is the days from `conception_latest` to `as_of`, not below 0. `latest_check` reports the last check with its day and whether it was `reliable`.
+
+## The API
+
+`GET /animals/:id` returns `reproduction` only when the server runs with `REGISTRY_BREEDING=1`. With the flag off the key is absent, not null, and the response is byte-for-byte what it was before. With it on the value is a view, or `null` for a male, an animal that had left by `as_of`, or an animal with no service by then. The write routes that echo an animal back follow the same rule, so a response does not change shape between a read and a write.
+
+With the flag on, `?as_of=YYYY-MM-DD` asks for the state on that day (default: today on the farm). Events dated later are invisible, including a later dry-off (whether she is in milk is read on `as_of`) and a later departure. A value that is not a real calendar date is a 400 `invalid_payload` on field `as_of`. With the flag off the parameter is not read.
+
+## Correcting a breeding event
+
+Stage 1 has no way to correct a breeding event. `registry:breed` has no `--supersedes`, and `registry:correct-calving` corrects calvings only. A wrongly entered service, check or heat stays effective and keeps driving the state. Adding a correction path is [OPEN-064](../../OPEN.md#open-064).
+
+## Migration 10 is one-way
+
+Migration 10 widens the event table so it can hold the five breeding types. It is one-way: it runs the first time a build that has it opens the database (a server start or any `registry:*` command), whatever `REGISTRY_BREEDING` says, and a build from before it refuses to open the migrated database. Rolling back means restoring a backup taken before it ran, such as the pre-migration snapshot written to `server/backups/`; see [Back up, verify and restore registry data](../../guides/backup-restore.md).
+
+## Not built yet
+
+Warnings and overrides, tasks, KPIs, entry forms and the Breeding page (stages 2 to 5, [OPEN-062](../../OPEN.md#open-062)).

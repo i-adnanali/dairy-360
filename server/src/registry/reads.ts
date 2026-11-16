@@ -10,7 +10,9 @@
 import type { Db } from './schema';
 import { GESTATION_DAYS, calvingTooSoonAfterBirth } from './calving';
 import { definitelyBefore } from './invariants';
-import { daysBetween, effectiveEvents } from './project';
+import { canonicalOrder, daysBetween, effectiveEvents, projectLactations, projectStatus } from './project';
+import { deriveReproduction } from './reproduction';
+import { farmToday } from './time';
 import { allAnimals, allEvents, allStatuses, eventsForAnimal, getAnimal } from './store';
 import type {
   AnimalStatusRow,
@@ -18,6 +20,7 @@ import type {
   RegistryAnimalRow,
   RegistryEventType,
   RegistrySex,
+  ReproductionView,
   SourceForm,
 } from './types';
 
@@ -96,6 +99,14 @@ export interface AnimalDetail {
   status: AnimalStatusRow | null;
   /** Canonical order, oldest first. INCLUDES superseded events. */
   events: TimelineEvent[];
+  /**
+   * Only present when the router was built with { breeding: true }; the key is
+   * ABSENT otherwise, so the response is byte-for-byte what it was. A view, or
+   * null for a male, an animal that had departed by the asked date, or an animal
+   * with no service by then. Derived on every read from the same events; nothing
+   * is stored.
+   */
+  reproduction?: ReproductionView | null;
 }
 
 /**
@@ -108,7 +119,11 @@ export interface AnimalDetail {
  * silent no-op. Every row carries `effective` and, when replaced,
  * `superseded_by_id`.
  */
-export function animalDetail(db: Db, animalId: string): AnimalDetail | null {
+export function animalDetail(
+  db: Db,
+  animalId: string,
+  opts: { breeding?: boolean; asOf?: string } = {},
+): AnimalDetail | null {
   const animal = getAnimal(db, animalId);
   if (!animal) return null;
 
@@ -122,7 +137,7 @@ export function animalDetail(db: Db, animalId: string): AnimalDetail | null {
     (allStatuses(db).find((s) => s.animal_id === animalId) as AnimalStatusRow | undefined) ??
     null;
 
-  return {
+  const detail: AnimalDetail = {
     animal,
     status,
     events: rows.map((e) => {
@@ -145,6 +160,27 @@ export function animalDetail(db: Db, animalId: string): AnimalDetail | null {
       };
     }),
   };
+
+  if (opts.breeding === true) {
+    const asOf = opts.asOf ?? farmToday();
+    // Only what had happened by asOf: a dry-off or a departure dated later must
+    // not change the state on an earlier day. So neither the stored status (which
+    // is today's) nor lactations over every event is read here; both are projected
+    // from the effective events dated <= asOf, with the existing projections.
+    const upTo = canonicalOrder(effectiveEvents(rows)).filter((e) => e.occurred_on <= asOf);
+    const lactations = projectLactations(animalId, upTo);
+    const departed = projectStatus({ animal, ordered: upTo, lactations, asOf }).status === 'departed';
+    detail.reproduction =
+      animal.sex !== 'female' || departed
+        ? null
+        : deriveReproduction({
+            events: rows,
+            asOf,
+            // In milk = one of her lactations had no end on asOf.
+            inMilk: lactations.some((l) => l.ended_on === null),
+          });
+  }
+  return detail;
 }
 
 /** The calvings on one animal, for the correction picker. */

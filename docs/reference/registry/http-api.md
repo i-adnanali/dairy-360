@@ -13,7 +13,7 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | GET | `/analytics/reconciliation` | reconciliation-oriented analytics response with paginated sessions |
 | GET | `/lists/:kind` | paginated animals, calvings, destinations or people; catalogs retain their original endpoints |
 | GET | `/animals` | herd table: identity + derived status + effective event count |
-| GET | `/animals/:id` | one animal, its status, and its **full** event list |
+| GET | `/animals/:id` | one animal, its status, and its **full** event list; with `REGISTRY_BREEDING=1` it also returns `reproduction` (optional `?as_of=`), see [Breeding](breeding.md) |
 | GET | `/animals/:id/calvings` | the correction picker's source |
 | GET | `/animals/:id/milkings` | one animal's yield, each row's lactation **derived** rather than stored |
 | GET | `/link-candidates?dam=&calf_sex=&occurred_on=&date_precision=` | link-mode picker |

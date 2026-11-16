@@ -25,7 +25,11 @@ import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 
 import { harnessApp } from './harness';
-import { cleanHerd, freshDb } from './fixtures';
+import { RECALL, addDeparture, addDryOff, cleanHerd, freshDb } from './fixtures';
+import { recordBreedingEvent } from './breeding';
+import { herd } from './reads';
+import { rebuild } from './projectStore';
+import type { RegistryOptions } from './routes';
 import type { Db } from './schema';
 
 const AS_OF = '2026-09-01';
@@ -38,8 +42,8 @@ interface Ctx {
 
 const open: Server[] = [];
 
-async function serve(db: Db): Promise<Ctx> {
-  const server = harnessApp(db).listen(0);
+async function serve(db: Db, opts: RegistryOptions = {}): Promise<Ctx> {
+  const server = harnessApp(db, opts).listen(0);
   open.push(server);
   await new Promise<void>((resolve) => server.once('listening', resolve));
   const { port } = server.address() as AddressInfo;
@@ -613,4 +617,91 @@ test('REGISTRY.md § HTTP surface lists exactly the routes the router mounts', (
     [],
     'REGISTRY.md § HTTP surface documents these routes and the router does not mount them',
   );
+});
+
+// ---------------------------------------------------------------------------
+// Breeding stage 1: the reproduction field, behind REGISTRY_BREEDING=1
+// ---------------------------------------------------------------------------
+
+test('flag off: the animal response has no reproduction key', async () => {
+  const ctx = await serve(cleanHerd());
+  const { body } = await get(ctx, '/animals/BD-0001');
+  assert.equal(Object.prototype.hasOwnProperty.call(body, 'reproduction'), false);
+});
+
+test('flag on, no breeding events: reproduction is null', async () => {
+  const ctx = await serve(cleanHerd(), { breeding: true });
+  const { body } = (await get(ctx, '/animals/BD-0001')) as { body: { reproduction: unknown } };
+  assert.equal(body.reproduction, null);
+  assert.ok(Object.prototype.hasOwnProperty.call(body, 'reproduction'), 'flag on: the reproduction key is present');
+});
+
+test('flag on: a served, confirmed animal carries her state', async () => {
+  const db = cleanHerd();
+  const female = herd(db).find((a) => a.sex === 'female' && a.status !== 'departed')!.id;
+  recordBreedingEvent(db, { animal_id: female, type: 'insemination', occurred_on: '2026-07-14', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL });
+  recordBreedingEvent(db, { animal_id: female, type: 'pregnancy_check', occurred_on: '2026-09-15', date_precision: 'day', payload: { method: 'palpation', result: 'positive' }, provenance: RECALL });
+  const ctx = await serve(db, { breeding: true });
+  const { body } = (await get(ctx, `/animals/${female}?as_of=2026-11-13`)) as { body: { reproduction: { state: string; day_max: number } } };
+  assert.equal(body.reproduction.day_max, 122);
+  assert.ok(['confirmed', 'dryoff'].includes(body.reproduction.state), `state ${body.reproduction.state}`); // depends on whether the fixture animal is in milk
+});
+
+test('a departed animal has no reproduction view', async () => {
+  const db = cleanHerd();
+  const female = herd(db).find((a) => a.sex === 'female' && a.status !== 'departed')!.id;
+  recordBreedingEvent(db, { animal_id: female, type: 'insemination', occurred_on: '2026-07-14', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL });
+  addDeparture(db, { animal_id: female, on: '2026-10-01', precision: 'day' });
+  rebuild(db, { asOf: '2026-11-13' });
+  const ctx = await serve(db, { breeding: true });
+  const { body } = (await get(ctx, `/animals/${female}`)) as { body: { reproduction: unknown } };
+  assert.equal(body.reproduction, null);
+  assert.ok(Object.prototype.hasOwnProperty.call(body, 'reproduction'), 'flag on: the reproduction key is present');
+});
+
+// Review Focus 1 at the API: BD-0001 calved 2024-06-02 and was never dried off, so
+// she is in milk. Served 2026-01-20 and confirmed by palpation 2026-03-10 (day 49), she is at day 251 on
+// 2026-09-28: inside the dry-off lead (248) and before close-up (264).
+function servedAndConfirmed(): Db {
+  const db = cleanHerd();
+  recordBreedingEvent(db, { animal_id: 'BD-0001', type: 'insemination', occurred_on: '2026-01-20', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL });
+  recordBreedingEvent(db, { animal_id: 'BD-0001', type: 'pregnancy_check', occurred_on: '2026-03-10', date_precision: 'day', payload: { method: 'palpation', result: 'positive' }, provenance: RECALL });
+  return db;
+}
+
+test('a dry-off dated after as_of does not change the state on as_of', async () => {
+  const before = await serve(servedAndConfirmed(), { breeding: true });
+  const was = (await get(before, '/animals/BD-0001?as_of=2026-09-28')) as { body: { reproduction: { state: string } | null } };
+  assert.equal(was.body.reproduction?.state, 'dryoff');
+
+  const db = servedAndConfirmed();
+  addDryOff(db, { animal_id: 'BD-0001', on: '2026-09-29', precision: 'day' });
+  rebuild(db, { asOf: '2026-11-13' });
+  const after = await serve(db, { breeding: true });
+  const still = (await get(after, '/animals/BD-0001?as_of=2026-09-28')) as { body: { reproduction: { state: string } | null } };
+  assert.equal(still.body.reproduction?.state, 'dryoff', 'a dry-off dated the day after as_of is invisible on as_of');
+});
+
+test('a departure dated after as_of does not null a past-dated view', async () => {
+  const db = servedAndConfirmed();
+  addDeparture(db, { animal_id: 'BD-0001', on: '2026-10-01', precision: 'day' });
+  rebuild(db, { asOf: '2026-11-13' });
+  const ctx = await serve(db, { breeding: true });
+  const past = (await get(ctx, '/animals/BD-0001?as_of=2026-09-28')) as { body: { reproduction: { state: string } | null } };
+  assert.equal(past.body.reproduction?.state, 'dryoff', 'she had not left on 2026-09-28');
+  const gone = (await get(ctx, '/animals/BD-0001?as_of=2026-10-01')) as { body: { reproduction: unknown } };
+  assert.equal(gone.body.reproduction, null);
+  assert.ok(Object.prototype.hasOwnProperty.call(gone.body, 'reproduction'), 'flag on: the reproduction key is present');
+});
+
+test('as_of is read only with the flag on, and an unparseable value is refused', async () => {
+  const on = await serve(cleanHerd(), { breeding: true });
+  const bad = await get(on, '/animals/BD-0001?as_of=not-a-date');
+  assert.equal(bad.status, 400);
+  assert.deepEqual(
+    [(bad.body as { error: string }).error, (bad.body as { field: string }).field],
+    ['invalid_payload', 'as_of'],
+  );
+  const off = await serve(cleanHerd());
+  assert.equal((await get(off, '/animals/BD-0001?as_of=not-a-date')).status, 200);
 });

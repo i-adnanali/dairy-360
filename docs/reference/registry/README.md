@@ -9,6 +9,7 @@ Current contracts for direct operational records. Start with [shared rules](shar
 | Dispatch, buyers, rates and balances | [Sales](sales.md) |
 | People, engagements, wages and payments | [Payroll](payroll.md) |
 | Crops, purchases and daily feeding | [Feed](feed.md) |
+| Heat, service, pregnancy checks and the derived reproductive state | [Breeding](breeding.md) |
 | Visits, treatment, vaccination and lifetime reports | [Health](health.md) |
 | Production, coverage and reconciliation metrics | [Analytics](analytics.md) |
 

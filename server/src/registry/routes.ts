@@ -347,7 +347,27 @@ function write(store: IdempotencyStore, fn: (req: Request, res: Response) => voi
   };
 }
 
-export function registryRouter(db: Db): express.Router {
+/**
+ * Switches for features that are dark until the farm turns them on. Each is
+ * set once, by index.ts from the environment, so a route never reads
+ * process.env itself.
+ */
+export interface RegistryOptions {
+  /** REGISTRY_BREEDING=1: GET /animals/:id also returns `reproduction`. */
+  breeding?: boolean;
+}
+
+/** The `as_of` query value for a breeding read: a real calendar date, or a 400. */
+function breedingAsOf(raw: unknown): string | undefined {
+  if (raw === undefined) return undefined;
+  const bad = () => new RegistryError('invalid_payload', 'as_of must be a calendar date, YYYY-MM-DD', 'as_of');
+  if (typeof raw !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) throw bad();
+  const d = new Date(`${raw}T00:00:00Z`);
+  if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== raw) throw bad();
+  return raw;
+}
+
+export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Router {
   const router = express.Router();
   router.use(healthRouter(db));
   router.get('/lists/:kind', handle((req, res) => res.json(registryList(db, req.params.kind, req.query))));
@@ -411,7 +431,8 @@ export function registryRouter(db: Db): express.Router {
   router.get(
     '/animals/:id',
     handle((req, res) => {
-      const detail = animalDetail(db, req.params.id);
+      const asOf = opts.breeding ? breedingAsOf(req.query.as_of) : undefined;
+      const detail = animalDetail(db, req.params.id, { breeding: opts.breeding, asOf });
       if (!detail) {
         res
           .status(404)
@@ -610,7 +631,7 @@ export function registryRouter(db: Db): express.Router {
         provenance: provenance(b),
         asOf: asOfFrom(b),
       });
-      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id) });
+      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id, opts) });
     }),
   );
 
@@ -635,7 +656,7 @@ export function registryRouter(db: Db): express.Router {
         provenance: provenance(b),
         asOf: asOfFrom(b),
       });
-      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id) });
+      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id, opts) });
     }),
   );
 
@@ -660,7 +681,7 @@ export function registryRouter(db: Db): express.Router {
         allow_after_departure: b.allow_after_departure === true,
         override_reason: str(b, 'override_reason'),
       });
-      res.status(201).json({ ...result, animal: animalDetail(db, animalId) });
+      res.status(201).json({ ...result, animal: animalDetail(db, animalId, opts) });
     }),
   );
 
@@ -693,8 +714,8 @@ export function registryRouter(db: Db): express.Router {
       });
       res.status(201).json({
         ...result,
-        dam: animalDetail(db, damId),
-        calf: animalDetail(db, result.calf_id),
+        dam: animalDetail(db, damId, opts),
+        calf: animalDetail(db, result.calf_id, opts),
       });
     }),
   );
@@ -717,8 +738,8 @@ export function registryRouter(db: Db): express.Router {
       });
       res.status(201).json({
         ...result,
-        dam: animalDetail(db, result.dam_id),
-        calf: animalDetail(db, result.calf_id),
+        dam: animalDetail(db, result.dam_id, opts),
+        calf: animalDetail(db, result.calf_id, opts),
       });
     }),
   );

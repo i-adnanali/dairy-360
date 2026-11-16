@@ -39,7 +39,7 @@ app.use('/api/farm', farmMonitorRouter(farmEventsBetween));
 // registryRouter is a FACTORY taking a handle, unlike farmRouter -- that is
 // what lets the development harness serve the same routes over an :memory:
 // fixture herd without a synthetic row ever reaching dairy.db.
-app.use('/api/registry', registryRouter(db));
+app.use('/api/registry', registryRouter(db, { breeding: process.env.REGISTRY_BREEDING === '1' }));
 
 app.get('/api/health', (_req, res) => {
   if (!isSeeded()) {

@@ -23,6 +23,7 @@ Use the maintained owner below for current behavior. Relative links were rebased
 | [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) | [architecture/system.md](../architecture/system.md) |
 | [PHASE5_PRECHECK.md](PHASE5_PRECHECK.md) | [reference/ui/design-system.md](../reference/ui/design-system.md) |
 | [REGISTRY.md](REGISTRY.md) | [reference/registry/animals.md](../reference/registry/animals.md) |
+| [REGISTRY_BREEDING.md](REGISTRY_BREEDING.md) | [reference/registry/breeding.md](../reference/registry/breeding.md) |
 | [REGISTRY_ENTRY_UX.md](REGISTRY_ENTRY_UX.md) | [reference/ui/application-interactions.md](../reference/ui/application-interactions.md) |
 | [REGISTRY_FEED.md](REGISTRY_FEED.md) | [reference/registry/feed.md](../reference/registry/feed.md) |
 | [REGISTRY_HEALTH.md](REGISTRY_HEALTH.md) | [reference/registry/health.md](../reference/registry/health.md) |

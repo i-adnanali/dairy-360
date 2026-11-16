@@ -315,6 +315,12 @@ Built when something needs them, not before.
 - **OPEN-063** — **`GESTATION_DAYS = 310` in `calving.ts` is not revisited**; it is a
   calving-too-soon-after-birth floor, not a gestation length —
   [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#left-alone-on-purpose)
+<a id="open-064"></a>
+
+- **OPEN-064** — **A breeding event cannot be corrected**: `registry:breed` has no `--supersedes`
+  and `registry:correct-calving` corrects calvings only, so a wrongly entered service, check or
+  heat keeps driving the state. Add a correction path (owner's decision, not built in stage 1) —
+  [Breeding](reference/registry/breeding.md#correcting-a-breeding-event)
 <a id="open-057"></a>
 
 - **OPEN-057** — Health/report real-farm acceptance remains unverified. Actual Chrome/Safari A4 Save-as-PDF output was verified on synthetic animal reports, including complete audit content and repeated long identity. Alternative-format support and further browser/report coverage were skipped on 9 October 2026; the known alternate-format limitation remains. See [current status and PDF evidence](reference/ui/acceptance-status.md), and the [original delivery record](records/REGISTRY_HEALTH.md#validation).

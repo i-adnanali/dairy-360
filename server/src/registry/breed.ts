@@ -159,25 +159,20 @@ export function main(argv: string[]): void {
   // Importing usage/help must never open or migrate the farm database.
   const { db } = require('../db') as typeof import('../db');
   const { recordBreedingEvent } = require('./breeding') as typeof import('./breeding');
-  const { deriveReproduction } = require('./reproduction') as typeof import('./reproduction');
-  const { canonicalOrder, effectiveEvents, projectLactations } = require('./project') as typeof import('./project');
-  const { eventsForAnimal } = require('./store') as typeof import('./store');
+  const { animalDetail } = require('./reads') as typeof import('./reads');
 
   const result = recordBreedingEvent(db, input);
 
-  const events = eventsForAnimal(db, animalId);
-  // In milk = one of her lactations has no end (the same reading project.ts gives the page).
-  const inMilk = projectLactations(animalId, canonicalOrder(effectiveEvents(events))).some(
-    (l) => l.ended_on === null,
-  );
-  const view = deriveReproduction({ events, asOf, inMilk });
+  // The same read the API gives the page, so the two cannot disagree: null for an
+  // animal with no service by --as-of, or one that had left by then.
+  const view = animalDetail(db, animalId, { breeding: true, asOf })?.reproduction ?? null;
 
   console.log(`registry:breed  ${type} on ${animalId}`);
   console.log(`  event       ${result.event_id}`);
   console.log(
     view
       ? `  state now   ${view.state} (${view.basis})  day ${view.day_min}-${view.day_max}   as-of ${asOf}`
-      : `  state now   no service on record   as-of ${asOf}`,
+      : `  state now   none (no service on record, or she had left)   as-of ${asOf}`,
   );
 }
 
