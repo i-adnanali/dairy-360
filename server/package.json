@@ -16,6 +16,7 @@
     "verify:payload:dt": "tsx src/farm/verifyDoubleTakeShape.ts",
     "registry:add": "TZ=Asia/Karachi tsx src/registry/add.ts",
     "registry:event": "TZ=Asia/Karachi tsx src/registry/event.ts",
+    "registry:breed": "TZ=Asia/Karachi tsx src/registry/breed.ts",
     "registry:calve": "TZ=Asia/Karachi tsx src/registry/calve.ts",
     "registry:correct-calving": "TZ=Asia/Karachi tsx src/registry/correct.ts",
     "registry:harness": "TZ=Asia/Karachi tsx src/registry/harness.ts",

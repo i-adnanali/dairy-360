@@ -29,6 +29,7 @@ export type RegistryErrorCode =
   | 'animal_departed'
   | 'already_departed'
   | 'sex_mismatch'
+  | 'not_female'
   // --- events ---
   | 'unknown_event'
   | 'not_a_calving'
@@ -37,6 +38,7 @@ export type RegistryErrorCode =
   | 'already_has_birth'
   | 'inconsistent_pair'
   | 'event_before_origin'
+  | 'breeding_precision'
   // --- calving ---
   | 'near_duplicate_calving'
   | 'self_calf'

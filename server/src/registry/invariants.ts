@@ -29,11 +29,14 @@ import {
   supersededIds,
 } from './project';
 import { lactationIdFor } from './events';
+import { breedingPrecisionAllowed } from './breeding';
 import { lactationCovering } from './milking';
 import { activeOn, priceInForce } from './destinations';
 import { rangesOverlap, termInForce } from './payroll';
 import { formatSerial, SERIAL_PREFIX } from './events';
+import { BREEDING_EVENT_TYPES } from './types';
 import type {
+  BreedingEventType,
   DatePrecision,
   DestinationPriceRow,
   PayTermRow,
@@ -1376,6 +1379,34 @@ export function labourReport(s: RegistrySnapshot, asOf: string): LabourReportLin
   return out;
 }
 
+// ---------------------------------------------------------------------------
+// 29. A breeding event is on a female, at a precision it can have
+// ---------------------------------------------------------------------------
+
+function checkBreeding(s: RegistrySnapshot): Violation[] {
+  const out: Violation[] = [];
+  const sex = new Map(s.animals.map((a) => [a.id, a.sex]));
+  for (const e of effectiveEvents(s.events)) {
+    if (!(BREEDING_EVENT_TYPES as readonly string[]).includes(e.type)) continue;
+    const target = { kind: 'animal' as const, id: e.animal_id };
+    if (sex.get(e.animal_id) !== 'female') {
+      out.push(
+        v(29, 'breeding-event-shape', `event ${e.id} is a ${e.type} on ${e.animal_id}, which is not female`, target),
+      );
+    }
+    const refusal = breedingPrecisionAllowed(
+      e.type as BreedingEventType,
+      e.payload as { service_type?: string },
+      e.date_precision,
+      e.occurred_time,
+    );
+    if (refusal) {
+      out.push(v(29, 'breeding-event-shape', `event ${e.id} (${e.type}@${e.occurred_on}): ${refusal}`, target));
+    }
+  }
+  return out;
+}
+
 export function checkSnapshot(s: RegistrySnapshot, asOf: string): Violation[] {
   return [
     ...checkOrigin(s),
@@ -1389,6 +1420,7 @@ export function checkSnapshot(s: RegistrySnapshot, asOf: string): Violation[] {
     ...checkMilkings(s),
     ...checkSales(s),
     ...checkLabour(s),
+    ...checkBreeding(s),
     ...checkProjectionAgreement(s, asOf),
   ];
 }

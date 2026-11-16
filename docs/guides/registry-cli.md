@@ -61,6 +61,37 @@ misleading green:
 NOTE: the registry is EMPTY, so every invariant passes vacuously.
 ```
 
+## Breeding events
+
+`registry:breed` writes the five breeding event types to a **female**. `--precision` is `day` or `month` (a
+`pregnancy_check` is `day` only); `year` and `estimated` are refused. It refuses exactly four things: an unknown
+animal, an animal that is not female, a precision a breeding event cannot have, and a date before she arrived or
+was born or after she left. There is no override flag. It prints the event id and her state at `--as-of`.
+
+```bash
+# heat seen
+npm run registry:breed -w server -- --animal=BD-0001 --type=heat_observed --sign=standing \
+  --on=2026-01-19 --time=06:30 --precision=day --source-form=recall --recorded-by=adnan
+
+# a service (ai | natural_observed | bull_exposure; a bull_exposure also needs --days and takes no time)
+npm run registry:breed -w server -- --animal=BD-0001 --type=insemination --service=ai \
+  --on=2026-01-20 --precision=day --source-form=recall --recorded-by=adnan
+npm run registry:breed -w server -- --animal=BD-0001 --type=insemination --service=bull_exposure --days=30 \
+  --on=2026-02-01 --precision=month --source-form=recall --recorded-by=adnan
+
+# a pregnancy check (palpation | ultrasound | pag | progesterone; positive | negative)
+npm run registry:breed -w server -- --animal=BD-0001 --type=pregnancy_check --method=ultrasound --result=positive \
+  --on=2026-03-01 --precision=day --source-form=recall --recorded-by=adnan
+
+# an abortion
+npm run registry:breed -w server -- --animal=BD-0001 --type=abortion \
+  --on=2026-05-01 --precision=day --source-form=recall --recorded-by=adnan
+
+# a watch that saw nothing (heat | pregnancy_check)
+npm run registry:breed -w server -- --animal=BD-0001 --type=null_observation --watched-for=heat \
+  --on=2026-02-10 --precision=day --source-form=recall --recorded-by=adnan
+```
+
 ---
 ## Recovery and related contracts
 

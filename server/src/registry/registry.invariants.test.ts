@@ -24,8 +24,8 @@ import {
   rowKey,
 } from './invariants';
 import { rebuild } from './projectStore';
-import { allLactations, allParentage, allStatuses, snapshot } from './store';
-import { AS_OF, cleanHerd, correctionOnlyOnDam, herdWithCorrection } from './fixtures';
+import { allLactations, allParentage, allStatuses, appendEvent, snapshot } from './store';
+import { AS_OF, addAcquired, cleanHerd, correctionOnlyOnDam, freshDb, herdWithCorrection, RECALL } from './fixtures';
 import type { RegistrySnapshot } from './types';
 
 function violations(s: RegistrySnapshot, asOf = AS_OF) {
@@ -1116,4 +1116,13 @@ test('labour report lines give stints and periods in words, never ISO', () => {
   assert.ok(lines.length > 0);
   for (const d of lines) assert.doesNotMatch(d, /\d{4}-\d{2}-\d{2}/, d);
   assert.ok(lines.some((d) => /onwards/.test(d)), lines.join('\n'));
+});
+
+test('invariant 29: a breeding event on a male, or at a precision it cannot have, is reported', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'male', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  appendEvent(db, { animal_id: 'BD-0001', type: 'insemination', occurred_on: '2026-01-01', date_precision: 'year', payload: { service_type: 'ai' }, provenance: RECALL });
+  const found = checkSnapshot(snapshot(db), '2026-11-13').filter((v) => v.invariant === 29);
+  assert.equal(found.length, 2);
+  assert.ok(found.every((v) => v.name === 'breeding-event-shape'));
 });

@@ -895,8 +895,8 @@ npm run dev:angular
 
 **What creates the database.** Nothing in `git`: `server/dairy.db` is gitignored.
 It is created the first time a process imports `server/src/db.ts` — for example
-the persistent server, a registry write command or `seed`. The harness and isolated unit tests must not import it. The four herd write CLI
-modules now defer that import until command execution, so importing their usage
+the persistent server, a registry write command or `seed`. The harness and isolated unit tests must not import it. The five herd write CLI
+modules (`add.ts`, `calve.ts`, `event.ts`, `correct.ts`, `breed.ts`) now defer that import until command execution, so importing their usage
 constants or asking for their help no longer opens the database. `new Database(DB_PATH)` creates the file,
 then `FARM_SCHEMA` and the migration runner apply.
 
