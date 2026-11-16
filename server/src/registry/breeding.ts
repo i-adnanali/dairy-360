@@ -15,19 +15,24 @@
 // (correct the replacement instead). There is no retraction: a correction is
 // always an event of the same type on the same animal.
 //
-// No warning, no override flag, no age check. A service to an animal after she
-// left did not happen, so there is nothing for an operator to know better about.
 // Both date comparisons use definitelyBefore, so an uncertain date never refuses.
+//
+// After those, three warnings the caller can save over (see breeding-checks.ts):
+// ambiguous_service on a service, early_check and check_without_service on a
+// check. A warning throws as a RegistryError of the same name unless the matching
+// allow_* flag is true, in which case the event is written and records the
+// override from the CONDITION: a flag with nothing to override records nothing.
 //
 // No projection rebuild: no existing projection reads these events.
 
 import type { Db } from './schema';
 import { RegistryError } from './errors';
-import { assertDatePrecision } from './events';
+import { breedingWarning } from './breeding-checks';
+import { assertDatePrecision, assertEventPayload } from './events';
 import { definitelyBefore } from './invariants';
 import { canonicalOrder, effectiveEvents, findOrigin } from './project';
 import { appendEvent, eventsForAnimal, getAnimal } from './store';
-import type { BreedingEventType, DatePrecision, Provenance } from './types';
+import type { BreedingEventType, BreedingOverriddenCheck, DatePrecision, Provenance, RegistryEvent } from './types';
 
 export interface RecordBreedingEventInput {
   animal_id: string;
@@ -39,6 +44,11 @@ export interface RecordBreedingEventInput {
   provenance: Provenance;
   /** The event this one corrects: same animal, same type, not yet corrected. */
   supersedes_id?: string | null;
+  allow_ambiguous_service?: boolean;
+  allow_early_check?: boolean;
+  allow_check_without_service?: boolean;
+  /** Free text kept with an override that happened. Optional. */
+  override_reason?: string | null;
 }
 
 /**
@@ -144,6 +154,36 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     }
   }
 
+  // The candidate carries the timestamp the event will be stored with, so on a
+  // same-day tie it sorts after the events already there and its warning holds.
+  const recordedAt = new Date().toISOString();
+  const candidate: RegistryEvent = {
+    id: 'candidate',
+    animal_id: input.animal_id,
+    type: input.type,
+    occurred_on: input.occurred_on,
+    occurred_time: time,
+    date_precision: input.date_precision,
+    payload: assertEventPayload(input.type, input.payload) as unknown as Record<string, unknown>,
+    source_form: input.provenance.source_form,
+    source_ref: input.provenance.source_ref ?? null,
+    observed_by: input.provenance.observed_by ?? null,
+    recorded_by: input.provenance.recorded_by,
+    recorded_at: recordedAt,
+    supersedes_id: supersedesId,
+    override_check: null,
+    override_reason: null,
+  };
+  const warning = breedingWarning(eventsForAnimal(db, input.animal_id), candidate);
+  const allowed: Record<BreedingOverriddenCheck, boolean | undefined> = {
+    ambiguous_service: input.allow_ambiguous_service,
+    early_check: input.allow_early_check,
+    check_without_service: input.allow_check_without_service,
+  };
+  if (warning && allowed[warning.check] !== true) {
+    throw new RegistryError(warning.check, warning.message, warning.field);
+  }
+
   const row = appendEvent(db, {
     animal_id: input.animal_id,
     type: input.type,
@@ -153,6 +193,8 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     payload: input.payload,
     provenance: input.provenance,
     supersedes_id: supersedesId,
+    recorded_at: recordedAt,
+    override: warning ? { check: warning.check, reason: input.override_reason ?? null } : null,
   });
   return { event_id: row.id };
 }

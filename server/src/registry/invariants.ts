@@ -1403,6 +1403,16 @@ function checkBreeding(s: RegistrySnapshot): Violation[] {
     if (refusal) {
       out.push(v(29, 'breeding-event-shape', `event ${e.id} (${e.type}@${e.occurred_on}): ${refusal}`, target));
     }
+    const allowedOn: Record<string, string> = {
+      ambiguous_service: 'insemination',
+      early_check: 'pregnancy_check',
+      check_without_service: 'pregnancy_check',
+    };
+    if (e.override_check && allowedOn[e.override_check] && allowedOn[e.override_check] !== e.type) {
+      out.push(
+        v(29, 'breeding-event-shape', `event ${e.id} is a ${e.type} but records an override of '${e.override_check}', which belongs to a ${allowedOn[e.override_check]}`, target),
+      );
+    }
   }
   return out;
 }

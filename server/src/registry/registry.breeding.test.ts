@@ -7,6 +7,7 @@ import { USAGE, buildBreedingPayload, buildSupersedesId } from './breed';
 import { recordBreedingEvent } from './breeding';
 import { CliError, parseFlags } from './cli';
 import { isRegistryError } from './errors';
+import { breedingHerd } from './breeding-fixtures';
 import { addAcquired, addDeparture, freshDb, RECALL } from './fixtures';
 import { checkSnapshot } from './invariants';
 import { deriveReproduction } from './reproduction';
@@ -130,4 +131,77 @@ test('--supersedes parses to an event id, is optional, and must not be empty', (
   assert.equal(buildSupersedesId(parseFlags([])), null);
   assert.throws(() => buildSupersedesId(parseFlags(['--supersedes='])), CliError);
   assert.match(USAGE, /--supersedes/);
+});
+
+// ---------------------------------------------------------------------------
+// Stage 2: the write path warns, and records an override from the condition.
+// ---------------------------------------------------------------------------
+
+const countEvents = (db: Db, id: string) => eventsForAnimal(db, id).length;
+const heerCheck = {
+  animal_id: 'BD-0007',
+  type: 'pregnancy_check',
+  occurred_on: '2026-11-13',
+  date_precision: 'day',
+  payload: { method: 'palpation', result: 'positive' },
+  provenance: RECALL,
+};
+
+test('an early check is refused until the caller saves over it', () => {
+  const db = breedingHerd();
+  const before = countEvents(db, 'BD-0007');
+  refuses(db, heerCheck, 'early_check', 'occurred_on');
+  assert.equal(countEvents(db, 'BD-0007'), before);
+  const { event_id } = recordBreedingEvent(db, {
+    ...heerCheck,
+    allow_early_check: true,
+    override_reason: 'vet was here anyway',
+  } as never);
+  assert.equal(countEvents(db, 'BD-0007'), before + 1);
+  const row = eventsForAnimal(db, 'BD-0007').find((e) => e.id === event_id)!;
+  assert.equal(row.override_check, 'early_check');
+  assert.equal(row.override_reason, 'vet was here anyway');
+});
+
+test('a flag with nothing to override records nothing', () => {
+  const db = breedingHerd();
+  const { event_id } = recordBreedingEvent(db, {
+    ...heerCheck,
+    payload: { method: 'ultrasound', result: 'positive' },
+    allow_ambiguous_service: true,
+    allow_early_check: true,
+    allow_check_without_service: true,
+  } as never);
+  const row = eventsForAnimal(db, 'BD-0007').find((e) => e.id === event_id)!;
+  assert.equal(row.override_check, null);
+  assert.equal(row.override_reason, null);
+});
+
+test('the flag for another warning does not save over this one', () => {
+  const db = breedingHerd();
+  refuses(
+    db,
+    { animal_id: 'BD-0006', type: 'insemination', occurred_on: '2026-09-23', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_early_check: true },
+    'ambiguous_service',
+  );
+});
+
+test('a second service dated the same day as the first still warns', () => {
+  const db = breedingHerd();
+  refuses(
+    db,
+    { animal_id: 'BD-0006', type: 'insemination', occurred_on: '2026-09-02', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL },
+    'ambiguous_service',
+  );
+});
+
+test('a refusal still wins over a warning', () => {
+  const db = breedingHerd();
+  refuses(db, { ...heerCheck, date_precision: 'month' }, 'breeding_precision');
+});
+
+test('USAGE names the four override flags', () => {
+  for (const f of ['--allow-ambiguous-service', '--allow-early-check', '--allow-check-without-service', '--override-reason']) {
+    assert.ok(USAGE.includes(f), f);
+  }
 });

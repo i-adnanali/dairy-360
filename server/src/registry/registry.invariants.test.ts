@@ -1126,3 +1126,19 @@ test('invariant 29: a breeding event on a male, or at a precision it cannot have
   assert.equal(found.length, 2);
   assert.ok(found.every((v) => v.name === 'breeding-event-shape'));
 });
+
+test('invariant 29 flags a breeding override on the wrong event type', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  appendEvent(db, {
+    animal_id: 'BD-0001',
+    type: 'insemination',
+    occurred_on: '2026-01-01',
+    date_precision: 'day',
+    payload: { service_type: 'ai' },
+    provenance: RECALL,
+    override: { check: 'early_check', reason: null },
+  });
+  const found = checkSnapshot(snapshot(db), '2026-11-13').filter((v) => v.invariant === 29);
+  assert.equal(found.length, 1);
+});

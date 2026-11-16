@@ -66,8 +66,10 @@ NOTE: the registry is EMPTY, so every invariant passes vacuously.
 `registry:breed` writes the five breeding event types to a **female**. `--precision` is `day` or `month` (a
 `pregnancy_check` is `day` only); `year` and `estimated` are refused. It refuses an unknown
 animal, an animal that is not female, a precision a breeding event cannot have, and a date before she arrived or
-was born or after she left. There is no override flag. `--supersedes=<event id>` corrects an earlier event of hers
+was born or after she left; those have no override. `--supersedes=<event id>` corrects an earlier event of hers
 (same animal, same type, once per event); a breeding event cannot be retracted, only replaced. It prints the event id and her state at `--as-of`.
+
+Three warnings are refused until you save over them, each with its own flag: `--allow-ambiguous-service` (a service that joins an earlier service's case, so her calving window widens), `--allow-early-check` (a check before its method can be relied on) and `--allow-check-without-service` (a check with no service on or before it). `--override-reason=<text>` is kept with the override. The override is recorded only when the warning actually fired; a flag with nothing to override records nothing.
 
 ```bash
 # heat seen

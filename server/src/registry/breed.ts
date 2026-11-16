@@ -7,8 +7,8 @@
 // Five types: heat_observed, insemination, pregnancy_check, abortion,
 // null_observation. The rules live in recordBreedingEvent() (breeding.ts); this
 // file only turns flags into an input object and prints what the herd looks like
-// afterwards. There is no override flag: the refusals are about things that
-// cannot have happened.
+// afterwards. The refusals are about things that cannot have happened and have no
+// override; the three breeding warnings (breeding-checks.ts) have an --allow-* flag.
 
 import {
   CliError,
@@ -43,6 +43,10 @@ const FLAGS = [
   'watched-for',
   'as-of',
   'supersedes',
+  'allow-ambiguous-service',
+  'allow-early-check',
+  'allow-check-without-service',
+  'override-reason',
   ...PROVENANCE_FLAGS,
 ] as const;
 
@@ -76,10 +80,18 @@ Optional:
                               event (correct the replacement to correct again). A wrong event cannot
                               be retracted, only replaced by a corrected one of the same type.
 
+  --allow-ambiguous-service   save a service that joins an earlier service's case
+  --allow-early-check         save a check before its method can be relied on
+  --allow-check-without-service
+                              save a check with no service on or before it
+  --override-reason=<text>    kept with an override that happened. A flag with nothing to
+                              override records nothing.
+
 Refused: an unknown animal, an animal that is not female, a
 precision a breeding event cannot have, a date before she arrived or was born, and a
 date after she left, and for --supersedes an unknown event (or one on another animal), a
-different type, or an event already corrected. There is no override.
+different type, or an event already corrected. Those cannot be overridden; the three
+warnings above can.
 `.trim();
 
 const choice = (flags: Flags, name: string, allowed: readonly string[]): string => {
@@ -168,6 +180,10 @@ export function main(argv: string[]): void {
     payload: buildBreedingPayload(breedingType, flags),
     provenance: requireProvenance(flags),
     supersedes_id: buildSupersedesId(flags),
+    allow_ambiguous_service: flags.has('allow-ambiguous-service'),
+    allow_early_check: flags.has('allow-early-check'),
+    allow_check_without_service: flags.has('allow-check-without-service'),
+    override_reason: optStr(flags, 'override-reason'),
   };
 
   // Importing usage/help must never open or migrate the farm database.
