@@ -318,7 +318,7 @@ test("database report refreshes corrections; pagination never changes totals", (
 });
 test("HTTP exposes reports and validates query errors without opening live database", async () => {
   const db = freshDb(),
-    server = harnessApp(db).listen(0);
+    server = harnessApp(db).listen(0, '127.0.0.1');
   try {
     await new Promise<void>((r) => server.once("listening", r));
     const port = (server.address() as { port: number }).port;

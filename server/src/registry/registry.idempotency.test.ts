@@ -47,7 +47,7 @@ interface Ctx {
 const open: Server[] = [];
 
 async function serve(db: Db): Promise<Ctx> {
-  const server = harnessApp(db).listen(0);
+  const server = harnessApp(db).listen(0, '127.0.0.1');
   open.push(server);
   await new Promise<void>((resolve) => server.once('listening', resolve));
   const { port } = server.address() as AddressInfo;

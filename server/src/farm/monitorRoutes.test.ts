@@ -17,7 +17,7 @@ after(() => {
 async function serve(read: (from: string, to: string) => FarmEventView[], synthetic = false) {
   const app = express();
   app.use('/api/farm', farmMonitorRouter(read, { synthetic }));
-  const server = app.listen(0);
+  const server = app.listen(0, '127.0.0.1');
   open.push(server);
   await new Promise<void>((r) => server.once('listening', r));
   return `http://127.0.0.1:${(server.address() as AddressInfo).port}/api/farm/events`;
