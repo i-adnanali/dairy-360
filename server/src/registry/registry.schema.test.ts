@@ -538,17 +538,17 @@ function dbAtVersion1(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('a fresh database lands on the current target version, now 10', () => {
+test('a fresh database lands on the current target version, now 11', () => {
   // The literal is deliberate and this test is meant to fail when a migration is
   // added: it forces whoever adds one to state the new number here rather than
   // letting TARGET_VERSION verify itself against itself.
   const db = freshDb();
   assert.equal(db.pragma('user_version', { simple: true }), TARGET_VERSION);
-  assert.equal(TARGET_VERSION, 10);
+  assert.equal(TARGET_VERSION, 11);
   db.close();
 });
 
-test('migrations 2 through 10 upgrade a v1 database and PRESERVE its rows', () => {
+test('migrations 2 through 11 upgrade a v1 database and PRESERVE its rows', () => {
   // The rebuild is create-copy-drop-rename. The copy is the part that would
   // silently lose data if it were wrong, so it is tested with data present --
   // even though the real database was empty when this shipped.
@@ -570,13 +570,13 @@ test('migrations 2 through 10 upgrade a v1 database and PRESERVE its rows', () =
 
   const result = runMigrations(db);
   assert.equal(result.from, 1);
-  assert.equal(result.to, 10);
+  assert.equal(result.to, 11);
   assert.equal(
     result.applied,
-    9,
+    10,
     'the estimated-convention rebuild, the milking table, the override columns, ' +
       'the four sales tables, the six labour tables, the staff-destination rebuild, ' +
-      'the feed tables, the health tables AND the breeding-types rebuild',
+      'the feed tables, the health tables, the breeding-types rebuild AND the override-vocabulary rebuild',
   );
 
   const rows = db
@@ -674,12 +674,12 @@ test('migration 4 MOVES a payload override into the columns, and out of the payl
 
   const result = runMigrations(db);
   assert.equal(result.from, 3);
-  assert.equal(result.to, 10);
+  assert.equal(result.to, 11);
   assert.equal(
     result.applied,
-    7,
+    8,
     'the override rebuild, the sales tables, the labour tables, the staff rebuild, ' +
-      'the feed tables, the health tables and the breeding-types rebuild',
+      'the feed tables, the health tables, the breeding-types rebuild and the override-vocabulary rebuild',
   );
 
   const rows = db
@@ -1384,8 +1384,8 @@ test('migration 10: every existing row survives unchanged, with its triggers and
 
   const result = runMigrations(db);
   assert.equal(result.from, 9);
-  assert.equal(result.to, 10);
-  assert.equal(result.applied, 1);
+  assert.equal(result.to, 11);
+  assert.equal(result.applied, 2);
 
   assert.deepEqual(snapshot(), before, 'every column of every row is unchanged');
 
@@ -1423,6 +1423,72 @@ test('migration 10: every existing row survives unchanged, with its triggers and
   db.close();
 });
 
-test('the schema version is 10', () => {
-  assert.equal(TARGET_VERSION, 10);
+test('the schema version is 11', () => {
+  assert.equal(TARGET_VERSION, 11);
+});
+
+// ---------------------------------------------------------------------------
+// Migration 11 -- the override vocabulary widens to five names
+// ---------------------------------------------------------------------------
+
+/** A database at schema version 10, for testing the v10 -> v11 upgrade. */
+function dbAtVersion10(): ReturnType<typeof freshDb> {
+  const db = new Database(':memory:');
+  applyRegistryPragmas(db);
+  db.transaction(() => {
+    for (let i = 0; i < 10; i++) MIGRATIONS[i].up(db);
+    db.exec('PRAGMA user_version = 10');
+  })();
+  return db;
+}
+
+test('TARGET_VERSION is 11', () => {
+  assert.equal(TARGET_VERSION, 11);
+});
+
+test('migration 11 lets an event carry a breeding override', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  const ins = db.prepare(
+    `INSERT INTO registry_animal_events (id, animal_id, type, occurred_on, date_precision, payload, source_form, recorded_by, recorded_at, override_check)
+     VALUES (?, 'BD-0001', 'insemination', '2026-01-21', 'day', '{}', 'recall', 't', '2026-01-21T00:00:00.000Z', ?)`,
+  );
+  ins.run('aevt_ok', 'ambiguous_service');
+  assert.throws(() => ins.run('aevt_bad', 'heat_missing'), /override_check_is_known/);
+  db.close();
+});
+
+test('migration 11 keeps every row of a version-10 database', () => {
+  const db = dbAtVersion10();
+  db.prepare(
+    `INSERT INTO registry_animals (id,name,sex,species,origin,post_no,tag_no)
+     VALUES ('BD-0001','Noor','female','buffalo','acquired',NULL,NULL)`,
+  ).run();
+  const ins = db.prepare(
+    `INSERT INTO registry_animal_events
+       (id, animal_id, type, occurred_on, date_precision, payload, source_form, recorded_by, recorded_at)
+     VALUES (?, 'BD-0001', ?, ?, 'day', ?, 'recall', 'x', ?)`,
+  );
+  ins.run('aevt_01', 'acquired', '2019-01-01', '{"k":"a"}', 't-1');
+  ins.run('aevt_02', 'calving', '2022-03-04', '{"k":"b"}', 't-2');
+  ins.run('aevt_03', 'insemination', '2026-01-20', '{"service_type":"ai"}', 't-3');
+  const snapshot = () =>
+    db.prepare(`SELECT id, type, payload FROM registry_animal_events ORDER BY id`).all();
+  const before = snapshot();
+
+  const result = runMigrations(db);
+  assert.equal(result.from, 10);
+  assert.equal(result.to, 11);
+
+  assert.deepEqual(snapshot(), before, 'same ids, types and payloads');
+  assert.throws(
+    () => db.prepare(`UPDATE registry_animal_events SET recorded_by = 'y' WHERE id = 'aevt_01'`).run(),
+    /append-only/,
+  );
+  assert.throws(
+    () => db.prepare(`DELETE FROM registry_animal_events WHERE id = 'aevt_01'`).run(),
+    /append-only/,
+  );
+  assert.deepEqual(db.pragma('foreign_key_check'), []);
+  db.close();
 });

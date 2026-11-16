@@ -310,8 +310,8 @@ test("v7 upgrade adds feed while preserving populated milk, animal and payroll r
     f.db.exec('DROP TABLE registry_health_' + t);
   f.db.pragma("user_version = 7");
   const result = applyRegistrySchema(f.db);
-  assert.equal(result.applied, 3);
-  assert.equal(result.to, 10);
+  assert.equal(result.applied, 4);
+  assert.equal(result.to, 11);
   assert.deepEqual(
     tables.map((t) => f.db.prepare("SELECT * FROM " + t).all()),
     before,
