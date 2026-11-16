@@ -377,3 +377,10 @@ test('a recorded override survives a projection rebuild untouched', () => {
 
   assert.deepEqual(overrideOf(latest(db, 'BD-0001', 'calving')), before);
 });
+
+test('assertOverride accepts the three breeding checks and still refuses an unknown one', () => {
+  for (const check of ['ambiguous_service', 'early_check', 'check_without_service']) {
+    assert.deepEqual(assertOverride({ check, reason: null }), { check, reason: null });
+  }
+  assert.throws(() => assertOverride({ check: 'heat_missing', reason: null }));
+});

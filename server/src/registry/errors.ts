@@ -58,6 +58,13 @@ export type RegistryErrorCode =
   // wrong animal or the wrong date, and both are fixed by correcting the input
   // rather than by insisting.
   | 'no_open_lactation'
+  // --- breeding (docs/records/REGISTRY_BREEDING.md) ---
+  | 'ambiguous_service'
+  | 'early_check'
+  | 'check_without_service'
+  // A rollout gate on the HTTP route, not a rule about the record, so it has
+  // no `allow_*` companion.
+  | 'breeding_entry_closed'
   | 'empty_session'
   // --- sales, home use and the ledger (docs/records/REGISTRY_SALES.md) ---
   | 'unknown_destination'

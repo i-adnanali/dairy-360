@@ -69,3 +69,19 @@ restoring a backup taken before it ran, such as the pre-migration snapshot; see
 her own birth a calving may be recorded, not a gestation length, and stage 1 does not use
 it. `null_observation` is given the narrow breeding payload (`watched_for`) here, although
 [REGISTRY.md](REGISTRY.md) Decision 8 imagined it arriving with sheet transcription.
+
+## Stage 2: entry for services and checks, on a pilot
+
+**Scope.** Stage 2 opens HTTP entry for `insemination` and `pregnancy_check`, on the animals listed in `REGISTRY_BREEDING_PILOT` only. The other breeding types (`heat_observed`, `null_observation`, `abortion`) stay CLI-only. The CLI is not gated by the pilot.
+
+**Three warnings, not refusals.** `ambiguous_service` fires when a new insemination joins a case that already has a service with nothing ruling it out. `check_without_service` fires when a pregnancy check has no service on or before it. `early_check` fires when the derived latest check is not reliable for its method's day (`CHECK_RELIABLE_FROM`). Each describes something unusual but possible: a repeat service before a heat is seen, a check on a service that was never entered, a check taken early. The farm may know better than the record, so each is a warning the caller can save over with `allow_ambiguous_service`, `allow_early_check` or `allow_check_without_service`, and the override is recorded from the condition, never from the flag. Only the impossible is refused.
+
+**One source of rules.** Warnings are answered by `deriveReproduction`, not by a second set of rules, so a warning and the badge cannot disagree.
+
+**Spec warnings left for later.** The 36-hour heat check and the gestational-heat check wait for heat entry (stage 3), because with no heat entry the first would fire on every service. The two calving-window checks are calving writes, not entries this stage opens (stage 4). The month-precision check needs a "the farm normally knows the day" setting that does not exist; open question 07 stays open, and the Breeding tab shows the widened range instead. The bull-exposure ceiling is a check on the calendar, not on a write (stage 3, with tasks).
+
+**One override column.** At most one stage 2 warning fires per event: a service can only trip `ambiguous_service`, and a check trips `check_without_service` (no service on file) or `early_check` (a service on file), never both. Stage 3's 36-hour heat check can fire on a service that is also ambiguous, so stage 3 must decide how to record two ([OPEN-066](../OPEN.md#open-066)).
+
+**No correction from the page.** A wrong entry is corrected with `registry:breed --supersedes`; a Correct action on the page is not built ([OPEN-065](../OPEN.md#open-065)).
+
+**Migration 11 is one-way.** Migration 11 widens `override_check` so it can hold the three new names. Like migration 10, it is one-way.
