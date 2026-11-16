@@ -904,7 +904,7 @@ then `FARM_SCHEMA` and the migration runner apply.
 after the first server start, before any seed:
 
 ```
-user_version = 9
+user_version = 10
 tables: farm_events, registry_animal_events, registry_animal_status,
         registry_animals, registry_destination_prices, registry_destinations,
         registry_dispatches, registry_engagements, registry_lactations,

@@ -9,8 +9,9 @@ Stage 1 lets the registry record breeding events and read back, for each animal,
 is in her cycle: when she was served, whether a check has confirmed her, and the window in
 which she should calve. It is read-only derivation over events that are only ever added.
 It leaves out warnings and overrides, tasks, KPIs, entry forms and the Breeding page. The
-server flag `REGISTRY_BREEDING=1` switches it on; with the flag off, nothing the farm sees
-changes.
+server flag `REGISTRY_BREEDING=1` switches it on; with the flag off, the API and the pages
+show what they did before. The flag does not cover the database: see
+[Migration 10 is one-way](#migration-10-is-one-way).
 
 ## A second derived axis, not a new status
 
@@ -49,6 +50,14 @@ only. `year` and `estimated` are refused, because a year-wide service date gives
 window too wide to say anything. The spec's warning row that mentions year-precision is
 therefore stale. A breeding event dated after the animal's departure is refused, with no
 override.
+
+## Migration 10 is one-way
+
+Migration 10 widens the event table's `type` check so it can hold the five breeding types. It
+is one-way: it runs the first time a build that has it opens the database, whatever the flag
+says, and a build from before it refuses to open the migrated database. Rolling back means
+restoring a backup taken before it ran, such as the pre-migration snapshot; see
+[Back up, verify and restore registry data](../guides/backup-restore.md).
 
 ## Left alone on purpose
 

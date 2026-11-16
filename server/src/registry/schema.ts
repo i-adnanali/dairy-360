@@ -1268,6 +1268,103 @@ CREATE INDEX registry_feed_sources_crop ON registry_feed_sources(crop_id);
 CREATE INDEX registry_feed_sources_purchase ON registry_feed_sources(purchase_id);
 `;
 
+// Migration 10: the event `type` CHECK widens from the six original names to the
+// eleven live ones (the five breeding types are appended). SQLite cannot alter a
+// CHECK, so the table is rebuilt. The constraints are those of migration 4's
+// table, verbatim, except the type list; the names are spelled out here rather
+// than interpolated because a migration must not change when a constant does.
+const MIGRATION_10_BREEDING_TYPES = `
+CREATE TABLE registry_animal_events_new (
+  id             TEXT PRIMARY KEY,
+  animal_id      TEXT NOT NULL REFERENCES registry_animals(id),
+  type           TEXT NOT NULL CHECK (
+                   type IN ('birth','acquired','calving','dry_off','departure','note',
+                            'heat_observed','insemination','pregnancy_check','abortion','null_observation')
+                 ),
+  occurred_on    TEXT NOT NULL,
+  occurred_time  TEXT,
+  date_precision TEXT NOT NULL CHECK (
+                   date_precision IN ('day','month','year','estimated')
+                 ),
+  payload        TEXT NOT NULL,
+  source_form    TEXT NOT NULL CHECK (
+                   source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                 ),
+  source_ref     TEXT,
+  observed_by    TEXT,
+  recorded_by    TEXT NOT NULL,
+  recorded_at    TEXT NOT NULL,
+  supersedes_id  TEXT REFERENCES registry_animal_events(id),
+
+  -- NEW in migration 4. Was payload.override.{check,reason}.
+  override_check  TEXT,
+  override_reason TEXT,
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT time_only_at_day_precision
+    CHECK (occurred_time IS NULL OR date_precision = 'day'),
+  CONSTRAINT occurred_time_is_hh_mm
+    CHECK (occurred_time IS NULL OR occurred_time GLOB '[0-2][0-9]:[0-5][0-9]'),
+  CONSTRAINT month_precision_dated_first
+    CHECK (date_precision <> 'month' OR substr(occurred_on, 9, 2) = '01'),
+  CONSTRAINT year_precision_dated_jan_first
+    CHECK (date_precision <> 'year' OR substr(occurred_on, 6, 5) = '01-01'),
+  CONSTRAINT estimated_precision_dated_jan_first
+    CHECK (date_precision <> 'estimated' OR substr(occurred_on, 6, 5) = '01-01'),
+  CONSTRAINT no_self_supersede
+    CHECK (supersedes_id IS NULL OR supersedes_id <> id),
+
+  -- The vocabulary, enforced at the database for the first time. In the payload
+  -- this was a write-boundary check only.
+  CONSTRAINT override_check_is_known
+    CHECK (override_check IS NULL OR
+           override_check IN ('near_duplicate_calving','animal_departed')),
+  -- A reason with no check is prose about a guard nobody stepped past. The
+  -- converse is fine and deliberate: the flag is load-bearing, the prose is
+  -- optional (see OverrideRecord in types.ts).
+  CONSTRAINT override_reason_needs_a_check
+    CHECK (override_reason IS NULL OR override_check IS NOT NULL),
+  -- A note is always allowed after a departure, so it can never carry an
+  -- override. The write boundary already refused one; now the schema does too.
+  CONSTRAINT note_never_overrides
+    CHECK (override_check IS NULL OR type <> 'note')
+);
+
+INSERT INTO registry_animal_events_new
+  (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+   source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+   override_check, override_reason)
+SELECT
+  id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+   source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+   override_check, override_reason
+FROM registry_animal_events;
+
+DROP TABLE registry_animal_events;
+ALTER TABLE registry_animal_events_new RENAME TO registry_animal_events;
+
+CREATE UNIQUE INDEX idx_registry_events_supersedes
+  ON registry_animal_events(supersedes_id)
+  WHERE supersedes_id IS NOT NULL;
+CREATE INDEX idx_registry_events_animal
+  ON registry_animal_events(animal_id, occurred_on);
+CREATE INDEX idx_registry_events_type
+  ON registry_animal_events(type);
+
+CREATE TRIGGER registry_animal_events_no_update
+BEFORE UPDATE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+
+CREATE TRIGGER registry_animal_events_no_delete
+BEFORE DELETE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+`;
+
 export const MIGRATIONS: readonly Migration[] = [
   { up: (db) => db.exec(MIGRATION_1_REGISTRY) },
   { up: (db) => db.exec(MIGRATION_2_ESTIMATED_JAN_FIRST), rebuildsTables: true },
@@ -1290,6 +1387,10 @@ export const MIGRATIONS: readonly Migration[] = [
   { up: (db) => db.exec(MIGRATION_7_STAFF_DESTINATIONS), rebuildsTables: true },
   { up: (db) => db.exec(MIGRATION_8_FEED) },
   { up: (db) => db.exec(HEALTH_SCHEMA) },
+  // Rebuilds registry_animal_events to widen the `type` CHECK to the eleven live
+  // names. Same self-referencing foreign key as migrations 2 and 4, hence
+  // `rebuildsTables`. No payload is rewritten, so plain SQL, not a function.
+  { up: (db) => db.exec(MIGRATION_10_BREEDING_TYPES), rebuildsTables: true },
 ];
 
 /** The version a fully-migrated database reports. */
