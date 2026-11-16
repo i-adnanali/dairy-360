@@ -25,6 +25,7 @@ import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 
 import { harnessApp } from './harness';
+import { BREEDING_PILOT, breedingHerd } from './breeding-fixtures';
 import { RECALL, addDeparture, addDryOff, cleanHerd, freshDb } from './fixtures';
 import { recordBreedingEvent } from './breeding';
 import { herd } from './reads';
@@ -598,7 +599,8 @@ test('REGISTRY.md § HTTP surface lists exactly the routes the router mounts', (
   );
   // Inspect the router without binding a port; this covers generated routes too.
   const db = freshDb();
-  const stack = registryRouter(db).stack as {route?: {path:string;methods:Record<string,boolean>}}[];
+  // breeding: true, because POST /breeding/events is mounted only with the flag.
+  const stack = registryRouter(db, { breeding: true }).stack as {route?: {path:string;methods:Record<string,boolean>}}[];
   const mounted = new Set(stack.flatMap(layer => layer.route ? Object.keys(layer.route.methods).map(method=>`${method.toUpperCase()} ${layer.route!.path}`) : []));
   db.close();
 
@@ -704,4 +706,86 @@ test('as_of is read only with the flag on, and an unparseable value is refused',
   );
   const off = await serve(cleanHerd());
   assert.equal((await get(off, '/animals/BD-0001?as_of=not-a-date')).status, 200);
+});
+
+// ---------------------------------------------------------------------------
+// Breeding stage 2: POST /breeding/events, open for the pilot animals only
+// ---------------------------------------------------------------------------
+
+const SVC = { type: 'insemination', occurred_on: '2026-11-13', date_precision: 'day', payload: { service_type: 'ai', exposure_days: null }, ...PROV };
+
+async function pilotCtx(): Promise<Ctx> {
+  return serve(breedingHerd(), { breeding: true, breedingPilot: BREEDING_PILOT });
+}
+
+test('a service for a pilot animal is written and the page gets her detail back', async () => {
+  const ctx = await pilotCtx();
+  const r = (await post(ctx, '/breeding/events', { animal_id: 'BD-0009', ...SVC })) as { status: number; body: { event_id: string; animal: { breeding_entry: boolean } } };
+  assert.equal(r.status, 201);
+  assert.ok(r.body.event_id);
+  assert.equal(r.body.animal.breeding_entry, true);
+  const g = (await get(ctx, '/animals/BD-0009?as_of=2026-11-13')) as { body: { reproduction: { state: string } } };
+  assert.equal(g.body.reproduction.state, 'bred');
+});
+
+test('the same Idempotency-Key writes once', async () => {
+  const ctx = await pilotCtx();
+  const count = () => (ctx.db.prepare(`SELECT COUNT(*) n FROM registry_animal_events WHERE animal_id = 'BD-0009'`).get() as { n: number }).n;
+  const before = count();
+  const send = async () => {
+    const r = await fetch(`${ctx.base}/breeding/events`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'idempotency-key': 'breeding-once' },
+      body: JSON.stringify({ animal_id: 'BD-0009', ...SVC }),
+    });
+    return (await r.json()) as { event_id: string };
+  };
+  const a = await send();
+  const b = await send();
+  assert.equal(a.event_id, b.event_id);
+  assert.equal(count(), before + 1);
+});
+
+test('an animal outside the pilot is refused', async () => {
+  const ctx = await pilotCtx();
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0006', ...SVC });
+  assert.equal(r.status, 400);
+  assert.equal((r.body as { error: string }).error, 'breeding_entry_closed');
+  assert.equal((r.body as { field: string }).field, 'animal_id');
+});
+
+test('a heat is not entered on the page yet', async () => {
+  const ctx = await pilotCtx();
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'heat_observed', occurred_on: '2026-11-13', date_precision: 'day', payload: { sign: 'standing' }, ...PROV });
+  assert.equal(r.status, 400);
+  assert.equal((r.body as { error: string }).error, 'breeding_entry_closed');
+  assert.equal((r.body as { field: string }).field, 'type');
+});
+
+test('a warning comes back as a 400 with its code, and the flag saves over it', async () => {
+  const ctx = await pilotCtx();
+  const chk = { animal_id: 'BD-0007', type: 'pregnancy_check', occurred_on: '2026-11-13', date_precision: 'day', payload: { method: 'palpation', result: 'positive' }, ...PROV };
+  const warned = await post(ctx, '/breeding/events', chk);
+  assert.equal(warned.status, 400);
+  const wb = warned.body as { error: string; field: string; message: string };
+  assert.equal(wb.error, 'early_check');
+  assert.equal(wb.field, 'occurred_on');
+  assert.equal(wb.message, 'A check by hand is not relied on before day 46. This one is on day 35.');
+  const saved = await post(ctx, '/breeding/events', { ...chk, allow_early_check: true });
+  assert.equal(saved.status, 201);
+});
+
+test('with the breeding flag off the route does not exist', async () => {
+  const ctx = await serve(breedingHerd());
+  const r = await fetch(`${ctx.base}/breeding/events`, { method: 'POST', headers: { 'content-type': 'application/json', 'idempotency-key': 'off-1' }, body: JSON.stringify({ animal_id: 'BD-0007', ...SVC }) });
+  assert.equal(r.status, 404);
+  const { body } = (await get(ctx, '/animals/BD-0007')) as { body: Record<string, unknown> };
+  assert.equal('reproduction' in body, false);
+  assert.equal('breeding_entry' in body, false);
+});
+
+test('breeding_entry is false for a female outside the pilot', async () => {
+  const ctx = await pilotCtx();
+  const { body } = (await get(ctx, '/animals/BD-0006')) as { body: { breeding_entry: boolean } };
+  assert.equal(body.breeding_entry, false);
 });

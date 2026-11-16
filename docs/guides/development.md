@@ -33,6 +33,8 @@ Open `/analytics`. Both commands share ports with the persistent app and cannot 
 
 For the breeding badge against every reproductive state, run `npm run harness:breeding`. It serves eleven synthetic females with the breeding view switched on. The states are counted from the real date, so they drift as time moves on; add `?as_of=2026-11-13` to the API URL, for example `/api/registry/animals/BD-0001?as_of=2026-11-13`, to pin them to the date the herd was built for (`GET /api/harness` reports it as `breeding_as_of`). The page does not forward `as_of`, so it always shows today's state.
 
+`npm run harness:breeding` also opens manual entry for BD-0007 (Heer) and BD-0009 (Shehzadi), so `POST /api/registry/breeding/events` accepts a service or a pregnancy check for those two and refuses the rest. For a real run, set `REGISTRY_BREEDING=1` and `REGISTRY_BREEDING_PILOT` to a comma-separated list of animal ids, for example `REGISTRY_BREEDING_PILOT=BD-0007,BD-0009`, before starting the server; an id that is not a female animal in the registry is logged as a warning at startup.
+
 ## Run the persistent app
 
 ```bash

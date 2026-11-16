@@ -99,6 +99,37 @@ The `window` is null for `calved`, `lost` and `open`; otherwise `opens_on` is `c
 
 With the flag on, `?as_of=YYYY-MM-DD` asks for the state on that day (default: today on the farm). Events dated later are invisible, including a later dry-off (whether she is in milk is read on `as_of`) and a later departure. A value that is not a real calendar date is a 400 `invalid_payload` on field `as_of`. With the flag off the parameter is not read.
 
+## `POST /breeding/events`
+
+Registered only with `REGISTRY_BREEDING=1`; without it the route does not exist (404). It writes one service or one pregnancy check through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction` and `breeding_entry`.
+
+Body: `animal_id`, `type` (`insemination` or `pregnancy_check`), `occurred_on`, `occurred_time`, `date_precision` (required, never defaulted), `payload` (an object, passed as is), `supersedes_id` (a correction), the three flags `allow_ambiguous_service`, `allow_early_check` and `allow_check_without_service` (each counts only when it is exactly `true`), `override_reason`, and the provenance fields (`source_form`, `source_ref`, `observed_by`, `recorded_by`).
+
+### The pilot gate
+
+`REGISTRY_BREEDING_PILOT` is a comma-separated list of animal ids, read once in `server/src/index.ts`. The route accepts an animal only when it is in the list and is female. `GET /animals/:id` carries `breeding_entry`, true or false, exactly when it carries `reproduction`, so the page knows whether to offer the form. At startup, with the breeding flag on, the server logs one warning naming the ids in the list that are not female animals in the registry. The gate is a rollout control, not a rule about the farm's data: the CLI is not gated.
+
+Two refusals come before the domain function, both `breeding_entry_closed`, a 400:
+
+| Field | Message |
+|---|---|
+| `type` | `<type> is not entered on the page yet; only a service or a pregnancy check is` |
+| `animal_id` | `breeding entry is not open for <animal_id>; it is open for the animals in the pilot` |
+
+`heat_observed`, `null_observation` and `abortion` stay CLI-only.
+
+## Warnings
+
+Beyond the refusals, three unusual-but-possible cases come back as a 400 whose `error` is the warning's name and whose `field` is `occurred_on`. The message is worded from what `deriveReproduction` says, never from a second copy of the rules. Send the matching flag as `true` to save over it.
+
+| Warning | On | Flag | When |
+|---|---|---|---|
+| `ambiguous_service` | `insemination` | `allow_ambiguous_service` | earlier services in this case are not ruled out by a heat, a negative check, a calving or a loss |
+| `early_check` | `pregnancy_check` | `allow_early_check` | the check is earlier than its method is relied on (`CHECK_RELIABLE_FROM`); the message names the day |
+| `check_without_service` | `pregnancy_check` | `allow_check_without_service` | no service is recorded on or before the check |
+
+At most one warning can fire for one event, so one `override_check` column records it. An override is recorded from the condition, never from the flag: a write that sends `allow_*: true` when the warning did not fire records no override.
+
 ## Correcting a breeding event
 
 A wrongly entered service, check or heat is corrected by writing a superseding event: `recordBreedingEvent` takes `supersedes_id`, and `registry:breed` takes `--supersedes=<event id>`. The original row stays in the table untouched; the new row carries `supersedes_id`, and `effectiveEvents()` drops the original, so the state follows the correction.
@@ -113,4 +144,4 @@ Migration 10 widens the event table so it can hold the five breeding types. It i
 
 ## Not built yet
 
-Warnings and overrides, tasks, KPIs, entry forms and the Breeding page (stages 2 to 5, [OPEN-062](../../OPEN.md#open-062)).
+Tasks, KPIs and the Breeding page (stages 3 to 5, [OPEN-062](../../OPEN.md#open-062)).

@@ -7,6 +7,7 @@
 // herd, and nothing more. A herd table, one animal's timeline, and the link
 // picker. No lifetime lane, no pedigree, no herd lanes.
 
+import { breedingEntryOpen } from './breeding-pilot';
 import type { Db } from './schema';
 import { GESTATION_DAYS, calvingTooSoonAfterBirth } from './calving';
 import { definitelyBefore } from './invariants';
@@ -107,6 +108,11 @@ export interface AnimalDetail {
    * is stored.
    */
   reproduction?: ReproductionView | null;
+  /**
+   * Present exactly when `reproduction` is: can the page enter a service or a
+   * check for this animal? In the pilot list, and female.
+   */
+  breeding_entry?: boolean;
 }
 
 /**
@@ -122,7 +128,7 @@ export interface AnimalDetail {
 export function animalDetail(
   db: Db,
   animalId: string,
-  opts: { breeding?: boolean; asOf?: string } = {},
+  opts: { breeding?: boolean; breedingPilot?: readonly string[]; asOf?: string } = {},
 ): AnimalDetail | null {
   const animal = getAnimal(db, animalId);
   if (!animal) return null;
@@ -179,6 +185,7 @@ export function animalDetail(
             // In milk = one of her lactations had no end on asOf.
             inMilk: lactations.some((l) => l.ended_on === null),
           });
+    detail.breeding_entry = breedingEntryOpen(db, animalId, opts.breedingPilot ?? []);
   }
   return detail;
 }

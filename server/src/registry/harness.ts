@@ -1,5 +1,5 @@
 import { analyticsHerd } from './analytics-fixtures';
-import { BREEDING_AS_OF, breedingHerd } from './breeding-fixtures';
+import { BREEDING_AS_OF, BREEDING_PILOT, breedingHerd } from './breeding-fixtures';
 import { addHealthFixtures } from './health-fixtures';
 import { addFeedFixtures } from './feed-fixtures';
 // Animal registry -- development harness. Serves the registry API over an
@@ -151,11 +151,12 @@ function main(): void {
   // URL pins them (the page does not forward it).
   if (args.breeding) {
     const bdb = breedingHerd();
-    const bapp = harnessApp(bdb, { breeding: true });
+    const bapp = harnessApp(bdb, { breeding: true, breedingPilot: BREEDING_PILOT });
     bapp.listen(args.port, () => {
       console.log(`registry harness  http://localhost:${args.port}/api/registry  [--breeding]`);
       console.log(`  storage     :memory:  (dairy.db is NOT open in this process)`);
       console.log(`  herd        ${herd(bdb).length} animal(s), states as of today`);
+      console.log(`  pilot       ${BREEDING_PILOT.join(', ')}  (POST /breeding/events is open for these only)`);
       console.log(
         `  pin         GET /api/registry/animals/BD-0001?as_of=${BREEDING_AS_OF}  (API URL; the page does not forward as_of)`,
       );

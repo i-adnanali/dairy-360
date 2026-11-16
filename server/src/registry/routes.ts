@@ -104,6 +104,8 @@ import {
   wageBalances,
   wageStatement,
 } from './wages';
+import { recordBreedingEvent } from './breeding';
+import { breedingEntryOpen } from './breeding-pilot';
 import { correctCalving, recordCalving } from './calving';
 import {
   deleteMilkings,
@@ -355,6 +357,8 @@ function write(store: IdempotencyStore, fn: (req: Request, res: Response) => voi
 export interface RegistryOptions {
   /** REGISTRY_BREEDING=1: GET /animals/:id also returns `reproduction`. */
   breeding?: boolean;
+  /** REGISTRY_BREEDING_PILOT: the animals POST /breeding/events accepts. */
+  breedingPilot?: readonly string[];
 }
 
 /** The `as_of` query value for a breeding read: a real calendar date, or a 400. */
@@ -432,7 +436,7 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
     '/animals/:id',
     handle((req, res) => {
       const asOf = opts.breeding ? breedingAsOf(req.query.as_of) : undefined;
-      const detail = animalDetail(db, req.params.id, { breeding: opts.breeding, asOf });
+      const detail = animalDetail(db, req.params.id, { breeding: opts.breeding, breedingPilot: opts.breedingPilot, asOf });
       if (!detail) {
         res
           .status(404)
@@ -684,6 +688,48 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
       res.status(201).json({ ...result, animal: animalDetail(db, animalId, opts) });
     }),
   );
+
+  // Breeding stage 2: manual entry for a service or a pregnancy check, on the
+  // pilot animals only. Absent (404) unless REGISTRY_BREEDING=1.
+  if (opts.breeding) {
+    router.post(
+      '/breeding/events',
+      write(replays, (req, res) => {
+        const b = body(req);
+        const animalId = requireStr(b, 'animal_id');
+        const type = requireStr(b, 'type');
+        if (type !== 'insemination' && type !== 'pregnancy_check') {
+          throw new RegistryError(
+            'breeding_entry_closed',
+            `${type} is not entered on the page yet; only a service or a pregnancy check is`,
+            'type',
+          );
+        }
+        if (!breedingEntryOpen(db, animalId, opts.breedingPilot ?? [])) {
+          throw new RegistryError(
+            'breeding_entry_closed',
+            `breeding entry is not open for ${animalId}; it is open for the animals in the pilot`,
+            'animal_id',
+          );
+        }
+        const result = recordBreedingEvent(db, {
+          animal_id: animalId,
+          type,
+          occurred_on: requireStr(b, 'occurred_on'),
+          occurred_time: str(b, 'occurred_time'),
+          date_precision: requirePrecision(b) as never,
+          payload: b.payload,
+          supersedes_id: str(b, 'supersedes_id'),
+          allow_ambiguous_service: b.allow_ambiguous_service === true,
+          allow_early_check: b.allow_early_check === true,
+          allow_check_without_service: b.allow_check_without_service === true,
+          override_reason: str(b, 'override_reason'),
+          provenance: provenance(b),
+        });
+        res.status(201).json({ ...result, animal: animalDetail(db, animalId, opts) });
+      }),
+    );
+  }
 
   router.post(
     '/calvings',
