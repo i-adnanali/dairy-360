@@ -1,0 +1,288 @@
+// Animal registry -- the reproductive state, derived from an animal's events
+// (docs/records/REGISTRY_BREEDING.md).
+//
+// PURE: no database, no clock. One ReproductionView per animal from her events
+// at a date. Nothing here is stored; the view is recalculated on every read.
+//
+// THE RULES deriveReproduction implements (registry.reproduction.test.ts pins
+// each line):
+//
+// Which events count. Take canonicalOrder(effectiveEvents(events)), then drop
+// every event whose occurred_on is after asOf. If no insemination remains,
+// return null.
+//
+// The case. The anchor is the last insemination. Walking backwards from it, an
+// earlier insemination joins the case when there is no calving, no abortion, no
+// heat_observed and no pregnancy_check with result negative between it and the
+// service after it; stop at the first one that does not join. services_in_case
+// is the number joined, ambiguous_attribution is services_in_case > 1, and
+// service describes the anchor.
+//
+// The conception range. For one service: earliest is its occurred_on; latest is
+// the last day of that month when its precision is month, otherwise
+// occurred_on, plus exposure_days when it is a bull_exposure.
+// conception_earliest is the smallest earliest and conception_latest the
+// largest latest across the case. Let W = daysBetween(conception_earliest,
+// conception_latest) and T = daysBetween(conception_earliest, asOf). Every
+// "day" below counts from conception_earliest.
+//
+// The evidence. Events after the earliest service of the case, in order:
+// calving, abortion, heat_observed, pregnancy_check. Walk the checks in order
+// keeping pos, lostBy, openBy: a positive sets pos and clears the other two; a
+// negative on or after its method's negative day sets lostBy and clears pos
+// when a pos is held, else sets openBy; a negative before that day is ignored.
+// heat is the latest heat_observed. latest_check is the last check walked;
+// reliable is whether its day is on or after its method's day for its result
+// (false for a progesterone positive).
+//
+// The state, first match wins:
+//   1  a calving is in the evidence                         calved       observed
+//   2  an abortion is in the evidence                       lost         observed
+//   3  lostBy is set                                        lost         inferred
+//   4  pos is set, and it is progesterone, or its day is
+//      before its method's positive day, or heat is dated
+//      after it                                             recheck      inferred
+//   5  pos is set and T > W + 325                           overdue      inferred
+//   6  pos is set and T >= 285                              window       inferred
+//   7  pos is set and T >= 264                              close        inferred
+//   8  pos is set, inMilk, and T >= 248                     dryoff       inferred
+//   9  pos is set                                           confirmed    observed
+//  10  openBy is set                                        open         observed, or inferred
+//      when the anchor is a bull_exposure and the check's day is <= W
+//  11  heat is set, unless the anchor is a bull_exposure
+//      and the heat's day is <= W                           open         inferred
+//  12  T <= W + 24                                          bred         observed
+//  13  otherwise                                            unconfirmed  inferred
+//
+// The window. null for calved, lost, open; otherwise opens_on =
+// conception_earliest + 285 and closes_on = conception_latest + 325.
+//
+// These gestation figures are NOT calving.ts's GESTATION_DAYS, which is a
+// calving-too-soon-after-birth floor and is deliberately not used here.
+
+import { canonicalOrder, daysBetween, effectiveEvents } from './project';
+import type {
+  CheckMethod,
+  CheckResult,
+  InseminationPayload,
+  PregnancyCheckPayload,
+  RegistryEvent,
+  ReproductionBasis,
+  ReproductionView,
+  ReproductiveState,
+} from './types';
+
+/** In days from the earliest possible conception. */
+export const GESTATION = {
+  windowOpens: 285,
+  windowCloses: 325,
+  expected: 308,
+  closeUpLead: 21,
+  dryOffLead: 60,
+  bredThrough: 24,
+} as const;
+
+/**
+ * The day close-up starts (264: back from the window opening) and the day
+ * dry-off starts (248: back from the expected day).
+ */
+const CLOSE_UP_FROM = GESTATION.windowOpens - GESTATION.closeUpLead;
+const DRY_OFF_FROM = GESTATION.expected - GESTATION.dryOffLead;
+
+/**
+ * The earliest day a check's result counts, per method and result. `null`
+ * means a positive by that method never counts on its own.
+ */
+export const CHECK_RELIABLE_FROM: Record<CheckMethod, { positive: number | null; negative: number }> = {
+  palpation: { positive: 46, negative: 46 },
+  ultrasound: { positive: 30, negative: 30 },
+  pag: { positive: 28, negative: 28 },
+  progesterone: { positive: null, negative: 20 },
+};
+
+/** `on` plus `days`, both as `YYYY-MM-DD` calendar dates, composed in UTC. */
+export function addDays(on: string, days: number): string {
+  const [y, m, d] = on.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
+/** The last calendar day of the month `on` falls in. */
+function lastDayOfMonth(on: string): string {
+  const [y, m] = on.split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+}
+
+function servicePayload(e: RegistryEvent): InseminationPayload {
+  return e.payload as unknown as InseminationPayload;
+}
+
+function checkPayload(e: RegistryEvent): PregnancyCheckPayload {
+  return e.payload as unknown as PregnancyCheckPayload;
+}
+
+/** The latest a conception from this one service could have happened. */
+function latestConception(service: RegistryEvent): string {
+  const p = servicePayload(service);
+  const base = service.date_precision === 'month' ? lastDayOfMonth(service.occurred_on) : service.occurred_on;
+  return p.service_type === 'bull_exposure' ? addDays(base, p.exposure_days ?? 0) : base;
+}
+
+/** Does this event rule out that the service before it caused the case? */
+function breaksCase(e: RegistryEvent): boolean {
+  if (e.type === 'calving' || e.type === 'abortion' || e.type === 'heat_observed') return true;
+  return e.type === 'pregnancy_check' && checkPayload(e).result === 'negative';
+}
+
+function reliableFrom(method: CheckMethod, result: CheckResult): number | null {
+  return CHECK_RELIABLE_FROM[method][result];
+}
+
+export function deriveReproduction(opts: {
+  events: RegistryEvent[];
+  asOf: string;
+  inMilk: boolean;
+}): ReproductionView | null {
+  const { asOf, inMilk } = opts;
+
+  // Which events count.
+  const ordered = canonicalOrder(effectiveEvents(opts.events)).filter((e) => e.occurred_on <= asOf);
+  const serviceAt: number[] = [];
+  ordered.forEach((e, i) => {
+    if (e.type === 'insemination') serviceAt.push(i);
+  });
+  if (serviceAt.length === 0) return null;
+
+  // The case: the anchor, then earlier services while nothing between rules them out.
+  const caseAt = [serviceAt[serviceAt.length - 1]];
+  for (let k = serviceAt.length - 2; k >= 0; k -= 1) {
+    const from = serviceAt[k];
+    const to = caseAt[caseAt.length - 1];
+    if (ordered.slice(from + 1, to).some(breaksCase)) break;
+    caseAt.push(from);
+  }
+  const anchor = ordered[caseAt[0]];
+  const anchorPayload = servicePayload(anchor);
+  const firstAt = caseAt[caseAt.length - 1];
+
+  // The conception range.
+  let conceptionEarliest = anchor.occurred_on;
+  let conceptionLatest = latestConception(anchor);
+  for (const i of caseAt) {
+    const s = ordered[i];
+    if (s.occurred_on < conceptionEarliest) conceptionEarliest = s.occurred_on;
+    const latest = latestConception(s);
+    if (latest > conceptionLatest) conceptionLatest = latest;
+  }
+  const W = daysBetween(conceptionEarliest, conceptionLatest);
+  const T = daysBetween(conceptionEarliest, asOf);
+  const dayOf = (e: RegistryEvent) => daysBetween(conceptionEarliest, e.occurred_on);
+
+  // The evidence.
+  const evidence = ordered.slice(firstAt + 1);
+  const calved = evidence.some((e) => e.type === 'calving');
+  const aborted = evidence.some((e) => e.type === 'abortion');
+  let heat: RegistryEvent | null = null;
+  let pos: RegistryEvent | null = null;
+  let lostBy: RegistryEvent | null = null;
+  let openBy: RegistryEvent | null = null;
+  let lastCheck: RegistryEvent | null = null;
+  for (const e of evidence) {
+    if (e.type === 'heat_observed') heat = e;
+    if (e.type !== 'pregnancy_check') continue;
+    lastCheck = e;
+    const { method, result } = checkPayload(e);
+    if (result === 'positive') {
+      pos = e;
+      lostBy = null;
+      openBy = null;
+    } else if (dayOf(e) >= CHECK_RELIABLE_FROM[method].negative) {
+      if (pos) {
+        lostBy = e;
+        pos = null;
+      } else {
+        openBy = e;
+      }
+    }
+  }
+
+  // The state, first match wins.
+  const bullIn = anchorPayload.service_type === 'bull_exposure';
+  let state: ReproductiveState;
+  let basis: ReproductionBasis;
+  if (calved) {
+    [state, basis] = ['calved', 'observed'];
+  } else if (aborted) {
+    [state, basis] = ['lost', 'observed'];
+  } else if (lostBy) {
+    [state, basis] = ['lost', 'inferred'];
+  } else if (pos) {
+    const { method } = checkPayload(pos);
+    const posFrom = reliableFrom(method, 'positive');
+    if (posFrom === null || dayOf(pos) < posFrom || (heat !== null && heat.occurred_on > pos.occurred_on)) {
+      [state, basis] = ['recheck', 'inferred'];
+    } else if (T > W + GESTATION.windowCloses) {
+      [state, basis] = ['overdue', 'inferred'];
+    } else if (T >= GESTATION.windowOpens) {
+      [state, basis] = ['window', 'inferred'];
+    } else if (T >= CLOSE_UP_FROM) {
+      [state, basis] = ['close', 'inferred'];
+    } else if (inMilk && T >= DRY_OFF_FROM) {
+      [state, basis] = ['dryoff', 'inferred'];
+    } else {
+      [state, basis] = ['confirmed', 'observed'];
+    }
+  } else if (openBy) {
+    [state, basis] = ['open', bullIn && dayOf(openBy) <= W ? 'inferred' : 'observed'];
+  } else if (heat && !(bullIn && dayOf(heat) <= W)) {
+    [state, basis] = ['open', 'inferred'];
+  } else if (T <= W + GESTATION.bredThrough) {
+    [state, basis] = ['bred', 'observed'];
+  } else {
+    [state, basis] = ['unconfirmed', 'inferred'];
+  }
+
+  // The window.
+  const window =
+    state === 'calved' || state === 'lost' || state === 'open'
+      ? null
+      : {
+          opens_on: addDays(conceptionEarliest, GESTATION.windowOpens),
+          closes_on: addDays(conceptionLatest, GESTATION.windowCloses),
+        };
+
+  let latestCheck: ReproductionView['latest_check'] = null;
+  if (lastCheck) {
+    const { method, result } = checkPayload(lastCheck);
+    const day = dayOf(lastCheck);
+    const from = reliableFrom(method, result);
+    latestCheck = {
+      event_id: lastCheck.id,
+      method,
+      result,
+      occurred_on: lastCheck.occurred_on,
+      day,
+      reliable: from !== null && day >= from,
+    };
+  }
+
+  return {
+    state,
+    basis,
+    as_of: asOf,
+    service: {
+      event_id: anchor.id,
+      service_type: anchorPayload.service_type,
+      occurred_on: anchor.occurred_on,
+      date_precision: anchor.date_precision,
+      exposure_days: anchorPayload.exposure_days,
+    },
+    services_in_case: caseAt.length,
+    ambiguous_attribution: caseAt.length > 1,
+    conception_earliest: conceptionEarliest,
+    conception_latest: conceptionLatest,
+    day_min: Math.max(0, daysBetween(conceptionLatest, asOf)),
+    day_max: T,
+    window,
+    latest_check: latestCheck,
+  };
+}

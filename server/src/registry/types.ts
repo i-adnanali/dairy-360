@@ -284,6 +284,41 @@ export interface NullObservationPayload {
   watched_for: WatchedFor;
 }
 
+// ---------------------------------------------------------------------------
+// The reproductive state (derived by reproduction.ts, never stored)
+// ---------------------------------------------------------------------------
+
+export const REPRODUCTIVE_STATES = [
+  'calved', 'lost', 'overdue', 'window', 'close', 'dryoff',
+  'confirmed', 'recheck', 'unconfirmed', 'bred', 'open',
+] as const;
+export type ReproductiveState = (typeof REPRODUCTIVE_STATES)[number];
+export type ReproductionBasis = 'observed' | 'inferred';
+
+export interface ReproductionView {
+  state: ReproductiveState;
+  basis: ReproductionBasis;
+  as_of: string;
+  service: {
+    event_id: string;
+    service_type: ServiceType;
+    occurred_on: string;
+    date_precision: DatePrecision;
+    exposure_days: number | null;
+  };
+  services_in_case: number;          // 1 unless attribution is ambiguous
+  ambiguous_attribution: boolean;
+  conception_earliest: string;       // YYYY-MM-DD
+  conception_latest: string;
+  day_min: number;                   // as_of minus conception_latest, floored at 0
+  day_max: number;                   // as_of minus conception_earliest ("T")
+  window: { opens_on: string; closes_on: string } | null;   // null for calved, lost, open
+  latest_check: {
+    event_id: string; method: CheckMethod; result: CheckResult;
+    occurred_on: string; day: number; reliable: boolean;
+  } | null;
+}
+
 /** One discriminated union on `type`, validated by assertEventPayload(). */
 export type RegistryEventPayload =
   | { type: 'birth'; payload: BirthPayload }
