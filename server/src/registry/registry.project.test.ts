@@ -115,23 +115,48 @@ test('serials are zero-padded so lexical order matches numeric order', () => {
 // ---------------------------------------------------------------------------
 
 test('every reserved event type is rejected, not accepted with a loose payload', () => {
-  for (const t of [
-    'heat_observed',
-    'insemination',
-    'pregnancy_check',
-    'abortion',
-    'treatment',
-    'vet_visit',
-    'null_observation',
-    'milking',
-    'weight',
-    'body_condition',
-  ]) {
+  for (const t of ['treatment', 'vet_visit', 'milking', 'weight', 'body_condition']) {
     assert.throws(
       () => assertEventPayload(t as never, {}),
       /RESERVED event type/,
       `${t} must be rejected`,
     );
+  }
+});
+
+test('the five breeding types are live, with exact payloads', () => {
+  assert.deepEqual(assertEventPayload('heat_observed', { sign: 'standing' }), { sign: 'standing' });
+  assert.deepEqual(
+    assertEventPayload('insemination', { service_type: 'ai' }),
+    { service_type: 'ai', exposure_days: null },
+  );
+  assert.deepEqual(
+    assertEventPayload('insemination', { service_type: 'bull_exposure', exposure_days: 45 }),
+    { service_type: 'bull_exposure', exposure_days: 45 },
+  );
+  assert.deepEqual(
+    assertEventPayload('pregnancy_check', { method: 'ultrasound', result: 'positive' }),
+    { method: 'ultrasound', result: 'positive' },
+  );
+  assert.deepEqual(assertEventPayload('abortion', {}), {});
+  assert.deepEqual(assertEventPayload('null_observation', { watched_for: 'heat' }), { watched_for: 'heat' });
+});
+
+test('breeding payloads reject what they cannot mean', () => {
+  const bad: [string, unknown][] = [
+    ['heat_observed', { sign: 'loud' }],
+    ['insemination', { service_type: 'bull_exposure' }],                 // exposure_days missing
+    ['insemination', { service_type: 'bull_exposure', exposure_days: 0 }],
+    ['insemination', { service_type: 'bull_exposure', exposure_days: 366 }],
+    ['insemination', { service_type: 'bull_exposure', exposure_days: 4.5 }],
+    ['insemination', { service_type: 'ai', exposure_days: 10 }],          // only a bull stays
+    ['pregnancy_check', { method: 'ultrasound', result: 'uncertain' }],
+    ['pregnancy_check', { method: 'xray', result: 'positive' }],
+    ['abortion', { observed_by: 'abdul' }],                               // unknown key
+    ['null_observation', { watched_for: 'rain' }],
+  ];
+  for (const [type, payload] of bad) {
+    assert.throws(() => assertEventPayload(type as never, payload), EventPayloadError, `${type} ${JSON.stringify(payload)}`);
   }
 });
 

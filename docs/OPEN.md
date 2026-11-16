@@ -303,8 +303,18 @@ Built when something needs them, not before.
 
 <a id="open-056"></a>
 
-- **OPEN-056** — Structured weight, movement, breed, breeding/pregnancy and discarded-milk capture
+- **OPEN-056** — Structured weight, movement, breed and discarded-milk capture
   remain stage 3; the report labels unsupported coverage — [REGISTRY_HEALTH.md](records/REGISTRY_HEALTH.md#using-it).
+  Breeding is no longer in this list: stage 1 is read-only derivation, see [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md).
+<a id="open-062"></a>
+
+- **OPEN-062** — **Breeding stages 2 to 5 are not built**: warnings and overrides, tasks, KPIs,
+  entry forms and the Breeding page — [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#what-stage-1-is)
+<a id="open-063"></a>
+
+- **OPEN-063** — **`GESTATION_DAYS = 310` in `calving.ts` is not revisited**; it is a
+  calving-too-soon-after-birth floor, not a gestation length —
+  [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#left-alone-on-purpose)
 <a id="open-057"></a>
 
 - **OPEN-057** — Health/report real-farm acceptance remains unverified. Actual Chrome/Safari A4 Save-as-PDF output was verified on synthetic animal reports, including complete audit content and repeated long identity. Alternative-format support and further browser/report coverage were skipped on 9 October 2026; the known alternate-format limitation remains. See [current status and PDF evidence](reference/ui/acceptance-status.md), and the [original delivery record](records/REGISTRY_HEALTH.md#validation).

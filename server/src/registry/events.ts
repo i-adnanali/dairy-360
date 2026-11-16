@@ -6,7 +6,7 @@
 // Validation is hand-rolled and exhaustive rather than schema-library-driven.
 // The repo has no Zod and no validation library; boundary validation today is
 // guardIds() plus String(args.x) coercion, with JSON-Schema enums enforced by
-// the model rather than by code. Six payload shapes is less code than the
+// the model rather than by code. Eleven payload shapes is less code than the
 // dependency would be, and adding a validation library is a repo-wide decision
 // rather than a registry one (decision doc §7).
 
@@ -14,16 +14,21 @@ import { randomUUID } from 'node:crypto';
 import { RegistryError } from './errors';
 import type { RegistryErrorCode } from './errors';
 import type {
+  AbortionPayload,
   AcquiredPayload,
   BirthPayload,
   CalvingPayload,
   DatePrecision,
   DeparturePayload,
   DryOffPayload,
+  HeatObservedPayload,
+  InseminationPayload,
   NotePayload,
+  NullObservationPayload,
   OverriddenCheck,
   OverrideRecord,
   PayloadFor,
+  PregnancyCheckPayload,
   RegistryEventType,
 } from './types';
 import {
@@ -227,6 +232,11 @@ const OUTCOMES = ['live', 'stillborn', 'died_within_24h'] as const;
 const ASSISTANCE = ['none', 'assisted', 'vet'] as const;
 const DRY_OFF_REASONS = ['scheduled', 'low_yield', 'health', 'other'] as const;
 const DEPARTURE_REASONS = ['sold', 'died', 'culled', 'lost'] as const;
+const SERVICE_TYPES = ['ai', 'natural_observed', 'bull_exposure'] as const;
+const CHECK_METHODS = ['palpation', 'ultrasound', 'pag', 'progesterone'] as const;
+const CHECK_RESULTS = ['positive', 'negative'] as const;
+const HEAT_SIGNS = ['standing', 'mucus', 'restless', 'other'] as const;
+const WATCHED_FOR = ['heat', 'pregnancy_check'] as const;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -425,6 +435,53 @@ export function assertEventPayload<T extends RegistryEventType>(
     case 'note': {
       rejectUnknownKeys(type, p, ['text']);
       const out: NotePayload = { text: str(type, p, 'text') };
+      return out as PayloadFor<T>;
+    }
+    case 'heat_observed': {
+      rejectUnknownKeys(type, p, ['sign']);
+      const out: HeatObservedPayload = { sign: enumOf(type, p, 'sign', HEAT_SIGNS) };
+      return out as PayloadFor<T>;
+    }
+    case 'insemination': {
+      rejectUnknownKeys(type, p, ['service_type', 'exposure_days']);
+      const service_type = enumOf(type, p, 'service_type', SERVICE_TYPES);
+      const days = p['exposure_days'];
+      let exposure_days: number | null = null;
+      if (service_type === 'bull_exposure') {
+        if (typeof days !== 'number' || !Number.isInteger(days) || days < 1 || days > 365) {
+          fail(
+            'invalid_payload',
+            `${type}.exposure_days: required whole number of days from 1 to 365 for a bull_exposure, got ${describe(days)}`,
+            'exposure_days',
+          );
+        }
+        exposure_days = days as number;
+      } else if (days !== undefined && days !== null) {
+        fail(
+          'invalid_payload',
+          `${type}.exposure_days: only a bull_exposure has a stay length, got ${describe(days)} for '${service_type}'`,
+          'exposure_days',
+        );
+      }
+      const out: InseminationPayload = { service_type, exposure_days };
+      return out as PayloadFor<T>;
+    }
+    case 'pregnancy_check': {
+      rejectUnknownKeys(type, p, ['method', 'result']);
+      const out: PregnancyCheckPayload = {
+        method: enumOf(type, p, 'method', CHECK_METHODS),
+        result: enumOf(type, p, 'result', CHECK_RESULTS),
+      };
+      return out as PayloadFor<T>;
+    }
+    case 'abortion': {
+      rejectUnknownKeys(type, p, []);
+      const out: AbortionPayload = {};
+      return out as PayloadFor<T>;
+    }
+    case 'null_observation': {
+      rejectUnknownKeys(type, p, ['watched_for']);
+      const out: NullObservationPayload = { watched_for: enumOf(type, p, 'watched_for', WATCHED_FOR) };
       return out as PayloadFor<T>;
     }
     default: {

@@ -41,7 +41,7 @@ import {
 import { ENTERABLE_EVENT_TYPES, appendLifeEvent } from './entry';
 import type { EnterableEventType } from './entry';
 import { farmToday } from './time';
-import { RESERVED_EVENT_TYPES } from './types';
+import { BREEDING_EVENT_TYPES, RESERVED_EVENT_TYPES } from './types';
 
 /** The types this command owns -- the core's list, not a second copy of it. */
 const ENTERABLE = ENTERABLE_EVENT_TYPES;
@@ -124,12 +124,16 @@ export function main(argv: string[]): void {
         '  second one.',
     );
   }
+  if ((BREEDING_EVENT_TYPES as readonly string[]).includes(type)) {
+    throw new CliError(
+      'a breeding event is not entered here. Use: npm run registry:breed -w server -- --help',
+    );
+  }
   if ((RESERVED_EVENT_TYPES as readonly string[]).includes(type)) {
     throw new CliError(
       `'${type}' is a RESERVED event type: named in the taxonomy so it is designed\n` +
-        '  once rather than accreted, but not implemented in this cycle. Breeding and\n' +
-        '  heat events are step 5; treatments and null-observations arrive with sheet\n' +
-        '  transcription at step 3. See docs/records/REGISTRY.md, Decision 8.',
+        '  once rather than accreted, but not implemented yet. Treatments and vet visits\n' +
+        '  arrive with sheet transcription at step 3. See docs/records/REGISTRY.md, Decision 8.',
     );
   }
   if (!(ENTERABLE as readonly string[]).includes(type)) {

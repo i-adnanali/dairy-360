@@ -101,6 +101,20 @@ export interface Provenance {
 // Event taxonomy (decision doc §7)
 // ---------------------------------------------------------------------------
 
+/**
+ * The breeding events (docs/records/REGISTRY_BREEDING.md). They are written only
+ * by the breeding write path, never by the generic event command.
+ */
+export const BREEDING_EVENT_TYPES = [
+  'heat_observed',
+  'insemination',
+  'pregnancy_check',
+  'abortion',
+  'null_observation',
+] as const;
+
+export type BreedingEventType = (typeof BREEDING_EVENT_TYPES)[number];
+
 export const LIVE_EVENT_TYPES = [
   'birth',
   'acquired',
@@ -108,6 +122,7 @@ export const LIVE_EVENT_TYPES = [
   'dry_off',
   'departure',
   'note',
+  ...BREEDING_EVENT_TYPES,
 ] as const;
 
 export type RegistryEventType = (typeof LIVE_EVENT_TYPES)[number];
@@ -115,15 +130,11 @@ export type RegistryEventType = (typeof LIVE_EVENT_TYPES)[number];
 /**
  * Named now so the taxonomy is designed once rather than accreted, and REJECTED
  * by the write boundary rather than accepted with a loose payload.
+ * The five breeding types left this list when breeding stage 1 made them live.
  */
 export const RESERVED_EVENT_TYPES = [
-  'heat_observed',
-  'insemination',
-  'pregnancy_check',
-  'abortion',
   'treatment',
   'vet_visit',
-  'null_observation',
   'milking',
   'weight',
   'body_condition',
@@ -241,6 +252,38 @@ export interface NotePayload {
   text: string;
 }
 
+// ---------------------------------------------------------------------------
+// Breeding payloads (docs/records/REGISTRY_BREEDING.md)
+// ---------------------------------------------------------------------------
+
+export type ServiceType = 'ai' | 'natural_observed' | 'bull_exposure';
+export type CheckMethod = 'palpation' | 'ultrasound' | 'pag' | 'progesterone';
+export type CheckResult = 'positive' | 'negative';
+export type HeatSign = 'standing' | 'mucus' | 'restless' | 'other';
+export type WatchedFor = 'heat' | 'pregnancy_check';
+
+export interface HeatObservedPayload {
+  sign: HeatSign;
+}
+
+/** `exposure_days` is the length of a bull's stay; null for every other service. */
+export interface InseminationPayload {
+  service_type: ServiceType;
+  exposure_days: number | null;
+}
+
+export interface PregnancyCheckPayload {
+  method: CheckMethod;
+  result: CheckResult;
+}
+
+/** Empty on purpose: who saw it is the provenance column `observed_by`, not a payload key. */
+export type AbortionPayload = Record<string, never>;
+
+export interface NullObservationPayload {
+  watched_for: WatchedFor;
+}
+
 /** One discriminated union on `type`, validated by assertEventPayload(). */
 export type RegistryEventPayload =
   | { type: 'birth'; payload: BirthPayload }
@@ -248,7 +291,12 @@ export type RegistryEventPayload =
   | { type: 'calving'; payload: CalvingPayload }
   | { type: 'dry_off'; payload: DryOffPayload }
   | { type: 'departure'; payload: DeparturePayload }
-  | { type: 'note'; payload: NotePayload };
+  | { type: 'note'; payload: NotePayload }
+  | { type: 'heat_observed'; payload: HeatObservedPayload }
+  | { type: 'insemination'; payload: InseminationPayload }
+  | { type: 'pregnancy_check'; payload: PregnancyCheckPayload }
+  | { type: 'abortion'; payload: AbortionPayload }
+  | { type: 'null_observation'; payload: NullObservationPayload };
 
 export type PayloadFor<T extends RegistryEventType> = Extract<
   RegistryEventPayload,
