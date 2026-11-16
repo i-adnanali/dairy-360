@@ -1,4 +1,5 @@
 import { analyticsHerd } from './analytics-fixtures';
+import { BREEDING_AS_OF, breedingHerd } from './breeding-fixtures';
 import { addHealthFixtures } from './health-fixtures';
 import { addFeedFixtures } from './feed-fixtures';
 // Animal registry -- development harness. Serves the registry API over an
@@ -44,11 +45,12 @@ interface Args {
   port: number;
   empty: boolean;
   analytics: boolean;
+  breeding: boolean;
   help: boolean;
 }
 
 export function parseArgs(argv: string[]): Args {
-  const args: Args = { port: 6410, empty: false, analytics: false, help: false };
+  const args: Args = { port: 6410, empty: false, analytics: false, breeding: false, help: false };
   for (const raw of argv) {
     const [flag, value] = raw.split('=');
     switch (flag) {
@@ -60,6 +62,9 @@ export function parseArgs(argv: string[]): Args {
         break;
       case '--analytics':
         args.analytics = true;
+        break;
+      case '--breeding':
+        args.breeding = true;
         break;
       case '--empty':
         args.empty = true;
@@ -73,6 +78,9 @@ export function parseArgs(argv: string[]): Args {
     }
   }
   if (args.empty && args.analytics) throw new Error('--empty and --analytics are mutually exclusive');
+  if (args.breeding && (args.empty || args.analytics)) {
+    throw new Error('--breeding is mutually exclusive with --empty and --analytics');
+  }
   return args;
 }
 
@@ -84,6 +92,7 @@ Serves /api/registry over an IN-MEMORY fixture herd. Never opens dairy.db.
 
   --port=<n>   default 6410 (the real server uses 6400)
   --analytics  30 milked animals, three full months plus current month, analytics edge cases
+  --breeding   eleven females in every breeding state, with the breeding view switched on
   --empty      start with an empty registry instead of the fixture herd
 
   --empty is not a throwaway option: the empty and one-row states are what the
@@ -120,6 +129,7 @@ export function harnessApp(db: Db, opts: RegistryOptions = {}): express.Express 
       storage: ':memory:',
       warning: 'fixture data, discarded on exit -- this is NOT dairy.db',
       animals: herd(db).length,
+      ...(opts.breeding ? { breeding_as_of: BREEDING_AS_OF } : {}),
       destinations: (
         db.prepare(`SELECT COUNT(*) n FROM registry_destinations`).get() as { n: number }
       ).n,
@@ -133,6 +143,24 @@ function main(): void {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
     console.log(USAGE);
+    return;
+  }
+
+  // --breeding serves its own herd with the breeding view on, and none of the
+  // fixtures below. States are counted from the real date; ?as_of= on the API
+  // URL pins them (the page does not forward it).
+  if (args.breeding) {
+    const bdb = breedingHerd();
+    const bapp = harnessApp(bdb, { breeding: true });
+    bapp.listen(args.port, () => {
+      console.log(`registry harness  http://localhost:${args.port}/api/registry  [--breeding]`);
+      console.log(`  storage     :memory:  (dairy.db is NOT open in this process)`);
+      console.log(`  herd        ${herd(bdb).length} animal(s), states as of today`);
+      console.log(
+        `  pin         GET /api/registry/animals/BD-0001?as_of=${BREEDING_AS_OF}  (API URL; the page does not forward as_of)`,
+      );
+      console.log('\n  Everything here is discarded when this process exits.');
+    });
     return;
   }
 

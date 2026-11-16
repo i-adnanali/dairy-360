@@ -31,6 +31,8 @@ npm run harness:analytics
 
 Open `/analytics`. Both commands share ports with the persistent app and cannot run simultaneously on their default ports. [Testing](testing.md) documents independent harness/build ports.
 
+For the breeding badge against every reproductive state, run `npm run harness:breeding`. It serves eleven synthetic females with the breeding view switched on. The states are counted from the real date, so they drift as time moves on; add `?as_of=2026-11-13` to the API URL, for example `/api/registry/animals/BD-0001?as_of=2026-11-13`, to pin them to the date the herd was built for (`GET /api/harness` reports it as `breeding_as_of`). The page does not forward `as_of`, so it always shows today's state.
+
 ## Run the persistent app
 
 ```bash

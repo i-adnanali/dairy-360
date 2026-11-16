@@ -20,6 +20,12 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 
+import { BREEDING_AS_OF, breedingHerd } from './breeding-fixtures';
+import { checkSnapshot } from './invariants';
+import { parseArgs } from './harness';
+import { animalDetail, herd } from './reads';
+import { snapshot } from './store';
+
 /**
  * Modules whose presence in the require cache means the constraint broke.
  *
@@ -174,4 +180,19 @@ test('the harness serves :memory: and says so', () => {
     .join('\n');
   assert.ok(!/new Database\(/.test(code), 'the harness opens no database of its own');
   assert.ok(!/writeFile|appendFile|createWriteStream/.test(code), 'the harness writes no files');
+});
+
+test('--breeding serves the sample herd with one animal in each expected state', async () => {
+  const db = breedingHerd();
+  const states = herd(db)
+    .map((a) => animalDetail(db, a.id, { breeding: true, asOf: BREEDING_AS_OF })!.reproduction?.state ?? null)
+    .filter(Boolean)
+    .sort();
+  assert.deepEqual(states, [
+    'bred', 'calved', 'confirmed', 'dryoff', 'open', 'overdue',
+    'recheck', 'unconfirmed', 'unconfirmed', 'unconfirmed', 'window',
+  ]);
+  assert.deepEqual(checkSnapshot(snapshot(db), BREEDING_AS_OF), []);
+  assert.deepEqual(parseArgs(['--breeding']).breeding, true);
+  assert.throws(() => parseArgs(['--breeding', '--empty']), /mutually exclusive/);
 });

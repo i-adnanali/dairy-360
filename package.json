@@ -30,6 +30,8 @@
     "harness:serve": "node scripts/serve-built.mjs",
     "preharness:analytics": "npm run clean:web-deps-cache",
     "harness:analytics": "npm run build:shared && concurrently -n harness,angular -c blue,red \"npm run registry:harness -w server -- --port=6400 --analytics\" \"npm run start -w web-angular\"",
+    "preharness:breeding": "npm run clean:web-deps-cache",
+    "harness:breeding": "npm run build:shared && concurrently -n harness,angular -c blue,red \"npm run registry:harness -w server -- --port=6400 --breeding\" \"npm run start -w web-angular\"",
     "check:docs": "node --test scripts/check-docs.test.mjs && node scripts/check-docs.mjs"
   },
   "devDependencies": {
