@@ -24,6 +24,7 @@ import type { PrecisionParts } from "../precision-display";
 import { ErrorPanel } from "../../ui/surface";
 import { HelpText, TextLink } from "../../ui/text";
 import { StatusBadge } from "../../ui/surface";
+import { basisWord, reproductionLabel, reproductionTone } from "../reproduction";
 
 type Tab = 'events' | 'add-event' | 'correct';
 
@@ -52,6 +53,10 @@ export class AnimalDetailView {
     if (tab === this.tab()) return;
     if (!this.drafts.hasChanges() || (await this.drafts.request())) this.tab.set(tab);
   }
+
+  protected readonly reproLabel = reproductionLabel;
+  protected readonly reproTone = reproductionTone;
+  protected readonly basisWord = basisWord;
 
   /** §6's no-record glyph, for the template. An en dash. */
   protected readonly noRecord = NO_RECORD;

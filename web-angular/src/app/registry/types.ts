@@ -25,7 +25,8 @@ export type SourceForm =
   | 'daily_herd_sheet' | 'cycle_card' | 'direct_entry' | 'import' | 'recall';
 
 export type RegistryEventType =
-  | 'birth' | 'acquired' | 'calving' | 'dry_off' | 'departure' | 'note';
+  | 'birth' | 'acquired' | 'calving' | 'dry_off' | 'departure' | 'note'
+  | 'heat_observed' | 'insemination' | 'pregnancy_check' | 'abortion' | 'null_observation';
 
 export type EnterableEventType = 'dry_off' | 'departure' | 'note';
 
@@ -87,6 +88,45 @@ export interface AnimalDetail {
     open_lactation_id: string | null;
   } | null;
   events: TimelineEvent[];
+  /**
+   * Present only when the server runs with REGISTRY_BREEDING=1. Absent with the
+   * flag off; null when the animal has no reproductive state. The page draws
+   * the badge only when this is a view.
+   */
+  reproduction?: ReproductionView | null;
+}
+
+export type ReproductiveState =
+  | 'calved' | 'lost' | 'overdue' | 'window' | 'close' | 'dryoff'
+  | 'confirmed' | 'recheck' | 'unconfirmed' | 'bred' | 'open';
+export type ReproductionBasis = 'observed' | 'inferred';
+export type ServiceType = 'ai' | 'natural_observed' | 'bull_exposure';
+export type CheckMethod = 'palpation' | 'ultrasound' | 'pag' | 'progesterone';
+export type CheckResult = 'positive' | 'negative';
+
+/** Mirrors ReproductionView in server/src/registry/types.ts, field for field. */
+export interface ReproductionView {
+  state: ReproductiveState;
+  basis: ReproductionBasis;
+  as_of: string;
+  service: {
+    event_id: string;
+    service_type: ServiceType;
+    occurred_on: string;
+    date_precision: DatePrecision;
+    exposure_days: number | null;
+  };
+  services_in_case: number;
+  ambiguous_attribution: boolean;
+  conception_earliest: string;
+  conception_latest: string;
+  day_min: number;
+  day_max: number;
+  window: { opens_on: string; closes_on: string } | null;
+  latest_check: {
+    event_id: string; method: CheckMethod; result: CheckResult;
+    occurred_on: string; day: number; reliable: boolean;
+  } | null;
 }
 
 export interface LinkCandidate {

@@ -233,4 +233,17 @@ describe('EventList — the correction window', () => {
     ]);
     expect(el.querySelector('[data-role="override"]')).toBeNull();
   });
+
+  it('names breeding events in plain words', () => {
+    const el = render([
+      ev({ id: 'a', type: 'insemination', payload: { service_type: 'bull_exposure', exposure_days: 45 } }),
+      ev({ id: 'b', type: 'pregnancy_check', payload: { method: 'palpation', result: 'negative' } }),
+      ev({ id: 'c', type: 'null_observation', payload: { watched_for: 'heat' } }),
+    ]);
+    expect(el.textContent).toContain('Service');
+    expect(el.textContent).toContain('Bull running with her · 45 days');
+    expect(el.textContent).toContain('By hand · not pregnant');
+    expect(el.textContent).toContain('Watched, none seen');
+    expect(el.textContent).not.toContain('null_observation');
+  });
 });

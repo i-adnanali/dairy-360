@@ -19,6 +19,10 @@
             <!-- The farm's word, with the stored enum on hover. -->
             <span appBadge [tone]="d.status?.status === 'departed' ? 'ended' : 'neutral'" data-role="status"
               [title]="d.status ? 'stored as ' + d.status.status : ''">{{ stage(d) }}</span>
+            @if (d.reproduction; as r) {
+              <span appBadge [tone]="reproTone(r.state)" data-role="reproduction">{{ reproLabel(r.state) }}</span>
+              <span appQualifier data-role="reproduction-basis">{{ basisWord(r.basis) }}</span>
+            }
           </div>
           <div class="flex flex-wrap gap-2">
             <a appButton variant="secondary" [routerLink]="['/animals', d.animal.id, 'report']">Lifetime report</a>
