@@ -51,6 +51,10 @@ window too wide to say anything. The spec's warning row that mentions year-preci
 therefore stale. A breeding event dated after the animal's departure is refused, with no
 override.
 
+## Correction path added after review
+
+On 2026-11-16, after review and before any real service was entered, the owner added a correction path to stage 1. A correction is a superseding event: `recordBreedingEvent` takes `supersedes_id` and `registry:breed` takes `--supersedes`. It must be the same type on the same animal, and an event can be corrected once. Retraction (saying an event never happened) is not built; it remains OPEN-064.
+
 ## Migration 10 is one-way
 
 Migration 10 widens the event table's `type` check so it can hold the five breeding types. It

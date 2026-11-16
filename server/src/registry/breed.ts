@@ -7,7 +7,7 @@
 // Five types: heat_observed, insemination, pregnancy_check, abortion,
 // null_observation. The rules live in recordBreedingEvent() (breeding.ts); this
 // file only turns flags into an input object and prints what the herd looks like
-// afterwards. There is no override flag: the four refusals are about things that
+// afterwards. There is no override flag: the refusals are about things that
 // cannot have happened.
 
 import {
@@ -42,6 +42,7 @@ const FLAGS = [
   'sign',
   'watched-for',
   'as-of',
+  'supersedes',
   ...PROVENANCE_FLAGS,
 ] as const;
 
@@ -71,10 +72,14 @@ Optional:
   --time=HH:MM                only with --precision=day, and not with a bull_exposure
   --observed-by=<id>  --source-ref=<ref>
   --as-of=YYYY-MM-DD          date to read her state at (default: today)
+  --supersedes=<event id>     correct that earlier event of hers: same animal, same type, once per
+                              event (correct the replacement to correct again). A wrong event cannot
+                              be retracted, only replaced by a corrected one of the same type.
 
-Refused, and nothing else: an unknown animal, an animal that is not female, a
+Refused: an unknown animal, an animal that is not female, a
 precision a breeding event cannot have, a date before she arrived or was born, and a
-date after she left. There is no override.
+date after she left, and for --supersedes an unknown event (or one on another animal), a
+different type, or an event already corrected. There is no override.
 `.trim();
 
 const choice = (flags: Flags, name: string, allowed: readonly string[]): string => {
@@ -130,6 +135,14 @@ export function buildBreedingPayload(type: BreedingEventType, flags: Flags): Rec
   }
 }
 
+/** The --supersedes flag: an event id, or null when absent. Pure, tested without a database. */
+export function buildSupersedesId(flags: Flags): string | null {
+  if (!flags.has('supersedes')) return null;
+  const v = optStr(flags, 'supersedes');
+  if (v === null || v.trim() === '') throw new CliError('--supersedes=<event id> needs the id of the event to correct');
+  return v;
+}
+
 export function main(argv: string[]): void {
   const flags = parseFlags(argv);
   if (wantsHelp(flags)) {
@@ -154,6 +167,7 @@ export function main(argv: string[]): void {
     date_precision: requirePrecision(flags),
     payload: buildBreedingPayload(breedingType, flags),
     provenance: requireProvenance(flags),
+    supersedes_id: buildSupersedesId(flags),
   };
 
   // Importing usage/help must never open or migrate the farm database.
@@ -169,6 +183,7 @@ export function main(argv: string[]): void {
 
   console.log(`registry:breed  ${type} on ${animalId}`);
   console.log(`  event       ${result.event_id}`);
+  if (input.supersedes_id) console.log(`  superseded  ${input.supersedes_id}`);
   console.log(
     view
       ? `  state now   ${view.state} (${view.basis})  day ${view.day_min}-${view.day_max}   as-of ${asOf}`

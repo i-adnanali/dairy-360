@@ -317,9 +317,10 @@ Built when something needs them, not before.
   [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#left-alone-on-purpose)
 <a id="open-064"></a>
 
-- **OPEN-064** — **A breeding event cannot be corrected**: `registry:breed` has no `--supersedes`
-  and `registry:correct-calving` corrects calvings only, so a wrongly entered service, check or
-  heat keeps driving the state. Add a correction path (owner's decision, not built in stage 1) —
+- **OPEN-064** — **A breeding event cannot be retracted**: a wrongly entered service, check or
+  heat can be corrected by a superseding event of the same type on the same animal
+  (`registry:breed --supersedes`), but nothing can say "this never happened". Decide whether a
+  retraction is needed —
   [Breeding](reference/registry/breeding.md#correcting-a-breeding-event)
 <a id="open-057"></a>
 

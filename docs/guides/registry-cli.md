@@ -64,9 +64,10 @@ NOTE: the registry is EMPTY, so every invariant passes vacuously.
 ## Breeding events
 
 `registry:breed` writes the five breeding event types to a **female**. `--precision` is `day` or `month` (a
-`pregnancy_check` is `day` only); `year` and `estimated` are refused. It refuses exactly four things: an unknown
+`pregnancy_check` is `day` only); `year` and `estimated` are refused. It refuses an unknown
 animal, an animal that is not female, a precision a breeding event cannot have, and a date before she arrived or
-was born or after she left. There is no override flag. It prints the event id and her state at `--as-of`.
+was born or after she left. There is no override flag. `--supersedes=<event id>` corrects an earlier event of hers
+(same animal, same type, once per event); a breeding event cannot be retracted, only replaced. It prints the event id and her state at `--as-of`.
 
 ```bash
 # heat seen
@@ -90,6 +91,10 @@ npm run registry:breed -w server -- --animal=BD-0001 --type=abortion \
 # a watch that saw nothing (heat | pregnancy_check)
 npm run registry:breed -w server -- --animal=BD-0001 --type=null_observation --watched-for=heat \
   --on=2026-02-10 --precision=day --source-form=recall --recorded-by=adnan
+
+# correct a service typed with the wrong date: a new insemination that supersedes the old event id
+npm run registry:breed -w server -- --animal=BD-0001 --type=insemination --service=ai \
+  --on=2026-02-20 --precision=day --source-form=recall --recorded-by=adnan --supersedes=<event id of the wrong service>
 ```
 
 ---

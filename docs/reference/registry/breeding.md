@@ -20,7 +20,7 @@ Dates take `day` or `month` precision. A `pregnancy_check` takes `day` only.
 
 ## Refusals
 
-The write path refuses exactly four things and offers no override:
+The write path refuses four things about the event as written, and offers no override:
 
 | Code | Meaning |
 |---|---|
@@ -28,6 +28,14 @@ The write path refuses exactly four things and offers no override:
 | `not_female` | the animal is not female |
 | `breeding_precision` | a precision a breeding event cannot have (`year` or `estimated`; `month` for a check; a time of day on a `bull_exposure`) |
 | `event_before_origin` / `animal_departed` | dated before she arrived or was born, or after she left |
+
+A correction (an event with `supersedes_id`) is checked against those four first, as written, and then refused for three more reasons. All three are on field `supersedes_id`:
+
+| Code | Meaning |
+|---|---|
+| `unknown_event` | no event has that id, or the event is on a different animal (the message says which) |
+| `supersede_type_mismatch` | the event is of a different breeding type; a correction keeps the type |
+| `already_superseded` | the event has already been replaced; the message names the replacing event, which is the one to correct instead |
 
 ## Constants
 
@@ -93,7 +101,11 @@ With the flag on, `?as_of=YYYY-MM-DD` asks for the state on that day (default: t
 
 ## Correcting a breeding event
 
-Stage 1 has no way to correct a breeding event. `registry:breed` has no `--supersedes`, and `registry:correct-calving` corrects calvings only. A wrongly entered service, check or heat stays effective and keeps driving the state. Adding a correction path is [OPEN-064](../../OPEN.md#open-064).
+A wrongly entered service, check or heat is corrected by writing a superseding event: `recordBreedingEvent` takes `supersedes_id`, and `registry:breed` takes `--supersedes=<event id>`. The original row stays in the table untouched; the new row carries `supersedes_id`, and `effectiveEvents()` drops the original, so the state follows the correction.
+
+- **Same animal, same type.** A service is corrected by a service, a check by a check. The corrected event is written as any other, so the four refusals above still apply to it.
+- **Once per event.** An event can be superseded only once. To correct a correction, supersede the replacement, not the original.
+- **No retraction.** There is still no way to say "this never happened": a correction must be an event of the same type on the same animal. That remaining gap is [OPEN-064](../../OPEN.md#open-064).
 
 ## Migration 10 is one-way
 

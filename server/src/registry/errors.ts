@@ -39,6 +39,7 @@ export type RegistryErrorCode =
   | 'inconsistent_pair'
   | 'event_before_origin'
   | 'breeding_precision'
+  | 'supersede_type_mismatch'
   // --- calving ---
   | 'near_duplicate_calving'
   | 'self_calf'

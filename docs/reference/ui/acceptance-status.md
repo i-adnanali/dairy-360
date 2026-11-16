@@ -9,7 +9,7 @@ Run on 16 November 2026 against branch `breeding-stage-1` (base `2be39a4`), Node
 | Check | Result |
 |---|---|
 | Frontend tests (`npm test -w web-angular -- --watch=false`) | 632 passed in 66 files, exit 0, no unhandled errors |
-| Server tests (`npm test -w server`) | 837 passed, 0 failed, 0 skipped |
+| Server tests (`npm test -w server`) | 841 passed, 0 failed, 0 skipped |
 | `check:docs`, `build:shared`, `check:templates`, typecheck | Pass |
 | Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.12 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
 
@@ -19,6 +19,7 @@ All seven gates above passed on this branch. The build warnings are all in files
 
 - **Badge:** checked in a browser on synthetic data only, the harness sample herd (11 cows and 12 male calves). No real-herd breeding event has been entered, and the `REGISTRY_BREEDING` flag is not turned on for the real registry. The page does not forward `?as_of`, so it shows today's state; the pinned dates were read from the API.
 - **Flag off:** the animal response has no reproduction key, the page header is unchanged, and no screenshot needs refreshing.
+- **Correction path:** added after review on 16 November: `recordBreedingEvent` takes `supersedes_id` and `registry:breed` takes `--supersedes` (same animal, same type, once per event; no retraction, OPEN-064). Tested in memory only; the CLI flag was checked by a unit test of its parser, and `registry:breed` was not run against any database.
 - **Migration 10:** rehearsed on a copy of a backup taken from `main`. Version 9 to 10, 0 verification violations, events 0 to 0, every row count unchanged. The real registry holds no events yet, so the rehearsal proves the schema step on real data but copies no event rows; row copying is covered by the in-memory migration test.
 
 ## Previous recorded results (11 November 2026)
