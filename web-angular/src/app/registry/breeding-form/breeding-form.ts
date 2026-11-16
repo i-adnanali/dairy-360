@@ -125,8 +125,6 @@ export class BreedingForm {
   protected readonly when = signal<DateEntry>({ status: 'empty' });
   protected readonly observedBy = signal('');
   protected readonly overrideReason = signal('');
-  /** The one warning saved over on the next submit; cleared after every submit. */
-  private readonly allow = signal<BreedingWarning | null>(null);
 
   protected readonly bullExposure = computed(
     () => this.kind() === 'insemination' && this.serviceType() === 'bull_exposure',
@@ -181,19 +179,21 @@ export class BreedingForm {
     void this.identifiers.refresh();
   }
 
-  /** Set only the flag for the warning on screen, and submit. */
+  /** Submit with only the flag for the warning on screen set. */
   protected saveOver(): void {
-    this.allow.set(this.warning());
-    void this.submit();
+    void this.submit(this.warning());
   }
 
-  protected async submit(): Promise<void> {
+  /**
+   * `allow` is an argument, not form state: a flag held between calls survived
+   * a save-over that sent nothing (an early return) and rode on the next plain save.
+   */
+  protected async submit(allow: BreedingWarning | null = null): Promise<void> {
     const entry = this.when();
     const k = this.kind();
     if (entry.status !== 'complete' || !k || this.blockedReason() !== null) return;
     const w = entry.value;
     const bull = this.bullExposure();
-    const allow = this.allow();
     const r = await this.state.runRequest(
       () =>
         [
@@ -217,7 +217,6 @@ export class BreedingForm {
         ] as const,
       (request, key) => this.api.recordBreedingEvent(request[0], key),
     );
-    this.allow.set(null);
     if (r) {
       this.kind.set(null);
       this.serviceType.set(null);

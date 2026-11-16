@@ -169,6 +169,19 @@ describe('BreedingForm', () => {
     expect(third.request.body.allow_check_without_service).toBe(false);
   });
 
+  it('a save-over that sends nothing leaves no flag for the next plain save', async () => {
+    const { http, fixture, el } = await tripEarlyCheck();
+    enterDate(fixture, el, '');
+    click(el, '[data-role="save-over"]');
+    expect(http.match(URL)).toHaveLength(0);
+    enterDate(fixture, el, '13 Nov 2026');
+    click(el, '[data-role="submit"]');
+    const b = http.expectOne(URL).request.body;
+    expect(b.allow_early_check).toBe(false);
+    expect(b.allow_ambiguous_service).toBe(false);
+    expect(b.allow_check_without_service).toBe(false);
+  });
+
   it('a blank reason is sent as null', async () => {
     const { http, el } = await tripEarlyCheck();
     click(el, '[data-role="save-over"]');
