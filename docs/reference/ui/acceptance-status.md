@@ -1,10 +1,29 @@
 # Acceptance status
 
-Updated **11 November 2026**, for branch `farm-born-unknown-mother` on top of `12a5735` (Add animal gains *Born here, mother not known*). The previous run, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
+Updated **16 November 2026**, for branch `breeding-stage-1` (see *Breeding stage 1* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
 
 ## Latest recorded results
 
-Run on 11 November 2026 against branch `farm-born-unknown-mother` (base `12a5735`):
+Run on 16 November 2026 against branch `breeding-stage-1` (base `2be39a4`), Node 22.22.3 (the Angular CLI refuses the machine default 22.3.0):
+
+| Check | Result |
+|---|---|
+| Frontend tests (`npm test -w web-angular -- --watch=false`) | 632 passed in 66 files, exit 0, no unhandled errors |
+| Server tests (`npm test -w server`) | 837 passed, 0 failed, 0 skipped |
+| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass |
+| Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.12 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
+
+## Breeding stage 1
+
+All seven gates above passed on this branch. The build warnings are all in files this branch does not touch (the same notices as the 11 November run below); they were not compared byte for byte against a build of `main`.
+
+- **Badge:** checked in a browser on synthetic data only, the harness sample herd (11 cows and 12 male calves). No real-herd breeding event has been entered, and the `REGISTRY_BREEDING` flag is not turned on for the real registry. The page does not forward `?as_of`, so it shows today's state; the pinned dates were read from the API.
+- **Flag off:** the animal response has no reproduction key, the page header is unchanged, and no screenshot needs refreshing.
+- **Migration 10:** rehearsed on a copy of a backup taken from `main`. Version 9 to 10, 0 verification violations, events 0 to 0, every row count unchanged. The real registry holds no events yet, so the rehearsal proves the schema step on real data but copies no event rows; row copying is covered by the in-memory migration test.
+
+## Previous recorded results (11 November 2026)
+
+Run on 11 November 2026 against branch `farm-born-unknown-mother` (base `12a5735`). Kept for comparison; superseded by the latest results above.
 
 | Check | Result |
 |---|---|
