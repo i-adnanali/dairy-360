@@ -323,6 +323,16 @@ export class RegistryApi {
     )));
   }
 
+  /** A service or a pregnancy check. Absent on the server unless REGISTRY_BREEDING=1. */
+  recordBreedingEvent(
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<{ event_id: string; animal: AnimalDetail }> {
+    return unwrap(firstValueFrom(this.http.post<{ event_id: string; animal: AnimalDetail }>(
+      `${BASE}/breeding/events`, body, RegistryApi.keyed(idempotencyKey),
+    )));
+  }
+
   recordCalving(body: Record<string, unknown>, idempotencyKey: string): Promise<{
     calf_id: string; linked: boolean; superseded_origin_event_id: string | null;
     dam: AnimalDetail; calf: AnimalDetail;

@@ -424,6 +424,7 @@ app-root {
  * ADD NEW REGISTRY COMPONENTS HERE. A missing one fails silently and looks like
  * a spacing bug, which is exactly how this went unnoticed.
  */
+app-breeding-form,
 app-calf-picker,
 app-chip-group,
 app-milk-session-nav,

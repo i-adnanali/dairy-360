@@ -31,10 +31,16 @@ export type RegistryEventType =
 export type EnterableEventType = 'dry_off' | 'departure' | 'note';
 
 /**
- * The two guards a write can be recorded as having stepped past. Mirrors
- * OverriddenCheck on the server; columns on the event since migration 4.
+ * The guards a write can be recorded as having stepped past. Mirrors
+ * OverriddenCheck on the server; columns on the event since migration 4, the
+ * three breeding warnings since migration 11.
  */
-export type OverriddenCheck = 'near_duplicate_calving' | 'animal_departed';
+export type OverriddenCheck =
+  | 'near_duplicate_calving'
+  | 'animal_departed'
+  | 'ambiguous_service'
+  | 'early_check'
+  | 'check_without_service';
 export type CalvingOutcome = 'live' | 'stillborn' | 'died_within_24h';
 
 export interface HerdRow {
@@ -94,6 +100,11 @@ export interface AnimalDetail {
    * the badge only when this is a view.
    */
   reproduction?: ReproductionView | null;
+  /**
+   * Present only with REGISTRY_BREEDING=1: true when this animal is in the
+   * pilot, so POST /breeding/events accepts a service or a check for her.
+   */
+  breeding_entry?: boolean;
 }
 
 export type ReproductiveState =

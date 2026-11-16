@@ -1,0 +1,150 @@
+
+    <form data-page-layout="entry" [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
+      <div appCard>
+        <app-chip-group
+          name="breeding-kind"
+          label="Service or pregnancy check"
+          [options]="kinds"
+          [value]="kind()"
+          (changed)="kind.set($any($event))"
+        />
+      </div>
+
+      @if (kind(); as k) {
+        @if (k === 'insemination') {
+          <div appCard>
+            <div appSectionLabel legend>How was she served?</div>
+            <app-chip-group
+              name="service-type"
+              label="How was she served?"
+              [options]="serviceTypes"
+              [value]="serviceType()"
+              (changed)="serviceType.set($any($event))"
+            />
+          </div>
+        } @else {
+          <div appCard class="space-y-3">
+            <div appSectionLabel legend>How was she checked?</div>
+            <app-chip-group
+              name="check-method"
+              label="How was she checked?"
+              [options]="methods"
+              [value]="method()"
+              (changed)="method.set($any($event))"
+            />
+            <div appSectionLabel legend>Result</div>
+            <app-chip-group
+              name="check-result"
+              label="Result"
+              [options]="results"
+              [value]="result()"
+              (changed)="result.set($any($event))"
+            />
+          </div>
+        }
+
+        <!-- A warning's message is shown once, in the override notice below,
+             not also under the date it names. -->
+        <app-precision-date
+          [label]="bullExposure() ? 'Bull went in' : 'Date'"
+          [allowTime]="!bullExposure()"
+          [error]="
+            warning()
+              ? null
+              : (state.fieldError('occurred_on') ??
+                state.fieldError('date_precision') ??
+                state.fieldError('occurred_time'))
+          "
+          (changed)="when.set($event)"
+        />
+
+        @if (bullExposure()) {
+          <label class="block">
+            <span appFieldLabel>Days he stayed</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              data-role="exposure_days"
+              [value]="exposureDays()"
+              (input)="exposureDays.set($any($event.target).value)"
+              appInput
+              class="w-32"
+            />
+          </label>
+          @if (state.fieldError('exposure_days'); as e) {
+            <p appErrorText data-role="error-exposure_days">{{ e }}</p>
+          }
+        }
+
+        <app-identifier-input
+          field="observed_by"
+          label="Observed by"
+          help="Who witnessed this event, if anyone. Leave blank if unknown. Pick the name from the list, so it is spelled the same on every record."
+          [value]="observedBy()"
+          [suggestions]="identifiers.values().observed_by"
+          (changed)="observedBy.set($event)"
+        />
+
+        @if (state.formError(fields); as e) {
+          <p appErrorPanel data-role="error-form">{{ e }}</p>
+        }
+
+        <!-- Outside the form-level error block, keyed on the code, as in the
+             event form: these warnings name occurred_on, so they never reach
+             that block. -->
+        @if (warning()) {
+          <div
+            class="override-notice rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
+            data-role="override"
+          >
+            <p data-role="override-message">{{ state.error()?.message }}</p>
+            <!-- Optional, and stays optional, as in the event form. -->
+            <label class="mt-2 block">
+              <span class="mb-1 block text-xs font-medium">
+                Why, if you want it on the record <span class="font-normal">(optional)</span>
+              </span>
+              <input
+                data-role="override_reason"
+                [value]="overrideReason()"
+                (input)="overrideReason.set($any($event.target).value)"
+                class="w-full rounded-lg border border-line-strong bg-surface-raised px-2 py-1.5 text-sm"
+              />
+            </label>
+            <button
+              type="button"
+              data-role="save-over"
+              (click)="saveOver()"
+              class="mt-2 font-medium underline"
+            >
+              Save over this check
+            </button>
+            <p appHelp size="xs" class="mt-1">
+              Saving over it writes the event and the fact that the check was written over. Her
+              record shows both.
+            </p>
+          </div>
+        }
+
+        <div class="flex items-center gap-3">
+          @if (session.ready()) {
+            <button
+              type="submit"
+              data-role="submit"
+              [appButtonDisabled]="!canSubmit()"
+              appButton
+              reason="breeding-submit-reason"
+              [busy]="state.submitting()"
+            >
+              {{ k === 'insemination' ? 'Save service' : 'Save check' }}
+            </button>
+          } @else {
+            <app-session-required what="a breeding event" />
+          }
+          @if (blockedReason(); as r) {
+            <span appHelp data-role="blocked" id="breeding-submit-reason">{{ r }}</span>
+          }
+        </div>
+      }
+    </form>
