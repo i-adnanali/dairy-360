@@ -179,21 +179,36 @@ test('a flag with nothing to override records nothing', () => {
   assert.equal(row.override_reason, null);
 });
 
+// A service on BD-0006 joins her case with no heat sign: two warnings, so the code is breeding_warnings,
+// and `ambiguous_service` must still be among them with nothing written.
+const refusesWithAmbiguous = (db: Db, input: object) => {
+  const before = countEvents(db, 'BD-0006');
+  assert.throws(
+    () => recordBreedingEvent(db, input as never),
+    (e: unknown) =>
+      isRegistryError(e) && e.code === 'breeding_warnings' && (e.warnings ?? []).map((w) => w.check).includes('ambiguous_service'),
+  );
+  assert.equal(countEvents(db, 'BD-0006'), before);
+};
+
 test('the flag for another warning does not save over this one', () => {
   const db = breedingHerd();
-  refuses(
+  refusesWithAmbiguous(
     db,
     { animal_id: 'BD-0006', type: 'insemination', occurred_on: '2026-09-23', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_early_check: true },
-    'breeding_warnings', // a service that joins a case with no heat sign raises two since stage 3
+  );
+  // Even the other service warning's flag does not save over ambiguous_service.
+  refusesWithAmbiguous(
+    db,
+    { animal_id: 'BD-0006', type: 'insemination', occurred_on: '2026-09-23', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_early_check: true, allow_no_heat_sign: true },
   );
 });
 
 test('a second service dated the same day as the first still warns', () => {
   const db = breedingHerd();
-  refuses(
+  refusesWithAmbiguous(
     db,
     { animal_id: 'BD-0006', type: 'insemination', occurred_on: '2026-09-02', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL },
-    'breeding_warnings', // ambiguous_service plus no_heat_sign since stage 3
   );
 });
 
