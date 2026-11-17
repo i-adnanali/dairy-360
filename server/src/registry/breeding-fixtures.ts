@@ -14,7 +14,7 @@ import { addAcquired, addDryOff, calve, freshDb, RECALL, resetRecordedSeq } from
 import { recordBreedingEvent } from './breeding';
 import { rebuild } from './projectStore';
 import type { Db } from './schema';
-import type { DatePrecision } from './types';
+import type { BreedingOverriddenCheck, DatePrecision } from './types';
 
 export const BREEDING_AS_OF = '2026-11-13';
 
@@ -26,13 +26,18 @@ interface Step {
   on: string;
   precision?: DatePrecision;
   payload: Record<string, unknown>;
+  /** Warnings this past record trips and is saved over. */
+  allow?: BreedingOverriddenCheck[];
 }
 
 const svc = (on: string, over: Partial<Step> = {}, payload: Record<string, unknown> = { service_type: 'ai', exposure_days: null }): Step =>
   ({ type: 'insemination', on, payload, ...over });
 const check = (on: string, method: string, result: string): Step =>
   ({ type: 'pregnancy_check', on, payload: { method, result } });
-const heat = (on: string): Step => ({ type: 'heat_observed', on, payload: { sign: 'standing' } });
+const heat = (on: string, over: Partial<Step> = {}): Step => ({ type: 'heat_observed', on, payload: { sign: 'standing' }, ...over });
+// A past service with no heat recorded before it trips `no_heat_sign`; Laali's heat follows her positive check.
+const NO_HEAT: Partial<Step> = { allow: ['no_heat_sign'] };
+const AFTER_POSITIVE: Partial<Step> = { allow: ['heat_after_positive'] };
 
 interface Cow {
   id: string;
@@ -48,19 +53,19 @@ interface Cow {
 // so that dry-off does not change their state. The Task 3 sample-herd dates are
 // kept verbatim, so the states match registry.reproduction.test.ts.
 const COWS: Cow[] = [
-  { id: 'BD-0001', name: 'Sohni', calvings: [{ on: '2024-09-01', dryOff: '2025-07-01' }], steps: [svc('2025-11-28'), check('2026-02-10', 'palpation', 'positive')] },
-  { id: 'BD-0002', name: 'Rani', calvings: [{ on: '2025-02-01', dryOff: '2025-11-30' }], steps: [svc('2026-01-20'), check('2026-03-03', 'ultrasound', 'positive')] },
-  { id: 'BD-0003', name: 'Noori', calvings: [{ on: '2025-12-01' }], steps: [svc('2026-03-05'), check('2026-05-12', 'palpation', 'positive')] },
-  { id: 'BD-0004', name: 'Kali', calvings: [{ on: '2026-03-01' }], steps: [svc('2026-07-14'), check('2026-09-15', 'palpation', 'positive')] },
-  { id: 'BD-0005', name: 'Laali', calvings: [{ on: '2026-04-15' }], steps: [svc('2026-08-11'), check('2026-09-22', 'ultrasound', 'positive'), heat('2026-11-10')] },
-  { id: 'BD-0006', name: 'Moti', calvings: [{ on: '2026-05-20' }], steps: [svc('2026-09-02')] },
-  { id: 'BD-0007', name: 'Heer', calvings: [{ on: '2026-06-10' }], steps: [svc('2026-10-09')] },
-  { id: 'BD-0008', name: 'Gulabo', calvings: [{ on: '2026-07-15' }], steps: [svc('2026-10-24')] },
-  { id: 'BD-0009', name: 'Shehzadi', calvings: [{ on: '2026-06-01' }], steps: [svc('2026-09-18'), check('2026-10-30', 'ultrasound', 'negative')] },
+  { id: 'BD-0001', name: 'Sohni', calvings: [{ on: '2024-09-01', dryOff: '2025-07-01' }], steps: [svc('2025-11-28', NO_HEAT), check('2026-02-10', 'palpation', 'positive')] },
+  { id: 'BD-0002', name: 'Rani', calvings: [{ on: '2025-02-01', dryOff: '2025-11-30' }], steps: [svc('2026-01-20', NO_HEAT), check('2026-03-03', 'ultrasound', 'positive')] },
+  { id: 'BD-0003', name: 'Noori', calvings: [{ on: '2025-12-01' }], steps: [svc('2026-03-05', NO_HEAT), check('2026-05-12', 'palpation', 'positive')] },
+  { id: 'BD-0004', name: 'Kali', calvings: [{ on: '2026-03-01' }], steps: [svc('2026-07-14', NO_HEAT), check('2026-09-15', 'palpation', 'positive')] },
+  { id: 'BD-0005', name: 'Laali', calvings: [{ on: '2026-04-15' }], steps: [svc('2026-08-11', NO_HEAT), check('2026-09-22', 'ultrasound', 'positive'), heat('2026-11-10', AFTER_POSITIVE)] },
+  { id: 'BD-0006', name: 'Moti', calvings: [{ on: '2026-05-20' }], steps: [svc('2026-09-02', NO_HEAT)] },
+  { id: 'BD-0007', name: 'Heer', calvings: [{ on: '2026-06-10' }], steps: [svc('2026-10-09', NO_HEAT)] },
+  { id: 'BD-0008', name: 'Gulabo', calvings: [{ on: '2026-07-15' }], steps: [svc('2026-10-24', NO_HEAT)] },
+  { id: 'BD-0009', name: 'Shehzadi', calvings: [{ on: '2026-06-01' }], steps: [svc('2026-09-18', NO_HEAT), check('2026-10-30', 'ultrasound', 'negative')] },
   // The bull ran with her for 45 days from some time in June; nobody checked her.
   { id: 'BD-0010', name: 'Bulbul', calvings: [{ on: '2025-11-01' }], steps: [svc('2026-06-01', { precision: 'month' }, { service_type: 'bull_exposure', exposure_days: 45 })] },
   // Served, confirmed, and already calved: the last calving is recorded after the steps.
-  { id: 'BD-0011', name: 'Champa', calvings: [{ on: '2024-12-01', dryOff: '2025-10-01' }], steps: [svc('2025-12-20'), check('2026-02-18', 'palpation', 'positive')] },
+  { id: 'BD-0011', name: 'Champa', calvings: [{ on: '2024-12-01', dryOff: '2025-10-01' }], steps: [svc('2025-12-20', NO_HEAT), check('2026-02-18', 'palpation', 'positive')] },
 ];
 
 /** Champa's calving from the service above. */
@@ -95,9 +100,9 @@ export function breedingHerd(): Db {
         date_precision: s.precision ?? 'day',
         payload: s.payload,
         provenance: RECALL,
-        // Past records: the stage 3 warnings are for new entry, so these are saved over them.
-        allow_no_heat_sign: true,
-        allow_heat_after_positive: true,
+        // Past records: a step that trips a stage 3 warning says so (`allow`), the rest are written plain.
+        allow_no_heat_sign: s.allow?.includes('no_heat_sign'),
+        allow_heat_after_positive: s.allow?.includes('heat_after_positive'),
       });
     }
   }

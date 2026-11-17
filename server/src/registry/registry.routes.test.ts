@@ -790,6 +790,20 @@ test('breeding_entry is false for a female outside the pilot', async () => {
   assert.equal(body.breeding_entry, false);
 });
 
+test('a service with no heat sign is refused over HTTP until its flag is sent', async () => {
+  const ctx = await pilotCtx();
+  const svc = { animal_id: 'BD-0009', type: 'insemination', occurred_on: '2026-11-13', date_precision: 'day', payload: { service_type: 'ai', exposure_days: null }, ...PROV };
+  const refused = (await post(ctx, '/breeding/events', svc)) as { status: number; body: { error: string; field: string; message: string; warnings: { check: string; message: string }[] } };
+  assert.equal(refused.status, 400);
+  assert.equal(refused.body.error, 'no_heat_sign');
+  assert.deepEqual(refused.body.warnings, [{ check: 'no_heat_sign', message: refused.body.message }]);
+  const saved = (await post(ctx, '/breeding/events', { ...svc, allow_no_heat_sign: true })) as { status: number; body: { event_id: string } };
+  assert.equal(saved.status, 201);
+  const { body } = (await get(ctx, '/animals/BD-0009')) as { body: { events: { id: string; override_checks: string[] }[] } };
+  assert.deepEqual(body.events.find((e) => e.id === saved.body.event_id)!.override_checks, ['no_heat_sign']);
+  await ctx.close();
+});
+
 test('the timeline carries a breeding save-over', async () => {
   const ctx = await pilotCtx();
   const r = await post(ctx, '/breeding/events', {

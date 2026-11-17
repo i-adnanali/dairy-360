@@ -33,6 +33,7 @@ test('a service is written as an ordinary appended event', () => {
   const { event_id } = recordBreedingEvent(db, { ...base, animal_id: 'BD-0001', type: 'insemination', payload: { service_type: 'ai' } });
   const row = eventsForAnimal(db, 'BD-0001').find((e) => e.id === event_id)!;
   assert.deepEqual([row.type, row.payload], ['insemination', { service_type: 'ai', exposure_days: null }]);
+  assert.deepEqual(row.override_checks, ['no_heat_sign']);
   assert.deepEqual(checkSnapshot(snapshot(db), '2026-11-13').filter((v) => v.invariant === 29), []);
 });
 
