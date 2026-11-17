@@ -349,6 +349,11 @@ export interface ReproductionView {
     event_id: string; method: CheckMethod; result: CheckResult;
     occurred_on: string; day: number; reliable: boolean;
   } | null;
+  heat_sign_before_service: 'seen' | 'not_seen' | 'unknowable';
+  heat_after_positive: boolean;      // recheck because a heat is dated after the latest positive
+  null_observations: { watched_for: WatchedFor; occurred_on: string }[];   // after the case's first service
+  negative_inside_exposure: boolean; // open (inferred) because the negative fell inside a bull exposure
+  month_precision_service: boolean;  // any service in the case is month-precision
 }
 
 /** One discriminated union on `type`, validated by assertEventPayload(). */

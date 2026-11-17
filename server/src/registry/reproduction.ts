@@ -70,6 +70,7 @@ import type {
   ReproductionBasis,
   ReproductionView,
   ReproductiveState,
+  WatchedFor,
 } from './types';
 
 /** In days from the earliest possible conception. */
@@ -80,6 +81,16 @@ export const GESTATION = {
   closeUpLead: 21,
   dryOffLead: 60,
   bredThrough: 24,
+} as const;
+
+/** Spec rows; kinds in REGISTRY_BREEDING.md. */
+export const HEAT_SIGN = { hoursBefore: 36, calendarDaysBack: 1 } as const;
+export const BREEDING_TASK_DAYS = {
+  heatWatchFrom: 18,
+  checkRedAfter: 60,
+  calvingWatchRedAfter: 318,
+  overdueFrom: 333,
+  overdueRedAfter: 346,
 } as const;
 
 /**
@@ -135,6 +146,27 @@ function breaksCase(e: RegistryEvent): boolean {
 
 function reliableFrom(method: CheckMethod, result: CheckResult): number | null {
   return CHECK_RELIABLE_FROM[method][result];
+}
+
+/** Minutes from `a` to `b`, farm-local date and `HH:MM` as written (no Date, no timezone). */
+function minutesBetween(a: { on: string; time: string }, b: { on: string; time: string }): number {
+  const clock = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+  return daysBetween(a.on, b.on) * 1440 + clock(b.time) - clock(a.time);
+}
+
+/** Was a heat seen shortly before this service? Never counts a heat dated after it. */
+function heatBefore(service: RegistryEvent, heats: RegistryEvent[]): boolean {
+  return heats.some((h) => {
+    if (h.occurred_time && service.occurred_time) {
+      const gap = minutesBetween(
+        { on: h.occurred_on, time: h.occurred_time },
+        { on: service.occurred_on, time: service.occurred_time },
+      );
+      return gap >= 0 && gap <= HEAT_SIGN.hoursBefore * 60;
+    }
+    const days = daysBetween(h.occurred_on, service.occurred_on);
+    return days >= 0 && days <= HEAT_SIGN.calendarDaysBack;
+  });
 }
 
 export function deriveReproduction(opts: {
@@ -209,6 +241,8 @@ export function deriveReproduction(opts: {
   const bullIn = anchorPayload.service_type === 'bull_exposure';
   let state: ReproductiveState;
   let basis: ReproductionBasis;
+  let heatAfterPositive = false;
+  let negativeInsideExposure = false;
   if (calved) {
     [state, basis] = ['calved', 'observed'];
   } else if (aborted) {
@@ -218,7 +252,8 @@ export function deriveReproduction(opts: {
   } else if (pos) {
     const { method } = checkPayload(pos);
     const posFrom = reliableFrom(method, 'positive');
-    if (posFrom === null || dayOf(pos) < posFrom || (heat !== null && heat.occurred_on > pos.occurred_on)) {
+    heatAfterPositive = heat !== null && heat.occurred_on > pos.occurred_on;
+    if (posFrom === null || dayOf(pos) < posFrom || heatAfterPositive) {
       [state, basis] = ['recheck', 'inferred'];
     } else if (T > W + GESTATION.windowCloses) {
       [state, basis] = ['overdue', 'inferred'];
@@ -232,7 +267,8 @@ export function deriveReproduction(opts: {
       [state, basis] = ['confirmed', 'observed'];
     }
   } else if (openBy) {
-    [state, basis] = ['open', bullIn && dayOf(openBy) <= W ? 'inferred' : 'observed'];
+    negativeInsideExposure = bullIn && dayOf(openBy) <= W;
+    [state, basis] = ['open', negativeInsideExposure ? 'inferred' : 'observed'];
   } else if (heat && !(bullIn && dayOf(heat) <= W)) {
     [state, basis] = ['open', 'inferred'];
   } else if (T <= W + GESTATION.bredThrough) {
@@ -265,6 +301,12 @@ export function deriveReproduction(opts: {
     };
   }
 
+  const monthPrecision = caseAt.some((i) => ordered[i].date_precision === 'month');
+  const heatSign: ReproductionView['heat_sign_before_service'] =
+    bullIn || anchor.date_precision === 'month'
+      ? 'unknowable'
+      : heatBefore(anchor, ordered.filter((e) => e.type === 'heat_observed')) ? 'seen' : 'not_seen';
+
   return {
     state,
     basis,
@@ -284,5 +326,36 @@ export function deriveReproduction(opts: {
     day_max: T,
     window,
     latest_check: latestCheck,
+    heat_sign_before_service: heatSign,
+    heat_after_positive: heatAfterPositive,
+    null_observations: evidence
+      .filter((e) => e.type === 'null_observation')
+      .map((e) => ({
+        watched_for: (e.payload as unknown as { watched_for: WatchedFor }).watched_for,
+        occurred_on: e.occurred_on,
+      })),
+    negative_inside_exposure: negativeInsideExposure,
+    month_precision_service: monthPrecision,
   };
+}
+
+/**
+ * Would the most recently recorded event, taken away, have changed which
+ * service this pregnancy is counted from? That is the case, not only its
+ * anchor: true when both views exist and any of service.event_id,
+ * services_in_case or conception_earliest differ between them.
+ */
+export function attributionChanged(opts: { events: RegistryEvent[]; asOf: string; inMilk: boolean }): boolean {
+  const effective = effectiveEvents(opts.events).filter((e) => e.occurred_on <= opts.asOf);
+  if (effective.length === 0) return false;
+  const latest = effective.reduce((a, b) => (b.recorded_at > a.recorded_at ? b : a));
+  const withIt = deriveReproduction({ ...opts, events: effective });
+  const without = deriveReproduction({ ...opts, events: effective.filter((e) => e !== latest) });
+  return (
+    withIt !== null &&
+    without !== null &&
+    (withIt.service.event_id !== without.service.event_id ||
+      withIt.services_in_case !== without.services_in_case ||
+      withIt.conception_earliest !== without.conception_earliest)
+  );
 }

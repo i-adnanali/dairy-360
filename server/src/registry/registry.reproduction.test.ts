@@ -6,7 +6,7 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 
-import { deriveReproduction } from './reproduction';
+import { attributionChanged, deriveReproduction } from './reproduction';
 import type { RegistryEvent } from './types';
 
 // ---------------------------------------------------------------------------
@@ -163,4 +163,73 @@ test('a superseded service is ignored', () => {
   const right = svc('2026-02-20', { supersedes_id: wrong.id });
   const v = derive([wrong, right])!;
   assert.deepEqual([v.conception_earliest, v.services_in_case], ['2026-02-20', 1]);
+});
+
+// ---------------------------------------------------------------------------
+// stage 3: what else the derivation knows
+// ---------------------------------------------------------------------------
+
+const timed = (e: RegistryEvent, time: string): RegistryEvent => ({ ...e, occurred_time: time });
+const sign = (events: RegistryEvent[]) => derive(events)!.heat_sign_before_service;
+const BULL = { service_type: 'bull_exposure', exposure_days: 45 };
+
+test('heat sign: both times, within 36 hours before the service', () => {
+  assert.equal(sign([timed(heat('2026-11-10'), '08:00'), timed(svc('2026-11-11'), '18:00')]), 'seen');      // 34 h
+  assert.equal(sign([timed(heat('2026-11-10'), '06:00'), timed(svc('2026-11-11'), '19:00')]), 'not_seen');  // 37 h
+  assert.equal(sign([timed(svc('2026-11-11'), '08:00'), timed(heat('2026-11-11'), '18:00')]), 'not_seen');  // after the AI
+});
+
+test('heat sign: a missing time falls back to the same day or the day before', () => {
+  assert.equal(sign([heat('2026-11-10'), timed(svc('2026-11-11'), '18:00')]), 'seen');
+  assert.equal(sign([heat('2026-11-09'), svc('2026-11-11')]), 'not_seen');
+  assert.equal(sign([timed(heat('2026-11-11'), '08:00'), svc('2026-11-11')]), 'seen');
+  assert.equal(sign([svc('2026-11-11'), heat('2026-11-12')]), 'not_seen');
+});
+
+test('heat sign: unknowable for a bull exposure or a month-precision service', () => {
+  assert.equal(sign([heat('2026-11-10'), svc('2026-11-11', {}, BULL)]), 'unknowable');
+  assert.equal(sign([heat('2026-11-10'), svc('2026-11-01', { date_precision: 'month' })]), 'unknowable');
+});
+
+test('heat_after_positive is true for Laali and false for Kali', () => {
+  const laali = derive([svc('2026-08-11'), check('2026-09-22', 'ultrasound', 'positive'), heat('2026-11-10')], true)!;
+  const kali = derive([svc('2026-07-14'), check('2026-09-15', 'palpation', 'positive')], true)!;
+  assert.deepEqual([laali.state, laali.heat_after_positive], ['recheck', true]);
+  assert.deepEqual([kali.state, kali.heat_after_positive], ['confirmed', false]);
+});
+
+test('null_observations lists those after the service and omits those before it', () => {
+  const nul = (on: string, watched_for: string) => ev({ type: 'null_observation', occurred_on: on, payload: { watched_for } });
+  const v = derive([nul('2026-10-01', 'heat'), svc('2026-10-05'), nul('2026-10-26', 'heat'), nul('2026-11-05', 'pregnancy_check')])!;
+  assert.deepEqual(v.null_observations, [
+    { watched_for: 'heat', occurred_on: '2026-10-26' },
+    { watched_for: 'pregnancy_check', occurred_on: '2026-11-05' },
+  ]);
+});
+
+test('negative_inside_exposure: a negative on day 40 of a 45-day exposure, not on day 50', () => {
+  const at = (on: string) => derive([svc('2026-08-01', {}, BULL), check(on, 'ultrasound', 'negative')])!;
+  assert.deepEqual([at('2026-09-10').state, at('2026-09-10').basis, at('2026-09-10').negative_inside_exposure], ['open', 'inferred', true]);
+  assert.deepEqual([at('2026-09-20').state, at('2026-09-20').basis, at('2026-09-20').negative_inside_exposure], ['open', 'observed', false]);
+});
+
+test('month_precision_service is true for Bulbul', () => {
+  const bulbul = derive([svc('2026-06-01', { date_precision: 'month' }, BULL)], true)!;
+  assert.equal(bulbul.month_precision_service, true);
+  assert.equal(derive([svc('2026-06-01')])!.month_precision_service, false);
+});
+
+test('attributionChanged: a heat that splits two services changes it, a check does not', () => {
+  const a = svc('2026-06-02');
+  const b = svc('2026-07-14');
+  const split = heat('2026-06-23');   // recorded last
+  assert.equal(attributionChanged({ events: [a, b, split], asOf: AS_OF, inMilk: false }), true);
+  const later = check('2026-09-20', 'ultrasound', 'positive');
+  assert.equal(attributionChanged({ events: [a, b, later], asOf: AS_OF, inMilk: false }), false);
+});
+
+test('attributionChanged: a new insemination recorded last changes it', () => {
+  const a = svc('2026-06-02');
+  const b = svc('2026-09-14');   // recorded last, after a heat between the two
+  assert.equal(attributionChanged({ events: [a, heat('2026-06-23'), b], asOf: AS_OF, inMilk: false }), true);
 });
