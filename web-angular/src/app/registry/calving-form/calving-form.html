@@ -43,7 +43,7 @@
           >
             <option value="">Choose a dam…</option>
             @for (d of filteredDams(); track d.id) {
-              <option [value]="d.id" [disabled]="!d.eligible">
+              <option [value]="d.id" [disabled]="!d.eligible" [selected]="d.id === damId()">
                 {{ d.id }}{{ d.name ? ' — ' + d.name : ''
                 }}{{ d.eligible ? '' : ' (' + d.ineligible_reason + ')' }}
               </option>

@@ -59,8 +59,8 @@ const board: BreedingBoard = {
   cases,
 };
 
-async function mount(url = '/animals/breeding') {
-  const breedingBoard = vi.fn(() => Promise.resolve(structuredClone(board)));
+async function mount(url = '/animals/breeding', data: BreedingBoard = board) {
+  const breedingBoard = vi.fn(() => Promise.resolve(structuredClone(data)));
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
@@ -170,8 +170,46 @@ describe('the Breeding page', () => {
     expect(text(row.querySelector('[data-role="day-cell"] [data-role="range-qualifier"]'))).toBe('month');
     expect(text(row.querySelector('[data-role="service"]'))).toBe('Bull running with her · Jun 2026month');
     expect(text(row.querySelector('[data-role="next"]'))).toBe('Pregnancy check due');
-    const closed = el.querySelector('[data-role="case-row"][data-animal="BD-0009"]')!;
-    expect(text(closed.querySelector('[data-role="latest-check"]'))).toBe('—');
+    const exact = el.querySelector('[data-role="case-row"][data-animal="BD-0009"]')!;
+    expect(text(exact.querySelector('[data-role="latest-check"]'))).toBe('—');
+  });
+
+  it('dots the calving window only when it rests on a month-only service', async () => {
+    const { el } = await mount('/animals/breeding?tab=cases');
+    const win = (id: string) => el.querySelector(`[data-role="case-row"][data-animal="${id}"] [data-role="window"] span`)!;
+    expect(win('BD-0009').getAttribute('data-certainty')).toBe('known');
+    expect(win('BD-0009').className).not.toContain('border-dotted');
+    expect(win('BD-0019').getAttribute('data-certainty')).toBe('approximate');
+    expect(win('BD-0019').className).toContain('border-dotted');
+  });
+
+  it('links Record calving to the calving form on her, and Record dry-off to her Add an event tab', async () => {
+    const b = structuredClone(board);
+    b.tasks = [
+      { ...task({ kind: 'calving_watch', animal_id: 'BD-0009', standing: 'due' }), animal_name: 'Moti' },
+      { ...task({ kind: 'dry_off', animal_id: 'BD-0007', standing: 'due' }), animal_name: 'Rani' },
+    ];
+    const { el } = await mount('/animals/breeding', b);
+    const href = (id: string) => el.querySelector(`[data-animal="${id}"] [data-role="task-action"]`)!.getAttribute('href');
+    expect(href('BD-0009')).toBe('/animals/calvings/new?dam=BD-0009');
+    expect(href('BD-0007')).toBe('/animals/BD-0007?tab=add-event');
+  });
+
+  it('the To do count is neutral at nought', async () => {
+    const b = { ...structuredClone(board), tasks: [], overdue: 0, due: 0 };
+    const { el } = await mount('/animals/breeding', b);
+    const n = el.querySelector('[data-tab="todo"] .tab-n')!;
+    expect(text(n)).toBe('0');
+    expect(n.className).not.toMatch(/danger|warning/);
+  });
+
+  it('Find filters as you type', async () => {
+    const { h, el } = await mount('/animals/breeding?tab=cases');
+    const find = el.querySelector<HTMLInputElement>('input[name="find"]')!;
+    find.value = 'rani';
+    find.dispatchEvent(new Event('input'));
+    await settle(h);
+    expect(Array.from(el.querySelectorAll('[data-role="case-row"]')).map((r) => r.getAttribute('data-animal'))).toEqual(['BD-0007']);
   });
 
   it('Record heat opens the panel with the form on heat_observed', async () => {

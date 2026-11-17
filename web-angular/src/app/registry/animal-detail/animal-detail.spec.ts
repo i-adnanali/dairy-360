@@ -1,6 +1,7 @@
 import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { AnimalDetailView } from './animal-detail';
 import { RegistryApi } from '../api';
 import type { AnimalDetail } from '../types';
@@ -199,5 +200,40 @@ describe('AnimalDetailView open breeding tasks', () => {
   it('draws no open section when there are no breeding tasks and nothing from health', async () => {
     const el = await mount(detail({ reproduction: view, breeding_entry: false, breeding_tasks: [] }));
     expect(el.querySelector('[data-role="open-now"]')).toBeNull();
+  });
+});
+
+describe('AnimalDetailView opened on a tab', () => {
+  async function open(url: string, d: AnimalDetail) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'animals/:id', component: AnimalDetailView }], withComponentInputBinding()),
+        {
+          provide: RegistryApi,
+          useValue: {
+            animal: vi.fn(async () => d),
+            list: vi.fn(async () => ({ items: [] })),
+            healthGet: vi.fn(async () => ({ tasks: [], withdrawals: [] })),
+            identifierValues: vi.fn(async () => ({ observed_by: [], acquired_from: [], sire_ref: [] })),
+          },
+        },
+      ],
+    });
+    const h = await RouterTestingHarness.create(url);
+    await tick(h.fixture);
+    await tick(h.fixture);
+    return h.fixture.nativeElement as HTMLElement;
+  }
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('opens the tab ?tab= names (the Breeding page\'s Record dry-off)', async () => {
+    const el = await open('/animals/BD-0001?tab=add-event', detail());
+    expect(el.querySelector('[data-tab="add-event"]')!.getAttribute('aria-selected')).toBe('true');
+    expect(el.querySelector('app-event-form')).not.toBeNull();
+  });
+
+  it('falls back to Timeline for a tab this animal does not offer, or no such tab', async () => {
+    const el = await open('/animals/BD-0001?tab=breeding', detail());
+    expect(el.querySelector('[data-tab="events"]')!.getAttribute('aria-selected')).toBe('true');
   });
 });

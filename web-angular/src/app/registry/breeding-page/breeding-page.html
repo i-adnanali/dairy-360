@@ -25,7 +25,7 @@
       @for (t of tabs; track t.id) {
         <button type="button" role="tab" [attr.data-tab]="t.id" [attr.aria-selected]="tab() === t.id" [attr.tabindex]="tab() === t.id ? 0 : -1" (click)="setTab(t.id)">
           {{ t.label }}@if (t.id === 'todo' && board(); as b) {
-            <span appBadge class="tab-n" [tone]="b.overdue ? 'danger' : 'warning'" [attr.aria-label]="b.overdue + b.due + ' past their limit or due'">{{ b.overdue + b.due }}</span>
+            <span appBadge class="tab-n" [tone]="b.overdue ? 'danger' : b.due ? 'warning' : 'neutral'" [attr.aria-label]="b.overdue + b.due + ' past their limit or due'">{{ b.overdue + b.due }}</span>
           }
         </button>
       }
@@ -95,10 +95,10 @@
                           }
                         }
                         @case ('calving_watch') {
-                          <a appButton variant="secondary" size="sm" data-role="task-action" routerLink="/animals/calvings/new">Record calving</a>
+                          <a appButton variant="secondary" size="sm" data-role="task-action" routerLink="/animals/calvings/new" [queryParams]="{ dam: t.animal_id }">Record calving</a>
                         }
                         @case ('dry_off') {
-                          <a appButton variant="secondary" size="sm" data-role="task-action" [routerLink]="['/animals', t.animal_id]">Record dry-off</a>
+                          <a appButton variant="secondary" size="sm" data-role="task-action" [routerLink]="['/animals', t.animal_id]" [queryParams]="{ tab: 'add-event' }">Record dry-off</a>
                         }
                         @default {
                           @if (canEnter(t.animal_id)) {
@@ -121,7 +121,7 @@
         <div class="cases-bar">
           <label
             ><span appFieldLabel>Find</span
-            ><input appInput type="search" name="find" placeholder="ID or name" [value]="url.value().find" (change)="set('find', $any($event.target).value)"
+            ><input appInput type="search" name="find" placeholder="ID or name" [value]="url.value().find" (input)="set('find', $any($event.target).value)"
           /></label>
           <div appSegmented role="group" aria-label="Which cases">
             @for (s of showChoices; track s.id) {
@@ -154,11 +154,12 @@
             <tbody>
               @for (c of visibleCases(); track c.animal_id) {
                 @let v = c.view;
+                <!-- The service date's precision: the window counted from it is as exact as it is. -->
+                @let s = readable(v.service.occurred_on, v.service.date_precision);
                 <tr class="border-t border-line-subtle" data-role="case-row" [attr.data-animal]="c.animal_id">
                   <td appCell class="whitespace-nowrap"><a appIdentifier [routerLink]="['/animals', c.animal_id]">{{ c.animal_id }}</a> {{ c.animal_name }}</td>
                   <td appCell><span appBadge [tone]="stateTone(v.state)">{{ stateLabel(v.state) }}</span><span appQualifier>{{ basisWord(v.basis) }}</span></td>
                   <td appCell data-role="service">
-                    @let s = readable(v.service.occurred_on, v.service.date_precision);
                     {{ serviceWord(v.service.service_type) }} · <span [appCertainty]="s.state">{{ s.figure }}</span>@if (s.qualifier) { <span appQualifier>{{ s.qualifier }}</span> }
                   </td>
                   <td appCell class="whitespace-nowrap" data-role="day-cell">
@@ -177,7 +178,7 @@
                   </td>
                   <td appCell data-role="window">
                     @if (v.window; as w) {
-                      <span appCertainty="approximate">{{ readable(w.opens_on, 'day').figure }} to {{ readable(w.closes_on, 'day').figure }}</span>
+                      <span [appCertainty]="s.state" [attr.data-certainty]="s.state">{{ readable(w.opens_on, 'day').figure }} to {{ readable(w.closes_on, 'day').figure }}</span>
                     } @else {
                       <span class="text-content-muted">—</span>
                     }

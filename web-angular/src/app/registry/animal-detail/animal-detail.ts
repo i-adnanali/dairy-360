@@ -2,7 +2,8 @@ import { TabBar } from "../../ui/selection";
 import { subjectTitle } from '../page-title';
 import { DestroyRef } from '@angular/core';
 import { DraftRegistry } from "../draft-registry";
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Button } from "../../ui/button";
 // One animal's record: identity, derived status, event list, and the two forms
 // that act on it.
@@ -169,6 +170,12 @@ export class AnimalDetailView {
   constructor() {
     subjectTitle(() => { const a = this.detail()?.animal; return a ? (a.name ? a.id + ' ' + a.name : a.id) : null; });
     inject(DestroyRef).onDestroy(() => ++this.loadSequence);
+    // ?tab=add-event from the Breeding page's "Record dry-off". A tab this
+    // animal does not offer falls back to Timeline through current().
+    inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe((q) => {
+      const t = q.get('tab');
+      if (t === 'events' || t === 'breeding' || t === 'add-event' || t === 'correct') this.tab.set(t);
+    });
     // Reload whenever the route id changes, so navigating between animals does
     // not leave a stale record on screen -- which, in a view whose whole job is
     // letting you check what you just wrote, would be the worst kind of bug.

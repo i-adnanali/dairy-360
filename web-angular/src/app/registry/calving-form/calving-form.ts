@@ -39,7 +39,8 @@ import {
   viewChildren,
 } from '@angular/core';
 import type { ElementRef } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RegistryApi } from "../api";
 import { FormState } from "../form-state";
 import { Session } from "../session";
@@ -247,6 +248,14 @@ export class CalvingForm {
 
     void this.loadDams();
     void this.identifiers.refresh();
+    // ?dam= from the Breeding page's "Record calving": the form opens on her.
+    inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe((q) => {
+      const dam = q.get('dam');
+      if (dam) {
+        this.setDam(dam);
+        this.writer.accept();
+      }
+    });
 
     // The list has to ARRIVE ON ITS OWN now. It used to be fetched when the
     // operator clicked "yes -- link to it", and that click no longer exists:

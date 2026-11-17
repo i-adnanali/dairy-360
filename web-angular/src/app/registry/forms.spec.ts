@@ -9,6 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { AnimalForm } from "./animal-form/animal-form";
 import { EventForm } from "./event-form/event-form";
 import { CorrectionForm } from "./correction-form/correction-form";
@@ -1100,5 +1101,31 @@ describe('CorrectionForm', () => {
     fixture.componentRef.setInput('events', []);
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('[data-role="no-calvings"]')).not.toBeNull();
+  });
+});
+
+describe('CalvingForm opened on a dam', () => {
+  it('chooses the dam named by ?dam= (the Breeding page\'s Record calving)', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withFetch()),
+        provideHttpClientTesting(),
+        provideRouter([{ path: 'animals/calvings/new', component: CalvingForm }]),
+      ],
+    });
+    TestBed.inject(Session).set('recall', 'adnan');
+    const http = TestBed.inject(HttpTestingController);
+    const h = await RouterTestingHarness.create('/animals/calvings/new?dam=BD-0001');
+    http.expectOne(`${BASE}/dam-candidates`).flush({ candidates: [{
+      id: 'BD-0001', name: 'Noor', sex: 'female', origin: 'acquired', birth_on: null, birth_precision: null,
+      eligible: true, ineligible_reason: null, days_apart: null, within_match_window: true,
+    }, {
+      id: 'BD-0002', name: 'Rani', sex: 'female', origin: 'acquired', birth_on: null, birth_precision: null,
+      eligible: true, ineligible_reason: null, days_apart: null, within_match_window: true,
+    }] });
+    await settle(h.fixture);
+    const sel = (h.fixture.nativeElement as HTMLElement).querySelector('[data-role="dam"]') as HTMLSelectElement;
+    expect(sel.value).toBe('BD-0001');
+    TestBed.resetTestingModule();
   });
 });
