@@ -7,12 +7,14 @@
 // herd, and nothing more. A herd table, one animal's timeline, and the link
 // picker. No lifetime lane, no pedigree, no herd lanes.
 
+import { reproductionNotes } from './breeding-notes';
+import type { ReproductionNote } from './breeding-notes';
 import { breedingEntryOpen } from './breeding-pilot';
 import type { Db } from './schema';
 import { GESTATION_DAYS, calvingTooSoonAfterBirth } from './calving';
 import { definitelyBefore } from './invariants';
 import { canonicalOrder, daysBetween, effectiveEvents, projectLactations, projectStatus } from './project';
-import { deriveReproduction } from './reproduction';
+import { attributionChanged, deriveReproduction } from './reproduction';
 import { farmToday } from './time';
 import { allAnimals, allEvents, allStatuses, eventsForAnimal, getAnimal } from './store';
 import type {
@@ -117,6 +119,8 @@ export interface AnimalDetail {
    * check for this animal? In the pilot list, and female.
    */
   breeding_entry?: boolean;
+  /** Present exactly when `reproduction` is; [] when the view is null. */
+  reproduction_notes?: ReproductionNote[];
 }
 
 /**
@@ -182,15 +186,16 @@ export function animalDetail(
     const upTo = canonicalOrder(effectiveEvents(rows)).filter((e) => e.occurred_on <= asOf);
     const lactations = projectLactations(animalId, upTo);
     const departed = projectStatus({ animal, ordered: upTo, lactations, asOf }).status === 'departed';
+    // In milk = one of her lactations had no end on asOf.
+    const inMilk = lactations.some((l) => l.ended_on === null);
     detail.reproduction =
-      animal.sex !== 'female' || departed
-        ? null
-        : deriveReproduction({
-            events: rows,
-            asOf,
-            // In milk = one of her lactations had no end on asOf.
-            inMilk: lactations.some((l) => l.ended_on === null),
-          });
+      animal.sex !== 'female' || departed ? null : deriveReproduction({ events: rows, asOf, inMilk });
+    detail.reproduction_notes = detail.reproduction
+      ? reproductionNotes(detail.reproduction, {
+          inMilk,
+          attributionChanged: attributionChanged({ events: rows, asOf, inMilk }),
+        })
+      : [];
     detail.breeding_entry = breedingEntryOpen(db, animalId, opts.breedingPilot ?? []);
   }
   return detail;
