@@ -19,6 +19,7 @@ import type {
   AnimalStatusRow,
   DatePrecision,
   RegistryAnimalRow,
+  RegistryEvent,
   RegistryEventType,
   RegistrySex,
   ReproductionView,
@@ -93,6 +94,9 @@ export interface TimelineEvent {
   superseded_by_id: string | null;
   /** False when superseded_by_id is set. No projection sees this row. */
   effective: boolean;
+  /** The warning this event was saved over, or null. Stored from the condition, never the flag. */
+  override_check: RegistryEvent['override_check'];
+  override_reason: string | null;
 }
 
 export interface AnimalDetail {
@@ -163,6 +167,8 @@ export function animalDetail(
         supersedes_id: e.supersedes_id,
         superseded_by_id,
         effective: superseded_by_id === null,
+        override_check: e.override_check,
+        override_reason: e.override_reason,
       };
     }),
   };

@@ -789,3 +789,50 @@ test('breeding_entry is false for a female outside the pilot', async () => {
   const { body } = (await get(ctx, '/animals/BD-0006')) as { body: { breeding_entry: boolean } };
   assert.equal(body.breeding_entry, false);
 });
+
+test('the timeline carries a breeding save-over', async () => {
+  const ctx = await pilotCtx();
+  const r = await post(ctx, '/breeding/events', {
+    animal_id: 'BD-0007', type: 'pregnancy_check', occurred_on: '2026-11-13', date_precision: 'day',
+    payload: { method: 'palpation', result: 'positive' },
+    allow_early_check: true, override_reason: 'vet was here anyway', ...PROV,
+  });
+  assert.equal(r.status, 201);
+  const { body } = (await get(ctx, '/animals/BD-0007')) as {
+    body: { events: { type: string; occurred_on: string; override_check: string | null; override_reason: string | null }[] };
+  };
+  const over = body.events.filter((e) => e.override_check !== null);
+  assert.equal(over.length, 1, 'exactly one event carries an override');
+  assert.equal(over[0].type, 'pregnancy_check');
+  assert.equal(over[0].occurred_on, '2026-11-13');
+  assert.equal(over[0].override_check, 'early_check');
+  assert.equal(over[0].override_reason, 'vet was here anyway');
+  for (const e of body.events.filter((x) => x !== over[0])) {
+    assert.equal(e.override_check, null);
+    assert.equal(e.override_reason, null);
+  }
+  await ctx.close();
+});
+
+test('the timeline carries a calving save-over', async () => {
+  const ctx = await serve(cleanHerd());
+  const calve = (extra: Record<string, unknown>) =>
+    post(ctx, '/calvings', {
+      dam_id: 'BD-0003', occurred_on: '2026-03-01', date_precision: 'day',
+      calf_sex: 'female', outcome: 'live', as_of: AS_OF, ...PROV, ...extra,
+    });
+  assert.equal((await calve({})).status, 201);
+  const warned = await calve({ occurred_on: '2026-03-20' });
+  assert.equal(warned.status, 400);
+  assert.equal((warned.body as { error: string }).error, 'near_duplicate_calving');
+  const saved = await calve({ occurred_on: '2026-03-20', allow_near_duplicate: true, override_reason: 'twins, entered twice' });
+  assert.equal(saved.status, 201);
+  const { body } = (await get(ctx, '/animals/BD-0003')) as {
+    body: { events: { type: string; occurred_on: string; override_check: string | null; override_reason: string | null }[] };
+  };
+  const calvings = body.events.filter((e) => e.type === 'calving' && e.occurred_on.startsWith('2026-03'));
+  const over = calvings.find((e) => e.occurred_on === '2026-03-20')!;
+  assert.equal(over.override_check, 'near_duplicate_calving');
+  assert.equal(over.override_reason, 'twins, entered twice');
+  await ctx.close();
+});
