@@ -8,9 +8,11 @@
 // button sets only the flags of the warnings on screen, for one submit.
 
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
   input,
   OnInit,
@@ -102,7 +104,11 @@ export class BreedingForm implements OnInit {
   }
 
   readonly animalId = input.required<string>();
-  /** The kind to open on (the Breeding page's buttons); null opens on none. */
+  /**
+   * The kind to open on (the Breeding page's buttons); null opens on none.
+   * Read once, on init (and as the kind to return to after a save): changing
+   * it later does not switch an open form.
+   */
   readonly initialKind = input<BreedingKind | null>(null);
   readonly saved = input<((d: AnimalDetail) => void) | null>(null);
 
@@ -112,6 +118,9 @@ export class BreedingForm implements OnInit {
   private readonly writeLog = inject(WriteLog);
 
   private readonly dateControl = viewChild(PrecisionDateControl);
+  private readonly noticeMessages = viewChild<ElementRef<HTMLElement>>('noticeMessages');
+  /** Whether the notice was up at the last render: focus moves only when it appears. */
+  private noticeShown = false;
 
   protected readonly fields = FIELDS;
   protected readonly kinds: { value: BreedingKind; label: string }[] = [
@@ -193,6 +202,12 @@ export class BreedingForm implements OnInit {
       .filter(isWarning),
   );
 
+  /** Every code on screen has a flag; one the client does not know has no way past it. */
+  protected readonly canSaveOver = computed(() => {
+    const ws = this.warnings();
+    return ws.length > 0 && ws.every((w) => isWarning(w.check));
+  });
+
   /**
    * What WriteLock sees. A warning is shown once, in the override notice, so
    * WriteLock is not handed it to print again as a red line of its own.
@@ -251,6 +266,14 @@ export class BreedingForm implements OnInit {
     });
 
     void this.identifiers.refresh();
+
+    // WriteLock focused the warning before the form stopped handing it over;
+    // the notice takes that over, when it goes from hidden to shown.
+    afterRenderEffect(() => {
+      const shown = this.warnings().length > 0;
+      if (shown && !this.noticeShown) this.noticeMessages()?.nativeElement.focus();
+      this.noticeShown = shown;
+    });
   }
 
   /** Opening on a kind is where the form starts, not an unsaved change. */
@@ -264,6 +287,7 @@ export class BreedingForm implements OnInit {
 
   /** Submit with the flags of the warnings on screen set, and only those. */
   protected saveOver(): void {
+    if (!this.canSaveOver()) return;
     void this.submit(this.shownCodes());
   }
 

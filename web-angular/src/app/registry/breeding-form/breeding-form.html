@@ -124,35 +124,42 @@
           <div
             class="override-notice rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
             data-role="override"
-            role="alert"
           >
-            @for (w of ws; track $index) {
-              <p data-role="override-message" [class.mt-1]="!$first">{{ w.message }}</p>
+            <!-- Only the sentences are the alert, and focus lands on them, as on
+                 WriteLock's summary: tabindex -1, reachable by script only. -->
+            <div #noticeMessages data-role="override-messages" role="alert" tabindex="-1">
+              @for (w of ws; track $index) {
+                <p data-role="override-message" [class.mt-1]="!$first">{{ w.message }}</p>
+              }
+            </div>
+            <!-- A code this page has no flag for cannot be saved over from here:
+                 its sentence shows, and nothing offers a way past it. -->
+            @if (canSaveOver()) {
+              <!-- Optional, and stays optional, as in the event form. -->
+              <label class="mt-2 block">
+                <span class="mb-1 block text-xs font-medium">
+                  Why, if you want it on the record <span class="font-normal">(optional)</span>
+                </span>
+                <input
+                  data-role="override_reason"
+                  [value]="overrideReason()"
+                  (input)="overrideReason.set($any($event.target).value)"
+                  class="w-full rounded-lg border border-line-strong bg-surface-raised px-2 py-1.5 text-sm"
+                />
+              </label>
+              <button
+                type="button"
+                data-role="save-over"
+                (click)="saveOver()"
+                class="mt-2 font-medium underline"
+              >
+                {{ ws.length > 1 ? 'Save over these checks' : 'Save over this check' }}
+              </button>
+              <p appHelp size="xs" class="mt-1">
+                Saving over it writes the event and the fact that the check was written over. Her
+                record shows both.
+              </p>
             }
-            <!-- Optional, and stays optional, as in the event form. -->
-            <label class="mt-2 block">
-              <span class="mb-1 block text-xs font-medium">
-                Why, if you want it on the record <span class="font-normal">(optional)</span>
-              </span>
-              <input
-                data-role="override_reason"
-                [value]="overrideReason()"
-                (input)="overrideReason.set($any($event.target).value)"
-                class="w-full rounded-lg border border-line-strong bg-surface-raised px-2 py-1.5 text-sm"
-              />
-            </label>
-            <button
-              type="button"
-              data-role="save-over"
-              (click)="saveOver()"
-              class="mt-2 font-medium underline"
-            >
-              {{ ws.length > 1 ? 'Save over these checks' : 'Save over this check' }}
-            </button>
-            <p appHelp size="xs" class="mt-1">
-              Saving over it writes the event and the fact that the check was written over. Her
-              record shows both.
-            </p>
           </div>
         }
 

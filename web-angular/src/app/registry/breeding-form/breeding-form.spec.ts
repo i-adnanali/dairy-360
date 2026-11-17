@@ -310,6 +310,79 @@ describe('BreedingForm', () => {
     expect(el.textContent?.split(sentence)).toHaveLength(2);
   });
 
+  it('moves focus to the notice when a warning comes back', async () => {
+    const { el } = await tripEarlyCheck();
+    await new Promise((r) => setTimeout(r, 0));
+    const messages = el.querySelector('[data-role="override-messages"]') as HTMLElement;
+    expect(messages.getAttribute('role')).toBe('alert');
+    expect(messages.getAttribute('tabindex')).toBe('-1');
+    expect(document.activeElement).toBe(messages);
+    // The alert holds the sentences only, not the reason input or the help text.
+    expect(messages.querySelector('input')).toBeNull();
+    expect(messages.textContent).not.toContain('Saving over it writes');
+  });
+
+  it('a warning the client does not know shows its message and no save-over', async () => {
+    const { http, fixture, el } = mount();
+    choose(fixture, el, 'insemination', 'ai');
+    enterDate(fixture, el, '13 Nov 2026');
+    click(el, '[data-role="submit"]');
+    const unknown = 'A sentence for a check this page has no flag for.';
+    http.expectOne(URL).flush(
+      {
+        error: 'breeding_warnings',
+        field: 'occurred_on',
+        message: `${AMBIGUOUS} ${unknown}`,
+        warnings: [
+          { check: 'ambiguous_service', message: AMBIGUOUS },
+          { check: 'some_future_check', message: unknown },
+        ],
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await settle(fixture);
+
+    const shown = [...el.querySelectorAll('[data-role="override-message"]')].map((p) =>
+      p.textContent?.trim(),
+    );
+    expect(shown).toEqual([AMBIGUOUS, unknown]);
+    expect(el.querySelector('[data-role="save-over"]')).toBeNull();
+    expect(el.querySelector('[data-role="override_reason"]')).toBeNull();
+  });
+
+  function mountOn(kind: string) {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withFetch()), provideHttpClientTesting(), provideRouter([])],
+    });
+    const http = TestBed.inject(HttpTestingController);
+    TestBed.inject(Session).set('recall', 'adnan');
+    const fixture = TestBed.createComponent(BreedingForm);
+    fixture.componentRef.setInput('animalId', 'BD-0001');
+    fixture.componentRef.setInput('initialKind', kind);
+    fixture.detectChanges();
+    return { http, fixture, el: fixture.nativeElement as HTMLElement };
+  }
+  const dirty = (fixture: { componentInstance: unknown }) =>
+    (fixture.componentInstance as unknown as { writer: { dirty(): boolean } }).writer.dirty();
+
+  it('is not dirty when it opens on a kind', () => {
+    const { fixture } = mountOn('heat_observed');
+    expect(dirty(fixture)).toBe(false);
+  });
+
+  it('goes back to the kind it opened on after a save', async () => {
+    const { http, fixture, el } = mountOn('heat_observed');
+    choose(fixture, el, 'mucus');
+    enterDate(fixture, el, '13 Nov 2026');
+    click(el, '[data-role="submit"]');
+    http.expectOne(URL).flush({ event_id: 'ev-1', animal }, { status: 201, statusText: 'Created' });
+    await settle(fixture);
+
+    expect(el.querySelector('[data-chip="heat_observed"]')?.getAttribute('aria-checked')).toBe('true');
+    expect(el.querySelector('[data-chip="mucus"]')?.getAttribute('aria-checked')).toBe('false');
+    expect(dirty(fixture)).toBe(false);
+  });
+
   it('on success resets, hands back the animal and announces the write', async () => {
     const { http, fixture, el } = mount();
     let got: unknown = null;
