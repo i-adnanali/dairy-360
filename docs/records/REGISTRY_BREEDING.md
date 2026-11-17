@@ -85,3 +85,36 @@ it. `null_observation` is given the narrow breeding payload (`watched_for`) here
 **No correction from the page.** A wrong entry is corrected with `registry:breed --supersedes`; a Correct action on the page is not built ([OPEN-065](../OPEN.md#open-065)).
 
 **Migration 11 is one-way.** Migration 11 widens `override_check` so it can hold the three new names. Like migration 10, it is one-way.
+
+## Stage 3: heat entry, two overrides, notes and tasks
+
+**Scope.** Stage 3 opens HTTP entry for `heat_observed` and `null_observation` on the pilot, beside the stage 2 types. Tasks show on Today, on the animal page and on the Breeding page. `abortion` stays CLI-only (stage 4).
+
+**Two overrides on one save ([OPEN-066](../OPEN.md#open-066), decided by the owner).** An `override_checks` list replaces the single `override_check` column (migration 12, one-way). `override_reason` stays one line for the whole save-over. Every override is still recorded from the condition, never from the flag.
+
+**Two warnings, not refusals.** `no_heat_sign` fires on a service with no heat sign before it; `heat_after_positive` fires on a heat recorded after a positive check. Each is unusual but possible: a service made without a seen heat, a heat seen on an animal later found pregnant. The farm may know better than the record, so the caller can save over each. The heat-sign warning does not apply to a bull exposure or a month-precision service, where the timing cannot be known.
+
+**Five notes.** The notes are worded from `deriveReproduction`'s answer, never from a second copy of a rule, and are computed on read.
+
+**Tasks.** A task is computed from the derived state and is cleared only by an event. Nothing stores a task and nobody ticks one off by hand.
+
+**New numbers.** Days count from the earliest possible conception (`T` is `day_max`). The numbers below are added once, in `reproduction.ts`.
+
+| Number | Value | Kind |
+| --- | --- | --- |
+| Heat watch opens | day 18 | farm-tunable default |
+| Heat watch red | `T >= 24` (`GESTATION.bredThrough`) | biological constant |
+| Pregnancy check opens | day 28 (`CHECK_RELIABLE_FROM.pag.positive`) | biological constant |
+| Pregnancy check red | `T > 60` | farm-tunable default |
+| Dry-off opens | day 248 (`GESTATION.expected - GESTATION.dryOffLead`) | farm-tunable default |
+| Dry-off red | `T >= 264` (`GESTATION.windowOpens - GESTATION.closeUpLead`) | farm-tunable default |
+| Calving watch opens | day 285 (`GESTATION.windowOpens`) | breed-specific |
+| Calving watch red | `T > 318` | farm-tunable default (low confidence) |
+| Overdue review opens | day 333 | farm-tunable default |
+| Overdue review red | `T > 346` | biological constant (low confidence) |
+| Heat sign counts | within 36 hours before the service | farm-tunable default |
+| Heat sign fallback, either time missing | same calendar day or the day before | farm-tunable default |
+
+A recheck is amber and never red.
+
+**Spec items.** The spec's warning for a bull exposure still open past a ceiling with no end date does not apply: stage 1 makes `exposure_days` required. "Attribution recomputed" is built, because it can be computed on read by deriving the view with and without the latest recorded event.

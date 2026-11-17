@@ -62,6 +62,11 @@ export type RegistryErrorCode =
   | 'ambiguous_service'
   | 'early_check'
   | 'check_without_service'
+  | 'no_heat_sign'
+  | 'heat_after_positive'
+  // Used when more than one breeding warning fires on one write, so the caller
+  // gets them together instead of one refusal per retry (stage 3, Task 4).
+  | 'breeding_warnings'
   // A rollout gate on the HTTP route, not a rule about the record, so it has
   // no `allow_*` companion.
   | 'breeding_entry_closed'

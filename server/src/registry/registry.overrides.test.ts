@@ -384,3 +384,10 @@ test('assertOverride accepts the three breeding checks and still refuses an unkn
   }
   assert.throws(() => assertOverride({ check: 'heat_missing', reason: null }));
 });
+
+test('assertOverride accepts the two stage 3 heat checks', () => {
+  for (const check of ['no_heat_sign', 'heat_after_positive']) {
+    assert.deepEqual(assertOverride({ check, reason: null }), { check, reason: null });
+  }
+  assert.throws(() => assertOverride({ check: 'heat_missing', reason: null }));
+});

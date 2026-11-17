@@ -308,8 +308,8 @@ Built when something needs them, not before.
   Breeding is no longer in this list: stage 1 is read-only derivation, see [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md).
 <a id="open-062"></a>
 
-- **OPEN-062** — **Breeding stages 3 to 5 are not built**: heat and absence entry, tasks,
-  abortion entry, KPIs, the Breeding page and general availability —
+- **OPEN-062** — **Breeding stages 4 and 5 are not built**: abortion entry, KPIs and general
+  availability —
   [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#what-stage-1-is)
 <a id="open-063"></a>
 
@@ -331,10 +331,9 @@ Built when something needs them, not before.
   [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-2-entry-for-services-and-checks-on-a-pilot)
 <a id="open-066"></a>
 
-- **OPEN-066** — **One `override_check` column holds one override**; stage 3 adds a second
-  service warning (36-hour heat) that can fire with `ambiguous_service`. Decide how two are
-  recorded before stage 3 —
-  [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-2-entry-for-services-and-checks-on-a-pilot)
+- **OPEN-066** — **Closed.** An `override_checks` list replaces the single `override_check`
+  column (migration 12), so two warnings can be recorded on one save; decided by the owner —
+  [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-3-heat-entry-two-overrides-notes-and-tasks)
 <a id="open-057"></a>
 
 - **OPEN-057** — Health/report real-farm acceptance remains unverified. Actual Chrome/Safari A4 Save-as-PDF output was verified on synthetic animal reports, including complete audit content and repeated long identity. Alternative-format support and further browser/report coverage were skipped on 9 October 2026; the known alternate-format limitation remains. See [current status and PDF evidence](reference/ui/acceptance-status.md), and the [original delivery record](records/REGISTRY_HEALTH.md#validation).

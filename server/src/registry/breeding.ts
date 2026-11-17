@@ -175,7 +175,8 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     override_reason: null,
   };
   const warning = breedingWarning(eventsForAnimal(db, input.animal_id), candidate);
-  const allowed: Record<BreedingOverriddenCheck, boolean | undefined> = {
+  // Partial until Task 4 adds the two stage 3 flags: no stage 2 warning can be either.
+  const allowed: Partial<Record<BreedingOverriddenCheck, boolean | undefined>> = {
     ambiguous_service: input.allow_ambiguous_service,
     early_check: input.allow_early_check,
     check_without_service: input.allow_check_without_service,

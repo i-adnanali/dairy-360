@@ -161,7 +161,9 @@ export type OverriddenCheck =
   | 'animal_departed'
   | 'ambiguous_service'
   | 'early_check'
-  | 'check_without_service';
+  | 'check_without_service'
+  | 'no_heat_sign'
+  | 'heat_after_positive';
 
 export const OVERRIDDEN_CHECKS: readonly OverriddenCheck[] = [
   'near_duplicate_calving',
@@ -169,15 +171,24 @@ export const OVERRIDDEN_CHECKS: readonly OverriddenCheck[] = [
   'ambiguous_service',
   'early_check',
   'check_without_service',
+  'no_heat_sign',
+  'heat_after_positive',
 ];
 
-/** The three warnings stage 2 adds for breeding entry (docs/records/REGISTRY_BREEDING.md). */
-export type BreedingOverriddenCheck = 'ambiguous_service' | 'early_check' | 'check_without_service';
+/** The warnings stages 2 and 3 add for breeding entry (docs/records/REGISTRY_BREEDING.md). */
+export type BreedingOverriddenCheck =
+  | 'ambiguous_service'
+  | 'early_check'
+  | 'check_without_service'
+  | 'no_heat_sign'
+  | 'heat_after_positive';
 
 export const BREEDING_OVERRIDDEN_CHECKS: readonly BreedingOverriddenCheck[] = [
   'ambiguous_service',
   'early_check',
   'check_without_service',
+  'no_heat_sign',
+  'heat_after_positive',
 ];
 
 /**
