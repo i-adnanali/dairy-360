@@ -1,6 +1,6 @@
 # Acceptance status
 
-Updated **17 November 2026**, for branch `breeding` (see *Breeding stage 2* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
+Updated **17 November 2026**, for branch `breeding` (see *Breeding stage 3* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
 
 ## Latest recorded results
 
@@ -12,6 +12,27 @@ Run on 16 November 2026 against branch `breeding-stage-1` (base `2be39a4`), Node
 | Server tests (`npm test -w server`) | 841 passed, 0 failed, 0 skipped |
 | `check:docs`, `build:shared`, `check:templates`, typecheck | Pass |
 | Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.12 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
+
+## Breeding stage 3
+
+Run on 17 November 2026 against branch `breeding` at `07b15ee`, Node 22.22.3.
+
+| Check | Result |
+|---|---|
+| Frontend tests (`npm test -w web-angular`) | 686 passed in 68 files. The timing-flaky `farm-monitor.spec.ts` test ("brings the linked event into view without CSS.escape", untouched by this branch) did not fail in this run; it failed in some task runs and passed alone each time. |
+| Server tests (`npm test -w server`) | 931 passed, 0 failed |
+| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass (docs: 76 files, 0 errors; templates: 105 files) |
+| Production build | Builds, with the same warnings as stage 2 (initial bundle 712.98 kB against the 500 kB budget, four component stylesheets over 4 kB, two unused imports, the shared CommonJS notice) |
+
+- **Browser walk, harness only** (sample herd, pilot `BD-0007, BD-0009`, farm date 17 November 2026):
+  - Heer (BD-0007): a heat (standing, no time) on 16 November, then an AI on 17 November saved with no warning: a heat the day before counts when a time is missing.
+  - Shehzadi (BD-0009): an AI on 17 November with no heat showed the no-heat-sign sentence once, with focus on it; Save over this check wrote it, and the Timeline shows "Written over the no_heat_sign check". A second AI the same day showed both the earlier-service sentence and the no-heat-sign sentence and the button `Save over these checks`; it wrote one event, and the Timeline shows "Written over the ambiguous_service and no_heat_sign checks".
+  - Herd › Breeding: To do listed 8 past their limit and 4 due now with Overdue and Due pills, each with its day and its red day; Bulbul's month-precision bull exposure read "Day 95 to 169" marked month. Cases listed all 11 breeding females. `Record calving` opens the calving form on the animal and `Record dry-off` opens the animal's Add an event tab.
+  - Today listed the breeding tasks under "Needs you now" and "Also open"; Moti's (BD-0006) animal page listed her two overdue tasks with "Open in Breeding".
+  - At 375 px the To do rows stack (animal and pill, then the task, then the action at full width) with no sideways scroll.
+- **Flag off:** a harness without `--breeding` answers `GET /api/registry/breeding/board` with 404, `/today` has no `breeding` key, the animal response has only `animal`, `status` and `events` (each event carries `override_checks` and `override_reason`), and the nav has no Breeding item.
+- **Migration 12 rehearsal:** `npm run registry:backup` was not run, because on this branch it would migrate the real database (it loads `db.ts`, which applies pending migrations); the owner chose a plain file copy instead. `server/dairy.db` was copied byte for byte outside the repository (same SHA-256 as the original) and only the copy was migrated and verified: version 11 to 12, one migration applied, events 0 before and 0 after, 0 violations. The real file's timestamp is unchanged (16 November, 21:02). The nightly backup job was unloaded on 17 November at the owner's request, so it cannot migrate the real database while this branch is checked out.
+- **Not checked:** no owner walkthrough on the real herd; the real farm's pilot list is not chosen; `REGISTRY_BREEDING` is not turned on for the real registry; the panel heading keeps the button's name ("Record heat") after the kind is changed inside the form.
 
 ## Breeding stage 2
 

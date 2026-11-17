@@ -150,4 +150,4 @@ Migration 10 widens the event table so it can hold the five breeding types. It i
 
 ## Not built yet
 
-Tasks, KPIs and the Breeding page (stages 3 to 5, [OPEN-062](../../OPEN.md#open-062)).
+Abortion entry, the KPIs and general availability (stages 4 and 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar waits for stage 4.
