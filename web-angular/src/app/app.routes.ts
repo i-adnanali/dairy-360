@@ -46,7 +46,7 @@ import { APP_NAME } from "./registry/page-title";
 const TITLES: Record<string, string> = {
   '': 'Today', analytics: 'Milk analytics',
   animals: 'Animals', 'animals/new': 'Add animal', 'animals/calvings': 'Calvings', 'animals/calvings/new': 'Record calving',
-  'animals/health': 'Animal health', 'animals/:id': 'Animal', 'animals/:id/report': 'Lifetime report',
+  'animals/health': 'Animal health', 'animals/breeding': 'Breeding', 'animals/:id': 'Animal', 'animals/:id/report': 'Lifetime report',
   'milk/milking': 'Milking', 'milk/dispatch': 'Dispatch', 'milk/buyers': 'Buyers', 'milk/buyers/:id': 'Buyer',
   feed: 'Feed', 'feed/crops': 'Fodder crops', 'feed/crops/:id': 'Fodder crop', 'feed/purchases': 'Feed purchases',
   'feed/purchases/:id': 'Feed purchase', 'feed/items': 'Feed catalogue', 'feed/daily': 'Feeding days', 'feed/daily/:on': 'Feeding day',
@@ -75,6 +75,13 @@ export const routes: Routes = [
         canDeactivate: [draftDeactivate],
         runGuardsAndResolvers: 'always',
         loadComponent: () => import("./registry/health-page/health-page").then((m) => m.HealthPage),
+      },
+      {
+        // BEFORE `animals/:id`. Only reachable from the nav with REGISTRY_BREEDING on;
+        // with it off the server has no /breeding/board and the page says so.
+        path: 'animals/breeding',
+        canDeactivate: [draftDeactivate],
+        loadComponent: () => import("./registry/breeding-page/breeding-page").then((m) => m.BreedingPage),
       },
       {
         path: 'animals/:id/report',

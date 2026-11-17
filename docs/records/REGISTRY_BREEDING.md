@@ -117,4 +117,6 @@ it. `null_observation` is given the narrow breeding payload (`watched_for`) here
 
 A recheck is amber and never red.
 
+**The Breeding page** (`/animals/breeding`, in Herd's nav only when `/today` carries `breeding`) has To do and Cases. The mockup's progress bar on Cases is not built: it needs a day-346 axis, which is a stage 4 concern.
+
 **Spec items.** The spec's warning for a bull exposure still open past a ceiling with no end date does not apply: stage 1 makes `exposure_days` required. "Attribution recomputed" is built, because it can be computed on read by deriving the view with and without the latest recorded event.

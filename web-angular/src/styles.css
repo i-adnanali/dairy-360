@@ -886,7 +886,7 @@ app-draft-dialog { display: block; }
    (craft floor) and said the same thing again. */
 .task-status { border: 1px solid rgb(var(--border-default)); border-radius: 999px; padding: 2px 8px; font-size: 12px; }
 .health-task[data-status="completed"] .task-status { color: rgb(var(--success-fg)); background: rgb(var(--success-bg)); }
-@media (max-width: 767px) { app-health-page button, app-health-page summary { min-height: 44px; } }
+@media (max-width: 767px) { app-health-page button, app-health-page summary, app-breeding-page button { min-height: 44px; } }
 
 .payroll-table th, .payroll-table td { padding: 12px; vertical-align: top; }
 .payroll-table th { color: rgb(var(--text-muted)); font-size: 12px; font-weight: 500; }
@@ -901,7 +901,8 @@ app-withdrawal-notices { display: block; min-width: 0; overflow-wrap: anywhere; 
 .entry-table td:first-child { white-space: normal; max-width: 260px; }
 @media (max-width: 767px) {
   .entry-table td:first-child { max-width: 100%; }
-  app-health-page input, app-health-page select, app-health-page textarea { font-size: 16px; min-height: 44px; max-width: 100%; }
+  app-health-page input, app-health-page select, app-health-page textarea,
+  app-breeding-page input, app-breeding-page select { font-size: 16px; min-height: 44px; max-width: 100%; }
 }
 
 .entry-table tbody tr[data-certainty="unanswered"]:hover { background-color: rgb(var(--warning-bg)); }

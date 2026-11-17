@@ -21,7 +21,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { CommandPalette } from "../command-palette/command-palette";
-import { SECTIONS, activeViewPath, sectionFor, ShellActions } from "../navigation";
+import { activeViewPath, sectionFor, sectionsFor, ShellActions } from "../navigation";
 import { Button } from "../../ui/button";
 import { Shortcuts } from "../../core/shortcuts";
 import { WriteLog } from "../after-write";
@@ -72,12 +72,13 @@ export class RegistryShell {
   private readonly injector = inject(Injector);
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly sections = SECTIONS;
   protected readonly actions = inject(ShellActions);
+  /** Breeding joins Herd's views only when the day board says it is on. */
+  protected readonly navSections = computed(() => sectionsFor(this.actions.breeding()));
   private readonly url = signal(this.router.url);
   /** The path (no query) of the last page focused, so a query-only change keeps focus. */
   private lastPath: string | null = null;
-  protected readonly activeSection = computed(() => sectionFor(this.url()));
+  protected readonly activeSection = computed(() => sectionFor(this.url(), this.navSections()));
   protected readonly activeView = computed(() => activeViewPath(this.activeSection(), this.url()));
 
   /**

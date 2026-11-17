@@ -5,7 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
-  AnimalDetail, BalanceRow, DestinationListRow, DestinationPrice, DispatchSheet,
+  AnimalDetail, BalanceRow, BreedingBoard, DestinationListRow, DestinationPrice, DispatchSheet,
   DayBoard, DuplicateCandidate, Engagement, HerdRow, IdentifierValues, LinkCandidate,
   MilkingHistoryRow, MilkingRoster, PayrollRun, PayTermWithBenefits, Person,
   Reconciliation, Statement, StorageInfo, TimelineEvent, Verification,
@@ -324,6 +324,11 @@ export class RegistryApi {
     return unwrap(firstValueFrom(this.http.post<{ event_id: string; animal: AnimalDetail }>(
       `${BASE}/events`, body, RegistryApi.keyed(idempotencyKey),
     )));
+  }
+
+  /** The Breeding page's tasks and cases on a day. Absent on the server unless REGISTRY_BREEDING=1. */
+  breedingBoard(on: string): Promise<BreedingBoard> {
+    return unwrap(firstValueFrom(this.http.get<BreedingBoard>(`${BASE}/breeding/board?on=${on}`)));
   }
 
   /** A service or a pregnancy check. Absent on the server unless REGISTRY_BREEDING=1. */

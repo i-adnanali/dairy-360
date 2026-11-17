@@ -70,19 +70,32 @@ export const SECTIONS: Section[] = [
   { label: 'Check', path: '/check', views: [], actions: [] },
 ];
 /**
+ * Herd's Breeding view: shown only when the day board (/today) carries a
+ * `breeding` key, which the server sends only with REGISTRY_BREEDING on. With
+ * the flag off the item is absent, not disabled.
+ */
+export const BREEDING_VIEW: NavigationItem = { label: 'Breeding', path: '/animals/breeding' };
+
+/** SECTIONS, with Breeding after Health when breeding is on. SECTIONS itself is never changed. */
+export function sectionsFor(breeding: boolean): Section[] {
+  if (!breeding) return SECTIONS;
+  return SECTIONS.map((s) => (s.label === 'Herd' ? { ...s, views: [...s.views, BREEDING_VIEW] } : s));
+}
+
+/**
  * A route that belongs to no nav section (the full-page Assistant). It used to
  * fall through to SECTIONS[0], which underlined Today while you were on /chat
  * (audit F18). It is not in SECTIONS, so no nav link is ever marked current.
  */
 export const ASSISTANT_SECTION: Section = { label: 'Assistant', path: '/chat', views: [], actions: [] };
 
-export function sectionFor(url: string): Section {
+export function sectionFor(url: string, sections: Section[] = SECTIONS): Section {
   const path = url.split(/[?#]/)[0];
   if (path === '/chat' || path.startsWith('/chat/')) return ASSISTANT_SECTION;
   return (
-    SECTIONS.find(
+    sections.find(
       (s) => s.path !== '/' && path.startsWith(s.path.split('/').slice(0, 2).join('/')),
-    ) ?? SECTIONS[0]
+    ) ?? sections[0]
   );
 }
 /**
@@ -110,6 +123,8 @@ export function activeViewPath(section: Section, url: string): string | null {
 export class ShellActions {
   readonly inShell = signal(false);
   readonly recheck = signal(0);
+  /** The shell's day board carries `breeding` (REGISTRY_BREEDING on). Set by the session board. */
+  readonly breeding = signal(false);
   refresh(): void {
     this.recheck.update((n) => n + 1);
   }

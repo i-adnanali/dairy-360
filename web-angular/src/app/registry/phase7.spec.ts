@@ -123,14 +123,14 @@ class Entry {
     Entry.saves++;
   }
 }
-async function shell() {
+async function shell(extra: Record<string, unknown> = {}) {
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
       provideRouter([
         { path: '', component: RegistryShell, children: [{ path: 'animals', component: Entry }] },
       ]),
-      { provide: RegistryApi, useValue: api },
+      { provide: RegistryApi, useValue: { ...api, ...extra } },
     ],
   });
   const h = await RouterTestingHarness.create('/animals');
@@ -138,6 +138,19 @@ async function shell() {
   return h;
 }
 describe('Phase 7 shell', () => {
+  it('shows the Breeding view only when the day board carries breeding', async () => {
+    const day = { on: '2026-11-13', milking: [], dispatch: [], feed: null };
+    for (const [board, shown] of [[day, false], [{ ...day, breeding: { on: '2026-11-13', tasks: [], overdue: 0, due: 0, cases: [] } }, true]] as const) {
+      const h = await shell({ today: () => Promise.resolve(board) });
+      await new Promise((r) => setTimeout(r, 0));
+      await h.fixture.whenStable();
+      h.detectChanges();
+      const views = Array.from((h.fixture.nativeElement as HTMLElement).querySelectorAll('[data-role="section-view"]')).map((a) => a.textContent!.trim());
+      expect(views.includes('Breeding')).toBe(shown);
+      expect(views).toContain('Health');
+      TestBed.resetTestingModule();
+    }
+  });
   it('shows eight sections and leaves contextual write actions to pages', async () => {
     const h = await shell();
     const el = h.fixture.nativeElement as HTMLElement;

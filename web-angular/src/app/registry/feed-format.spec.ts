@@ -1,5 +1,5 @@
 import { dayStanding, feedDay, feedLabel, feedProvenance, feedRelativeDay, feedWeekday } from './feed-format';
-import { SECTIONS, activeViewPath } from './navigation';
+import { SECTIONS, activeViewPath, sectionsFor } from './navigation';
 
 describe('feed formatting', () => {
   it('shows calendar dates as the rest of the app does', () => {
@@ -41,5 +41,18 @@ describe('section view matching', () => {
     expect(activeViewPath(herd, '/animals/calvings/new')).toBe('/animals/calvings');
     expect(activeViewPath(herd, '/animals/BD-0001')).toBe('/animals');
     expect(activeViewPath(herd, '/animals')).toBe('/animals');
+  });
+});
+
+describe('the Breeding view', () => {
+  const herdViews = (sections: typeof SECTIONS) =>
+    sections.find((s) => s.label === 'Herd')!.views.map((v) => v.label);
+  it('is in Herd only when the day board carries breeding', () => {
+    expect(herdViews(sectionsFor(false))).toEqual(['Animals', 'Calvings', 'Health']);
+    expect(herdViews(sectionsFor(true))).toEqual(['Animals', 'Calvings', 'Health', 'Breeding']);
+    const herd = sectionsFor(true).find((s) => s.label === 'Herd')!;
+    expect(activeViewPath(herd, '/animals/breeding?animal=BD-0007')).toBe('/animals/breeding');
+    // The shared list is never changed in place.
+    expect(herdViews(SECTIONS)).toEqual(['Animals', 'Calvings', 'Health']);
   });
 });

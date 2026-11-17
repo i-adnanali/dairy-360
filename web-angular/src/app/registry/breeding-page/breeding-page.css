@@ -1,0 +1,75 @@
+/*
+ * BREEDING. The Health page's layout (health-page.css), copied for the rules
+ * this page uses: a list you work down and one panel beside it. On a wide
+ * screen the panel sits beside the list; narrower, it slides over; on a phone
+ * it is the whole screen with Back. The panel's own look is global
+ * (.health-panel, .panel-head in styles.css).
+ */
+:host { display: block; }
+label { display: block; }
+select { width: 100%; background: transparent; }
+
+.health { display: grid; gap: 1.5rem; align-items: start; }
+.health-main { display: grid; gap: 1.25rem; min-width: 0; }
+.health-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.75rem 1.5rem; }
+.tab-n { margin-left: 0.375rem; }
+
+.health-summary { font-size: 1rem; color: rgb(var(--text-primary)); }
+.health-summary [data-tone='danger'] { color: rgb(var(--danger-fg)); font-weight: 600; }
+.health-summary [data-tone='warning'] { color: rgb(var(--warning-fg)); font-weight: 600; }
+
+.filters { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); align-items: start; }
+.filters-toggle { display: none; }
+
+.health-block { display: grid; gap: 0.625rem; }
+.health-block-title { display: flex; align-items: baseline; gap: 0.5rem; font-size: 1rem; font-weight: 650; color: rgb(var(--text-heading)); }
+.block-n { font-size: 0.8125rem; font-weight: 500; color: rgb(var(--text-muted)); font-variant-numeric: tabular-nums; }
+.task-rows { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem; background: rgb(var(--surface-raised)); }
+.health-task {
+  display: grid; grid-template-columns: 11rem minmax(0, 1fr) auto auto; align-items: center; gap: 0.5rem 1rem;
+  padding: 0.625rem 0.875rem;
+}
+.task-rows > li + li { border-top: 1px solid rgb(var(--border-hairline)); }
+.task-what { display: grid; min-width: 0; }
+.task-meta { display: block; font-size: 0.8125rem; color: rgb(var(--text-muted)); }
+.task-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; justify-content: flex-end; }
+
+.cases-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem 1rem; }
+.cases-bar > label { width: min(100%, 14rem); }
+.cases-legend { display: grid; gap: 0.25rem; margin: 0; padding: 0; list-style: none; }
+
+/* ---- Wide: the panel sits beside the list --------------------------------- */
+@media (min-width: 1180px) {
+  .health.panel-open { grid-template-columns: minmax(0, 1fr) minmax(24rem, 30rem); }
+  .health.panel-open .health-task { grid-template-columns: 9rem minmax(0, 1fr) auto; }
+  .health.panel-open .task-actions { grid-column: 2 / -1; justify-content: flex-start; }
+  .health-panel { position: sticky; top: 0; max-height: calc(100vh - 16rem); }
+}
+/* ---- Narrower: it slides over the list ------------------------------------- */
+@media (max-width: 1179px) {
+  .health-panel {
+    position: fixed; z-index: 40; top: 0.75rem; right: 0.75rem; bottom: 0.75rem; width: min(30rem, calc(100vw - 1.5rem));
+  }
+}
+/* ---- Phone (screen 8): label and pill above, the action full width -------- */
+@media (max-width: 767px) {
+  .health-task { grid-template-columns: minmax(0, 1fr) auto; }
+  .task-what { grid-column: 1 / -1; grid-row: 2; }
+  .task-status { grid-column: 2; grid-row: 1; }
+  .task-actions { grid-column: 1 / -1; justify-content: stretch; }
+  .task-actions > * { flex: 1 1 0; justify-content: center; }
+  .filters-toggle {
+    display: inline-flex; width: max-content; padding: 0.4375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500;
+    border: 1px solid rgb(var(--border-default)); background: rgb(var(--surface-raised)); color: rgb(var(--text-primary));
+  }
+  .filters-toggle[aria-expanded='true'] { background: rgb(var(--surface-sunken)); }
+  .filters:not(.filters-open) { display: none; }
+}
+/* ---- Phone (screen 9): the panel is the whole screen, with Back ----------- */
+@media (max-width: 639px) {
+  .health-panel { inset: 0; width: auto; border-radius: 0; border: 0; }
+  .panel-head { grid-template-columns: minmax(0, 1fr); padding: 0.75rem 1rem; }
+  .panel-back { display: inline-flex !important; }
+  .panel-close { display: none; }
+  .panel-body { padding: 1rem; }
+}

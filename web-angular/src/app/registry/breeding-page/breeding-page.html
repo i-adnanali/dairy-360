@@ -1,0 +1,236 @@
+<!--
+  BREEDING. The Health page's shape: a list you work down, and one panel
+  beside it where the entry form opens. Full screen on a phone, with Back.
+-->
+<div data-page-layout="review" class="health" [class.panel-open]="!!panelKind()">
+  <div class="health-main">
+    <header class="health-head">
+      <div class="space-y-1">
+        <h2 appPageHeading>Breeding</h2>
+        <p appHelp>Services, heats and pregnancy checks. A status here is worked out from what was recorded, never typed in.</p>
+      </div>
+      <div class="flex flex-wrap gap-2" data-role="breeding-actions">
+        <button appButton (click)="open('insemination')">Record service</button
+        ><button appButton variant="secondary" (click)="open('heat_observed')">Record heat</button
+        ><button appButton variant="secondary" (click)="open('pregnancy_check')">Record check</button>
+      </div>
+    </header>
+
+    @if (error()) {
+      <p appErrorPanel role="alert" tabindex="-1">{{ error() }}</p>
+      <button appButton variant="secondary" class="justify-self-start" (click)="load()">Reload</button>
+    }
+
+    <div appTabBar class="health-tabs" aria-label="Breeding views">
+      @for (t of tabs; track t.id) {
+        <button type="button" role="tab" [attr.data-tab]="t.id" [attr.aria-selected]="tab() === t.id" [attr.tabindex]="tab() === t.id ? 0 : -1" (click)="setTab(t.id)">
+          {{ t.label }}@if (t.id === 'todo' && board(); as b) {
+            <span appBadge class="tab-n" [tone]="b.overdue ? 'danger' : 'warning'" [attr.aria-label]="b.overdue + b.due + ' past their limit or due'">{{ b.overdue + b.due }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    @if (board(); as b) {
+      @if (tab() === 'todo') {
+        <p class="health-summary" data-role="breeding-summary">
+          <span [attr.data-tone]="summary().overdue ? 'danger' : null">{{ summary().overdue }} past their limit</span><span aria-hidden="true"> · </span><span [attr.data-tone]="summary().due ? 'warning' : null">{{ summary().due }} due now</span>
+        </p>
+
+        <button type="button" class="filters-toggle" [attr.aria-expanded]="filtersOpen" aria-controls="breeding-filters" (click)="filtersOpen = !filtersOpen">
+          Filters{{ activeFilters() ? ' · ' + activeFilters() + ' active' : '' }}
+        </button>
+        <div class="filters" id="breeding-filters" [class.filters-open]="filtersOpen">
+          <label
+            ><span appFieldLabel>Animal</span
+            ><select appInput name="animal" (change)="set('animal', $any($event.target).value)">
+              <option value="">All animals</option>
+              @for (c of b.cases; track c.animal_id) {
+                <option [value]="c.animal_id" [selected]="url.value().animal === c.animal_id">{{ c.animal_id }} · {{ c.animal_name || 'Unnamed' }}</option>
+              }
+            </select></label
+          >
+          <label
+            ><span appFieldLabel>Task type</span
+            ><select appInput name="type" (change)="set('type', $any($event.target).value)">
+              <option value="">All task types</option>
+              @for (k of kinds; track k) {
+                <option [value]="k" [selected]="url.value().type === k">{{ taskLabel(k) }}</option>
+              }
+            </select></label
+          >
+          <label
+            ><span appFieldLabel>Due status</span
+            ><select appInput name="due" (change)="set('due', $any($event.target).value)">
+              <option value="">All outstanding</option>
+              <option value="overdue" [selected]="url.value().due === 'overdue'">Past their limit</option>
+              <option value="due" [selected]="url.value().due === 'due'">Due now</option>
+            </select></label
+          >
+        </div>
+
+        @for (block of [{ id: 'overdue', title: 'Past their limit', rows: overdueTasks() }, { id: 'due', title: 'Due now', rows: dueTasks() }]; track block.id) {
+          @if (block.rows.length) {
+            <section class="health-block" [attr.data-role]="block.id + '-block'" [attr.aria-labelledby]="block.id + '-heading'">
+              <h3 [id]="block.id + '-heading'" class="health-block-title">{{ block.title }} <span class="block-n">{{ block.rows.length }}</span></h3>
+              <ul class="task-rows">
+                @for (t of block.rows; track t.kind + t.animal_id) {
+                  <li class="health-task" data-role="breeding-task" [attr.data-animal]="t.animal_id" [attr.data-kind]="t.kind" [attr.data-status]="t.standing">
+                    <span class="task-animal"
+                      ><a appIdentifier [routerLink]="['/animals', t.animal_id]">{{ t.animal_id }}</a> {{ t.animal_name }}</span
+                    >
+                    <span class="task-what">
+                      <span class="font-medium">{{ taskLabel(t.kind) }}</span>
+                      <span class="task-meta"
+                        >@if (t.day_min === t.day_max) { <span data-role="day">{{ dayRange(t) }}</span> } @else { <span data-role="day" appCertainty="approximate" data-certainty="approximate">{{ dayRange(t) }}</span>@if (rangeQualifier(t.animal_id); as q) { <span appQualifier data-role="range-qualifier">{{ q }}</span> } }@if (redClause(t); as red) { · {{ red }} }</span
+                      >
+                    </span>
+                    <span appBadge class="task-status" [tone]="t.standing === 'overdue' ? 'danger' : 'warning'">{{ t.standing === 'overdue' ? 'Overdue' : 'Due' }}</span>
+                    <span class="task-actions">
+                      @switch (t.kind) {
+                        @case ('heat_watch') {
+                          @if (canEnter(t.animal_id)) {
+                            <button appButton variant="secondary" size="sm" data-role="task-action" [attr.aria-label]="'Heat seen for ' + subject(t)" (click)="open('heat_observed', t.animal_id)">Heat seen</button
+                            ><button appButton variant="secondary" size="sm" data-role="task-action" [attr.aria-label]="'Nothing seen for ' + subject(t)" (click)="open('null_observation', t.animal_id)">Nothing seen</button>
+                          }
+                        }
+                        @case ('calving_watch') {
+                          <a appButton variant="secondary" size="sm" data-role="task-action" routerLink="/animals/calvings/new">Record calving</a>
+                        }
+                        @case ('dry_off') {
+                          <a appButton variant="secondary" size="sm" data-role="task-action" [routerLink]="['/animals', t.animal_id]">Record dry-off</a>
+                        }
+                        @default {
+                          @if (canEnter(t.animal_id)) {
+                            <button appButton variant="secondary" size="sm" data-role="task-action" [attr.aria-label]="'Record check for ' + subject(t)" (click)="open('pregnancy_check', t.animal_id)">Record check</button>
+                          }
+                        }
+                      }
+                    </span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        }
+        @if (!visibleTasks().length) {
+          <p appHelp data-role="nothing-due">Nothing is due.</p>
+        }
+        <p appHelp>A task opens from a rule and closes when the matching event is recorded. Nobody ticks one off by hand.</p>
+      } @else {
+        <div class="cases-bar">
+          <label
+            ><span appFieldLabel>Find</span
+            ><input appInput type="search" name="find" placeholder="ID or name" [value]="url.value().find" (change)="set('find', $any($event.target).value)"
+          /></label>
+          <div appSegmented role="group" aria-label="Which cases">
+            @for (s of showChoices; track s.id) {
+              <button type="button" [attr.data-show]="s.id" [attr.aria-pressed]="url.value().show === s.id" (click)="setShow(s.id)">{{ s.label }}</button>
+            }
+          </div>
+          <label
+            ><span appFieldLabel>Status</span
+            ><select appInput name="status" (change)="set('status', $any($event.target).value)">
+              <option value="">Any status</option>
+              @for (s of statesOnBoard(); track s) {
+                <option [value]="s" [selected]="url.value().status === s">{{ stateLabel(s) }}</option>
+              }
+            </select></label
+          >
+        </div>
+        <div appScrollRegion="Breeding cases" class="rounded-xl border border-line bg-surface-raised">
+          <table class="w-full text-left text-sm" data-role="cases-table">
+            <thead>
+              <tr>
+                <th appCell>Animal</th>
+                <th appCell>Status</th>
+                <th appCell>Service</th>
+                <th appCell>Day</th>
+                <th appCell>Latest check</th>
+                <th appCell>Calving window</th>
+                <th appCell>Next</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of visibleCases(); track c.animal_id) {
+                @let v = c.view;
+                <tr class="border-t border-line-subtle" data-role="case-row" [attr.data-animal]="c.animal_id">
+                  <td appCell class="whitespace-nowrap"><a appIdentifier [routerLink]="['/animals', c.animal_id]">{{ c.animal_id }}</a> {{ c.animal_name }}</td>
+                  <td appCell><span appBadge [tone]="stateTone(v.state)">{{ stateLabel(v.state) }}</span><span appQualifier>{{ basisWord(v.basis) }}</span></td>
+                  <td appCell data-role="service">
+                    @let s = readable(v.service.occurred_on, v.service.date_precision);
+                    {{ serviceWord(v.service.service_type) }} · <span [appCertainty]="s.state">{{ s.figure }}</span>@if (s.qualifier) { <span appQualifier>{{ s.qualifier }}</span> }
+                  </td>
+                  <td appCell class="whitespace-nowrap" data-role="day-cell">
+                    @if (v.day_min === v.day_max) {
+                      <span data-role="day">{{ dayRange(v) }}</span>
+                    } @else {
+                      <span data-role="day" appCertainty="approximate" data-certainty="approximate">{{ dayRange(v) }}</span>@if (rangeQualifier(c.animal_id); as q) { <span appQualifier data-role="range-qualifier">{{ q }}</span> }
+                    }
+                  </td>
+                  <td appCell data-role="latest-check">
+                    @if (v.latest_check; as k) {
+                      {{ methodWord(k.method) }} · {{ k.result === 'positive' ? 'Pregnant' : 'Not pregnant' }} · day {{ k.day }}@if (!k.reliable) { <span appQualifier>not relied on yet</span> }
+                    } @else {
+                      <span class="text-content-muted">—</span>
+                    }
+                  </td>
+                  <td appCell data-role="window">
+                    @if (v.window; as w) {
+                      <span appCertainty="approximate">{{ readable(w.opens_on, 'day').figure }} to {{ readable(w.closes_on, 'day').figure }}</span>
+                    } @else {
+                      <span class="text-content-muted">—</span>
+                    }
+                  </td>
+                  <td appCell data-role="next">
+                    @if (c.tasks[0]; as t) { {{ taskLabel(t.kind) }} } @else { <span class="text-content-muted">—</span> }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td appCell colspan="7">No cases for this selection.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="cases-legend" appHelp>
+          <li><span appQualifier>recorded</span> means someone saw it and wrote it down.</li>
+          <li><span appQualifier>worked out</span> means the app counted forward from what was recorded.</li>
+          <li><span appCertainty="approximate">Jun 2026</span> a dotted line marks a figure that rests on a month-only date.</li>
+        </ul>
+      }
+    }
+  </div>
+
+  <!-- THE PANEL, as on Health: beside the list, over it when narrower, the
+       whole screen with Back on a phone. -->
+  @if (panelKind(); as kind) {
+    <aside class="health-panel" data-role="breeding-panel" role="region" aria-labelledby="breeding-panel-title" (keydown.escape)="closePanel()">
+      <div class="panel-head">
+        <button type="button" class="health-back panel-back" (click)="closePanel()">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>
+          Back
+        </button>
+        <div class="min-w-0">
+          <h3 id="breeding-panel-title" tabindex="-1">{{ panelTitle() }}</h3>
+        </div>
+        <button type="button" class="panel-close" aria-label="Close" (click)="closePanel()">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+        </button>
+      </div>
+      <div class="panel-body">
+        <label
+          ><span appFieldLabel>Animal</span
+          ><select appInput name="entryAnimal" #picker (change)="chooseAnimal(picker.value, picker)">
+            <option value="" [selected]="entryAnimal() === ''">Choose an animal</option>
+            @for (c of entryCases(); track c.animal_id) {
+              <option [value]="c.animal_id" [selected]="entryAnimal() === c.animal_id">{{ c.animal_id }} · {{ c.animal_name || 'Unnamed' }}</option>
+            }
+          </select></label
+        >
+        @for (f of formKey(); track f.key) {
+          <app-breeding-form [animalId]="f.animal" [initialKind]="f.kind" [saved]="onSaved" />
+        }
+      </div>
+    </aside>
+  }
+</div>
