@@ -105,6 +105,7 @@ import {
   wageStatement,
 } from './wages';
 import { recordBreedingEvent } from './breeding';
+import { breedingBoard } from './breeding-board';
 import { breedingEntryOpen } from './breeding-pilot';
 import { correctCalving, recordCalving } from './calving';
 import {
@@ -584,7 +585,7 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
     '/today',
     handle((req, res) => {
       const on = typeof req.query.on === 'string' ? req.query.on : farmToday();
-      res.json(dayBoard(db, on));
+      res.json(dayBoard(db, on, { breeding: opts.breeding, breedingPilot: opts.breedingPilot }));
     }),
   );
 
@@ -692,16 +693,24 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
   // Breeding stage 2: manual entry for a service or a pregnancy check, on the
   // pilot animals only. Absent (404) unless REGISTRY_BREEDING=1.
   if (opts.breeding) {
+    /** The breeding tasks and cases as of `on` (default farm today). */
+    router.get(
+      '/breeding/board',
+      handle((req, res) => {
+        const on = breedingAsOf(req.query.on) ?? farmToday();
+        res.json(breedingBoard(db, on, opts.breedingPilot ?? []));
+      }),
+    );
     router.post(
       '/breeding/events',
       write(replays, (req, res) => {
         const b = body(req);
         const animalId = requireStr(b, 'animal_id');
         const type = requireStr(b, 'type');
-        if (type !== 'insemination' && type !== 'pregnancy_check') {
+        if (type !== 'insemination' && type !== 'pregnancy_check' && type !== 'heat_observed' && type !== 'null_observation') {
           throw new RegistryError(
             'breeding_entry_closed',
-            `${type} is not entered on the page yet; only a service or a pregnancy check is`,
+            `${type} is not entered on the page yet; a service, a heat, a pregnancy check or "nothing seen" is`,
             'type',
           );
         }

@@ -7,9 +7,10 @@
 // herd, and nothing more. A herd table, one animal's timeline, and the link
 // picker. No lifetime lane, no pedigree, no herd lanes.
 
-import { reproductionNotes } from './breeding-notes';
+import { breedingForAnimal } from './breeding-board';
 import type { ReproductionNote } from './breeding-notes';
 import { breedingEntryOpen } from './breeding-pilot';
+import type { BreedingTask } from './breeding-tasks';
 import type { Db } from './schema';
 import { GESTATION_DAYS, calvingTooSoonAfterBirth } from './calving';
 import { definitelyBefore } from './invariants';
@@ -121,6 +122,8 @@ export interface AnimalDetail {
   breeding_entry?: boolean;
   /** Present exactly when `reproduction` is; [] when the view is null. */
   reproduction_notes?: ReproductionNote[];
+  /** Present exactly when `reproduction` is; [] when the view is null. Computed, never stored. */
+  breeding_tasks?: BreedingTask[];
 }
 
 /**
@@ -179,23 +182,10 @@ export function animalDetail(
 
   if (opts.breeding === true) {
     const asOf = opts.asOf ?? farmToday();
-    // Only what had happened by asOf: a dry-off or a departure dated later must
-    // not change the state on an earlier day. So neither the stored status (which
-    // is today's) nor lactations over every event is read here; both are projected
-    // from the effective events dated <= asOf, with the existing projections.
-    const upTo = canonicalOrder(effectiveEvents(rows)).filter((e) => e.occurred_on <= asOf);
-    const lactations = projectLactations(animalId, upTo);
-    const departed = projectStatus({ animal, ordered: upTo, lactations, asOf }).status === 'departed';
-    // In milk = one of her lactations had no end on asOf.
-    const inMilk = lactations.some((l) => l.ended_on === null);
-    detail.reproduction =
-      animal.sex !== 'female' || departed ? null : deriveReproduction({ events: rows, asOf, inMilk });
-    detail.reproduction_notes = detail.reproduction
-      ? reproductionNotes(detail.reproduction, {
-          inMilk,
-          attributionChanged: attributionChanged({ events: rows, asOf, inMilk }),
-        })
-      : [];
+    const b = breedingForAnimal(animal, rows, asOf);
+    detail.reproduction = b.view;
+    detail.reproduction_notes = b.notes;
+    detail.breeding_tasks = b.tasks;
     detail.breeding_entry = breedingEntryOpen(db, animalId, opts.breedingPilot ?? []);
   }
   return detail;

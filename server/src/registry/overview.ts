@@ -1,3 +1,5 @@
+import { breedingBoard } from './breeding-board';
+import type { BreedingBoard } from './breeding-board';
 import { healthBoard } from './health-reads';
 import { feedStanding } from './feed';
 // Animal registry -- the day board (docs/records/REGISTRY_PAYROLL.md §12.4).
@@ -42,6 +44,8 @@ export interface SessionStanding {
 }
 
 export interface DayBoard {
+  /** Only when the breeding flag is on; the key is absent otherwise. */
+  breeding?: BreedingBoard;
   health: ReturnType<typeof healthBoard>;
   on: string;
   feed: ReturnType<typeof feedStanding>;
@@ -96,7 +100,7 @@ export function previousMonthBounds(on: string): { from: string; to: string } {
  * queries, so "recorded" means here exactly what it means on the screen that
  * records it. If the milking roster's rule changes, this changes with it.
  */
-export function dayBoard(db: Db, on: string): DayBoard {
+export function dayBoard(db: Db, on: string, opts: { breeding?: boolean; breedingPilot?: readonly string[] } = {}): DayBoard {
   const milking: SessionStanding[] = SESSIONS.map((session) => {
     const roster = milkingRoster(db, { occurred_on: on, session });
     return {
@@ -150,5 +154,6 @@ export function dayBoard(db: Db, on: string): DayBoard {
             permanent: prevRun.permanent.length,
           }
         : null,
+    ...(opts.breeding ? { breeding: breedingBoard(db, on, opts.breedingPilot ?? []) } : {}),
   };
 }

@@ -99,11 +99,15 @@ The `window` is null for `calved`, `lost` and `open`; otherwise `opens_on` is `c
 
 With the flag on, `?as_of=YYYY-MM-DD` asks for the state on that day (default: today on the farm). Events dated later are invisible, including a later dry-off (whether she is in milk is read on `as_of`) and a later departure. A value that is not a real calendar date is a 400 `invalid_payload` on field `as_of`. With the flag off the parameter is not read.
 
+## The tasks: `GET /breeding/board` and `breeding_tasks`
+
+Tasks are computed on every read from the same `reproduction` view and the same in-milk flag (`breedingForAnimal` in `breeding-board.ts`, which the detail and the board share); nothing is stored. `GET /breeding/board?on=YYYY-MM-DD` (default today on the farm; a bad date is a 400 `invalid_payload` on `on`; 404 without the flag) answers `{ on, tasks, overdue, due, cases }`. `tasks` holds every animal's tasks, each with `animal_name`, overdue first, then due, each group by `red_on` (none last) then `animal_id`. `cases` has one row per current female with a view: `{ animal_id, animal_name, view, notes, tasks, entry_open }`. `GET /today` carries the same object as `breeding` with the flag on, and no `breeding` key without it. `GET /animals/:id` carries `breeding_tasks` exactly when it carries `reproduction`.
+
 ## `POST /breeding/events`
 
-Registered only with `REGISTRY_BREEDING=1`; without it the route does not exist (404). It writes one service or one pregnancy check through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction` and `breeding_entry`.
+Registered only with `REGISTRY_BREEDING=1`; without it the route does not exist (404). It writes one service, heat, pregnancy check or "nothing seen" through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry`.
 
-Body: `animal_id`, `type` (`insemination` or `pregnancy_check`), `occurred_on`, `occurred_time`, `date_precision` (required, never defaulted), `payload` (an object, passed as is), `supersedes_id` (a correction), the three flags `allow_ambiguous_service`, `allow_early_check` and `allow_check_without_service` (each counts only when it is exactly `true`), `override_reason`, and the provenance fields (`source_form`, `source_ref`, `observed_by`, `recorded_by`).
+Body: `animal_id`, `type` (`insemination`, `pregnancy_check`, `heat_observed` with payload `{ sign }`, or `null_observation` with payload `{ watched_for }`; `occurred_time` is optional), `occurred_on`, `occurred_time`, `date_precision` (required, never defaulted), `payload` (an object, passed as is), `supersedes_id` (a correction), the five flags `allow_ambiguous_service`, `allow_early_check`, `allow_check_without_service`, `allow_no_heat_sign` and `allow_heat_after_positive` (each counts only when it is exactly `true`), `override_reason`, and the provenance fields (`source_form`, `source_ref`, `observed_by`, `recorded_by`).
 
 ### The pilot gate
 
@@ -113,20 +117,22 @@ Two refusals come before the domain function, both `breeding_entry_closed`, a 40
 
 | Field | Message |
 |---|---|
-| `type` | `<type> is not entered on the page yet; only a service or a pregnancy check is` |
+| `type` | `<type> is not entered on the page yet; a service, a heat, a pregnancy check or "nothing seen" is` |
 | `animal_id` | `breeding entry is not open for <animal_id>; it is open for the animals in the pilot` |
 
-`heat_observed`, `null_observation` and `abortion` stay CLI-only.
+`abortion` stays CLI-only.
 
 ## Warnings
 
-Beyond the refusals, three unusual-but-possible cases come back as a 400 whose `error` is the warning's name and whose `field` is `occurred_on`. The message is worded from what `deriveReproduction` says, never from a second copy of the rules. Send the matching flag as `true` to save over it.
+Beyond the refusals, unusual-but-possible cases come back as a 400 whose `error` is the warning's name and whose `field` is `occurred_on`. When more than one fires, `error` is `breeding_warnings` and the message joins theirs. Either way the body carries `warnings`, a list of `{ check, message }`, one per warning that fired. The message is worded from what `deriveReproduction` says, never from a second copy of the rules. Send the matching flag as `true` to save over it.
 
 | Warning | On | Flag | When |
 |---|---|---|---|
 | `ambiguous_service` | `insemination` | `allow_ambiguous_service` | earlier services in this case are not ruled out by a heat, a negative check, a calving or a loss |
 | `early_check` | `pregnancy_check` | `allow_early_check` | the check is earlier than its method is relied on (`CHECK_RELIABLE_FROM`); the message names the day |
 | `check_without_service` | `pregnancy_check` | `allow_check_without_service` | no service is recorded on or before the check |
+| `no_heat_sign` | `insemination` | `allow_no_heat_sign` | no heat sign is recorded close enough before the service |
+| `heat_after_positive` | `heat_observed` | `allow_heat_after_positive` | the heat is dated after her latest positive check |
 
 One save can step past more than one warning, so the event's `override_checks` column (a list of names, since migration 12) records every one of them, and `override_reason` is one line for the whole save-over. An override is recorded from the condition, never from the flag: a write that sends `allow_*: true` when the warning did not fire records no override.
 

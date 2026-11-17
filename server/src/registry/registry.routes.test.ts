@@ -754,12 +754,44 @@ test('an animal outside the pilot is refused', async () => {
   assert.equal((r.body as { field: string }).field, 'animal_id');
 });
 
-test('a heat is not entered on the page yet', async () => {
+test('an abortion is not entered on the page', async () => {
   const ctx = await pilotCtx();
-  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'heat_observed', occurred_on: '2026-11-13', date_precision: 'day', payload: { sign: 'standing' }, ...PROV });
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'abortion', occurred_on: '2026-11-13', date_precision: 'day', payload: {}, ...PROV });
   assert.equal(r.status, 400);
   assert.equal((r.body as { error: string }).error, 'breeding_entry_closed');
   assert.equal((r.body as { field: string }).field, 'type');
+  assert.equal((r.body as { message: string }).message, 'abortion is not entered on the page yet; a service, a heat, a pregnancy check or "nothing seen" is');
+});
+
+test('a heat for a pilot animal is written', async () => {
+  const ctx = await pilotCtx();
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'heat_observed', occurred_on: '2026-11-13', occurred_time: '06:30', date_precision: 'day', payload: { sign: 'standing' }, ...PROV });
+  assert.equal(r.status, 201);
+  const { body } = (await get(ctx, '/animals/BD-0007')) as { body: { events: { type: string; occurred_on: string; occurred_time: string | null }[] } };
+  const h = body.events.find((e) => e.type === 'heat_observed')!;
+  assert.equal(h.occurred_on, '2026-11-13');
+  assert.equal(h.occurred_time, '06:30');
+});
+
+test('"nothing seen" for a pilot animal is written', async () => {
+  const ctx = await pilotCtx();
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0009', type: 'null_observation', occurred_on: '2026-11-13', date_precision: 'day', payload: { watched_for: 'heat' }, ...PROV });
+  assert.equal(r.status, 201);
+  const { body } = (await get(ctx, '/animals/BD-0009?as_of=2026-11-13')) as { body: { events: { type: string }[] } };
+  assert.equal(body.events.filter((e) => e.type === 'null_observation').length, 1);
+});
+
+test('a service that is ambiguous and has no heat sign gives two warnings, and both flags save it', async () => {
+  const ctx = await pilotCtx();
+  // BD-0007 was served on 2026-10-09 and not checked: a second service 35 days on is ambiguous, with no heat before it.
+  const svc = { animal_id: 'BD-0007', type: 'insemination', occurred_on: '2026-11-13', date_precision: 'day', payload: { service_type: 'ai', exposure_days: null }, ...PROV };
+  const refused = (await post(ctx, '/breeding/events', svc)) as { status: number; body: { error: string; warnings: { check: string; message: string }[] } };
+  assert.equal(refused.status, 400);
+  assert.equal(refused.body.error, 'breeding_warnings');
+  assert.equal(refused.body.warnings.length, 2);
+  assert.deepEqual(refused.body.warnings.map((w) => w.check).sort(), ['ambiguous_service', 'no_heat_sign']);
+  const saved = (await post(ctx, '/breeding/events', { ...svc, allow_ambiguous_service: true, allow_no_heat_sign: true })) as { status: number };
+  assert.equal(saved.status, 201);
 });
 
 test('a warning comes back as a 400 with its code, and the flag saves over it', async () => {
@@ -854,4 +886,61 @@ test('the timeline carries a calving save-over', async () => {
   assert.ok(!('override_check' in over), 'the single-column field is gone from the wire');
   assert.equal(over.override_reason, 'twins, entered twice');
   await ctx.close();
+});
+
+// ---------------------------------------------------------------------------
+// Breeding stage 3: the board, Today and the animal detail
+// ---------------------------------------------------------------------------
+
+test('GET /breeding/board returns the tasks and cases', async () => {
+  const ctx = await pilotCtx();
+  const r = (await get(ctx, '/breeding/board?on=2026-11-13')) as { status: number; body: { on: string; tasks: unknown[]; overdue: number; due: number; cases: unknown[] } };
+  assert.equal(r.status, 200);
+  assert.equal(r.body.on, '2026-11-13');
+  assert.ok(r.body.tasks.length > 0);
+  assert.equal(r.body.overdue + r.body.due, r.body.tasks.length);
+  assert.equal((await get(ctx, '/breeding/board?on=nope')).status, 400);
+});
+
+test('/today carries the breeding board with the flag on', async () => {
+  const ctx = await pilotCtx();
+  const r = (await get(ctx, '/today?on=2026-11-13')) as { body: { breeding: { tasks: unknown[]; on: string } } };
+  assert.equal(r.body.breeding.on, '2026-11-13');
+  assert.ok(Array.isArray(r.body.breeding.tasks));
+});
+
+test('the animal detail carries breeding_tasks and reproduction_notes', async () => {
+  const ctx = await pilotCtx();
+  const { body } = (await get(ctx, '/animals/BD-0006?as_of=2026-11-13')) as { body: { breeding_tasks: { kind: string; animal_id: string }[]; reproduction_notes: unknown[] } };
+  assert.ok(Array.isArray(body.reproduction_notes));
+  assert.ok(body.breeding_tasks.length > 0);
+  assert.ok(body.breeding_tasks.every((t) => t.animal_id === 'BD-0006'));
+});
+
+test('a recorded dry_off event clears the dry_off task on the detail and the board', async () => {
+  const db = breedingHerd();
+  // BD-0003 is confirmed, in milk, and past day 248 on 2026-11-13.
+  const ctx = await serve(db, { breeding: true, breedingPilot: BREEDING_PILOT });
+  const kinds = async () => {
+    const d = (await get(ctx, '/animals/BD-0003?as_of=2026-11-13')) as { body: { breeding_tasks: { kind: string }[] } };
+    const b = (await get(ctx, '/breeding/board?on=2026-11-13')) as { body: { tasks: { kind: string; animal_id: string }[] } };
+    return { detail: d.body.breeding_tasks.map((t) => t.kind), board: b.body.tasks.filter((t) => t.animal_id === 'BD-0003').map((t) => t.kind) };
+  };
+  const before = await kinds();
+  assert.ok(before.detail.includes('dry_off'));
+  assert.ok(before.board.includes('dry_off'));
+  addDryOff(db, { animal_id: 'BD-0003', on: '2026-11-10', precision: 'day' });
+  rebuild(db, { asOf: '2026-11-13' });
+  const after = await kinds();
+  assert.ok(!after.detail.includes('dry_off'));
+  assert.ok(!after.board.includes('dry_off'));
+});
+
+test('with the breeding flag off there is no board and no breeding keys', async () => {
+  const ctx = await serve(breedingHerd());
+  assert.equal((await fetch(`${ctx.base}/breeding/board`)).status, 404);
+  const today = (await get(ctx, '/today?on=2026-11-13')) as { body: Record<string, unknown> };
+  assert.equal('breeding' in today.body, false);
+  const { body } = (await get(ctx, '/animals/BD-0006')) as { body: Record<string, unknown> };
+  for (const k of ['reproduction', 'reproduction_notes', 'breeding_tasks', 'breeding_entry']) assert.equal(k in body, false, k);
 });
