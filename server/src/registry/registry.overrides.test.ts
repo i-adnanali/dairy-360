@@ -392,6 +392,15 @@ test('assertOverride accepts the two stage 3 heat checks', () => {
   assert.throws(() => assertOverride({ checks: ['heat_missing'], reason: null }));
 });
 
+test('assertOverride refuses an empty list; callers pass null for no override', () => {
+  for (const reason of ['x', null]) {
+    assert.throws(
+      () => assertOverride({ checks: [], reason }),
+      (e: unknown) => (e as { code?: string }).code === 'invalid_payload' && /non-empty/.test((e as Error).message),
+    );
+  }
+});
+
 test('assertOverride keeps a list of two names and refuses a name twice', () => {
   assert.deepEqual(
     assertOverride({ checks: ['ambiguous_service', 'no_heat_sign'], reason: 'both' }),

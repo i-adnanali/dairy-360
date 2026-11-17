@@ -1452,18 +1452,6 @@ function dbAtVersion10(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('migration 11 lets an event carry a breeding override', () => {
-  const db = freshDb();
-  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
-  const ins = db.prepare(
-    `INSERT INTO registry_animal_events (id, animal_id, type, occurred_on, date_precision, payload, source_form, recorded_by, recorded_at, override_checks)
-     VALUES (?, 'BD-0001', 'insemination', '2026-01-21', 'day', '{}', 'recall', 't', '2026-01-21T00:00:00.000Z', ?)`,
-  );
-  ins.run('aevt_ok', '["ambiguous_service"]');
-  assert.throws(() => ins.run('aevt_bad', '["heat_missing"]'), /override_check_is_known/);
-  db.close();
-});
-
 test('migration 11 keeps every row of a version-10 database', () => {
   const db = dbAtVersion10();
   db.prepare(

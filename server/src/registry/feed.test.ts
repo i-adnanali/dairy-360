@@ -308,6 +308,7 @@ function rewindEventsTableToVersion7(db: ReturnType<typeof freshDb>): void {
   );
   for (const r of rows) {
     const checks = JSON.parse(r.override_checks as string) as string[];
+    assert.ok(checks.length <= 1, `event ${String(r.id)} has ${checks.length} override names; version 7 held at most one`);
     insert.run({ ...r, override_check: checks[0] ?? null });
   }
   db.pragma("foreign_keys = ON");

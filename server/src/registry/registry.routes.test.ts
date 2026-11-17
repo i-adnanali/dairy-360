@@ -806,6 +806,7 @@ test('the timeline carries a breeding save-over', async () => {
   assert.equal(over[0].type, 'pregnancy_check');
   assert.equal(over[0].occurred_on, '2026-11-13');
   assert.deepEqual(over[0].override_checks, ['early_check']);
+  assert.ok(!('override_check' in over[0]), 'the single-column field is gone from the wire');
   assert.equal(over[0].override_reason, 'vet was here anyway');
   for (const e of body.events.filter((x) => x !== over[0])) {
     assert.deepEqual(e.override_checks, []);
@@ -833,6 +834,7 @@ test('the timeline carries a calving save-over', async () => {
   const calvings = body.events.filter((e) => e.type === 'calving' && e.occurred_on.startsWith('2026-03'));
   const over = calvings.find((e) => e.occurred_on === '2026-03-20')!;
   assert.deepEqual(over.override_checks, ['near_duplicate_calving']);
+  assert.ok(!('override_check' in over), 'the single-column field is gone from the wire');
   assert.equal(over.override_reason, 'twins, entered twice');
   await ctx.close();
 });

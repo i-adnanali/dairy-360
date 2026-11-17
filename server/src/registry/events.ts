@@ -279,10 +279,12 @@ export function assertOverride(v: unknown): OverrideRecord | null {
     }
     checks.push(c as OverriddenCheck);
   }
-  const reason = optStr('override', o, 'reason');
-  // No check, no override: a reason about a guard nobody stepped past is prose
-  // about nothing (the schema refuses it too).
-  return checks.length === 0 ? null : { checks, reason };
+  // Callers pass null for "no override"; an empty list is a caller bug, and a
+  // reason about a guard nobody stepped past is prose about nothing.
+  if (checks.length === 0) {
+    fail('invalid_payload', 'override.checks: must be non-empty (pass no override instead)', 'override');
+  }
+  return { checks, reason: optStr('override', o, 'reason') };
 }
 
 function optDate(type: string, p: Rec, key: string): string | null {
