@@ -1,6 +1,6 @@
 # Acceptance status
 
-Updated **16 November 2026**, for branch `breeding-stage-1` (see *Breeding stage 1* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
+Updated **17 November 2026**, for branch `breeding` (see *Breeding stage 2* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
 
 ## Latest recorded results
 
@@ -12,6 +12,23 @@ Run on 16 November 2026 against branch `breeding-stage-1` (base `2be39a4`), Node
 | Server tests (`npm test -w server`) | 841 passed, 0 failed, 0 skipped |
 | `check:docs`, `build:shared`, `check:templates`, typecheck | Pass |
 | Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.12 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
+
+## Breeding stage 2
+
+Run on 17 November 2026 against branch `breeding` at `cac82ff`, Node 22.22.3.
+
+| Check | Result |
+|---|---|
+| Frontend tests (`npm test -w web-angular`) | 650 passed in 67 files. One earlier full run failed one test, `farm-monitor.spec.ts` "brings the linked event into view without CSS.escape" (a `setTimeout(0)` scroll check this branch does not touch). It failed in 2 of 4 full runs and passed 3 of 3 runs on its own: a timing flake that predates this branch. |
+| Server tests (`npm test -w server`) | 873 passed, 0 failed |
+| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass (docs: 75 files, 0 errors) |
+| Production build | Builds, with the same warnings as stage 1 (initial bundle 712.23 kB against the 500 kB budget, four component stylesheets over 4 kB, two unused imports, the shared CommonJS notice) |
+
+- **Browser walk, harness only:** on the harness sample herd with the pilot `BD-0007, BD-0009`. Shehzadi (BD-0009): an AI service saved from the Breeding tab, and the badge changed from Open to Bred. Heer (BD-0007): a check by hand, Pregnant, dated 13 Nov 2026 showed "A check by hand is not relied on before day 46. This one is on day 35."; Save over this check wrote it, and the Timeline then showed "Written over the early_check check — no reason recorded". Moti (BD-0006): the tab showed the pregnancy and "Breeding entry is open only for the animals in the pilot.", with no form.
+- **Timeline override line:** the walk found that the animal response never carried `override_check` or `override_reason`, so the Timeline's "Written over" line had never shown, for calving overrides either (the same on `main`). Fixed on this branch: every event in the animal response now carries both fields, flag on or off.
+- **Flag off:** a harness without `--breeding` answers `POST /api/registry/breeding/events` with 404, and the animal response has only `animal`, `status` and `events`.
+- **Migration 11 rehearsal:** a backup taken on 17 November was copied outside the repository and migrated and verified there. The copy was already at version 11, so nothing was applied: version 11 to 11, events 0 to 0, 0 violations. The real database had already been migrated from 9 to 11 on 16 November at 21:02 by the nightly backup job, which runs `registry:backup` from this checkout while `breeding` was checked out (`registry:backup` loads `db.ts`, and `db.ts` applies pending migrations). The registry's record tables were empty, so no record was affected; a build of `main` (target version 9) can no longer open that database until it is restored from a version-9 backup or this branch is merged.
+- **Not checked:** no owner walkthrough on the real herd; the real farm's pilot list is not chosen; `REGISTRY_BREEDING` is not turned on for the real registry.
 
 ## Breeding stage 1
 
