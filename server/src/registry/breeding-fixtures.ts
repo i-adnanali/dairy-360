@@ -95,6 +95,9 @@ export function breedingHerd(): Db {
         date_precision: s.precision ?? 'day',
         payload: s.payload,
         provenance: RECALL,
+        // Past records: the stage 3 warnings are for new entry, so these are saved over them.
+        allow_no_heat_sign: true,
+        allow_heat_after_positive: true,
       });
     }
   }

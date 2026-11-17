@@ -3,7 +3,7 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 
-import { USAGE, buildBreedingPayload, buildSupersedesId } from './breed';
+import { USAGE, buildBreedingPayload, buildSupersedesId, flagIsOn } from './breed';
 import { recordBreedingEvent } from './breeding';
 import { CliError, parseFlags } from './cli';
 import { isRegistryError } from './errors';
@@ -20,7 +20,8 @@ function herd(): Db {
   addAcquired(db, { id: 'BD-0002', sex: 'male', acquired_on: '2024-03-01', acquired_precision: 'month' });
   return db;
 }
-const base = { occurred_on: '2026-01-20', date_precision: 'day' as const, provenance: RECALL };
+// These tests are about other rules, so the no-heat-sign warning is saved over for them.
+const base = { occurred_on: '2026-01-20', date_precision: 'day' as const, provenance: RECALL, allow_no_heat_sign: true };
 const refuses = (db: Db, input: object, code: string, field?: string) =>
   assert.throws(
     () => recordBreedingEvent(db, input as never),
@@ -182,7 +183,7 @@ test('the flag for another warning does not save over this one', () => {
   refuses(
     db,
     { animal_id: 'BD-0006', type: 'insemination', occurred_on: '2026-09-23', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_early_check: true },
-    'ambiguous_service',
+    'breeding_warnings', // a service that joins a case with no heat sign raises two since stage 3
   );
 });
 
@@ -191,7 +192,7 @@ test('a second service dated the same day as the first still warns', () => {
   refuses(
     db,
     { animal_id: 'BD-0006', type: 'insemination', occurred_on: '2026-09-02', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL },
-    'ambiguous_service',
+    'breeding_warnings', // ambiguous_service plus no_heat_sign since stage 3
   );
 });
 
@@ -204,4 +205,78 @@ test('USAGE names the four override flags', () => {
   for (const f of ['--allow-ambiguous-service', '--allow-early-check', '--allow-check-without-service', '--override-reason']) {
     assert.ok(USAGE.includes(f), f);
   }
+});
+
+// ---------------------------------------------------------------------------
+// Stage 3: several warnings on one write, and every one recorded.
+// ---------------------------------------------------------------------------
+
+const mothService = {
+  animal_id: 'BD-0006',
+  type: 'insemination',
+  occurred_on: '2026-09-23',
+  date_precision: 'day',
+  payload: { service_type: 'ai' },
+  provenance: RECALL,
+};
+
+test('two warnings are refused together and write nothing', () => {
+  const db = breedingHerd();
+  const before = countEvents(db, 'BD-0006');
+  assert.throws(
+    () => recordBreedingEvent(db, mothService as never),
+    (e: unknown) =>
+      isRegistryError(e) &&
+      e.code === 'breeding_warnings' &&
+      e.field === 'occurred_on' &&
+      e.warnings?.map((w) => w.check).join() === 'ambiguous_service,no_heat_sign' &&
+      e.message === e.warnings.map((w) => w.message).join(' ') &&
+      JSON.stringify(e.toWire().warnings) === JSON.stringify(e.warnings),
+  );
+  assert.equal(countEvents(db, 'BD-0006'), before);
+});
+
+test('one flag of two still refuses', () => {
+  const db = breedingHerd();
+  refuses(db, { ...mothService, allow_ambiguous_service: true }, 'breeding_warnings');
+  refuses(db, { ...mothService, allow_no_heat_sign: true }, 'breeding_warnings');
+});
+
+test('a single warning carries its own code and a one-item warnings list', () => {
+  const db = breedingHerd();
+  assert.throws(
+    () => recordBreedingEvent(db, { ...mothService, animal_id: 'BD-0009', occurred_on: '2026-11-13' } as never),
+    (e: unknown) => isRegistryError(e) && e.code === 'no_heat_sign' && e.field === 'occurred_on' && e.warnings?.length === 1 && e.warnings[0].check === 'no_heat_sign',
+  );
+});
+
+test('both flags write one event that records both checks', () => {
+  const db = breedingHerd();
+  const { event_id } = recordBreedingEvent(db, { ...mothService, allow_ambiguous_service: true, allow_no_heat_sign: true, override_reason: 'owner saw it' } as never);
+  const row = eventsForAnimal(db, 'BD-0006').find((e) => e.id === event_id)!;
+  assert.deepEqual(row.override_checks, ['ambiguous_service', 'no_heat_sign']);
+  assert.equal(row.override_reason, 'owner saw it');
+});
+
+test('a heat after a positive check is refused until its flag is given', () => {
+  const db = breedingHerd();
+  const heat = { animal_id: 'BD-0004', type: 'heat_observed', occurred_on: '2026-10-01', date_precision: 'day', payload: { sign: 'standing' }, provenance: RECALL };
+  refuses(db, heat, 'heat_after_positive', 'occurred_on');
+  const { event_id } = recordBreedingEvent(db, { ...heat, allow_heat_after_positive: true } as never);
+  assert.deepEqual(eventsForAnimal(db, 'BD-0004').find((e) => e.id === event_id)!.override_checks, ['heat_after_positive']);
+});
+
+test('flags with nothing fired record an empty list', () => {
+  const db = breedingHerd();
+  const { event_id } = recordBreedingEvent(db, { ...heerCheck, payload: { method: 'ultrasound', result: 'positive' }, allow_no_heat_sign: true, allow_heat_after_positive: true } as never);
+  assert.deepEqual(eventsForAnimal(db, 'BD-0007').find((e) => e.id === event_id)!.override_checks, []);
+});
+
+test('--allow-x=false is false, and USAGE names the two new flags', () => {
+  assert.equal(flagIsOn(parseFlags(['--allow-early-check=false']), 'allow-early-check'), false);
+  assert.equal(flagIsOn(parseFlags(['--allow-early-check']), 'allow-early-check'), true);
+  assert.equal(flagIsOn(parseFlags(['--allow-early-check=true']), 'allow-early-check'), true);
+  assert.equal(flagIsOn(parseFlags([]), 'allow-early-check'), false);
+  assert.throws(() => flagIsOn(parseFlags(['--allow-early-check=maybe']), 'allow-early-check'), CliError);
+  for (const f of ['--allow-no-heat-sign', '--allow-heat-after-positive']) assert.ok(USAGE.includes(f), f);
 });

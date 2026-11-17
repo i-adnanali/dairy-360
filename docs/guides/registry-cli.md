@@ -69,7 +69,7 @@ animal, an animal that is not female, a precision a breeding event cannot have, 
 was born or after she left; those have no override. `--supersedes=<event id>` corrects an earlier event of hers
 (same animal, same type, once per event); a breeding event cannot be retracted, only replaced. It prints the event id and her state at `--as-of`.
 
-Three warnings are refused until you save over them, each with its own flag: `--allow-ambiguous-service` (a service that joins an earlier service's case, so her calving window widens), `--allow-early-check` (a check before its method can be relied on) and `--allow-check-without-service` (a check with no service on or before it). `--override-reason=<text>` is kept with the override. The override is recorded only when the warning actually fired; a flag with nothing to override records nothing.
+Five warnings are refused until you save over them, each with its own flag: `--allow-ambiguous-service` (a service that joins an earlier service's case, so her calving window widens), `--allow-no-heat-sign` (a service with no heat sign recorded before it), `--allow-early-check` (a check before its method can be relied on), `--allow-check-without-service` (a check with no service on or before it) and `--allow-heat-after-positive` (a heat dated after a positive check; she still reads as Pregnant, re-check due). When one write raises several, they are refused together as `breeding_warnings`, and the write goes through only when every one of them has its flag. A flag is a switch: bare or `=true` is on, `=false` is off. `--override-reason=<text>` is kept with the override. Every warning that fired is recorded on the event; a flag with nothing to override records nothing.
 
 ```bash
 # heat seen

@@ -17,17 +17,19 @@
 //
 // Both date comparisons use definitelyBefore, so an uncertain date never refuses.
 //
-// After those, three warnings the caller can save over (see breeding-checks.ts):
-// ambiguous_service on a service, early_check and check_without_service on a
-// check. A warning throws as a RegistryError of the same name unless the matching
-// allow_* flag is true, in which case the event is written and records the
-// override from the CONDITION: a flag with nothing to override records nothing.
+// After those, five warnings the caller can save over (see breeding-checks.ts):
+// ambiguous_service and no_heat_sign on a service, early_check and
+// check_without_service on a check, heat_after_positive on a heat. They all come
+// back together: one warning throws as a RegistryError of its own code, several as
+// `breeding_warnings`, unless EVERY fired warning's allow_* flag is true, in which
+// case the event is written and records every fired check from the CONDITION: a
+// flag with nothing to override records nothing.
 //
 // No projection rebuild: no existing projection reads these events.
 
 import type { Db } from './schema';
 import { RegistryError } from './errors';
-import { breedingWarning } from './breeding-checks';
+import { breedingWarnings } from './breeding-checks';
 import { assertDatePrecision, assertEventPayload } from './events';
 import { definitelyBefore } from './invariants';
 import { canonicalOrder, effectiveEvents, findOrigin } from './project';
@@ -47,6 +49,8 @@ export interface RecordBreedingEventInput {
   allow_ambiguous_service?: boolean;
   allow_early_check?: boolean;
   allow_check_without_service?: boolean;
+  allow_no_heat_sign?: boolean;
+  allow_heat_after_positive?: boolean;
   /** Free text kept with an override that happened. Optional. */
   override_reason?: string | null;
 }
@@ -174,17 +178,20 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     override_checks: [],
     override_reason: null,
   };
-  const warning = breedingWarning(eventsForAnimal(db, input.animal_id), candidate);
+  const warnings = breedingWarnings(eventsForAnimal(db, input.animal_id), candidate);
   const allowed: Record<BreedingOverriddenCheck, boolean | undefined> = {
     ambiguous_service: input.allow_ambiguous_service,
     early_check: input.allow_early_check,
     check_without_service: input.allow_check_without_service,
-    // Task 4 wires the allow_* flags for the two stage 3 warnings.
-    no_heat_sign: undefined,
-    heat_after_positive: undefined,
+    no_heat_sign: input.allow_no_heat_sign,
+    heat_after_positive: input.allow_heat_after_positive,
   };
-  if (warning && allowed[warning.check] !== true) {
-    throw new RegistryError(warning.check, warning.message, warning.field);
+  // The write proceeds only when every warning that fired has its own flag.
+  if (warnings.some((w) => allowed[w.check] !== true)) {
+    const wire = warnings.map((w) => ({ check: w.check, message: w.message }));
+    throw warnings.length === 1
+      ? new RegistryError(warnings[0].check, warnings[0].message, warnings[0].field, wire)
+      : new RegistryError('breeding_warnings', warnings.map((w) => w.message).join(' '), 'occurred_on', wire);
   }
 
   const row = appendEvent(db, {
@@ -197,7 +204,7 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     provenance: input.provenance,
     supersedes_id: supersedesId,
     recorded_at: recordedAt,
-    override: warning ? { checks: [warning.check], reason: input.override_reason ?? null } : null,
+    override: warnings.length > 0 ? { checks: warnings.map((w) => w.check), reason: input.override_reason ?? null } : null,
   });
   return { event_id: row.id };
 }

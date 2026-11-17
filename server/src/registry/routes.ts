@@ -723,6 +723,8 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
           allow_ambiguous_service: b.allow_ambiguous_service === true,
           allow_early_check: b.allow_early_check === true,
           allow_check_without_service: b.allow_check_without_service === true,
+          allow_no_heat_sign: b.allow_no_heat_sign === true,
+          allow_heat_after_positive: b.allow_heat_after_positive === true,
           override_reason: str(b, 'override_reason'),
           provenance: provenance(b),
         });

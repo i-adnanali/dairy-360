@@ -641,7 +641,7 @@ test('flag on, no breeding events: reproduction is null', async () => {
 test('flag on: a served, confirmed animal carries her state', async () => {
   const db = cleanHerd();
   const female = herd(db).find((a) => a.sex === 'female' && a.status !== 'departed')!.id;
-  recordBreedingEvent(db, { animal_id: female, type: 'insemination', occurred_on: '2026-07-14', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL });
+  recordBreedingEvent(db, { animal_id: female, type: 'insemination', occurred_on: '2026-07-14', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_no_heat_sign: true });
   recordBreedingEvent(db, { animal_id: female, type: 'pregnancy_check', occurred_on: '2026-09-15', date_precision: 'day', payload: { method: 'palpation', result: 'positive' }, provenance: RECALL });
   const ctx = await serve(db, { breeding: true });
   const { body } = (await get(ctx, `/animals/${female}?as_of=2026-11-13`)) as { body: { reproduction: { state: string; day_max: number } } };
@@ -652,7 +652,7 @@ test('flag on: a served, confirmed animal carries her state', async () => {
 test('a departed animal has no reproduction view', async () => {
   const db = cleanHerd();
   const female = herd(db).find((a) => a.sex === 'female' && a.status !== 'departed')!.id;
-  recordBreedingEvent(db, { animal_id: female, type: 'insemination', occurred_on: '2026-07-14', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL });
+  recordBreedingEvent(db, { animal_id: female, type: 'insemination', occurred_on: '2026-07-14', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_no_heat_sign: true });
   addDeparture(db, { animal_id: female, on: '2026-10-01', precision: 'day' });
   rebuild(db, { asOf: '2026-11-13' });
   const ctx = await serve(db, { breeding: true });
@@ -666,7 +666,7 @@ test('a departed animal has no reproduction view', async () => {
 // 2026-09-28: inside the dry-off lead (248) and before close-up (264).
 function servedAndConfirmed(): Db {
   const db = cleanHerd();
-  recordBreedingEvent(db, { animal_id: 'BD-0001', type: 'insemination', occurred_on: '2026-01-20', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL });
+  recordBreedingEvent(db, { animal_id: 'BD-0001', type: 'insemination', occurred_on: '2026-01-20', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_no_heat_sign: true });
   recordBreedingEvent(db, { animal_id: 'BD-0001', type: 'pregnancy_check', occurred_on: '2026-03-10', date_precision: 'day', payload: { method: 'palpation', result: 'positive' }, provenance: RECALL });
   return db;
 }
@@ -712,7 +712,7 @@ test('as_of is read only with the flag on, and an unparseable value is refused',
 // Breeding stage 2: POST /breeding/events, open for the pilot animals only
 // ---------------------------------------------------------------------------
 
-const SVC = { type: 'insemination', occurred_on: '2026-11-13', date_precision: 'day', payload: { service_type: 'ai', exposure_days: null }, ...PROV };
+const SVC = { type: 'insemination', occurred_on: '2026-11-13', date_precision: 'day', payload: { service_type: 'ai', exposure_days: null }, allow_no_heat_sign: true, ...PROV };
 
 async function pilotCtx(): Promise<Ctx> {
   return serve(breedingHerd(), { breeding: true, breedingPilot: BREEDING_PILOT });
@@ -801,14 +801,17 @@ test('the timeline carries a breeding save-over', async () => {
   const { body } = (await get(ctx, '/animals/BD-0007')) as {
     body: { events: { type: string; occurred_on: string; override_checks: string[]; override_reason: string | null }[] };
   };
-  const over = body.events.filter((e) => e.override_checks.length > 0);
-  assert.equal(over.length, 1, 'exactly one event carries an override');
+  // The fixture's own service was saved over no_heat_sign (it is a past record); the new check is the other override.
+  const fixtureService = body.events.find((e) => e.type === 'insemination')!;
+  assert.deepEqual(fixtureService.override_checks, ['no_heat_sign']);
+  const over = body.events.filter((e) => e.override_checks.length > 0 && e !== fixtureService);
+  assert.equal(over.length, 1, 'exactly one other event carries an override');
   assert.equal(over[0].type, 'pregnancy_check');
   assert.equal(over[0].occurred_on, '2026-11-13');
   assert.deepEqual(over[0].override_checks, ['early_check']);
   assert.ok(!('override_check' in over[0]), 'the single-column field is gone from the wire');
   assert.equal(over[0].override_reason, 'vet was here anyway');
-  for (const e of body.events.filter((x) => x !== over[0])) {
+  for (const e of body.events.filter((x) => x !== over[0] && x !== fixtureService)) {
     assert.deepEqual(e.override_checks, []);
     assert.equal(e.override_reason, null);
   }

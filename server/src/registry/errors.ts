@@ -20,6 +20,8 @@
 // rules about the herd, and they hold whether the caller is a command, a route,
 // or a future agent tool.
 
+import type { BreedingOverriddenCheck } from './types';
+
 /** Stable identifiers. Callers branch on these; the prose may be reworded. */
 export type RegistryErrorCode =
   // --- animals ---
@@ -117,12 +119,20 @@ export type RegistryErrorCode =
   // a second error vocabulary for one case would mean every caller learning two.
   | 'missing_idempotency_key';
 
+/** One warning among several, as the page gets it. */
+export interface WireWarning {
+  check: BreedingOverriddenCheck;
+  message: string;
+}
+
 export interface WireError {
   error: RegistryErrorCode;
   /** The input this belongs next to, when there is one. */
   field?: string;
   /** The prose, verbatim. Never rewritten by a transport. */
   message: string;
+  /** Every breeding warning that fired, when the write raised any. */
+  warnings?: WireWarning[];
 }
 
 /**
@@ -135,18 +145,22 @@ export interface WireError {
 export class RegistryError extends Error {
   readonly code: RegistryErrorCode;
   readonly field?: string;
+  readonly warnings?: WireWarning[];
 
-  constructor(code: RegistryErrorCode, message: string, field?: string) {
+  constructor(code: RegistryErrorCode, message: string, field?: string, warnings?: WireWarning[]) {
     super(message);
     this.name = 'RegistryError';
     this.code = code;
     this.field = field;
+    this.warnings = warnings;
   }
 
   toWire(): WireError {
-    return this.field !== undefined
+    const wire: WireError = this.field !== undefined
       ? { error: this.code, field: this.field, message: this.message }
       : { error: this.code, message: this.message };
+    if (this.warnings !== undefined) wire.warnings = this.warnings;
+    return wire;
   }
 }
 

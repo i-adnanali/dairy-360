@@ -8,7 +8,7 @@
 // null_observation. The rules live in recordBreedingEvent() (breeding.ts); this
 // file only turns flags into an input object and prints what the herd looks like
 // afterwards. The refusals are about things that cannot have happened and have no
-// override; the three breeding warnings (breeding-checks.ts) have an --allow-* flag.
+// override; the five breeding warnings (breeding-checks.ts) have an --allow-* flag.
 
 import {
   CliError,
@@ -46,6 +46,8 @@ const FLAGS = [
   'allow-ambiguous-service',
   'allow-early-check',
   'allow-check-without-service',
+  'allow-no-heat-sign',
+  'allow-heat-after-positive',
   'override-reason',
   ...PROVENANCE_FLAGS,
 ] as const;
@@ -84,13 +86,15 @@ Optional:
   --allow-early-check         save a check before its method can be relied on
   --allow-check-without-service
                               save a check with no service on or before it
+  --allow-no-heat-sign        save a service with no heat sign recorded before it
+  --allow-heat-after-positive save a heat dated after a positive check
   --override-reason=<text>    kept with an override that happened. A flag with nothing to
                               override records nothing.
 
 Refused: an unknown animal, an animal that is not female, a
 precision a breeding event cannot have, a date before she arrived or was born, and a
 date after she left, and for --supersedes an unknown event (or one on another animal), a
-different type, or an event already corrected. Those cannot be overridden; the three
+different type, or an event already corrected. Those cannot be overridden; the
 warnings above can.
 `.trim();
 
@@ -155,6 +159,14 @@ export function buildSupersedesId(flags: Flags): string | null {
   return v;
 }
 
+/** A switch: bare `--x` and `--x=true` are on, `--x=false` and an absent flag are off. */
+export function flagIsOn(flags: Flags, name: string): boolean {
+  const v = flags.get(name);
+  if (v === undefined || v === 'false') return false;
+  if (v === true || v === 'true') return true;
+  throw new CliError(`--${name} is a switch: use it bare, or =true / =false, not '${v}'`);
+}
+
 export function main(argv: string[]): void {
   const flags = parseFlags(argv);
   if (wantsHelp(flags)) {
@@ -180,9 +192,11 @@ export function main(argv: string[]): void {
     payload: buildBreedingPayload(breedingType, flags),
     provenance: requireProvenance(flags),
     supersedes_id: buildSupersedesId(flags),
-    allow_ambiguous_service: flags.has('allow-ambiguous-service'),
-    allow_early_check: flags.has('allow-early-check'),
-    allow_check_without_service: flags.has('allow-check-without-service'),
+    allow_ambiguous_service: flagIsOn(flags, 'allow-ambiguous-service'),
+    allow_early_check: flagIsOn(flags, 'allow-early-check'),
+    allow_check_without_service: flagIsOn(flags, 'allow-check-without-service'),
+    allow_no_heat_sign: flagIsOn(flags, 'allow-no-heat-sign'),
+    allow_heat_after_positive: flagIsOn(flags, 'allow-heat-after-positive'),
     override_reason: optStr(flags, 'override-reason'),
   };
 
