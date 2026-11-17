@@ -25,7 +25,7 @@ import type { DatePrecision } from "../types";
 import { ErrorPanel } from "../../ui/surface";
 import { HelpText, TextLink } from "../../ui/text";
 import { StatusBadge } from "../../ui/surface";
-import { basisWord, dayRange, reproductionLabel, reproductionTone, serviceWord } from "../reproduction";
+import { basisWord, breedingTaskLabel, dayRange, reproductionLabel, reproductionTone, serviceWord } from "../reproduction";
 import { BreedingForm } from "../breeding-form/breeding-form";
 import type { CheckMethod } from "../types";
 
@@ -68,6 +68,7 @@ export class AnimalDetailView {
 
   protected readonly reproLabel = reproductionLabel;
   protected readonly reproTone = reproductionTone;
+  protected readonly breedingTaskLabel = breedingTaskLabel;
   protected readonly basisWord = basisWord;
   protected readonly serviceWord = serviceWord;
   protected readonly dayRange = dayRange;

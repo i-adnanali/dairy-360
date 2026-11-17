@@ -2,7 +2,7 @@
 // this only names and tones it.
 
 import type { BadgeTone } from '../ui/surface';
-import type { ReproductionBasis, ReproductionView, ReproductiveState, ServiceType } from './types';
+import type { BreedingTaskKind, ReproductionBasis, ReproductionView, ReproductiveState, ServiceType } from './types';
 
 /** Same states, same order as the server's REPRODUCTIVE_STATES. */
 export const REPRODUCTIVE_STATES: readonly ReproductiveState[] = [
@@ -48,6 +48,20 @@ export function serviceWord(t: ServiceType): string {
 }
 
 /** "Day 35", or "Day 91 to 165" when day_min and day_max differ. */
-export function dayRange(v: ReproductionView): string {
+export function dayRange(v: Pick<ReproductionView, 'day_min' | 'day_max'>): string {
   return v.day_min === v.day_max ? `Day ${v.day_min}` : `Day ${v.day_min} to ${v.day_max}`;
+}
+
+/** Same strings as the server's BREEDING_TASK_LABEL. */
+const BREEDING_TASK_LABEL: Record<BreedingTaskKind, string> = {
+  heat_watch: 'Heat watch',
+  pregnancy_check: 'Pregnancy check due',
+  recheck: 'Recheck due',
+  dry_off: 'Dry-off reminder',
+  calving_watch: 'Calving watch',
+  overdue_review: 'Overdue review',
+};
+
+export function breedingTaskLabel(kind: BreedingTaskKind): string {
+  return BREEDING_TASK_LABEL[kind];
 }

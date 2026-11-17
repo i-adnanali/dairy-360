@@ -29,6 +29,7 @@ import { urlParams } from "../url-state";
 import type { DayBoard, HerdRow } from "../types";
 import type { HealthBoard } from "../health-workflows";
 import { lifeStage } from "../life-stage";
+import { breedingTaskLabel, dayRange } from "../reproduction";
 import { buildSlots } from "../session-board/session-board";
 import { ErrorPanel } from "../../ui/surface";
 import { HelpText } from "../../ui/text";
@@ -107,6 +108,22 @@ export function attentionItems(
         when: 'Today', action: 'Open task', link: ['/animals/health'],
         query: { animal: String(t.animal_id ?? ''), task: t.id },
       });
+  }
+  // Breeding tasks come with the board (only when the server runs with
+  // REGISTRY_BREEDING); computed on read, closed only by a recorded event.
+  for (const t of board.breeding?.tasks ?? []) {
+    const overdue = t.standing === 'overdue';
+    (overdue ? now : open).push({
+      key: 'breeding-' + t.kind + '-' + t.animal_id,
+      severity: overdue ? 'danger' : 'warning',
+      badge: overdue ? 'Overdue' : 'Due',
+      subject: t.animal_name ? `${t.animal_id} ${t.animal_name}` : t.animal_id,
+      what: breedingTaskLabel(t.kind),
+      when: overdue && t.red_on ? 'Since ' + shortDate(t.red_on) : dayRange(t),
+      action: 'Open in Breeding',
+      link: ['/animals/breeding'],
+      query: { animal: t.animal_id },
+    });
   }
   for (const w of health?.withdrawals ?? []) {
     if (w.target !== 'milk') continue;
@@ -317,7 +334,8 @@ export class TodayBoard {
       b.dispatch.every((s) => s.complete) &&
       b.payroll_previous === null &&
       (!b.feed || b.feed.state === 'complete') &&
-      (!b.health || (b.health.overdue === 0 && b.health.due === 0 && b.health.withdrawals.length === 0))
+      (!b.health || (b.health.overdue === 0 && b.health.due === 0 && b.health.withdrawals.length === 0)) &&
+      (!b.breeding || b.breeding.tasks.length === 0)
     );
   });
 

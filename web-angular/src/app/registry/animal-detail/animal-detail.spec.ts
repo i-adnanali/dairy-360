@@ -115,6 +115,19 @@ describe('AnimalDetailView Breeding tab', () => {
     expect(tab.querySelector('app-breeding-form')).not.toBeNull();
     expect(tab.querySelector('[data-role="entry-closed"]')).toBeNull();
   });
+  it('the tab shows each derived note under the pregnancy', async () => {
+    const tab = await openBreeding(
+      await mount(detail({
+        reproduction: view, breeding_entry: false,
+        reproduction_notes: [{ code: 'wide_window', text: 'The service date is a range, so every date from it is too.' }],
+      })),
+    );
+    const notes = [...tab.querySelectorAll('[data-role="note"]')];
+    expect(notes).toHaveLength(1);
+    expect(notes[0].textContent).toContain('The service date is a range, so every date from it is too.');
+    expect(notes[0].querySelector('[appQualifier]')).not.toBeNull();
+    expect(tab.querySelector('[data-role="this-pregnancy"] ~ [data-role="note"]')).not.toBeNull();
+  });
   it('a month-wide service says it is a range', async () => {
     const tab = await openBreeding(
       await mount(detail({ reproduction: { ...view, conception_latest: '2026-02-28' }, breeding_entry: false })),
@@ -142,5 +155,26 @@ describe('AnimalDetailView Breeding tab', () => {
     const timeline = el.querySelector('[data-tab="events"]');
     expect(timeline?.getAttribute('aria-selected')).toBe('true');
     expect(timeline?.getAttribute('tabindex')).toBe('0');
+  });
+});
+
+describe('AnimalDetailView open breeding tasks', () => {
+  it('lists a breeding task under "Open for this animal", linked to Breeding', async () => {
+    const el = await mount(detail({
+      reproduction: view, breeding_entry: false, reproduction_notes: [],
+      breeding_tasks: [{ kind: 'calving_watch', animal_id: 'BD-0001', standing: 'due', day_min: 288, day_max: 288, red_from: 319, red_on: '2026-12-17' }],
+    }));
+    const open = el.querySelector('[data-role="open-now"]');
+    expect(open).not.toBeNull();
+    const row = open!.querySelector('[data-role="open-breeding-task"]')!;
+    expect(row.textContent).toContain('Calving watch');
+    expect(row.closest('.open-item')!.querySelector('[appBadge]')!.textContent).toContain('Due');
+    const link = [...open!.querySelectorAll('a')].find((a) => a.textContent?.includes('Open in Breeding'));
+    expect(link?.getAttribute('href')).toBe('/animals/breeding?animal=BD-0001');
+    expect(open!.textContent).not.toContain('Open in Health');
+  });
+  it('draws no open section when there are no breeding tasks and nothing from health', async () => {
+    const el = await mount(detail({ reproduction: view, breeding_entry: false, breeding_tasks: [] }));
+    expect(el.querySelector('[data-role="open-now"]')).toBeNull();
   });
 });

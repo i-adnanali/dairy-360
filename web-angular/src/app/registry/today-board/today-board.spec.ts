@@ -75,6 +75,40 @@ describe('attentionItems', () => {
     expect(by('Urgent')).toMatchObject({ link: ['/monitor'], query: { window: 'night', event: 'e2' }, action: 'Open event' });
   });
 
+  it('puts an overdue pregnancy check in "needs you now" and a due heat watch in "also open"', () => {
+    const b: DayBoard = {
+      ...board(),
+      breeding: {
+        on: '2026-11-06', overdue: 1, due: 1, cases: [],
+        tasks: [
+          { kind: 'pregnancy_check', animal_id: 'BD-0001', animal_name: 'Noori', standing: 'overdue',
+            day_min: 64, day_max: 64, red_from: 61, red_on: '2026-11-03' },
+          { kind: 'heat_watch', animal_id: 'BD-0002', animal_name: null, standing: 'due',
+            day_min: 19, day_max: 19, red_from: 24, red_on: '2026-11-11' },
+        ],
+      },
+    };
+    const { now, open } = attentionItems(b, null, 0, 'morning');
+    expect(now).toHaveLength(1);
+    expect(now[0]).toMatchObject({
+      key: 'breeding-pregnancy_check-BD-0001', severity: 'danger', badge: 'Overdue',
+      subject: 'BD-0001 Noori', what: 'Pregnancy check due',
+      link: ['/animals/breeding'], query: { animal: 'BD-0001' },
+    });
+    expect(open).toHaveLength(1);
+    expect(open[0]).toMatchObject({
+      key: 'breeding-heat_watch-BD-0002', severity: 'warning', badge: 'Due',
+      subject: 'BD-0002', what: 'Heat watch',
+      link: ['/animals/breeding'], query: { animal: 'BD-0002' },
+    });
+  });
+
+  it('changes nothing when the board has no breeding key', () => {
+    const b = board();
+    expect('breeding' in b).toBe(false);
+    expect(attentionItems(b, null, 0, 'morning')).toEqual({ now: [], open: [] });
+  });
+
   it('lists a session still open from the morning as late, in the evening only', () => {
     const b = board();
     b.milking[0] = { session: 'morning', expected: 6, recorded: 2, complete: false };

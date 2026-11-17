@@ -108,6 +108,62 @@ export interface AnimalDetail {
    * pilot, so POST /breeding/events accepts a service or a check for her.
    */
   breeding_entry?: boolean;
+  /** Present only with REGISTRY_BREEDING=1: the derived notes on her state. */
+  reproduction_notes?: ReproductionNote[];
+  /** Present only with REGISTRY_BREEDING=1: her open breeding tasks, computed on read. */
+  breeding_tasks?: BreedingTask[];
+}
+
+/** Mirrors server/src/registry/breeding-tasks.ts. */
+export type BreedingTaskKind = 'heat_watch' | 'pregnancy_check' | 'recheck' | 'dry_off' | 'calving_watch' | 'overdue_review';
+
+/** Mirrors BreedingTask in server/src/registry/breeding-tasks.ts, field for field. */
+export interface BreedingTask {
+  kind: BreedingTaskKind;
+  animal_id: string;
+  /** 'overdue' = past its red line; 'due' = open, not yet red. */
+  standing: 'due' | 'overdue';
+  day_min: number;
+  day_max: number;
+  /** The first day it is red; null for recheck. */
+  red_from: number | null;
+  /** Calendar date of red_from, counted from conception_earliest. */
+  red_on: string | null;
+}
+
+/** Mirrors server/src/registry/breeding-notes.ts. */
+export type ReproductionNoteCode =
+  | 'null_observation'
+  | 'negative_inside_exposure'
+  | 'dry_off_while_unconfirmed'
+  | 'wide_window'
+  | 'attribution_changed';
+
+export interface ReproductionNote {
+  code: ReproductionNoteCode;
+  text: string;
+}
+
+/** Mirrors BreedingCaseRow in server/src/registry/breeding-board.ts. */
+export interface BreedingCaseRow {
+  animal_id: string;
+  animal_name: string | null;
+  view: ReproductionView;
+  notes: ReproductionNote[];
+  tasks: BreedingTask[];
+  /** The page may enter for her. */
+  entry_open: boolean;
+}
+
+/** Mirrors BreedingBoard in server/src/registry/breeding-board.ts. */
+export interface BreedingBoard {
+  on: string;
+  /** Overdue first, then due; within each by red_on (none last), then animal_id. */
+  tasks: (BreedingTask & { animal_name: string | null })[];
+  overdue: number;
+  due: number;
+  /** Every current female with a non-null view. */
+  cases: BreedingCaseRow[];
 }
 
 export type ReproductiveState =
@@ -767,6 +823,8 @@ export interface SessionStanding {
 export interface DayBoard {
   health?: {overdue:number;due:number;upcoming:number;withdrawals:unknown[]};
   feed?: {state: string; summary: string};
+  /** Present only with REGISTRY_BREEDING=1. */
+  breeding?: BreedingBoard;
   on: string;
   milking: SessionStanding[];
   /** STANDING destinations only — an occasional household is not a gap. */
