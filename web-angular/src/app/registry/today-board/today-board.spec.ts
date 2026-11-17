@@ -101,6 +101,22 @@ describe('attentionItems', () => {
       subject: 'BD-0002', what: 'Heat watch',
       link: ['/animals/breeding'], query: { animal: 'BD-0002' },
     });
+    expect(now[0].when).toBe('Since 3 Nov');
+    expect(open[0].when).toBe('Day 19');
+  });
+
+  it('keeps the day range on an overdue breeding row when the range is wide', () => {
+    const b: DayBoard = {
+      ...board(),
+      breeding: {
+        on: '2026-11-06', overdue: 1, due: 0, cases: [],
+        tasks: [
+          { kind: 'heat_watch', animal_id: 'BD-0004', animal_name: null, standing: 'overdue',
+            day_min: 40, day_max: 52, red_from: 24, red_on: '2026-11-03' },
+        ],
+      },
+    };
+    expect(attentionItems(b, null, 0, 'morning').now[0].when).toBe('Since 3 Nov · Day 40 to 52');
   });
 
   it('changes nothing when the board has no breeding key', () => {

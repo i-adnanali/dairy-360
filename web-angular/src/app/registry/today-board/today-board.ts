@@ -119,7 +119,10 @@ export function attentionItems(
       badge: overdue ? 'Overdue' : 'Due',
       subject: t.animal_name ? `${t.animal_id} ${t.animal_name}` : t.animal_id,
       what: breedingTaskLabel(t.kind),
-      when: overdue && t.red_on ? 'Since ' + shortDate(t.red_on) : dayRange(t),
+      // Uncertainty stays visible: a wide range is kept on an overdue row too.
+      when: overdue && t.red_on
+        ? ['Since ' + shortDate(t.red_on), ...(t.day_min !== t.day_max ? [dayRange(t)] : [])].join(' · ')
+        : dayRange(t),
       action: 'Open in Breeding',
       link: ['/animals/breeding'],
       query: { animal: t.animal_id },

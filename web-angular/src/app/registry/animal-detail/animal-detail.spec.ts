@@ -32,7 +32,10 @@ async function mount(d: AnimalDetail) {
   return (await mountFixture(() => d)).nativeElement as HTMLElement;
 }
 
-async function mountFixture(byId: (id: string) => AnimalDetail) {
+async function mountFixture(
+  byId: (id: string) => AnimalDetail,
+  health: { tasks: unknown[]; withdrawals: unknown[] } = { tasks: [], withdrawals: [] },
+) {
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
@@ -41,7 +44,7 @@ async function mountFixture(byId: (id: string) => AnimalDetail) {
         useValue: {
           animal: vi.fn(async (id: string) => byId(id)),
           list: vi.fn(async () => ({ items: [] })),
-          healthGet: vi.fn(async () => ({ tasks: [], withdrawals: [] })),
+          healthGet: vi.fn(async () => health),
           identifierValues: vi.fn(async () => ({ observed_by: [], acquired_from: [], sire_ref: [] })),
         },
       },
@@ -119,12 +122,12 @@ describe('AnimalDetailView Breeding tab', () => {
     const tab = await openBreeding(
       await mount(detail({
         reproduction: view, breeding_entry: false,
-        reproduction_notes: [{ code: 'wide_window', text: 'The service date is a range, so every date from it is too.' }],
+        reproduction_notes: [{ code: 'wide_window', text: 'The calving window is wider because the service date is known to the month only.' }],
       })),
     );
     const notes = [...tab.querySelectorAll('[data-role="note"]')];
     expect(notes).toHaveLength(1);
-    expect(notes[0].textContent).toContain('The service date is a range, so every date from it is too.');
+    expect(notes[0].textContent).toContain('The calving window is wider because the service date is known to the month only.');
     expect(notes[0].querySelector('[appQualifier]')).not.toBeNull();
     expect(tab.querySelector('[data-role="this-pregnancy"] ~ [data-role="note"]')).not.toBeNull();
   });
@@ -172,6 +175,26 @@ describe('AnimalDetailView open breeding tasks', () => {
     const link = [...open!.querySelectorAll('a')].find((a) => a.textContent?.includes('Open in Breeding'));
     expect(link?.getAttribute('href')).toBe('/animals/breeding?animal=BD-0001');
     expect(open!.textContent).not.toContain('Open in Health');
+  });
+  it('lists the breeding row after the health row, each with its own link', async () => {
+    const f = await mountFixture(
+      () => detail({
+        reproduction: view, breeding_entry: false, reproduction_notes: [],
+        breeding_tasks: [{ kind: 'calving_watch', animal_id: 'BD-0001', standing: 'due', day_min: 288, day_max: 288, red_from: 319, red_on: '2026-12-17' }],
+      }),
+      { tasks: [{ id: 't1', kind: 'administration', standing: 'due', animal_id: 'BD-0001', instructions: 'Vaccine' }], withdrawals: [] },
+    );
+    // The health board is a second, optional read: let it land.
+    await tick(f);
+    const open = (f.nativeElement as HTMLElement).querySelector('[data-role="open-now"]')!;
+    const health = open.querySelector('[data-role="open-task"]')!;
+    const breeding = open.querySelector('[data-role="open-breeding-task"]')!;
+    expect(health.textContent).toContain('Vaccine');
+    expect(breeding.textContent).toContain('Calving watch');
+    expect(health.compareDocumentPosition(breeding) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const links = [...open.querySelectorAll('a')].map((a) => a.textContent?.trim());
+    expect(links).toContain('Open in Health');
+    expect(links).toContain('Open in Breeding');
   });
   it('draws no open section when there are no breeding tasks and nothing from health', async () => {
     const el = await mount(detail({ reproduction: view, breeding_entry: false, breeding_tasks: [] }));
