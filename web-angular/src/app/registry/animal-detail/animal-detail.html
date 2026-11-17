@@ -71,11 +71,11 @@
 
         <div appTabBar class="detail-tabs" aria-label="Record">
           @for (t of tabs(); track t.id) {
-            <button type="button" role="tab" [attr.data-tab]="t.id" [attr.aria-selected]="tab() === t.id" [attr.tabindex]="tab() === t.id ? 0 : -1" (click)="selectTab(t.id)">{{ t.label }}</button>
+            <button type="button" role="tab" [attr.data-tab]="t.id" [attr.aria-selected]="current() === t.id" [attr.tabindex]="current() === t.id ? 0 : -1" (click)="selectTab(t.id)">{{ t.label }}</button>
           }
         </div>
 
-        @switch (tab()) {
+        @switch (current()) {
           @case ('events') {
             <app-event-list [events]="d.events" [newestFirst]="true" />
           }

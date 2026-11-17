@@ -29,13 +29,17 @@ const view = {
 };
 
 async function mount(d: AnimalDetail) {
+  return (await mountFixture(() => d)).nativeElement as HTMLElement;
+}
+
+async function mountFixture(byId: (id: string) => AnimalDetail) {
   TestBed.configureTestingModule({
     providers: [
       provideRouter([]),
       {
         provide: RegistryApi,
         useValue: {
-          animal: vi.fn(async () => d),
+          animal: vi.fn(async (id: string) => byId(id)),
           list: vi.fn(async () => ({ items: [] })),
           healthGet: vi.fn(async () => ({ tasks: [], withdrawals: [] })),
           identifierValues: vi.fn(async () => ({ observed_by: [], acquired_from: [], sire_ref: [] })),
@@ -47,7 +51,7 @@ async function mount(d: AnimalDetail) {
   f.componentRef.setInput('id', 'BD-0001');
   await tick(f);
   await tick(f);
-  return f.nativeElement as HTMLElement;
+  return f;
 }
 
 describe('AnimalDetailView reproduction badge', () => {
@@ -123,5 +127,20 @@ describe('AnimalDetailView Breeding tab', () => {
     const el = await mount(detail({ reproduction: null }));
     const labels = [...el.querySelectorAll('[data-tab]')].map((b) => b.textContent?.trim());
     expect(labels).toEqual(['Timeline', 'Breeding', 'Add an event', 'Correct a calving']);
+  });
+  it('falls back to Timeline when the next animal has no Breeding tab', async () => {
+    const bull = detail({ reproduction: null });
+    bull.animal = { ...bull.animal, id: 'BD-0002', sex: 'male' };
+    const f = await mountFixture((id) => (id === 'BD-0002' ? bull : detail({ reproduction: view, breeding_entry: false })));
+    const el = f.nativeElement as HTMLElement;
+    expect(await openBreeding(el)).not.toBeNull();
+    f.componentRef.setInput('id', 'BD-0002');
+    await tick(f);
+    await tick(f);
+    expect(el.querySelector('[data-role="serial"]')?.textContent).toContain('BD-0002');
+    expect(el.querySelector('[data-role="breeding-tab"]')).toBeNull();
+    const timeline = el.querySelector('[data-tab="events"]');
+    expect(timeline?.getAttribute('aria-selected')).toBe('true');
+    expect(timeline?.getAttribute('tabindex')).toBe('0');
   });
 });

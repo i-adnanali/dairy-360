@@ -62,7 +62,7 @@ const METHOD_WORDS: Record<CheckMethod, string> = {
 export class AnimalDetailView {
   private readonly drafts = inject(DraftRegistry);
   protected async selectTab(tab: Tab) {
-    if (tab === this.tab()) return;
+    if (tab === this.current()) return;
     if (!this.drafts.hasChanges() || (await this.drafts.request())) this.tab.set(tab);
   }
 
@@ -149,6 +149,10 @@ export class AnimalDetailView {
       { id: 'correct', label: 'Correct a calving' },
     ];
   });
+  /** The tab drawn: Timeline when this animal does not offer the chosen one. */
+  protected readonly current = computed<Tab>(() =>
+    this.tabs().some((t) => t.id === this.tab()) ? this.tab() : 'events',
+  );
 
   /** Bound as an input rather than an output, so a child can hand back a fresh
    * detail without this component re-fetching on a signal it cannot see. */
