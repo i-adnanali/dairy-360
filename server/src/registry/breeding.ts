@@ -175,11 +175,13 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     override_reason: null,
   };
   const warning = breedingWarning(eventsForAnimal(db, input.animal_id), candidate);
-  // Partial until Task 4 adds the two stage 3 flags: no stage 2 warning can be either.
-  const allowed: Partial<Record<BreedingOverriddenCheck, boolean | undefined>> = {
+  const allowed: Record<BreedingOverriddenCheck, boolean | undefined> = {
     ambiguous_service: input.allow_ambiguous_service,
     early_check: input.allow_early_check,
     check_without_service: input.allow_check_without_service,
+    // Task 4 wires the allow_* flags for the two stage 3 warnings.
+    no_heat_sign: undefined,
+    heat_after_positive: undefined,
   };
   if (warning && allowed[warning.check] !== true) {
     throw new RegistryError(warning.check, warning.message, warning.field);

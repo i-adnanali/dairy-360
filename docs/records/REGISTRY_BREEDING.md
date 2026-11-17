@@ -80,7 +80,7 @@ it. `null_observation` is given the narrow breeding payload (`watched_for`) here
 
 **Spec warnings left for later.** The 36-hour heat check and the gestational-heat check wait for heat entry (stage 3), because with no heat entry the first would fire on every service. The two calving-window checks are calving writes, not entries this stage opens (stage 4). The month-precision check needs a "the farm normally knows the day" setting that does not exist; open question 07 stays open, and the Breeding tab shows the widened range instead. The bull-exposure ceiling is a check on the calendar, not on a write (stage 3, with tasks).
 
-**One override column.** At most one stage 2 warning fires per event: a service can only trip `ambiguous_service`, and a check trips `check_without_service` (no service on file) or `early_check` (a service on file), never both. Stage 3's 36-hour heat check can fire on a service that is also ambiguous, so stage 3 must decide how to record two ([OPEN-066](../OPEN.md#open-066)).
+**One override column.** At most one stage 2 warning fires per event: a service can only trip `ambiguous_service`, and a check trips `check_without_service` (no service on file) or `early_check` (a service on file), never both. Stage 3's 36-hour heat check can fire on a service that is also ambiguous, so stage 3 decided how to record two: see [Stage 3](#stage-3-heat-entry-two-overrides-notes-and-tasks) ([OPEN-066](../OPEN.md#open-066), closed).
 
 **No correction from the page.** A wrong entry is corrected with `registry:breed --supersedes`; a Correct action on the page is not built ([OPEN-065](../OPEN.md#open-065)).
 
@@ -94,7 +94,7 @@ it. `null_observation` is given the narrow breeding payload (`watched_for`) here
 
 **Two warnings, not refusals.** `no_heat_sign` fires on a service with no heat sign before it; `heat_after_positive` fires on a heat recorded after a positive check. Each is unusual but possible: a service made without a seen heat, a heat seen on an animal later found pregnant. The farm may know better than the record, so the caller can save over each. The heat-sign warning does not apply to a bull exposure or a month-precision service, where the timing cannot be known.
 
-**Five notes.** The notes are worded from `deriveReproduction`'s answer, never from a second copy of a rule, and are computed on read.
+**Five notes.** A null observation reads as an absence, not evidence. A negative check inside a bull exposure is noted. Dry-off due while the pregnancy is unconfirmed is noted. A month-precision service shows a wider window. A note says when the latest record changed which service is counted. The notes are worded from `deriveReproduction`'s answer, never from a second copy of a rule, and are computed on read.
 
 **Tasks.** A task is computed from the derived state and is cleared only by an event. Nothing stores a task and nobody ticks one off by hand.
 
