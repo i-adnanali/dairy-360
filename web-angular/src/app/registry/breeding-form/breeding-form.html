@@ -1,9 +1,9 @@
 
-    <form data-page-layout="entry" [appWriteLock]="state" class="space-y-4" (submit)="onSubmit($event)">
+    <form data-page-layout="entry" [appWriteLock]="lock" class="space-y-4" (submit)="onSubmit($event)">
       <div appCard>
         <app-chip-group
           name="breeding-kind"
-          label="Service or pregnancy check"
+          label="What to record"
           [options]="kinds"
           [value]="kind()"
           (changed)="kind.set($any($event))"
@@ -20,6 +20,28 @@
               [options]="serviceTypes"
               [value]="serviceType()"
               (changed)="serviceType.set($any($event))"
+            />
+          </div>
+        } @else if (k === 'heat_observed') {
+          <div appCard>
+            <div appSectionLabel legend>What did you see?</div>
+            <app-chip-group
+              name="heat-sign"
+              label="What did you see?"
+              [options]="signs"
+              [value]="sign()"
+              (changed)="sign.set($any($event))"
+            />
+          </div>
+        } @else if (k === 'null_observation') {
+          <div appCard>
+            <div appSectionLabel legend>Watched for</div>
+            <app-chip-group
+              name="watched-for"
+              label="Watched for"
+              [options]="watchedFors"
+              [value]="watchedFor()"
+              (changed)="watchedFor.set($any($event))"
             />
           </div>
         } @else {
@@ -47,9 +69,9 @@
              not also under the date it names. -->
         <app-precision-date
           [label]="bullExposure() ? 'Bull went in' : 'Date'"
-          [allowTime]="!bullExposure()"
+          [allowTime]="allowTime()"
           [error]="
-            warning()
+            warnings().length
               ? null
               : (state.fieldError('occurred_on') ??
                 state.fieldError('date_precision') ??
@@ -93,13 +115,20 @@
 
         <!-- Outside the form-level error block, keyed on the code, as in the
              event form: these warnings name occurred_on, so they never reach
-             that block. -->
-        @if (warning()) {
+             that block. Each sentence shows here once: not under the date, and
+             not as WriteLock's red line (the form hands it `lock`, which hides
+             a warning). Two or more come back together; one button saves over
+             all of them. -->
+        @let ws = warnings();
+        @if (ws.length) {
           <div
             class="override-notice rounded-lg bg-surface-sunken px-3 py-2 text-sm text-content-primary"
             data-role="override"
+            role="alert"
           >
-            <p data-role="override-message">{{ state.error()?.message }}</p>
+            @for (w of ws; track $index) {
+              <p data-role="override-message" [class.mt-1]="!$first">{{ w.message }}</p>
+            }
             <!-- Optional, and stays optional, as in the event form. -->
             <label class="mt-2 block">
               <span class="mb-1 block text-xs font-medium">
@@ -118,7 +147,7 @@
               (click)="saveOver()"
               class="mt-2 font-medium underline"
             >
-              Save over this check
+              {{ ws.length > 1 ? 'Save over these checks' : 'Save over this check' }}
             </button>
             <p appHelp size="xs" class="mt-1">
               Saving over it writes the event and the fact that the check was written over. Her
@@ -137,7 +166,7 @@
               reason="breeding-submit-reason"
               [busy]="state.submitting()"
             >
-              {{ k === 'insemination' ? 'Save service' : 'Save check' }}
+              {{ saveLabel[k] }}
             </button>
           } @else {
             <app-session-required what="a breeding event" />

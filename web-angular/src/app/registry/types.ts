@@ -117,6 +117,8 @@ export type ReproductionBasis = 'observed' | 'inferred';
 export type ServiceType = 'ai' | 'natural_observed' | 'bull_exposure';
 export type CheckMethod = 'palpation' | 'ultrasound' | 'pag' | 'progesterone';
 export type CheckResult = 'positive' | 'negative';
+export type HeatSign = 'standing' | 'mucus' | 'restless' | 'other';
+export type WatchedFor = 'heat' | 'pregnancy_check';
 
 /** Mirrors ReproductionView in server/src/registry/types.ts, field for field. */
 export interface ReproductionView {
@@ -304,6 +306,12 @@ export interface WireError {
   error: string;
   field?: string;
   message: string;
+  /**
+   * Breeding entry only: every warning that fired, one sentence each. Two or
+   * more come back under the code `breeding_warnings`, with `message` their
+   * sentences joined by a space; one comes back under its own code.
+   */
+  warnings?: { check: string; message: string }[];
 }
 
 /** `GET /api/registry/storage` -- which database the server writes to. */

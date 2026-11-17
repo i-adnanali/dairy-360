@@ -190,6 +190,126 @@ describe('BreedingForm', () => {
     expect(req.request.body.override_reason).toBeNull();
   });
 
+  it('sends a heat with its sign and time', () => {
+    const { http, fixture, el } = mount();
+    choose(fixture, el, 'heat_observed', 'standing');
+    enterDate(fixture, el, '13 Nov 2026');
+    type(fixture, el, 'app-precision-date [data-role="time"]', '05:30');
+    expect(el.querySelector('[data-role="submit"]')?.textContent?.trim()).toBe('Save heat');
+    click(el, '[data-role="submit"]');
+
+    const b = http.expectOne(URL).request.body;
+    expect(b.type).toBe('heat_observed');
+    expect(b.payload).toEqual({ sign: 'standing' });
+    expect(b.occurred_on).toBe('2026-11-13');
+    expect(b.date_precision).toBe('day');
+    expect(b.occurred_time).toBe('05:30');
+  });
+
+  it('sends nothing seen with what was watched for', () => {
+    const { http, fixture, el } = mount();
+    choose(fixture, el, 'null_observation');
+    // Scoped: the kind chips carry a `pregnancy_check` value too.
+    click(el, '[data-role="watched-for-group"] [data-chip="pregnancy_check"]');
+    fixture.detectChanges();
+    enterDate(fixture, el, '13 Nov 2026');
+    // Dated to the day: no time is offered.
+    expect(el.querySelector('app-precision-date [data-role="time"]')).toBeNull();
+    click(el, '[data-role="submit"]');
+
+    const b = http.expectOne(URL).request.body;
+    expect(b.type).toBe('null_observation');
+    expect(b.payload).toEqual({ watched_for: 'pregnancy_check' });
+    expect(b.occurred_on).toBe('2026-11-13');
+    expect(b.occurred_time).toBeNull();
+  });
+
+  it('opens on the kind it is given', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withFetch()), provideHttpClientTesting(), provideRouter([])],
+    });
+    TestBed.inject(Session).set('recall', 'adnan');
+    const fixture = TestBed.createComponent(BreedingForm);
+    fixture.componentRef.setInput('animalId', 'BD-0001');
+    fixture.componentRef.setInput('initialKind', 'heat_observed');
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-chip="heat_observed"]')?.getAttribute('aria-checked')).toBe('true');
+    expect(el.textContent).toContain('What did you see?');
+  });
+
+  const AMBIGUOUS =
+    'BD-0001 has 1 earlier service in this case, the first on 2026-10-20, and nothing recorded since rules it out: no heat, no negative check, no calving or loss. Saved, this service joins that case and her calving window widens to cover it.';
+  const NO_HEAT =
+    'No heat sign is recorded for BD-0001 in the 36 hours before this service, or on its day or the day before when a time is missing. Saved, the service counts as it is; record the heat too if one was seen.';
+  const FLAGS = [
+    'allow_ambiguous_service',
+    'allow_early_check',
+    'allow_check_without_service',
+    'allow_no_heat_sign',
+    'allow_heat_after_positive',
+  ];
+  const flagsOf = (b: Record<string, unknown>) => Object.fromEntries(FLAGS.map((f) => [f, b[f]]));
+
+  it('two warnings show both sentences and one button sends both flags', async () => {
+    const { http, fixture, el } = mount();
+    choose(fixture, el, 'insemination', 'ai');
+    enterDate(fixture, el, '13 Nov 2026');
+    click(el, '[data-role="submit"]');
+    const twoWarnings = {
+      error: 'breeding_warnings',
+      field: 'occurred_on',
+      message: `${AMBIGUOUS} ${NO_HEAT}`,
+      warnings: [
+        { check: 'ambiguous_service', message: AMBIGUOUS },
+        { check: 'no_heat_sign', message: NO_HEAT },
+      ],
+    };
+    http.expectOne(URL).flush(twoWarnings, { status: 400, statusText: 'Bad Request' });
+    await settle(fixture);
+
+    const shown = [...el.querySelectorAll('[data-role="override-message"]')].map((p) =>
+      p.textContent?.trim(),
+    );
+    expect(shown).toEqual([AMBIGUOUS, NO_HEAT]);
+    // Each sentence once: in the notice, not again as the date's red error.
+    expect(el.querySelector('app-precision-date [data-role="error"]')).toBeNull();
+    expect(el.textContent?.split(AMBIGUOUS)).toHaveLength(2);
+    expect(el.textContent?.split(NO_HEAT)).toHaveLength(2);
+    expect(el.querySelectorAll('[data-role="save-over"]')).toHaveLength(1);
+    expect(el.querySelector('[data-role="save-over"]')?.textContent?.trim()).toBe(
+      'Save over these checks',
+    );
+    click(el, '[data-role="save-over"]');
+
+    const second = http.expectOne(URL);
+    expect(flagsOf(second.request.body)).toEqual({
+      allow_ambiguous_service: true,
+      allow_early_check: false,
+      allow_check_without_service: false,
+      allow_no_heat_sign: true,
+      allow_heat_after_positive: false,
+    });
+    second.flush(twoWarnings, { status: 400, statusText: 'Bad Request' });
+    await settle(fixture);
+
+    click(el, '[data-role="submit"]');
+    const third = http.expectOne(URL);
+    expect(Object.values(flagsOf(third.request.body))).toEqual([false, false, false, false, false]);
+  });
+
+  it('one warning still reads Save over this check', async () => {
+    const { el } = await tripEarlyCheck();
+    const sentence = 'A check by hand is not relied on before day 46. This one is on day 35.';
+    expect(el.querySelector('[data-role="save-over"]')?.textContent?.trim()).toBe(
+      'Save over this check',
+    );
+    expect(el.querySelectorAll('[data-role="override-message"]')).toHaveLength(1);
+    // Shown once, in the notice; the date carries no red copy of it.
+    expect(el.querySelector('app-precision-date [data-role="error"]')).toBeNull();
+    expect(el.textContent?.split(sentence)).toHaveLength(2);
+  });
+
   it('on success resets, hands back the animal and announces the write', async () => {
     const { http, fixture, el } = mount();
     let got: unknown = null;
