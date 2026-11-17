@@ -102,18 +102,18 @@ it. `null_observation` is given the narrow breeding payload (`watched_for`) here
 
 | Number | Value | Kind |
 | --- | --- | --- |
-| Heat watch opens | day 18 | farm-tunable default |
+| Heat watch opens | day 18 (`BREEDING_TASK_DAYS.heatWatchFrom`) | farm-tunable default |
 | Heat watch red | `T >= 24` (`GESTATION.bredThrough`) | biological constant |
 | Pregnancy check opens | day 28 (`CHECK_RELIABLE_FROM.pag.positive`) | biological constant |
-| Pregnancy check red | `T > 60` | farm-tunable default |
+| Pregnancy check red | `T > 60` (`BREEDING_TASK_DAYS.checkRedAfter`) | farm-tunable default |
 | Dry-off opens | day 248 (`GESTATION.expected - GESTATION.dryOffLead`) | farm-tunable default |
 | Dry-off red | `T >= 264` (`GESTATION.windowOpens - GESTATION.closeUpLead`) | farm-tunable default |
 | Calving watch opens | day 285 (`GESTATION.windowOpens`) | breed-specific |
-| Calving watch red | `T > 318` | farm-tunable default (low confidence) |
-| Overdue review opens | day 333 | farm-tunable default |
-| Overdue review red | `T > 346` | biological constant (low confidence) |
-| Heat sign counts | within 36 hours before the service | farm-tunable default |
-| Heat sign fallback, either time missing | same calendar day or the day before | farm-tunable default |
+| Calving watch red | `T > 318` (`BREEDING_TASK_DAYS.calvingWatchRedAfter`) | farm-tunable default (low confidence) |
+| Overdue review opens | day 333 (`BREEDING_TASK_DAYS.overdueFrom`) | farm-tunable default |
+| Overdue review red | `T > 346` (`BREEDING_TASK_DAYS.overdueRedAfter`) | biological constant (low confidence) |
+| Heat sign counts | within 36 hours before the service (`HEAT_SIGN.hoursBefore`) | farm-tunable default |
+| Heat sign fallback, either time missing | same calendar day or the day before (`HEAT_SIGN.calendarDaysBack`) | farm-tunable default |
 
 A recheck is amber and never red.
 

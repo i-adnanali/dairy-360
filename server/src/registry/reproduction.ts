@@ -343,14 +343,16 @@ export function deriveReproduction(opts: {
  * Would the most recently recorded event, taken away, have changed which
  * service this pregnancy is counted from? That is the case, not only its
  * anchor: true when both views exist and any of service.event_id,
- * services_in_case or conception_earliest differ between them.
+ * services_in_case or conception_earliest differ between them. The earlier
+ * view is the raw events minus the latest recorded, with supersession applied
+ * as usual, so a record that the removed one corrected comes back.
  */
 export function attributionChanged(opts: { events: RegistryEvent[]; asOf: string; inMilk: boolean }): boolean {
-  const effective = effectiveEvents(opts.events).filter((e) => e.occurred_on <= opts.asOf);
-  if (effective.length === 0) return false;
-  const latest = effective.reduce((a, b) => (b.recorded_at > a.recorded_at ? b : a));
-  const withIt = deriveReproduction({ ...opts, events: effective });
-  const without = deriveReproduction({ ...opts, events: effective.filter((e) => e !== latest) });
+  const raw = opts.events.filter((e) => e.occurred_on <= opts.asOf);
+  if (raw.length === 0) return false;
+  const latest = raw.reduce((a, b) => (b.recorded_at > a.recorded_at ? b : a));
+  const withIt = deriveReproduction({ ...opts, events: raw });
+  const without = deriveReproduction({ ...opts, events: raw.filter((e) => e !== latest) });
   return (
     withIt !== null &&
     without !== null &&

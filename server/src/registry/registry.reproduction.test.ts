@@ -27,7 +27,7 @@ function ev(over: Partial<RegistryEvent> & Pick<RegistryEvent, 'type'>): Registr
     source_ref: null,
     observed_by: null,
     recorded_by: 'tester',
-    recorded_at: `2026-01-01T00:00:${String(seq % 60).padStart(2, '0')}.000Z`,
+    recorded_at: `2026-01-01T${String(Math.floor(seq / 3600)).padStart(2, '0')}:${String(Math.floor(seq / 60) % 60).padStart(2, '0')}:${String(seq % 60).padStart(2, '0')}.000Z`,
     supersedes_id: null,
     override_checks: [],
     override_reason: null,
@@ -232,4 +232,18 @@ test('attributionChanged: a new insemination recorded last changes it', () => {
   const a = svc('2026-06-02');
   const b = svc('2026-09-14');   // recorded last, after a heat between the two
   assert.equal(attributionChanged({ events: [a, heat('2026-06-23'), b], asOf: AS_OF, inMilk: false }), true);
+});
+
+test('heat sign: the 36-hour boundary', () => {
+  const at = (heatTime: string, aiTime: string) =>
+    sign([timed(heat('2026-11-10'), heatTime), timed(svc('2026-11-11'), aiTime)]);
+  assert.equal(at('06:00', '18:00'), 'seen');       // exactly 36 h
+  assert.equal(at('05:59', '18:00'), 'not_seen');   // 36 h 1 min
+  assert.equal(sign([timed(heat('2026-11-11'), '10:00'), timed(svc('2026-11-11'), '10:00')]), 'seen');   // gap 0
+});
+
+test('attributionChanged: a correction recorded last brings the corrected record back', () => {
+  const wrong = svc('2026-06-02');
+  const right = svc('2026-07-20', { supersedes_id: wrong.id });   // recorded last
+  assert.equal(attributionChanged({ events: [wrong, right], asOf: AS_OF, inMilk: false }), true);
 });
