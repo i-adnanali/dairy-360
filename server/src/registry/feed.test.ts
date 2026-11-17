@@ -283,6 +283,36 @@ test("feed integrity detects relational drift without flagging unknown quantitie
   );
   f.db.close();
 });
+/** Give a current database the events table it had at schema version 7, rows kept. */
+function rewindEventsTableToVersion7(db: ReturnType<typeof freshDb>): void {
+  const rows = db.prepare("SELECT * FROM registry_animal_events").all() as Record<string, unknown>[];
+  const scratch = new Database(":memory:");
+  scratch.pragma("foreign_keys = OFF");
+  for (let i = 0; i < 7; i++) MIGRATIONS[i].up(scratch);
+  const ddl = scratch
+    .prepare("SELECT sql FROM sqlite_master WHERE tbl_name = 'registry_animal_events' AND sql IS NOT NULL ORDER BY type = 'table' DESC")
+    .all() as { sql: string }[];
+  scratch.close();
+  db.pragma("foreign_keys = OFF");
+  db.exec("DROP TABLE registry_animal_events");
+  for (const d of ddl) db.exec(d.sql);
+  const insert = db.prepare(
+    `INSERT INTO registry_animal_events
+       (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+        source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+        override_check, override_reason)
+     VALUES
+       (@id, @animal_id, @type, @occurred_on, @occurred_time, @date_precision, @payload,
+        @source_form, @source_ref, @observed_by, @recorded_by, @recorded_at, @supersedes_id,
+        @override_check, @override_reason)`,
+  );
+  for (const r of rows) {
+    const checks = JSON.parse(r.override_checks as string) as string[];
+    insert.run({ ...r, override_check: checks[0] ?? null });
+  }
+  db.pragma("foreign_keys = ON");
+}
+
 test("v7 upgrade adds feed while preserving populated milk, animal and payroll records", () => {
   const f = staffedHerd(AS_OF);
   const tables = [
@@ -308,10 +338,14 @@ test("v7 upgrade adds feed while preserving populated milk, animal and payroll r
   // Remove later health schema too: this fixture simulates a genuine v7 database.
   for (const t of ['attachment_links','revisions','requests','attachments','records'])
     f.db.exec('DROP TABLE registry_health_' + t);
+  // The fixture is current, so the events table is at its newest shape; migrations
+  // 10 to 12 rebuild it from the shape before them. Put it back to the version-7
+  // shape (migration 12 reads override_check, which only an older table has).
+  rewindEventsTableToVersion7(f.db);
   f.db.pragma("user_version = 7");
   const result = applyRegistrySchema(f.db);
-  assert.equal(result.applied, 4);
-  assert.equal(result.to, 11);
+  assert.equal(result.applied, 5);
+  assert.equal(result.to, 12);
   assert.deepEqual(
     tables.map((t) => f.db.prepare("SELECT * FROM " + t).all()),
     before,

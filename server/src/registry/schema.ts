@@ -1463,6 +1463,123 @@ BEGIN
 END;
 `;
 
+// Migration 12: one event can be saved over several warnings. The single
+// override_check column becomes override_checks, a JSON list of names (seven are
+// known). The table is rebuilt once more (the names are spelled out, not
+// interpolated, for the same reason as migrations 10 and 11), and the
+// append-only triggers are recreated with it.
+const MIGRATION_12_OVERRIDE_LIST = `
+CREATE TABLE registry_animal_events_new (
+  id             TEXT PRIMARY KEY,
+  animal_id      TEXT NOT NULL REFERENCES registry_animals(id),
+  type           TEXT NOT NULL CHECK (
+                   type IN ('birth','acquired','calving','dry_off','departure','note',
+                            'heat_observed','insemination','pregnancy_check','abortion','null_observation')
+                 ),
+  occurred_on    TEXT NOT NULL,
+  occurred_time  TEXT,
+  date_precision TEXT NOT NULL CHECK (
+                   date_precision IN ('day','month','year','estimated')
+                 ),
+  payload        TEXT NOT NULL,
+  source_form    TEXT NOT NULL CHECK (
+                   source_form IN ('daily_herd_sheet','cycle_card','direct_entry','import','recall')
+                 ),
+  source_ref     TEXT,
+  observed_by    TEXT,
+  recorded_by    TEXT NOT NULL,
+  recorded_at    TEXT NOT NULL,
+  supersedes_id  TEXT REFERENCES registry_animal_events(id),
+
+  -- Migration 12: one event can be saved over several warnings, so the single
+  -- override_check becomes a JSON list of names. override_reason stays: one
+  -- optional sentence about the whole override.
+  override_checks TEXT NOT NULL DEFAULT '[]',
+  override_reason TEXT,
+
+  CONSTRAINT occurred_on_is_a_date
+    CHECK (occurred_on GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'),
+  CONSTRAINT time_only_at_day_precision
+    CHECK (occurred_time IS NULL OR date_precision = 'day'),
+  CONSTRAINT occurred_time_is_hh_mm
+    CHECK (occurred_time IS NULL OR occurred_time GLOB '[0-2][0-9]:[0-5][0-9]'),
+  CONSTRAINT month_precision_dated_first
+    CHECK (date_precision <> 'month' OR substr(occurred_on, 9, 2) = '01'),
+  CONSTRAINT year_precision_dated_jan_first
+    CHECK (date_precision <> 'year' OR substr(occurred_on, 6, 5) = '01-01'),
+  CONSTRAINT estimated_precision_dated_jan_first
+    CHECK (date_precision <> 'estimated' OR substr(occurred_on, 6, 5) = '01-01'),
+  CONSTRAINT no_self_supersede
+    CHECK (supersedes_id IS NULL OR supersedes_id <> id),
+
+  -- The list is a JSON array. The names inside it are checked by the
+  -- registry_animal_events_override_known trigger below: SQLite forbids a
+  -- subquery in a CHECK, and json_each is one.
+  CONSTRAINT override_checks_is_a_list
+    CHECK (json_valid(override_checks) AND json_type(override_checks) = 'array'),
+  -- A reason with no check is prose about a guard nobody stepped past. The
+  -- converse is fine and deliberate: the flag is load-bearing, the prose is
+  -- optional (see OverrideRecord in types.ts).
+  CONSTRAINT override_reason_needs_a_check
+    CHECK (override_reason IS NULL OR json_array_length(override_checks) > 0),
+  -- A note is always allowed after a departure, so it can never carry an
+  -- override.
+  CONSTRAINT note_never_overrides
+    CHECK (type <> 'note' OR json_array_length(override_checks) = 0)
+);
+
+INSERT INTO registry_animal_events_new
+  (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+   source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+   override_checks, override_reason)
+SELECT
+  id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
+   source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
+   CASE WHEN override_check IS NULL THEN '[]' ELSE json_array(override_check) END,
+   override_reason
+FROM registry_animal_events;
+
+DROP TABLE registry_animal_events;
+ALTER TABLE registry_animal_events_new RENAME TO registry_animal_events;
+
+CREATE UNIQUE INDEX idx_registry_events_supersedes
+  ON registry_animal_events(supersedes_id)
+  WHERE supersedes_id IS NOT NULL;
+CREATE INDEX idx_registry_events_animal
+  ON registry_animal_events(animal_id, occurred_on);
+CREATE INDEX idx_registry_events_type
+  ON registry_animal_events(type);
+
+CREATE TRIGGER registry_animal_events_no_update
+BEFORE UPDATE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+
+CREATE TRIGGER registry_animal_events_no_delete
+BEFORE DELETE ON registry_animal_events
+BEGIN
+  SELECT RAISE(ABORT, 'registry_animal_events is append-only: correct by superseding event');
+END;
+
+CREATE TRIGGER registry_animal_events_override_known
+BEFORE INSERT ON registry_animal_events
+WHEN json_valid(NEW.override_checks)
+ AND json_type(NEW.override_checks) = 'array'
+ AND EXISTS (
+       SELECT 1 FROM json_each(NEW.override_checks)
+        WHERE value IS NOT 'near_duplicate_calving'
+          AND value IS NOT 'animal_departed'
+          AND value IS NOT 'ambiguous_service'
+          AND value IS NOT 'early_check'
+          AND value IS NOT 'check_without_service'
+          AND value IS NOT 'no_heat_sign'
+          AND value IS NOT 'heat_after_positive')
+BEGIN
+  SELECT RAISE(ABORT, 'override_check_is_known');
+END;
+`;
+
 export const MIGRATIONS: readonly Migration[] = [
   { up: (db) => db.exec(MIGRATION_1_REGISTRY) },
   { up: (db) => db.exec(MIGRATION_2_ESTIMATED_JAN_FIRST), rebuildsTables: true },
@@ -1492,6 +1609,9 @@ export const MIGRATIONS: readonly Migration[] = [
   // Rebuilds registry_animal_events to widen override_check_is_known to five
   // names; same self-referencing foreign key, hence `rebuildsTables`.
   { up: (db) => db.exec(MIGRATION_11_BREEDING_OVERRIDES), rebuildsTables: true },
+  // Replaces override_check with the override_checks list; same self-referencing
+  // foreign key, hence `rebuildsTables`.
+  { up: (db) => db.exec(MIGRATION_12_OVERRIDE_LIST), rebuildsTables: true },
 ];
 
 /** The version a fully-migrated database reports. */

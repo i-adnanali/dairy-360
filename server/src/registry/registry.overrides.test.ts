@@ -35,7 +35,7 @@ const PROV = { source_form: 'recall' as const, recorded_by: 'adnan' };
 // so every assertion below is unchanged by the move -- which is the point: the
 // storage changed and the guarantee did not.
 const overrideOf = (e: RegistryEvent): OverrideRecord | null =>
-  e.override_check === null ? null : { check: e.override_check, reason: e.override_reason };
+  e.override_checks.length === 0 ? null : { checks: e.override_checks, reason: e.override_reason };
 
 function latest(db: ReturnType<typeof freshDb>, animalId: string, type: string): RegistryEvent {
   const all = effectiveEvents(eventsForAnimal(db, animalId)).filter((e) => e.type === type);
@@ -87,7 +87,7 @@ test('a calving inside the window, allowed explicitly, records WHICH check it st
 
   const o = overrideOf(latest(db, 'BD-0001', 'calving'));
   assert.deepEqual(o, {
-    check: 'near_duplicate_calving',
+    checks: ['near_duplicate_calving'],
     reason: 'twin born the following month, confirmed against the cycle card',
   });
 });
@@ -144,7 +144,7 @@ test('a reason is optional: the flag is what is load-bearing', () => {
     allow_near_duplicate: true,
   });
   assert.deepEqual(overrideOf(latest(db, 'BD-0001', 'calving')), {
-    check: 'near_duplicate_calving',
+    checks: ['near_duplicate_calving'],
     reason: null,
   });
 });
@@ -178,7 +178,7 @@ test('a dry_off after a departure, allowed explicitly, records the override', ()
     override_reason: 'sold in May but stayed on the farm until August',
   });
   assert.deepEqual(overrideOf(latest(db, 'BD-0001', 'dry_off')), {
-    check: 'animal_departed',
+    checks: ['animal_departed'],
     reason: 'sold in May but stayed on the farm until August',
   });
 });
@@ -255,7 +255,7 @@ test('a correction records its OWN override, and does not inherit the superseded
 
 test('an override naming an unknown check is refused', () => {
   assert.throws(
-    () => assertOverride({ check: 'made_it_up', reason: null }),
+    () => assertOverride({ checks: ['made_it_up'], reason: null }),
     /must be one of near_duplicate_calving \| animal_departed/,
   );
 });
@@ -265,7 +265,7 @@ test('an override with an unknown key is refused', () => {
   // undefined, which is the same silent-wrong-value class rejectUnknownKeys
   // exists for.
   assert.throws(
-    () => assertOverride({ check: 'animal_departed', why: 'typo for reason' }),
+    () => assertOverride({ checks: ['animal_departed'], why: 'typo for reason' }),
     /unknown payload key\(s\) 'why'/,
   );
 });
@@ -306,7 +306,7 @@ test('appendEvent REFUSES an override on a note, because a note has no guard', (
         occurred_on: '2024-09-01',
         date_precision: 'month',
         payload: { text: 'hi' },
-        override: { check: 'animal_departed', reason: null },
+        override: { checks: ['animal_departed'], reason: null },
         provenance: PROV,
       }),
     /a note is always allowed/,
@@ -338,21 +338,21 @@ test('the DATABASE refuses an unknown check and a reason with no check', () => {
         `INSERT INTO registry_animal_events
            (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
             source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
-            override_check, override_reason)
+            override_checks, override_reason)
          VALUES
            (@id, @animal_id, @type, @occurred_on, NULL, @date_precision, @payload,
             @source_form, @source_ref, @observed_by, @recorded_by, @recorded_at, @supersedes_id,
-            @override_check, @override_reason)`,
+            @override_checks, @override_reason)`,
       )
-      .run({ ...row, override_check: null, override_reason: null, ...extra });
+      .run({ ...row, override_checks: '[]', override_reason: null, ...extra });
 
-  assert.throws(() => insert({ override_check: 'made_it_up' }), /override_check_is_known/);
+  assert.throws(() => insert({ override_checks: '["made_it_up"]' }), /override_check_is_known/);
   assert.throws(
     () => insert({ override_reason: 'prose about nothing' }),
     /override_reason_needs_a_check/,
   );
   assert.throws(
-    () => insert({ type: 'note', payload: '{"text":"hi"}', override_check: 'animal_departed' }),
+    () => insert({ type: 'note', payload: '{"text":"hi"}', override_checks: '["animal_departed"]' }),
     /note_never_overrides/,
   );
 });
@@ -380,14 +380,22 @@ test('a recorded override survives a projection rebuild untouched', () => {
 
 test('assertOverride accepts the three breeding checks and still refuses an unknown one', () => {
   for (const check of ['ambiguous_service', 'early_check', 'check_without_service']) {
-    assert.deepEqual(assertOverride({ check, reason: null }), { check, reason: null });
+    assert.deepEqual(assertOverride({ checks: [check], reason: null }), { checks: [check], reason: null });
   }
-  assert.throws(() => assertOverride({ check: 'heat_missing', reason: null }));
+  assert.throws(() => assertOverride({ checks: ['heat_missing'], reason: null }));
 });
 
 test('assertOverride accepts the two stage 3 heat checks', () => {
   for (const check of ['no_heat_sign', 'heat_after_positive']) {
-    assert.deepEqual(assertOverride({ check, reason: null }), { check, reason: null });
+    assert.deepEqual(assertOverride({ checks: [check], reason: null }), { checks: [check], reason: null });
   }
-  assert.throws(() => assertOverride({ check: 'heat_missing', reason: null }));
+  assert.throws(() => assertOverride({ checks: ['heat_missing'], reason: null }));
+});
+
+test('assertOverride keeps a list of two names and refuses a name twice', () => {
+  assert.deepEqual(
+    assertOverride({ checks: ['ambiguous_service', 'no_heat_sign'], reason: 'both' }),
+    { checks: ['ambiguous_service', 'no_heat_sign'], reason: 'both' },
+  );
+  assert.throws(() => assertOverride({ checks: ['early_check', 'early_check'], reason: null }), /twice/);
 });

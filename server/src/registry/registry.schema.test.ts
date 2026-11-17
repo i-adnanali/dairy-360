@@ -538,17 +538,17 @@ function dbAtVersion1(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('a fresh database lands on the current target version, now 11', () => {
+test('a fresh database lands on the current target version, now 12', () => {
   // The literal is deliberate and this test is meant to fail when a migration is
   // added: it forces whoever adds one to state the new number here rather than
   // letting TARGET_VERSION verify itself against itself.
   const db = freshDb();
   assert.equal(db.pragma('user_version', { simple: true }), TARGET_VERSION);
-  assert.equal(TARGET_VERSION, 11);
+  assert.equal(TARGET_VERSION, 12);
   db.close();
 });
 
-test('migrations 2 through 11 upgrade a v1 database and PRESERVE its rows', () => {
+test('migrations 2 through 12 upgrade a v1 database and PRESERVE its rows', () => {
   // The rebuild is create-copy-drop-rename. The copy is the part that would
   // silently lose data if it were wrong, so it is tested with data present --
   // even though the real database was empty when this shipped.
@@ -570,13 +570,13 @@ test('migrations 2 through 11 upgrade a v1 database and PRESERVE its rows', () =
 
   const result = runMigrations(db);
   assert.equal(result.from, 1);
-  assert.equal(result.to, 11);
+  assert.equal(result.to, 12);
   assert.equal(
     result.applied,
-    10,
+    11,
     'the estimated-convention rebuild, the milking table, the override columns, ' +
       'the four sales tables, the six labour tables, the staff-destination rebuild, ' +
-      'the feed tables, the health tables, the breeding-types rebuild AND the override-vocabulary rebuild',
+      'the feed tables, the health tables, the breeding-types rebuild, the override-vocabulary rebuild AND the override-list rebuild',
   );
 
   const rows = db
@@ -674,23 +674,23 @@ test('migration 4 MOVES a payload override into the columns, and out of the payl
 
   const result = runMigrations(db);
   assert.equal(result.from, 3);
-  assert.equal(result.to, 11);
+  assert.equal(result.to, 12);
   assert.equal(
     result.applied,
-    8,
+    9,
     'the override rebuild, the sales tables, the labour tables, the staff rebuild, ' +
-      'the feed tables, the health tables, the breeding-types rebuild and the override-vocabulary rebuild',
+      'the feed tables, the health tables, the breeding-types rebuild, the override-vocabulary rebuild and the override-list rebuild',
   );
 
   const rows = db
     .prepare(
-      `SELECT id, payload, override_check, override_reason, supersedes_id
+      `SELECT id, payload, override_checks, override_reason, supersedes_id
          FROM registry_animal_events ORDER BY id`,
     )
     .all() as {
     id: string;
     payload: string;
-    override_check: string | null;
+    override_checks: string;
     override_reason: string | null;
     supersedes_id: string | null;
   }[];
@@ -699,28 +699,28 @@ test('migration 4 MOVES a payload override into the columns, and out of the payl
     {
       id: 'aevt_1',
       payload: '{"notes":null,"reason":null}',
-      override_check: 'animal_departed',
+      override_checks: '["animal_departed"]',
       override_reason: 'stayed on until August',
       supersedes_id: null,
     },
     {
       id: 'aevt_2',
       payload: '{"notes":null,"reason":null}',
-      override_check: 'animal_departed',
+      override_checks: '["animal_departed"]',
       override_reason: null,
       supersedes_id: null,
     },
     {
       id: 'aevt_3',
       payload: '{"notes":null,"reason":"scheduled"}',
-      override_check: null,
+      override_checks: '[]',
       override_reason: null,
       supersedes_id: null,
     },
     {
       id: 'aevt_4',
       payload: '{"text":"hello"}',
-      override_check: null,
+      override_checks: '[]',
       override_reason: null,
       supersedes_id: 'aevt_3',
     },
@@ -1377,15 +1377,24 @@ test('migration 10: every existing row survives unchanged, with its triggers and
   ins.run(row('aevt_06', 'note', '2023-03-03'));
   ins.run(row('aevt_07', 'note', '2023-03-04', { sup: 'aevt_06' }));
 
+  // Migration 12 turns override_check into the override_checks list, so the
+  // override is compared as a list; every other column is compared as stored.
   const snapshot = () =>
-    db.prepare(`SELECT * FROM registry_animal_events ORDER BY id`).all();
+    (db.prepare(`SELECT * FROM registry_animal_events ORDER BY id`).all() as Record<string, unknown>[]).map(
+      ({ override_check, override_checks, ...rest }) => ({
+        ...rest,
+        override: override_checks !== undefined
+          ? JSON.parse(override_checks as string)
+          : override_check === null ? [] : [override_check],
+      }),
+    );
   const before = snapshot();
   assert.equal(before.length, 7);
 
   const result = runMigrations(db);
   assert.equal(result.from, 9);
-  assert.equal(result.to, 11);
-  assert.equal(result.applied, 2);
+  assert.equal(result.to, 12);
+  assert.equal(result.applied, 3);
 
   assert.deepEqual(snapshot(), before, 'every column of every row is unchanged');
 
@@ -1403,6 +1412,7 @@ test('migration 10: every existing row survives unchanged, with its triggers and
   assert.deepEqual(names('trigger').sort(), [
     'registry_animal_events_no_delete',
     'registry_animal_events_no_update',
+    'registry_animal_events_override_known',
   ]);
   assert.throws(
     () => db.prepare(`UPDATE registry_animal_events SET recorded_by = 'y' WHERE id = 'aevt_01'`).run(),
@@ -1423,8 +1433,8 @@ test('migration 10: every existing row survives unchanged, with its triggers and
   db.close();
 });
 
-test('the schema version is 11', () => {
-  assert.equal(TARGET_VERSION, 11);
+test('the schema version is 12', () => {
+  assert.equal(TARGET_VERSION, 12);
 });
 
 // ---------------------------------------------------------------------------
@@ -1442,19 +1452,15 @@ function dbAtVersion10(): ReturnType<typeof freshDb> {
   return db;
 }
 
-test('TARGET_VERSION is 11', () => {
-  assert.equal(TARGET_VERSION, 11);
-});
-
 test('migration 11 lets an event carry a breeding override', () => {
   const db = freshDb();
   addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
   const ins = db.prepare(
-    `INSERT INTO registry_animal_events (id, animal_id, type, occurred_on, date_precision, payload, source_form, recorded_by, recorded_at, override_check)
+    `INSERT INTO registry_animal_events (id, animal_id, type, occurred_on, date_precision, payload, source_form, recorded_by, recorded_at, override_checks)
      VALUES (?, 'BD-0001', 'insemination', '2026-01-21', 'day', '{}', 'recall', 't', '2026-01-21T00:00:00.000Z', ?)`,
   );
-  ins.run('aevt_ok', 'ambiguous_service');
-  assert.throws(() => ins.run('aevt_bad', 'heat_missing'), /override_check_is_known/);
+  ins.run('aevt_ok', '["ambiguous_service"]');
+  assert.throws(() => ins.run('aevt_bad', '["heat_missing"]'), /override_check_is_known/);
   db.close();
 });
 
@@ -1478,7 +1484,7 @@ test('migration 11 keeps every row of a version-10 database', () => {
 
   const result = runMigrations(db);
   assert.equal(result.from, 10);
-  assert.equal(result.to, 11);
+  assert.equal(result.to, 12);
 
   assert.deepEqual(snapshot(), before, 'same ids, types and payloads');
   assert.throws(
@@ -1490,5 +1496,135 @@ test('migration 11 keeps every row of a version-10 database', () => {
     /append-only/,
   );
   assert.deepEqual(db.pragma('foreign_key_check'), []);
+  db.close();
+});
+
+// ---------------------------------------------------------------------------
+// Migration 12 -- one event, a list of overrides
+// ---------------------------------------------------------------------------
+
+/** A database at schema version 11, for testing the v11 -> v12 upgrade. */
+function dbAtVersion11(): ReturnType<typeof freshDb> {
+  const db = new Database(':memory:');
+  applyRegistryPragmas(db);
+  db.transaction(() => {
+    for (let i = 0; i < 11; i++) MIGRATIONS[i].up(db);
+    db.exec('PRAGMA user_version = 11');
+  })();
+  return db;
+}
+
+test('TARGET_VERSION is 12', () => {
+  assert.equal(TARGET_VERSION, 12);
+});
+
+test('migration 12 turns one override into a one-element list', () => {
+  const db = dbAtVersion11();
+  db.prepare(
+    `INSERT INTO registry_animals (id,name,sex,species,origin,post_no,tag_no)
+     VALUES ('BD-0001','Noor','female','buffalo','acquired',NULL,NULL)`,
+  ).run();
+  const ins = db.prepare(
+    `INSERT INTO registry_animal_events
+       (id, animal_id, type, occurred_on, date_precision, payload, source_form, recorded_by, recorded_at,
+        override_check, override_reason)
+     VALUES (?, 'BD-0001', ?, ?, 'day', '{}', 'recall', 'x', ?, ?, ?)`,
+  );
+  ins.run('aevt_01', 'calving', '2022-03-04', 't-1', 'near_duplicate_calving', 'twins entered twice');
+  ins.run('aevt_02', 'insemination', '2026-01-20', 't-2', null, null);
+
+  const result = runMigrations(db);
+  assert.equal(result.from, 11);
+  assert.equal(result.to, 12);
+
+  const rows = db
+    .prepare(`SELECT id, override_checks, override_reason FROM registry_animal_events ORDER BY id`)
+    .all();
+  assert.deepEqual(rows, [
+    { id: 'aevt_01', override_checks: '["near_duplicate_calving"]', override_reason: 'twins entered twice' },
+    { id: 'aevt_02', override_checks: '[]', override_reason: null },
+  ]);
+  const columns = (db.prepare(`PRAGMA table_info(registry_animal_events)`).all() as { name: string }[]).map((c) => c.name);
+  assert.ok(!columns.includes('override_check'), 'the single column is gone');
+  assert.deepEqual(db.pragma('foreign_key_check'), []);
+  db.close();
+});
+
+function overrideInsert(db: ReturnType<typeof freshDb>) {
+  return db.prepare(
+    `INSERT INTO registry_animal_events (id, animal_id, type, occurred_on, date_precision, payload, source_form, recorded_by, recorded_at, override_checks, override_reason)
+     VALUES (@id, 'BD-0001', @type, '2026-01-21', 'day', '{}', 'recall', 't', '2026-01-21T00:00:00.000Z', @checks, @reason)`,
+  );
+}
+
+test('migration 12 refuses an unknown name in the list', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  const ins = overrideInsert(db);
+  assert.throws(
+    () => ins.run({ id: 'aevt_bad', type: 'insemination', checks: '["heat_missing"]', reason: null }),
+    /override_check_is_known/,
+  );
+  assert.throws(
+    () => ins.run({ id: 'aevt_bad2', type: 'insemination', checks: '["ambiguous_service","heat_missing"]', reason: null }),
+    /override_check_is_known/,
+  );
+  db.close();
+});
+
+test('migration 12 accepts two names', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  overrideInsert(db).run({
+    id: 'aevt_two', type: 'insemination', checks: '["ambiguous_service","no_heat_sign"]', reason: 'both known',
+  });
+  const row = db.prepare(`SELECT override_checks FROM registry_animal_events WHERE id = 'aevt_two'`).get() as {
+    override_checks: string;
+  };
+  assert.deepEqual(JSON.parse(row.override_checks), ['ambiguous_service', 'no_heat_sign']);
+  db.close();
+});
+
+test('migration 12 keeps the list shape, the reason rule and the note rule', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  const ins = overrideInsert(db);
+  assert.throws(
+    () => ins.run({ id: 'a1', type: 'insemination', checks: '{"a":1}', reason: null }),
+    /override_checks_is_a_list/,
+  );
+  assert.throws(
+    () => ins.run({ id: 'a2', type: 'insemination', checks: 'not json', reason: null }),
+    /malformed JSON|override_checks_is_a_list/,
+  );
+  assert.throws(
+    () => ins.run({ id: 'a3', type: 'insemination', checks: '[]', reason: 'prose about nothing' }),
+    /override_reason_needs_a_check/,
+  );
+  assert.throws(
+    () => ins.run({ id: 'a4', type: 'note', checks: '["animal_departed"]', reason: null }),
+    /note_never_overrides/,
+  );
+  db.close();
+});
+
+test('migration 12 keeps the append-only triggers and every index', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  overrideInsert(db).run({ id: 'aevt_x', type: 'insemination', checks: '[]', reason: null });
+  assert.throws(
+    () => db.prepare(`UPDATE registry_animal_events SET recorded_by = 'y' WHERE id = 'aevt_x'`).run(),
+    /append-only/,
+  );
+  assert.throws(
+    () => db.prepare(`DELETE FROM registry_animal_events WHERE id = 'aevt_x'`).run(),
+    /append-only/,
+  );
+  const indexes = (db.prepare(
+    `SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'registry_animal_events'`,
+  ).all() as { name: string }[]).map((r) => r.name);
+  for (const i of ['idx_registry_events_supersedes', 'idx_registry_events_animal', 'idx_registry_events_type']) {
+    assert.ok(indexes.includes(i), `${i} exists`);
+  }
   db.close();
 });

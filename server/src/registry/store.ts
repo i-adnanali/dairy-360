@@ -47,7 +47,11 @@ import type {
 // ---------------------------------------------------------------------------
 
 function parseEvent(row: RegistryEventRow): RegistryEvent {
-  return { ...row, payload: JSON.parse(row.payload) as Record<string, unknown> };
+  return {
+    ...row,
+    payload: JSON.parse(row.payload) as Record<string, unknown>,
+    override_checks: JSON.parse(row.override_checks) as RegistryEvent['override_checks'],
+  };
 }
 
 export function allAnimals(db: Db): RegistryAnimalRow[] {
@@ -360,7 +364,7 @@ export function appendEvent(db: Db, input: AppendEventInput): RegistryEventRow {
     recorded_by: input.provenance.recorded_by,
     recorded_at: input.recorded_at ?? new Date().toISOString(),
     supersedes_id: input.supersedes_id ?? null,
-    override_check: override?.check ?? null,
+    override_checks: JSON.stringify(override?.checks ?? []),
     override_reason: override?.reason ?? null,
   };
 
@@ -368,11 +372,11 @@ export function appendEvent(db: Db, input: AppendEventInput): RegistryEventRow {
     `INSERT INTO registry_animal_events
        (id, animal_id, type, occurred_on, occurred_time, date_precision, payload,
         source_form, source_ref, observed_by, recorded_by, recorded_at, supersedes_id,
-        override_check, override_reason)
+        override_checks, override_reason)
      VALUES
        (@id, @animal_id, @type, @occurred_on, @occurred_time, @date_precision, @payload,
         @source_form, @source_ref, @observed_by, @recorded_by, @recorded_at, @supersedes_id,
-        @override_check, @override_reason)`,
+        @override_checks, @override_reason)`,
   ).run(row);
 
   return row;

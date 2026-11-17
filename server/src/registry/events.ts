@@ -259,9 +259,30 @@ export function assertOverride(v: unknown): OverrideRecord | null {
     fail('invalid_payload', `override: must be an object, got ${describe(v)}`, 'override');
   }
   const o = v as Rec;
-  rejectUnknownKeys('override', o, ['check', 'reason']);
-  const check = enumOf('override', o, 'check', OVERRIDDEN_CHECKS as readonly OverriddenCheck[]);
-  return { check, reason: optStr('override', o, 'reason') };
+  rejectUnknownKeys('override', o, ['checks', 'reason']);
+  if (!Array.isArray(o.checks)) {
+    fail('invalid_payload', `override.checks: must be a list, got ${describe(o.checks)}`, 'override');
+  }
+  const checks: OverriddenCheck[] = [];
+  for (const c of o.checks as unknown[]) {
+    if (typeof c !== 'string' || !(OVERRIDDEN_CHECKS as readonly string[]).includes(c)) {
+      fail(
+        'invalid_payload',
+        `override.checks: ${describe(c)} must be one of ${OVERRIDDEN_CHECKS.join(' | ')}`,
+        'override',
+      );
+    }
+    // A name twice is a bug in the caller, not something to tidy away: the list
+    // is "every warning this write was saved over", and a warning fires once.
+    if (checks.includes(c as OverriddenCheck)) {
+      throw new Error(`override.checks: '${c}' appears twice`);
+    }
+    checks.push(c as OverriddenCheck);
+  }
+  const reason = optStr('override', o, 'reason');
+  // No check, no override: a reason about a guard nobody stepped past is prose
+  // about nothing (the schema refuses it too).
+  return checks.length === 0 ? null : { checks, reason };
 }
 
 function optDate(type: string, p: Rec, key: string): string | null {

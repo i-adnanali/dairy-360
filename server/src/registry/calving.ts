@@ -409,7 +409,7 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
       // caller's flag. A caller that always passes allow_near_duplicate must
       // not have every write claim an override happened.
       override: overrode
-        ? { check: 'near_duplicate_calving', reason: input.override_reason ?? null }
+        ? { checks: ['near_duplicate_calving'], reason: input.override_reason ?? null }
         : null,
       provenance: input.provenance,
     });
@@ -786,6 +786,7 @@ function eventsForAnimal_all(
   const original = {
     ...(row as unknown as RegistryEvent),
     payload: JSON.parse(row.payload) as Record<string, unknown>,
+    override_checks: JSON.parse((row as unknown as { override_checks: string }).override_checks) as RegistryEvent['override_checks'],
   };
   const sup = db
     .prepare(`SELECT id FROM registry_animal_events WHERE supersedes_id = ?`)

@@ -95,7 +95,7 @@ export interface TimelineEvent {
   /** False when superseded_by_id is set. No projection sees this row. */
   effective: boolean;
   /** The warning this event was saved over, or null. Stored from the condition, never the flag. */
-  override_check: RegistryEvent['override_check'];
+  override_checks: RegistryEvent['override_checks'];
   override_reason: string | null;
 }
 
@@ -167,7 +167,7 @@ export function animalDetail(
         supersedes_id: e.supersedes_id,
         superseded_by_id,
         effective: superseded_by_id === null,
-        override_check: e.override_check,
+        override_checks: e.override_checks,
         override_reason: e.override_reason,
       };
     }),

@@ -159,7 +159,7 @@ test('an early check is refused until the caller saves over it', () => {
   } as never);
   assert.equal(countEvents(db, 'BD-0007'), before + 1);
   const row = eventsForAnimal(db, 'BD-0007').find((e) => e.id === event_id)!;
-  assert.equal(row.override_check, 'early_check');
+  assert.deepEqual(row.override_checks, ['early_check']);
   assert.equal(row.override_reason, 'vet was here anyway');
 });
 
@@ -173,7 +173,7 @@ test('a flag with nothing to override records nothing', () => {
     allow_check_without_service: true,
   } as never);
   const row = eventsForAnimal(db, 'BD-0007').find((e) => e.id === event_id)!;
-  assert.equal(row.override_check, null);
+  assert.deepEqual(row.override_checks, []);
   assert.equal(row.override_reason, null);
 });
 

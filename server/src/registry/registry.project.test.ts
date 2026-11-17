@@ -56,7 +56,7 @@ function ev(over: Partial<RegistryEvent> & Pick<RegistryEvent, 'type'>): Registr
     recorded_by: 'tester',
     recorded_at: `2026-01-01T00:00:${String(seq % 60).padStart(2, '0')}.000Z`,
     supersedes_id: null,
-    override_check: null,
+    override_checks: [],
     override_reason: null,
     ...over,
   };

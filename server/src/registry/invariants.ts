@@ -1407,11 +1407,15 @@ function checkBreeding(s: RegistrySnapshot): Violation[] {
       ambiguous_service: 'insemination',
       early_check: 'pregnancy_check',
       check_without_service: 'pregnancy_check',
+      no_heat_sign: 'insemination',
+      heat_after_positive: 'heat_observed',
     };
-    if (e.override_check && allowedOn[e.override_check] && allowedOn[e.override_check] !== e.type) {
-      out.push(
-        v(29, 'breeding-event-shape', `event ${e.id} is a ${e.type} but records an override of '${e.override_check}', which belongs to a ${allowedOn[e.override_check]}`, target),
-      );
+    for (const check of e.override_checks) {
+      if (allowedOn[check] && allowedOn[check] !== e.type) {
+        out.push(
+          v(29, 'breeding-event-shape', `event ${e.id} is a ${e.type} but records an override of '${check}', which belongs to a ${allowedOn[check]}`, target),
+        );
+      }
     }
   }
   return out;

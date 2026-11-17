@@ -171,7 +171,7 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     recorded_by: input.provenance.recorded_by,
     recorded_at: recordedAt,
     supersedes_id: supersedesId,
-    override_check: null,
+    override_checks: [],
     override_reason: null,
   };
   const warning = breedingWarning(eventsForAnimal(db, input.animal_id), candidate);
@@ -197,7 +197,7 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
     provenance: input.provenance,
     supersedes_id: supersedesId,
     recorded_at: recordedAt,
-    override: warning ? { check: warning.check, reason: input.override_reason ?? null } : null,
+    override: warning ? { checks: [warning.check], reason: input.override_reason ?? null } : null,
   });
   return { event_id: row.id };
 }

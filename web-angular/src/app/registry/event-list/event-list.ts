@@ -68,12 +68,13 @@ export class EventList {
   /**
    * The override record on an event, when a guard was stepped past to write it.
    *
-   * Two columns since migration 4, so this no longer has to defend against a
-   * malformed sub-object -- the database refuses an unknown check and a reason
-   * with no check, which is most of what the old shape-checking was for.
+   * A list of checks and one reason since migration 12. The database refuses an
+   * unknown check and a reason with no check, so nothing here defends against a
+   * malformed record; the wire may omit the list, which reads as none.
    */
-  protected override(e: TimelineEvent): { check: string; reason: string | null } | null {
-    return e.override_check == null ? null : { check: e.override_check, reason: e.override_reason };
+  protected override(e: TimelineEvent): { checks: string[]; reason: string | null } | null {
+    const checks = e.override_checks ?? [];
+    return checks.length === 0 ? null : { checks, reason: e.override_reason };
   }
 
   protected label(t: string): string {

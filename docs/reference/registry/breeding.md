@@ -128,7 +128,7 @@ Beyond the refusals, three unusual-but-possible cases come back as a 400 whose `
 | `early_check` | `pregnancy_check` | `allow_early_check` | the check is earlier than its method is relied on (`CHECK_RELIABLE_FROM`); the message names the day |
 | `check_without_service` | `pregnancy_check` | `allow_check_without_service` | no service is recorded on or before the check |
 
-At most one warning can fire for one event, so one `override_check` column records it. An override is recorded from the condition, never from the flag: a write that sends `allow_*: true` when the warning did not fire records no override.
+One save can step past more than one warning, so the event's `override_checks` column (a list of names, since migration 12) records every one of them, and `override_reason` is one line for the whole save-over. An override is recorded from the condition, never from the flag: a write that sends `allow_*: true` when the warning did not fire records no override.
 
 ## Correcting a breeding event
 

@@ -799,16 +799,16 @@ test('the timeline carries a breeding save-over', async () => {
   });
   assert.equal(r.status, 201);
   const { body } = (await get(ctx, '/animals/BD-0007')) as {
-    body: { events: { type: string; occurred_on: string; override_check: string | null; override_reason: string | null }[] };
+    body: { events: { type: string; occurred_on: string; override_checks: string[]; override_reason: string | null }[] };
   };
-  const over = body.events.filter((e) => e.override_check !== null);
+  const over = body.events.filter((e) => e.override_checks.length > 0);
   assert.equal(over.length, 1, 'exactly one event carries an override');
   assert.equal(over[0].type, 'pregnancy_check');
   assert.equal(over[0].occurred_on, '2026-11-13');
-  assert.equal(over[0].override_check, 'early_check');
+  assert.deepEqual(over[0].override_checks, ['early_check']);
   assert.equal(over[0].override_reason, 'vet was here anyway');
   for (const e of body.events.filter((x) => x !== over[0])) {
-    assert.equal(e.override_check, null);
+    assert.deepEqual(e.override_checks, []);
     assert.equal(e.override_reason, null);
   }
   await ctx.close();
@@ -828,11 +828,11 @@ test('the timeline carries a calving save-over', async () => {
   const saved = await calve({ occurred_on: '2026-03-20', allow_near_duplicate: true, override_reason: 'twins, entered twice' });
   assert.equal(saved.status, 201);
   const { body } = (await get(ctx, '/animals/BD-0003')) as {
-    body: { events: { type: string; occurred_on: string; override_check: string | null; override_reason: string | null }[] };
+    body: { events: { type: string; occurred_on: string; override_checks: string[]; override_reason: string | null }[] };
   };
   const calvings = body.events.filter((e) => e.type === 'calving' && e.occurred_on.startsWith('2026-03'));
   const over = calvings.find((e) => e.occurred_on === '2026-03-20')!;
-  assert.equal(over.override_check, 'near_duplicate_calving');
+  assert.deepEqual(over.override_checks, ['near_duplicate_calving']);
   assert.equal(over.override_reason, 'twins, entered twice');
   await ctx.close();
 });

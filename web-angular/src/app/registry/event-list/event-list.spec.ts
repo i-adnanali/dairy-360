@@ -15,7 +15,7 @@ function ev(over: Partial<TimelineEvent> & Pick<TimelineEvent, 'id' | 'type'>): 
     recorded_at: '2026-01-01T00:00:00.000Z',
     supersedes_id: null,
     superseded_by_id: null,
-    override_check: null,
+    override_checks: [],
     override_reason: null,
     effective: true,
     ...over,
@@ -39,7 +39,7 @@ describe('EventList — the correction window', () => {
 
   it('does not invent an override when the wire omits optional override fields', () => {
     const event = ev({ id: 'aevt_plain', type: 'note' });
-    delete (event as Partial<TimelineEvent>).override_check;
+    delete (event as Partial<TimelineEvent>).override_checks;
     const el = render([event]);
     expect(el.querySelector('[data-role="override"]')).toBeNull();
   });
@@ -206,7 +206,7 @@ describe('EventList — the correction window', () => {
         id: 'aevt_over',
         type: 'dry_off',
         payload: { reason: null, notes: null },
-        override_check: 'animal_departed',
+        override_checks: ['animal_departed'],
         override_reason: 'stayed on the farm until August',
       }),
     ]);
@@ -215,13 +215,36 @@ describe('EventList — the correction window', () => {
     expect(o.textContent).toContain('stayed on the farm until August');
   });
 
+  it('names every check an event was written over', () => {
+    const el = render([
+      ev({
+        id: 'aevt_two',
+        type: 'insemination',
+        payload: { service_type: 'ai' },
+        override_checks: ['ambiguous_service', 'no_heat_sign'],
+      }),
+    ]);
+    expect(el.querySelector('[data-role="override"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+      'Written over the ambiguous_service and no_heat_sign checks',
+    );
+  });
+
+  it('reads one check as it always did', () => {
+    const el = render([
+      ev({ id: 'aevt_one', type: 'pregnancy_check', payload: { method: 'palpation', result: 'positive' }, override_checks: ['early_check'] }),
+    ]);
+    expect(el.querySelector('[data-role="override"]')!.textContent!.replace(/\s+/g, ' ')).toContain(
+      'Written over the early_check check',
+    );
+  });
+
   it('says a reason was not recorded rather than showing a blank', () => {
     const el = render([
       ev({
         id: 'aevt_over',
         type: 'dry_off',
         payload: { reason: null, notes: null },
-        override_check: 'animal_departed',
+        override_checks: ['animal_departed'],
       }),
     ]);
     expect(el.querySelector('[data-role="override"]')!.textContent).toContain('no reason recorded');

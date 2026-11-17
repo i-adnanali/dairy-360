@@ -204,11 +204,12 @@ export const BREEDING_OVERRIDDEN_CHECKS: readonly BreedingOverriddenCheck[] = [
  * debt -- "do not migrate for this alone, bundle it into whichever migration
  * lands next" -- and migration 4 is where it was paid.
  *
- * `override_check` and `override_reason` are now columns on
- * registry_animal_events: uniform across event types, queryable without
- * json_extract, sitting beside the other provenance fields they resemble, and
- * -- new -- constrained by the database rather than only by this module. See
- * the migration 4 comment in schema.ts for what else the move bought.
+ * `override_checks` (a JSON list, since migration 12; one column `override_check`
+ * before that) and `override_reason` are columns on registry_animal_events:
+ * uniform across event types, queryable without json_extract, sitting beside
+ * the other provenance fields they resemble, and constrained by the database
+ * rather than only by this module. See the migration 4 and 12 comments in
+ * schema.ts for what else the move bought.
  *
  * This interface survives as the in-memory shape passed to appendEvent() and
  * returned to readers. It is no longer part of any payload.
@@ -220,7 +221,8 @@ export const BREEDING_OVERRIDDEN_CHECKS: readonly BreedingOverriddenCheck[] = [
  * bonus when someone bothers.
  */
 export interface OverrideRecord {
-  check: OverriddenCheck;
+  /** Every warning this write was saved over; never empty, no name twice. */
+  checks: OverriddenCheck[];
   reason: string | null;
 }
 
@@ -382,7 +384,7 @@ export interface RegistryAnimalRow {
   tag_no: string | null;
 }
 
-/** An event row exactly as stored. `payload` is JSON TEXT. */
+/** An event row exactly as stored. `payload` and `override_checks` are JSON TEXT. */
 export interface RegistryEventRow {
   id: string;
   animal_id: string;
@@ -398,21 +400,23 @@ export interface RegistryEventRow {
   recorded_at: string;
   supersedes_id: string | null;
   /**
-   * The guard this write stepped past, or null. Migration 4 moved these out of
-   * the payload; see OverrideRecord.
+   * The guards this write stepped past, as JSON TEXT of a list of names ('[]'
+   * when none). Migration 12 replaced the single override_check with it.
    *
    * Recorded from the CONDITION, never from the caller's flag -- a caller that
    * passes `allow_near_duplicate` unconditionally must not have every write
    * claim an override happened, because a field that is always set carries no
    * information.
    */
-  override_check: OverriddenCheck | null;
+  override_checks: string;
   override_reason: string | null;
 }
 
 /** An event row with its payload parsed -- what the pure core consumes. */
-export interface RegistryEvent extends Omit<RegistryEventRow, 'payload'> {
+export interface RegistryEvent extends Omit<RegistryEventRow, 'payload' | 'override_checks'> {
   payload: Record<string, unknown>;
+  /** The guards this event was saved over, parsed from the stored JSON list. */
+  override_checks: OverriddenCheck[];
 }
 
 // ---------------------------------------------------------------------------

@@ -1137,8 +1137,40 @@ test('invariant 29 flags a breeding override on the wrong event type', () => {
     date_precision: 'day',
     payload: { service_type: 'ai' },
     provenance: RECALL,
-    override: { check: 'early_check', reason: null },
+    override: { checks: ['early_check'], reason: null },
   });
   const found = checkSnapshot(snapshot(db), '2026-11-13').filter((v) => v.invariant === 29);
   assert.equal(found.length, 1);
+});
+
+test('invariant 29 is clean for two warnings that both belong to an insemination', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  appendEvent(db, {
+    animal_id: 'BD-0001',
+    type: 'insemination',
+    occurred_on: '2026-01-01',
+    date_precision: 'day',
+    payload: { service_type: 'ai' },
+    provenance: RECALL,
+    override: { checks: ['ambiguous_service', 'no_heat_sign'], reason: null },
+  });
+  const found = checkSnapshot(snapshot(db), '2026-11-13').filter((v) => v.invariant === 29);
+  assert.equal(found.length, 0);
+});
+
+test('invariant 29 flags each name in a list that sits on the wrong event type', () => {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2020-01-01', acquired_precision: 'year' });
+  appendEvent(db, {
+    animal_id: 'BD-0001',
+    type: 'heat_observed',
+    occurred_on: '2026-01-01',
+    date_precision: 'day',
+    payload: { sign: 'standing' },
+    provenance: RECALL,
+    override: { checks: ['heat_after_positive', 'no_heat_sign'], reason: null },
+  });
+  const found = checkSnapshot(snapshot(db), '2026-11-13').filter((v) => v.invariant === 29);
+  assert.equal(found.length, 1, 'heat_after_positive belongs here, no_heat_sign does not');
 });

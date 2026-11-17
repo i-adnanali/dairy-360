@@ -369,7 +369,7 @@ export function appendLifeEvent(
   // A SIBLING of the payload since migration 4. Still derived from `overrode`
   // above -- the condition, not the flag.
   const override: OverrideRecord | null = overrode
-    ? { check: 'animal_departed', reason: input.override_reason ?? null }
+    ? { checks: ['animal_departed'], reason: input.override_reason ?? null }
     : null;
 
   const event = db.transaction(() => {

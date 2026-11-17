@@ -32,15 +32,18 @@ export type EnterableEventType = 'dry_off' | 'departure' | 'note';
 
 /**
  * The guards a write can be recorded as having stepped past. Mirrors
- * OverriddenCheck on the server; columns on the event since migration 4, the
- * three breeding warnings since migration 11.
+ * OverriddenCheck on the server; a list on the event since migration 12 (a column
+ * since migration 4), the three breeding warnings since migration 11 and the two
+ * heat warnings since stage 3.
  */
 export type OverriddenCheck =
   | 'near_duplicate_calving'
   | 'animal_departed'
   | 'ambiguous_service'
   | 'early_check'
-  | 'check_without_service';
+  | 'check_without_service'
+  | 'no_heat_sign'
+  | 'heat_after_positive';
 export type CalvingOutcome = 'live' | 'stillborn' | 'died_within_24h';
 
 export interface HerdRow {
@@ -73,10 +76,10 @@ export interface TimelineEvent {
   recorded_at: string;
   supersedes_id: string | null;
   /**
-   * The guard this write stepped past, or null. Columns since migration 4 --
-   * these used to live inside `payload.override`.
+   * Every guard this write stepped past, empty when none. Since migration 12 a
+   * list: one save can step past more than one warning.
    */
-  override_check: OverriddenCheck | null;
+  override_checks: OverriddenCheck[];
   override_reason: string | null;
   /** The event that REPLACED this one. Rendered, not filtered. */
   superseded_by_id: string | null;

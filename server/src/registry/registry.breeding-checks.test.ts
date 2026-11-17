@@ -26,7 +26,7 @@ const candidate = (animal_id: string, type: RegistryEvent['type'], on: string, p
   recorded_by: 'test',
   recorded_at: '2026-11-13T00:00:00.000Z',
   supersedes_id: null,
-  override_check: null,
+  override_checks: [],
   override_reason: null,
 });
 const service = (id: string, on: string) => candidate(id, 'insemination', on, { service_type: 'ai', exposure_days: null });

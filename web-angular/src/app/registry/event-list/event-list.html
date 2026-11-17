@@ -87,7 +87,9 @@
                 class="override-notice mt-1.5 rounded-lg bg-surface-sunken px-2 py-1 text-xs text-content-primary"
                 data-role="override"
               >
-                Written over the <span class="font-mono">{{ o.check }}</span> check{{
+                Written over the
+                @for (c of o.checks; track c; let i = $index; let last = $last) {{{ i === 0 ? '' : last ? ' and ' : ', ' }}<span class="font-mono">{{ c }}</span>}
+                {{ o.checks.length > 1 ? 'checks' : 'check' }}{{
                   o.reason ? ' — ' + o.reason : ''
                 }}
                 @if (!o.reason) {
