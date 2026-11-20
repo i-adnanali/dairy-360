@@ -38,8 +38,8 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | POST | `/animals/born-here` | `addFarmBornAnimal` — born on the farm, mother not known |
 | POST | `/events` | `appendLifeEvent` |
 | POST | `/breeding/events` | `recordBreedingEvent`, only with `REGISTRY_BREEDING=1` and only for the animals in `REGISTRY_BREEDING_PILOT`; see [Breeding](breeding.md) |
-| POST | `/calvings` | `recordCalving` — `calf_id` present means link mode |
-| POST | `/calvings/:eventId/correction` | `correctCalving` |
+| POST | `/calvings` | `recordCalving` — `calf_id` present means link mode; with `REGISTRY_BREEDING=1`, the calving warnings in [Breeding](breeding.md#calving-warnings) |
+| POST | `/calvings/:eventId/correction` | `correctCalving`; with `REGISTRY_BREEDING=1`, the same calving warnings |
 | POST | `/milking/session` | one whole session, all rows or none |
 | POST | `/milking/session/delete` | remove a session, or one animal's row in it |
 | POST | `/destinations` | `addDestination` |

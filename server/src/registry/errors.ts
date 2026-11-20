@@ -20,7 +20,7 @@
 // rules about the herd, and they hold whether the caller is a command, a route,
 // or a future agent tool.
 
-import type { BreedingOverriddenCheck } from './types';
+import type { OverriddenCheck } from './types';
 
 /** Stable identifiers. Callers branch on these; the prose may be reworded. */
 export type RegistryErrorCode =
@@ -123,7 +123,7 @@ export type RegistryErrorCode =
 
 /** One warning among several, as the page gets it. */
 export interface WireWarning {
-  check: BreedingOverriddenCheck;
+  check: OverriddenCheck;
   message: string;
 }
 
@@ -133,7 +133,7 @@ export interface WireError {
   field?: string;
   /** The prose, verbatim. Never rewritten by a transport. */
   message: string;
-  /** Every breeding warning that fired, when the write raised any. */
+  /** Every breeding or calving warning that fired, when the write raised any. */
   warnings?: WireWarning[];
 }
 
@@ -176,8 +176,8 @@ export class RegistryError extends Error {
  * and for the callers that already narrow on it.
  */
 export class CalvingError extends RegistryError {
-  constructor(code: RegistryErrorCode, message: string, field?: string) {
-    super(code, message, field);
+  constructor(code: RegistryErrorCode, message: string, field?: string, warnings?: WireWarning[]) {
+    super(code, message, field, warnings);
     this.name = 'CalvingError';
   }
 }

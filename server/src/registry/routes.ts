@@ -767,6 +767,9 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         provenance: provenance(b),
         asOf: asOfFrom(b),
         allow_near_duplicate: b.allow_near_duplicate === true,
+        allow_calving_before_window: b.allow_calving_before_window === true,
+        allow_calving_past_extreme: b.allow_calving_past_extreme === true,
+        breeding: opts.breeding === true,
         override_reason: str(b, 'override_reason'),
       });
       res.status(201).json({
@@ -791,6 +794,9 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         provenance: provenance(b),
         asOf: asOfFrom(b),
         allow_near_duplicate: b.allow_near_duplicate === true,
+        allow_calving_before_window: b.allow_calving_before_window === true,
+        allow_calving_past_extreme: b.allow_calving_past_extreme === true,
+        breeding: opts.breeding === true,
         override_reason: str(b, 'override_reason'),
       });
       res.status(201).json({

@@ -136,6 +136,17 @@ Beyond the refusals, unusual-but-possible cases come back as a 400 whose `error`
 
 One save can step past more than one warning, so the event's `override_checks` column (a list of names, since migration 12) records every one of them, and `override_reason` is one line for the whole save-over. An override is recorded from the condition, never from the flag: a write that sends `allow_*: true` when the warning did not fire records no override.
 
+### Calving warnings
+
+With `REGISTRY_BREEDING=1`, a calving (`POST /calvings`) and a calving correction (`POST /calvings/:eventId/correction`) are also measured against the breeding case the calving closes. The dam's view is derived with the calving in it, as of the calving date; when that view is `calved`, two warnings can fire:
+
+| Warning | Flag | When |
+|---|---|---|
+| `calving_before_window` | `allow_calving_before_window` | the calving is fewer than `GESTATION.windowOpens` (285) days after the earliest possible conception |
+| `calving_past_extreme` | `allow_calving_past_extreme` | the calving is more than `BREEDING_TASK_DAYS.overdueRedAfter` (346) days after the latest possible conception |
+
+A dam with no service on or before the calving has no view, so neither fires. They come back with `near_duplicate_calving` when that fires too, in the order `near_duplicate_calving`, `calving_before_window`, `calving_past_extreme`, as the breeding warnings do: one is a 400 of its own code with `field` `occurred_on` and `warnings`; two or more are `breeding_warnings` with the messages joined. The calving is written only when every fired warning's flag is `true`, and its `override_checks` lists every fired warning. The hard calving refusals still come first. With the flag off, neither warning runs and every calving response is as in stage 3: a near-duplicate is `near_duplicate_calving` with no `field` and no `warnings`. The CLI (`registry:calve`, `registry:correct-calving`) has no breeding flag, so it never runs them.
+
 ## Correcting a breeding event
 
 A wrongly entered service, check or heat is corrected by writing a superseding event: `recordBreedingEvent` takes `supersedes_id`, and `registry:breed` takes `--supersedes=<event id>`. The original row stays in the table untouched; the new row carries `supersedes_id`, and `effectiveEvents()` drops the original, so the state follows the correction.

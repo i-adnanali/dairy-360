@@ -11,15 +11,21 @@ import type { Db } from './schema';
 export { CalvingError } from './errors';
 import { newEventId } from './events';
 import { allocateSerial, appendEvent, eventsForAnimal, getAnimal, insertAnimal } from './store';
+import { breedingForAnimal } from './breeding-board';
 import { CalvingError } from './errors';
+import type { WireWarning } from './errors';
 import { definitelyBefore } from './invariants';
-import { effectiveEvents } from './project';
+import { daysBetween, effectiveEvents } from './project';
 import { rebuildAnimals } from './projectStore';
+import { BREEDING_TASK_DAYS, GESTATION } from './reproduction';
 import type {
   CalvingAssistance,
   CalvingOutcome,
   DatePrecision,
+  OverriddenCheck,
+  OverrideRecord,
   Provenance,
+  RegistryAnimalRow,
   RegistryEvent,
   RegistrySex,
 } from './types';
@@ -117,6 +123,90 @@ export function calvingTooSoonAfterBirth(
   );
 }
 
+/**
+ * The two stage 4 window warnings (docs/records/REGISTRY_BREEDING.md), worded
+ * from the dam's derived view with the candidate calving in it. The candidate
+ * carries the write's real `recorded_at`, so it sorts last among her same-day
+ * events, and the view is taken as of the calving date: the case it reads is the
+ * one this calving closes. No warning unless that view is `calved`, which needs
+ * a service in the case (no service, no view).
+ */
+function windowWarnings(dam: RegistryAnimalRow, rows: RegistryEvent[], candidate: RegistryEvent): WireWarning[] {
+  const on = candidate.occurred_on;
+  const view = breedingForAnimal(dam, [...rows, candidate], on).view;
+  if (!view || view.state !== 'calved') return [];
+  const out: WireWarning[] = [];
+  const fromEarliest = daysBetween(view.conception_earliest, on);
+  if (fromEarliest < GESTATION.windowOpens) {
+    out.push({
+      check: 'calving_before_window',
+      message:
+        `This calving is ${fromEarliest} days after the earliest possible conception for ${dam.id} ` +
+        `(service on ${view.service.occurred_on}). The calving window opens at day ${GESTATION.windowOpens}; ` +
+        `check the service or the calving date. Saved, the calving counts as it is.`,
+    });
+  }
+  const fromLatest = daysBetween(view.conception_latest, on);
+  if (fromLatest > BREEDING_TASK_DAYS.overdueRedAfter) {
+    out.push({
+      check: 'calving_past_extreme',
+      message:
+        `This calving is ${fromLatest} days after the latest possible conception for ${dam.id}, past the ` +
+        `${BREEDING_TASK_DAYS.overdueRedAfter}-day extreme. A service is probably missing from her record. ` +
+        `Saved, the calving counts as it is.`,
+    });
+  }
+  return out;
+}
+
+/**
+ * With breeding on, every overridable calving check that fired comes back at
+ * once, as recordBreedingEvent does: one as a refusal of its own code, several
+ * as `breeding_warnings`, unless every fired check's own flag is true. Then the
+ * override records every fired check, from the condition: a flag with nothing
+ * to override records nothing.
+ */
+function settleCalvingWarnings(
+  fired: WireWarning[],
+  allowed: Partial<Record<OverriddenCheck, boolean>>,
+  reason: string | null,
+): OverrideRecord | null {
+  if (fired.some((w) => allowed[w.check] !== true)) {
+    throw fired.length === 1
+      ? new CalvingError(fired[0].check, fired[0].message, 'occurred_on', fired)
+      : new CalvingError('breeding_warnings', fired.map((w) => w.message).join(' '), 'occurred_on', fired);
+  }
+  return fired.length > 0 ? { checks: fired.map((w) => w.check), reason } : null;
+}
+
+/** The calving about to be written, with the id and `recorded_at` it will be stored with. */
+function candidateCalving(
+  id: string,
+  damId: string,
+  input: { occurred_on: string; occurred_time?: string | null; date_precision: DatePrecision; provenance: Provenance },
+  payload: Record<string, unknown>,
+  recordedAt: string,
+  supersedesId: string | null,
+): RegistryEvent {
+  return {
+    id,
+    animal_id: damId,
+    type: 'calving',
+    occurred_on: input.occurred_on,
+    occurred_time: input.occurred_time ?? null,
+    date_precision: input.date_precision,
+    payload,
+    source_form: input.provenance.source_form,
+    source_ref: input.provenance.source_ref ?? null,
+    observed_by: input.provenance.observed_by ?? null,
+    recorded_by: input.provenance.recorded_by,
+    recorded_at: recordedAt,
+    supersedes_id: supersedesId,
+    override_checks: [],
+    override_reason: null,
+  };
+}
+
 export interface RecordCalvingInput {
   dam_id: string;
   occurred_on: string;
@@ -155,6 +245,16 @@ export interface RecordCalvingInput {
    * says "yes, really" in the input rather than the code guessing.
    */
   allow_near_duplicate?: boolean;
+  /** Save over `calving_before_window` (breeding on only). */
+  allow_calving_before_window?: boolean;
+  /** Save over `calving_past_extreme` (breeding on only). */
+  allow_calving_past_extreme?: boolean;
+  /**
+   * REGISTRY_BREEDING. Off (or absent): the two window warnings never run and
+   * every refusal is as in stage 3. On: every overridable calving check that
+   * fires comes back together (settleCalvingWarnings).
+   */
+  breeding?: boolean;
   /** Free text recorded alongside an exercised override. Optional. */
   override_reason?: string | null;
   /**
@@ -220,9 +320,10 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
   const birthEventId = newEventId();
 
   const run = db.transaction((): RecordCalvingResult => {
-    // Set in step 1 when the near-duplicate guard is actually stepped past, and
-    // read in step 2 where the calving payload is built.
-    let overrode = false;
+    // Set in step 1 from the guards actually stepped past, and read in step 4
+    // where the calving event is written.
+    let override: OverrideRecord | null = null;
+    const recordedAt = new Date().toISOString();
 
     // --- 1. Validate ------------------------------------------------------
     const dam = getAnimal(db, input.dam_id);
@@ -251,19 +352,25 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
         e.type === 'calving' &&
         daysApart(e.occurred_on, input.occurred_on) <= DOUBLE_ENTRY_WINDOW_DAYS,
     );
-    // Recorded from the CONDITION, not from the input flag. A caller that
-    // always passes allow_near_duplicate must not have every calving claim an
-    // override happened -- the override is a fact about this write meeting this
-    // guard, and it is only true when `near` actually matched.
-    overrode = near !== undefined && input.allow_near_duplicate === true;
-    if (near && !input.allow_near_duplicate) {
-      throw new CalvingError(
-        'near_duplicate_calving',
-        `dam '${dam.id}' already has a calving on ${near.occurred_on}, within ` +
-          `${DOUBLE_ENTRY_WINDOW_DAYS} days of ${input.occurred_on}. This is far more ` +
-          `likely a double entry than a real second calving. Pass ` +
-          `allow_near_duplicate: true if it is genuinely a separate event.`,
-      );
+    const nearMessage = near
+      ? `dam '${dam.id}' already has a calving on ${near.occurred_on}, within ` +
+        `${DOUBLE_ENTRY_WINDOW_DAYS} days of ${input.occurred_on}. This is far more ` +
+        `likely a double entry than a real second calving. Pass ` +
+        `allow_near_duplicate: true if it is genuinely a separate event.`
+      : '';
+    // Breeding off: exactly as in stage 3. With breeding on, the near-duplicate
+    // is collected with the window warnings after the hard refusals below.
+    if (!input.breeding) {
+      // Recorded from the CONDITION, not from the input flag. A caller that
+      // always passes allow_near_duplicate must not have every calving claim an
+      // override happened -- the override is a fact about this write meeting
+      // this guard, and it is only true when `near` actually matched.
+      if (near !== undefined && input.allow_near_duplicate === true) {
+        override = { checks: ['near_duplicate_calving'], reason: input.override_reason ?? null };
+      }
+      if (near && !input.allow_near_duplicate) {
+        throw new CalvingError('near_duplicate_calving', nearMessage);
+      }
     }
     // Link mode validation, all of it here in step 1 alongside the dam checks.
     let linkedOrigin: RegistryEvent | null = null;
@@ -364,6 +471,29 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
 
       linkedOrigin = origin;
     }
+
+    if (input.breeding) {
+      const fired: WireWarning[] = near ? [{ check: 'near_duplicate_calving', message: nearMessage }] : [];
+      // The calf has no id yet in mint mode; the derivation reads none.
+      const candidate = candidateCalving(
+        calvingEventId,
+        dam.id,
+        input,
+        { calf_id: input.calf.existing_id ?? null, calf_sex: input.calf.sex, outcome: input.calf.outcome },
+        recordedAt,
+        null,
+      );
+      fired.push(...windowWarnings(dam, eventsForAnimal(db, dam.id), candidate));
+      override = settleCalvingWarnings(
+        fired,
+        {
+          near_duplicate_calving: input.allow_near_duplicate,
+          calving_before_window: input.allow_calving_before_window,
+          calving_past_extreme: input.allow_calving_past_extreme,
+        },
+        input.override_reason ?? null,
+      );
+    }
     faultAt(1);
 
     // --- 2. Resolve the calf's id ----------------------------------------
@@ -405,13 +535,12 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
         notes: input.notes ?? null,
       },
       // A SIBLING of the payload since migration 4, and still derived from
-      // `overrode` -- whether the guard actually matched -- never from the
-      // caller's flag. A caller that always passes allow_near_duplicate must
-      // not have every write claim an override happened.
-      override: overrode
-        ? { checks: ['near_duplicate_calving'], reason: input.override_reason ?? null }
-        : null,
+      // whether each guard actually matched -- never from the caller's flag. A
+      // caller that always passes allow_near_duplicate must not have every write
+      // claim an override happened.
+      override,
       provenance: input.provenance,
+      recorded_at: recordedAt,
     });
     faultAt(4);
 
@@ -504,6 +633,10 @@ export interface CorrectCalvingInput {
   asOf: string;
   /** As on recordCalving: accept a corrected date near another calving. */
   allow_near_duplicate?: boolean;
+  /** As on recordCalving. */
+  allow_calving_before_window?: boolean;
+  allow_calving_past_extreme?: boolean;
+  breeding?: boolean;
   /** Free text recorded alongside an exercised override. Optional. */
   override_reason?: string | null;
   /** TEST-ONLY fault injection, per step. See recordCalving. */
@@ -650,13 +783,38 @@ export function correctCalving(
         e.id !== original.id && // never compare the event being corrected to itself
         daysApart(e.occurred_on, input.occurred_on) <= DOUBLE_ENTRY_WINDOW_DAYS,
     );
-    const overrode = near !== undefined && input.allow_near_duplicate === true;
-    if (near && !input.allow_near_duplicate) {
-      throw new CalvingError(
-        'near_duplicate_calving',
-        `the corrected date ${input.occurred_on} lands within ${DOUBLE_ENTRY_WINDOW_DAYS} ` +
-          `days of dam '${damId}' other calving on ${near.occurred_on}. Pass ` +
-          `allow_near_duplicate: true if both are genuinely separate events.`,
+    const nearMessage = near
+      ? `the corrected date ${input.occurred_on} lands within ${DOUBLE_ENTRY_WINDOW_DAYS} ` +
+        `days of dam '${damId}' other calving on ${near.occurred_on}. Pass ` +
+        `allow_near_duplicate: true if both are genuinely separate events.`
+      : '';
+    const recordedAt = new Date().toISOString();
+    let override: OverrideRecord | null = null;
+    if (!input.breeding) {
+      // As in stage 3. Nothing was recorded for a stepped-past near-duplicate
+      // on a correction then, and nothing is now.
+      if (near && !input.allow_near_duplicate) {
+        throw new CalvingError('near_duplicate_calving', nearMessage);
+      }
+    } else {
+      const fired: WireWarning[] = near ? [{ check: 'near_duplicate_calving', message: nearMessage }] : [];
+      const candidate = candidateCalving(
+        newCalvingId,
+        damId,
+        input,
+        { calf_id: calfId, calf_sex: original.payload.calf_sex, outcome: original.payload.outcome },
+        recordedAt,
+        original.id,
+      );
+      fired.push(...windowWarnings(dam, eventsForAnimal(db, damId), candidate));
+      override = settleCalvingWarnings(
+        fired,
+        {
+          near_duplicate_calving: input.allow_near_duplicate,
+          calving_before_window: input.allow_calving_before_window,
+          calving_past_extreme: input.allow_calving_past_extreme,
+        },
+        input.override_reason ?? null,
       );
     }
     faultAt(1);
@@ -687,6 +845,8 @@ export function correctCalving(
       },
       provenance: input.provenance,
       supersedes_id: original.id,
+      override,
+      recorded_at: recordedAt,
     });
     faultAt(2);
 

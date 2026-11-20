@@ -26,7 +26,7 @@ import type { Server } from 'node:http';
 
 import { harnessApp } from './harness';
 import { BREEDING_PILOT, breedingHerd } from './breeding-fixtures';
-import { RECALL, addDeparture, addDryOff, cleanHerd, freshDb } from './fixtures';
+import { RECALL, addAcquired, addDeparture, addDryOff, cleanHerd, freshDb } from './fixtures';
 import { recordBreedingEvent } from './breeding';
 import { herd } from './reads';
 import { rebuild } from './projectStore';
@@ -943,4 +943,54 @@ test('with the breeding flag off there is no board and no breeding keys', async 
   assert.equal('breeding' in today.body, false);
   const { body } = (await get(ctx, '/animals/BD-0006')) as { body: Record<string, unknown> };
   for (const k of ['reproduction', 'reproduction_notes', 'breeding_tasks', 'breeding_entry']) assert.equal(k in body, false, k);
+});
+
+// Stage 4: a calving 280 days after a day-precision AI is before the calving window.
+function servedForCalving(): Db {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2019-01-01', acquired_precision: 'year' });
+  recordBreedingEvent(db, { animal_id: 'BD-0001', type: 'insemination', occurred_on: '2025-01-10', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_no_heat_sign: true });
+  return db;
+}
+const EARLY_CALVING = { dam_id: 'BD-0001', occurred_on: '2025-10-17', date_precision: 'day', calf_sex: 'female', outcome: 'live', as_of: '2026-11-13', ...PROV };
+
+test('POST /calvings before the window: 400 with warnings, 201 with the flag', async () => {
+  const ctx = await serve(servedForCalving(), { breeding: true });
+  const refused = (await post(ctx, '/calvings', EARLY_CALVING)) as { status: number; body: { error: string; field: string; warnings: { check: string }[] } };
+  assert.equal(refused.status, 400);
+  assert.equal(refused.body.error, 'calving_before_window');
+  assert.equal(refused.body.field, 'occurred_on');
+  assert.deepEqual(refused.body.warnings.map((w) => w.check), ['calving_before_window']);
+  const saved = (await post(ctx, '/calvings', { ...EARLY_CALVING, allow_calving_before_window: true })) as {
+    status: number;
+    body: { calving_event_id: string; dam: { events: { id: string; override_checks: string[] }[] } };
+  };
+  assert.equal(saved.status, 201);
+  const row = saved.body.dam.events.find((e) => e.id === saved.body.calving_event_id)!;
+  assert.deepEqual(row.override_checks, ['calving_before_window']);
+  await ctx.close();
+});
+
+test('POST /calvings/:id/correction before the window: 400 with warnings, 201 with the flag', async () => {
+  const ctx = await serve(servedForCalving(), { breeding: true });
+  const first = (await post(ctx, '/calvings', { ...EARLY_CALVING, occurred_on: '2025-11-06' })) as { status: number; body: { calving_event_id: string } };
+  assert.equal(first.status, 201);
+  const fix = { occurred_on: '2025-10-17', date_precision: 'day', as_of: '2026-11-13', ...PROV };
+  const refused = (await post(ctx, `/calvings/${first.body.calving_event_id}/correction`, fix)) as { status: number; body: { error: string; warnings: unknown[] } };
+  assert.equal(refused.status, 400);
+  assert.equal(refused.body.error, 'calving_before_window');
+  assert.equal(refused.body.warnings.length, 1);
+  const saved = await post(ctx, `/calvings/${first.body.calving_event_id}/correction`, { ...fix, allow_calving_before_window: true });
+  assert.equal(saved.status, 201);
+  await ctx.close();
+});
+
+test('POST /calvings with the breeding flag off: the same calving is written, and a near-duplicate body is as in stage 3', async () => {
+  const ctx = await serve(servedForCalving());
+  assert.equal((await post(ctx, '/calvings', EARLY_CALVING)).status, 201);
+  const dup = (await post(ctx, '/calvings', { ...EARLY_CALVING, occurred_on: '2025-10-20' })) as { status: number; body: Record<string, unknown> };
+  assert.equal(dup.status, 400);
+  assert.deepEqual(Object.keys(dup.body).sort(), ['error', 'message']);
+  assert.equal(dup.body.error, 'near_duplicate_calving');
+  await ctx.close();
 });
