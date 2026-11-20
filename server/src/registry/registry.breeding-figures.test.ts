@@ -131,15 +131,15 @@ test('one inferred loss of four confirmed cases', () => {
   assert.deepEqual(f.losses, { n: 1, of: 4, rate: null });
 });
 
-test('a female open for 63 days of P is expected to show 3 heats', () => {
+/** Open on the heat of `heatOn` until the service of 2026-09-23 (no check on the earlier services). */
+const openFrom = (heatOn: string) =>
+  herd({ [id(1)]: [calving('2025-06-01'), svc('2025-10-01'), svc('2026-07-01'), heat(heatOn), svc('2026-09-23')] });
+
+test('a female open for 63 days of P is expected to show 3 heats, and for 62 days 2', () => {
   // Unconfirmed from 2025-10-01 (no check), open on the heat of 2026-07-22, served again
-  // on 2026-09-23: open 2026-07-22 .. 2026-09-22, 63 days.
-  const f = breedingFigures(
-    herd({ [id(1)]: [calving('2025-06-01'), svc('2025-10-01'), svc('2026-07-01'), heat('2026-07-22'), svc('2026-09-23')] }),
-    ON,
-    '12m',
-  );
-  assert.deepEqual(f.heats_caught, { recorded: 1, expected: 3, estimated: true });
+  // on 2026-09-23: open 2026-07-22 .. 2026-09-22, 63 days. A heat a day later: 62 days.
+  assert.deepEqual(breedingFigures(openFrom('2026-07-22'), ON, '12m').heats_caught, { recorded: 1, expected: 3, estimated: true });
+  assert.deepEqual(breedingFigures(openFrom('2026-07-23'), ON, '12m').heats_caught, { recorded: 1, expected: 2, estimated: true });
 });
 
 test('a female calved 45 days ago or more with no service since is eligible', () => {
@@ -147,6 +147,45 @@ test('a female calved 45 days ago or more with no service since is eligible', ()
   // She needs a view to be a current female, so an earlier service closed by this calving.
   const f = breedingFigures(herd({ [id(1)]: [calving('2025-06-01'), svc('2025-11-01'), calving('2026-09-01')] }), ON, '12m');
   assert.equal(f.heats_caught.expected, 1);
+});
+
+test('a dam with calvings and no service still counts for the calving interval', () => {
+  const f = breedingFigures(herd({ [id(1)]: [calving('2025-08-01'), calving('2026-09-01')] }), ON, '12m');
+  assert.deepEqual(f.calving_interval, { value: 396, n: 1, min: 396, max: 396, approximate: 0 });
+  assert.equal(f.animals, 0);
+  assert.deepEqual(f.by_animal, []);
+});
+
+test('a calved cow never served is eligible from day 45 of her calving', () => {
+  // Calved 2026-05-01: eligible 2026-06-15 .. 2026-11-13 = 16 + 31 + 31 + 30 + 31 + 13 = 152 days -> 7.
+  const f = breedingFigures(herd({ [id(1)]: [calving('2026-05-01')] }), ON, '12m');
+  assert.deepEqual(f.heats_caught, { recorded: 0, expected: 7, estimated: true });
+});
+
+test('days open leaves out a span with a year or estimated date, with a rough line', () => {
+  const year = breedingFigures(herd({ [id(1)]: [calving('2025-01-01', 'year'), svc('2025-12-01'), pos('2026-01-10')] }), ON, '12m');
+  assert.deepEqual(year.days_open, { value: null, n: 0, min: null, max: null, approximate: 0 });
+  assert.deepEqual(year.rough, [
+    '1 days-open span left out because a date is known only to the year or estimated',
+    'expected heats are estimated',
+  ]);
+  const both = breedingFigures(
+    herd({
+      [id(1)]: [calving('2025-01-01', 'year'), svc('2025-12-01'), pos('2026-01-10')],
+      [id(2)]: [calving('2025-01-01', 'estimated'), svc('2025-12-01'), pos('2026-01-10')],
+      [id(3)]: HELD,
+    }),
+    ON,
+    '12m',
+  );
+  assert.equal(both.days_open.n, 1);
+  assert.equal(both.rough[0], '2 days-open spans left out because a date is known only to the year or estimated');
+});
+
+test('"no outcome yet" counts services, not cases', () => {
+  // Two services with nothing between them join one pending case.
+  const f = breedingFigures(herd({ [id(1)]: [calving('2026-06-01'), svc('2026-10-01'), svc('2026-10-20')] }), ON, '12m');
+  assert.equal(f.rough[0], '2 services have no outcome yet');
 });
 
 test('period all includes a case before P that 12m leaves out', () => {

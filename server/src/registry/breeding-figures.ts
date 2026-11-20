@@ -6,8 +6,8 @@
 // badge. Nothing is stored. The definitions are in REGISTRY_BREEDING.md
 // ("The eight figures"); registry.breeding-figures.test.ts pins them.
 //
-// The current females are the board's: a female that had not left by `on` and
-// has a view then. P is `on` and the 364 days before it for '12m' (periodDays),
+// The current females are every female that had not left by `on`, with or
+// without a service; only those with a view on `on` have cases. P is `on` and the 364 days before it for '12m' (periodDays),
 // every day up to `on` for 'all'. A case `replaced` by a new service with no
 // loss recorded is counted apart: it is in none of the figures, and has its
 // own rough line.
@@ -103,16 +103,16 @@ export function breedingFigures(db: Db, on: string, period: FiguresPeriod): Bree
   const from = period === '12m' ? addDays(on, -(FIGURES.periodDays - 1)) : null;
   const inP = (d: string | null | undefined): d is string => !!d && d <= on && (from === null || d >= from);
 
-  // The current females: the board's set, with their cases as of `on`.
+  // The current females (not left by `on`), with their cases as of `on`.
   const females: Female[] = [];
   const overdue: BreedingFigures['overdue_now']['animals'] = [];
   for (const animal of allAnimals(db)) {
     if (animal.sex !== 'female') continue;
     const rows = eventsForAnimal(db, animal.id);
-    const { view, inMilk } = reproductionAsOf(animal, rows, on);
-    if (!view) continue;
-    females.push({ animal, rows, cases: breedingCases(rows, on, inMilk) });
-    if (view.state === 'overdue') overdue.push({ animal_id: animal.id, animal_name: animal.name, day_max: view.day_max });
+    const { current, view, inMilk } = reproductionAsOf(animal, rows, on);
+    if (!current) continue;
+    females.push({ animal, rows, cases: view ? breedingCases(rows, on, inMilk) : [] });
+    if (view?.state === 'overdue') overdue.push({ animal_id: animal.id, animal_name: animal.name, day_max: view.day_max });
   }
 
   const all = females.flatMap((f) => f.cases);
@@ -133,9 +133,15 @@ export function breedingFigures(db: Db, on: string, period: FiguresPeriod): Bree
   const confirmedDays = confirmed.map((c) => c.first_reliable_positive!.day);
   const laterDays = confirmedDays.filter((d) => d > BREEDING_TASK_DAYS.checkRedAfter).sort((a, b) => a - b);
 
-  // Days open.
-  const open: Span[] = heldInP
-    .filter((c) => c.previous_calving !== null)
+  // Days open. A span with an end known only to the year, or estimated, is left
+  // out (measured dates are never pooled with estimated ones) and has a rough line.
+  const measurable = (p: DatePrecision) => p === 'day' || p === 'month';
+  const withCalving = heldInP.filter((c) => c.previous_calving !== null);
+  const roughOpen = withCalving.filter(
+    (c) => !measurable(c.previous_calving!.date_precision) || !measurable(lastService(c).date_precision),
+  ).length;
+  const open: Span[] = withCalving
+    .filter((c) => measurable(c.previous_calving!.date_precision) && measurable(lastService(c).date_precision))
     .map((c) => ({
       animal_id: c.animal_id,
       days: daysBetween(c.previous_calving!.occurred_on, lastService(c).occurred_on),
@@ -148,8 +154,7 @@ export function breedingFigures(db: Db, on: string, period: FiguresPeriod): Bree
     const calvings = canonicalOrder(effectiveEvents(f.rows)).filter((e) => e.type === 'calving' && e.occurred_on <= on);
     for (let i = 1; i < calvings.length; i += 1) {
       const [a, b] = [calvings[i - 1], calvings[i]];
-      const usable = (p: DatePrecision) => p === 'day' || p === 'month';
-      if (!inP(b.occurred_on) || !usable(a.date_precision) || !usable(b.date_precision)) continue;
+      if (!inP(b.occurred_on) || !measurable(a.date_precision) || !measurable(b.date_precision)) continue;
       intervals.push({
         animal_id: f.animal.id,
         days: daysBetween(a.occurred_on, b.occurred_on),
@@ -205,10 +210,15 @@ export function breedingFigures(db: Db, on: string, period: FiguresPeriod): Bree
 
   // Why some figures are rough.
   const rough: string[] = [];
-  const pending = counted.filter((c) => c.outcome === 'pending' && inP(lastService(c).occurred_on)).length;
+  const pending = counted
+    .filter((c) => c.outcome === 'pending' && inP(lastService(c).occurred_on))
+    .reduce((n, c) => n + c.services.length, 0);
   if (pending > 0) rough.push(line(pending, 'service has', 'services have', 'no outcome yet'));
   const noCalving = new Set(heldInP.filter((c) => c.previous_calving === null).map((c) => c.animal_id)).size;
   if (noCalving > 0) rough.push(line(noCalving, 'animal has', 'animals have', 'no earlier calving'));
+  if (roughOpen > 0) {
+    rough.push(line(roughOpen, 'days-open span', 'days-open spans', 'left out because a date is known only to the year or estimated'));
+  }
   const replaced = all.filter((c) => c.outcome === 'replaced' && inP(c.closed_by?.occurred_on));
   const replacedHeld = replaced.filter((c) => c.first_reliable_positive !== null).length;
   const replacedOpen = replaced.length - replacedHeld;
