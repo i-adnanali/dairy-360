@@ -103,6 +103,26 @@ With the flag on, `?as_of=YYYY-MM-DD` asks for the state on that day (default: t
 
 Tasks are computed on every read from the same `reproduction` view and the same in-milk flag (`breedingForAnimal` in `breeding-board.ts`, which the detail and the board share); nothing is stored. `GET /breeding/board?on=YYYY-MM-DD` (default today on the farm; a bad date is a 400 `invalid_payload` on `on`; 404 without the flag) answers `{ on, tasks, overdue, due, cases }`. `tasks` holds every animal's tasks, each with `animal_name`, overdue first, then due, each group by `red_on` (none last) then `animal_id`. `cases` has one row per current female with a view: `{ animal_id, animal_name, view, notes, tasks, entry_open }`. `GET /today` carries the same object as `breeding` with the flag on, and no `breeding` key without it. `GET /animals/:id` carries `breeding_tasks` exactly when it carries `reproduction`.
 
+## The herd figures: `GET /breeding/figures`
+
+`GET /breeding/figures?period=12m|all&on=YYYY-MM-DD` (404 without the flag) answers the eight herd figures, computed on every read by `breedingFigures` in `breeding-figures.ts`; nothing is stored. `period` is `12m` (default) or `all`, anything else a 400 `invalid_payload` on `period`; `on` defaults to today on the farm, and a bad date is a 400 `invalid_payload`. `P` is `on` and the 364 days before it for `12m` (`FIGURES.periodDays`), and every day up to `on` for `all`; `from` is the first day of `P`, null for `all`.
+
+The figures are counted from `breedingCases` over the current females (the board's `cases`: a female that had not left by `on` and has a view), so they cannot disagree with the badge. A case `replaced` by a new service with no loss recorded is in none of the figures and has its own rough line. A `Count` is `{ n, of, rate }`; `rate` is a whole percent, present only when `of >= FIGURES.minCases` (10), else null. A `Spread` is `{ value, n, min, max, approximate }`, where `approximate` counts the spans built on a month-precision date.
+
+| Key | Definition |
+|---|---|
+| `animals` | Current females with a service in `P`. |
+| `overdue_now` | Current females whose view on `on` is `overdue`, with `day_max`. Ignores `P`. |
+| `services_per_conception` | Held cases with `held_on` in `P`: `services` is the sum of `services_since_calving`, `conceptions` their number; `value` to one decimal, null below `minCases` conceptions. |
+| `held_to_first_service` | Cases with `starts_after_calving` and the first service in `P`: `of` those held, failed or lost, `n` the held; `pending` the rest. |
+| `confirmed_by_day_60` | Held cases with the first reliable positive in `P`: `n` those on day 60 or earlier (`BREEDING_TASK_DAYS.checkRedAfter`); `later_days` the other days, ascending. |
+| `days_open` | Held cases with `held_on` in `P` and an earlier calving: days from that calving to the case's last service. `value` is the median (lower middle when even). |
+| `calving_interval` | Consecutive effective calvings of a current female, the later one in `P`, both day or month precision. `value` is the mean, to a whole day. |
+| `losses` | Cases with `held_on` (a reliable positive or a calving) in `P`: `n` those lost. |
+| `heats_caught` | `recorded`: effective `heat_observed` events in `P`. `expected`: each current female's eligible days in `P` (her view that day is `open`, or she calved at least `FIGURES.voluntaryWaitDays` days before and has no service since; not on a day she had left), summed, divided by `FIGURES.cycleDays` and rounded down. `estimated` is always true. |
+| `by_animal` | One row per female counted in `animals`, by `animal_id`: her services in `P`, and her latest in `P` of: first-service outcome, confirmed day, days open, calving interval (null when none). |
+| `rough` | "{k} services have no outcome yet" (pending cases with the last service in `P`); "{k} animals have no earlier calving" (held cases in `P` left out of days open); "{k} confirmed pregnancies followed by a new service with no loss recorded" and "{k} services followed by a new service with no outcome recorded" (replaced cases with and without a reliable positive, replaced in `P`); always "expected heats are estimated". Singular when k is 1; a line with k = 0 is left out. |
+
 ## `POST /breeding/events`
 
 Registered only with `REGISTRY_BREEDING=1`; without it the route does not exist (404). It writes one service, heat, pregnancy check or "nothing seen" through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry`.
@@ -161,4 +181,4 @@ Migration 10 widens the event table so it can hold the five breeding types. It i
 
 ## Not built yet
 
-Abortion entry, the KPIs and general availability (stages 4 and 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar waits for stage 4.
+Abortion entry and general availability (stages 4 and 5, [OPEN-062](../../OPEN.md#open-062)). The herd figures are served but not yet shown on the page. The Breeding page's day-by-day progress bar waits for stage 4.

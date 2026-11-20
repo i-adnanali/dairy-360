@@ -902,6 +902,27 @@ test('GET /breeding/board returns the tasks and cases', async () => {
   assert.equal((await get(ctx, '/breeding/board?on=nope')).status, 400);
 });
 
+test('GET /breeding/figures answers every figure; a bad period is a 400', async () => {
+  const ctx = await pilotCtx();
+  const r = (await get(ctx, '/breeding/figures?period=12m&on=2026-11-13')) as { status: number; body: Record<string, unknown> };
+  assert.equal(r.status, 200);
+  assert.deepEqual(Object.keys(r.body).sort(), [
+    'animals', 'by_animal', 'calving_interval', 'confirmed_by_day_60', 'days_open', 'from', 'heats_caught',
+    'held_to_first_service', 'losses', 'on', 'overdue_now', 'period', 'rough', 'services_per_conception',
+  ]);
+  assert.equal(r.body.period, '12m');
+  assert.equal(r.body.from, '2025-11-14');
+  const all = (await get(ctx, '/breeding/figures?period=all&on=2026-11-13')) as { status: number; body: { period: string; from: null } };
+  assert.equal(all.status, 200);
+  assert.equal(all.body.from, null);
+  assert.equal(((await get(ctx, '/breeding/figures')) as { body: { period: string } }).body.period, '12m');
+  const bad = (await get(ctx, '/breeding/figures?period=6m')) as { status: number; body: { error: string; field: string } };
+  assert.equal(bad.status, 400);
+  assert.equal(bad.body.error, 'invalid_payload');
+  assert.equal(bad.body.field, 'period');
+  assert.equal((await get(ctx, '/breeding/figures?on=nope')).status, 400);
+});
+
 test('/today carries the breeding board with the flag on', async () => {
   const ctx = await pilotCtx();
   const r = (await get(ctx, '/today?on=2026-11-13')) as { body: { breeding: { tasks: unknown[]; on: string } } };
@@ -939,6 +960,7 @@ test('a recorded dry_off event clears the dry_off task on the detail and the boa
 test('with the breeding flag off there is no board and no breeding keys', async () => {
   const ctx = await serve(breedingHerd());
   assert.equal((await fetch(`${ctx.base}/breeding/board`)).status, 404);
+  assert.equal((await fetch(`${ctx.base}/breeding/figures?period=12m`)).status, 404);
   const today = (await get(ctx, '/today?on=2026-11-13')) as { body: Record<string, unknown> };
   assert.equal('breeding' in today.body, false);
   const { body } = (await get(ctx, '/animals/BD-0006')) as { body: Record<string, unknown> };

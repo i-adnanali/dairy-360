@@ -28,6 +28,7 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | GET | `/reconcile?from=&to=` | produced against dispatched; `gap_pct` is null when production is incomplete |
 | GET | `/today?on=` | the day board: which sessions and which payroll month still need recording; with `REGISTRY_BREEDING=1` also `breeding`, the breeding board |
 | GET | `/breeding/board?on=` | only with `REGISTRY_BREEDING=1`: the breeding tasks (overdue first) and one case per breeding female; see [Breeding](breeding.md) |
+| GET | `/breeding/figures?period=&on=` | only with `REGISTRY_BREEDING=1`: the eight herd figures over the last 12 months (`period=12m`, default) or everything on record (`period=all`); see [Breeding](breeding.md#the-herd-figures-get-breedingfigures) |
 | GET | `/people?as_of=` | everybody on file, with what is owed; people with no open stint are flagged, not hidden |
 | GET | `/people/:id?as_of=` | one person's statement: stints, package, wage periods, payments, balance |
 | GET | `/engagements/:id/terms` | the package history for one stint, benefits included |

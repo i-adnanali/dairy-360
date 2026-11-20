@@ -21,18 +21,33 @@ export interface BreedingForAnimal {
   tasks: BreedingTask[];
 }
 
+export interface ReproductionAsOf {
+  /** A female that had not left by `asOf`. */
+  current: boolean;
+  inMilk: boolean;
+  /** Null for a male, a departed animal, or one with no service by `asOf`. */
+  view: ReproductionView | null;
+}
+
 /**
  * Only what had happened by `asOf`: a dry-off or a departure dated later must
  * not change the state on an earlier day, so both the in-milk flag and the
  * departure are projected from the effective events dated <= asOf.
+ * breedingForAnimal and the herd figures both call it.
  */
-export function breedingForAnimal(animal: RegistryAnimalRow, rows: RegistryEvent[], asOf: string): BreedingForAnimal {
+export function reproductionAsOf(animal: RegistryAnimalRow, rows: RegistryEvent[], asOf: string): ReproductionAsOf {
   const upTo = canonicalOrder(effectiveEvents(rows)).filter((e) => e.occurred_on <= asOf);
   const lactations = projectLactations(animal.id, upTo);
   const departed = projectStatus({ animal, ordered: upTo, lactations, asOf }).status === 'departed';
   // In milk = one of her lactations had no end on asOf.
   const inMilk = lactations.some((l) => l.ended_on === null);
-  const view = animal.sex !== 'female' || departed ? null : deriveReproduction({ events: rows, asOf, inMilk });
+  const current = animal.sex === 'female' && !departed;
+  return { current, inMilk, view: current ? deriveReproduction({ events: rows, asOf, inMilk }) : null };
+}
+
+/** The view, its notes and its tasks as of `asOf` (reproductionAsOf). */
+export function breedingForAnimal(animal: RegistryAnimalRow, rows: RegistryEvent[], asOf: string): BreedingForAnimal {
+  const { view, inMilk } = reproductionAsOf(animal, rows, asOf);
   if (!view) return { view: null, notes: [], tasks: [] };
   return {
     view,

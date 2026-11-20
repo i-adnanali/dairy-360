@@ -106,6 +106,7 @@ import {
 } from './wages';
 import { recordBreedingEvent } from './breeding';
 import { breedingBoard } from './breeding-board';
+import { breedingFigures } from './breeding-figures';
 import { breedingEntryOpen } from './breeding-pilot';
 import { correctCalving, recordCalving } from './calving';
 import {
@@ -699,6 +700,18 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
       handle((req, res) => {
         const on = breedingAsOf(req.query.on) ?? farmToday();
         res.json(breedingBoard(db, on, opts.breedingPilot ?? []));
+      }),
+    );
+    /** The eight herd figures as of `on` (default farm today), over `period` 12m (default) or all. */
+    router.get(
+      '/breeding/figures',
+      handle((req, res) => {
+        const on = breedingAsOf(req.query.on) ?? farmToday();
+        const period = req.query.period ?? '12m';
+        if (period !== '12m' && period !== 'all') {
+          throw new RegistryError('invalid_payload', 'period must be 12m or all', 'period');
+        }
+        res.json(breedingFigures(db, on, period));
       }),
     );
     router.post(
