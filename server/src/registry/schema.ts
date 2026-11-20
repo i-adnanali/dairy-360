@@ -1580,6 +1580,35 @@ BEGIN
 END;
 `;
 
+// Migration 13: two more override names, for a calving saved over a window
+// warning (calving_before_window, calving_past_extreme). Nine names are known.
+// Only the trigger changes: a CHECK cannot hold the names (SQLite forbids a
+// subquery in one), so the vocabulary lives in a trigger, and a trigger is
+// dropped and created without touching the table. No table is rebuilt, no row is
+// read or written. The names are spelled out, as in migration 12.
+const MIGRATION_13_CALVING_OVERRIDES = `
+DROP TRIGGER registry_animal_events_override_known;
+
+CREATE TRIGGER registry_animal_events_override_known
+BEFORE INSERT ON registry_animal_events
+WHEN json_valid(NEW.override_checks)
+ AND json_type(NEW.override_checks) = 'array'
+ AND EXISTS (
+       SELECT 1 FROM json_each(NEW.override_checks)
+        WHERE value IS NOT 'near_duplicate_calving'
+          AND value IS NOT 'animal_departed'
+          AND value IS NOT 'ambiguous_service'
+          AND value IS NOT 'early_check'
+          AND value IS NOT 'check_without_service'
+          AND value IS NOT 'no_heat_sign'
+          AND value IS NOT 'heat_after_positive'
+          AND value IS NOT 'calving_before_window'
+          AND value IS NOT 'calving_past_extreme')
+BEGIN
+  SELECT RAISE(ABORT, 'override_check_is_known');
+END;
+`;
+
 export const MIGRATIONS: readonly Migration[] = [
   { up: (db) => db.exec(MIGRATION_1_REGISTRY) },
   { up: (db) => db.exec(MIGRATION_2_ESTIMATED_JAN_FIRST), rebuildsTables: true },
@@ -1612,6 +1641,9 @@ export const MIGRATIONS: readonly Migration[] = [
   // Replaces override_check with the override_checks list; same self-referencing
   // foreign key, hence `rebuildsTables`.
   { up: (db) => db.exec(MIGRATION_12_OVERRIDE_LIST), rebuildsTables: true },
+  // Drops and recreates one trigger to widen override_check_is_known to nine
+  // names. No table is touched, so no `rebuildsTables`.
+  { up: (db) => db.exec(MIGRATION_13_CALVING_OVERRIDES) },
 ];
 
 /** The version a fully-migrated database reports. */

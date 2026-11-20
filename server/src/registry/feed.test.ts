@@ -345,8 +345,8 @@ test("v7 upgrade adds feed while preserving populated milk, animal and payroll r
   rewindEventsTableToVersion7(f.db);
   f.db.pragma("user_version = 7");
   const result = applyRegistrySchema(f.db);
-  assert.equal(result.applied, 5);
-  assert.equal(result.to, 12);
+  assert.equal(result.applied, 6);
+  assert.equal(result.to, 13);
   assert.deepEqual(
     tables.map((t) => f.db.prepare("SELECT * FROM " + t).all()),
     before,

@@ -1409,6 +1409,8 @@ function checkBreeding(s: RegistrySnapshot): Violation[] {
       check_without_service: 'pregnancy_check',
       no_heat_sign: 'insemination',
       heat_after_positive: 'heat_observed',
+      calving_before_window: 'calving',
+      calving_past_extreme: 'calving',
     };
     for (const check of e.override_checks) {
       if (allowedOn[check] && allowedOn[check] !== e.type) {
