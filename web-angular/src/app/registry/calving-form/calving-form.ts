@@ -43,7 +43,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RegistryApi } from "../api";
 import { FormState } from "../form-state";
-import { saveOver } from "../save-over";
+import { CALVING_OVERRIDES, saveOver } from "../save-over";
+import type { CalvingWarning } from "../save-over";
 import { Session } from "../session";
 import { WriteLog, focusAfterWrite } from "../after-write";
 import { CalfPicker } from "../calf-picker/calf-picker";
@@ -65,14 +66,6 @@ import { TextLink } from "../../ui/text";
 import { Button } from "../../ui/button";
 
 const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', 'outcome'] as const;
-
-/** The warnings a calving can be saved over, and the flag each one sets. */
-export const CALVING_OVERRIDES = {
-  near_duplicate_calving: 'allow_near_duplicate',
-  calving_before_window: 'allow_calving_before_window',
-  calving_past_extreme: 'allow_calving_past_extreme',
-} as const;
-export type CalvingWarning = keyof typeof CALVING_OVERRIDES;
 
 @Component({
   selector: 'app-calving-form',
@@ -201,6 +194,10 @@ export class CalvingForm {
   protected readonly warnings = this.over.warnings;
   protected readonly canSaveOver = this.over.canSaveOver;
   protected readonly lock = this.over.lock;
+  /** A near duplicate is on screen: the form adds its check-the-date hint. */
+  protected readonly nearDuplicate = computed(() =>
+    this.over.shown().includes('near_duplicate_calving'),
+  );
 
   /**
    * Eligibility depends on the date AND the sex, so the picker waits for both.

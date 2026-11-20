@@ -19,9 +19,8 @@ import {
 } from '@angular/core';
 import { RegistryApi } from "../api";
 import { FormState } from "../form-state";
-import { saveOver } from "../save-over";
-import { CALVING_OVERRIDES } from "../calving-form/calving-form";
-import type { CalvingWarning } from "../calving-form/calving-form";
+import { CALVING_OVERRIDES, saveOver } from "../save-over";
+import type { CalvingWarning } from "../save-over";
 import { Session } from "../session";
 import { SessionRequired } from "../session-required/session-required";
 import { WriteLog } from "../after-write";
@@ -128,6 +127,10 @@ export class CorrectionForm {
   protected readonly warnings = this.over.warnings;
   protected readonly canSaveOver = this.over.canSaveOver;
   protected readonly lock = this.over.lock;
+  /** A near duplicate is on screen: the form adds its check-it hint. */
+  protected readonly nearDuplicate = computed(() =>
+    this.over.shown().includes('near_duplicate_calving'),
+  );
 
   /** Only EFFECTIVE calvings. A superseded one must be corrected at the chain's end. */
   protected readonly correctable = computed(() =>

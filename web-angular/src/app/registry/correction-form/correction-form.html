@@ -87,6 +87,10 @@
                 <p data-role="override-message" [class.mt-1]="!$first">{{ w.message }}</p>
               }
             </div>
+            <!-- The form's own advice, not the server's: outside the alert. -->
+            @if (nearDuplicate()) {
+              <p data-role="override-hint" class="mt-2">Check it first.</p>
+            }
             <!-- A code this page has no flag for shows its sentence and offers no
                  way past it. -->
             @if (canSaveOver()) {
@@ -109,9 +113,10 @@
               >
                 {{ ws.length > 1 ? 'Save over these checks' : 'Save over this check' }}
               </button>
-              <p appHelp size="xs" class="mt-1">
-                Saving over it writes the correction and the fact that the check was written over.
-                  Her record shows both.
+              <!-- True in both modes: with the breeding flag off, a correction
+                   records no override, so this does not claim one. -->
+              <p appHelp size="xs" class="mt-1" data-role="save-over-help">
+                Saving over it writes the correction.
               </p>
             }
           </div>

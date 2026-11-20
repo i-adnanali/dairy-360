@@ -88,6 +88,15 @@ function expectShownOnce(el: HTMLElement, ...sentences: string[]) {
   for (const s of sentences) expect(el.textContent?.split(s)).toHaveLength(2);
 }
 
+/** The form's own hint: in the notice, outside the alert, once. */
+function expectHint(el: HTMLElement, text: string) {
+  const hints = el.querySelectorAll('[data-role="override-hint"]');
+  expect(hints).toHaveLength(1);
+  expect(hints[0].textContent?.trim()).toBe(text);
+  expect(el.querySelector('[data-role="override"]')?.contains(hints[0])).toBe(true);
+  expect(el.querySelector('[data-role="override-messages"]')?.contains(hints[0])).toBe(false);
+}
+
 describe('CalvingForm over a calving-window warning', () => {
   it('a calving before the window shows its sentence once and saves over it alone', async () => {
     const { http, fixture, el } = await readyCalving();
@@ -102,6 +111,8 @@ describe('CalvingForm over a calving-window warning', () => {
     const messages = el.querySelector('[data-role="override-messages"]') as HTMLElement;
     expect(messages.getAttribute('role')).toBe('alert');
     expect(document.activeElement).toBe(messages);
+    // The check-the-date hint belongs to a near duplicate, not to a window warning.
+    expect(el.querySelector('[data-role="override-hint"]')).toBeNull();
     expect(el.querySelector('[data-role="save-over"]')?.textContent?.trim()).toBe(
       'Save over this check',
     );
@@ -129,6 +140,7 @@ describe('CalvingForm over a calving-window warning', () => {
     await settle(fixture);
 
     expectShownOnce(el, DUPLICATE, PAST);
+    expectHint(el, 'Check the date first.');
     expect(el.querySelectorAll('[data-role="save-over"]')).toHaveLength(1);
     expect(el.querySelector('[data-role="save-over"]')?.textContent?.trim()).toBe(
       'Save over these checks',
@@ -162,6 +174,7 @@ describe('CalvingForm over a calving-window warning', () => {
     await settle(fixture);
 
     expectShownOnce(el, DUPLICATE);
+    expectHint(el, 'Check the date first.');
     expect(el.querySelector('[data-role="save-over"]')?.textContent?.trim()).toBe(
       'Save over this check',
     );
@@ -194,7 +207,7 @@ describe('CorrectionForm over a calving-window warning', () => {
   };
   const URL = `${BASE}/calvings/aevt_target/correction`;
 
-  it('two warnings show once each, save over both, and a plain save sends none', async () => {
+  async function tripCorrection(body: object) {
     const http = setup();
     const fixture = TestBed.createComponent(CorrectionForm);
     fixture.componentRef.setInput('events', [calving]);
@@ -204,6 +217,18 @@ describe('CorrectionForm over a calving-window warning', () => {
     fixture.detectChanges();
     enterDate(fixture, el, 'May 2023');
     click(el, '[data-role="submit"]');
+    http.expectOne(URL).flush(...refuse(body));
+    await settle(fixture);
+    return { http, fixture, el };
+  }
+
+  /** True in both modes: with breeding off a correction records no override. */
+  const expectCorrectionHelp = (el: HTMLElement) =>
+    expect(el.querySelector('[data-role="save-over-help"]')?.textContent?.trim()).toBe(
+      'Saving over it writes the correction.',
+    );
+
+  it('two warnings show once each, save over both, and a plain save sends none', async () => {
     const two = {
       error: 'breeding_warnings', field: 'occurred_on', message: `${BEFORE} ${PAST}`,
       warnings: [
@@ -211,10 +236,15 @@ describe('CorrectionForm over a calving-window warning', () => {
         { check: 'calving_past_extreme', message: PAST },
       ],
     };
-    http.expectOne(URL).flush(...refuse(two));
-    await settle(fixture);
+    const { http, fixture, el } = await tripCorrection(two);
 
     expectShownOnce(el, BEFORE, PAST);
+    const messages = el.querySelector('[data-role="override-messages"]') as HTMLElement;
+    expect(messages.getAttribute('role')).toBe('alert');
+    expect(messages.getAttribute('tabindex')).toBe('-1');
+    expect(document.activeElement).toBe(messages);
+    expect(el.querySelector('[data-role="override-hint"]')).toBeNull();
+    expectCorrectionHelp(el);
     expect(el.querySelector('[data-role="save-over"]')?.textContent?.trim()).toBe(
       'Save over these checks',
     );
@@ -230,5 +260,24 @@ describe('CorrectionForm over a calving-window warning', () => {
 
     click(el, '[data-role="submit"]');
     expect(Object.values(flagsOf(http.expectOne(URL).request.body))).toEqual([false, false, false]);
+  });
+
+  it('with breeding off, a near duplicate (no list) shows once, hints, and saves over it alone', async () => {
+    const { http, el } = await tripCorrection({
+      error: 'near_duplicate_calving', field: 'occurred_on', message: DUPLICATE,
+    });
+
+    expectShownOnce(el, DUPLICATE);
+    expectHint(el, 'Check it first.');
+    expectCorrectionHelp(el);
+    expect(el.querySelector('[data-role="save-over"]')?.textContent?.trim()).toBe(
+      'Save over this check',
+    );
+    click(el, '[data-role="save-over"]');
+    expect(flagsOf(http.expectOne(URL).request.body)).toEqual({
+      allow_near_duplicate: true,
+      allow_calving_before_window: false,
+      allow_calving_past_extreme: false,
+    });
   });
 });

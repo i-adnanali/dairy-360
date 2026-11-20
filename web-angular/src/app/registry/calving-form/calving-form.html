@@ -152,6 +152,10 @@
               <p data-role="override-message" [class.mt-1]="!$first">{{ w.message }}</p>
             }
           </div>
+          <!-- The form's own advice, not the server's: outside the alert. -->
+          @if (nearDuplicate()) {
+            <p data-role="override-hint" class="mt-2">Check the date first.</p>
+          }
           <!-- A code this page has no flag for shows its sentence and offers no
                way past it. -->
           @if (canSaveOver()) {

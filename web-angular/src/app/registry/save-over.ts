@@ -11,6 +11,17 @@ import { afterRenderEffect, computed } from '@angular/core';
 import type { ElementRef, Signal } from '@angular/core';
 import type { FormState } from './form-state';
 
+/**
+ * The warnings a calving (or a calving correction) can be saved over, and the
+ * flag each one sets. Here rather than in either form, since both use it.
+ */
+export const CALVING_OVERRIDES = {
+  near_duplicate_calving: 'allow_near_duplicate',
+  calving_before_window: 'allow_calving_before_window',
+  calving_past_extreme: 'allow_calving_past_extreme',
+} as const;
+export type CalvingWarning = keyof typeof CALVING_OVERRIDES;
+
 /** Two or more warnings fired at once come back under this code, each listed. */
 const SEVERAL = 'breeding_warnings';
 
