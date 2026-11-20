@@ -118,6 +118,22 @@ test('a service with nothing after it as of asOf: pending', () => {
   assert.equal(cases[0].starts_after_calving, true);
 });
 
+test('an early negative between two services: two cases, the first not lost', () => {
+  const first = svc('2026-03-01');
+  const second = svc('2026-03-20');
+  const cases = breedingCases([first, check('2026-03-16', 'ultrasound', 'negative'), second], AS_OF, false); // day 15 < 30
+  assert.deepEqual(cases.map((k) => k.services.map((x) => x.event_id)), [[first.id], [second.id]]);
+  assert.equal(cases[0].outcome, 'pending');
+  assert.equal(cases[1].services_since_calving, 2);
+});
+
+test('two services with nothing between them are one case', () => {
+  const a = svc('2026-10-01');
+  const b = svc('2026-10-03');
+  const cases = breedingCases([a, b], AS_OF, false);
+  assert.deepEqual(cases.map((k) => k.services.map((x) => x.event_id)), [[a.id, b.id]]);
+});
+
 test('a female with no service has no case', () => {
   assert.deepEqual(breedingCases([calving('2026-05-01'), heat('2026-06-10')], AS_OF, true), []);
 });

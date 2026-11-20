@@ -6,17 +6,18 @@
 //
 // THE RULES (registry.breeding-cases.test.ts pins them):
 //
-// Take canonicalOrder(effectiveEvents(events)) dated <= asOf. A boundary is each
-// calving, abortion, heat_observed and reliable negative pregnancy_check, then
-// asOf. At a boundary event the view is derived over the events up to and
-// including that event in canonical order, as of its date: a service recorded
-// after a heat on the same day is not yet in the heat's view, so the heat
-// closes the case before it. A negative check is reliable when the view taken
-// at it says so (latest_check.reliable). The view at asOf is
+// Take canonicalOrder(effectiveEvents(events)) dated <= asOf. Every one of
+// these events is a boundary, then asOf, so no case can fall between two
+// boundaries and this file keeps no list of which events end a case. At a
+// boundary event the view is derived over the events up to and including that
+// event in canonical order, as of its date: a service recorded after a heat on
+// the same day is not yet in the heat's view. The view at asOf is
 // deriveReproduction over all the events, which is the badge's view.
 //
-// Each distinct service.event_id gives one case; the latest view for that
-// anchor wins. Outcome: lost when the state is lost; failed when it is open;
+// Each distinct service.event_id gives one case; its view at the last event
+// where it is still the anchor (or at asOf) wins. A service that a later
+// anchor's view lists in its case_services joined that case and gives none of
+// its own. Outcome: lost when the state is lost; failed when it is open;
 // held when it is calved or the view has a reliable positive (a non-lost,
 // non-open view with one is confirmed, dryoff, close, window, overdue or
 // recheck); otherwise pending. closed_by is the boundary event at which the
@@ -74,20 +75,18 @@ export function breedingCases(events: RegistryEvent[], asOf: string, inMilk: boo
   };
 
   ordered.forEach((e, i) => {
-    const candidate =
-      e.type === 'calving' ||
-      e.type === 'abortion' ||
-      e.type === 'heat_observed' ||
-      (e.type === 'pregnancy_check' && (e.payload as { result?: string }).result === 'negative');
-    if (!candidate) return;
-    const view = deriveReproduction({ events: ordered.slice(0, i + 1), asOf: e.occurred_on, inMilk });
-    if (e.type === 'pregnancy_check' && !(view?.latest_check?.event_id === e.id && view.latest_check.reliable)) return;
-    take(view, e);
+    take(deriveReproduction({ events: ordered.slice(0, i + 1), asOf: e.occurred_on, inMilk }), e);
   });
   take(deriveReproduction({ events: ordered, asOf, inMilk }), null);
 
+  const joined = new Set<string>();
+  for (const { view } of latest.values()) {
+    for (const s of view.case_services) if (s.event_id !== view.service.event_id) joined.add(s.event_id);
+  }
+
   const cases: BreedingCase[] = [];
   for (const { view, enteredAt } of latest.values()) {
+    if (joined.has(view.service.event_id)) continue;
     const services = view.case_services;
     const firstAt = ordered.findIndex((e) => e.id === services[0].event_id);
     const lastAt = ordered.findIndex((e) => e.id === view.service.event_id);

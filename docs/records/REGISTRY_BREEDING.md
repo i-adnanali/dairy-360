@@ -142,7 +142,7 @@ Both are worded from `deriveReproduction`'s answer, never from a second copy of 
 - "Record a loss" opens an empty abortion form.
 - Overdue is a task and a count. There is no banner.
 
-**`breedingCases`.** It derives the cases of a female by calling `deriveReproduction` at each boundary (each service, check, calving and loss) and reading the case that ends there. The cases are derived at each boundary because a case's outcome depends on what was known on that day, and one derivation as of today would show a later record's attribution on an earlier case. The warnings, the Cases tab and the figures all read it, so they cannot disagree.
+**`breedingCases`.** It derives the cases of a female by calling `deriveReproduction` at each boundary: every recorded event dated up to the read date, and the read date itself. Each case's outcome is its view at the last event where it is still the anchor. A service that a later case lists among its services joined that case and is not a case of its own. The cases are derived at each boundary because a case's outcome depends on what was known on that day, and one derivation as of today would show a later record's attribution on an earlier case. The warnings, the Cases tab and the figures all read it, so they cannot disagree.
 
 **The eight figures.** `P` is the period: for `12m`, `[on - 364 days, on]` (`on` and the 364 days before it); for `all`, everything up to and including `on`. A rate is shown only when its denominator is at least `FIGURES.minCases`; below that the page shows the count ("4 of 7") and no percentage.
 
