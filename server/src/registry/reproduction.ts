@@ -220,6 +220,12 @@ export function deriveReproduction(opts: {
   const W = daysBetween(conceptionEarliest, conceptionLatest);
   const T = daysBetween(conceptionEarliest, asOf);
   const dayOf = (e: RegistryEvent) => daysBetween(conceptionEarliest, e.occurred_on);
+  /** The one reliability rule: a check counts on or after its method's day for its result. */
+  const isReliable = (check: RegistryEvent) => {
+    const { method, result } = checkPayload(check);
+    const from = reliableFrom(method, result);
+    return from !== null && dayOf(check) >= from;
+  };
 
   // The evidence.
   const evidence = ordered.slice(firstAt + 1);
@@ -235,14 +241,12 @@ export function deriveReproduction(opts: {
     if (e.type === 'heat_observed') heat = e;
     if (e.type !== 'pregnancy_check') continue;
     lastCheck = e;
-    const { method, result } = checkPayload(e);
-    if (result === 'positive') {
-      const posFrom = reliableFrom(method, 'positive');
-      if (!firstReliablePositive && posFrom !== null && dayOf(e) >= posFrom) firstReliablePositive = e;
+    if (checkPayload(e).result === 'positive') {
+      if (!firstReliablePositive && isReliable(e)) firstReliablePositive = e;
       pos = e;
       lostBy = null;
       openBy = null;
-    } else if (dayOf(e) >= CHECK_RELIABLE_FROM[method].negative) {
+    } else if (isReliable(e)) {
       if (pos) {
         lostBy = e;
         pos = null;
@@ -265,10 +269,8 @@ export function deriveReproduction(opts: {
   } else if (lostBy) {
     [state, basis] = ['lost', 'inferred'];
   } else if (pos) {
-    const { method } = checkPayload(pos);
-    const posFrom = reliableFrom(method, 'positive');
     heatAfterPositive = heat !== null && heat.occurred_on > pos.occurred_on;
-    if (posFrom === null || dayOf(pos) < posFrom || heatAfterPositive) {
+    if (!isReliable(pos) || heatAfterPositive) {
       [state, basis] = ['recheck', 'inferred'];
     } else if (T > W + GESTATION.windowCloses) {
       [state, basis] = ['overdue', 'inferred'];
@@ -304,15 +306,13 @@ export function deriveReproduction(opts: {
   let latestCheck: ReproductionView['latest_check'] = null;
   if (lastCheck) {
     const { method, result } = checkPayload(lastCheck);
-    const day = dayOf(lastCheck);
-    const from = reliableFrom(method, result);
     latestCheck = {
       event_id: lastCheck.id,
       method,
       result,
       occurred_on: lastCheck.occurred_on,
-      day,
-      reliable: from !== null && day >= from,
+      day: dayOf(lastCheck),
+      reliable: isReliable(lastCheck),
     };
   }
 

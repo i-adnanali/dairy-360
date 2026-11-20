@@ -20,8 +20,11 @@
 // its own. Outcome: lost when the state is lost; failed when it is open;
 // held when it is calved or the view has a reliable positive (a non-lost,
 // non-open view with one is confirmed, dryoff, close, window, overdue or
-// recheck); otherwise pending. closed_by is the boundary event at which the
-// anchor's view entered its final state, for calved, lost and open only.
+// recheck); otherwise pending. A held or pending case that a later case
+// follows is replaced instead: a new service came with no loss recorded.
+// closed_by is the boundary event at which the anchor's view entered its final
+// state and basis, for calved, lost and open; for a replaced case it is the
+// next case's first service (read from that case's view).
 //
 // inMilk: the caller passes today's value for every boundary. A past case's
 // outcome does not depend on it: in-milk only decides dryoff against
@@ -31,7 +34,7 @@ import { canonicalOrder, effectiveEvents } from './project';
 import { deriveReproduction } from './reproduction';
 import type { DatePrecision, RegistryEvent, RegistryEventType, ReproductionView } from './types';
 
-export type CaseOutcome = 'held' | 'failed' | 'lost' | 'pending';
+export type CaseOutcome = 'held' | 'failed' | 'lost' | 'pending' | 'replaced';
 
 export interface BreedingCase {
   animal_id: string;
@@ -47,7 +50,10 @@ export interface BreedingCase {
   /** First positive check past its method's reliable day: its date and day (from conception_earliest). */
   first_reliable_positive: { occurred_on: string; day: number } | null;
   outcome: CaseOutcome;
-  /** The calving, loss, heat or negative check that closed it; null when pending or still held without a calving. */
+  /**
+   * The calving, loss, heat or negative check that closed it, or for a replaced
+   * case the next case's first service; null when pending or still held without a calving.
+   */
   closed_by: { type: RegistryEventType; occurred_on: string; date_precision: DatePrecision } | null;
   loss_basis: 'observed' | 'inferred' | null;
   /** The date the case first counted as held: first reliable positive, else the calving. */
@@ -70,7 +76,8 @@ export function breedingCases(events: RegistryEvent[], asOf: string, inMilk: boo
   const take = (view: ReproductionView | null, at: RegistryEvent | null) => {
     if (!view) return;
     const prev = latest.get(view.service.event_id);
-    const enteredAt = prev && prev.view.state === view.state ? prev.enteredAt : at;
+    const same = prev && prev.view.state === view.state && prev.view.basis === view.basis;
+    const enteredAt = same ? prev.enteredAt : at;
     latest.set(view.service.event_id, { view, enteredAt });
   };
 
@@ -84,12 +91,17 @@ export function breedingCases(events: RegistryEvent[], asOf: string, inMilk: boo
     for (const s of view.case_services) if (s.event_id !== view.service.event_id) joined.add(s.event_id);
   }
 
+  const order = (id: string) => ordered.findIndex((e) => e.id === id);
+  const kept = [...latest.values()]
+    .filter(({ view }) => !joined.has(view.service.event_id))
+    .sort((a, b) => order(a.view.case_services[0].event_id) - order(b.view.case_services[0].event_id));
+
   const cases: BreedingCase[] = [];
-  for (const { view, enteredAt } of latest.values()) {
-    if (joined.has(view.service.event_id)) continue;
+  kept.forEach(({ view, enteredAt }, k) => {
+    const next = kept[k + 1]?.view.case_services[0];
     const services = view.case_services;
-    const firstAt = ordered.findIndex((e) => e.id === services[0].event_id);
-    const lastAt = ordered.findIndex((e) => e.id === view.service.event_id);
+    const firstAt = order(services[0].event_id);
+    const lastAt = order(view.service.event_id);
     let calvingAt = -1;
     for (let i = firstAt - 1; i >= 0; i -= 1) {
       if (ordered[i].type === 'calving') {
@@ -99,8 +111,15 @@ export function breedingCases(events: RegistryEvent[], asOf: string, inMilk: boo
     }
     const servicesBetween = (from: number, to: number) =>
       ordered.slice(from, to).filter((e) => e.type === 'insemination').length;
-    const outcome = outcomeOf(view);
-    const closer = view.state === 'calved' || view.state === 'lost' || view.state === 'open' ? enteredAt : null;
+    const derived = outcomeOf(view);
+    const replaced = next !== undefined && (derived === 'held' || derived === 'pending') && view.state !== 'calved';
+    const outcome: CaseOutcome = replaced ? 'replaced' : derived;
+    const closedState = view.state === 'calved' || view.state === 'lost' || view.state === 'open';
+    const closer = replaced
+      ? { type: 'insemination' as const, occurred_on: next.occurred_on, date_precision: next.date_precision }
+      : closedState && enteredAt
+        ? { type: enteredAt.type, occurred_on: enteredAt.occurred_on, date_precision: enteredAt.date_precision }
+        : null;
     const frp = view.first_reliable_positive;
     const calvedOn = view.state === 'calved' && closer ? closer.occurred_on : null;
     cases.push({
@@ -116,14 +135,10 @@ export function breedingCases(events: RegistryEvent[], asOf: string, inMilk: boo
       conception_latest: view.conception_latest,
       first_reliable_positive: frp ? { occurred_on: frp.occurred_on, day: frp.day } : null,
       outcome,
-      closed_by: closer ? { type: closer.type, occurred_on: closer.occurred_on, date_precision: closer.date_precision } : null,
+      closed_by: closer,
       loss_basis: view.state === 'lost' ? view.basis : null,
       held_on: frp ? frp.occurred_on : calvedOn,
     });
-  }
-  return cases.sort((a, b) => {
-    const x = ordered.findIndex((e) => e.id === a.services[0].event_id);
-    const y = ordered.findIndex((e) => e.id === b.services[0].event_id);
-    return x - y;
   });
+  return cases;
 }

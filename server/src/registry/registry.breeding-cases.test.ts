@@ -123,7 +123,8 @@ test('an early negative between two services: two cases, the first not lost', ()
   const second = svc('2026-03-20');
   const cases = breedingCases([first, check('2026-03-16', 'ultrasound', 'negative'), second], AS_OF, false); // day 15 < 30
   assert.deepEqual(cases.map((k) => k.services.map((x) => x.event_id)), [[first.id], [second.id]]);
-  assert.equal(cases[0].outcome, 'pending');
+  assert.equal(cases[0].outcome, 'replaced');
+  assert.deepEqual(cases[0].closed_by, { type: 'insemination', occurred_on: '2026-03-20', date_precision: 'day' });
   assert.equal(cases[1].services_since_calving, 2);
 });
 
@@ -132,6 +133,65 @@ test('two services with nothing between them are one case', () => {
   const b = svc('2026-10-03');
   const cases = breedingCases([a, b], AS_OF, false);
   assert.deepEqual(cases.map((k) => k.services.map((x) => x.event_id)), [[a.id, b.id]]);
+});
+
+test('a confirmed case followed by a heat and a new service is replaced; the new one calves', () => {
+  const a = svc('2025-01-01');
+  const pos = check('2025-02-05', 'ultrasound', 'positive'); // day 35
+  const h = heat('2025-02-20');                                // day 50
+  const b = svc('2025-02-20');                                 // recorded after the heat
+  const c = calving('2025-11-27');                             // day 280 of b
+  const cases = breedingCases([a, pos, h, b, c], AS_OF, true);
+  assert.deepEqual(cases.map((k) => k.services.map((x) => x.event_id)), [[a.id], [b.id]]);
+  assert.equal(cases[0].outcome, 'replaced');
+  assert.deepEqual(cases[0].first_reliable_positive, { occurred_on: '2025-02-05', day: 35 });
+  assert.equal(cases[0].held_on, '2025-02-05');
+  assert.deepEqual(cases[0].closed_by, { type: 'insemination', occurred_on: '2025-02-20', date_precision: 'day' });
+  assert.equal(cases[1].outcome, 'held');
+  assert.equal(cases[1].closed_by?.type, 'calving');
+  assert.equal(cases[1].closed_by?.occurred_on, '2025-11-27');
+});
+
+test('a reliable positive, an unreliable negative, then a new service: the first case is replaced', () => {
+  const cases = breedingCases(
+    [
+      svc('2026-03-01'),
+      check('2026-04-05', 'ultrasound', 'positive'), // day 35
+      check('2026-04-10', 'palpation', 'negative'),  // day 40 < 46
+      svc('2026-04-12'),
+    ],
+    AS_OF,
+    false,
+  );
+  assert.equal(cases.length, 2);
+  assert.equal(cases[0].outcome, 'replaced');
+  assert.equal(cases[0].first_reliable_positive?.occurred_on, '2026-04-05');
+  assert.equal(cases[1].outcome, 'pending');
+});
+
+test('an inferred loss that an abortion then records is observed, closed by the abortion', () => {
+  const cases = breedingCases(
+    [
+      svc('2026-06-01'),
+      check('2026-07-13', 'ultrasound', 'positive'),
+      check('2026-07-30', 'ultrasound', 'negative'),
+      abortion('2026-08-05'),
+    ],
+    AS_OF,
+    false,
+  );
+  assert.equal(cases.length, 1);
+  assert.equal(cases[0].outcome, 'lost');
+  assert.equal(cases[0].loss_basis, 'observed');
+  assert.deepEqual(cases[0].closed_by, { type: 'abortion', occurred_on: '2026-08-05', date_precision: 'day' });
+});
+
+test('a corrected service gives one case, anchored on the correction', () => {
+  const wrong = svc('2026-02-01');
+  const right = ev({ type: 'insemination', occurred_on: '2026-02-20', payload: { service_type: 'ai', exposure_days: null }, supersedes_id: wrong.id });
+  const cases = breedingCases([wrong, right], AS_OF, false);
+  assert.equal(cases.length, 1);
+  assert.deepEqual(cases[0].services.map((x) => x.event_id), [right.id]);
 });
 
 test('a female with no service has no case', () => {

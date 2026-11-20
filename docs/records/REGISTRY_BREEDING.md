@@ -144,6 +144,8 @@ Both are worded from `deriveReproduction`'s answer, never from a second copy of 
 
 **`breedingCases`.** It derives the cases of a female by calling `deriveReproduction` at each boundary: every recorded event dated up to the read date, and the read date itself. Each case's outcome is its view at the last event where it is still the anchor. A service that a later case lists among its services joined that case and is not a case of its own. The cases are derived at each boundary because a case's outcome depends on what was known on that day, and one derivation as of today would show a later record's attribution on an earlier case. The warnings, the Cases tab and the figures all read it, so they cannot disagree.
 
+**Case outcomes.** `lost` when that view is lost; `failed` when it is open; `held` when it is calved or has a reliable positive; otherwise `pending`. A held or pending case followed by a later case is `replaced`: a new service came with no loss recorded, and its `closed_by` is the next case's first service. A re-service recorded before the heat on the same day sorts before the heat, so it joins the earlier service in one failed case.
+
 **The eight figures.** `P` is the period: for `12m`, `[on - 364 days, on]` (`on` and the 364 days before it); for `all`, everything up to and including `on`. A rate is shown only when its denominator is at least `FIGURES.minCases`; below that the page shows the count ("4 of 7") and no percentage.
 
 | Figure | Definition |
