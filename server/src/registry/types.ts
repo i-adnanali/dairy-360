@@ -153,7 +153,8 @@ export type ReservedEventType = (typeof RESERVED_EVENT_TYPES)[number];
  * caller passes `allow_near_duplicate` / `allow_after_departure` (and, for the
  * breeding checks, `allow_ambiguous_service` / `allow_early_check` /
  * `allow_check_without_service`, and the two stage 3 names `no_heat_sign` /
- * `heat_after_positive`) and the guard steps aside. What was missing is that stepping aside left NO TRACE -- an
+ * `heat_after_positive`, and the two stage 4 calving names `calving_before_window` /
+ * `calving_past_extreme`) and the guard steps aside. What was missing is that stepping aside left NO TRACE -- an
  * overridden write was indistinguishable from one that never tripped a check,
  * in an append-only log whose whole premise is that the record explains itself.
  */
@@ -164,7 +165,9 @@ export type OverriddenCheck =
   | 'early_check'
   | 'check_without_service'
   | 'no_heat_sign'
-  | 'heat_after_positive';
+  | 'heat_after_positive'
+  | 'calving_before_window'
+  | 'calving_past_extreme';
 
 export const OVERRIDDEN_CHECKS: readonly OverriddenCheck[] = [
   'near_duplicate_calving',
@@ -174,6 +177,8 @@ export const OVERRIDDEN_CHECKS: readonly OverriddenCheck[] = [
   'check_without_service',
   'no_heat_sign',
   'heat_after_positive',
+  'calving_before_window',
+  'calving_past_extreme',
 ];
 
 /** The warnings stages 2 and 3 add for breeding entry (docs/records/REGISTRY_BREEDING.md). */

@@ -308,8 +308,8 @@ Built when something needs them, not before.
   Breeding is no longer in this list: stage 1 is read-only derivation, see [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md).
 <a id="open-062"></a>
 
-- **OPEN-062** — **Breeding stages 4 and 5 are not built**: abortion entry, KPIs and general
-  availability —
+- **OPEN-062** — **Breeding stage 5 is not built**: general availability, page correction and
+  backfill —
   [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#what-stage-1-is)
 <a id="open-063"></a>
 

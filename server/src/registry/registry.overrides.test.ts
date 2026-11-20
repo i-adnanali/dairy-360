@@ -408,3 +408,10 @@ test('assertOverride keeps a list of two names and refuses a name twice', () => 
   );
   assert.throws(() => assertOverride({ checks: ['early_check', 'early_check'], reason: null }), /twice/);
 });
+
+test('assertOverride accepts the two stage 4 calving checks', () => {
+  for (const check of ['calving_before_window', 'calving_past_extreme']) {
+    assert.deepEqual(assertOverride({ checks: [check], reason: null }), { checks: [check], reason: null });
+  }
+  assert.throws(() => assertOverride({ checks: ['calving_early'], reason: null }));
+});

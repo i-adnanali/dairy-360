@@ -120,3 +120,52 @@ A recheck is amber and never red.
 **The Breeding page** (`/animals/breeding`, in Herd's nav only when `/today` carries `breeding`) has To do and Cases. The mockup's progress bar on Cases is not built: it needs a day-346 axis, which is a stage 4 concern.
 
 **Spec items.** The spec's warning for a bull exposure still open past a ceiling with no end date does not apply: stage 1 makes `exposure_days` required. "Attribution recomputed" is built, because it can be computed on read by deriving the view with and without the latest recorded event.
+
+## Stage 4: loss entry, calving-window warnings and herd figures
+
+**Scope.** Stage 4 adds three things on the pilot: abortion entry over HTTP, two calving-window warnings, and eight herd figures on the Breeding page. `breedingCases` is the one place cases are built. Nothing here is stored: warnings and figures are computed on read, and events are only ever added.
+
+**Two calving warnings, not refusals.** A calving is possible at almost any gestation length, so neither is a refusal. Each says the record and the calving do not agree, and the farm may know better (a wrong service date, a long or short pregnancy). The caller can save over either, and the override is recorded from the condition, never from the flag. They fire only with `REGISTRY_BREEDING` on, and only when the calving closes a case that has a service.
+
+- `calving_before_window`: the calving falls before day 285 counted from the earliest possible conception, so the case says too early to be this service.
+- `calving_past_extreme`: the calving falls after day 346 counted from the latest possible conception, so the case says too late to be this service.
+
+Both are worded from `deriveReproduction`'s answer, never from a second copy of the rule. `GESTATION_DAYS = 310` in `calving.ts` is not read, changed or reused.
+
+**Migration 13 changes the trigger only.** It adds the two names to the `override_check` list the database trigger enforces, and nothing else. It is one-way. Until it runs, the trigger still lists seven names.
+
+**Abortion entry.** `abortion` is accepted on the pilot with an empty payload and no warning. An abortion with no pregnancy on file is accepted too, because a service may have gone unrecorded. Only the impossible is refused.
+
+**Owner defaults for this stage.**
+
+- A loss is never prefilled from an inferred outcome.
+- "Record a loss" opens an empty abortion form.
+- Overdue is a task and a count. There is no banner.
+
+**`breedingCases`.** It derives the cases of a female by calling `deriveReproduction` at each boundary (each service, check, calving and loss) and reading the case that ends there. The cases are derived at each boundary because a case's outcome depends on what was known on that day, and one derivation as of today would show a later record's attribution on an earlier case. The warnings, the Cases tab and the figures all read it, so they cannot disagree.
+
+**The eight figures.** `P` is the period: for `12m`, `[on - 364 days, on]` (`on` and the 364 days before it); for `all`, everything up to and including `on`. A rate is shown only when its denominator is at least `FIGURES.minCases`; below that the page shows the count ("4 of 7") and no percentage.
+
+| Figure | Definition |
+| --- | --- |
+| Overdue now | Current females whose view as of `on` is `overdue`. Ignores `P`. |
+| Services per conception | Over held cases with `held_on` in `P`: the sum of `services_since_calving` divided by the number of cases, to one decimal. Null when there are fewer cases than `minCases`. |
+| Held to first service | Cases that start after a calving with the first service in `P`. Of those with outcome `held`, `failed` or `lost`, the share `held`. The rest are pending. |
+| Confirmed by day 60 | Held cases with the first reliable positive in `P`. The share with that positive on day 60 or earlier (`BREEDING_TASK_DAYS.checkRedAfter`); the later days are listed. |
+| Days open | Held cases with `held_on` in `P` and an earlier calving: days from that calving to the case's last service. The median (lower middle when even). Approximate when a month-precision date is used. |
+| Calving interval | Consecutive effective calvings of the same dam, the later one in `P`, both day or month precision. The mean, to a whole day. Approximate when a month-precision date is used. |
+| Losses | Cases that had a reliable positive or a calving with `held_on` in `P`. The share whose outcome is `lost`. |
+| Heats caught | Effective `heat_observed` events in `P`, against the heats expected. Expected is each current female's eligible days in `P` (open, or calved at least `voluntaryWaitDays` ago with no service since) divided by `cycleDays`, rounded down. Always marked estimated. |
+
+**New numbers.** Added once, in `reproduction.ts`. Days count from the earliest possible conception unless a row says latest.
+
+| Number | Value | Kind |
+| --- | --- | --- |
+| Calving before the window | `daysBetween(conception_earliest, calving) < GESTATION.windowOpens` (285) | breed-specific |
+| Calving past the extreme | `daysBetween(conception_latest, calving) > BREEDING_TASK_DAYS.overdueRedAfter` (346) | biological constant (low confidence) |
+| `FIGURES.minCases` | 10 | farm-tunable default |
+| `FIGURES.cycleDays` | 21 | biological constant (high confidence) |
+| `FIGURES.voluntaryWaitDays` | 45 | farm-tunable default (low confidence) |
+| `FIGURES.periodDays` | 365 | farm-tunable default |
+
+**Not built.** The season split and target lines (no target is drawn, and none is invented). The Breeding page's progress bar on Cases, if it is still not built when this stage closes. General availability, page correction and backfill are stage 5.

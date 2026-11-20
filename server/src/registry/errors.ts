@@ -66,6 +66,8 @@ export type RegistryErrorCode =
   | 'check_without_service'
   | 'no_heat_sign'
   | 'heat_after_positive'
+  | 'calving_before_window'
+  | 'calving_past_extreme'
   // Used when more than one breeding warning fires on one write, so the caller
   // gets them together instead of one refusal per retry (stage 3, Task 4).
   | 'breeding_warnings'
