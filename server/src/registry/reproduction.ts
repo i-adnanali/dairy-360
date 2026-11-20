@@ -33,7 +33,10 @@
 // when a pos is held, else sets openBy; a negative before that day is ignored.
 // heat is the latest heat_observed. latest_check is the last check walked;
 // reliable is whether its day is on or after its method's day for its result
-// (false for a progesterone positive).
+// (false for a progesterone positive). first_reliable_positive is the first
+// positive walked whose day is on or after its method's positive day; it is
+// kept even when a later check clears pos. case_services lists the case's
+// services, earliest first.
 //
 // The state, first match wins:
 //   1  a calving is in the evidence                         calved       observed
@@ -92,6 +95,15 @@ export const BREEDING_TASK_DAYS = {
   overdueFrom: 333,
   overdueRedAfter: 346,
 } as const;
+
+/**
+ * The herd figures (REGISTRY_BREEDING.md, stage 4). minCases: a rate is shown
+ * only over at least this many cases (farm-tunable default). cycleDays: the
+ * heat cycle (biological constant, high confidence). voluntaryWaitDays: days
+ * after a calving before she is eligible to be served (farm-tunable default,
+ * low confidence). periodDays: the trailing period (farm-tunable default).
+ */
+export const FIGURES = { minCases: 10, cycleDays: 21, voluntaryWaitDays: 45, periodDays: 365 } as const;
 
 /**
  * The day close-up starts (264: back from the window opening) and the day
@@ -218,12 +230,15 @@ export function deriveReproduction(opts: {
   let lostBy: RegistryEvent | null = null;
   let openBy: RegistryEvent | null = null;
   let lastCheck: RegistryEvent | null = null;
+  let firstReliablePositive: RegistryEvent | null = null;
   for (const e of evidence) {
     if (e.type === 'heat_observed') heat = e;
     if (e.type !== 'pregnancy_check') continue;
     lastCheck = e;
     const { method, result } = checkPayload(e);
     if (result === 'positive') {
+      const posFrom = reliableFrom(method, 'positive');
+      if (!firstReliablePositive && posFrom !== null && dayOf(e) >= posFrom) firstReliablePositive = e;
       pos = e;
       lostBy = null;
       openBy = null;
@@ -336,6 +351,14 @@ export function deriveReproduction(opts: {
       })),
     negative_inside_exposure: negativeInsideExposure,
     month_precision_service: monthPrecision,
+    case_services: [...caseAt].reverse().map((i) => ({
+      event_id: ordered[i].id,
+      occurred_on: ordered[i].occurred_on,
+      date_precision: ordered[i].date_precision,
+    })),
+    first_reliable_positive: firstReliablePositive
+      ? { event_id: firstReliablePositive.id, occurred_on: firstReliablePositive.occurred_on, day: dayOf(firstReliablePositive) }
+      : null,
   };
 }
 

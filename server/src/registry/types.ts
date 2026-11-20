@@ -359,6 +359,10 @@ export interface ReproductionView {
   null_observations: { watched_for: WatchedFor; occurred_on: string }[];   // after the case's first service
   negative_inside_exposure: boolean; // open (inferred) because the negative fell inside a bull exposure
   month_precision_service: boolean;  // any service in the case is month-precision
+  /** The services of the case (the anchor last), in canonical order. */
+  case_services: { event_id: string; occurred_on: string; date_precision: DatePrecision }[];
+  /** The first positive check in the evidence on or after its method's CHECK_RELIABLE_FROM positive day. */
+  first_reliable_positive: { event_id: string; occurred_on: string; day: number } | null;
 }
 
 /** One discriminated union on `type`, validated by assertEventPayload(). */

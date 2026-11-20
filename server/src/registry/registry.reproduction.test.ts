@@ -247,3 +247,16 @@ test('attributionChanged: a correction recorded last brings the corrected record
   const right = svc('2026-07-20', { supersedes_id: wrong.id });   // recorded last
   assert.equal(attributionChanged({ events: [wrong, right], asOf: AS_OF, inMilk: false }), true);
 });
+
+test('the view lists the case services and the first reliable positive', () => {
+  const a = svc('2026-03-01');
+  const b = svc('2026-03-03');
+  const early = check('2026-03-20', 'ultrasound', 'positive');  // day 19 < 30
+  const first = check('2026-04-05', 'ultrasound', 'positive');  // day 35
+  const v = derive([a, b, early, first, check('2026-05-01', 'palpation', 'positive')])!;
+  assert.deepEqual(v.case_services.map((s) => s.event_id), [a.id, b.id]);
+  assert.deepEqual(v.first_reliable_positive, { event_id: first.id, occurred_on: '2026-04-05', day: 35 });
+  assert.equal(derive([svc('2026-10-01'), check('2026-11-05', 'progesterone', 'positive')])!.first_reliable_positive, null);
+  const lost = derive([svc('2026-06-01'), check('2026-07-13', 'ultrasound', 'positive'), check('2026-08-20', 'ultrasound', 'negative')])!;
+  assert.equal(lost.first_reliable_positive?.occurred_on, '2026-07-13', 'kept after a later negative clears pos');
+});
