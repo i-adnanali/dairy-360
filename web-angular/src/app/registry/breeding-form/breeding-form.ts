@@ -8,7 +8,6 @@
 // button sets only the flags of the warnings on screen, for one submit.
 
 import {
-  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -23,6 +22,7 @@ import { writerDraft } from '../writer-draft';
 import { WriteLock } from '../write-lock';
 import { RegistryApi } from '../api';
 import { FormState } from '../form-state';
+import { saveOver } from '../save-over';
 import { Session } from '../session';
 import { SessionRequired } from '../session-required/session-required';
 import { WriteLog } from '../after-write';
@@ -59,12 +59,6 @@ const OVERRIDES = {
   heat_after_positive: 'allow_heat_after_positive',
 } as const;
 type BreedingWarning = keyof typeof OVERRIDES;
-const WARNINGS = Object.keys(OVERRIDES) as BreedingWarning[];
-const isWarning = (code: string): code is BreedingWarning =>
-  (WARNINGS as string[]).includes(code);
-
-/** Two or more warnings fired at once come back under this code, each listed. */
-const SEVERAL = 'breeding_warnings';
 
 const FIELDS = [
   'occurred_on',
@@ -119,8 +113,6 @@ export class BreedingForm implements OnInit {
 
   private readonly dateControl = viewChild(PrecisionDateControl);
   private readonly noticeMessages = viewChild<ElementRef<HTMLElement>>('noticeMessages');
-  /** Whether the notice was up at the last render: focus moves only when it appears. */
-  private noticeShown = false;
 
   protected readonly fields = FIELDS;
   protected readonly kinds: { value: BreedingKind; label: string }[] = [
@@ -182,41 +174,11 @@ export class BreedingForm implements OnInit {
     () => !this.bullExposure() && this.kind() !== 'null_observation',
   );
 
-  /**
-   * Every warning the last refusal carried: the listed ones under
-   * `breeding_warnings`, or the single one named by its own code (whose body
-   * may list it too, or not). Empty when the refusal is not a warning.
-   */
-  protected readonly warnings = computed<{ check: string; message: string }[]>(() => {
-    const e = this.state.error();
-    if (!e || !e.isRefusal) return [];
-    if (e.code === SEVERAL) return e.warnings ?? [];
-    if (!isWarning(e.code)) return [];
-    return e.warnings?.length ? e.warnings : [{ check: e.code, message: e.message }];
-  });
-
-  /** The codes on screen that have a flag: exactly what a save-over sets. */
-  private readonly shownCodes = computed(() =>
-    this.warnings()
-      .map((w) => w.check)
-      .filter(isWarning),
-  );
-
-  /** Every code on screen has a flag; one the client does not know has no way past it. */
-  protected readonly canSaveOver = computed(() => {
-    const ws = this.warnings();
-    return ws.length > 0 && ws.every((w) => isWarning(w.check));
-  });
-
-  /**
-   * What WriteLock sees. A warning is shown once, in the override notice, so
-   * WriteLock is not handed it to print again as a red line of its own.
-   */
-  protected readonly lock = {
-    locked: () => this.state.locked(),
-    uncertain: () => this.state.uncertain(),
-    error: () => (this.warnings().length > 0 ? null : this.state.error()),
-  };
+  /** The override notice: the warnings on screen, and what a save-over sends. */
+  private readonly over = saveOver(this.state, OVERRIDES, this.noticeMessages);
+  protected readonly warnings = this.over.warnings;
+  protected readonly canSaveOver = this.over.canSaveOver;
+  protected readonly lock = this.over.lock;
 
   private readonly days = computed(() => {
     const v = this.exposureDays().trim();
@@ -266,14 +228,6 @@ export class BreedingForm implements OnInit {
     });
 
     void this.identifiers.refresh();
-
-    // WriteLock focused the warning before the form stopped handing it over;
-    // the notice takes that over, when it goes from hidden to shown.
-    afterRenderEffect(() => {
-      const shown = this.warnings().length > 0;
-      if (shown && !this.noticeShown) this.noticeMessages()?.nativeElement.focus();
-      this.noticeShown = shown;
-    });
   }
 
   /** Opening on a kind is where the form starts, not an unsaved change. */
@@ -288,7 +242,7 @@ export class BreedingForm implements OnInit {
   /** Submit with the flags of the warnings on screen set, and only those. */
   protected saveOver(): void {
     if (!this.canSaveOver()) return;
-    void this.submit(this.shownCodes());
+    void this.submit(this.over.shown());
   }
 
   /**
@@ -313,7 +267,7 @@ export class BreedingForm implements OnInit {
             date_precision: w.date_precision,
             payload: this.payload(k, bull),
             observed_by: blank(this.observedBy()),
-            ...Object.fromEntries(WARNINGS.map((c) => [OVERRIDES[c], allow.includes(c)])),
+            ...this.over.flags(allow),
             override_reason: blank(this.overrideReason()),
             ...this.session.provenance(),
           },

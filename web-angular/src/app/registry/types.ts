@@ -33,8 +33,8 @@ export type EnterableEventType = 'dry_off' | 'departure' | 'note';
 /**
  * The guards a write can be recorded as having stepped past. Mirrors
  * OverriddenCheck on the server; a list on the event since migration 12 (a column
- * since migration 4), the three breeding warnings since migration 11 and the two
- * heat warnings since stage 3.
+ * since migration 4), the three breeding warnings since migration 11, the two
+ * heat warnings since stage 3 and the two calving-window warnings since stage 4.
  */
 export type OverriddenCheck =
   | 'near_duplicate_calving'
@@ -43,7 +43,9 @@ export type OverriddenCheck =
   | 'early_check'
   | 'check_without_service'
   | 'no_heat_sign'
-  | 'heat_after_positive';
+  | 'heat_after_positive'
+  | 'calving_before_window'
+  | 'calving_past_extreme';
 export type CalvingOutcome = 'live' | 'stillborn' | 'died_within_24h';
 
 export interface HerdRow {
@@ -363,9 +365,12 @@ export interface WireError {
   field?: string;
   message: string;
   /**
-   * Breeding entry only: every warning that fired, one sentence each. Two or
-   * more come back under the code `breeding_warnings`, with `message` their
-   * sentences joined by a space; one comes back under its own code.
+   * Breeding entry and calvings (with the breeding flag on): every warning that
+   * fired, one sentence each. Two or more come back under the code
+   * `breeding_warnings`, with `message` their sentences joined by a space; one
+   * comes back under its own code. `check` is an OverriddenCheck from the
+   * server, kept a string here: a code this client does not know is shown as
+   * its sentence, with no way past it.
    */
   warnings?: { check: string; message: string }[];
 }

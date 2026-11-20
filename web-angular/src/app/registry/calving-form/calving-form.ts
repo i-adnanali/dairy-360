@@ -43,6 +43,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RegistryApi } from "../api";
 import { FormState } from "../form-state";
+import { saveOver } from "../save-over";
 import { Session } from "../session";
 import { WriteLog, focusAfterWrite } from "../after-write";
 import { CalfPicker } from "../calf-picker/calf-picker";
@@ -64,6 +65,14 @@ import { TextLink } from "../../ui/text";
 import { Button } from "../../ui/button";
 
 const FIELDS = ['dam_id', 'occurred_on', 'date_precision', 'calf', 'calf_sex', 'outcome'] as const;
+
+/** The warnings a calving can be saved over, and the flag each one sets. */
+export const CALVING_OVERRIDES = {
+  near_duplicate_calving: 'allow_near_duplicate',
+  calving_before_window: 'allow_calving_before_window',
+  calving_past_extreme: 'allow_calving_past_extreme',
+} as const;
+export type CalvingWarning = keyof typeof CALVING_OVERRIDES;
 
 @Component({
   selector: 'app-calving-form',
@@ -117,6 +126,7 @@ export class CalvingForm {
   private readonly writeLog = inject(WriteLog);
 
   private readonly firstField = viewChild<ElementRef<HTMLSelectElement>>('firstField');
+  private readonly noticeMessages = viewChild<ElementRef<HTMLElement>>('noticeMessages');
   private readonly dateControls = viewChildren(PrecisionDateControl);
 
   protected readonly fields = FIELDS;
@@ -184,8 +194,13 @@ export class CalvingForm {
   protected readonly calfName = signal<string | null>(null);
   protected readonly sireRef = signal('');
   protected readonly observedBy = signal('');
-  protected readonly allowDuplicate = signal(false);
   protected readonly overrideReason = signal('');
+
+  /** The override notice: the warnings on screen, and what a save-over sends. */
+  private readonly over = saveOver(this.state, CALVING_OVERRIDES, this.noticeMessages);
+  protected readonly warnings = this.over.warnings;
+  protected readonly canSaveOver = this.over.canSaveOver;
+  protected readonly lock = this.over.lock;
 
   /**
    * Eligibility depends on the date AND the sex, so the picker waits for both.
@@ -236,7 +251,6 @@ export class CalvingForm {
         calfName: this.calfName,
         sireRef: this.sireRef,
         observedBy: this.observedBy,
-        allowDuplicate: this.allowDuplicate,
         overrideReason: this.overrideReason,
       },
       states: [this.state],
@@ -328,7 +342,17 @@ export class CalvingForm {
     }
   }
 
-  protected async submit(): Promise<void> {
+  /** Submit with the flags of the warnings on screen set, and only those. */
+  protected saveOver(): void {
+    if (!this.over.canSaveOver()) return;
+    void this.submit(this.over.shown());
+  }
+
+  /**
+   * `allow` is an argument, not form state: a flag held between calls survived
+   * a save-over that sent nothing (an early return) and rode on the next plain save.
+   */
+  protected async submit(allow: readonly CalvingWarning[] = []): Promise<void> {
     if (this.state.submitting() || (!this.state.uncertain() && !this.canSubmit())) return;
     const entry = this.when();
     if (entry.status !== 'complete') return;
@@ -353,14 +377,13 @@ export class CalvingForm {
             outcome: this.outcome(),
             sire_ref: blank(this.sireRef()),
             observed_by: blank(this.observedBy()),
-            allow_near_duplicate: this.allowDuplicate(),
+            ...this.over.flags(allow),
             override_reason: blank(this.overrideReason()),
             ...this.session.provenance(),
           },
         ] as const,
       (request, key) => this.api.recordCalving(request[0], key),
     );
-    this.allowDuplicate.set(false);
     if (r) {
       void this.loadDams();
       // The calving just minted or linked an animal, so the list is stale and

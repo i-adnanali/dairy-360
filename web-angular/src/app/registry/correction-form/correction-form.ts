@@ -11,6 +11,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
   input,
   signal,
@@ -18,6 +19,9 @@ import {
 } from '@angular/core';
 import { RegistryApi } from "../api";
 import { FormState } from "../form-state";
+import { saveOver } from "../save-over";
+import { CALVING_OVERRIDES } from "../calving-form/calving-form";
+import type { CalvingWarning } from "../calving-form/calving-form";
 import { Session } from "../session";
 import { SessionRequired } from "../session-required/session-required";
 import { WriteLog } from "../after-write";
@@ -62,7 +66,6 @@ export class CorrectionForm {
         target: this.target,
         when: this.when,
         notes: this.notes,
-        allowDuplicate: this.allowDuplicate,
         overrideReason: this.overrideReason,
       },
       states: [this.state],
@@ -95,6 +98,7 @@ export class CorrectionForm {
   protected readonly session = inject(Session);
   private readonly writeLog = inject(WriteLog);
   private readonly dateControl = viewChild(PrecisionDateControl);
+  private readonly noticeMessages = viewChild<ElementRef<HTMLElement>>('noticeMessages');
 
   protected readonly fields = FIELDS;
   protected readonly state = new FormState<{
@@ -117,8 +121,13 @@ export class CorrectionForm {
   }
   protected readonly when = signal<DateEntry>({ status: 'empty' });
   protected readonly notes = signal('');
-  protected readonly allowDuplicate = signal(false);
   protected readonly overrideReason = signal('');
+
+  /** The override notice, as on the calving form: the same warnings and flags. */
+  private readonly over = saveOver(this.state, CALVING_OVERRIDES, this.noticeMessages);
+  protected readonly warnings = this.over.warnings;
+  protected readonly canSaveOver = this.over.canSaveOver;
+  protected readonly lock = this.over.lock;
 
   /** Only EFFECTIVE calvings. A superseded one must be corrected at the chain's end. */
   protected readonly correctable = computed(() =>
@@ -132,7 +141,14 @@ export class CorrectionForm {
       !this.state.submitting(),
   );
 
-  protected async submit(): Promise<void> {
+  /** Submit with the flags of the warnings on screen set, and only those. */
+  protected saveOver(): void {
+    if (!this.over.canSaveOver()) return;
+    void this.submit(this.over.shown());
+  }
+
+  /** `allow` is an argument, not form state, as on the calving form. */
+  protected async submit(allow: readonly CalvingWarning[] = []): Promise<void> {
     const entry = this.when();
     if (entry.status !== 'complete') return;
     const w = entry.value;
@@ -146,14 +162,13 @@ export class CorrectionForm {
             occurred_time: w.occurred_time,
             date_precision: w.date_precision,
             notes: blank(this.notes()),
-            allow_near_duplicate: this.allowDuplicate(),
+            ...this.over.flags(allow),
             override_reason: blank(this.overrideReason()),
             ...this.session.provenance(),
           },
         ] as const,
       (request, key) => this.api.correctCalving(request[0], request[1], key),
     );
-    this.allowDuplicate.set(false);
     if (r) {
       this.target.set('');
       this.dateControl()?.reset();

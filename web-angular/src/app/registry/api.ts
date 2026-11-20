@@ -46,7 +46,7 @@ export class ApiError extends Error {
   readonly field?: string;
   /** True when this is a domain refusal (400/404) rather than a bug or a network fault. */
   readonly isRefusal: boolean;
-  /** Each warning that fired, when the server lists them (breeding entry). */
+  /** Each warning that fired, when the server lists them (breeding entry, calvings). */
   readonly warnings?: { check: string; message: string }[];
 
   constructor(wire: WireError, isRefusal: boolean) {
