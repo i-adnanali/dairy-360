@@ -128,16 +128,22 @@ export function calvingTooSoonAfterBirth(
  * from the dam's derived view with the candidate calving in it. The candidate
  * carries the write's real `recorded_at`, so it sorts last among her same-day
  * events, and the view is taken as of the calving date: the case it reads is the
- * one this calving closes. No warning unless that view is `calved`, which needs
- * a service in the case (no service, no view).
+ * latest case as of the calving date. No warning unless that view is `calved`,
+ * which needs a service in the case (no service, no view).
+ *
+ * Each check fires only when the WHOLE calving date lies outside the bound, by
+ * `definitelyBefore` as calvingTooSoonAfterBirth does: a month or year calving is
+ * stored on the 1st, and an estimated one is never compared. `d` in the message
+ * is counted from the stored date.
  */
 function windowWarnings(dam: RegistryAnimalRow, rows: RegistryEvent[], candidate: RegistryEvent): WireWarning[] {
   const on = candidate.occurred_on;
   const view = breedingForAnimal(dam, [...rows, candidate], on).view;
   if (!view || view.state !== 'calved') return [];
   const out: WireWarning[] = [];
+  const when = { on, precision: candidate.date_precision };
   const fromEarliest = daysBetween(view.conception_earliest, on);
-  if (fromEarliest < GESTATION.windowOpens) {
+  if (definitelyBefore(when, { on: addDays(view.conception_earliest, GESTATION.windowOpens), precision: 'day' })) {
     out.push({
       check: 'calving_before_window',
       message:
@@ -147,7 +153,7 @@ function windowWarnings(dam: RegistryAnimalRow, rows: RegistryEvent[], candidate
     });
   }
   const fromLatest = daysBetween(view.conception_latest, on);
-  if (fromLatest > BREEDING_TASK_DAYS.overdueRedAfter) {
+  if (definitelyBefore({ on: addDays(view.conception_latest, BREEDING_TASK_DAYS.overdueRedAfter), precision: 'day' }, when)) {
     out.push({
       check: 'calving_past_extreme',
       message:
@@ -562,6 +568,7 @@ export function recordCalving(db: Db, input: RecordCalvingInput): RecordCalvingR
         outcome: input.calf.outcome,
       },
       provenance: input.provenance,
+      recorded_at: recordedAt,
       // Link mode: this birth REPLACES the `acquired` origin. The only
       // supersession in the schema that changes an event's type -- see
       // isOriginPromotion() in invariants.ts for why it is allowed here and
@@ -868,6 +875,7 @@ export function correctCalving(
         outcome: birth.payload.outcome,
       },
       provenance: input.provenance,
+      recorded_at: recordedAt,
       supersedes_id: birth.id,
     });
     faultAt(3);
