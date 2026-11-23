@@ -4,6 +4,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { AnimalDetailView } from './animal-detail';
 import { RegistryApi } from '../api';
+import { DraftRegistry } from '../draft-registry';
 import type { AnimalDetail } from '../types';
 
 const tick = async (f: any) => {
@@ -131,6 +132,23 @@ describe('AnimalDetailView Breeding tab', () => {
     expect(form.querySelector('[data-chip="abortion"]')?.getAttribute('aria-checked')).toBe('true');
     // Nothing prefilled: the date is empty.
     expect((form.querySelector('app-precision-date [data-role="date-text"]') as HTMLInputElement).value).toBe('');
+  });
+  it('Record a loss reopens the form on a loss after the kind was changed', async () => {
+    const lost = { ...view, state: 'lost', basis: 'inferred', window: null };
+    const tab = await openBreeding(await mount(detail({ reproduction: lost, breeding_entry: true })));
+    const press = async (sel: string) => {
+      (tab.querySelector(sel) as HTMLButtonElement).click();
+      await new Promise((r) => setTimeout(r));
+      TestBed.inject(ApplicationRef).tick();
+    };
+    await press('[data-role="record-loss"]');
+    await press('app-breeding-form [data-chip="heat_observed"]');
+    expect(tab.querySelector('app-breeding-form [data-chip="abortion"]')?.getAttribute('aria-checked')).toBe('false');
+    // The kind change is an unsaved change: the prompt is answered "discard".
+    const request = vi.spyOn(TestBed.inject(DraftRegistry), 'request').mockResolvedValue(true);
+    await press('[data-role="record-loss"]');
+    expect(request).toHaveBeenCalled();
+    expect(tab.querySelector('app-breeding-form [data-chip="abortion"]')?.getAttribute('aria-checked')).toBe('true');
   });
   it('no Record a loss when the loss is observed, or outside the pilot', async () => {
     const observed = await openBreeding(await mount(detail({ reproduction: { ...view, state: 'lost', basis: 'observed', window: null }, breeding_entry: true })));

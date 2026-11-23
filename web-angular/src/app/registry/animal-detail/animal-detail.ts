@@ -65,19 +65,25 @@ export class AnimalDetailView {
   protected async selectTab(tab: Tab) {
     if (tab === this.current()) return;
     if (!this.drafts.hasChanges() || (await this.drafts.request())) {
-      this.breedingKind.set(null);
+      this.openBreedingForm(null);
       this.tab.set(tab);
     }
   }
 
   /**
-   * The kind the Breeding tab's form opens on. "Record a loss" sets it, and the
-   * form is mounted again on it, empty: an inferred loss is never prefilled.
+   * The kind the Breeding tab's form opens on, and a count that mounts it again.
+   * "Record a loss" always mounts a fresh form on a loss, even when the form was
+   * already opened on one and its kind changed since: an inferred loss is never
+   * prefilled.
    */
-  protected readonly breedingKind = signal<'abortion' | null>(null);
+  protected readonly breedingForm = signal<{ kind: 'abortion' | null; n: number }>({ kind: null, n: 0 });
+  private breedingMounts = 0;
+  /** Writes without reading the signal: the id effect calls it, and must not track it. */
+  private openBreedingForm(kind: 'abortion' | null): void {
+    this.breedingForm.set({ kind, n: ++this.breedingMounts });
+  }
   protected async recordLoss(): Promise<void> {
-    if (this.breedingKind() === 'abortion') return;
-    if (!this.drafts.hasChanges() || (await this.drafts.request())) this.breedingKind.set('abortion');
+    if (!this.drafts.hasChanges() || (await this.drafts.request())) this.openBreedingForm('abortion');
   }
 
   protected readonly reproLabel = reproductionLabel;
@@ -173,7 +179,7 @@ export class AnimalDetailView {
    * detail without this component re-fetching on a signal it cannot see. */
   protected readonly onSaved = (d: Detail): void => {
     this.detail.set(d);
-    this.breedingKind.set(null);
+    this.openBreedingForm(null);
     this.tab.set('events');
   };
 
@@ -196,7 +202,7 @@ export class AnimalDetailView {
     effect(() => {
       const id = this.id();
       this.detail.set(null);
-      this.breedingKind.set(null);
+      this.openBreedingForm(null);
       void this.load(id);
     });
     // Both optional extras: the page works without them.

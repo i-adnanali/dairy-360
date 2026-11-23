@@ -756,11 +756,11 @@ test('an animal outside the pilot is refused', async () => {
 
 test('a type the page does not enter is refused', async () => {
   const ctx = await pilotCtx();
-  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'weaning', occurred_on: '2026-11-13', date_precision: 'day', payload: {}, ...PROV });
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'calving', occurred_on: '2026-11-13', date_precision: 'day', payload: {}, ...PROV });
   assert.equal(r.status, 400);
   assert.equal((r.body as { error: string }).error, 'breeding_entry_closed');
   assert.equal((r.body as { field: string }).field, 'type');
-  assert.equal((r.body as { message: string }).message, 'weaning is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is');
+  assert.equal((r.body as { message: string }).message, 'calving is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is');
 });
 
 test('a loss for a pilot animal is written and she reads as lost, observed', async () => {
