@@ -9,7 +9,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { BreedingPage } from './breeding-page';
 import { RegistryApi } from '../api';
 import { Session } from '../session';
-import type { BreedingBoard, BreedingCaseRow, BreedingTask, ReproductionView } from '../types';
+import type { BreedingBoard, BreedingCaseRow, BreedingFigures, BreedingTask, ReproductionView } from '../types';
 
 const view = (over: Partial<ReproductionView>): ReproductionView => ({
   state: 'unconfirmed',
@@ -59,19 +59,43 @@ const board: BreedingBoard = {
   cases,
 };
 
-async function mount(url = '/animals/breeding', data: BreedingBoard = board) {
+// The mockup's sample herd, worded through the server's shape. Held to first
+// service has 7 decided cases, under minCases, so no rate; losses has 12, so one.
+const figures: BreedingFigures = {
+  on: '2026-11-13',
+  period: '12m',
+  from: '2025-11-14',
+  animals: 11,
+  overdue_now: { n: 1, animals: [{ animal_id: 'BD-0002', animal_name: 'Sohni', day_max: 350 }] },
+  services_per_conception: { services: 8, conceptions: 6, value: null },
+  held_to_first_service: { n: 4, of: 7, rate: null, pending: 4 },
+  confirmed_by_day_60: { n: 3, of: 6, rate: null, later_days: [63, 68, 74] },
+  days_open: { value: 97, n: 5, min: 67, max: 148, approximate: 1 },
+  calving_interval: { value: 416, n: 4, min: 408, max: 430, approximate: 0 },
+  losses: { n: 1, of: 12, rate: 8 },
+  heats_caught: { recorded: 7, expected: 12, estimated: true },
+  by_animal: [
+    { animal_id: 'BD-0002', animal_name: 'Sohni', services: 2, first_service: 'held', confirmed_day: 63, days_open: 97, calving_interval: 416 },
+    { animal_id: 'BD-0007', animal_name: 'Rani', services: 1, first_service: 'pending', confirmed_day: null, days_open: null, calving_interval: null },
+    { animal_id: 'BD-0009', animal_name: null, services: 3, first_service: 'replaced', confirmed_day: null, days_open: null, calving_interval: null },
+  ],
+  rough: ['4 services have no outcome yet', '1 animal has no earlier calving', 'expected heats are estimated'],
+};
+
+async function mount(url = '/animals/breeding', data: BreedingBoard = board, figs: BreedingFigures = figures) {
   const breedingBoard = vi.fn(() => Promise.resolve(structuredClone(data)));
+  const breedingFigures = vi.fn((period: '12m' | 'all') => Promise.resolve({ ...structuredClone(figs), period, from: period === 'all' ? null : figs.from }));
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
       provideRouter([{ path: 'animals/breeding', component: BreedingPage }]),
-      { provide: RegistryApi, useValue: { breedingBoard, identifierValues: () => Promise.resolve({}) } },
+      { provide: RegistryApi, useValue: { breedingBoard, breedingFigures, identifierValues: () => Promise.resolve({}) } },
     ],
   });
   TestBed.inject(Session).set('direct_entry', 'adnan');
   const h = await RouterTestingHarness.create(url);
   await settle(h);
-  return { h, el: h.fixture.nativeElement as HTMLElement, breedingBoard };
+  return { h, el: h.fixture.nativeElement as HTMLElement, breedingBoard, breedingFigures };
 }
 async function settle(h: RouterTestingHarness) {
   for (let i = 0; i < 3; i++) {
@@ -238,5 +262,113 @@ describe('the Breeding page', () => {
     const panel = el.querySelector('[data-role="breeding-panel"]')!;
     expect(panel.querySelector<HTMLSelectElement>('select[name="entryAnimal"]')!.value).toBe('BD-0007');
     expect(panel.querySelector('app-breeding-form [data-chip="null_observation"]')?.getAttribute('aria-checked')).toBe('true');
+  });
+
+  // ---- Herd figures ---------------------------------------------------------
+  it('the Herd figures tab asks for the last 12 months, and All on record asks for all', async () => {
+    const { h, el, breedingFigures } = await mount();
+    expect(breedingFigures).not.toHaveBeenCalled();
+    el.querySelector<HTMLButtonElement>('[data-tab="figures"]')!.click();
+    await settle(h);
+    expect(text(el.querySelector('[data-tab="figures"]'))).toBe('Herd figures');
+    expect(breedingFigures).toHaveBeenLastCalledWith('12m');
+    expect(text(el.querySelector('[data-role="figures-lead"]'))).toBe(
+      'Counted from the cases on record. With a herd this size, read the counts before the percentages.',
+    );
+    expect(text(el.querySelector('[data-role="figures-range"]'))).toBe('14 Nov 2025 to 13 Nov 2026 · 11 animals with a service in this period');
+    el.querySelector<HTMLButtonElement>('[data-period="all"]')!.click();
+    await settle(h);
+    expect(breedingFigures).toHaveBeenLastCalledWith('all');
+    expect(el.querySelector('[data-period="all"]')!.getAttribute('aria-pressed')).toBe('true');
+    expect(text(el.querySelector('[data-role="figures-range"]'))).toBe('All on record · 11 animals with a service');
+  });
+
+  it('opens on the figures from the address, with the eight cards in order', async () => {
+    const { el, breedingFigures } = await mount('/animals/breeding?tab=figures&period=all');
+    expect(breedingFigures).toHaveBeenLastCalledWith('all');
+    const titles = Array.from(el.querySelectorAll('[data-role="figure"] dt')).map(text);
+    expect(titles).toEqual([
+      'Overdue now', 'Services per conception', 'Held to first service', 'Confirmed by day 60',
+      'Days open', 'Calving interval', 'Losses', 'Heats caught',
+    ]);
+  });
+
+  it('a count under its minimum shows "4 of 7" and no percentage; one with a rate shows it', async () => {
+    const { el } = await mount('/animals/breeding?tab=figures');
+    const card = (k: string) => el.querySelector(`[data-role="figure"][data-figure="${k}"]`)!;
+    const held = card('held_to_first_service');
+    expect(text(held.querySelector('.figure-value'))).toBe('4 of 7');
+    expect(text(held)).not.toContain('%');
+    expect(text(held.querySelector('.figure-note'))).toBe('First services with a known outcome. 4 more have no outcome yet.');
+    const losses = card('losses');
+    expect(text(losses.querySelector('.figure-value'))).toBe('1 of 12 · 8%');
+    expect(text(card('overdue_now').querySelector('.figure-note'))).toBe('BD-0002 Sohni, day 350. Follows straight from the calving window.');
+    expect(text(card('services_per_conception').querySelector('.figure-value'))).toBe('–');
+    expect(text(card('services_per_conception').querySelector('.figure-note'))).toBe(
+      '8 services for 6 confirmed pregnancies. Counts only services that were written down.',
+    );
+    expect(text(card('confirmed_by_day_60').querySelector('.figure-note'))).toBe(
+      'The other 3 were confirmed later, on days 63, 68 and 74. Day 60 is your own yardstick.',
+    );
+    const open = card('days_open');
+    expect(text(open.querySelector('.figure-value'))).toBe('97 days, middle of 5');
+    expect(open.querySelector('[data-role="spread-value"]')!.className).toContain('border-dotted');
+    expect(text(open.querySelector('.figure-note'))).toBe('From calving to the service that held. Shortest 67, longest 148.');
+    const interval = card('calving_interval');
+    expect(text(interval.querySelector('.figure-value'))).toBe('416 days, average of 4');
+    expect(interval.querySelector('[data-role="spread-value"]')!.className).not.toContain('border-dotted');
+  });
+
+  it('a held-to-first-service count at its minimum shows the rate', async () => {
+    const f = { ...structuredClone(figures), held_to_first_service: { n: 6, of: 10, rate: 60, pending: 0 } };
+    const { el } = await mount('/animals/breeding?tab=figures', board, f);
+    const held = el.querySelector('[data-figure="held_to_first_service"]')!;
+    expect(text(held.querySelector('.figure-value'))).toBe('6 of 10');
+    expect(text(held.querySelector('.figure-note'))).toBe('60% of first services with a known outcome.');
+  });
+
+  it('nothing to count shows a dash and no numbers in the sentence', async () => {
+    const f = {
+      ...structuredClone(figures),
+      overdue_now: { n: 0, animals: [] },
+      services_per_conception: { services: 0, conceptions: 0, value: null },
+      confirmed_by_day_60: { n: 0, of: 0, rate: null, later_days: [] },
+      days_open: { value: null, n: 0, min: null, max: null, approximate: 0 },
+    };
+    const { el } = await mount('/animals/breeding?tab=figures', board, f);
+    const card = (k: string) => el.querySelector(`[data-figure="${k}"]`)!;
+    expect(text(card('overdue_now').querySelector('.figure-value'))).toBe('0');
+    expect(text(card('overdue_now').querySelector('.figure-note'))).toBe('Follows straight from the calving window.');
+    expect(text(card('services_per_conception').querySelector('.figure-note'))).toBe('Counts only services that were written down.');
+    expect(text(card('confirmed_by_day_60').querySelector('.figure-value'))).toBe('–');
+    expect(text(card('confirmed_by_day_60').querySelector('.figure-note'))).toBe('Day 60 is your own yardstick.');
+    expect(text(card('days_open').querySelector('.figure-value'))).toBe('–');
+    expect(text(card('days_open').querySelector('.figure-note'))).toBe('From calving to the service that held.');
+  });
+
+  it('Heats caught carries est, and the rough lines and footers are shown', async () => {
+    const { el } = await mount('/animals/breeding?tab=figures');
+    const heats = el.querySelector('[data-figure="heats_caught"]')!;
+    expect(text(heats.querySelector('.figure-value'))).toBe('7 of 12est');
+    expect(text(heats.querySelector('[appQualifier]'))).toBe('est');
+    expect(text(heats.querySelector('.figure-note'))).toBe('Heats recorded against heats expected. "Expected" is itself an estimate.');
+    expect(Array.from(el.querySelectorAll('[data-role="rough"] li')).map(text)).toEqual(figures.rough);
+    expect(text(el)).toContain('No target lines are drawn. What counts as a good days-open or calving interval differs by breed and by source, so the page shows your own numbers and their range.');
+    expect(text(el)).toContain('A figure with fewer than its minimum number of cases shows the count and no rate.');
+  });
+
+  it('the By animal table lists one row per animal, with outcomes in words', async () => {
+    const { el } = await mount('/animals/breeding?tab=figures');
+    const table = el.querySelector('[data-role="by-animal"]')!;
+    expect(Array.from(table.querySelectorAll('th')).map(text)).toEqual([
+      'Animal', 'Services', 'First service', 'Confirmed', 'Days open', 'Calving interval',
+    ]);
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    expect(rows.map((r) => r.getAttribute('data-animal'))).toEqual(['BD-0002', 'BD-0007', 'BD-0009']);
+    expect(Array.from(rows[0].querySelectorAll('td')).map(text)).toEqual(['BD-0002 Sohni', '2', 'Held', 'Day 63', '97', '416']);
+    expect(Array.from(rows[1].querySelectorAll('td')).map(text)).toEqual(['BD-0007 Rani', '1', 'No outcome yet', '–', '–', '–']);
+    expect(rows[1].querySelector('[data-role="first-service"] span')!.className).toContain('italic');
+    expect(text(rows[2].querySelector('[data-role="first-service"]'))).toBe('Followed by a new service');
+    expect(text(el)).toContain('Words in italics are answers that are still open. A dash means there is nothing to count, such as a first calving with no interval before it.');
   });
 });

@@ -1,25 +1,28 @@
-// The Breeding page: what is due (To do) and every animal with a case (Cases),
-// with the entry form in a panel beside the list. The Health page's shape --
+// The Breeding page: what is due (To do), every animal with a case (Cases) and
+// the eight herd figures (Herd figures), with the entry form in a panel beside the list. The Health page's shape --
 // header, [appTabBar] tabs with a count, filters, .task-status pill, a panel
 // that is the whole screen with Back on a phone -- not a second one.
 //
 // Nothing here works out a state, a day or a task: the server computes the
-// board on read (GET /breeding/board). The page filters, sorts and words it.
+// board on read (GET /breeding/board), and the figures (GET /breeding/figures).
+// The page filters, sorts and words them; it never counts a figure itself.
 
 import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RegistryApi } from '../api';
 import { DraftRegistry } from '../draft-registry';
 import { farmToday } from '../today';
 import { urlParams } from '../url-state';
-import { readableParts, precisionParts } from '../precision-display';
+import { NO_RECORD, readableParts, precisionParts } from '../precision-display';
 import {
   REPRODUCTIVE_STATES,
   basisWord,
@@ -33,9 +36,13 @@ import type {
   AnimalDetail,
   BreedingBoard,
   BreedingCaseRow,
+  BreedingFigures,
   BreedingTask,
   BreedingTaskKind,
+  CaseOutcome,
   CheckMethod,
+  FiguresPeriod,
+  FiguresSpread,
   ReproductiveState,
 } from '../types';
 import { BreedingForm } from '../breeding-form/breeding-form';
@@ -60,6 +67,15 @@ const CLOSED: ReproductiveState[] = ['calved', 'lost', 'open'];
 const METHOD_WORDS: Record<CheckMethod, string> = {
   palpation: 'Palpation', ultrasound: 'Ultrasound', pag: 'PAG test', progesterone: 'Progesterone test',
 };
+/** A case's outcome in the By animal table; `pending` is drawn italic, an open answer. */
+const OUTCOME_WORDS: Record<CaseOutcome, string> = {
+  held: 'Held', failed: 'Did not hold', lost: 'Lost', replaced: 'Followed by a new service', pending: 'No outcome yet',
+};
+/** `1 service` / `8 services`. */
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+/** `63`, `63 and 68`, `63, 68 and 74`. */
+const listed = (xs: number[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+
 const PANEL_TITLE: Record<EntryKind, string> = {
   insemination: 'Record service',
   heat_observed: 'Record heat',
@@ -71,7 +87,7 @@ const PANEL_TITLE: Record<EntryKind, string> = {
   selector: 'app-breeding-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    RouterLink, BreedingForm, Segmented, TabBar, Button, TextInput, ErrorPanel, StatusBadge,
+    NgTemplateOutlet, RouterLink, BreedingForm, Segmented, TabBar, Button, TextInput, ErrorPanel, StatusBadge,
     IdentifierLink, PageHeading, FieldLabel, HelpText, Certainty, Qualifier, Cell, ScrollRegion,
   ],
   templateUrl: './breeding-page.html',
@@ -86,12 +102,16 @@ export class BreedingPage {
 
   /** The view and its filters live in the address, so a link from an animal lands filtered. */
   protected readonly url = urlParams({
-    tab: 'todo', animal: '', type: '', due: '', find: '', show: 'running', status: '',
+    tab: 'todo', animal: '', type: '', due: '', find: '', show: 'running', status: '', period: '12m',
   });
-  protected readonly tab = computed(() => (this.url.value().tab === 'cases' ? 'cases' : 'todo'));
+  protected readonly tab = computed(() => {
+    const t = this.url.value().tab;
+    return t === 'cases' || t === 'figures' ? t : 'todo';
+  });
   protected readonly tabs = [
     { id: 'todo', label: 'To do' },
     { id: 'cases', label: 'Cases' },
+    { id: 'figures', label: 'Herd figures' },
   ] as const;
   protected readonly kinds = KINDS;
   protected readonly showChoices = [
@@ -179,6 +199,54 @@ export class BreedingPage {
       .sort((a, b) => rank(a) - rank(b) || b.view.day_max - a.view.day_max);
   });
 
+  // ---- Herd figures --------------------------------------------------------
+  protected readonly figures = signal<BreedingFigures | null>(null);
+  protected readonly period = computed<FiguresPeriod>(() => (this.url.value().period === 'all' ? 'all' : '12m'));
+  protected readonly periods = [
+    { id: '12m', label: 'Last 12 months' },
+    { id: 'all', label: 'All on record' },
+  ] as const;
+  protected readonly noRecord = NO_RECORD;
+  protected outcomeWord(o: CaseOutcome): string {
+    return OUTCOME_WORDS[o];
+  }
+  /** `14 Nov 2025 to 13 Nov 2026 · 11 animals with a service in this period`. */
+  protected rangeLine(f: BreedingFigures): string {
+    const animals = plural(f.animals, 'animal', 'animals');
+    if (f.from === null) return `All on record · ${animals} with a service`;
+    return `${readableParts(f.from, 'day').figure} to ${readableParts(f.on, 'day').figure} · ${animals} with a service in this period`;
+  }
+  protected overdueNote(f: BreedingFigures): string {
+    const who = f.overdue_now.animals.map((a) => `${a.animal_name ? `${a.animal_id} ${a.animal_name}` : a.animal_id}, day ${a.day_max}`);
+    return [who.length ? who.join('; ') + '.' : '', 'Follows straight from the calving window.'].filter(Boolean).join(' ');
+  }
+  protected servicesNote(f: BreedingFigures): string {
+    const { services, conceptions } = f.services_per_conception;
+    const counts = conceptions > 0
+      ? `${plural(services, 'service', 'services')} for ${plural(conceptions, 'confirmed pregnancy', 'confirmed pregnancies')}. `
+      : '';
+    return counts + 'Counts only services that were written down.';
+  }
+  protected heldNote(f: BreedingFigures): string {
+    const h = f.held_to_first_service;
+    if (h.of === 0) return 'First services with a known outcome.';
+    const lead = h.rate !== null ? `${h.rate}% of first services with a known outcome.` : 'First services with a known outcome.';
+    return h.pending > 0 ? `${lead} ${h.pending} more ${h.pending === 1 ? 'has' : 'have'} no outcome yet.` : lead;
+  }
+  protected confirmedNote(f: BreedingFigures): string {
+    const later = f.confirmed_by_day_60.later_days;
+    if (f.confirmed_by_day_60.of === 0 || later.length === 0) return 'Day 60 is your own yardstick.';
+    const which = later.length === 1 ? `The other 1 was confirmed later, on day ${later[0]}.` : `The other ${later.length} were confirmed later, on days ${listed(later)}.`;
+    return `${which} Day 60 is your own yardstick.`;
+  }
+  /** `Shortest 67, longest 148.` after the figure's own words; none when nothing was counted. */
+  protected spreadNote(s: FiguresSpread, words: string): string {
+    return s.n > 0 && s.min !== null && s.max !== null ? `${words} Shortest ${s.min}, longest ${s.max}.` : words;
+  }
+  protected setPeriod(id: FiguresPeriod): void {
+    void this.url.set({ period: id === '12m' ? '' : id });
+  }
+
   // ---- The panel -----------------------------------------------------------
   protected readonly panelKind = signal<EntryKind | null>(null);
   protected readonly entryAnimal = signal('');
@@ -232,7 +300,7 @@ export class BreedingPage {
   };
 
   // ---- Tabs and filters ----------------------------------------------------
-  protected setTab(id: 'todo' | 'cases'): void {
+  protected setTab(id: 'todo' | 'cases' | 'figures'): void {
     void this.url.set({ tab: id === 'todo' ? '' : id });
   }
   protected set(key: 'animal' | 'type' | 'due' | 'find' | 'status', value: string): void {
@@ -243,11 +311,24 @@ export class BreedingPage {
   }
 
   private sequence = 0;
+  private figuresSequence = 0;
   constructor() {
-    inject(DestroyRef).onDestroy(() => ++this.sequence);
-    void this.load();
+    inject(DestroyRef).onDestroy(() => {
+      ++this.sequence;
+      ++this.figuresSequence;
+    });
+    void this.loadBoard();
+    // The figures are read only when their tab is open, and again for the other period.
+    effect(() => {
+      if (this.tab() === 'figures') void this.loadFigures(this.period());
+    });
   }
+  /** Reload (and after a save): the board, and the figures when their tab is open. */
   protected async load(): Promise<void> {
+    await this.loadBoard();
+    if (this.tab() === 'figures') await this.loadFigures(this.period());
+  }
+  private async loadBoard(): Promise<void> {
     const n = ++this.sequence;
     this.error.set('');
     try {
@@ -255,6 +336,15 @@ export class BreedingPage {
       if (n === this.sequence) this.board.set(b);
     } catch (e) {
       if (n === this.sequence) this.error.set(e instanceof Error ? e.message : String(e));
+    }
+  }
+  private async loadFigures(period: FiguresPeriod): Promise<void> {
+    const n = ++this.figuresSequence;
+    try {
+      const f = await this.api.breedingFigures(period);
+      if (n === this.figuresSequence) this.figures.set(f);
+    } catch (e) {
+      if (n === this.figuresSequence) this.error.set(e instanceof Error ? e.message : String(e));
     }
   }
 }

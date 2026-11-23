@@ -168,6 +168,56 @@ export interface BreedingBoard {
   cases: BreedingCaseRow[];
 }
 
+/** Mirrors FiguresPeriod in server/src/registry/breeding-figures.ts. */
+export type FiguresPeriod = '12m' | 'all';
+/** Mirrors CaseOutcome in server/src/registry/breeding-cases.ts. */
+export type CaseOutcome = 'held' | 'failed' | 'lost' | 'pending' | 'replaced';
+/** Mirrors Count: `rate` is a whole percent of `of`, only when `of >= FIGURES.minCases`. */
+export interface FiguresCount {
+  n: number;
+  of: number;
+  rate: number | null;
+}
+/** Mirrors Spread. `approximate`: how many of the n use a month-precision date. */
+export interface FiguresSpread {
+  value: number | null;
+  n: number;
+  min: number | null;
+  max: number | null;
+  approximate: number;
+}
+/** Mirrors BreedingFigures in server/src/registry/breeding-figures.ts, field for field. */
+export interface BreedingFigures {
+  on: string;
+  period: FiguresPeriod;
+  /** The first day of the period; null for 'all'. */
+  from: string | null;
+  /** Current females with a service in the period. */
+  animals: number;
+  overdue_now: { n: number; animals: { animal_id: string; animal_name: string | null; day_max: number }[] };
+  /** `value` is null under FIGURES.minCases conceptions. */
+  services_per_conception: { services: number; conceptions: number; value: number | null };
+  held_to_first_service: FiguresCount & { pending: number };
+  confirmed_by_day_60: FiguresCount & { later_days: number[] };
+  /** Median, lower middle when even. */
+  days_open: FiguresSpread;
+  /** Mean, to a whole day. */
+  calving_interval: FiguresSpread;
+  losses: FiguresCount;
+  heats_caught: { recorded: number; expected: number; estimated: true };
+  by_animal: {
+    animal_id: string;
+    animal_name: string | null;
+    services: number;
+    first_service: CaseOutcome | null;
+    confirmed_day: number | null;
+    days_open: number | null;
+    calving_interval: number | null;
+  }[];
+  /** The "Why some figures are rough" lines, worded by the server. */
+  rough: string[];
+}
+
 export type ReproductiveState =
   | 'calved' | 'lost' | 'overdue' | 'window' | 'close' | 'dryoff'
   | 'confirmed' | 'recheck' | 'unconfirmed' | 'bred' | 'open';

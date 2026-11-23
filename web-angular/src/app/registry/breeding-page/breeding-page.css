@@ -38,6 +38,24 @@ select { width: 100%; background: transparent; }
 .cases-bar > label { width: min(100%, 14rem); }
 .cases-legend { display: grid; gap: 0.25rem; margin: 0; padding: 0; list-style: none; }
 
+/* ---- Herd figures: the analytics page's figure cells (analytics-page.css),
+   eight of them, four to a row and two on a phone. A hairline between cells. */
+.figures-range { font-size: 0.875rem; color: rgb(var(--text-secondary)); }
+.figures {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; margin: 0; overflow: hidden;
+  border: 1px solid rgb(var(--border-subtle)); border-radius: 0.75rem; background: rgb(var(--border-subtle));
+}
+.figure { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; background: rgb(var(--surface-raised)); }
+.figure dd { margin: 0; }
+.figure dt { font-size: 0.8125rem; line-height: 1.125rem; font-weight: 500; color: rgb(var(--text-secondary)); }
+.figure-value {
+  font-size: 1.75rem; line-height: 2.25rem; font-weight: 650; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums; color: rgb(var(--text-heading)); overflow-wrap: anywhere;
+}
+.figure-of { font-size: 1rem; font-weight: 500; letter-spacing: 0; color: rgb(var(--text-secondary)); }
+.figure-note { font-size: 0.8125rem; line-height: 1.125rem; color: rgb(var(--text-muted)); text-wrap: pretty; }
+.rough { display: grid; gap: 0.25rem; margin: 0; padding-left: 1.25rem; list-style: disc; font-size: 0.875rem; color: rgb(var(--text-primary)); }
+
 /* ---- Wide: the panel sits beside the list --------------------------------- */
 @media (min-width: 1180px) {
   .health.panel-open { grid-template-columns: minmax(0, 1fr) minmax(24rem, 30rem); }
@@ -46,6 +64,9 @@ select { width: 100%; background: transparent; }
   .health-panel { position: sticky; top: 0; max-height: calc(100vh - 16rem); }
 }
 /* ---- Narrower: it slides over the list ------------------------------------- */
+@media (max-width: 1023px) {
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 1179px) {
   .health-panel {
     position: fixed; z-index: 40; top: 0.75rem; right: 0.75rem; bottom: 0.75rem; width: min(30rem, calc(100vw - 1.5rem));
@@ -72,4 +93,6 @@ select { width: 100%; background: transparent; }
   .panel-back { display: inline-flex !important; }
   .panel-close { display: none; }
   .panel-body { padding: 1rem; }
+  .figure { padding: 0.75rem 0.875rem; }
+  .figure-value { font-size: 1.375rem; line-height: 1.75rem; }
 }

@@ -5,8 +5,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type {
-  AnimalDetail, BalanceRow, BreedingBoard, DestinationListRow, DestinationPrice, DispatchSheet,
-  DayBoard, DuplicateCandidate, Engagement, HerdRow, IdentifierValues, LinkCandidate,
+  AnimalDetail, BalanceRow, BreedingBoard, BreedingFigures, DestinationListRow, DestinationPrice, DispatchSheet,
+  DayBoard, DuplicateCandidate, Engagement, FiguresPeriod, HerdRow, IdentifierValues, LinkCandidate,
   MilkingHistoryRow, MilkingRoster, PayrollRun, PayTermWithBenefits, Person,
   Reconciliation, Statement, StorageInfo, TimelineEvent, Verification,
   WageBalanceRow, WageStatement, WireError,
@@ -329,6 +329,11 @@ export class RegistryApi {
   /** The Breeding page's tasks and cases on a day. Absent on the server unless REGISTRY_BREEDING=1. */
   breedingBoard(on: string): Promise<BreedingBoard> {
     return unwrap(firstValueFrom(this.http.get<BreedingBoard>(`${BASE}/breeding/board?on=${on}`)));
+  }
+
+  /** The eight herd figures as of farm today, over the last 12 months or all on record. Absent unless REGISTRY_BREEDING=1. */
+  breedingFigures(period: FiguresPeriod): Promise<BreedingFigures> {
+    return unwrap(firstValueFrom(this.http.get<BreedingFigures>(`${BASE}/breeding/figures?period=${period}`)));
   }
 
   /** A service, a heat, a pregnancy check, "nothing seen" or a loss. Absent on the server unless REGISTRY_BREEDING=1. */

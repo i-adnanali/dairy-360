@@ -31,7 +31,151 @@
       }
     </div>
 
-    @if (board(); as b) {
+    @if (tab() === 'figures') {
+      <!-- HERD FIGURES. Every number is the server's (GET /breeding/figures);
+           the page only words it. A rate only when the server sends one; a
+           dash when there is nothing to count. No chart and no target line. -->
+      <p appHelp data-role="figures-lead">Counted from the cases on record. With a herd this size, read the counts before the percentages.</p>
+      <div class="cases-bar">
+        <div appSegmented role="group" aria-label="Which period">
+          @for (p of periods; track p.id) {
+            <button type="button" [attr.data-period]="p.id" [attr.aria-pressed]="period() === p.id" (click)="setPeriod(p.id)">{{ p.label }}</button>
+          }
+        </div>
+      </div>
+      @if (figures(); as f) {
+        <p class="figures-range" data-role="figures-range">{{ rangeLine(f) }}</p>
+        <ng-template #count let-c>
+          @if (c.of > 0) {
+            <span appCertainty="known">{{ c.n }}</span><span class="figure-of"> of {{ c.of }}</span>
+          } @else {
+            <span appCertainty="no-record">{{ noRecord }}</span>
+          }
+        </ng-template>
+        <dl class="figures" data-role="figures">
+          <div class="figure" data-role="figure" data-figure="overdue_now">
+            <dt>Overdue now</dt>
+            <dd class="figure-value"><span appCertainty="known">{{ f.overdue_now.n }}</span></dd>
+            <dd class="figure-note">{{ overdueNote(f) }}</dd>
+          </div>
+          <div class="figure" data-role="figure" data-figure="services_per_conception">
+            <dt>Services per conception</dt>
+            <dd class="figure-value">
+              @if (f.services_per_conception.value !== null) {
+                <span appCertainty="known">{{ f.services_per_conception.value }}</span>
+              } @else {
+                <span appCertainty="no-record">{{ noRecord }}</span>
+              }
+            </dd>
+            <dd class="figure-note">{{ servicesNote(f) }}</dd>
+          </div>
+          <div class="figure" data-role="figure" data-figure="held_to_first_service">
+            <dt>Held to first service</dt>
+            <dd class="figure-value"><ng-container *ngTemplateOutlet="count; context: { $implicit: f.held_to_first_service }" /></dd>
+            <dd class="figure-note">{{ heldNote(f) }}</dd>
+          </div>
+          <div class="figure" data-role="figure" data-figure="confirmed_by_day_60">
+            <dt>Confirmed by day 60</dt>
+            <dd class="figure-value">
+              <ng-container *ngTemplateOutlet="count; context: { $implicit: f.confirmed_by_day_60 }" />@if (f.confirmed_by_day_60.rate !== null) {<span class="figure-of" data-role="rate"> · {{ f.confirmed_by_day_60.rate }}%</span>}
+            </dd>
+            <dd class="figure-note">{{ confirmedNote(f) }}</dd>
+          </div>
+          @for (s of [{ key: 'days_open', title: 'Days open', of: 'middle of', words: 'From calving to the service that held.', spread: f.days_open }, { key: 'calving_interval', title: 'Calving interval', of: 'average of', words: 'Between one calving and the next, same animal.', spread: f.calving_interval }]; track s.key) {
+            <div class="figure" data-role="figure" [attr.data-figure]="s.key">
+              <dt>{{ s.title }}</dt>
+              <dd class="figure-value">
+                @if (s.spread.n > 0 && s.spread.value !== null) {
+                  <span data-role="spread-value" [appCertainty]="s.spread.approximate > 0 ? 'approximate' : 'known'" [attr.data-certainty]="s.spread.approximate > 0 ? 'approximate' : 'known'">{{ s.spread.value }} days</span><span class="figure-of">, {{ s.of }} {{ s.spread.n }}</span>
+                } @else {
+                  <span appCertainty="no-record">{{ noRecord }}</span>
+                }
+              </dd>
+              <dd class="figure-note">{{ spreadNote(s.spread, s.words) }}</dd>
+            </div>
+          }
+          <div class="figure" data-role="figure" data-figure="losses">
+            <dt>Losses</dt>
+            <dd class="figure-value">
+              <ng-container *ngTemplateOutlet="count; context: { $implicit: f.losses }" />@if (f.losses.rate !== null) {<span class="figure-of" data-role="rate"> · {{ f.losses.rate }}%</span>}
+            </dd>
+            <dd class="figure-note">Confirmed pregnancies that ended without a calf. An early loss nobody saw is not in here.</dd>
+          </div>
+          <div class="figure" data-role="figure" data-figure="heats_caught">
+            <dt>Heats caught</dt>
+            <dd class="figure-value">
+              @if (f.heats_caught.expected > 0) {
+                <span appCertainty="known">{{ f.heats_caught.recorded }}</span><span class="figure-of"> of {{ f.heats_caught.expected }}</span>
+              } @else {
+                <span appCertainty="no-record">{{ noRecord }}</span>
+              }<span appQualifier>est</span>
+            </dd>
+            <dd class="figure-note">Heats recorded against heats expected. "Expected" is itself an estimate.</dd>
+          </div>
+        </dl>
+
+        <section class="health-block" aria-labelledby="rough-heading">
+          <h3 id="rough-heading" class="health-block-title">Why some figures are rough</h3>
+          <ul class="rough" data-role="rough">
+            @for (r of f.rough; track $index) {
+              <li>{{ r }}</li>
+            }
+          </ul>
+          <p appHelp>No target lines are drawn. What counts as a good days-open or calving interval differs by breed and by source, so the page shows your own numbers and their range.</p>
+          <p appHelp>A figure with fewer than its minimum number of cases shows the count and no rate.</p>
+        </section>
+
+        <section class="health-block" aria-labelledby="by-animal-heading">
+          <div>
+            <h3 id="by-animal-heading" class="health-block-title">By animal</h3>
+            <p appHelp>The cases behind the figures above</p>
+          </div>
+          <div appScrollRegion="Herd figures by animal" class="rounded-xl border border-line bg-surface-raised">
+            <table class="w-full text-left text-sm" data-role="by-animal">
+              <thead>
+                <tr>
+                  <th appCell>Animal</th>
+                  <th appCell>Services</th>
+                  <th appCell>First service</th>
+                  <th appCell>Confirmed</th>
+                  <th appCell>Days open</th>
+                  <th appCell>Calving interval</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (a of f.by_animal; track a.animal_id) {
+                  <tr class="border-t border-line-subtle" [attr.data-animal]="a.animal_id">
+                    <td appCell class="whitespace-nowrap"><a appIdentifier [routerLink]="['/animals', a.animal_id]">{{ a.animal_id }}</a> {{ a.animal_name }}</td>
+                    <td appCell><span appCertainty="known">{{ a.services }}</span></td>
+                    <td appCell data-role="first-service">
+                      @if (a.first_service === null) {
+                        <span appCertainty="no-record">{{ noRecord }}</span>
+                      } @else if (a.first_service === 'pending') {
+                        <span class="italic">{{ outcomeWord(a.first_service) }}</span>
+                      } @else {
+                        {{ outcomeWord(a.first_service) }}
+                      }
+                    </td>
+                    @for (v of [a.confirmed_day, a.days_open, a.calving_interval]; track $index) {
+                      <td appCell>
+                        @if (v === null) {
+                          <span appCertainty="no-record">{{ noRecord }}</span>
+                        } @else {
+                          <span appCertainty="known">{{ $index === 0 ? 'Day ' + v : v }}</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                } @empty {
+                  <tr><td appCell colspan="6">No animal had a service in this period.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p appHelp>Words in italics are answers that are still open. A dash means there is nothing to count, such as a first calving with no interval before it.</p>
+        </section>
+      }
+    } @else if (board(); as b) {
       @if (tab() === 'todo') {
         <p class="health-summary" data-role="breeding-summary">
           <span [attr.data-tone]="summary().overdue ? 'danger' : null">{{ summary().overdue }} past their limit</span><span aria-hidden="true"> · </span><span [attr.data-tone]="summary().due ? 'warning' : null">{{ summary().due }} due now</span>
