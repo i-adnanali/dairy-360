@@ -1,6 +1,6 @@
 # Acceptance status
 
-Updated **17 November 2026**, for branch `breeding` (see *Breeding stage 3* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
+Updated **23 November 2026**, for branch `breeding` (see *Breeding stage 4* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
 
 ## Latest recorded results
 
@@ -12,6 +12,25 @@ Run on 16 November 2026 against branch `breeding-stage-1` (base `2be39a4`), Node
 | Server tests (`npm test -w server`) | 841 passed, 0 failed, 0 skipped |
 | `check:docs`, `build:shared`, `check:templates`, typecheck | Pass |
 | Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.12 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
+
+## Breeding stage 4
+
+Run on 23 November 2026 against branch `breeding` at `b7634db`, Node 22.22.3.
+
+| Check | Result |
+|---|---|
+| Frontend tests (`npm test -w web-angular`) | 709 passed in 69 files. The timing-flaky `farm-monitor.spec.ts` test did not fail in this run. |
+| Server tests (`npm test -w server`) | 999 passed, 0 failed |
+| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass (docs: 77 files, 0 errors; templates: 106 files) |
+| Production build | Builds, with the stage 3 warnings (initial bundle 713.07 kB against the 500 kB budget, two unused imports, the shared CommonJS notice) and five component stylesheets over 4 kB, now including `breeding-page.css` (4.22 kB) |
+
+- **One full case through the pilot, harness only.** On Shehzadi (BD-0009) a service dated 20 August 2025 was entered from the Breeding page (the no-heat-sign warning showed and was saved over), then an ultrasound check, Pregnant, dated 1 October 2025 (day 42). Her calving already on record for 1 June 2026, 285 days after the service, closes that case: on Herd figures (`All on record`) it counts as held and her row shows Confirmed on day 42. **This full case has passed through the pilot only in the harness. It has not happened on the real herd.**
+- **A loss.** On Heer (BD-0007) an ultrasound Pregnant on 10 November 2026 and an ultrasound Not pregnant on 20 November made her Lost (worked out); her Breeding tab then offered `Record a loss`, which opened an empty form (no date, no observer, no time field, button `Save loss`). Saving a loss dated 18 November made her Lost (recorded), and Losses on Herd figures read 1 of 8.
+- **A calving before the window.** On Sohni (BD-0001), `Record calving` opened the calving form already set to her; a calving dated 4 September 2026, 280 days after her service of 28 November 2025, showed "This calving is 280 days after the earliest possible conception … The calving window opens at day 285 …" once, with focus on it and the button `Save over this check`. Saving over it wrote the calving with the override `calving_before_window`, and her state read Calved.
+- **Herd figures.** The tab showed all eight figures, counts with no percentage (every figure is under 10 cases in the harness herd), the "Why some figures are rough" lines and the By animal table.
+- **Flag off:** a harness without `--breeding` answers `GET /api/registry/breeding/figures` with 404 and the animal response has only `animal`, `status` and `events`. That harness herd has no services, so the "a calving writes with no window warning when the flag is off" case was checked by the server test, not in the browser.
+- **Migration rehearsal:** `server/dairy.db` was copied byte for byte outside the repository (same SHA-256) and only the copy was migrated and verified: version 11 to 13 (migrations 12 and 13 applied), events 0 before and 0 after, 0 violations. The real file's timestamp is unchanged (16 November, 21:02). `npm run registry:backup` was not run, because on this branch it would migrate the real database. The nightly backup job stays unloaded.
+- **Not checked:** no owner walkthrough on the real herd; the real farm's pilot list is not chosen; `REGISTRY_BREEDING` is not turned on for the real registry; the Herd figures layout was checked at desktop width only; "Confirmed by day 60" and the By animal "Confirmed" column count held cases only, so a pregnancy confirmed and then lost (Heer) shows a dash there.
 
 ## Breeding stage 3
 

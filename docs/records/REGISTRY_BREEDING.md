@@ -117,20 +117,22 @@ it. `null_observation` is given the narrow breeding payload (`watched_for`) here
 
 A recheck is amber and never red.
 
-**The Breeding page** (`/animals/breeding`, in Herd's nav only when `/today` carries `breeding`) has To do and Cases. The mockup's progress bar on Cases is not built: it needs a day-346 axis, which is a stage 4 concern.
+**The Breeding page** (`/animals/breeding`, in Herd's nav only when `/today` carries `breeding`) has To do and Cases. The mockup's day-by-day progress bar on Cases is not built (it needs a day-346 axis); stage 4 did not build it either.
 
 **Spec items.** The spec's warning for a bull exposure still open past a ceiling with no end date does not apply: stage 1 makes `exposure_days` required. "Attribution recomputed" is built, because it can be computed on read by deriving the view with and without the latest recorded event.
 
 ## Stage 4: loss entry, calving-window warnings and herd figures
 
-**Scope.** Stage 4 adds three things on the pilot: abortion entry over HTTP, two calving-window warnings, and eight herd figures on the Breeding page. `breedingCases` is the one place cases are built. Nothing here is stored: warnings and figures are computed on read, and events are only ever added.
+**Scope.** Stage 4 adds three things: abortion entry over HTTP on the pilot, two calving-window warnings on any calving write, and eight herd figures on the Breeding page (a Herd figures tab, read for the whole herd, not only the pilot). `breedingCases` is the one place cases are built. Nothing here is stored: warnings and figures are computed on read, and events are only ever added.
 
-**Two calving warnings, not refusals.** A calving is possible at almost any gestation length, so neither is a refusal. Each says the record and the calving do not agree, and the farm may know better (a wrong service date, a long or short pregnancy). The caller can save over either, and the override is recorded from the condition, never from the flag. They fire only with `REGISTRY_BREEDING` on, and only when the calving closes a case that has a service.
+**Two calving warnings, not refusals.** A calving is possible at almost any gestation length, so neither is a refusal. Each says the record and the calving do not agree, and the farm may know better (a wrong service date, a long or short pregnancy). The caller can save over either, and the override is recorded from the condition, never from the flag. They fire only with `REGISTRY_BREEDING` on, on a new calving and on a calving correction, and only when the calving closes a case that has a service (the dam's view with the calving in it, as of the calving date, is `calved`). They come back together with `near_duplicate_calving` when that fires too.
 
 - `calving_before_window`: the calving falls before day 285 counted from the earliest possible conception, so the case says too early to be this service.
 - `calving_past_extreme`: the calving falls after day 346 counted from the latest possible conception, so the case says too late to be this service.
 
-Both are worded from `deriveReproduction`'s answer, never from a second copy of the rule. `GESTATION_DAYS = 310` in `calving.ts` is not read, changed or reused.
+Each fires only when the whole calving date lies outside the bound. A month- or year-precision calving is judged by its whole month or year (it is stored on the 1st, and the day was never known), and an estimated date never warns. The day count in the message is taken from the stored date.
+
+Both are worded from `deriveReproduction`'s answer (the case the calving closes), never from a second copy of the rule. `GESTATION_DAYS = 310` in `calving.ts` is not read, changed or reused.
 
 **Migration 13 changes the trigger only.** It adds the two names to the `override_check` list the database trigger enforces, and nothing else. It is one-way. Until it runs, the trigger still lists seven names.
 
@@ -144,30 +146,32 @@ Both are worded from `deriveReproduction`'s answer, never from a second copy of 
 
 **`breedingCases`.** It derives the cases of a female by calling `deriveReproduction` at each boundary: every recorded event dated up to the read date, and the read date itself. Each case's outcome is its view at the last event where it is still the anchor. A service that a later case lists among its services joined that case and is not a case of its own. The cases are derived at each boundary because a case's outcome depends on what was known on that day, and one derivation as of today would show a later record's attribution on an earlier case. The warnings, the Cases tab and the figures all read it, so they cannot disagree.
 
-**Case outcomes.** `lost` when that view is lost; `failed` when it is open; `held` when it is calved or has a reliable positive; otherwise `pending`. A held or pending case followed by a later case is `replaced`: a new service came with no loss recorded, and its `closed_by` is the next case's first service. A re-service recorded before the heat on the same day sorts before the heat, so it joins the earlier service in one failed case.
+**Case outcomes.** `lost` when that view is lost; `failed` when it is open; `held` when it is calved or has a reliable positive; otherwise `pending`. A held or pending case followed by a later case is `replaced`: a new service came with no loss recorded, and its `closed_by` is the next case's first service. A case that has calved is never `replaced`: it stays `held` and its `closed_by` is the calving. A re-service recorded before the heat on the same day sorts before the heat, so it joins the earlier service in one failed case.
 
-**The eight figures.** `P` is the period: for `12m`, `[on - 364 days, on]` (`on` and the 364 days before it); for `all`, everything up to and including `on`. A rate is shown only when its denominator is at least `FIGURES.minCases`; below that the page shows the count ("4 of 7") and no percentage.
+**The eight figures.** `P` is the period: for `12m`, `[on - 364 days, on]` (`on` and the 364 days before it); for `all`, everything up to and including `on`. A rate is a whole percent (7 of 10 is 70), shown only when its denominator is at least `FIGURES.minCases` (10); below that the page shows the count ("4 of 7") and no percentage. The current females are every female that had not left by `on`, with or without a service, and a breeding view is not required. `replaced` cases are left out of services per conception, held to first service, confirmed by day 60 and losses, and are reported in "Why some figures are rough".
 
 | Figure | Definition |
 | --- | --- |
-| Overdue now | Current females whose view as of `on` is `overdue`. Ignores `P`. |
+| Overdue now | Current females whose view as of `on` is `overdue`, with each one's `day_max`. Ignores `P`. |
 | Services per conception | Over held cases with `held_on` in `P`: the sum of `services_since_calving` divided by the number of cases, to one decimal. Null when there are fewer cases than `minCases`. |
-| Held to first service | Cases that start after a calving with the first service in `P`. Of those with outcome `held`, `failed` or `lost`, the share `held`. The rest are pending. |
-| Confirmed by day 60 | Held cases with the first reliable positive in `P`. The share with that positive on day 60 or earlier (`BREEDING_TASK_DAYS.checkRedAfter`); the later days are listed. |
-| Days open | Held cases with `held_on` in `P` and an earlier calving: days from that calving to the case's last service. The median (lower middle when even). Approximate when a month-precision date is used. |
-| Calving interval | Consecutive effective calvings of the same dam, the later one in `P`, both day or month precision. The mean, to a whole day. Approximate when a month-precision date is used. |
-| Losses | Cases that had a reliable positive or a calving with `held_on` in `P`. The share whose outcome is `lost`. |
-| Heats caught | Effective `heat_observed` events in `P`, against the heats expected. Expected is each current female's eligible days in `P` (open, or calved at least `voluntaryWaitDays` ago with no service since) divided by `cycleDays`, rounded down. Always marked estimated. |
+| Held to first service | Cases that start after a calving (or are her first ever) with the first service in `P`. Of those with outcome `held`, `failed` or `lost`, the share `held`. The rest are pending, and are given as a count. |
+| Confirmed by day 60 | Held cases with the first reliable positive in `P`. The share with that positive on day 60 or earlier (`BREEDING_TASK_DAYS.checkRedAfter`); the later days are listed. Held cases only, so a pregnancy confirmed and then lost is not in it. |
+| Days open | Held cases with `held_on` in `P` and an earlier calving: days from that calving to the case's last service. The median (lower middle when even). Approximate when a month-precision date is used. A span whose either end is known only to the year, or is estimated, is left out, and the rough lines say how many. |
+| Calving interval | Consecutive effective calvings of the same current female, the later one in `P`, both day or month precision. The mean, to a whole day. Approximate when a month-precision date is used. |
+| Losses | Cases that had a reliable positive or a calving with `held_on` in `P`. The share whose outcome is `lost`. A lost case with no reliable positive has no `held_on` and is not counted. |
+| Heats caught | Effective `heat_observed` events in `P`, against the heats expected. Expected is each current female's eligible days in `P`, counted from her first calving or service on record (her view that day is `open`, or she calved at least `voluntaryWaitDays` before with no service since; not on a day she had left), divided by `cycleDays`, rounded down. Always marked estimated. |
+
+**By animal and the rough lines.** Under the figures the page lists a By animal table: one row for each female with a service in `P`, with her services in `P` and her latest value in `P` of first-service outcome, confirmed day, days open and calving interval (none shown when she has none). "Why some figures are rough" lists, each only when its count is above 0: the services of pending cases that have no outcome yet (it counts services, not cases); animals with no earlier calving; days-open spans left out for a year-only or estimated date; confirmed pregnancies, and services, followed by a new service with no loss recorded (the `replaced` cases); and always "expected heats are estimated".
 
 **New numbers.** Added once, in `reproduction.ts`. Days count from the earliest possible conception unless a row says latest.
 
 | Number | Value | Kind |
 | --- | --- | --- |
-| Calving before the window | `daysBetween(conception_earliest, calving) < GESTATION.windowOpens` (285) | breed-specific |
-| Calving past the extreme | `daysBetween(conception_latest, calving) > BREEDING_TASK_DAYS.overdueRedAfter` (346) | biological constant (low confidence) |
+| Calving before the window | the calving is definitely before `conception_earliest` + `GESTATION.windowOpens` (285) days (`definitelyBefore`, which allows for precision) | breed-specific |
+| Calving past the extreme | the calving is definitely after `conception_latest` + `BREEDING_TASK_DAYS.overdueRedAfter` (346) days (`definitelyBefore`, which allows for precision) | biological constant (low confidence) |
 | `FIGURES.minCases` | 10 | farm-tunable default |
 | `FIGURES.cycleDays` | 21 | biological constant (high confidence) |
 | `FIGURES.voluntaryWaitDays` | 45 | farm-tunable default (low confidence) |
 | `FIGURES.periodDays` | 365 | farm-tunable default |
 
-**Not built.** The season split and target lines (no target is drawn, and none is invented). The Breeding page's progress bar on Cases, if it is still not built when this stage closes. General availability, page correction and backfill are stage 5.
+**Not built.** The season split and target lines (no target is drawn, and none is invented). The Breeding page's day-by-day progress bar on Cases is not built. General availability, correcting a breeding event from the page, and the backfill command are stage 5.

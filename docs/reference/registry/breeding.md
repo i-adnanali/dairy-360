@@ -181,4 +181,4 @@ Migration 10 widens the event table so it can hold the five breeding types. It i
 
 ## Not built yet
 
-Abortion entry and general availability (stages 4 and 5, [OPEN-062](../../OPEN.md#open-062)). The herd figures are served but not yet shown on the page. The Breeding page's day-by-day progress bar waits for stage 4.
+General availability, correcting a breeding event from the page, and the backfill command (stage 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar is not built.

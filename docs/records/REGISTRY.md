@@ -442,9 +442,9 @@ Surface precision wherever a date is displayed — "March 2024 (month)", "~2021 
 
 ### An overridden check leaves a trace
 
-Two guards can be stepped past: `near_duplicate_calving` (a second calving within
+Nine checks can be stepped past now (`OVERRIDDEN_CHECKS` in `types.ts`); this section was written when there were two, and describes those two: `near_duplicate_calving` (a second calving within
 `DOUBLE_ENTRY_WINDOW_DAYS` of an existing one) and `animal_departed` (a non-note event after a
-departure). Both are hard refusals with an explicit opt-out — the caller passes
+departure). The other seven are the breeding warnings (`ambiguous_service`, `early_check`, `check_without_service`, `no_heat_sign`, `heat_after_positive`) and the two calving-window warnings (`calving_before_window`, `calving_past_extreme`); see REGISTRY_BREEDING.md. These two are hard refusals with an explicit opt-out — the caller passes
 `allow_near_duplicate` / `allow_after_departure` and the guard steps aside.
 
 Those flags used to be **transient input only**, so stepping aside left nothing behind: an
