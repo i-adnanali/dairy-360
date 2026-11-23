@@ -82,9 +82,12 @@ const figures: BreedingFigures = {
   rough: ['4 services have no outcome yet', '1 animal has no earlier calving', 'expected heats are estimated'],
 };
 
-async function mount(url = '/animals/breeding', data: BreedingBoard = board, figs: BreedingFigures = figures) {
+type FiguresFn = (period: '12m' | 'all') => Promise<BreedingFigures>;
+async function mount(url = '/animals/breeding', data: BreedingBoard = board, figs: BreedingFigures = figures, fetchFigures?: FiguresFn) {
   const breedingBoard = vi.fn(() => Promise.resolve(structuredClone(data)));
-  const breedingFigures = vi.fn((period: '12m' | 'all') => Promise.resolve({ ...structuredClone(figs), period, from: period === 'all' ? null : figs.from }));
+  const breedingFigures = vi.fn(
+    fetchFigures ?? ((period: '12m' | 'all') => Promise.resolve({ ...structuredClone(figs), period, from: period === 'all' ? null : figs.from })),
+  );
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
@@ -323,8 +326,81 @@ describe('the Breeding page', () => {
     const f = { ...structuredClone(figures), held_to_first_service: { n: 6, of: 10, rate: 60, pending: 0 } };
     const { el } = await mount('/animals/breeding?tab=figures', board, f);
     const held = el.querySelector('[data-figure="held_to_first_service"]')!;
-    expect(text(held.querySelector('.figure-value'))).toBe('6 of 10');
+    expect(text(held.querySelector('.figure-value'))).toBe('6 of 10 · 60%');
     expect(text(held.querySelector('.figure-note'))).toBe('60% of first services with a known outcome.');
+  });
+
+  it('a confirmed-by-day-60 count at its minimum shows the rate in the value line', async () => {
+    const f = { ...structuredClone(figures), confirmed_by_day_60: { n: 9, of: 10, rate: 90, later_days: [63] } };
+    const { el } = await mount('/animals/breeding?tab=figures', board, f);
+    const card = el.querySelector('[data-figure="confirmed_by_day_60"]')!;
+    expect(text(card.querySelector('.figure-value'))).toBe('9 of 10 · 90%');
+    expect(text(card.querySelector('.figure-note'))).toBe('The other 1 was confirmed later, on day 63. Day 60 is your own yardstick.');
+  });
+
+  it('keeps every count visible when its base is nought', async () => {
+    const f = {
+      ...structuredClone(figures),
+      held_to_first_service: { n: 0, of: 0, rate: null, pending: 3 },
+      heats_caught: { recorded: 2, expected: 0, estimated: true as const },
+      services_per_conception: { services: 3, conceptions: 0, value: null },
+    };
+    const { el } = await mount('/animals/breeding?tab=figures', board, f);
+    const card = (k: string) => el.querySelector(`[data-figure="${k}"]`)!;
+    expect(text(card('held_to_first_service').querySelector('.figure-value'))).toBe('–');
+    expect(text(card('held_to_first_service').querySelector('.figure-note'))).toBe('First services with a known outcome. 3 have no outcome yet.');
+    expect(text(card('heats_caught').querySelector('.figure-value'))).toBe('2 of 0est');
+    expect(text(card('services_per_conception').querySelector('.figure-note'))).toBe(
+      '3 services for 0 confirmed pregnancies. Counts only services that were written down.',
+    );
+  });
+
+  it('Heats caught shows a dash only when nothing was recorded or expected', async () => {
+    const f = { ...structuredClone(figures), heats_caught: { recorded: 0, expected: 0, estimated: true as const } };
+    const { el } = await mount('/animals/breeding?tab=figures', board, f);
+    expect(text(el.querySelector('[data-figure="heats_caught"] .figure-value'))).toBe('–est');
+  });
+
+  it('a failed figures read is cleared by a successful switch, and old numbers never sit under the new period', async () => {
+    let release!: () => void;
+    const fetchFigures = (period: '12m' | 'all') =>
+      period === '12m'
+        ? Promise.reject(new Error('The figures could not be read'))
+        : new Promise<BreedingFigures>((r) => (release = () => r({ ...structuredClone(figures), period, from: null })));
+    const { h, el } = await mount('/animals/breeding?tab=figures', board, figures, fetchFigures);
+    expect(text(el.querySelector('[role="alert"]'))).toBe('The figures could not be read');
+    el.querySelector<HTMLButtonElement>('[data-period="all"]')!.click();
+    await settle(h);
+    expect(el.querySelector('[role="alert"]')).toBeNull();
+    expect(el.querySelector('[data-role="figures-range"]')).toBeNull();
+    release();
+    await settle(h);
+    expect(text(el.querySelector('[data-role="figures-range"]'))).toBe('All on record · 11 animals with a service');
+  });
+
+  it('switching period clears the previous figures until the new ones arrive', async () => {
+    let release!: () => void;
+    const fetchFigures = (period: '12m' | 'all') =>
+      period === '12m'
+        ? Promise.resolve(structuredClone(figures))
+        : new Promise<BreedingFigures>((r) => (release = () => r({ ...structuredClone(figures), period, from: null })));
+    const { h, el } = await mount('/animals/breeding?tab=figures', board, figures, fetchFigures);
+    expect(el.querySelector('[data-role="figures-range"]')).not.toBeNull();
+    el.querySelector<HTMLButtonElement>('[data-period="all"]')!.click();
+    await settle(h);
+    expect(el.querySelector('[data-role="figure"]')).toBeNull();
+    release();
+    await settle(h);
+    expect(el.querySelectorAll('[data-role="figure"]').length).toBe(8);
+  });
+
+  it('the empty By animal row names the period', async () => {
+    const f = { ...structuredClone(figures), by_animal: [] };
+    const { h, el } = await mount('/animals/breeding?tab=figures', board, f);
+    expect(text(el.querySelector('[data-role="by-animal"] tbody'))).toBe('No animal had a service in this period.');
+    el.querySelector<HTMLButtonElement>('[data-period="all"]')!.click();
+    await settle(h);
+    expect(text(el.querySelector('[data-role="by-animal"] tbody'))).toBe('No animal has a service on record.');
   });
 
   it('nothing to count shows a dash and no numbers in the sentence', async () => {
@@ -368,6 +444,11 @@ describe('the Breeding page', () => {
     expect(Array.from(rows[0].querySelectorAll('td')).map(text)).toEqual(['BD-0002 Sohni', '2', 'Held', 'Day 63', '97', '416']);
     expect(Array.from(rows[1].querySelectorAll('td')).map(text)).toEqual(['BD-0007 Rani', '1', 'No outcome yet', '–', '–', '–']);
     expect(rows[1].querySelector('[data-role="first-service"] span')!.className).toContain('italic');
+    // No per-row approximate flag from the server, so these cells claim no certainty.
+    for (const k of ['days-open', 'calving-interval']) {
+      expect(rows[0].querySelector(`[data-role="${k}"] [appCertainty]`)).toBeNull();
+      expect(rows[0].querySelector(`[data-role="${k}"]`)!.className).not.toContain('font-mono');
+    }
     expect(text(rows[2].querySelector('[data-role="first-service"]'))).toBe('Followed by a new service');
     expect(text(el)).toContain('Words in italics are answers that are still open. A dash means there is nothing to count, such as a first calving with no interval before it.');
   });

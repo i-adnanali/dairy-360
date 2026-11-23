@@ -71,7 +71,9 @@
           </div>
           <div class="figure" data-role="figure" data-figure="held_to_first_service">
             <dt>Held to first service</dt>
-            <dd class="figure-value"><ng-container *ngTemplateOutlet="count; context: { $implicit: f.held_to_first_service }" /></dd>
+            <dd class="figure-value">
+              <ng-container *ngTemplateOutlet="count; context: { $implicit: f.held_to_first_service }" />@if (f.held_to_first_service.rate !== null) {<span class="figure-of" data-role="rate"> · {{ f.held_to_first_service.rate }}%</span>}
+            </dd>
             <dd class="figure-note">{{ heldNote(f) }}</dd>
           </div>
           <div class="figure" data-role="figure" data-figure="confirmed_by_day_60">
@@ -104,7 +106,7 @@
           <div class="figure" data-role="figure" data-figure="heats_caught">
             <dt>Heats caught</dt>
             <dd class="figure-value">
-              @if (f.heats_caught.expected > 0) {
+              @if (f.heats_caught.recorded > 0 || f.heats_caught.expected > 0) {
                 <span appCertainty="known">{{ f.heats_caught.recorded }}</span><span class="figure-of"> of {{ f.heats_caught.expected }}</span>
               } @else {
                 <span appCertainty="no-record">{{ noRecord }}</span>
@@ -156,18 +158,28 @@
                         {{ outcomeWord(a.first_service) }}
                       }
                     </td>
-                    @for (v of [a.confirmed_day, a.days_open, a.calving_interval]; track $index) {
-                      <td appCell>
-                        @if (v === null) {
+                    <td appCell data-role="confirmed">
+                      @if (a.confirmed_day === null) {
+                        <span appCertainty="no-record">{{ noRecord }}</span>
+                      } @else {
+                        <span appCertainty="known">Day {{ a.confirmed_day }}</span>
+                      }
+                    </td>
+                    <!-- No certainty claimed: the server sends no per-row approximate
+                         flag for these spans yet (a follow-up), so a month-precision
+                         span cannot be told from an exact one here. -->
+                    @for (v of [{ key: 'days-open', days: a.days_open }, { key: 'calving-interval', days: a.calving_interval }]; track v.key) {
+                      <td appCell [attr.data-role]="v.key">
+                        @if (v.days === null) {
                           <span appCertainty="no-record">{{ noRecord }}</span>
                         } @else {
-                          <span appCertainty="known">{{ $index === 0 ? 'Day ' + v : v }}</span>
+                          {{ v.days }}
                         }
                       </td>
                     }
                   </tr>
                 } @empty {
-                  <tr><td appCell colspan="6">No animal had a service in this period.</td></tr>
+                  <tr><td appCell colspan="6">{{ f.period === 'all' ? 'No animal has a service on record.' : 'No animal had a service in this period.' }}</td></tr>
                 }
               </tbody>
             </table>

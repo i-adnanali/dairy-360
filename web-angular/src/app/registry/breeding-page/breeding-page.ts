@@ -15,6 +15,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -222,16 +223,17 @@ export class BreedingPage {
   }
   protected servicesNote(f: BreedingFigures): string {
     const { services, conceptions } = f.services_per_conception;
-    const counts = conceptions > 0
+    const counts = services > 0 || conceptions > 0
       ? `${plural(services, 'service', 'services')} for ${plural(conceptions, 'confirmed pregnancy', 'confirmed pregnancies')}. `
       : '';
     return counts + 'Counts only services that were written down.';
   }
   protected heldNote(f: BreedingFigures): string {
     const h = f.held_to_first_service;
-    if (h.of === 0) return 'First services with a known outcome.';
     const lead = h.rate !== null ? `${h.rate}% of first services with a known outcome.` : 'First services with a known outcome.';
-    return h.pending > 0 ? `${lead} ${h.pending} more ${h.pending === 1 ? 'has' : 'have'} no outcome yet.` : lead;
+    if (h.pending === 0) return lead;
+    // "more" only when some first services do have an outcome.
+    return `${lead} ${h.pending}${h.of > 0 ? ' more' : ''} ${h.pending === 1 ? 'has' : 'have'} no outcome yet.`;
   }
   protected confirmedNote(f: BreedingFigures): string {
     const later = f.confirmed_by_day_60.later_days;
@@ -320,7 +322,10 @@ export class BreedingPage {
     void this.loadBoard();
     // The figures are read only when their tab is open, and again for the other period.
     effect(() => {
-      if (this.tab() === 'figures') void this.loadFigures(this.period());
+      const period = this.period();
+      // Another period's numbers never sit under the newly chosen segment.
+      if (untracked(this.figures)?.period !== period) this.figures.set(null);
+      if (this.tab() === 'figures') void this.loadFigures(period);
     });
   }
   /** Reload (and after a save): the board, and the figures when their tab is open. */
@@ -340,6 +345,7 @@ export class BreedingPage {
   }
   private async loadFigures(period: FiguresPeriod): Promise<void> {
     const n = ++this.figuresSequence;
+    this.error.set('');
     try {
       const f = await this.api.breedingFigures(period);
       if (n === this.figuresSequence) this.figures.set(f);
