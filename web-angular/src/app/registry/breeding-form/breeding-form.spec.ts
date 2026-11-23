@@ -224,6 +224,26 @@ describe('BreedingForm', () => {
     expect(b.occurred_time).toBeNull();
   });
 
+  it('sends a loss with its date and nothing else', () => {
+    const { http, fixture, el } = mount();
+    choose(fixture, el, 'abortion');
+    const chip = el.querySelector('[data-chip="abortion"]')!;
+    const key = chip.querySelector('[data-role="chip-key"]')?.textContent ?? '';
+    expect(chip.textContent?.trim().slice(key.length).trim()).toBe('Record a loss');
+    enterDate(fixture, el, 'Nov 2026');
+    // Dated to the day or the month: no time is offered.
+    expect(el.querySelector('app-precision-date [data-role="time"]')).toBeNull();
+    expect(el.querySelector('[data-role="submit"]')?.textContent?.trim()).toBe('Save loss');
+    click(el, '[data-role="submit"]');
+
+    const b = http.expectOne(URL).request.body;
+    expect(b.type).toBe('abortion');
+    expect(b.payload).toEqual({});
+    expect(b.occurred_on).toBe('2026-11-01');
+    expect(b.date_precision).toBe('month');
+    expect(b.occurred_time).toBeNull();
+  });
+
   it('opens on the kind it is given', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(withFetch()), provideHttpClientTesting(), provideRouter([])],

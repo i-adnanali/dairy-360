@@ -125,9 +125,9 @@ The current females are every female that had not left by `on`, served or not; t
 
 ## `POST /breeding/events`
 
-Registered only with `REGISTRY_BREEDING=1`; without it the route does not exist (404). It writes one service, heat, pregnancy check or "nothing seen" through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry`.
+Registered only with `REGISTRY_BREEDING=1`; without it the route does not exist (404). It writes one service, heat, pregnancy check, "nothing seen" or loss through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry`.
 
-Body: `animal_id`, `type` (`insemination`, `pregnancy_check`, `heat_observed` with payload `{ sign }`, or `null_observation` with payload `{ watched_for }`; `occurred_time` is optional), `occurred_on`, `occurred_time`, `date_precision` (required, never defaulted), `payload` (an object, passed as is), `supersedes_id` (a correction), the five flags `allow_ambiguous_service`, `allow_early_check`, `allow_check_without_service`, `allow_no_heat_sign` and `allow_heat_after_positive` (each counts only when it is exactly `true`), `override_reason`, and the provenance fields (`source_form`, `source_ref`, `observed_by`, `recorded_by`).
+Body: `animal_id`, `type` (`insemination`, `pregnancy_check`, `heat_observed` with payload `{ sign }`, `null_observation` with payload `{ watched_for }`, or `abortion` with payload `{}`; `occurred_time` is optional), `occurred_on`, `occurred_time`, `date_precision` (required, never defaulted), `payload` (an object, passed as is), `supersedes_id` (a correction), the five flags `allow_ambiguous_service`, `allow_early_check`, `allow_check_without_service`, `allow_no_heat_sign` and `allow_heat_after_positive` (each counts only when it is exactly `true`), `override_reason`, and the provenance fields (`source_form`, `source_ref`, `observed_by`, `recorded_by`).
 
 ### The pilot gate
 
@@ -137,10 +137,10 @@ Two refusals come before the domain function, both `breeding_entry_closed`, a 40
 
 | Field | Message |
 |---|---|
-| `type` | `<type> is not entered on the page yet; a service, a heat, a pregnancy check or "nothing seen" is` |
+| `type` | `<type> is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is` |
 | `animal_id` | `breeding entry is not open for <animal_id>; it is open for the animals in the pilot` |
 
-`abortion` stays CLI-only.
+An `abortion` raises no warning, with or without a pregnancy on file. On the page it is dated to the day or the month, with no time. The animal page's Breeding tab offers "Record a loss" when the pilot is open for her and her state is `lost` with basis `inferred`; it opens the form on a loss with nothing prefilled.
 
 ## Warnings
 

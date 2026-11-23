@@ -1,4 +1,4 @@
-// Record a service, a heat, a pregnancy check or "nothing seen":
+// Record a service, a heat, a pregnancy check, "nothing seen" or a loss:
 // POST /breeding/events.
 //
 // Built on the event form's structure (FormState, its override notice,
@@ -48,7 +48,7 @@ import { TextInput } from '../../ui/input';
 import { SectionLabel } from '../../ui/text';
 import { Button } from '../../ui/button';
 
-type BreedingKind = 'insemination' | 'pregnancy_check' | 'heat_observed' | 'null_observation';
+type BreedingKind = 'insemination' | 'pregnancy_check' | 'heat_observed' | 'null_observation' | 'abortion';
 
 /** The warnings a breeding write can be saved over, and the flag each one sets. */
 const OVERRIDES = {
@@ -120,12 +120,14 @@ export class BreedingForm implements OnInit {
     { value: 'heat_observed', label: 'Record heat' },
     { value: 'pregnancy_check', label: 'Record check' },
     { value: 'null_observation', label: 'Nothing seen' },
+    { value: 'abortion', label: 'Record a loss' },
   ];
   protected readonly saveLabel: Record<BreedingKind, string> = {
     insemination: 'Save service',
     heat_observed: 'Save heat',
     pregnancy_check: 'Save check',
     null_observation: 'Save',
+    abortion: 'Save loss',
   };
   protected readonly signs: { value: HeatSign; label: string }[] = [
     { value: 'standing', label: 'Standing' },
@@ -169,9 +171,9 @@ export class BreedingForm implements OnInit {
     () => this.kind() === 'insemination' && this.serviceType() === 'bull_exposure',
   );
 
-  /** "Nothing seen" is dated to the day; a bull's stay has no time either. */
+  /** "Nothing seen" is dated to the day; a bull's stay and a loss have no time either. */
   protected readonly allowTime = computed(
-    () => !this.bullExposure() && this.kind() !== 'null_observation',
+    () => !this.bullExposure() && this.kind() !== 'null_observation' && this.kind() !== 'abortion',
   );
 
   /** The override notice: the warnings on screen, and what a save-over sends. */
@@ -303,6 +305,8 @@ export class BreedingForm implements OnInit {
         return { sign: this.sign() };
       case 'null_observation':
         return { watched_for: this.watchedFor() };
+      case 'abortion':
+        return {};
     }
   }
 }
@@ -312,6 +316,7 @@ const RECORDED: Record<BreedingKind, string> = {
   pregnancy_check: 'a pregnancy check',
   heat_observed: 'a heat',
   null_observation: 'nothing seen',
+  abortion: 'a loss',
 };
 
 function blank(v: string): string | null {

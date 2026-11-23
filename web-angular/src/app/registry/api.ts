@@ -331,7 +331,7 @@ export class RegistryApi {
     return unwrap(firstValueFrom(this.http.get<BreedingBoard>(`${BASE}/breeding/board?on=${on}`)));
   }
 
-  /** A service or a pregnancy check. Absent on the server unless REGISTRY_BREEDING=1. */
+  /** A service, a heat, a pregnancy check, "nothing seen" or a loss. Absent on the server unless REGISTRY_BREEDING=1. */
   recordBreedingEvent(
     body: Record<string, unknown>,
     idempotencyKey: string,

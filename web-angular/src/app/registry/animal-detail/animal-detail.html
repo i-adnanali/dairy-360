@@ -121,7 +121,12 @@
                 <p appHelp data-role="no-service">No service recorded.</p>
               }
               @if (d.breeding_entry) {
-                <app-breeding-form [animalId]="d.animal.id" [saved]="onSaved" />
+                @if (d.reproduction?.state === 'lost' && d.reproduction.basis === 'inferred') {
+                  <p><button appButton variant="secondary" type="button" data-role="record-loss" (click)="recordLoss()">Record a loss</button></p>
+                }
+                @for (k of [breedingKind()]; track k) {
+                  <app-breeding-form [animalId]="d.animal.id" [initialKind]="k" [saved]="onSaved" />
+                }
               } @else {
                 <p appHelp data-role="entry-closed">Breeding entry is open only for the animals in the pilot.</p>
               }

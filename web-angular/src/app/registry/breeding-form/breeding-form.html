@@ -44,7 +44,7 @@
               (changed)="watchedFor.set($any($event))"
             />
           </div>
-        } @else {
+        } @else if (k === 'pregnancy_check') {
           <div appCard class="space-y-3">
             <div appSectionLabel legend>How was she checked?</div>
             <app-chip-group

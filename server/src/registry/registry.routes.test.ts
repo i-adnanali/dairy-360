@@ -754,13 +754,29 @@ test('an animal outside the pilot is refused', async () => {
   assert.equal((r.body as { field: string }).field, 'animal_id');
 });
 
-test('an abortion is not entered on the page', async () => {
+test('a type the page does not enter is refused', async () => {
   const ctx = await pilotCtx();
-  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'abortion', occurred_on: '2026-11-13', date_precision: 'day', payload: {}, ...PROV });
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'weaning', occurred_on: '2026-11-13', date_precision: 'day', payload: {}, ...PROV });
   assert.equal(r.status, 400);
   assert.equal((r.body as { error: string }).error, 'breeding_entry_closed');
   assert.equal((r.body as { field: string }).field, 'type');
-  assert.equal((r.body as { message: string }).message, 'abortion is not entered on the page yet; a service, a heat, a pregnancy check or "nothing seen" is');
+  assert.equal((r.body as { message: string }).message, 'weaning is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is');
+});
+
+test('a loss for a pilot animal is written and she reads as lost, observed', async () => {
+  const ctx = await pilotCtx();
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0009', type: 'abortion', occurred_on: '2026-11-13', date_precision: 'day', payload: {}, ...PROV });
+  assert.equal(r.status, 201);
+  const g = (await get(ctx, '/animals/BD-0009?as_of=2026-11-13')) as { body: { reproduction: { state: string; basis: string } } };
+  assert.deepEqual([g.body.reproduction.state, g.body.reproduction.basis], ['lost', 'observed']);
+});
+
+test('a loss for an animal outside the pilot is refused', async () => {
+  const ctx = await pilotCtx();
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-0006', type: 'abortion', occurred_on: '2026-11-13', date_precision: 'day', payload: {}, ...PROV });
+  assert.equal(r.status, 400);
+  assert.equal((r.body as { error: string }).error, 'breeding_entry_closed');
+  assert.equal((r.body as { field: string }).field, 'animal_id');
 });
 
 test('a heat for a pilot animal is written', async () => {

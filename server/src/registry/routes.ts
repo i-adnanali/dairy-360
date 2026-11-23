@@ -720,10 +720,10 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         const b = body(req);
         const animalId = requireStr(b, 'animal_id');
         const type = requireStr(b, 'type');
-        if (type !== 'insemination' && type !== 'pregnancy_check' && type !== 'heat_observed' && type !== 'null_observation') {
+        if (type !== 'insemination' && type !== 'pregnancy_check' && type !== 'heat_observed' && type !== 'null_observation' && type !== 'abortion') {
           throw new RegistryError(
             'breeding_entry_closed',
-            `${type} is not entered on the page yet; a service, a heat, a pregnancy check or "nothing seen" is`,
+            `${type} is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is`,
             'type',
           );
         }

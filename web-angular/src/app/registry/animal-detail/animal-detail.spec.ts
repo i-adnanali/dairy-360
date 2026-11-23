@@ -119,6 +119,26 @@ describe('AnimalDetailView Breeding tab', () => {
     expect(tab.querySelector('app-breeding-form')).not.toBeNull();
     expect(tab.querySelector('[data-role="entry-closed"]')).toBeNull();
   });
+  it('an inferred loss in the pilot offers Record a loss, which opens an empty loss form', async () => {
+    const lost = { ...view, state: 'lost', basis: 'inferred', window: null };
+    const tab = await openBreeding(await mount(detail({ reproduction: lost, breeding_entry: true })));
+    const button = tab.querySelector('[data-role="record-loss"]') as HTMLButtonElement;
+    expect(button?.textContent?.trim()).toBe('Record a loss');
+    button.click();
+    await new Promise((r) => setTimeout(r));
+    TestBed.inject(ApplicationRef).tick();
+    const form = tab.querySelector('app-breeding-form') as HTMLElement;
+    expect(form.querySelector('[data-chip="abortion"]')?.getAttribute('aria-checked')).toBe('true');
+    // Nothing prefilled: the date is empty.
+    expect((form.querySelector('app-precision-date [data-role="date-text"]') as HTMLInputElement).value).toBe('');
+  });
+  it('no Record a loss when the loss is observed, or outside the pilot', async () => {
+    const observed = await openBreeding(await mount(detail({ reproduction: { ...view, state: 'lost', basis: 'observed', window: null }, breeding_entry: true })));
+    expect(observed.querySelector('[data-role="record-loss"]')).toBeNull();
+    TestBed.resetTestingModule();
+    const closed = await openBreeding(await mount(detail({ reproduction: { ...view, state: 'lost', basis: 'inferred', window: null }, breeding_entry: false })));
+    expect(closed.querySelector('[data-role="record-loss"]')).toBeNull();
+  });
   it('the tab shows each derived note under the pregnancy', async () => {
     const tab = await openBreeding(
       await mount(detail({
