@@ -42,7 +42,7 @@ Editable sheets need hidden-row validation and whole-session saves. Feed/Health 
 npm run test:regression -w server
 ```
 
-This calls the live model, needs `ANTHROPIC_API_KEY`, can spend tokens and is not part of ordinary isolated unit validation. Core, cap, fallback and registry-precision scripts are defined in [server/package.json](../../server/package.json). Missing credentials can skip tests; a skip is not a pass. Review setup/data access before running these suites.
+This calls the live model, needs `ANTHROPIC_API_KEY`, can spend tokens and is not part of ordinary isolated unit validation. Core, cap, fallback and registry-precision scripts are defined in [server/package.json](../../server/package.json). **Blocked (24 November 2026):** All four suites (core, cap, fallback, registry precision) import `server/src/db.ts`, directly or through the agent tools, and `db.ts` now refuses to load under the test runner ([`server/src/db-guard.ts`](../../server/src/db-guard.ts)), so it can never open and migrate the real `dairy.db`. The suites are therefore **blocked**: each fails at load, with or without a key, until it is given its own database. There is deliberately no override. Before the guard, missing credentials skipped these tests; a skip was never a pass.
 
 CI gates the live suite on credential availability and manual/tag execution; ordinary pushes must not silently enable model spending. [Original regression design](../records/REGRESSION.md) preserves rationale and historical scenarios. It is not a fresh live acceptance result.
 

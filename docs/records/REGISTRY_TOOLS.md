@@ -299,6 +299,8 @@ If Eval 1 fails, the caveat-in-the-digest design does not survive contact with a
 
 ### Result: all three pass
 
+> **Blocked (24 November 2026):** This eval and the other three regression suites import `server/src/db.ts`, directly or through the agent tools, and `db.ts` now refuses to load under the test runner ([`server/src/db-guard.ts`](../../server/src/db-guard.ts)), so it can never open and migrate the real `dairy.db`. The suites are therefore **blocked**: each fails at load, with or without a key, until it is given its own database. There is deliberately no override. The run below predates the guard.
+
 `npm run test:regression:registry -w server`, `claude-sonnet-4-6`, against `cleanHerd()`. Verbatim excerpts, because the prose *is* the result:
 
 **Eval 1** — refused the average unprompted, and named the sample correctly:

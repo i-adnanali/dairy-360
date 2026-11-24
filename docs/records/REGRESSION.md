@@ -14,6 +14,8 @@
 > below describe the `v0.6.0` baseline; current commands are in
 > [DEVELOPMENT.md §5](DEVELOPMENT.md#5-test).
 
+> **Blocked (24 November 2026):** All four suites (core, cap, fallback, registry precision) import `server/src/db.ts`, directly or through the agent tools, and `db.ts` now refuses to load under the test runner ([`server/src/db-guard.ts`](../../server/src/db-guard.ts)), so it can never open and migrate the real `dairy.db`. The suites are therefore **blocked**: each fails at load, with or without a key, until it is given its own database. There is deliberately no override.
+
 ## Context
 
 `docs/OBSERVABILITY.md` § Open items originally called this "Cycle 2" —
