@@ -7,6 +7,7 @@ import path from 'node:path';
 import { mock, test } from 'node:test';
 
 import { BACKFILL_USAGE, backfillMain, parseBackfillArgs } from './breed-backfill';
+import { recordBreedingEvent } from './breeding';
 import { checkBackfill, parseBackfillFile, saveBackfill } from './breeding-backfill';
 import { CliError } from './cli';
 import { addAcquired, freshDb } from './fixtures';
@@ -323,4 +324,33 @@ test('a file listing the service before its same-day heat reads bred, not a retu
   assert.equal(saveBackfill(db, file, 'adnan').written, true);
   const v = deriveReproduction({ events: eventsForAnimal(db, 'BD-0001'), asOf: '2026-01-25', inMilk: false });
   assert.deepEqual([v?.state, v?.heat_sign_before_service], ['bred', 'seen']);
+});
+
+test('a re-run after a page correction writes nothing for the corrected row', () => {
+  const db = herd();
+  const file = {
+    cases: [{
+      animal_id: 'BD-0001',
+      source_form: 'recall',
+      events: [
+        { type: 'heat_observed', occurred_on: '2026-03-01', date_precision: 'day', payload: { sign: 'standing' } },
+        { type: 'insemination', occurred_on: '2026-03-02', date_precision: 'day', payload: { service_type: 'ai' } },
+      ],
+    }],
+  };
+  assert.equal(saveBackfill(db, file, 'adnan').written, true);
+  // The owner corrects the heat on the page: 28 Feb, mucus.
+  const original = breedingRows(db, 'BD-0001').find((e) => e.type === 'heat_observed')!;
+  recordBreedingEvent(db, {
+    animal_id: 'BD-0001', type: 'heat_observed', occurred_on: '2026-02-28', date_precision: 'day',
+    payload: { sign: 'mucus' }, supersedes_id: original.id,
+    provenance: { source_form: 'direct_entry', recorded_by: 'owner' },
+  });
+  const check = checkBackfill(db, file, 'adnan');
+  assert.deepEqual(check.rows.map((r) => r.outcome), ['already_on_record', 'already_on_record']);
+  assert.equal(check.rows[0].outcome === 'already_on_record' && check.rows[0].event_id, original.id);
+  const saved = saveBackfill(db, file, 'adnan');
+  assert.deepEqual(saved.event_ids, []);
+  const heats = effectiveEvents(eventsForAnimal(db, 'BD-0001')).filter((e) => e.type === 'heat_observed');
+  assert.deepEqual(heats.map((e) => [e.occurred_on, e.payload]), [['2026-02-28', { sign: 'mucus' }]]);
 });

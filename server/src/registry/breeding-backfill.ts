@@ -16,10 +16,13 @@
 //
 //   would_write        recordBreedingEvent accepted it (any warning it raised is
 //                      named in the row's `allow`, and recorded from the condition)
-//   already_on_record  an effective event ALREADY ON RECORD before this run has the
-//                      same animal, type, date, time, precision and payload; not
-//                      written again. Rows written earlier in the same run never
-//                      count, so a real second same-day service is not dropped.
+//   already_on_record  an event ALREADY ON RECORD before this run has the same
+//                      animal, type, date, time, precision and payload; not
+//                      written again. Superseded events count too: a row the
+//                      owner has since corrected on the page is not written
+//                      back (event_id is then the corrected original). Rows
+//                      written earlier in the same run never count, so a real
+//                      second same-day service is not dropped.
 //   refused            a stage 1 refusal: code and message
 //   needs_allow        a warning fired that the row's `allow` does not name
 
@@ -173,7 +176,10 @@ export function parseBackfillFile(raw: unknown): BackfillFile {
   return { cases };
 }
 
-/** The event on record before the run that this row repeats, or null. Payloads compare by canonical JSON. */
+/**
+ * The event on record before the run that this row repeats, or null; an
+ * effective one first, else a superseded one. Payloads compare by canonical JSON.
+ */
 function onRecord(before: RegistryEvent[], e: BackfillEvent): string | null {
   let payload: string;
   try {
@@ -182,14 +188,13 @@ function onRecord(before: RegistryEvent[], e: BackfillEvent): string | null {
     // An invalid payload matches nothing; the write path refuses it.
     return null;
   }
-  const same = before.find(
-    (x) =>
-      x.type === e.type &&
-      x.occurred_on === e.occurred_on &&
-      (x.occurred_time ?? null) === e.occurred_time &&
-      x.date_precision === e.date_precision &&
-      stableStringify(x.payload) === payload,
-  );
+  const matches = (x: RegistryEvent) =>
+    x.type === e.type &&
+    x.occurred_on === e.occurred_on &&
+    (x.occurred_time ?? null) === e.occurred_time &&
+    x.date_precision === e.date_precision &&
+    stableStringify(x.payload) === payload;
+  const same = effectiveEvents(before).find(matches) ?? before.find(matches);
   return same ? same.id : null;
 }
 
@@ -202,10 +207,11 @@ class Rollback {
 function run(db: Db, file: BackfillFile, recordedBy: string): { report: BackfillReport; event_ids: string[] } {
   const rows: BackfillRow[] = [];
   const event_ids: string[] = [];
-  // What was on record before this run, per animal: a row matches only these.
+  // What was on record before this run, per animal, superseded events
+  // included: a row matches only these.
   const before = new Map<string, RegistryEvent[]>();
   for (const c of file.cases) {
-    if (!before.has(c.animal_id)) before.set(c.animal_id, effectiveEvents(eventsForAnimal(db, c.animal_id)));
+    if (!before.has(c.animal_id)) before.set(c.animal_id, eventsForAnimal(db, c.animal_id));
   }
   let last = 0;
   const nextRecordedAt = (): string => {
