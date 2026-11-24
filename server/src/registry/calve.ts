@@ -16,6 +16,7 @@
 import {
   CliError,
   PROVENANCE_FLAGS,
+  flagIsOn,
   optStr,
   parseFlags,
   rejectUnknownFlags,
@@ -28,6 +29,7 @@ import {
 } from './cli';
 import { recordCalving } from './calving';
 import { farmToday } from './time';
+import type { Db } from './schema';
 import type { CalvingAssistance, CalvingOutcome, RegistrySex } from './types';
 
 const OUTCOMES = ['live', 'stillborn', 'died_within_24h'] as const;
@@ -51,6 +53,9 @@ const CALVE_FLAGS = [
   'notes',
   'as-of',
   'allow-near-duplicate',
+  'allow-calving-before-window',
+  'allow-calving-past-extreme',
+  'override-reason',
   ...PROVENANCE_FLAGS,
 ] as const;
 
@@ -91,13 +96,22 @@ Optional:
   --observed-by=<id>  --source-ref=<ref>
   --as-of=YYYY-MM-DD
   --allow-near-duplicate      accept a calving within 60 days of an existing one
+  --allow-calving-before-window
+                              save a calving dated before her calving window
+                              opens (counted from the earliest possible conception)
+  --allow-calving-past-extreme
+                              save a calving dated past the extreme after her
+                              latest possible conception
+  --override-reason=<text>    kept with an override that happened. A flag with
+                              nothing to override records nothing.
 
 A stillborn or died_within_24h calf is STILL created, still gets a birth event,
 and still opens the lactation -- it counts toward parity and toward the calving
 interval. Enter calvings oldest first.
 `.trim();
 
-export function calveMain(argv: string[]): void {
+/** `handle` is for tests (an :memory: database); the command itself opens dairy.db. */
+export function calveMain(argv: string[], handle?: Db): void {
   const flags = parseFlags(argv);
   if (wantsHelp(flags)) {
     console.log(CALVE_USAGE);
@@ -124,7 +138,7 @@ export function calveMain(argv: string[]): void {
   const existingCalf = optStr(flags, 'calf');
 
   // Importing usage/help must never open or migrate the farm database.
-  const { db } = require('../db') as typeof import('../db');
+  const db = handle ?? (require('../db') as typeof import('../db')).db;
   const r = recordCalving(db, {
     dam_id: damId,
     occurred_on: requireDate(flags, 'on', 'the calving date'),
@@ -144,6 +158,9 @@ export function calveMain(argv: string[]): void {
     provenance: requireProvenance(flags),
     asOf,
     allow_near_duplicate: flags.has('allow-near-duplicate'),
+    allow_calving_before_window: flagIsOn(flags, 'allow-calving-before-window'),
+    allow_calving_past_extreme: flagIsOn(flags, 'allow-calving-past-extreme'),
+    override_reason: optStr(flags, 'override-reason'),
   });
 
   const rows = db

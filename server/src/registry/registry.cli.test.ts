@@ -1,8 +1,9 @@
 // Animal registry -- CLI argument handling and the refusal rules.
 //
-// PURE: exercises cli.ts with no database. The refusals are the point of this
-// file -- decision doc §11 makes "precision is never defaulted" a BLOCKING
-// rule, and a rule that is only a comment is not blocking.
+// Mostly PURE: exercises cli.ts with no database. The refusals are the point of
+// this file -- decision doc §11 makes "precision is never defaulted" a BLOCKING
+// rule, and a rule that is only a comment is not blocking. The calving-window
+// cases at the end run the two calving commands against an :memory: handle.
 
 import assert from 'node:assert';
 import { test } from 'node:test';
@@ -21,8 +22,13 @@ import {
   wantsHelp,
 } from './cli';
 import { USAGE as ADD_USAGE } from './add';
-import { CALVE_USAGE } from './calve';
-import { CORRECT_USAGE } from './correct';
+import { CALVE_USAGE, calveMain } from './calve';
+import { CORRECT_USAGE, correctMain } from './correct';
+import { recordBreedingEvent } from './breeding';
+import { RECALL, addAcquired, freshDb } from './fixtures';
+import { effectiveEvents } from './project';
+import { eventsForAnimal } from './store';
+import type { Db } from './schema';
 import { USAGE as EVENT_USAGE } from './event';
 
 // ---------------------------------------------------------------------------
@@ -202,4 +208,59 @@ test('registry:correct-calving explains the pairing in its usage', () => {
 test('CLI usage imports never open the live database or seed module', () => {
   const loaded = Object.keys(require.cache).filter(p => /[/\\](db|seed)\.(ts|js)$/.test(p));
   assert.deepEqual(loaded, []);
+});
+
+// ---------------------------------------------------------------------------
+// The calving commands save over a calving-window warning only with its flag
+// ---------------------------------------------------------------------------
+
+/** BD-0001, served by AI on 2025-01-10: the window opens at day 285, the extreme is day 346. */
+function servedDam(): Db {
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2019-01-01', acquired_precision: 'year' });
+  recordBreedingEvent(db, { animal_id: 'BD-0001', type: 'insemination', occurred_on: '2025-01-10', date_precision: 'day', payload: { service_type: 'ai' }, provenance: RECALL, allow_no_heat_sign: true });
+  return db;
+}
+const lastCalvingOf = (db: Db) => effectiveEvents(eventsForAnimal(db, 'BD-0001')).filter((e) => e.type === 'calving').at(-1);
+const PROV_FLAGS = ['--source-form=recall', '--recorded-by=test', '--as-of=2026-11-13'];
+// Day 280 after the service: before the window.
+const CALVE_ARGS = ['--dam=BD-0001', '--on=2025-10-17', '--precision=day', '--calf-sex=female', '--outcome=live', ...PROV_FLAGS];
+
+test('registry:calve refuses a calving before the window unless --allow-calving-before-window is given', (t) => {
+  t.mock.method(console, 'log', () => {});
+  const db = servedDam();
+  assert.throws(() => calveMain(CALVE_ARGS, db), (e: { code?: string }) => e.code === 'calving_before_window');
+  assert.throws(() => calveMain([...CALVE_ARGS, '--allow-calving-before-window=false'], db), (e: { code?: string }) => e.code === 'calving_before_window');
+  assert.equal(lastCalvingOf(db), undefined);
+  calveMain([...CALVE_ARGS, '--allow-calving-before-window', '--override-reason=premature'], db);
+  const row = lastCalvingOf(db)!;
+  assert.equal(row.occurred_on, '2025-10-17');
+  assert.deepEqual(row.override_checks, ['calving_before_window']);
+  assert.equal(row.override_reason, 'premature');
+});
+
+test('registry:correct-calving refuses a date past the extreme unless --allow-calving-past-extreme is given', (t) => {
+  t.mock.method(console, 'log', () => {});
+  const db = servedDam();
+  // Day 300: inside the window, written plainly.
+  calveMain(['--dam=BD-0001', '--on=2025-11-06', '--precision=day', '--calf-sex=female', '--outcome=live', ...PROV_FLAGS], db);
+  const original = lastCalvingOf(db)!;
+  // Day 347: past the extreme.
+  const fix = [`--event=${original.id}`, '--on=2025-12-23', '--precision=day', ...PROV_FLAGS];
+  assert.throws(() => correctMain(fix, db), (e: { code?: string }) => e.code === 'calving_past_extreme');
+  assert.equal(lastCalvingOf(db)!.id, original.id);
+  correctMain([...fix, '--allow-calving-past-extreme', '--override-reason=late record'], db);
+  const row = lastCalvingOf(db)!;
+  assert.equal(row.occurred_on, '2025-12-23');
+  assert.equal(row.supersedes_id, original.id);
+  assert.deepEqual(row.override_checks, ['calving_past_extreme']);
+  assert.equal(row.override_reason, 'late record');
+});
+
+test('both calving commands document the window flags', () => {
+  for (const usage of [CALVE_USAGE, CORRECT_USAGE]) {
+    for (const flag of ['--allow-calving-before-window', '--allow-calving-past-extreme', '--override-reason']) {
+      assert.ok(usage.includes(flag), flag);
+    }
+  }
 });

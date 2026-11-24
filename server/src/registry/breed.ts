@@ -13,6 +13,7 @@
 import {
   CliError,
   PROVENANCE_FLAGS,
+  flagIsOn,
   optDate,
   optStr,
   parseFlags,
@@ -159,13 +160,8 @@ export function buildSupersedesId(flags: Flags): string | null {
   return v;
 }
 
-/** A switch: bare `--x` and `--x=true` are on, `--x=false` and an absent flag are off. */
-export function flagIsOn(flags: Flags, name: string): boolean {
-  const v = flags.get(name);
-  if (v === undefined || v === 'false') return false;
-  if (v === true || v === 'true') return true;
-  throw new CliError(`--${name} is a switch: use it bare, or =true / =false, not '${v}'`);
-}
+// flagIsOn lives in cli.ts, shared with the calving commands; re-exported for the tests.
+export { flagIsOn };
 
 export function main(argv: string[]): void {
   const flags = parseFlags(argv);

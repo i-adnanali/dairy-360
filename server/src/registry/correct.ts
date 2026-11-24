@@ -11,6 +11,7 @@
 import {
   CliError,
   PROVENANCE_FLAGS,
+  flagIsOn,
   optStr,
   parseFlags,
   rejectUnknownFlags,
@@ -23,6 +24,7 @@ import {
 } from './cli';
 import { correctCalving } from './calving';
 import { farmToday } from './time';
+import type { Db } from './schema';
 import type { CalvingAssistance } from './types';
 
 const ASSISTANCE = ['none', 'assisted', 'vet'] as const;
@@ -38,6 +40,9 @@ const CORRECT_FLAGS = [
   'notes',
   'as-of',
   'allow-near-duplicate',
+  'allow-calving-before-window',
+  'allow-calving-past-extreme',
+  'override-reason',
   ...PROVENANCE_FLAGS,
 ] as const;
 
@@ -68,13 +73,22 @@ Optional:
   --notes=<text>              also correct notes
   --observed-by=<id>  --source-ref=<ref>  --as-of=YYYY-MM-DD
   --allow-near-duplicate
+  --allow-calving-before-window
+                              save a calving dated before her calving window
+                              opens (counted from the earliest possible conception)
+  --allow-calving-past-extreme
+                              save a calving dated past the extreme after her
+                              latest possible conception
+  --override-reason=<text>    kept with an override that happened. A flag with
+                              nothing to override records nothing.
 
 Nothing is ever UPDATEd or DELETEd: the old events remain in the log, marked
 superseded, and the projections ignore them. Find the event id with
 verify:registry or by querying registry_animal_events.
 `.trim();
 
-export function correctMain(argv: string[]): void {
+/** `handle` is for tests (an :memory: database); the command itself opens dairy.db. */
+export function correctMain(argv: string[], handle?: Db): void {
   const flags = parseFlags(argv);
   if (wantsHelp(flags)) {
     console.log(CORRECT_USAGE);
@@ -90,7 +104,7 @@ export function correctMain(argv: string[]): void {
   const asOf = optStr(flags, 'as-of') ?? farmToday();
 
   // Importing usage/help must never open or migrate the farm database.
-  const { db } = require('../db') as typeof import('../db');
+  const db = handle ?? (require('../db') as typeof import('../db')).db;
   const r = correctCalving(db, {
     calving_event_id: requireStr(flags, 'event', 'the calving event being corrected'),
     occurred_on: requireDate(flags, 'on', 'the corrected date'),
@@ -102,6 +116,9 @@ export function correctMain(argv: string[]): void {
     provenance: requireProvenance(flags),
     asOf,
     allow_near_duplicate: flags.has('allow-near-duplicate'),
+    allow_calving_before_window: flagIsOn(flags, 'allow-calving-before-window'),
+    allow_calving_past_extreme: flagIsOn(flags, 'allow-calving-past-extreme'),
+    override_reason: optStr(flags, 'override-reason'),
   });
 
   console.log('registry:correct-calving');

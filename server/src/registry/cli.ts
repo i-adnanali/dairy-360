@@ -78,6 +78,14 @@ export function rejectUnknownFlags(flags: Flags, allowed: readonly string[]): vo
   }
 }
 
+/** A switch: bare `--x` and `--x=true` are on, `--x=false` and an absent flag are off. */
+export function flagIsOn(flags: Flags, name: string): boolean {
+  const v = flags.get(name);
+  if (v === undefined || v === 'false') return false;
+  if (v === true || v === 'true') return true;
+  throw new CliError(`--${name} is a switch: use it bare, or =true / =false, not '${v}'`);
+}
+
 export function wantsHelp(flags: Flags): boolean {
   return flags.has('help') || flags.has('h');
 }

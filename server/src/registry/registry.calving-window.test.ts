@@ -277,7 +277,15 @@ test('a correction saved over a near-duplicate records the override from the con
   const e = refusal(() =>
     correctCalving(db, { calving_event_id: r.calving_event_id, occurred_on: '2025-06-20', date_precision: 'day', provenance: RECALL, asOf: AS_OF }),
   );
-  assert.equal(e.code, 'near_duplicate_calving');
+  const message =
+    `the corrected date 2025-06-20 lands within 60 days of dam 'BD-0001' other calving on 2025-06-01. ` +
+    `Pass allow_near_duplicate: true if both are genuinely separate events.`;
+  assert.deepEqual(e.toWire(), {
+    error: 'near_duplicate_calving',
+    message,
+    field: 'occurred_on',
+    warnings: [{ check: 'near_duplicate_calving', message }],
+  });
   correctCalving(db, {
     calving_event_id: r.calving_event_id,
     occurred_on: '2025-06-20',

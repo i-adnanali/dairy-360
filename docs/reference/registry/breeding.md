@@ -131,7 +131,7 @@ Body: `animal_id`, `type` (`insemination`, `pregnancy_check`, `heat_observed` wi
 
 ### Who can be entered for
 
-Every female. A male is refused `not_female` and an event dated after she left is refused `animal_departed`, by `recordBreedingEvent` as in stage 1; there is no list of animals and no environment variable. `GET /animals/:id` always carries `breeding_entry`, true exactly for a current (not departed) female, so the page knows whether to offer the form; each board case carries the same value as `entry_open`.
+Every female. A male is refused `not_female`, an event dated after she left is refused `animal_departed`, and an id that is not in the registry is refused `unknown_animal`, by `recordBreedingEvent` as in stage 1; there is no list of animals and no environment variable. `GET /animals/:id` always carries `breeding_entry`, true exactly for a current (not departed) female, so the page knows whether to offer the form; each board case carries the same value as `entry_open`.
 
 One refusal comes before the domain function, `breeding_entry_closed`, a 400:
 
@@ -164,7 +164,7 @@ A calving (`POST /calvings`) and a calving correction (`POST /calvings/:eventId/
 | `calving_before_window` | `allow_calving_before_window` | the calving is fewer than `GESTATION.windowOpens` (285) days after the earliest possible conception |
 | `calving_past_extreme` | `allow_calving_past_extreme` | the calving is more than `BREEDING_TASK_DAYS.overdueRedAfter` (346) days after the latest possible conception |
 
-Each fires only when the whole calving date lies outside the bound: a month- or year-precision calving is compared by its month or year, and an `estimated` one never fires. A dam with no service on or before the calving has no view, so neither fires. They come back with `near_duplicate_calving` when that fires too, in the order `near_duplicate_calving`, `calving_before_window`, `calving_past_extreme`, as the breeding warnings do: one is a 400 of its own code with `field` `occurred_on` and `warnings`; two or more are `breeding_warnings` with the messages joined. The calving is written only when every fired warning's flag is `true`, and its `override_checks` lists every fired warning. The hard calving refusals still come first. A correction saved over a near-duplicate records `near_duplicate_calving` in its `override_checks`, as a new calving does. The CLI (`registry:calve`, `registry:correct-calving`) calls the same functions, so it runs the two window warnings too; it has a flag to save over the near-duplicate (`--allow-near-duplicate`) but none for the two window warnings.
+Each fires only when the whole calving date lies outside the bound: a month- or year-precision calving is compared by its month or year, and an `estimated` one never fires. A dam with no service on or before the calving has no view, so neither fires. They come back with `near_duplicate_calving` when that fires too, in the order `near_duplicate_calving`, `calving_before_window`, `calving_past_extreme`, as the breeding warnings do: one is a 400 of its own code with `field` `occurred_on` and `warnings`; two or more are `breeding_warnings` with the messages joined. The calving is written only when every fired warning's flag is `true`, and its `override_checks` lists every fired warning. The hard calving refusals still come first. A correction saved over a near-duplicate records `near_duplicate_calving` in its `override_checks`, as a new calving does. The CLI (`registry:calve`, `registry:correct-calving`) calls the same functions, so it runs the same warnings, and saves over them with `--allow-near-duplicate`, `--allow-calving-before-window` and `--allow-calving-past-extreme`, with `--override-reason`; see [Registry CLI](../../guides/registry-cli.md#calving-warnings).
 
 ## Correcting a breeding event
 
@@ -180,4 +180,4 @@ Migration 10 widens the event table so it can hold the five breeding types. It i
 
 ## Not built yet
 
-General availability, correcting a breeding event from the page, and the backfill command (stage 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar is not built.
+Correcting a breeding event from the page, and the backfill command (stage 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar is not built.

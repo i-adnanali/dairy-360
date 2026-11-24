@@ -44,6 +44,16 @@ npm run registry:backup -w server
 `--event=` for `correct-calving` is the **currently effective** calving event id,
 printed by `registry:calve` and listed by `verify:registry`.
 
+## Calving warnings
+
+`registry:calve` and `registry:correct-calving` refuse a calving that is unusual but possible until you save over it, each warning with its own flag: `--allow-near-duplicate` (another calving of hers within 60 days), `--allow-calving-before-window` (dated before her calving window opens, counted from the earliest possible conception of her last service) and `--allow-calving-past-extreme` (dated past the extreme after her latest possible conception, so a service is probably missing). When one write raises several, they are refused together as `breeding_warnings`, and the write goes through only when every one of them has its flag. The two window flags are switches: bare or `=true` is on, `=false` is off. `--override-reason=<text>` is kept with the override, and every warning that fired is recorded on the calving; a flag with nothing to override records nothing. The rules are in [Breeding](../reference/registry/breeding.md#calving-warnings).
+
+```bash
+npm run registry:calve -w server -- --dam=BD-0001 --on=2025-10-17 --precision=day \
+  --calf-sex=female --outcome=live --source-form=recall --recorded-by=adnan \
+  --allow-calving-before-window --override-reason="born early, vet confirmed"
+```
+
 `--db=` paths are resolved from **`server/`**, not the repo root — npm runs
 workspace scripts with the workspace as cwd. So the path you read off a repo-root
 listing needs one segment fewer. Getting it wrong is caught and named:

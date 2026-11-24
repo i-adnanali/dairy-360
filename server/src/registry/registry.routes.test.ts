@@ -770,6 +770,13 @@ test('a male is refused as in stage 1', async () => {
   });
 });
 
+test('an unknown animal is refused unknown_animal', async () => {
+  const ctx = await breedingCtx();
+  const r = await post(ctx, '/breeding/events', { animal_id: 'BD-9999', ...SVC });
+  assert.equal(r.status, 400);
+  assert.deepEqual(r.body, { error: 'unknown_animal', message: `unknown registry animal 'BD-9999'`, field: 'animal_id' });
+});
+
 test('a departed female is refused as in stage 1', async () => {
   const db = breedingHerd();
   addDeparture(db, { animal_id: 'BD-0006', on: '2026-11-01', precision: 'day' });
