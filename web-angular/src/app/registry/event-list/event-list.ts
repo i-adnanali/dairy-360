@@ -22,15 +22,8 @@ import type { TimelineEvent } from "../types";
 import { Certainty, Qualifier } from "../../ui/certainty";
 import { precisionParts, readableParts } from "../precision-display";
 import type { PrecisionParts } from "../precision-display";
+import { BREEDING_TYPES, breedingDetail, breedingTitle } from "../breeding-words";
 
-const CHECK_METHOD_WORDS: Record<string, string> = {
-  palpation: 'By hand', ultrasound: 'Ultrasound', pag: 'PAG blood test', progesterone: 'Progesterone',
-};
-
-/** The breeding kinds a Timeline row can be corrected from. */
-const BREEDING_TYPES: ReadonlySet<string> = new Set([
-  'insemination', 'heat_observed', 'pregnancy_check', 'null_observation', 'abortion',
-]);
 
 @Component({
   selector: 'app-event-list',
@@ -106,18 +99,8 @@ export class EventList {
         return 'Left the farm';
       case 'note':
         return 'Note';
-      case 'heat_observed':
-        return 'Heat seen';
-      case 'insemination':
-        return 'Service';
-      case 'pregnancy_check':
-        return 'Pregnancy check';
-      case 'abortion':
-        return 'Loss seen';
-      case 'null_observation':
-        return 'Watched, none seen';
       default:
-        return t;
+        return breedingTitle(t) ?? t;
     }
   }
 
@@ -172,32 +155,8 @@ export class EventList {
       }
       case 'note':
         return s('text');
-      case 'insemination': {
-        const t = s('service_type');
-        if (t === 'ai') return 'AI';
-        if (t === 'natural_observed') return 'Bull, seen';
-        if (t === 'bull_exposure') {
-          const d = p['exposure_days'];
-          return typeof d === 'number' ? `Bull running with her · ${d} days` : 'Bull running with her';
-        }
-        return null;
-      }
-      case 'pregnancy_check': {
-        const m = s('method');
-        const method = m ? CHECK_METHOD_WORDS[m] ?? m : null;
-        const r = s('result');
-        const result = r === 'positive' ? 'pregnant' : r === 'negative' ? 'not pregnant' : null;
-        const bits = [method, result].filter((x): x is string => !!x);
-        return bits.length ? bits.join(' · ') : null;
-      }
-      case 'heat_observed':
-        return s('sign');
-      case 'null_observation': {
-        const w = s('watched_for');
-        return w === 'heat' ? 'for heat' : w === 'pregnancy_check' ? 'for a pregnancy check' : null;
-      }
       default:
-        return null;
+        return breedingDetail(e.type, p);
     }
   }
 }

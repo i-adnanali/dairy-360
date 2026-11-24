@@ -46,9 +46,10 @@ The report includes full JSON export and measured pages for browser Save as PDF.
 Long sections use local pagination with 25, 50 or 100 records per page. Print/export includes
 all loaded records. Source fields remain available separately from readable record
 content. New structured weight, movement, breed and discarded-milk capture is **not
-included**: these are stage 3, explicitly identified as gaps. Breeding and pregnancy
-events are recorded (see [Breeding](breeding.md)), but the report's reproduction section
-still lists calvings and dry-offs only and says breeding capture is not supported.
+included**: these are stage 3, explicitly identified as gaps. The report's reproduction
+section lists calvings, dry-offs and the five breeding events (see [Breeding](breeding.md)),
+read in the same words as the animal's Timeline; the derived reproductive state stays on
+the animal page.
 No individual consumption, pooled revenue or animal profitability is inferred.
 
 ## Persistence and audit
@@ -128,6 +129,6 @@ Actual administration, planned work and operator/veterinary instructions remain 
 
 ## Limits and evidence
 
-Structured weight, movement, breed and discarded-milk capture remain deferred stage-3 scope. Breeding events are captured but not yet shown in the lifetime report. Clinical, real-farm and exhaustive print/export acceptance are not implied by the implemented report layout. [Acceptance status](../ui/acceptance-status.md) records performed checks and the owner-approved exclusions.
+Structured weight, movement, breed and discarded-milk capture remain deferred stage-3 scope. Clinical, real-farm and exhaustive print/export acceptance are not implied by the implemented report layout. [Acceptance status](../ui/acceptance-status.md) records performed checks and the owner-approved exclusions.
 
 [Testing](../../guides/testing.md) describes the synthetic harness. [Original requirements](../../records/ANIMAL_HEALTH_SPEC.md) and [delivery record](../../records/REGISTRY_HEALTH.md) preserve original acceptance examples, deviations and dated measurements.

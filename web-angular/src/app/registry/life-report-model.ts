@@ -1,5 +1,6 @@
 import { formatMinor } from './money';
 import { healthWords } from './health-model';
+import { BREEDING_TYPES, breedingDetail, breedingTitle } from './breeding-words';
 
 // Explicit reading adapters; the untouched response remains the technical/export contract.
 type RecordData = Record<string, any>;
@@ -148,7 +149,8 @@ export function lifeSummary(original: RecordData, domain: string): string[] {
   const add = (label: string, value: any) => {
     if (value !== null && value !== undefined && value !== '') lines.push(`${label}: ${value}`);
   };
-  const event = ['birth', 'acquired', 'calving', 'dry_off', 'departure', 'note'].includes(r.type);
+  const breeding = BREEDING_TYPES.has(r.type);
+  const event = breeding || ['birth', 'acquired', 'calving', 'dry_off', 'departure', 'note'].includes(r.type);
   const known =
     event || HEALTH[r.entity] || ['identity', 'milk', 'lactation', 'feed', 'cost'].includes(domain);
   if (!known)
@@ -157,7 +159,7 @@ export function lifeSummary(original: RecordData, domain: string): string[] {
       ...provenanceLines(r),
     ];
   const title = event
-    ? healthWords(r.type)
+    ? (breedingTitle(r.type) ?? healthWords(r.type))
     : (HEALTH[r.entity] ??
       (
         {
@@ -196,7 +198,9 @@ export function lifeSummary(original: RecordData, domain: string): string[] {
           ? 'Not voided at this revision'
           : 'Current revision',
     );
-  if (event) {
+  if (breeding) {
+    add('Detail', breedingDetail(r.type, payload));
+  } else if (event) {
     for (const [key, label] of [
       ['calf_id', 'Calf'],
       ['calf_sex', 'Calf sex'],

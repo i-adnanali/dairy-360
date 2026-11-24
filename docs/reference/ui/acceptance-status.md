@@ -4,16 +4,16 @@ Updated **24 November 2026**, for `main` at `2beaa6f` after branch `breeding` wa
 
 ## Latest recorded results
 
-Run on 24 November 2026 against `main` at `2beaa6f` (branch `breeding` merged by fast-forward), Node 22.22.3 (the Angular CLI refuses the machine default 22.3.0):
+Run on 24 November 2026 on `main` after branch `breeding` was merged by fast-forward (`2beaa6f`) and the lifetime report was taught the breeding events (the commit that records this run), Node 22.22.3 (the Angular CLI refuses the machine default 22.3.0):
 
 | Check | Result |
 |---|---|
-| Frontend tests (`npm test -w web-angular -- --watch=false`) | 724 passed in 69 files |
-| Server tests (`npm test -w server`) | 1040 passed, 0 failed, 0 skipped |
-| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass (docs: 78 files, 0 errors; templates: 106 files) |
+| Frontend tests (`npm test -w web-angular -- --watch=false`) | 725 passed in 69 files |
+| Server tests (`npm test -w server`) | 1041 passed, 0 failed, 0 skipped |
+| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass (docs: 78 files, 0 errors; templates: 107 files) |
 | Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.73 kB against the 500 kB budget; five component stylesheets over the 4 kB budget (Breeding, Analytics, Today, life report, Health); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
 
-Breeding is on with the merge: it has no switch. The real `server/dairy.db` is at schema version 13 and holds no registry events; nothing has been entered on the real herd. The live-model regression suites are refused by the test-runner guard until they get their own database ([OPEN-067](../../OPEN.md#open-067)).
+Breeding is on with the merge: it has no switch. In the breeding harness, Laali's (BD-0005) lifetime report lists her calving, service, pregnancy check and heat under *Calvings and reproduction*, with no "not yet supported" line. The real `server/dairy.db` is at schema version 13 and holds no registry events; nothing has been entered on the real herd. The live-model regression suites are refused by the test-runner guard until they get their own database ([OPEN-067](../../OPEN.md#open-067)).
 
 ## Breeding stage 5
 

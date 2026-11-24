@@ -305,8 +305,8 @@ Built when something needs them, not before.
 
 - **OPEN-056** — Structured weight, movement, breed and discarded-milk capture
   remain stage 3; the report labels unsupported coverage — [REGISTRY_HEALTH.md](records/REGISTRY_HEALTH.md#using-it).
-  Breeding is no longer in this list: it is built, see [Breeding](reference/registry/breeding.md).
-  The lifetime report does not show breeding events yet and still says they are not supported.
+  Breeding is no longer in this list: it is built and the lifetime report lists its events, see
+  [Breeding](reference/registry/breeding.md).
 <a id="open-062"></a>
 
 - **OPEN-062** — **Closed.** Breeding stages 2 to 5 are built and were merged into `main` on

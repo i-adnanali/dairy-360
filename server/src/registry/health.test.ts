@@ -20,6 +20,7 @@ import {
   checkHealth,
 } from "./health";
 import { lifeReport, healthBoard, healthWithdrawals } from "./health-reads";
+import { recordBreedingEvent } from "./breeding";
 import { dumpRecordTables } from "./backup";
 import { healthRouter } from "./health-routes";
 import express from "express";
@@ -393,6 +394,56 @@ test("report exposes gaps, direct/shared costs separately, no invented animal pr
     assert.equal(r.sections.financial.records.length, 0);
     assert.equal(r.sections.shared_visit_costs.records.length, 1);
     assert.equal(r.sections.production.state, "no_records");
+  } finally {
+    db.close();
+  }
+});
+test("report lists breeding events under reproduction and no longer calls them unsupported", () => {
+  const db = setup();
+  try {
+    const prov = { recorded_by: "operator", source_form: "recall" } as const;
+    recordBreedingEvent(db, {
+      animal_id: "BD-0001",
+      type: "heat_observed",
+      occurred_on: "2026-01-19",
+      date_precision: "day",
+      payload: { sign: "standing" },
+      provenance: prov,
+    });
+    recordBreedingEvent(db, {
+      animal_id: "BD-0001",
+      type: "insemination",
+      occurred_on: "2026-01-20",
+      date_precision: "day",
+      payload: { service_type: "ai" },
+      provenance: prov,
+    });
+    recordBreedingEvent(db, {
+      animal_id: "BD-0001",
+      type: "pregnancy_check",
+      occurred_on: "2026-03-10",
+      date_precision: "day",
+      payload: { method: "ultrasound", result: "positive" },
+      provenance: prov,
+    });
+    const r = lifeReport(db, "BD-0001");
+    const repro = r.sections.reproduction;
+    assert.equal(repro.state, "recorded");
+    assert.deepEqual(
+      (repro.records as { type: string }[]).map((e) => e.type),
+      ["heat_observed", "insemination", "pregnancy_check"],
+    );
+    assert.doesNotMatch(repro.note ?? "", /not yet supported/);
+    assert.ok(
+      !r.coverage_warnings.some((w: string) => /breeding/i.test(w)),
+      "coverage warnings must not call breeding capture deferred",
+    );
+    // A window that ends before the service keeps only the heat.
+    const early = lifeReport(db, "BD-0001", { to: "2026-01-19" });
+    assert.deepEqual(
+      (early.sections.reproduction.records as { type: string }[]).map((e) => e.type),
+      ["heat_observed"],
+    );
   } finally {
     db.close();
   }

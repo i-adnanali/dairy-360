@@ -9,6 +9,7 @@ import {
 import { animalDetail } from "./reads";
 import { farmToday } from "./time";
 import { feedList } from "./feed";
+import { BREEDING_EVENT_TYPES } from "./types";
 
 export function healthWithdrawals(
   db: Db,
@@ -242,8 +243,13 @@ export function lifeReport(
           ),
         ),
         reproduction: section(
-          events.filter((e) => ["calving", "dry_off"].includes(e.type)),
-          "Breeding and pregnancy-check capture is not yet supported.",
+          events.filter(
+            (e) =>
+              e.type === "calving" ||
+              e.type === "dry_off" ||
+              (BREEDING_EVENT_TYPES as readonly string[]).includes(e.type),
+          ),
+          "Calvings, dry-offs and breeding events: services, heats, pregnancy checks, watches with nothing seen, and losses. The reproductive state is worked out on the animal page.",
         ),
         parentage: section(
           db
@@ -313,7 +319,7 @@ export function lifeReport(
       coverage_warnings: [
         "No records means no evidence entered, not that an event never happened.",
         "This is recorded history as known at generation, not a reconstruction of an earlier database.",
-        "Structured breed, weight, movement, breeding and discarded-milk capture are deferred.",
+        "Structured breed, weight, movement and discarded-milk capture are deferred.",
         "Bulk sales and shared feed/payroll costs are not attributable animal profit.",
       ],
       corrections: opts.corrections

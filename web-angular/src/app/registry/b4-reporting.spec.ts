@@ -127,6 +127,29 @@ describe('B4 life report', () => {
       'Rs 45,000.00',
     );
   });
+  it('reads breeding events in plain words, the same as the Timeline', () => {
+    const row = (type: string, payload: Record<string, unknown>, date_precision = 'day') =>
+      lifeSummary(
+        { type, effective: true, occurred_on: '2026-03-10', date_precision, animal_id: 'BD-0001', payload },
+        'event',
+      ).join(' | ');
+    const service = row('insemination', { service_type: 'bull_exposure', exposure_days: 45 }, 'month');
+    expect(service).toContain('Service');
+    expect(service).toContain('Bull running with her · 45 days');
+    expect(service).toContain('Mar 2026 (month known)');
+    expect(service).not.toContain('Technical audit');
+    expect(row('pregnancy_check', { method: 'ultrasound', result: 'positive' })).toContain(
+      'Pregnancy check | Date: 10 Mar 2026',
+    );
+    expect(row('pregnancy_check', { method: 'ultrasound', result: 'positive' })).toContain(
+      'Detail: Ultrasound · pregnant',
+    );
+    expect(row('heat_observed', { sign: 'standing' })).toContain('Heat seen');
+    expect(row('null_observation', { watched_for: 'heat' })).toContain('Watched, none seen');
+    expect(row('null_observation', { watched_for: 'heat' })).toContain('Detail: for heat');
+    expect(row('abortion', {})).toContain('Loss seen');
+    expect(row('abortion', {})).not.toContain('Detail');
+  });
   it('prints all 101 rows and disclosures and exports the untouched complete response', async () => {
     const r = life();
     TestBed.configureTestingModule({
