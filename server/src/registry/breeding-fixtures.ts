@@ -18,9 +18,6 @@ import type { BreedingOverriddenCheck, DatePrecision } from './types';
 
 export const BREEDING_AS_OF = '2026-11-13';
 
-/** The animals the --breeding harness opens manual entry for: Heer and Shehzadi. */
-export const BREEDING_PILOT: readonly string[] = ['BD-0007', 'BD-0009'];
-
 interface Step {
   type: 'insemination' | 'pregnancy_check' | 'heat_observed';
   on: string;

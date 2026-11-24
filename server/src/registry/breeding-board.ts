@@ -6,13 +6,13 @@
 
 import { reproductionNotes } from './breeding-notes';
 import type { ReproductionNote } from './breeding-notes';
-import { breedingEntryOpen } from './breeding-pilot';
 import { breedingTasks } from './breeding-tasks';
 import type { BreedingTask } from './breeding-tasks';
 import { canonicalOrder, effectiveEvents, projectLactations, projectStatus } from './project';
 import { attributionChanged, deriveReproduction } from './reproduction';
 import type { Db } from './schema';
-import { allAnimals, eventsForAnimal } from './store';
+import { allAnimals, eventsForAnimal, getAnimal } from './store';
+import { farmToday } from './time';
 import type { RegistryAnimalRow, RegistryEvent, ReproductionView } from './types';
 
 export interface BreedingForAnimal {
@@ -45,6 +45,17 @@ export function reproductionAsOf(animal: RegistryAnimalRow, rows: RegistryEvent[
   return { current, inMilk, view: current ? deriveReproduction({ events: rows, asOf, inMilk }) : null };
 }
 
+/**
+ * Can the page enter a breeding event for this animal today? A current
+ * (not departed) female. A male or a departed female is still refused by
+ * recordBreedingEvent's stage 1 checks if a write is sent anyway.
+ */
+export function breedingEntryOpen(db: Db, animalId: string): boolean {
+  const animal = getAnimal(db, animalId);
+  if (!animal) return false;
+  return reproductionAsOf(animal, eventsForAnimal(db, animalId), farmToday()).current;
+}
+
 /** The view, its notes and its tasks as of `asOf` (reproductionAsOf). */
 export function breedingForAnimal(animal: RegistryAnimalRow, rows: RegistryEvent[], asOf: string): BreedingForAnimal {
   const { view, inMilk } = reproductionAsOf(animal, rows, asOf);
@@ -62,7 +73,7 @@ export interface BreedingCaseRow {
   view: ReproductionView;
   notes: ReproductionNote[];
   tasks: BreedingTask[];
-  /** breedingEntryOpen(db, animal_id, pilot): the page may enter for her. */
+  /** breedingEntryOpen(db, animal_id): the page may enter for her. */
   entry_open: boolean;
 }
 
@@ -76,7 +87,7 @@ export interface BreedingBoard {
   cases: BreedingCaseRow[];
 }
 
-export function breedingBoard(db: Db, on: string, pilot: readonly string[]): BreedingBoard {
+export function breedingBoard(db: Db, on: string): BreedingBoard {
   const cases: BreedingCaseRow[] = [];
   for (const animal of allAnimals(db)) {
     if (animal.sex !== 'female') continue;
@@ -88,7 +99,7 @@ export function breedingBoard(db: Db, on: string, pilot: readonly string[]): Bre
       view: r.view,
       notes: r.notes,
       tasks: r.tasks,
-      entry_open: breedingEntryOpen(db, animal.id, pilot),
+      entry_open: breedingEntryOpen(db, animal.id),
     });
   }
   const tasks = cases.flatMap((c) => c.tasks.map((t) => ({ ...t, animal_name: c.animal_name })));

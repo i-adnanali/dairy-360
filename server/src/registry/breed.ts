@@ -209,7 +209,7 @@ export function main(argv: string[]): void {
 
   // The same read the API gives the page, so the two cannot disagree: null for an
   // animal with no service by --as-of, or one that had left by then.
-  const view = animalDetail(db, animalId, { breeding: true, asOf })?.reproduction ?? null;
+  const view = animalDetail(db, animalId, { asOf })?.reproduction ?? null;
 
   console.log(`registry:breed  ${type} on ${animalId}`);
   console.log(`  event       ${result.event_id}`);

@@ -91,12 +91,10 @@ test('attribution_changed: from the context flag, last in the list', () => {
   assert.deepEqual(codes(events, '2026-11-13'), []);
 });
 
-test('animal detail: notes ride with the view; none for a plain confirmed pregnancy; absent with the flag off', () => {
+test('animal detail: notes ride with the view; none for a plain confirmed pregnancy', () => {
   const db = breedingHerd();
-  const kali = animalDetail(db, 'BD-0004', { breeding: true, asOf: BREEDING_AS_OF });
+  const kali = animalDetail(db, 'BD-0004', { asOf: BREEDING_AS_OF });
   assert.deepEqual(kali?.reproduction_notes, []);
-  const unserved = animalDetail(db, 'BD-0001', { breeding: true, asOf: '2020-01-01' });
+  const unserved = animalDetail(db, 'BD-0001', { asOf: '2020-01-01' });
   assert.deepEqual([unserved?.reproduction, unserved?.reproduction_notes], [null, []]);
-  const off = animalDetail(db, 'BD-0004', { asOf: BREEDING_AS_OF });
-  assert.ok(off && !('reproduction_notes' in off) && !('reproduction' in off));
 });

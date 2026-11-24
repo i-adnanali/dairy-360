@@ -18,7 +18,7 @@ Changing a calving date uses the coupled correction operation so the dam and cal
 
 Birth, acquisition and historical events retain exact/month/year precision and estimation. Display truncates to recorded precision instead of presenting synthetic January/first-day dates as known facts. Calving intervals qualify approximate history separately; do not pool measured and uncertain intervals into an unqualified mean.
 
-The current projection uses an 18-month provisional calf threshold; other life-stage transitions are event-driven. Calving validation includes the domain gestation floor and duplicate-entry protections, and, with `REGISTRY_BREEDING=1`, the two calving-window warnings ([Breeding](breeding.md#calving-warnings)). Supported overrides must preserve their reason/provenance; the gestation floor is not silently bypassed by presentation code.
+The current projection uses an 18-month provisional calf threshold; other life-stage transitions are event-driven. Calving validation includes the domain gestation floor and duplicate-entry protections, and the two calving-window warnings ([Breeding](breeding.md#calving-warnings)). Supported overrides must preserve their reason/provenance; the gestation floor is not silently bypassed by presentation code.
 
 ## Workflows
 

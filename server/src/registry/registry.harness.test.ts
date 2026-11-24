@@ -185,7 +185,7 @@ test('the harness serves :memory: and says so', () => {
 test('--breeding serves the sample herd with one animal in each expected state', async () => {
   const db = breedingHerd();
   const states = herd(db)
-    .map((a) => animalDetail(db, a.id, { breeding: true, asOf: BREEDING_AS_OF })!.reproduction?.state ?? null)
+    .map((a) => animalDetail(db, a.id, { asOf: BREEDING_AS_OF })!.reproduction?.state ?? null)
     .filter(Boolean)
     .sort();
   assert.deepEqual(states, [

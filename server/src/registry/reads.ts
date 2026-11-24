@@ -7,9 +7,8 @@
 // herd, and nothing more. A herd table, one animal's timeline, and the link
 // picker. No lifetime lane, no pedigree, no herd lanes.
 
-import { breedingForAnimal } from './breeding-board';
+import { breedingEntryOpen, breedingForAnimal } from './breeding-board';
 import type { ReproductionNote } from './breeding-notes';
-import { breedingEntryOpen } from './breeding-pilot';
 import type { BreedingTask } from './breeding-tasks';
 import type { Db } from './schema';
 import { GESTATION_DAYS, calvingTooSoonAfterBirth } from './calving';
@@ -108,22 +107,17 @@ export interface AnimalDetail {
   /** Canonical order, oldest first. INCLUDES superseded events. */
   events: TimelineEvent[];
   /**
-   * Only present when the router was built with { breeding: true }; the key is
-   * ABSENT otherwise, so the response is byte-for-byte what it was. A view, or
-   * null for a male, an animal that had departed by the asked date, or an animal
-   * with no service by then. Derived on every read from the same events; nothing
-   * is stored.
+   * A view, or null for a male, an animal that had departed by the asked date,
+   * or an animal with no service by then. Derived on every read from the same
+   * events; nothing is stored.
    */
-  reproduction?: ReproductionView | null;
-  /**
-   * Present exactly when `reproduction` is: can the page enter a service or a
-   * check for this animal? In the pilot list, and female.
-   */
-  breeding_entry?: boolean;
-  /** Present exactly when `reproduction` is; [] when the view is null. */
-  reproduction_notes?: ReproductionNote[];
-  /** Present exactly when `reproduction` is; [] when the view is null. Computed, never stored. */
-  breeding_tasks?: BreedingTask[];
+  reproduction: ReproductionView | null;
+  /** Can the page enter a breeding event for this animal? A current (not departed) female. */
+  breeding_entry: boolean;
+  /** [] when the view is null. */
+  reproduction_notes: ReproductionNote[];
+  /** [] when the view is null. Computed, never stored. */
+  breeding_tasks: BreedingTask[];
 }
 
 /**
@@ -139,7 +133,7 @@ export interface AnimalDetail {
 export function animalDetail(
   db: Db,
   animalId: string,
-  opts: { breeding?: boolean; breedingPilot?: readonly string[]; asOf?: string } = {},
+  opts: { asOf?: string } = {},
 ): AnimalDetail | null {
   const animal = getAnimal(db, animalId);
   if (!animal) return null;
@@ -154,7 +148,8 @@ export function animalDetail(
     (allStatuses(db).find((s) => s.animal_id === animalId) as AnimalStatusRow | undefined) ??
     null;
 
-  const detail: AnimalDetail = {
+  const b = breedingForAnimal(animal, rows, opts.asOf ?? farmToday());
+  return {
     animal,
     status,
     events: rows.map((e) => {
@@ -178,17 +173,11 @@ export function animalDetail(
         override_reason: e.override_reason,
       };
     }),
+    reproduction: b.view,
+    reproduction_notes: b.notes,
+    breeding_tasks: b.tasks,
+    breeding_entry: breedingEntryOpen(db, animalId),
   };
-
-  if (opts.breeding === true) {
-    const asOf = opts.asOf ?? farmToday();
-    const b = breedingForAnimal(animal, rows, asOf);
-    detail.reproduction = b.view;
-    detail.reproduction_notes = b.notes;
-    detail.breeding_tasks = b.tasks;
-    detail.breeding_entry = breedingEntryOpen(db, animalId, opts.breedingPilot ?? []);
-  }
-  return detail;
 }
 
 /** The calvings on one animal, for the correction picker. */

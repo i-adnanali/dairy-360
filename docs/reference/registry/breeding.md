@@ -95,17 +95,17 @@ The `window` is null for `calved`, `lost` and `open`; otherwise `opens_on` is `c
 
 ## The API
 
-`GET /animals/:id` returns `reproduction` only when the server runs with `REGISTRY_BREEDING=1`. With the flag off the key is absent, not null, and the response is byte-for-byte what it was before. With it on the value is a view, or `null` for a male, an animal that had left by `as_of`, or an animal with no service by then. The write routes that echo an animal back follow the same rule, so a response does not change shape between a read and a write.
+Breeding has no switch: since stage 5 it is on for the whole herd. `GET /animals/:id` always returns `reproduction`: a view, or `null` for a male, an animal that had left by `as_of`, or an animal with no service by then. The write routes that echo an animal back follow the same rule, so a response does not change shape between a read and a write.
 
-With the flag on, `?as_of=YYYY-MM-DD` asks for the state on that day (default: today on the farm). Events dated later are invisible, including a later dry-off (whether she is in milk is read on `as_of`) and a later departure. A value that is not a real calendar date is a 400 `invalid_payload` on field `as_of`. With the flag off the parameter is not read.
+`?as_of=YYYY-MM-DD` asks for the state on that day (default: today on the farm). Events dated later are invisible, including a later dry-off (whether she is in milk is read on `as_of`) and a later departure. A value that is not a real calendar date is a 400 `invalid_payload` on field `as_of`.
 
 ## The tasks: `GET /breeding/board` and `breeding_tasks`
 
-Tasks are computed on every read from the same `reproduction` view and the same in-milk flag (`breedingForAnimal` in `breeding-board.ts`, which the detail and the board share); nothing is stored. `GET /breeding/board?on=YYYY-MM-DD` (default today on the farm; a bad date is a 400 `invalid_payload` on `on`; 404 without the flag) answers `{ on, tasks, overdue, due, cases }`. `tasks` holds every animal's tasks, each with `animal_name`, overdue first, then due, each group by `red_on` (none last) then `animal_id`. `cases` has one row per current female with a view: `{ animal_id, animal_name, view, notes, tasks, entry_open }`. `GET /today` carries the same object as `breeding` with the flag on, and no `breeding` key without it. `GET /animals/:id` carries `breeding_tasks` exactly when it carries `reproduction`.
+Tasks are computed on every read from the same `reproduction` view and the same in-milk flag (`breedingForAnimal` in `breeding-board.ts`, which the detail and the board share); nothing is stored. `GET /breeding/board?on=YYYY-MM-DD` (default today on the farm; a bad date is a 400 `invalid_payload` on `on`) answers `{ on, tasks, overdue, due, cases }`. `tasks` holds every animal's tasks, each with `animal_name`, overdue first, then due, each group by `red_on` (none last) then `animal_id`. `cases` has one row per current female with a view: `{ animal_id, animal_name, view, notes, tasks, entry_open }`. `GET /today` always carries the same object as `breeding`. `GET /animals/:id` always carries `breeding_tasks`.
 
 ## The herd figures: `GET /breeding/figures`
 
-`GET /breeding/figures?period=12m|all&on=YYYY-MM-DD` (404 without the flag) answers the eight herd figures, computed on every read by `breedingFigures` in `breeding-figures.ts`; nothing is stored. `period` is `12m` (default) or `all`, anything else a 400 `invalid_payload` on `period`; `on` defaults to today on the farm, and a bad date is a 400 `invalid_payload`. `P` is `on` and the 364 days before it for `12m` (`FIGURES.periodDays`), and every day up to `on` for `all`; `from` is the first day of `P`, null for `all`.
+`GET /breeding/figures?period=12m|all&on=YYYY-MM-DD` answers the eight herd figures, computed on every read by `breedingFigures` in `breeding-figures.ts`; nothing is stored. `period` is `12m` (default) or `all`, anything else a 400 `invalid_payload` on `period`; `on` defaults to today on the farm, and a bad date is a 400 `invalid_payload`. `P` is `on` and the 364 days before it for `12m` (`FIGURES.periodDays`), and every day up to `on` for `all`; `from` is the first day of `P`, null for `all`.
 
 The current females are every female that had not left by `on`, served or not; the cases are `breedingCases` over those with a view on `on`, so the figures cannot disagree with the badge. A case `replaced` by a new service with no loss recorded is in none of the figures and has its own rough line. A `Count` is `{ n, of, rate }`; `rate` is a whole percent, present only when `of >= FIGURES.minCases` (10), else null. A `Spread` is `{ value, n, min, max, approximate }`, where `approximate` counts the spans built on a month-precision date.
 
@@ -125,22 +125,21 @@ The current females are every female that had not left by `on`, served or not; t
 
 ## `POST /breeding/events`
 
-Registered only with `REGISTRY_BREEDING=1`; without it the route does not exist (404). It writes one service, heat, pregnancy check, "nothing seen" or loss through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry`.
+It writes one service, heat, pregnancy check, "nothing seen" or loss through `recordBreedingEvent`, goes through the same `Idempotency-Key` handling as every write route, and answers `201 { event_id, animal }`, where `animal` is the animal's detail with `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry`.
 
 Body: `animal_id`, `type` (`insemination`, `pregnancy_check`, `heat_observed` with payload `{ sign }`, `null_observation` with payload `{ watched_for }`, or `abortion` with payload `{}`; `occurred_time` is optional), `occurred_on`, `occurred_time`, `date_precision` (required, never defaulted), `payload` (an object, passed as is), `supersedes_id` (a correction), the five flags `allow_ambiguous_service`, `allow_early_check`, `allow_check_without_service`, `allow_no_heat_sign` and `allow_heat_after_positive` (each counts only when it is exactly `true`), `override_reason`, and the provenance fields (`source_form`, `source_ref`, `observed_by`, `recorded_by`).
 
-### The pilot gate
+### Who can be entered for
 
-`REGISTRY_BREEDING_PILOT` is a comma-separated list of animal ids, read once in `server/src/index.ts`. The route accepts an animal only when it is in the list and is female. `GET /animals/:id` carries `breeding_entry`, true or false, exactly when it carries `reproduction`, so the page knows whether to offer the form. At startup, with the breeding flag on, the server logs one warning naming the ids in the list that are not female animals in the registry. The gate is a rollout control, not a rule about the farm's data: the CLI is not gated.
+Every female. A male is refused `not_female` and an event dated after she left is refused `animal_departed`, by `recordBreedingEvent` as in stage 1; there is no list of animals and no environment variable. `GET /animals/:id` always carries `breeding_entry`, true exactly for a current (not departed) female, so the page knows whether to offer the form; each board case carries the same value as `entry_open`.
 
-Two refusals come before the domain function, both `breeding_entry_closed`, a 400:
+One refusal comes before the domain function, `breeding_entry_closed`, a 400:
 
 | Field | Message |
 |---|---|
 | `type` | `<type> is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is` |
-| `animal_id` | `breeding entry is not open for <animal_id>; it is open for the animals in the pilot` |
 
-An `abortion` raises no warning, with or without a pregnancy on file. On the page it is dated to the day or the month, with no time. The animal page's Breeding tab offers "Record a loss" when the pilot is open for her and her state is `lost` with basis `inferred`; it opens the form on a loss with nothing prefilled.
+An `abortion` raises no warning, with or without a pregnancy on file. On the page it is dated to the day or the month, with no time. The animal page's Breeding tab offers "Record a loss" when entry is open for her and her state is `lost` with basis `inferred`; it opens the form on a loss with nothing prefilled.
 
 ## Warnings
 
@@ -158,14 +157,14 @@ One save can step past more than one warning, so the event's `override_checks` c
 
 ### Calving warnings
 
-With `REGISTRY_BREEDING=1`, a calving (`POST /calvings`) and a calving correction (`POST /calvings/:eventId/correction`) are also measured against the breeding case the calving closes. The dam's view is derived with the calving in it, as of the calving date; when that view is `calved`, two warnings can fire:
+A calving (`POST /calvings`) and a calving correction (`POST /calvings/:eventId/correction`) are also measured against the breeding case the calving closes. The dam's view is derived with the calving in it, as of the calving date; when that view is `calved`, two warnings can fire:
 
 | Warning | Flag | When |
 |---|---|---|
 | `calving_before_window` | `allow_calving_before_window` | the calving is fewer than `GESTATION.windowOpens` (285) days after the earliest possible conception |
 | `calving_past_extreme` | `allow_calving_past_extreme` | the calving is more than `BREEDING_TASK_DAYS.overdueRedAfter` (346) days after the latest possible conception |
 
-Each fires only when the whole calving date lies outside the bound: a month- or year-precision calving is compared by its month or year, and an `estimated` one never fires. A dam with no service on or before the calving has no view, so neither fires. They come back with `near_duplicate_calving` when that fires too, in the order `near_duplicate_calving`, `calving_before_window`, `calving_past_extreme`, as the breeding warnings do: one is a 400 of its own code with `field` `occurred_on` and `warnings`; two or more are `breeding_warnings` with the messages joined. The calving is written only when every fired warning's flag is `true`, and its `override_checks` lists every fired warning. The hard calving refusals still come first. With the flag off, neither warning runs and every calving response is as in stage 3: a near-duplicate is `near_duplicate_calving` with no `field` and no `warnings`. The CLI (`registry:calve`, `registry:correct-calving`) has no breeding flag, so it never runs them.
+Each fires only when the whole calving date lies outside the bound: a month- or year-precision calving is compared by its month or year, and an `estimated` one never fires. A dam with no service on or before the calving has no view, so neither fires. They come back with `near_duplicate_calving` when that fires too, in the order `near_duplicate_calving`, `calving_before_window`, `calving_past_extreme`, as the breeding warnings do: one is a 400 of its own code with `field` `occurred_on` and `warnings`; two or more are `breeding_warnings` with the messages joined. The calving is written only when every fired warning's flag is `true`, and its `override_checks` lists every fired warning. The hard calving refusals still come first. A correction saved over a near-duplicate records `near_duplicate_calving` in its `override_checks`, as a new calving does. The CLI (`registry:calve`, `registry:correct-calving`) calls the same functions, so it runs the two window warnings too; it has a flag to save over the near-duplicate (`--allow-near-duplicate`) but none for the two window warnings.
 
 ## Correcting a breeding event
 
@@ -177,7 +176,7 @@ A wrongly entered service, check or heat is corrected by writing a superseding e
 
 ## Migration 10 is one-way
 
-Migration 10 widens the event table so it can hold the five breeding types. It is one-way: it runs the first time a build that has it opens the database (a server start or any `registry:*` command), whatever `REGISTRY_BREEDING` says, and a build from before it refuses to open the migrated database. Rolling back means restoring a backup taken before it ran, such as the pre-migration snapshot written to `server/backups/`; see [Back up, verify and restore registry data](../../guides/backup-restore.md).
+Migration 10 widens the event table so it can hold the five breeding types. It is one-way: it runs the first time a build that has it opens the database (a server start or any `registry:*` command), and a build from before it refuses to open the migrated database. Rolling back means restoring a backup taken before it ran, such as the pre-migration snapshot written to `server/backups/`; see [Back up, verify and restore registry data](../../guides/backup-restore.md).
 
 ## Not built yet
 

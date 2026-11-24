@@ -107,7 +107,6 @@ import {
 import { recordBreedingEvent } from './breeding';
 import { breedingBoard } from './breeding-board';
 import { breedingFigures } from './breeding-figures';
-import { breedingEntryOpen } from './breeding-pilot';
 import { correctCalving, recordCalving } from './calving';
 import {
   deleteMilkings,
@@ -351,18 +350,6 @@ function write(store: IdempotencyStore, fn: (req: Request, res: Response) => voi
   };
 }
 
-/**
- * Switches for features that are dark until the farm turns them on. Each is
- * set once, by index.ts from the environment, so a route never reads
- * process.env itself.
- */
-export interface RegistryOptions {
-  /** REGISTRY_BREEDING=1: GET /animals/:id also returns `reproduction`. */
-  breeding?: boolean;
-  /** REGISTRY_BREEDING_PILOT: the animals POST /breeding/events accepts. */
-  breedingPilot?: readonly string[];
-}
-
 /** The `as_of` query value for a breeding read: a real calendar date, or a 400. */
 function breedingAsOf(raw: unknown): string | undefined {
   if (raw === undefined) return undefined;
@@ -373,7 +360,7 @@ function breedingAsOf(raw: unknown): string | undefined {
   return raw;
 }
 
-export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Router {
+export function registryRouter(db: Db): express.Router {
   const router = express.Router();
   router.use(healthRouter(db));
   router.get('/lists/:kind', handle((req, res) => res.json(registryList(db, req.params.kind, req.query))));
@@ -437,8 +424,8 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
   router.get(
     '/animals/:id',
     handle((req, res) => {
-      const asOf = opts.breeding ? breedingAsOf(req.query.as_of) : undefined;
-      const detail = animalDetail(db, req.params.id, { breeding: opts.breeding, breedingPilot: opts.breedingPilot, asOf });
+      const asOf = breedingAsOf(req.query.as_of);
+      const detail = animalDetail(db, req.params.id, { asOf });
       if (!detail) {
         res
           .status(404)
@@ -586,7 +573,7 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
     '/today',
     handle((req, res) => {
       const on = typeof req.query.on === 'string' ? req.query.on : farmToday();
-      res.json(dayBoard(db, on, { breeding: opts.breeding, breedingPilot: opts.breedingPilot }));
+      res.json(dayBoard(db, on));
     }),
   );
 
@@ -637,7 +624,7 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         provenance: provenance(b),
         asOf: asOfFrom(b),
       });
-      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id, opts) });
+      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id) });
     }),
   );
 
@@ -662,7 +649,7 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         provenance: provenance(b),
         asOf: asOfFrom(b),
       });
-      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id, opts) });
+      res.status(201).json({ ...result, animal: animalDetail(db, result.animal_id) });
     }),
   );
 
@@ -687,73 +674,65 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         allow_after_departure: b.allow_after_departure === true,
         override_reason: str(b, 'override_reason'),
       });
-      res.status(201).json({ ...result, animal: animalDetail(db, animalId, opts) });
+      res.status(201).json({ ...result, animal: animalDetail(db, animalId) });
     }),
   );
 
-  // Breeding stage 2: manual entry for a service or a pregnancy check, on the
-  // pilot animals only. Absent (404) unless REGISTRY_BREEDING=1.
-  if (opts.breeding) {
-    /** The breeding tasks and cases as of `on` (default farm today). */
-    router.get(
-      '/breeding/board',
-      handle((req, res) => {
-        const on = breedingAsOf(req.query.on) ?? farmToday();
-        res.json(breedingBoard(db, on, opts.breedingPilot ?? []));
-      }),
-    );
-    /** The eight herd figures as of `on` (default farm today), over `period` 12m (default) or all. */
-    router.get(
-      '/breeding/figures',
-      handle((req, res) => {
-        const on = breedingAsOf(req.query.on) ?? farmToday();
-        const period = req.query.period ?? '12m';
-        if (period !== '12m' && period !== 'all') {
-          throw new RegistryError('invalid_payload', 'period must be 12m or all', 'period');
-        }
-        res.json(breedingFigures(db, on, period));
-      }),
-    );
-    router.post(
-      '/breeding/events',
-      write(replays, (req, res) => {
-        const b = body(req);
-        const animalId = requireStr(b, 'animal_id');
-        const type = requireStr(b, 'type');
-        if (type !== 'insemination' && type !== 'pregnancy_check' && type !== 'heat_observed' && type !== 'null_observation' && type !== 'abortion') {
-          throw new RegistryError(
-            'breeding_entry_closed',
-            `${type} is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is`,
-            'type',
-          );
-        }
-        if (!breedingEntryOpen(db, animalId, opts.breedingPilot ?? [])) {
-          throw new RegistryError(
-            'breeding_entry_closed',
-            `breeding entry is not open for ${animalId}; it is open for the animals in the pilot`,
-            'animal_id',
-          );
-        }
-        const result = recordBreedingEvent(db, {
-          animal_id: animalId,
-          type,
-          occurred_on: requireStr(b, 'occurred_on'),
-          occurred_time: str(b, 'occurred_time'),
-          date_precision: requirePrecision(b) as never,
-          payload: b.payload,
-          supersedes_id: str(b, 'supersedes_id'),
-          allow_ambiguous_service: b.allow_ambiguous_service === true,
-          allow_early_check: b.allow_early_check === true,
-          allow_check_without_service: b.allow_check_without_service === true,
-          allow_no_heat_sign: b.allow_no_heat_sign === true,
-          allow_heat_after_positive: b.allow_heat_after_positive === true,
-          override_reason: str(b, 'override_reason'),
-          provenance: provenance(b),
-        });
-        res.status(201).json({ ...result, animal: animalDetail(db, animalId, opts) });
-      }),
-    );
-  }
+  // Breeding: the board, the herd figures and manual entry, for every current female.
+  /** The breeding tasks and cases as of `on` (default farm today). */
+  router.get(
+    '/breeding/board',
+    handle((req, res) => {
+      const on = breedingAsOf(req.query.on) ?? farmToday();
+      res.json(breedingBoard(db, on));
+    }),
+  );
+  /** The eight herd figures as of `on` (default farm today), over `period` 12m (default) or all. */
+  router.get(
+    '/breeding/figures',
+    handle((req, res) => {
+      const on = breedingAsOf(req.query.on) ?? farmToday();
+      const period = req.query.period ?? '12m';
+      if (period !== '12m' && period !== 'all') {
+        throw new RegistryError('invalid_payload', 'period must be 12m or all', 'period');
+      }
+      res.json(breedingFigures(db, on, period));
+    }),
+  );
+  router.post(
+    '/breeding/events',
+    write(replays, (req, res) => {
+      const b = body(req);
+      const animalId = requireStr(b, 'animal_id');
+      const type = requireStr(b, 'type');
+      if (type !== 'insemination' && type !== 'pregnancy_check' && type !== 'heat_observed' && type !== 'null_observation' && type !== 'abortion') {
+        throw new RegistryError(
+          'breeding_entry_closed',
+          `${type} is not entered on the page yet; a service, a heat, a pregnancy check, "nothing seen" or a loss is`,
+          'type',
+        );
+      }
+      // A male, or a date after she left, is refused by recordBreedingEvent's
+      // stage 1 checks; every other female is open.
+      const result = recordBreedingEvent(db, {
+        animal_id: animalId,
+        type,
+        occurred_on: requireStr(b, 'occurred_on'),
+        occurred_time: str(b, 'occurred_time'),
+        date_precision: requirePrecision(b) as never,
+        payload: b.payload,
+        supersedes_id: str(b, 'supersedes_id'),
+        allow_ambiguous_service: b.allow_ambiguous_service === true,
+        allow_early_check: b.allow_early_check === true,
+        allow_check_without_service: b.allow_check_without_service === true,
+        allow_no_heat_sign: b.allow_no_heat_sign === true,
+        allow_heat_after_positive: b.allow_heat_after_positive === true,
+        override_reason: str(b, 'override_reason'),
+        provenance: provenance(b),
+      });
+      res.status(201).json({ ...result, animal: animalDetail(db, animalId) });
+    }),
+  );
 
   router.post(
     '/calvings',
@@ -782,13 +761,12 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         allow_near_duplicate: b.allow_near_duplicate === true,
         allow_calving_before_window: b.allow_calving_before_window === true,
         allow_calving_past_extreme: b.allow_calving_past_extreme === true,
-        breeding: opts.breeding === true,
         override_reason: str(b, 'override_reason'),
       });
       res.status(201).json({
         ...result,
-        dam: animalDetail(db, damId, opts),
-        calf: animalDetail(db, result.calf_id, opts),
+        dam: animalDetail(db, damId),
+        calf: animalDetail(db, result.calf_id),
       });
     }),
   );
@@ -809,13 +787,12 @@ export function registryRouter(db: Db, opts: RegistryOptions = {}): express.Rout
         allow_near_duplicate: b.allow_near_duplicate === true,
         allow_calving_before_window: b.allow_calving_before_window === true,
         allow_calving_past_extreme: b.allow_calving_past_extreme === true,
-        breeding: opts.breeding === true,
         override_reason: str(b, 'override_reason'),
       });
       res.status(201).json({
         ...result,
-        dam: animalDetail(db, result.dam_id, opts),
-        calf: animalDetail(db, result.calf_id, opts),
+        dam: animalDetail(db, result.dam_id),
+        calf: animalDetail(db, result.calf_id),
       });
     }),
   );

@@ -15,7 +15,6 @@ import { runAgentStream } from './agent/stream';
 import { farmRouter } from './farm/routes';
 import { farmMonitorRouter } from './farm/monitorRoutes';
 import { registryRouter } from './registry/routes';
-import { parseBreedingPilot, pilotIdsNotFound } from './registry/breeding-pilot';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 6400;
@@ -40,15 +39,7 @@ app.use('/api/farm', farmMonitorRouter(farmEventsBetween));
 // registryRouter is a FACTORY taking a handle, unlike farmRouter -- that is
 // what lets the development harness serve the same routes over an :memory:
 // fixture herd without a synthetic row ever reaching dairy.db.
-const breedingOn = process.env.REGISTRY_BREEDING === '1';
-const breedingPilot = parseBreedingPilot(process.env.REGISTRY_BREEDING_PILOT);
-if (breedingOn) {
-  const missing = pilotIdsNotFound(db, breedingPilot);
-  if (missing.length > 0) {
-    console.warn(`REGISTRY_BREEDING_PILOT names animals that are not female animals in the registry: ${missing.join(', ')}`);
-  }
-}
-app.use('/api/registry', registryRouter(db, { breeding: breedingOn, breedingPilot }));
+app.use('/api/registry', registryRouter(db));
 
 app.get('/api/health', (_req, res) => {
   if (!isSeeded()) {

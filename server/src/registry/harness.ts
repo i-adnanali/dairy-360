@@ -1,5 +1,5 @@
 import { analyticsHerd } from './analytics-fixtures';
-import { BREEDING_AS_OF, BREEDING_PILOT, breedingHerd } from './breeding-fixtures';
+import { BREEDING_AS_OF, breedingHerd } from './breeding-fixtures';
 import { addHealthFixtures } from './health-fixtures';
 import { addFeedFixtures } from './feed-fixtures';
 // Animal registry -- development harness. Serves the registry API over an
@@ -33,7 +33,6 @@ import express from 'express';
 import cors from 'cors';
 
 import { registryRouter } from './routes';
-import type { RegistryOptions } from './routes';
 import { farmMonitorRouter } from '../farm/monitorRoutes';
 import { syntheticFarmEvents } from '../farm/monitorFixtures';
 import { freshDb, staffedHerd } from './fixtures';
@@ -92,7 +91,7 @@ Serves /api/registry over an IN-MEMORY fixture herd. Never opens dairy.db.
 
   --port=<n>   default 6410 (the real server uses 6400)
   --analytics  30 milked animals, three full months plus current month, analytics edge cases
-  --breeding   eleven females in every breeding state, with the breeding view switched on
+  --breeding   eleven females in every breeding state (breeding is on for every herd)
   --empty      start with an empty registry instead of the fixture herd
 
   --empty is not a throwaway option: the empty and one-row states are what the
@@ -103,13 +102,19 @@ Everything is discarded on exit. There is no persistence, and there must not be
 one -- a harness that saved its state would be a second registry.
 `.trim();
 
+/** Harness-only options; none of them switches a feature. */
+export interface HarnessOptions {
+  /** The breeding sample herd's pinned date, shown on the banner (--breeding). */
+  breedingAsOf?: string;
+}
+
 /** Build the harness app over a caller-supplied handle. Exported for tests. */
-export function harnessApp(db: Db, opts: RegistryOptions = {}): express.Express {
+export function harnessApp(db: Db, opts: HarnessOptions = {}): express.Express {
   const app = express();
   app.use(cors());
   app.use('/api/registry/health/attachments', express.json({ limit: '14mb' }));
   app.use(express.json({ limit: '2mb' }));
-  app.use('/api/registry', registryRouter(db, opts));
+  app.use('/api/registry', registryRouter(db));
   // Synthetic farm events for the Farm Monitor screen (no cameras, no dairy.db).
   app.use(
     '/api/farm',
@@ -129,7 +134,7 @@ export function harnessApp(db: Db, opts: RegistryOptions = {}): express.Express 
       storage: ':memory:',
       warning: 'fixture data, discarded on exit -- this is NOT dairy.db',
       animals: herd(db).length,
-      ...(opts.breeding ? { breeding_as_of: BREEDING_AS_OF } : {}),
+      ...(opts.breedingAsOf ? { breeding_as_of: opts.breedingAsOf } : {}),
       destinations: (
         db.prepare(`SELECT COUNT(*) n FROM registry_destinations`).get() as { n: number }
       ).n,
@@ -146,17 +151,17 @@ function main(): void {
     return;
   }
 
-  // --breeding serves its own herd with the breeding view on, and none of the
-  // fixtures below. States are counted from the real date; ?as_of= on the API
-  // URL pins them (the page does not forward it).
+  // --breeding serves its own herd, and none of the fixtures below. It chooses
+  // the herd only: every herd serves the breeding routes. States are counted
+  // from the real date; ?as_of= on the API URL pins them (the page does not
+  // forward it).
   if (args.breeding) {
     const bdb = breedingHerd();
-    const bapp = harnessApp(bdb, { breeding: true, breedingPilot: BREEDING_PILOT });
+    const bapp = harnessApp(bdb, { breedingAsOf: BREEDING_AS_OF });
     bapp.listen(args.port, () => {
       console.log(`registry harness  http://localhost:${args.port}/api/registry  [--breeding]`);
       console.log(`  storage     :memory:  (dairy.db is NOT open in this process)`);
       console.log(`  herd        ${herd(bdb).length} animal(s), states as of today`);
-      console.log(`  pilot       ${BREEDING_PILOT.join(', ')}  (POST /breeding/events is open for these only)`);
       console.log(
         `  pin         GET /api/registry/animals/BD-0001?as_of=${BREEDING_AS_OF}  (API URL; the page does not forward as_of)`,
       );

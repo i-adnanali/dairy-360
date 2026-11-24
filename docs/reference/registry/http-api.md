@@ -13,7 +13,7 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | GET | `/analytics/reconciliation` | reconciliation-oriented analytics response with paginated sessions |
 | GET | `/lists/:kind` | paginated animals, calvings, destinations or people; catalogs retain their original endpoints |
 | GET | `/animals` | herd table: identity + derived status + effective event count |
-| GET | `/animals/:id` | one animal, its status, and its **full** event list; with `REGISTRY_BREEDING=1` it also returns `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry` (optional `?as_of=`), see [Breeding](breeding.md) |
+| GET | `/animals/:id` | one animal, its status, and its **full** event list, with `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry` (optional `?as_of=`), see [Breeding](breeding.md) |
 | GET | `/animals/:id/calvings` | the correction picker's source |
 | GET | `/animals/:id/milkings` | one animal's yield, each row's lactation **derived** rather than stored |
 | GET | `/link-candidates?dam=&calf_sex=&occurred_on=&date_precision=` | link-mode picker |
@@ -26,9 +26,9 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | GET | `/balances` | balances for the billable destinations; home is absent, not zero |
 | GET | `/dispatch/sheet?on=&session=` | the daily sheet, split into standing and occasional |
 | GET | `/reconcile?from=&to=` | produced against dispatched; `gap_pct` is null when production is incomplete |
-| GET | `/today?on=` | the day board: which sessions and which payroll month still need recording; with `REGISTRY_BREEDING=1` also `breeding`, the breeding board |
-| GET | `/breeding/board?on=` | only with `REGISTRY_BREEDING=1`: the breeding tasks (overdue first) and one case per breeding female; see [Breeding](breeding.md) |
-| GET | `/breeding/figures?period=&on=` | only with `REGISTRY_BREEDING=1`: the eight herd figures over the last 12 months (`period=12m`, default) or everything on record (`period=all`); see [Breeding](breeding.md#the-herd-figures-get-breedingfigures) |
+| GET | `/today?on=` | the day board: which sessions and which payroll month still need recording, and `breeding`, the breeding board |
+| GET | `/breeding/board?on=` | the breeding tasks (overdue first) and one case per breeding female; see [Breeding](breeding.md) |
+| GET | `/breeding/figures?period=&on=` | the eight herd figures over the last 12 months (`period=12m`, default) or everything on record (`period=all`); see [Breeding](breeding.md#the-herd-figures-get-breedingfigures) |
 | GET | `/people?as_of=` | everybody on file, with what is owed; people with no open stint are flagged, not hidden |
 | GET | `/people/:id?as_of=` | one person's statement: stints, package, wage periods, payments, balance |
 | GET | `/engagements/:id/terms` | the package history for one stint, benefits included |
@@ -38,9 +38,9 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | POST | `/animals` | `addAcquiredAnimal` |
 | POST | `/animals/born-here` | `addFarmBornAnimal` — born on the farm, mother not known |
 | POST | `/events` | `appendLifeEvent` |
-| POST | `/breeding/events` | `recordBreedingEvent`, only with `REGISTRY_BREEDING=1` and only for the animals in `REGISTRY_BREEDING_PILOT`; see [Breeding](breeding.md) |
-| POST | `/calvings` | `recordCalving` — `calf_id` present means link mode; with `REGISTRY_BREEDING=1`, the calving warnings in [Breeding](breeding.md#calving-warnings) |
-| POST | `/calvings/:eventId/correction` | `correctCalving`; with `REGISTRY_BREEDING=1`, the same calving warnings |
+| POST | `/breeding/events` | `recordBreedingEvent`, for any female; see [Breeding](breeding.md) |
+| POST | `/calvings` | `recordCalving` — `calf_id` present means link mode; the calving warnings in [Breeding](breeding.md#calving-warnings) |
+| POST | `/calvings/:eventId/correction` | `correctCalving`; the same calving warnings |
 | POST | `/milking/session` | one whole session, all rows or none |
 | POST | `/milking/session/delete` | remove a session, or one animal's row in it |
 | POST | `/destinations` | `addDestination` |

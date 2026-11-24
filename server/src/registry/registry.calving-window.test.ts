@@ -45,7 +45,6 @@ const calving = (on: string, over: Partial<RecordCalvingInput> = {}): RecordCalv
   calf: { sex: 'female', outcome: 'live' },
   provenance: RECALL,
   asOf: AS_OF,
-  breeding: true,
   ...over,
 });
 
@@ -131,16 +130,6 @@ test('a flag with nothing fired records nothing', () => {
   assert.deepEqual(lastCalving(db).override_checks, []);
 });
 
-test('breeding off: the same 280-day calving writes plainly', () => {
-  const db = served();
-  recordCalving(db, calving(addDays(SERVICE, 280), { breeding: false }));
-  assert.deepEqual(lastCalving(db).override_checks, []);
-  const absent = served();
-  const { breeding: _ignored, ...input } = calving(addDays(SERVICE, 280));
-  recordCalving(absent, input);
-  assert.deepEqual(lastCalving(absent).override_checks, []);
-});
-
 test('the flag for one check does not save over another', () => {
   const db = served();
   const e = refusal(() => recordCalving(db, calving(addDays(SERVICE, 280), { allow_calving_past_extreme: true })));
@@ -154,7 +143,8 @@ test('two fired: breeding_warnings with both, and one override list when both ar
     `dam 'BD-0001' already has a calving on ${near}, within 60 days of ${on}. This is far more ` +
     `likely a double entry than a real second calving. Pass allow_near_duplicate: true if it is genuinely a separate event.`;
   const db = served();
-  calve(db, { dam_id: 'BD-0001', on: near, precision: 'day' });
+  // The first calving is itself 250 days after the service, so it is saved over its own window warning.
+  recordCalving(db, calving(near, { allow_calving_before_window: true }));
   const e = refusal(() => recordCalving(db, calving(on, { allow_near_duplicate: true })));
   assert.equal(e.code, 'breeding_warnings');
   assert.equal(e.field, 'occurred_on');
@@ -168,46 +158,13 @@ test('two fired: breeding_warnings with both, and one override list when both ar
   assert.deepEqual(lastCalving(db).override_checks, ['near_duplicate_calving', 'calving_before_window']);
 });
 
-test('breeding on, only the near-duplicate fires: its code, field occurred_on, and warnings', () => {
+test('only the near-duplicate fires: its code, field occurred_on, and warnings', () => {
   const db = dam();
   calve(db, { dam_id: 'BD-0001', on: '2025-06-01', precision: 'day' });
   const e = refusal(() => recordCalving(db, calving('2025-06-20')));
   assert.equal(e.code, 'near_duplicate_calving');
   assert.equal(e.field, 'occurred_on');
   assert.deepEqual(e.warnings, [{ check: 'near_duplicate_calving', message: e.message }]);
-});
-
-test('breeding off, the near-duplicate refusal is as in stage 3: no field, no warnings', () => {
-  const db = dam();
-  calve(db, { dam_id: 'BD-0001', on: '2025-06-01', precision: 'day' });
-  const e = refusal(() => recordCalving(db, calving('2025-06-20', { breeding: false })));
-  assert.deepEqual(e.toWire(), {
-    error: 'near_duplicate_calving',
-    message:
-      `dam 'BD-0001' already has a calving on 2025-06-01, within 60 days of 2025-06-20. This is far more ` +
-      `likely a double entry than a real second calving. Pass allow_near_duplicate: true if it is genuinely a separate event.`,
-  });
-});
-
-test('breeding off, a correction near-duplicate refusal is as in stage 3: no field, no warnings', () => {
-  const db = dam();
-  calve(db, { dam_id: 'BD-0001', on: '2025-06-01', precision: 'day' });
-  const r = recordCalving(db, calving('2026-06-01', { breeding: false }));
-  const e = refusal(() =>
-    correctCalving(db, {
-      calving_event_id: r.calving_event_id,
-      occurred_on: '2025-06-20',
-      date_precision: 'day',
-      provenance: RECALL,
-      asOf: AS_OF,
-    }),
-  );
-  assert.deepEqual(e.toWire(), {
-    error: 'near_duplicate_calving',
-    message:
-      `the corrected date 2025-06-20 lands within 60 days of dam 'BD-0001' other calving on 2025-06-01. ` +
-      `Pass allow_near_duplicate: true if both are genuinely separate events.`,
-  });
 });
 
 test('284 days: before the window', () => {
@@ -255,7 +212,7 @@ test('a near-duplicate and past the extreme fire together, in that order', () =>
   assert.deepEqual(e.warnings!.map((w) => w.check), ['near_duplicate_calving', 'calving_past_extreme']);
 });
 
-test('breeding on: a link-mode hard refusal wins over a near-duplicate', () => {
+test('a link-mode hard refusal wins over a near-duplicate', () => {
   const db = dam();
   calve(db, { dam_id: 'BD-0001', on: '2025-06-01', precision: 'day' });
   const e = refusal(() => recordCalving(db, calving('2025-06-20', { calf: { existing_id: 'BD-0001', sex: 'female', outcome: 'live' } })));
@@ -272,7 +229,6 @@ test('correctCalving to a date 280 days after the service warns', () => {
       date_precision: 'day',
       provenance: RECALL,
       asOf: AS_OF,
-      breeding: true,
       ...over,
     });
   const e = refusal(() => correct());
@@ -293,7 +249,6 @@ test('correctCalving to a date 347 days after the service is past the extreme', 
       date_precision: 'day',
       provenance: RECALL,
       asOf: AS_OF,
-      breeding: true,
     }),
   );
   assert.equal(e.code, 'calving_past_extreme');
@@ -311,20 +266,25 @@ test('the calving and its birth share one recorded_at', () => {
     date_precision: 'day',
     provenance: RECALL,
     asOf: AS_OF,
-    breeding: true,
   });
   assert.equal(at(c.birth_event_id, c.calf_id), at(c.calving_event_id, 'BD-0001'));
 });
 
-test('correctCalving with breeding off writes the same date plainly', () => {
-  const db = served();
-  const r = recordCalving(db, calving(addDays(SERVICE, 300)));
+test('a correction saved over a near-duplicate records the override from the condition', () => {
+  const db = dam();
+  calve(db, { dam_id: 'BD-0001', on: '2025-06-01', precision: 'day' });
+  const r = recordCalving(db, calving('2026-06-01'));
+  const e = refusal(() =>
+    correctCalving(db, { calving_event_id: r.calving_event_id, occurred_on: '2025-06-20', date_precision: 'day', provenance: RECALL, asOf: AS_OF }),
+  );
+  assert.equal(e.code, 'near_duplicate_calving');
   correctCalving(db, {
     calving_event_id: r.calving_event_id,
-    occurred_on: addDays(SERVICE, 280),
+    occurred_on: '2025-06-20',
     date_precision: 'day',
     provenance: RECALL,
     asOf: AS_OF,
+    allow_near_duplicate: true,
   });
-  assert.deepEqual(lastCalving(db).override_checks, []);
+  assert.deepEqual(lastCalving(db).override_checks, ['near_duplicate_calving']);
 });
