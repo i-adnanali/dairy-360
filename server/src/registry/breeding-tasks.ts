@@ -3,8 +3,19 @@
 // PURE and never stored: a task opens from a rule over the view and closes
 // only when the matching event is recorded (the event changes the view). No
 // task table, no projection, no second copy of a state rule.
+//
+// Which day a task counts from (owner decision after the final review, I2,
+// 24 Nov). heat_watch and pregnancy_check count from the latest service in the
+// case, the anchor (view.service): day_max is the days from its date, day_min
+// the days from the latest conception it alone allows (the last day of its
+// month for month precision, plus exposure_days for a bull exposure), and
+// red_on is its date plus red_from. A re-served cow is watched from the
+// service she most likely conceived from. dry_off, calving_watch,
+// overdue_review and recheck count from conception_earliest (the view's
+// day_min, day_max), as the state does.
 
-import { BREEDING_TASK_DAYS, CHECK_RELIABLE_FROM, GESTATION, addDays } from './reproduction';
+import { daysBetween } from './project';
+import { BREEDING_TASK_DAYS, CHECK_RELIABLE_FROM, GESTATION, addDays, serviceLatest } from './reproduction';
 import type { ReproductionView, ReproductiveState } from './types';
 
 export type BreedingTaskKind = 'heat_watch' | 'pregnancy_check' | 'recheck' | 'dry_off' | 'calving_watch' | 'overdue_review';
@@ -18,7 +29,10 @@ export interface BreedingTask {
   day_max: number;
   /** The first day it is red; null for recheck. */
   red_from: number | null;
-  /** Calendar date of red_from, counted from conception_earliest. */
+  /**
+   * Calendar date of red_from: counted from the anchor's date for heat_watch
+   * and pregnancy_check, from conception_earliest for the others.
+   */
   red_on: string | null;
 }
 
@@ -46,24 +60,33 @@ export function breedingTasks(view: ReproductionView | null, ctx: { animal_id: s
   const noCheck = view.latest_check === null;
   const tasks: BreedingTask[] = [];
 
+  type Clock = { from: string; day_min: number; day_max: number };
+  const fromConception: Clock = { from: view.conception_earliest, day_min: view.day_min, day_max: view.day_max };
+  const fromAnchor: Clock = {
+    from: view.service.occurred_on,
+    day_min: Math.max(0, daysBetween(serviceLatest(view.service), view.as_of)),
+    day_max: daysBetween(view.service.occurred_on, view.as_of),
+  };
+
   /** `redFrom` is the first red day: the limit for a `>=` row, limit + 1 for a `>` row. */
-  const add = (kind: BreedingTaskKind, redFrom: number | null) => {
+  const add = (kind: BreedingTaskKind, redFrom: number | null, clock: Clock = fromConception) => {
     tasks.push({
       kind,
       animal_id: ctx.animal_id,
-      standing: redFrom !== null && T >= redFrom ? 'overdue' : 'due',
-      day_min: view.day_min,
-      day_max: view.day_max,
+      standing: redFrom !== null && clock.day_max >= redFrom ? 'overdue' : 'due',
+      day_min: clock.day_min,
+      day_max: clock.day_max,
       red_from: redFrom,
-      red_on: redFrom === null ? null : addDays(view.conception_earliest, redFrom),
+      red_on: redFrom === null ? null : addDays(clock.from, redFrom),
     });
   };
 
-  if (T >= BREEDING_TASK_DAYS.heatWatchFrom && UNCONFIRMED_STATES.includes(view.state) && noCheck) {
-    add('heat_watch', GESTATION.bredThrough);
+  const sinceAnchor = fromAnchor.day_max;
+  if (sinceAnchor >= BREEDING_TASK_DAYS.heatWatchFrom && UNCONFIRMED_STATES.includes(view.state) && noCheck) {
+    add('heat_watch', GESTATION.bredThrough, fromAnchor);
   }
-  if (T >= PREGNANCY_CHECK_OPENS && UNCONFIRMED_STATES.includes(view.state) && noCheck) {
-    add('pregnancy_check', BREEDING_TASK_DAYS.checkRedAfter + 1);
+  if (sinceAnchor >= PREGNANCY_CHECK_OPENS && UNCONFIRMED_STATES.includes(view.state) && noCheck) {
+    add('pregnancy_check', BREEDING_TASK_DAYS.checkRedAfter + 1, fromAnchor);
   }
   if (view.state === 'recheck') add('recheck', null);
   if (T >= DRY_OFF_OPENS && ctx.inMilk && DRY_OFF_STATES.includes(view.state)) {

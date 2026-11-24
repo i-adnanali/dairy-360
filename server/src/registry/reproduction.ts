@@ -149,11 +149,16 @@ function checkPayload(e: RegistryEvent): PregnancyCheckPayload {
   return e.payload as unknown as PregnancyCheckPayload;
 }
 
+/** The latest a conception from this one service could have happened, from the view's `service`. */
+export function serviceLatest(service: Pick<ReproductionView['service'], 'occurred_on' | 'date_precision' | 'service_type' | 'exposure_days'>): string {
+  const base = service.date_precision === 'month' ? lastDayOfMonth(service.occurred_on) : service.occurred_on;
+  return service.service_type === 'bull_exposure' ? addDays(base, service.exposure_days ?? 0) : base;
+}
+
 /** The latest a conception from this one service could have happened. */
 function latestConception(service: RegistryEvent): string {
   const p = servicePayload(service);
-  const base = service.date_precision === 'month' ? lastDayOfMonth(service.occurred_on) : service.occurred_on;
-  return p.service_type === 'bull_exposure' ? addDays(base, p.exposure_days ?? 0) : base;
+  return serviceLatest({ ...service, service_type: p.service_type, exposure_days: p.exposure_days });
 }
 
 /** Is this same-day heat the sign for that service, so before it in breedingOrder? */

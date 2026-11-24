@@ -131,7 +131,10 @@ export interface BreedingTask {
   day_max: number;
   /** The first day it is red; null for recheck. */
   red_from: number | null;
-  /** Calendar date of red_from, counted from conception_earliest. */
+  /**
+   * Calendar date of red_from: counted from the anchor's date for heat_watch
+   * and pregnancy_check, from conception_earliest for the others.
+   */
   red_on: string | null;
 }
 

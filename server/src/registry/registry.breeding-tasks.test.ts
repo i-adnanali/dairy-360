@@ -154,6 +154,49 @@ test('Bulbul: a month-precision bull exposure produces tasks from day_max, with 
   assert.equal(tasks[0].red_on, addDays(v.conception_earliest, 24));
 });
 
+// Owner decision after the final review (I2, 24 Nov): heat watch and pregnancy
+// check count from the latest service in the case (the anchor), not from the
+// earliest possible conception, so a re-served cow is not red 3 days after it.
+test('an ambiguous case: heat_watch counts from the latest service, not the earliest', () => {
+  const events = [svc(), svc(day(21))];
+  assert.equal(deriveReproduction({ events, asOf: day(24), inMilk: false })?.ambiguous_attribution, true);
+  assert.equal(find(events, 24, 'heat_watch'), undefined, 'day 3 after the re-service');
+  assert.equal(find(events, 38, 'heat_watch'), undefined, 'day 17');
+  assert.deepEqual(find(events, 39, 'heat_watch'), {
+    kind: 'heat_watch', animal_id: 'BD-0001', standing: 'due', day_min: 18, day_max: 18, red_from: 24, red_on: day(45),
+  });
+  assert.equal(find(events, 44, 'heat_watch')?.standing, 'due');
+  assert.equal(find(events, 45, 'heat_watch')?.standing, 'overdue');
+});
+
+test('an ambiguous case: pregnancy_check counts from the latest service, not the earliest', () => {
+  const events = [svc(), svc(day(21))];
+  assert.equal(find(events, 48, 'pregnancy_check'), undefined, 'day 27 after the re-service');
+  assert.deepEqual(find(events, 49, 'pregnancy_check'), {
+    kind: 'pregnancy_check', animal_id: 'BD-0001', standing: 'due', day_min: 28, day_max: 28, red_from: 61, red_on: day(82),
+  });
+  assert.equal(find(events, 81, 'pregnancy_check')?.standing, 'due');
+  assert.equal(find(events, 82, 'pregnancy_check')?.standing, 'overdue');
+});
+
+test('an ambiguous case: dry_off, calving_watch and overdue_review still count from the earliest conception', () => {
+  const events = [svc(), svc(day(21)), check(80, 'palpation', 'positive')];
+  assert.deepEqual(find(events, 248, 'dry_off', true), {
+    kind: 'dry_off', animal_id: 'BD-0001', standing: 'due', day_min: 227, day_max: 248, red_from: 264, red_on: day(264),
+  });
+  assert.equal(find(events, 285, 'calving_watch')?.red_on, day(319));
+  assert.equal(find(events, 333, 'overdue_review')?.red_on, day(347));
+});
+
+test('a month-precision anchor after an earlier service keeps its own range on heat_watch', () => {
+  const month = ev({ type: 'insemination', occurred_on: '2026-02-01', date_precision: 'month', payload: AI });
+  const v = deriveReproduction({ events: [svc(), month], asOf: '2026-03-15', inMilk: false })!;
+  assert.equal(v.ambiguous_attribution, true);
+  const t = breedingTasks(v, { animal_id: 'BD-0001', inMilk: false }).find((x) => x.kind === 'heat_watch');
+  // 1 Feb to 15 Mar is 42 days; 28 Feb (the month's last day) to 15 Mar is 15.
+  assert.deepEqual([t?.day_min, t?.day_max, t?.red_on, t?.standing], [15, 42, '2026-02-25', 'overdue']);
+});
+
 test('a male (null view) has no tasks', () => {
   assert.deepEqual(breedingTasks(null, { animal_id: 'BD-0100', inMilk: false }), []);
 });

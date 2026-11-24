@@ -98,7 +98,7 @@ it. `null_observation` is given the narrow breeding payload (`watched_for`) here
 
 **Tasks.** A task is computed from the derived state and is cleared only by an event. Nothing stores a task and nobody ticks one off by hand.
 
-**New numbers.** Days count from the earliest possible conception (`T` is `day_max`). The numbers below are added once, in `reproduction.ts`.
+**New numbers.** Days count from the earliest possible conception (`T` is `day_max`). The numbers below are added once, in `reproduction.ts`. Since the final review (I2, 24 Nov), Heat watch and Pregnancy check count `T` from the latest service in the case instead; see Stage 5.
 
 | Number | Value | Kind |
 | --- | --- | --- |
@@ -189,6 +189,8 @@ Both are worded from `deriveReproduction`'s answer (the case the calving closes)
 **A row already on record is skipped, not written twice.** An effective event with the same animal, type, date, precision and payload counts as already on record, so a re-run does not write it twice. An `already_on_record` row also matches on `occurred_time`, and each backfilled row gets a strictly increasing `recorded_at` so same-day rows keep the file's order.
 
 **Same-day heat and service (final review C1, 24 Nov).** The derivation takes the events in `breedingOrder` (`reproduction.ts`): the canonical order, except that a `heat_observed` on the same calendar day as an `insemination`, with no time on either one of them, goes before that insemination whatever order they were recorded in. It is the service's heat sign, never a return to heat, so following the `no_heat_sign` advice (record the heat too) leaves her bred, with `heat_sign_before_service` `seen` and her tasks kept. This holds for the page, the CLI and the backfill alike. When both have a time, the times decide as before: a service at 06:00 and a heat at 18:00 on the same day is a return, and she reads open. `breedingCases` takes the same order. The 13 state rules and their order are unchanged.
+
+**Heat watch and Pregnancy check count from the latest service (final review I2, 24 Nov).** Owner decision. In a case of more than one service, the stage 3 rule counted every task from the earliest possible conception, so a cow re-served on day 21 with no heat recorded read Heat watch red 3 days after the re-service. Heat watch and Pregnancy check now count from the case's latest service, the anchor (`view.service`): they open on day 18 and day 28 after its date, turn red on day 24 and day 61 after it, and `red_on` is its date plus `red_from`. The task's `day_max` is the days from the anchor's date and `day_min` the days from the latest conception that service alone allows (the last day of its month at month precision, plus `exposure_days` for a bull exposure), so a month-precision or bull-exposure anchor still shows its range. Dry-off, Calving watch and Overdue review still count from `conception_earliest`, as the state does, and Recheck is unchanged. With one service in the case the two counts are the same. No number changed and no field was renamed; for the two tasks, `day_min`, `day_max`, `red_from` and `red_on` now mean days from the anchor.
 
 **Left open for the owner.** OPEN-064 (retraction, "this never happened") is not built. A wrong entry is still corrected by a superseding event.
 
