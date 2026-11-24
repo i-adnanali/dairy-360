@@ -1,12 +1,15 @@
 
     <form data-page-layout="entry" [appWriteLock]="lock" class="space-y-4" (submit)="onSubmit($event)">
       <div appCard>
+        @if (correctingLine(); as line) {
+          <p class="mb-3 text-sm text-content-primary" data-role="correcting">{{ line }}</p>
+        }
         <app-chip-group
           name="breeding-kind"
           label="What to record"
-          [options]="kinds"
+          [options]="kindOptions()"
           [value]="kind()"
-          (changed)="kind.set($any($event))"
+          (changed)="setKind($event)"
         />
       </div>
 
@@ -77,7 +80,9 @@
                 state.fieldError('date_precision') ??
                 state.fieldError('occurred_time'))
           "
-          (changed)="when.set($event)"
+          [initialValue]="initialDate()"
+          [resetKey]="dateResetKey()"
+          (changed)="onDate($event)"
         />
 
         @if (bullExposure()) {
@@ -173,7 +178,7 @@
               reason="breeding-submit-reason"
               [busy]="state.submitting()"
             >
-              {{ saveLabel[k] }}
+              {{ correcting() ? 'Save correction' : saveLabel[k] }}
             </button>
           } @else {
             <app-session-required what="a breeding event" />

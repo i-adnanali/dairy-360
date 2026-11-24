@@ -270,3 +270,45 @@ describe('EventList — the correction window', () => {
     expect(el.textContent).not.toContain('null_observation');
   });
 });
+
+describe('EventList — Correct on a breeding row', () => {
+  function renderWith(events: TimelineEvent[], correct: ((e: TimelineEvent) => void) | null) {
+    const fixture = TestBed.createComponent(EventList);
+    fixture.componentRef.setInput('events', events);
+    fixture.componentRef.setInput('correct', correct);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+  const breeding = ['insemination', 'heat_observed', 'pregnancy_check', 'null_observation', 'abortion'] as const;
+
+  it('shows Correct on each effective breeding row, and pressing it hands over that event', () => {
+    const got: TimelineEvent[] = [];
+    const events = breeding.map((type, i) => ev({ id: 'aevt_' + i, type }));
+    const el = renderWith(events, (e) => got.push(e));
+    const buttons = [...el.querySelectorAll('[data-role="correct"]')] as HTMLButtonElement[];
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual(breeding.map(() => 'Correct'));
+    (el.querySelector('[data-event="aevt_2"] [data-role="correct"]') as HTMLButtonElement).click();
+    expect(got.map((e) => e.id)).toEqual(['aevt_2']);
+  });
+
+  it('no Correct on a superseded row, a calving (it has its own correction) or another kind', () => {
+    const el = renderWith(
+      [
+        ev({ id: 'aevt_old', type: 'insemination', effective: false, superseded_by_id: 'aevt_new' }),
+        ev({ id: 'aevt_new', type: 'insemination', supersedes_id: 'aevt_old' }),
+        ev({ id: 'aevt_calving', type: 'calving' }),
+        ev({ id: 'aevt_note', type: 'note' }),
+      ],
+      () => undefined,
+    );
+    expect(el.querySelector('[data-event="aevt_old"] [data-role="correct"]')).toBeNull();
+    expect(el.querySelector('[data-event="aevt_new"] [data-role="correct"]')).not.toBeNull();
+    expect(el.querySelector('[data-event="aevt_calving"] [data-role="correct"]')).toBeNull();
+    expect(el.querySelector('[data-event="aevt_note"] [data-role="correct"]')).toBeNull();
+  });
+
+  it('no Correct at all without a handler (the calving correction view, or entry closed)', () => {
+    const el = renderWith([ev({ id: 'aevt_s', type: 'insemination' })], null);
+    expect(el.querySelector('[data-role="correct"]')).toBeNull();
+  });
+});

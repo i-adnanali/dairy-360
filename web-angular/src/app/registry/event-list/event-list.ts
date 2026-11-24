@@ -1,4 +1,5 @@
 import { StatusBadge } from "../../ui/surface";
+import { Button } from "../../ui/button";
 // One animal's event list.
 //
 // ---------------------------------------------------------------------------
@@ -26,10 +27,15 @@ const CHECK_METHOD_WORDS: Record<string, string> = {
   palpation: 'By hand', ultrasound: 'Ultrasound', pag: 'PAG blood test', progesterone: 'Progesterone',
 };
 
+/** The breeding kinds a Timeline row can be corrected from. */
+const BREEDING_TYPES: ReadonlySet<string> = new Set([
+  'insemination', 'heat_observed', 'pregnancy_check', 'null_observation', 'abortion',
+]);
+
 @Component({
   selector: 'app-event-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [StatusBadge, Certainty, Qualifier],
+  imports: [StatusBadge, Certainty, Qualifier, Button],
   templateUrl: './event-list.html',
   styleUrl: './event-list.css',
 })
@@ -40,6 +46,15 @@ export class EventList {
   }
 
   readonly events = input.required<TimelineEvent[]>();
+  /**
+   * Offers Correct on each effective breeding row, and is called with the row's
+   * event. Null offers nothing: the calving correction's copy of the list, and
+   * an animal whose breeding entry is closed. A calving has its own correction.
+   */
+  readonly correct = input<((e: TimelineEvent) => void) | null>(null);
+  protected correctable(e: TimelineEvent): boolean {
+    return this.correct() !== null && e.superseded_by_id === null && BREEDING_TYPES.has(e.type);
+  }
   /** The animal page reads newest first; the correction view keeps the log's order. */
   readonly newestFirst = input(false);
   protected readonly ordered = computed(() => {

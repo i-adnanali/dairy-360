@@ -30,13 +30,15 @@ import { ChipGroup } from '../chip-group/chip-group';
 import { IdentifierInput } from '../identifier-input/identifier-input';
 import { Identifiers } from '../identifiers';
 import { PrecisionDateControl, dateBlocker } from '../precision-date/precision-date';
-import type { DateEntry } from '../precision-date/precision-date';
+import type { DateEntry, PrecisionDate } from '../precision-date/precision-date';
+import { readableParts } from '../precision-display';
 import type {
   AnimalDetail,
   CheckMethod,
   CheckResult,
   HeatSign,
   ServiceType,
+  TimelineEvent,
   WatchedFor,
 } from '../types';
 import { Card } from '../../ui/surface';
@@ -48,7 +50,7 @@ import { TextInput } from '../../ui/input';
 import { SectionLabel } from '../../ui/text';
 import { Button } from '../../ui/button';
 
-type BreedingKind = 'insemination' | 'pregnancy_check' | 'heat_observed' | 'null_observation' | 'abortion';
+export type BreedingKind = 'insemination' | 'pregnancy_check' | 'heat_observed' | 'null_observation' | 'abortion';
 
 /** The warnings a breeding write can be saved over, and the flag each one sets. */
 const OVERRIDES = {
@@ -105,6 +107,12 @@ export class BreedingForm implements OnInit {
    */
   readonly initialKind = input<BreedingKind | null>(null);
   readonly saved = input<((d: AnimalDetail) => void) | null>(null);
+  /**
+   * The effective event this form corrects, or null for a new event. Read once,
+   * on init: the form opens on its kind (locked), prefilled with its values, and
+   * the POST names it in `supersedes_id`. The original row is never changed.
+   */
+  readonly correcting = input<TimelineEvent | null>(null);
 
   private readonly api = inject(RegistryApi);
   protected readonly session = inject(Session);
@@ -154,6 +162,24 @@ export class BreedingForm implements OnInit {
     { value: 'positive', label: 'Pregnant' },
     { value: 'negative', label: 'Not pregnant' },
   ];
+  /** While correcting, the event's kind is the only chip: the kind cannot change. */
+  protected readonly kindOptions = computed(() => {
+    const c = this.correcting();
+    return c ? this.kinds.filter((o) => o.value === c.type) : this.kinds;
+  });
+  protected readonly correctingLine = computed(() => {
+    const c = this.correcting();
+    if (!c) return null;
+    const word = RECORDED[c.type as BreedingKind].replace(/^a /, '');
+    const date = readableParts(c.occurred_on, c.date_precision).figure;
+    return `Correcting the ${word} of ${date}. The original stays on her record.`;
+  });
+  /** The corrected event's date, handed to the date control to show and read back. */
+  protected readonly initialDate = signal<PrecisionDate | null>(null);
+  protected readonly dateResetKey = signal(0);
+  /** Set until the date control hands back the prefilled date: that is the baseline. */
+  private baselinePending = false;
+
   protected readonly state = new FormState<{ event_id: string; animal: AnimalDetail }>();
 
   protected readonly kind = signal<BreedingKind | null>(null);
@@ -225,7 +251,9 @@ export class BreedingForm implements OnInit {
       },
       states: [this.state],
       afterRestore: () => {
-        this.dateControl()?.reset();
+        // A correction's baseline is the event's date: show it again, not an empty field.
+        if (this.correcting()) this.dateResetKey.update((n) => n + 1);
+        else this.dateControl()?.reset();
       },
     });
 
@@ -234,11 +262,53 @@ export class BreedingForm implements OnInit {
 
   /** Opening on a kind is where the form starts, not an unsaved change. */
   ngOnInit(): void {
+    const c = this.correcting();
+    if (c) {
+      this.prefill(c);
+      return;
+    }
     const k = this.initialKind();
     if (k !== null && this.kind() === null) {
       this.kind.set(k);
       this.writer.accept();
     }
+  }
+
+  /**
+   * A correction opens on the event's values, and those are where the form
+   * starts, not an unsaved change. The date arrives from the date control after
+   * it reads `initialDate`, so the baseline is taken then (see onDate).
+   */
+  private prefill(c: TimelineEvent): void {
+    const p = c.payload;
+    const str = <T extends string>(key: string): T | null =>
+      typeof p[key] === 'string' ? (p[key] as T) : null;
+    this.kind.set(c.type as BreedingKind);
+    this.serviceType.set(str<ServiceType>('service_type'));
+    this.exposureDays.set(typeof p['exposure_days'] === 'number' ? String(p['exposure_days']) : '');
+    this.method.set(str<CheckMethod>('method'));
+    this.result.set(str<CheckResult>('result'));
+    this.sign.set(str<HeatSign>('sign'));
+    this.watchedFor.set(str<WatchedFor>('watched_for'));
+    this.observedBy.set(c.observed_by ?? '');
+    this.initialDate.set({
+      occurred_on: c.occurred_on,
+      date_precision: c.date_precision,
+      occurred_time: c.occurred_time,
+    });
+    this.baselinePending = true;
+  }
+
+  protected onDate(entry: DateEntry): void {
+    this.when.set(entry);
+    if (this.baselinePending && entry.status !== 'empty') {
+      this.baselinePending = false;
+      this.writer.accept();
+    }
+  }
+
+  protected setKind(k: string): void {
+    if (!this.correcting()) this.kind.set(k as BreedingKind);
   }
 
   /** Submit with the flags of the warnings on screen set, and only those. */
@@ -258,6 +328,7 @@ export class BreedingForm implements OnInit {
     const w = entry.value;
     const bull = this.bullExposure();
     const timed = this.allowTime();
+    const correcting = this.correcting();
     const r = await this.state.runRequest(
       () =>
         [
@@ -271,6 +342,7 @@ export class BreedingForm implements OnInit {
             observed_by: blank(this.observedBy()),
             ...this.over.flags(allow),
             override_reason: blank(this.overrideReason()),
+            ...(correcting ? { supersedes_id: correcting.id } : {}),
             ...this.session.provenance(),
           },
         ] as const,

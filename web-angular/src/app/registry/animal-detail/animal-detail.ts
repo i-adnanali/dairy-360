@@ -28,7 +28,8 @@ import { HelpText, TextLink } from "../../ui/text";
 import { StatusBadge } from "../../ui/surface";
 import { basisWord, breedingTaskLabel, dayRange, reproductionLabel, reproductionTone, serviceWord } from "../reproduction";
 import { BreedingForm } from "../breeding-form/breeding-form";
-import type { CheckMethod } from "../types";
+import type { BreedingKind } from "../breeding-form/breeding-form";
+import type { CheckMethod, TimelineEvent } from "../types";
 
 type Tab = 'events' | 'breeding' | 'add-event' | 'correct';
 
@@ -74,14 +75,29 @@ export class AnimalDetailView {
    * The kind the Breeding tab's form opens on, and a count that mounts it again.
    * "Record a loss" always mounts a fresh form on a loss, even when the form was
    * already opened on one and its kind changed since: an inferred loss is never
-   * prefilled.
+   * prefilled. A correction mounts it on the corrected event, prefilled from it.
    */
-  protected readonly breedingForm = signal<{ kind: 'abortion' | null; n: number }>({ kind: null, n: 0 });
+  protected readonly breedingForm = signal<{
+    kind: BreedingKind | null;
+    correcting: TimelineEvent | null;
+    n: number;
+  }>({ kind: null, correcting: null, n: 0 });
   private breedingMounts = 0;
   /** Writes without reading the signal: the id effect calls it, and must not track it. */
-  private openBreedingForm(kind: 'abortion' | null): void {
-    this.breedingForm.set({ kind, n: ++this.breedingMounts });
+  private openBreedingForm(kind: 'abortion' | null, correcting: TimelineEvent | null = null): void {
+    this.breedingForm.set({
+      kind: correcting ? (correcting.type as BreedingKind) : kind,
+      correcting,
+      n: ++this.breedingMounts,
+    });
   }
+
+  /** The Timeline's Correct: the Breeding tab's form, on that event. */
+  protected readonly correctEvent = async (e: TimelineEvent): Promise<void> => {
+    if (this.drafts.hasChanges() && !(await this.drafts.request())) return;
+    this.openBreedingForm(null, e);
+    this.tab.set('breeding');
+  };
   protected async recordLoss(): Promise<void> {
     if (!this.drafts.hasChanges() || (await this.drafts.request())) this.openBreedingForm('abortion');
   }

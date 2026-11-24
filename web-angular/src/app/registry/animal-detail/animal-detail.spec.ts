@@ -5,6 +5,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { AnimalDetailView } from './animal-detail';
 import { RegistryApi } from '../api';
 import { DraftRegistry } from '../draft-registry';
+import { Session } from '../session';
 import type { AnimalDetail } from '../types';
 
 const tick = async (f: any) => {
@@ -285,5 +286,80 @@ describe('AnimalDetailView opened on a tab', () => {
     bull.animal = { ...bull.animal, sex: 'male' };
     const el = await open('/animals/BD-0001?tab=breeding', bull);
     expect(el.querySelector('[data-tab="events"]')!.getAttribute('aria-selected')).toBe('true');
+  });
+});
+
+describe('AnimalDetailView Correct from the Timeline', () => {
+  const service = {
+    id: 'aevt_service', type: 'insemination', occurred_on: '2026-11-13', occurred_time: null,
+    date_precision: 'day', payload: { service_type: 'ai', exposure_days: null }, source_form: 'recall',
+    source_ref: null, observed_by: 'Bashir', recorded_by: 'adnan', recorded_at: '2026-11-13T06:40:00.000Z',
+    supersedes_id: null, override_checks: [], override_reason: null, superseded_by_id: null, effective: true,
+  };
+  const calving = { ...service, id: 'aevt_calving', type: 'calving', payload: { calf_id: 'BD-0002' } };
+  const flush = async (f: any) => {
+    await new Promise((r) => setTimeout(r));
+    TestBed.inject(ApplicationRef).tick();
+    await f.whenStable();
+    f.detectChanges();
+  };
+
+  it('a breeding row offers Correct, a calving row does not', async () => {
+    const el = await mount(detail({ events: [service, calving] }));
+    expect(el.querySelector('[data-event="aevt_service"] [data-role="correct"]')).not.toBeNull();
+    expect(el.querySelector('[data-event="aevt_calving"] [data-role="correct"]')).toBeNull();
+  });
+
+  it('no Correct when breeding entry is closed', async () => {
+    const el = await mount(departed({ events: [service] }));
+    expect(el.querySelector('[data-role="correct"]')).toBeNull();
+  });
+
+  it('Correct opens the Breeding tab\'s form on that event, prefilled and locked', async () => {
+    const f = await mountFixture(() => detail({ events: [service] }));
+    const el = f.nativeElement as HTMLElement;
+    (el.querySelector('[data-event="aevt_service"] [data-role="correct"]') as HTMLButtonElement).click();
+    await flush(f);
+    await flush(f);
+    expect(el.querySelector('[data-tab="breeding"]')?.getAttribute('aria-selected')).toBe('true');
+    const form = el.querySelector('app-breeding-form') as HTMLElement;
+    expect(form.querySelector('[data-role="correcting"]')?.textContent?.trim()).toBe(
+      'Correcting the service of 13 Nov 2026. The original stays on her record.',
+    );
+    const kinds = [...form.querySelectorAll('[data-role="breeding-kind-group"] [data-chip]')];
+    expect(kinds.map((c) => c.getAttribute('data-chip'))).toEqual(['insemination']);
+    expect(form.querySelector('[data-chip="ai"]')?.getAttribute('aria-checked')).toBe('true');
+    expect((form.querySelector('app-precision-date [data-role="date-text"]') as HTMLInputElement).value).toBe('13 Nov 2026');
+    expect((form.querySelector('[data-role="observed_by"]') as HTMLInputElement).value).toBe('Bashir');
+    // Opening on the event is where the form starts, not an unsaved change.
+    expect(TestBed.inject(DraftRegistry).hasChanges()).toBe(false);
+  });
+
+  it('after Save correction the Timeline shows the correcting row and the original as replaced', async () => {
+    const f = await mountFixture(() => detail({ events: [service] }));
+    const el = f.nativeElement as HTMLElement;
+    TestBed.inject(Session).set('recall', 'adnan');
+    const after = detail({
+      events: [
+        { ...service, effective: false, superseded_by_id: 'aevt_fixed' },
+        { ...service, id: 'aevt_fixed', occurred_on: '2026-11-14', supersedes_id: 'aevt_service' },
+      ],
+    });
+    const record = vi.fn(async () => ({ event_id: 'aevt_fixed', animal: after }));
+    (TestBed.inject(RegistryApi) as unknown as Record<string, unknown>)['recordBreedingEvent'] = record;
+    (el.querySelector('[data-event="aevt_service"] [data-role="correct"]') as HTMLButtonElement).click();
+    await flush(f);
+    await flush(f);
+    const submit = el.querySelector('app-breeding-form [data-role="submit"]') as HTMLButtonElement;
+    expect(submit.textContent?.trim()).toBe('Save correction');
+    submit.click();
+    await flush(f);
+    await flush(f);
+    expect((record.mock.calls[0] as unknown[])[0]).toMatchObject({ supersedes_id: 'aevt_service' });
+    expect(el.querySelector('[data-tab="events"]')?.getAttribute('aria-selected')).toBe('true');
+    expect(el.querySelector('[data-event="aevt_service"]')?.getAttribute('data-effective')).toBe('false');
+    expect(el.querySelector('[data-event="aevt_service"] [data-role="superseded-badge"]')).not.toBeNull();
+    expect(el.querySelector('[data-event="aevt_fixed"] [data-role="correction-note"]')).not.toBeNull();
+    expect(el.querySelector('[data-event="aevt_fixed"] [data-role="correct"]')).not.toBeNull();
   });
 });

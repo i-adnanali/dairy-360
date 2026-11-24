@@ -86,7 +86,7 @@
 
         @switch (current()) {
           @case ('events') {
-            <app-event-list [events]="d.events" [newestFirst]="true" />
+            <app-event-list [events]="d.events" [newestFirst]="true" [correct]="d.breeding_entry ? correctEvent : null" />
           }
           @case ('breeding') {
             <section data-role="breeding-tab" class="space-y-4">
@@ -125,7 +125,7 @@
                   <p><button appButton variant="secondary" type="button" data-role="record-loss" (click)="recordLoss()">Record a loss</button></p>
                 }
                 @for (f of [breedingForm()]; track f.n) {
-                  <app-breeding-form [animalId]="d.animal.id" [initialKind]="f.kind" [saved]="onSaved" />
+                  <app-breeding-form [animalId]="d.animal.id" [initialKind]="f.kind" [correcting]="f.correcting" [saved]="onSaved" />
                 }
               } @else {
                 <p appHelp data-role="entry-closed">She has left the herd, so breeding entry is closed here. Her services stay on the Timeline.</p>

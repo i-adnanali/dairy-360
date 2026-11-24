@@ -67,6 +67,12 @@
                 <span class="text-xs text-content-subtle" data-role="correction-note">corrects an earlier entry</span>
               }
 
+              @if (correctable(e)) {
+                <span class="ml-auto">
+                  <button appButton variant="secondary" size="sm" type="button" data-role="correct" (click)="correct()!(e)">Correct</button>
+                </span>
+              }
+
             </div>
 
 

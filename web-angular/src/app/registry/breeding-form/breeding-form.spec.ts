@@ -418,4 +418,150 @@ describe('BreedingForm', () => {
     expect(TestBed.inject(WriteLog).last()).toBe('Recorded a service on BD-0001.');
     expect(el.querySelector('[data-chip="insemination"]')?.getAttribute('aria-checked')).toBe('false');
   });
+
+  describe('correcting an event', () => {
+    const original = {
+      id: 'aevt_service',
+      type: 'insemination',
+      occurred_on: '2026-11-13',
+      occurred_time: '06:30',
+      date_precision: 'day',
+      payload: { service_type: 'ai', exposure_days: null },
+      source_form: 'recall',
+      source_ref: null,
+      observed_by: 'Bashir',
+      recorded_by: 'adnan',
+      recorded_at: '2026-11-13T06:40:00.000Z',
+      supersedes_id: null,
+      override_checks: [],
+      override_reason: null,
+      superseded_by_id: null,
+      effective: true,
+    };
+
+    async function mountCorrecting(event: Record<string, unknown>) {
+      TestBed.configureTestingModule({
+        providers: [provideHttpClient(withFetch()), provideHttpClientTesting(), provideRouter([])],
+      });
+      const http = TestBed.inject(HttpTestingController);
+      TestBed.inject(Session).set('recall', 'adnan');
+      const fixture = TestBed.createComponent(BreedingForm);
+      fixture.componentRef.setInput('animalId', 'BD-0001');
+      fixture.componentRef.setInput('initialKind', event['type']);
+      fixture.componentRef.setInput('correcting', event);
+      fixture.detectChanges();
+      await settle(fixture);
+      return { http, fixture, el: fixture.nativeElement as HTMLElement };
+    }
+
+    it('opens prefilled from the event, on its kind only, and not dirty', async () => {
+      const { fixture, el } = await mountCorrecting(original);
+      expect(el.querySelector('[data-role="correcting"]')?.textContent?.trim()).toBe(
+        'Correcting the service of 13 Nov 2026. The original stays on her record.',
+      );
+      // Locked: the event's kind is the only kind chip, and it is chosen.
+      const kinds = [...el.querySelectorAll('[data-role="breeding-kind-group"] [data-chip]')];
+      expect(kinds.map((c) => c.getAttribute('data-chip'))).toEqual(['insemination']);
+      expect(kinds[0].getAttribute('aria-checked')).toBe('true');
+      expect(el.querySelector('[data-chip="ai"]')?.getAttribute('aria-checked')).toBe('true');
+      expect(
+        (el.querySelector('app-precision-date [data-role="date-text"]') as HTMLInputElement).value,
+      ).toBe('13 Nov 2026');
+      expect((el.querySelector('app-precision-date [data-role="time"]') as HTMLInputElement).value).toBe(
+        '06:30',
+      );
+      expect((el.querySelector('[data-role="observed_by"]') as HTMLInputElement).value).toBe('Bashir');
+      expect(el.querySelector('[data-role="submit"]')?.textContent?.trim()).toBe('Save correction');
+      expect(dirty(fixture)).toBe(false);
+    });
+
+    it('Save correction sends supersedes_id with the event\'s values', async () => {
+      const { http, el } = await mountCorrecting(original);
+      click(el, '[data-role="submit"]');
+      const b = http.expectOne(URL).request.body;
+      expect(b.supersedes_id).toBe('aevt_service');
+      expect(b.type).toBe('insemination');
+      expect(b.occurred_on).toBe('2026-11-13');
+      expect(b.occurred_time).toBe('06:30');
+      expect(b.date_precision).toBe('day');
+      expect(b.payload).toEqual({ service_type: 'ai', exposure_days: null });
+      expect(b.observed_by).toBe('Bashir');
+    });
+
+    it('a new event sends no supersedes_id', () => {
+      const { http, fixture, el } = mount();
+      choose(fixture, el, 'insemination', 'ai');
+      enterDate(fixture, el, '13 Nov 2026');
+      click(el, '[data-role="submit"]');
+      expect('supersedes_id' in http.expectOne(URL).request.body).toBe(false);
+    });
+
+    it('a no_heat_sign answer shows the save-over, and the second POST still corrects', async () => {
+      const { http, fixture, el } = await mountCorrecting(original);
+      click(el, '[data-role="submit"]');
+      http.expectOne(URL).flush(
+        { error: 'no_heat_sign', field: 'occurred_on', message: NO_HEAT },
+        { status: 400, statusText: 'Bad Request' },
+      );
+      await settle(fixture);
+      expect(el.querySelector('[data-role="override-message"]')?.textContent?.trim()).toBe(NO_HEAT);
+      click(el, '[data-role="save-over"]');
+      const second = http.expectOne(URL).request.body;
+      expect(second.supersedes_id).toBe('aevt_service');
+      expect(second.allow_no_heat_sign).toBe(true);
+    });
+
+    it('prefills a month-wide check with its method and result', async () => {
+      const { http, el } = await mountCorrecting({
+        ...original,
+        id: 'aevt_check',
+        type: 'pregnancy_check',
+        occurred_on: '2026-10-01',
+        occurred_time: null,
+        date_precision: 'month',
+        payload: { method: 'ultrasound', result: 'negative' },
+        observed_by: null,
+      });
+      expect(el.querySelector('[data-role="correcting"]')?.textContent?.trim()).toBe(
+        'Correcting the pregnancy check of Oct 2026. The original stays on her record.',
+      );
+      expect(el.querySelector('[data-chip="ultrasound"]')?.getAttribute('aria-checked')).toBe('true');
+      expect(el.querySelector('[data-chip="negative"]')?.getAttribute('aria-checked')).toBe('true');
+      click(el, '[data-role="submit"]');
+      const b = http.expectOne(URL).request.body;
+      expect(b.supersedes_id).toBe('aevt_check');
+      expect(b.occurred_on).toBe('2026-10-01');
+      expect(b.date_precision).toBe('month');
+      expect(b.payload).toEqual({ method: 'ultrasound', result: 'negative' });
+      expect(b.observed_by).toBeNull();
+    });
+
+    it('prefills a bull\'s stay with its days, a heat with its sign, nothing seen with what was watched for', async () => {
+      const bull = await mountCorrecting({
+        ...original,
+        occurred_time: null,
+        payload: { service_type: 'bull_exposure', exposure_days: 21 },
+      });
+      expect((bull.el.querySelector('[data-role="exposure_days"]') as HTMLInputElement).value).toBe('21');
+      click(bull.el, '[data-role="submit"]');
+      expect(bull.http.expectOne(URL).request.body.payload).toEqual({
+        service_type: 'bull_exposure',
+        exposure_days: 21,
+      });
+      TestBed.resetTestingModule();
+      const heat = await mountCorrecting({ ...original, type: 'heat_observed', payload: { sign: 'mucus' } });
+      expect(heat.el.querySelector('[data-chip="mucus"]')?.getAttribute('aria-checked')).toBe('true');
+      TestBed.resetTestingModule();
+      const none = await mountCorrecting({
+        ...original,
+        type: 'null_observation',
+        occurred_time: null,
+        payload: { watched_for: 'heat' },
+      });
+      expect(none.el.querySelector('[data-chip="heat"]')?.getAttribute('aria-checked')).toBe('true');
+      expect(none.el.querySelector('[data-role="correcting"]')?.textContent).toContain(
+        'Correcting the nothing seen of 13 Nov 2026.',
+      );
+    });
+  });
 });
