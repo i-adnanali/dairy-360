@@ -13,8 +13,7 @@ import type { BreedingTask } from './breeding-tasks';
 import type { Db } from './schema';
 import { GESTATION_DAYS, calvingTooSoonAfterBirth } from './calving';
 import { definitelyBefore } from './invariants';
-import { canonicalOrder, daysBetween, effectiveEvents, projectLactations, projectStatus } from './project';
-import { attributionChanged, deriveReproduction } from './reproduction';
+import { daysBetween, effectiveEvents } from './project';
 import { farmToday } from './time';
 import { allAnimals, allEvents, allStatuses, eventsForAnimal, getAnimal } from './store';
 import type {

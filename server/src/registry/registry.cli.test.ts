@@ -257,6 +257,24 @@ test('registry:correct-calving refuses a date past the extreme unless --allow-ca
   assert.equal(row.override_reason, 'late record');
 });
 
+test('registry:calve and registry:correct-calving read --allow-near-duplicate=false as off', (t) => {
+  t.mock.method(console, 'log', () => {});
+  const db = servedDam();
+  const near = (e: { code?: string }) => e.code === 'near_duplicate_calving';
+  // Day 300: inside the window, written plainly.
+  calveMain(['--dam=BD-0001', '--on=2025-11-06', '--precision=day', '--calf-sex=female', '--outcome=live', ...PROV_FLAGS], db);
+  const second = ['--dam=BD-0001', '--on=2025-11-08', '--precision=day', '--calf-sex=female', '--outcome=live', ...PROV_FLAGS];
+  assert.throws(() => calveMain([...second, '--allow-near-duplicate=false'], db), near);
+  // A year later (past the extreme, saved over), then corrected back to two days after the first.
+  calveMain(['--dam=BD-0001', '--on=2026-11-06', '--precision=day', '--calf-sex=female', '--outcome=live', '--allow-calving-past-extreme', '--override-reason=no service on record', ...PROV_FLAGS], db);
+  const later = lastCalvingOf(db)!;
+  const fix = [`--event=${later.id}`, '--on=2025-11-08', '--precision=day', ...PROV_FLAGS];
+  assert.throws(() => correctMain([...fix, '--allow-near-duplicate=false'], db), near);
+  assert.equal(lastCalvingOf(db)!.id, later.id);
+  correctMain([...fix, '--allow-near-duplicate', '--override-reason=twin entry'], db);
+  assert.deepEqual(lastCalvingOf(db)!.override_checks, ['near_duplicate_calving']);
+});
+
 test('both calving commands document the window flags', () => {
   for (const usage of [CALVE_USAGE, CORRECT_USAGE]) {
     for (const flag of ['--allow-calving-before-window', '--allow-calving-past-extreme', '--override-reason']) {

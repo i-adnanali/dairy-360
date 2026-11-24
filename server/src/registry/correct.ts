@@ -115,7 +115,7 @@ export function correctMain(argv: string[], handle?: Db): void {
     notes: flags.has('notes') ? optStr(flags, 'notes') : undefined,
     provenance: requireProvenance(flags),
     asOf,
-    allow_near_duplicate: flags.has('allow-near-duplicate'),
+    allow_near_duplicate: flagIsOn(flags, 'allow-near-duplicate'),
     allow_calving_before_window: flagIsOn(flags, 'allow-calving-before-window'),
     allow_calving_past_extreme: flagIsOn(flags, 'allow-calving-past-extreme'),
     override_reason: optStr(flags, 'override-reason'),
