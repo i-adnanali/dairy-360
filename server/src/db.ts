@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'node:path';
+import { underTestRunner } from './db-guard';
 import { preMigrationBackup } from './registry/backup';
 import { applyRegistrySchema } from './registry/schema';
 import type {
@@ -17,6 +18,15 @@ import type {
 // dairy.db lives next to the server package root (one level up from src once
 // running via tsx, this resolves to server/dairy.db).
 export const DB_PATH = path.join(__dirname, '..', 'dairy.db');
+
+// dairy.db holds the farm's real records, and loading this module migrates it.
+// A test must use a `:memory:` handle; reaching this line from one is a bug.
+if (underTestRunner(process.env, process.execArgv)) {
+  throw new Error(
+    `Refusing to open ${DB_PATH}: the real farm database must never be opened from a test. ` +
+      'Pass the test an in-memory database handle instead.',
+  );
+}
 
 export const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
