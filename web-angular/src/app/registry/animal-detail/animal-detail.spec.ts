@@ -362,4 +362,47 @@ describe('AnimalDetailView Correct from the Timeline', () => {
     expect(el.querySelector('[data-event="aevt_fixed"] [data-role="correction-note"]')).not.toBeNull();
     expect(el.querySelector('[data-event="aevt_fixed"] [data-role="correct"]')).not.toBeNull();
   });
+
+  it('a plain save after a finished correction sends no supersedes_id', async () => {
+    const f = await mountFixture(() => detail({ events: [service] }));
+    const el = f.nativeElement as HTMLElement;
+    TestBed.inject(Session).set('recall', 'adnan');
+    const after = detail({
+      events: [
+        { ...service, effective: false, superseded_by_id: 'aevt_fixed' },
+        { ...service, id: 'aevt_fixed', supersedes_id: 'aevt_service' },
+      ],
+    });
+    const record = vi.fn(async () => ({ event_id: 'aevt_next', animal: after }));
+    (TestBed.inject(RegistryApi) as unknown as Record<string, unknown>)['recordBreedingEvent'] = record;
+    (el.querySelector('[data-event="aevt_service"] [data-role="correct"]') as HTMLButtonElement).click();
+    await flush(f);
+    await flush(f);
+    (el.querySelector('app-breeding-form [data-role="submit"]') as HTMLButtonElement).click();
+    await flush(f);
+    await flush(f);
+    expect((record.mock.calls[0] as unknown[])[0]).toMatchObject({ supersedes_id: 'aevt_service' });
+
+    (el.querySelector('[data-tab="breeding"]') as HTMLButtonElement).click();
+    await flush(f);
+    await flush(f);
+    const form = el.querySelector('app-breeding-form') as HTMLElement;
+    expect(form.querySelector('[data-role="correcting"]')).toBeNull();
+    const press = async (sel: string) => {
+      (form.querySelector(sel) as HTMLButtonElement).click();
+      await flush(f);
+    };
+    await press('[data-chip="heat_observed"]');
+    await press('[data-chip="mucus"]');
+    const date = form.querySelector('app-precision-date [data-role="date-text"]') as HTMLInputElement;
+    date.value = '15 Nov 2026';
+    date.dispatchEvent(new Event('input'));
+    await flush(f);
+    await press('[data-role="submit"]');
+    await flush(f);
+    expect(record).toHaveBeenCalledTimes(2);
+    const second = (record.mock.calls[1] as unknown[])[0] as Record<string, unknown>;
+    expect(second['type']).toBe('heat_observed');
+    expect('supersedes_id' in second).toBe(false);
+  });
 });

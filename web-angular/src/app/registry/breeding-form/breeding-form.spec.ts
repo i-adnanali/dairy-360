@@ -488,6 +488,27 @@ describe('BreedingForm', () => {
       expect(b.observed_by).toBe('Bashir');
     });
 
+    it('a correction announces itself as a correction', async () => {
+      const { http, fixture, el } = await mountCorrecting(original);
+      click(el, '[data-role="submit"]');
+      http.expectOne(URL).flush({ event_id: 'ev-2', animal }, { status: 201, statusText: 'Created' });
+      await settle(fixture);
+      expect(TestBed.inject(WriteLog).last()).toBe('Corrected the service on BD-0001.');
+    });
+
+    it('a refusal on supersedes_id shows in the form error', async () => {
+      const { http, fixture, el } = await mountCorrecting(original);
+      click(el, '[data-role="submit"]');
+      const message = 'This event has already been corrected.';
+      http.expectOne(URL).flush(
+        { error: 'already_superseded', field: 'supersedes_id', message },
+        { status: 400, statusText: 'Bad Request' },
+      );
+      await settle(fixture);
+      expect(el.querySelector('[data-role="error-form"]')?.textContent?.trim()).toBe(message);
+      expect(el.querySelector('[data-role="save-over"]')).toBeNull();
+    });
+
     it('a new event sends no supersedes_id', () => {
       const { http, fixture, el } = mount();
       choose(fixture, el, 'insemination', 'ai');
@@ -525,6 +546,9 @@ describe('BreedingForm', () => {
       expect(el.querySelector('[data-role="correcting"]')?.textContent?.trim()).toBe(
         'Correcting the pregnancy check of Oct 2026. The original stays on her record.',
       );
+      expect(
+        (el.querySelector('app-precision-date [data-role="date-text"]') as HTMLInputElement).value,
+      ).toBe('Oct 2026');
       expect(el.querySelector('[data-chip="ultrasound"]')?.getAttribute('aria-checked')).toBe('true');
       expect(el.querySelector('[data-chip="negative"]')?.getAttribute('aria-checked')).toBe('true');
       click(el, '[data-role="submit"]');
@@ -560,7 +584,7 @@ describe('BreedingForm', () => {
       });
       expect(none.el.querySelector('[data-chip="heat"]')?.getAttribute('aria-checked')).toBe('true');
       expect(none.el.querySelector('[data-role="correcting"]')?.textContent).toContain(
-        'Correcting the nothing seen of 13 Nov 2026.',
+        'Correcting the “nothing seen” entry of 13 Nov 2026.',
       );
     });
   });

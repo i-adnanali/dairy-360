@@ -111,6 +111,9 @@ export class BreedingForm implements OnInit {
    * The effective event this form corrects, or null for a new event. Read once,
    * on init: the form opens on its kind (locked), prefilled with its values, and
    * the POST names it in `supersedes_id`. The original row is never changed.
+   * The parent must remount the form after `saved`: a form left mounted would
+   * still name the corrected event, and its next save would be refused as
+   * already superseded.
    */
   readonly correcting = input<TimelineEvent | null>(null);
 
@@ -170,7 +173,7 @@ export class BreedingForm implements OnInit {
   protected readonly correctingLine = computed(() => {
     const c = this.correcting();
     if (!c) return null;
-    const word = RECORDED[c.type as BreedingKind].replace(/^a /, '');
+    const word = CORRECTING_WORD[c.type as BreedingKind];
     const date = readableParts(c.occurred_on, c.date_precision).figure;
     return `Correcting the ${word} of ${date}. The original stays on her record.`;
   });
@@ -363,7 +366,11 @@ export class BreedingForm implements OnInit {
       this.when.set({ status: 'empty' });
       this.writer.accept();
       this.saved()?.(r.animal);
-      this.writeLog.announce(`Recorded ${RECORDED[k]} on ${this.animalId()}.`);
+      this.writeLog.announce(
+        correcting
+          ? `Corrected the ${CORRECTING_WORD[k]} on ${this.animalId()}.`
+          : `Recorded ${RECORDED[k]} on ${this.animalId()}.`,
+      );
     }
   }
 
@@ -382,6 +389,15 @@ export class BreedingForm implements OnInit {
     }
   }
 }
+
+/** "Correcting the … of {date}" and "Corrected the … on {animal}". */
+const CORRECTING_WORD: Record<BreedingKind, string> = {
+  insemination: 'service',
+  heat_observed: 'heat',
+  pregnancy_check: 'pregnancy check',
+  null_observation: '“nothing seen” entry',
+  abortion: 'loss',
+};
 
 const RECORDED: Record<BreedingKind, string> = {
   insemination: 'a service',
