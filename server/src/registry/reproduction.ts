@@ -7,9 +7,15 @@
 // THE RULES deriveReproduction implements (registry.reproduction.test.ts pins
 // each line):
 //
-// Which events count. Take canonicalOrder(effectiveEvents(events)), then drop
+// Which events count. Take breedingOrder(effectiveEvents(events)), then drop
 // every event whose occurred_on is after asOf. If no insemination remains,
 // return null.
+//
+// The order. breedingOrder is canonicalOrder with one breeding rule: a
+// heat_observed on the same calendar day as an insemination, where either of
+// the two has no occurred_time, goes before that insemination, whatever order
+// they were recorded in. It is the service's heat sign (heatBefore counts it),
+// never a return to heat. When both have times, the times decide.
 //
 // The case. The anchor is the last insemination. Walking backwards from it, an
 // earlier insemination joins the case when there is no calving, no abortion, no
@@ -150,6 +156,31 @@ function latestConception(service: RegistryEvent): string {
   return p.service_type === 'bull_exposure' ? addDays(base, p.exposure_days ?? 0) : base;
 }
 
+/** Is this same-day heat the sign for that service, so before it in breedingOrder? */
+function heatGoesBefore(heat: RegistryEvent, service: RegistryEvent): boolean {
+  return (
+    heat.type === 'heat_observed' &&
+    service.type === 'insemination' &&
+    heat.occurred_on === service.occurred_on &&
+    (!heat.occurred_time || !service.occurred_time)
+  );
+}
+
+/**
+ * canonicalOrder, then each same-day heat that heatGoesBefore a service sorted
+ * after it moves to just before the first such service. Every reader that
+ * relates heats to services in the breeding derivation uses this order.
+ */
+export function breedingOrder(events: RegistryEvent[]): RegistryEvent[] {
+  const out: RegistryEvent[] = [];
+  for (const e of canonicalOrder(events)) {
+    const at = e.type === 'heat_observed' ? out.findIndex((s) => heatGoesBefore(e, s)) : -1;
+    if (at >= 0) out.splice(at, 0, e);
+    else out.push(e);
+  }
+  return out;
+}
+
 /** Does this event rule out that the service before it caused the case? */
 function breaksCase(e: RegistryEvent): boolean {
   if (e.type === 'calving' || e.type === 'abortion' || e.type === 'heat_observed') return true;
@@ -189,7 +220,7 @@ export function deriveReproduction(opts: {
   const { asOf, inMilk } = opts;
 
   // Which events count.
-  const ordered = canonicalOrder(effectiveEvents(opts.events)).filter((e) => e.occurred_on <= asOf);
+  const ordered = breedingOrder(effectiveEvents(opts.events)).filter((e) => e.occurred_on <= asOf);
   const serviceAt: number[] = [];
   ordered.forEach((e, i) => {
     if (e.type === 'insemination') serviceAt.push(i);

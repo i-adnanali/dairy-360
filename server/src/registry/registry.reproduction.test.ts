@@ -191,6 +191,44 @@ test('heat sign: unknowable for a bull exposure or a month-precision service', (
   assert.equal(sign([heat('2026-11-10'), svc('2026-11-01', { date_precision: 'month' })]), 'unknowable');
 });
 
+// A same-day heat with a time missing on either side is the service's heat
+// sign, never a return, whatever order the two were recorded in (owner, 24 Nov).
+const sameDay = (events: RegistryEvent[], asOf = '2026-10-21') => {
+  const v = derive(events, false, asOf)!;
+  return [v.state, v.basis, v.heat_sign_before_service, v.services_in_case];
+};
+
+test('same day: an untimed service, then an untimed heat recorded after it, reads bred with the sign seen', () => {
+  assert.deepEqual(sameDay([svc('2026-10-01'), heat('2026-10-01')]), ['bred', 'observed', 'seen', 1]);
+});
+
+test('same day: an untimed service and heat recorded at the same instant read bred whatever the ids', () => {
+  for (const [sid, hid] of [['aevt_a', 'aevt_b'], ['aevt_b', 'aevt_a']]) {
+    const at = '2026-10-01T05:00:00.000Z';
+    const s = { ...svc('2026-10-01'), id: sid, recorded_at: at };
+    const h = { ...heat('2026-10-01'), id: hid, recorded_at: at };
+    assert.deepEqual(sameDay([s, h]), ['bred', 'observed', 'seen', 1]);
+  }
+});
+
+test('same day: an untimed service, then a heat timed 08:00, reads bred with the sign seen', () => {
+  assert.deepEqual(sameDay([svc('2026-10-01'), timed(heat('2026-10-01'), '08:00')]), ['bred', 'observed', 'seen', 1]);
+});
+
+test('same day: a service timed 08:00, then an untimed heat, reads bred with the sign seen', () => {
+  assert.deepEqual(sameDay([timed(svc('2026-10-01'), '08:00'), heat('2026-10-01')]), ['bred', 'observed', 'seen', 1]);
+});
+
+test('same day: a service at 06:00 and a heat at 18:00, both timed, is a return to heat as before', () => {
+  assert.deepEqual(sameDay([timed(svc('2026-10-01'), '06:00'), timed(heat('2026-10-01'), '18:00')]), ['open', 'inferred', 'not_seen', 1]);
+});
+
+test('same day: a re-service recorded before its untimed heat starts a case of its own', () => {
+  // First service 10 Sep; on 1 Oct the re-service is typed before the heat.
+  const v = derive([svc('2026-09-10'), svc('2026-10-01'), heat('2026-10-01')], false, '2026-10-21')!;
+  assert.deepEqual([v.state, v.services_in_case, v.conception_earliest, v.heat_sign_before_service], ['bred', 1, '2026-10-01', 'seen']);
+});
+
 test('heat_after_positive is true for Laali and false for Kali', () => {
   const laali = derive([svc('2026-08-11'), check('2026-09-22', 'ultrasound', 'positive'), heat('2026-11-10')], true)!;
   const kali = derive([svc('2026-07-14'), check('2026-09-15', 'palpation', 'positive')], true)!;

@@ -6,11 +6,12 @@
 //
 // THE RULES (registry.breeding-cases.test.ts pins them):
 //
-// Take canonicalOrder(effectiveEvents(events)) dated <= asOf. Every one of
-// these events is a boundary, then asOf, so no case can fall between two
-// boundaries and this file keeps no list of which events end a case. At a
-// boundary event the view is derived over the events up to and including that
-// event in canonical order, as of its date: a service recorded after a heat on
+// Take breedingOrder(effectiveEvents(events)) dated <= asOf (reproduction.ts:
+// the canonical order, with a same-day heat that is a service's sign moved
+// before it). Every one of these events is a boundary, then asOf, so no case
+// can fall between two boundaries and this file keeps no list of which events
+// end a case. At a boundary event the view is derived over the events up to
+// and including that event in that order, as of its date: a service recorded after a heat on
 // the same day is not yet in the heat's view. The view at asOf is
 // deriveReproduction over all the events, which is the badge's view.
 //
@@ -30,8 +31,8 @@
 // outcome does not depend on it: in-milk only decides dryoff against
 // confirmed, and both are held.
 
-import { canonicalOrder, effectiveEvents } from './project';
-import { deriveReproduction } from './reproduction';
+import { effectiveEvents } from './project';
+import { breedingOrder, deriveReproduction } from './reproduction';
 import type { DatePrecision, RegistryEvent, RegistryEventType, ReproductionView } from './types';
 
 export type CaseOutcome = 'held' | 'failed' | 'lost' | 'pending' | 'replaced';
@@ -68,7 +69,7 @@ function outcomeOf(view: ReproductionView): CaseOutcome {
 }
 
 export function breedingCases(events: RegistryEvent[], asOf: string, inMilk: boolean): BreedingCase[] {
-  const ordered = canonicalOrder(effectiveEvents(events)).filter((e) => e.occurred_on <= asOf);
+  const ordered = breedingOrder(effectiveEvents(events)).filter((e) => e.occurred_on <= asOf);
 
   // The latest view per anchor, and the boundary event at which that anchor's
   // view entered its current state (null when it entered at asOf).

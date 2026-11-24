@@ -4,7 +4,10 @@
 import assert from 'node:assert';
 import { test } from 'node:test';
 
-import { breedingBoard } from './breeding-board';
+import { recordBreedingEvent } from './breeding';
+import { breedingBoard, breedingForAnimal } from './breeding-board';
+import { addAcquired, freshDb } from './fixtures';
+import { eventsForAnimal, getAnimal } from './store';
 import { BREEDING_AS_OF, breedingHerd } from './breeding-fixtures';
 
 test('cases are one row per breeding female and the counts add up', () => {
@@ -36,4 +39,27 @@ test('tasks are overdue first, then due, each by red_on (none last) then animal 
     }
     assert.ok(a.animal_id <= b.animal_id);
   }
+});
+
+test('a heat recorded on the page after a same-day service is its sign: bred, tasks kept', () => {
+  // Following the no_heat_sign advice: save the service over the warning, then record the heat.
+  const db = freshDb();
+  addAcquired(db, { id: 'BD-0001', sex: 'female', acquired_on: '2023-01-01', acquired_precision: 'day' });
+  const prov = { source_form: 'direct_entry', recorded_by: 'owner' } as const;
+  recordBreedingEvent(db, {
+    animal_id: 'BD-0001', type: 'insemination', occurred_on: '2026-10-01', date_precision: 'day',
+    payload: { service_type: 'ai', exposure_days: null }, provenance: prov, allow_no_heat_sign: true,
+    recorded_at: '2026-10-01T05:00:00.000Z',
+  });
+  recordBreedingEvent(db, {
+    animal_id: 'BD-0001', type: 'heat_observed', occurred_on: '2026-10-01', date_precision: 'day',
+    payload: { sign: 'standing' }, provenance: prov, recorded_at: '2026-10-01T05:02:00.000Z',
+  });
+  const read = (on: string) => {
+    const r = breedingForAnimal(getAnimal(db, 'BD-0001')!, eventsForAnimal(db, 'BD-0001'), on);
+    return [r.view?.state, r.view?.heat_sign_before_service, r.tasks.map((t) => t.kind)];
+  };
+  assert.deepEqual(read('2026-10-01'), ['bred', 'seen', []]);
+  assert.deepEqual(read('2026-10-25'), ['bred', 'seen', ['heat_watch']]);
+  assert.deepEqual(read('2026-11-24'), ['unconfirmed', 'seen', ['heat_watch', 'pregnancy_check']]);
 });

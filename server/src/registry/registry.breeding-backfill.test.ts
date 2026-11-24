@@ -307,3 +307,20 @@ test('the CLI says when there is nothing new to write', () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('a file listing the service before its same-day heat reads bred, not a return to heat', () => {
+  const db = herd();
+  const file = {
+    cases: [{
+      animal_id: 'BD-0001',
+      source_form: 'recall',
+      events: [
+        { type: 'insemination', occurred_on: '2026-01-20', date_precision: 'day', payload: { service_type: 'ai' }, allow: ['no_heat_sign'] },
+        { type: 'heat_observed', occurred_on: '2026-01-20', date_precision: 'day', payload: { sign: 'standing' } },
+      ],
+    }],
+  };
+  assert.equal(saveBackfill(db, file, 'adnan').written, true);
+  const v = deriveReproduction({ events: eventsForAnimal(db, 'BD-0001'), asOf: '2026-01-25', inMilk: false });
+  assert.deepEqual([v?.state, v?.heat_sign_before_service], ['bred', 'seen']);
+});

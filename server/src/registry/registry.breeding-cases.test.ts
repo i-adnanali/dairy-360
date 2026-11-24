@@ -240,3 +240,15 @@ test("every fixture animal's current case agrees with deriveReproduction", () =>
   }
   assert.equal(seen, 11);
 });
+
+test('a re-service recorded before its untimed heat on the same day: the first case failed, the second pending', () => {
+  const cases = breedingCases([svc('2026-09-10'), svc('2026-10-01'), heat('2026-10-01')], '2026-10-21', false);
+  assert.deepEqual(cases.map((c) => [c.services.map((s) => s.occurred_on), c.outcome]), [
+    [['2026-09-10'], 'failed'],
+    [['2026-10-01'], 'pending'],
+  ]);
+});
+
+test('a service, then its untimed heat recorded after it on the same day: one pending case', () => {
+  assert.deepEqual(breedingCases([svc('2026-10-01'), heat('2026-10-01')], '2026-11-24', false).map((c) => c.outcome), ['pending']);
+});

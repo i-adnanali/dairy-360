@@ -65,6 +65,8 @@ The earliest day a check's result counts:
 
 Events are taken in canonical order with superseded ones dropped, then any event dated after `as_of` is dropped. With no insemination left there is no view (`null`).
 
+One breeding rule changes the canonical order (`breedingOrder` in `reproduction.ts`): a `heat_observed` on the same calendar day as an `insemination`, where either of the two has no `occurred_time`, goes before that insemination, whatever order they were recorded in. It is the service's heat sign, the same heat `heat_sign_before_service` counts, never a return to heat. When both have a time, the times decide: a heat at 18:00 after a service at 06:00 on the same day is a return (rule 11). The cases (`breedingCases`) take the same order.
+
 The anchor is the last insemination. An earlier insemination joins the case when no calving, abortion, heat observation or negative check lies between it and the service after it; the walk stops at the first one that does not join. `services_in_case` counts them and `ambiguous_attribution` is true when there is more than one.
 
 For one service the earliest conception is its date. The latest is the last day of its month for `month` precision, otherwise its date, plus `exposure_days` for a `bull_exposure`. Across the case, `conception_earliest` is the smallest earliest and `conception_latest` the largest latest. Let W be the days between them and T the days from `conception_earliest` to `as_of`.
