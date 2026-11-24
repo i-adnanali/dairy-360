@@ -4,12 +4,14 @@ import assert from 'node:assert';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { test } from 'node:test';
+import { mock, test } from 'node:test';
 
 import { BACKFILL_USAGE, backfillMain, parseBackfillArgs } from './breed-backfill';
 import { checkBackfill, parseBackfillFile, saveBackfill } from './breeding-backfill';
 import { CliError } from './cli';
 import { addAcquired, freshDb } from './fixtures';
+import { canonicalOrder, effectiveEvents } from './project';
+import { deriveReproduction } from './reproduction';
 import { eventsForAnimal } from './store';
 import type { Db } from './schema';
 
@@ -156,6 +158,11 @@ test('a malformed file is refused before anything is checked or written', () => 
     { cases: [{ ...cleanCase, events: [{ ...noHeatService, allow: ['everything'] }] }] },
     { cases: [{ ...cleanCase, events: [{ ...noHeatService, notes: 'x' }] }] },
     { cases: [{ ...cleanCase, events: [{ ...noHeatService, date_precision: 'sometime' }] }] },
+    { cases: [{ ...cleanCase, source_form: 'direct_entry' }] },
+    { cases: [{ ...cleanCase, animal_id: ' BD-0001' }] },
+    { cases: [{ ...cleanCase, animal_id: 'BD-0001 ' }] },
+    { cases: [{ ...cleanCase, events: [{ ...noHeatService, occurred_time: '24:00' }] }] },
+    { cases: [{ ...cleanCase, events: [{ ...noHeatService, occurred_time: '07:60' }] }] },
   ];
   for (const file of bad) {
     assert.throws(() => parseBackfillFile(file), CliError, JSON.stringify(file));
@@ -177,6 +184,7 @@ test('the CLI reads --save as a switch and needs a file and a recorder', () => {
   assert.throws(() => p('--file=a.json'), CliError);
   assert.throws(() => p('--file=a.json', '--recorded-by=adnan', '--force'), CliError);
   assert.match(BACKFILL_USAGE, /opens the registry database/);
+  assert.match(BACKFILL_USAGE.replace(/\s+/g, ' '), /writes no rows; like every registry:\* command, opening the database applies any pending migration first/);
 });
 
 test('the CLI checks without --save, saves with it, and exits non-zero on anything held back', () => {
@@ -193,8 +201,107 @@ test('the CLI checks without --save, saves with it, and exits non-zero on anythi
     assert.deepEqual(breedingRows(db, 'BD-0001'), []);
     assert.equal(backfillMain([`--file=${good}`, '--recorded-by=adnan', '--save'], db), 0);
     assert.equal(breedingRows(db, 'BD-0001').length, 2);
+    assert.equal(backfillMain([`--file=${held}`, '--recorded-by=adnan'], db), 1);
     assert.equal(backfillMain([`--file=${held}`, '--recorded-by=adnan', '--save'], db), 1);
     assert.deepEqual(breedingRows(db, 'BD-0003'), []);
+  } finally {
+    console.log = log;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('rows of the same day keep file order even when the clock does not move', () => {
+  // A frozen clock gives every row the same instant: the tie used to fall to the random id.
+  mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-11-24T08:00:00.000Z') });
+  try {
+    for (let i = 0; i < 25; i++) {
+      const db = herd();
+      const file = {
+        cases: [{
+          animal_id: 'BD-0001',
+          source_form: 'recall',
+          events: [
+            { type: 'heat_observed', occurred_on: '2026-01-20', date_precision: 'day', payload: { sign: 'standing' } },
+            { type: 'insemination', occurred_on: '2026-01-20', date_precision: 'day', payload: { service_type: 'ai' } },
+          ],
+        }],
+      };
+      assert.equal(saveBackfill(db, file, 'adnan').written, true);
+      const events = eventsForAnimal(db, 'BD-0001');
+      assert.deepEqual(
+        canonicalOrder(effectiveEvents(events)).filter((e) => e.type !== 'acquired').map((e) => e.type),
+        ['heat_observed', 'insemination'],
+      );
+      assert.equal(deriveReproduction({ events, asOf: '2026-01-25', inMilk: false })?.state, 'bred');
+    }
+  } finally {
+    mock.timers.reset();
+  }
+});
+
+test('a second service on the same day at another time is written, not taken as on record', () => {
+  const db = herd();
+  const file = {
+    cases: [{
+      animal_id: 'BD-0001',
+      source_form: 'recall',
+      events: [
+        { type: 'heat_observed', occurred_on: '2026-01-20', occurred_time: '05:30', date_precision: 'day', payload: { sign: 'standing' } },
+        { type: 'insemination', occurred_on: '2026-01-20', occurred_time: '06:00', date_precision: 'day', payload: { service_type: 'ai' } },
+        { type: 'insemination', occurred_on: '2026-01-20', occurred_time: '18:00', date_precision: 'day', payload: { service_type: 'ai' }, allow: ['ambiguous_service'] },
+      ],
+    }],
+  };
+  assert.deepEqual(checkBackfill(db, file, 'adnan').rows.map((r) => r.outcome), ['would_write', 'would_write', 'would_write']);
+  const saved = saveBackfill(db, file, 'adnan');
+  assert.equal(saved.event_ids.length, 3);
+  assert.deepEqual(breedingRows(db, 'BD-0001').map((e) => e.occurred_time), ['05:30', '06:00', '18:00']);
+});
+
+test('a row repeated within one file is checked like any other row, not taken as on record', () => {
+  const db = herd();
+  const ai = { type: 'insemination', occurred_on: '2026-01-20', date_precision: 'day', payload: { service_type: 'ai' }, allow: ['no_heat_sign'] };
+  const report = checkBackfill(db, { cases: [{ animal_id: 'BD-0001', source_form: 'recall', events: [ai, ai] }] }, 'adnan');
+  assert.equal(report.rows[0].outcome, 'would_write');
+  const second = report.rows[1];
+  assert.ok(second.outcome === 'needs_allow');
+  assert.deepEqual(second.warnings.map((w) => w.check), ['ambiguous_service']);
+});
+
+test('a file that partly overlaps the record writes only the new rows, checked against the existing ones', () => {
+  const db = herd();
+  saveBackfill(db, { cases: [cleanCase] }, 'adnan');
+  const laterService = { type: 'insemination', occurred_on: '2026-02-01', date_precision: 'day', payload: { service_type: 'ai' }, allow: ['no_heat_sign'] };
+  const check = { type: 'pregnancy_check', occurred_on: '2026-03-15', date_precision: 'day', payload: { method: 'ultrasound', result: 'positive' } };
+  const file = { cases: [{ ...cleanCase, events: [...cleanCase.events, laterService, check] }] };
+
+  const report = checkBackfill(db, file, 'adnan');
+  assert.deepEqual(report.rows.map((r) => r.outcome), ['already_on_record', 'already_on_record', 'needs_allow', 'would_write']);
+  const held = report.rows[2];
+  assert.ok(held.outcome === 'needs_allow');
+  // The earlier service is the one already on record.
+  assert.match(held.warnings[0].message, /the first on 2026-01-20/);
+
+  file.cases[0].events[2] = { ...laterService, allow: ['no_heat_sign', 'ambiguous_service'] };
+  const saved = saveBackfill(db, file, 'adnan');
+  assert.equal(saved.event_ids.length, 2);
+  assert.equal(breedingRows(db, 'BD-0001').length, 4);
+});
+
+test('the CLI says when there is nothing new to write', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'breed-backfill-'));
+  const log = console.log;
+  const out: string[] = [];
+  console.log = (...a: unknown[]) => { out.push(a.join(' ')); };
+  try {
+    const good = path.join(dir, 'good.json');
+    writeFileSync(good, JSON.stringify({ cases: [cleanCase] }));
+    const db = herd();
+    backfillMain([`--file=${good}`, '--recorded-by=adnan', '--save'], db);
+    out.length = 0;
+    assert.equal(backfillMain([`--file=${good}`, '--recorded-by=adnan', '--save'], db), 0);
+    assert.ok(out.some((l) => l.includes('Nothing new to write.')), out.join('\n'));
+    assert.ok(!out.some((l) => l.includes('written:')), out.join('\n'));
   } finally {
     console.log = log;
     rmSync(dir, { recursive: true, force: true });

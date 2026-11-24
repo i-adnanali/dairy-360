@@ -3,7 +3,7 @@
 //   npm run registry:breed-backfill -w server -- --file=cases.json --recorded-by=adnan [--save]
 //
 // A thin shell over checkBackfill / saveBackfill (breeding-backfill.ts), which
-// hold every rule. Without --save it prints the report and writes nothing; with
+// hold every rule. Without --save it prints the report and writes no rows; with
 // it, the whole file is written in one transaction or not at all.
 
 import { readFileSync } from 'node:fs';
@@ -24,12 +24,16 @@ order given. Every row goes through the same write path as registry:breed, so a
 later row of a case is checked with the earlier ones already in place.
 
 This command opens the registry database the other registry:* commands open --
-in normal use that is the REAL one, server/dairy.db.
+in normal use that is the REAL one, server/dairy.db. Without --save it writes no
+rows; like every registry:* command, opening the database applies any pending
+migration first.
 
   --file=<path>        { "cases": [ { "animal_id", "source_form", "events": [...] } ] }
   --recorded-by=<id>   who is entering this backfill
   --save               write the file. A switch: bare or =true is on, =false is off.
-                       Without it, nothing is written.
+
+source_form is one of recall | cycle_card | daily_herd_sheet | import. On the
+same day, give both rows a time or neither.
 
 Each row reports one of:
   would_write          it will be written (with --save: it was)
@@ -38,7 +42,7 @@ Each row reports one of:
   needs_allow          a warning fired that the row's "allow" does not name
 
 The exit code is non-zero when any row is refused or needs an allow, and then
---save writes nothing at all, not even the other rows.
+--save writes no rows at all, not even the other rows.
 `.trim();
 
 export function parseBackfillArgs(argv: string[]): { file: string; recordedBy: string; save: boolean } {
@@ -94,7 +98,7 @@ export function backfillMain(argv: string[], handle?: Db): number {
   // Importing usage/help must never open or migrate the farm database.
   const db = handle ?? (require('../db') as typeof import('../db')).db;
 
-  console.log(`registry:breed-backfill  ${args.file}${args.save ? '  (--save)' : '  (check only, nothing written)'}`);
+  console.log(`registry:breed-backfill  ${args.file}${args.save ? '  (--save)' : '  (check only, no rows written)'}`);
   if (!args.save) {
     const report = checkBackfill(db, raw, args.recordedBy);
     printReport(report);
@@ -103,9 +107,11 @@ export function backfillMain(argv: string[], handle?: Db): number {
   const result = saveBackfill(db, raw, args.recordedBy);
   printReport(result.report);
   console.log(
-    result.written
-      ? `  written: ${result.event_ids.length} event(s) in one transaction`
-      : '  nothing written: fix the refused rows, or name the warnings in "allow", and run again',
+    !result.written
+      ? '  no rows written: fix the refused rows, or name the warnings in "allow", and run again'
+      : result.event_ids.length === 0
+        ? '  Nothing new to write.'
+        : `  written: ${result.event_ids.length} event(s) in one transaction`,
   );
   return result.written ? 0 : 1;
 }

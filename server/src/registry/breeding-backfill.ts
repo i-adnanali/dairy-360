@@ -10,10 +10,16 @@
 // commits it only when no row was refused or needs an allow, so a file is
 // written whole or not at all.
 //
+// Each row gets a strictly increasing recorded_at, so rows of the same day keep
+// file order even when the clock does not move between them (the canonical
+// order breaks a same-time tie on recorded_at, then on the random id).
+//
 //   would_write        recordBreedingEvent accepted it (any warning it raised is
 //                      named in the row's `allow`, and recorded from the condition)
-//   already_on_record  an effective event with the same animal, type, date,
-//                      precision and payload exists; not written again
+//   already_on_record  an effective event ALREADY ON RECORD before this run has the
+//                      same animal, type, date, time, precision and payload; not
+//                      written again. Rows written earlier in the same run never
+//                      count, so a real second same-day service is not dropped.
 //   refused            a stage 1 refusal: code and message
 //   needs_allow        a warning fired that the row's `allow` does not name
 
@@ -23,9 +29,12 @@ import { recordBreedingEvent } from './breeding';
 import { assertEventPayload } from './events';
 import { effectiveEvents } from './project';
 import { eventsForAnimal, stableStringify } from './store';
-import { BREEDING_EVENT_TYPES, BREEDING_OVERRIDDEN_CHECKS, DATE_PRECISIONS, SOURCE_FORMS } from './types';
+import { BREEDING_EVENT_TYPES, BREEDING_OVERRIDDEN_CHECKS, DATE_PRECISIONS } from './types';
 import type { Db } from './schema';
-import type { BreedingEventType, BreedingOverriddenCheck, DatePrecision, SourceForm } from './types';
+import type { BreedingEventType, BreedingOverriddenCheck, DatePrecision, RegistryEvent, SourceForm } from './types';
+
+/** Where backfilled rows come from. `direct_entry` is the page, not a backfill. */
+export const BACKFILL_SOURCE_FORMS = ['recall', 'cycle_card', 'daily_herd_sheet', 'import'] as const satisfies readonly SourceForm[];
 
 export interface BackfillEvent {
   type: BreedingEventType;
@@ -76,7 +85,7 @@ export interface BackfillSaveResult {
 }
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const TIME_RE = /^\d{2}:\d{2}$/;
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -118,7 +127,10 @@ export function parseBackfillFile(raw: unknown): BackfillFile {
     if (typeof c.animal_id !== 'string' || c.animal_id.trim() === '') {
       throw new CliError(`${at}.animal_id must be a registry serial, e.g. "BD-0012"`);
     }
-    const source_form = oneOf(`${at}.source_form`, c.source_form, SOURCE_FORMS);
+    if (c.animal_id !== c.animal_id.trim()) {
+      throw new CliError(`${at}.animal_id has spaces around it: ${JSON.stringify(c.animal_id)}`);
+    }
+    const source_form = oneOf(`${at}.source_form`, c.source_form, BACKFILL_SOURCE_FORMS);
     if (!Array.isArray(c.events) || c.events.length === 0) {
       throw new CliError(`${at}.events must be a non-empty list`);
     }
@@ -137,7 +149,7 @@ export function parseBackfillFile(raw: unknown): BackfillFile {
       const date_precision = oneOf(`${eat}.date_precision`, e.date_precision, DATE_PRECISIONS);
       const occurred_time = optText(`${eat}.occurred_time`, e.occurred_time);
       if (occurred_time !== null && !TIME_RE.test(occurred_time)) {
-        throw new CliError(`${eat}.occurred_time must be HH:MM, got ${JSON.stringify(occurred_time)}`);
+        throw new CliError(`${eat}.occurred_time must be HH:MM from 00:00 to 23:59, got ${JSON.stringify(occurred_time)}`);
       }
       if (!isObject(e.payload)) throw new CliError(`${eat}.payload must be an object`);
       let allow: BreedingOverriddenCheck[] = [];
@@ -161,8 +173,8 @@ export function parseBackfillFile(raw: unknown): BackfillFile {
   return { cases };
 }
 
-/** The effective event this row repeats, or null. Payloads compare by canonical JSON. */
-function onRecord(db: Db, animalId: string, e: BackfillEvent): string | null {
+/** The event on record before the run that this row repeats, or null. Payloads compare by canonical JSON. */
+function onRecord(before: RegistryEvent[], e: BackfillEvent): string | null {
   let payload: string;
   try {
     payload = stableStringify(assertEventPayload(e.type, e.payload) as unknown as Record<string, unknown>);
@@ -170,10 +182,11 @@ function onRecord(db: Db, animalId: string, e: BackfillEvent): string | null {
     // An invalid payload matches nothing; the write path refuses it.
     return null;
   }
-  const same = effectiveEvents(eventsForAnimal(db, animalId)).find(
+  const same = before.find(
     (x) =>
       x.type === e.type &&
       x.occurred_on === e.occurred_on &&
+      (x.occurred_time ?? null) === e.occurred_time &&
       x.date_precision === e.date_precision &&
       stableStringify(x.payload) === payload,
   );
@@ -189,10 +202,20 @@ class Rollback {
 function run(db: Db, file: BackfillFile, recordedBy: string): { report: BackfillReport; event_ids: string[] } {
   const rows: BackfillRow[] = [];
   const event_ids: string[] = [];
+  // What was on record before this run, per animal: a row matches only these.
+  const before = new Map<string, RegistryEvent[]>();
+  for (const c of file.cases) {
+    if (!before.has(c.animal_id)) before.set(c.animal_id, effectiveEvents(eventsForAnimal(db, c.animal_id)));
+  }
+  let last = 0;
+  const nextRecordedAt = (): string => {
+    last = Math.max(Date.now(), last + 1);
+    return new Date(last).toISOString();
+  };
   file.cases.forEach((c, case_index) => {
     c.events.forEach((e, event_index) => {
       const at = { case_index, event_index, animal_id: c.animal_id, type: e.type, occurred_on: e.occurred_on };
-      const existing = onRecord(db, c.animal_id, e);
+      const existing = onRecord(before.get(c.animal_id) ?? [], e);
       if (existing !== null) {
         rows.push({ ...at, outcome: 'already_on_record', event_id: existing });
         return;
@@ -218,6 +241,7 @@ function run(db: Db, file: BackfillFile, recordedBy: string): { report: Backfill
           allow_no_heat_sign: allows.has('no_heat_sign'),
           allow_heat_after_positive: allows.has('heat_after_positive'),
           override_reason: e.override_reason,
+          recorded_at: nextRecordedAt(),
         });
         event_ids.push(event_id);
         rows.push({ ...at, outcome: 'would_write' });

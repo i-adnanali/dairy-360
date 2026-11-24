@@ -53,6 +53,11 @@ export interface RecordBreedingEventInput {
   allow_heat_after_positive?: boolean;
   /** Free text kept with an override that happened. Optional. */
   override_reason?: string | null;
+  /**
+   * The timestamp to store, ISO. Defaults to now. A batch writer passes strictly
+   * increasing values so rows of the same day keep the order it wrote them in.
+   */
+  recorded_at?: string;
 }
 
 /**
@@ -160,7 +165,7 @@ export function recordBreedingEvent(db: Db, input: RecordBreedingEventInput): { 
 
   // The candidate carries the timestamp the event will be stored with, so on a
   // same-day tie it sorts after the events already there and its warning holds.
-  const recordedAt = new Date().toISOString();
+  const recordedAt = input.recorded_at ?? new Date().toISOString();
   const candidate: RegistryEvent = {
     id: 'candidate',
     animal_id: input.animal_id,
