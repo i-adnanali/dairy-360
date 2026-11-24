@@ -29,8 +29,7 @@ describe('Farm monitor, arriving from Today with an event', () => {
     Element.prototype.scrollIntoView = function (this: Element) { scrolled.push(this); };
     try {
       const f = TestBed.createComponent(FarmMonitor);
-      await f.whenStable(); f.detectChanges();
-      await new Promise((r) => setTimeout(r, 0));
+      await f.whenStable();
       const el = f.nativeElement as HTMLElement;
       expect(scrolled).toEqual([el.querySelector('[data-event="e2"]')]);
     } finally {
