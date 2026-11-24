@@ -100,9 +100,11 @@ export interface AnimalDetail {
   } | null;
   events: TimelineEvent[];
   /**
-   * Her reproductive state as of farm today; null for a male, a female that
-   * has left the herd, or a female with no service on record. The page draws
-   * the badge only when this is a view.
+   * Her reproductive state as of farm today; null for a male, for a female
+   * that has left the herd (even one with services on record), or for a
+   * current female with no service on record. The page draws the badge only
+   * when this is a view, and says "No service recorded." only for a current
+   * female.
    */
   reproduction: ReproductionView | null;
   /**

@@ -117,7 +117,7 @@
                 @if (r.ambiguous_attribution) {
                   <p appHelp data-role="ambiguous-note">{{ r.services_in_case }} services count as one case here; nothing recorded between them rules one out.</p>
                 }
-              } @else {
+              } @else if (d.breeding_entry) {
                 <p appHelp data-role="no-service">No service recorded.</p>
               }
               @if (d.breeding_entry) {
@@ -128,7 +128,7 @@
                   <app-breeding-form [animalId]="d.animal.id" [initialKind]="f.kind" [saved]="onSaved" />
                 }
               } @else {
-                <p appHelp data-role="entry-closed">She has left the herd, so no breeding event can be entered for her.</p>
+                <p appHelp data-role="entry-closed">She has left the herd, so breeding entry is closed here. Her services stay on the Timeline.</p>
               }
             </section>
           }

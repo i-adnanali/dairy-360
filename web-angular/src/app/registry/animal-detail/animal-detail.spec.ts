@@ -122,8 +122,10 @@ describe('AnimalDetailView Breeding tab', () => {
   it('a female that has left the herd keeps the tab, with no form and a note saying why', async () => {
     const tab = await openBreeding(await mount(departed()));
     expect(tab.querySelector('app-breeding-form')).toBeNull();
+    // Her view is null because she left, not because she was never served.
+    expect(tab.querySelector('[data-role="no-service"]')).toBeNull();
     expect(tab.querySelector('[data-role="entry-closed"]')?.textContent?.trim()).toBe(
-      'She has left the herd, so no breeding event can be entered for her.',
+      'She has left the herd, so breeding entry is closed here. Her services stay on the Timeline.',
     );
     expect(tab.textContent).not.toContain('pilot');
   });
@@ -167,7 +169,7 @@ describe('AnimalDetailView Breeding tab', () => {
   it('the tab shows each derived note under the pregnancy', async () => {
     const tab = await openBreeding(
       await mount(detail({
-        reproduction: view, breeding_entry: false,
+        reproduction: view,
         reproduction_notes: [{ code: 'wide_window', text: 'The calving window is wider because the service date is known to the month only.' }],
       })),
     );
