@@ -637,7 +637,7 @@ Rules, in order, first match wins:
 
 **If the birth date is unknown, rule 2 cannot fire** and the animal falls through to `heifer`/`male` even if it is visibly a calf. That is a documented consequence, not a bug: the fix is to enter an *estimated* birth date, which the precision qualifier makes safe to do.
 
-`pregnant` is deliberately absent — it requires breeding events, which are step 5. At step 5 it gets added and the two vocabularies converge except for `heifer`, `male` and `departed`.
+`pregnant` is deliberately absent from this vocabulary, and stays absent. Reproductive state is a **second derived axis**, computed on read by `deriveReproduction` (`registry/reproduction.ts`) from the breeding events, never stored in `registry_animal_status`. It is always on: the breeding feature has no switch. The animal response carries it as `reproduction` beside `status`, and the two do not interact. See [REGISTRY_BREEDING.md](REGISTRY_BREEDING.md) and [the breeding reference](../reference/registry/breeding.md).
 
 ### Where the calf threshold lives
 
@@ -662,6 +662,8 @@ The CLI came first and was the only way in for most of this cycle. **It is no lo
 | `registry:rebuild` | projection tables only, from the event log |
 | `registry:backup` | nothing in the database — a snapshot + dump into `server/backups/` |
 | `verify:registry` | nothing |
+
+Breeding added two more, documented in [the Registry CLI guide](../guides/registry-cli.md#breeding-events): `registry:breed` writes one breeding event (with `--supersedes` for a correction), and `registry:breed-backfill` checks, and with `--save` writes, a JSON file of breeding cases the owner picked ([Breeding backfill](../guides/registry-cli.md#breeding-backfill)).
 
 `verify:registry` also takes `--db=<path>`, which points it at a backup instead of the live database: read-only, never migrated. That is what makes a backup checkable before you need it, and it reuses invariants 0–28 plus feed integrity check 29 and health integrity check 30 rather than inventing a second notion of "valid". Feed and health checks are skipped for snapshots predating their respective tables.
 
@@ -829,6 +831,9 @@ Mounted at `/api/registry` on the real server ([index.ts](../../server/src/index
 | POST | `/wage-payments` | `recordWagePayment` — only an `adjustment` may be signed, and it must say why |
 | POST | `/wage-payments/:id/delete` | remove one wage payment, by id |
 | POST | `/rebuild` | `registry:rebuild` |
+| GET | `/breeding/board?on=` | the breeding tasks and cases as of a date; see [the breeding reference](../reference/registry/breeding.md) |
+| GET | `/breeding/figures?on=&period=` | the eight herd breeding figures, over `12m` (default) or `all` |
+| POST | `/breeding/events` | one breeding event for a current female; `supersedes_id` makes it a correction of an earlier one |
 | GET | `/feed/recipients` | Date-specific herd and milking recipient suggestions |
 | GET | `/feed/history` | Date-range daily coverage |
 | GET | `/feed/overview` | Recorded costs, quantities and feeding coverage |
@@ -1116,13 +1121,13 @@ There is no client-side re-implementation of any herd rule. The server already r
 
 A refusal whose `field` this form does not render is shown at form level rather than dropped: an unknown field is still the server saying something true, and swallowing it would leave a form that refuses and says nothing. A **non**-refusal (a 500, an unreachable server) says so explicitly — it is not something to fix in the form, and presenting it as such sends the operator hunting for a mistake they did not make.
 
-Overrides — `--allow-near-duplicate`, `--allow-after-departure` — are keyed on the error **code**, not nested in the form-level error block. Both refusals name `occurred_on`, so their messages bind to the date control; a button nested in the form-level block was **unreachable**, which a form test caught.
+Overrides — `--allow-near-duplicate`, `--allow-after-departure` and the seven more added since (nine names in all, `OVERRIDDEN_CHECKS` in `server/src/registry/types.ts`: `near_duplicate_calving`, `animal_departed`, `ambiguous_service`, `early_check`, `check_without_service`, `no_heat_sign`, `heat_after_positive`, `calving_before_window`, `calving_past_extreme`) — are keyed on the error **code**, not nested in the form-level error block. Both refusals name `occurred_on`, so their messages bind to the date control; a button nested in the form-level block was **unreachable**, which a form test caught.
 
 #### The general rule: a refusal with an escape hatch binds on `code`, in its own block
 
 **Field-binding is right for validation and wrong for anything with a way past it.** Bind a *message* by `field` — that is what `field` is for, and it is why the controls are named after domain columns. But bind the *override* by `code`, in a block of its own, never nested inside the form-level error block.
 
-The reason is that the two placements are driven by different things and only look like one decision. `field` decides where the message goes; whether an override exists is a property of the `code`. So an override nested in the form-level block is reachable **only for refusals that name no field** — and `animal_departed` and `near_duplicate_calving`, the only two codes that have overrides, both name `occurred_on`. Every refusal that could offer a way past was therefore the one refusal whose way past did not render, and the failure is silent in the worst way: the message appears, correctly placed, and reads as a hard wall.
+The reason is that the two placements are driven by different things and only look like one decision. `field` decides where the message goes; whether an override exists is a property of the `code`. So an override nested in the form-level block is reachable **only for refusals that name no field** — and `animal_departed` and `near_duplicate_calving` — the only two codes that had overrides when this was written; nine names exist now (`OVERRIDDEN_CHECKS` in `server/src/registry/types.ts`) — both name `occurred_on`, and so do the breeding and calving-window warnings, which also carry a `warnings` list. Every refusal that could offer a way past was therefore the one refusal whose way past did not render, and the failure is silent in the worst way: the message appears, correctly placed, and reads as a hard wall.
 
 `FormState.hasCode()` exists for exactly this, and the rule generalizes to any code added later with an `allow_*` companion: if the server offers a way past, the way past is keyed on the code.
 

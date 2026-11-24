@@ -1,6 +1,6 @@
 # Acceptance status
 
-Updated **23 November 2026**, for branch `breeding` (see *Breeding stage 4* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
+Updated **24 November 2026**, for branch `breeding` (see *Breeding stage 5* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
 
 ## Latest recorded results
 
@@ -12,6 +12,25 @@ Run on 16 November 2026 against branch `breeding-stage-1` (base `2be39a4`), Node
 | Server tests (`npm test -w server`) | 841 passed, 0 failed, 0 skipped |
 | `check:docs`, `build:shared`, `check:templates`, typecheck | Pass |
 | Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.12 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
+
+## Breeding stage 5
+
+Run on 24 November 2026 against branch `breeding` at `66e8bd9`, Node 22.22.3. Breeding has no switch any more: **merging this branch turns it on for the real registry. Merging is the owner's decision.**
+
+| Check | Result |
+|---|---|
+| Frontend tests (`npm test -w web-angular`) | 724 passed in 69 files |
+| Server tests (`npm test -w server`) | 1024 passed, 0 failed |
+| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass (docs: 78 files, 0 errors; templates: 106 files) |
+| Production build | Builds, with the stage 4 warnings (initial bundle 712.73 kB against the 500 kB budget; six component stylesheets over 4 kB, including `breeding-page.css`) |
+
+- **No flag, harness only.** The default harness herd and the breeding herd both serve `GET /breeding/board`, `GET /breeding/figures` and `/today`'s `breeding` with no environment variable; the animal response always carries `reproduction`, `reproduction_notes`, `breeding_tasks` and `breeding_entry`; Herd › Breeding is always in the menu.
+- **Entry for the whole herd.** The Record service picker lists all 11 breeding females of the sample herd (the pilot had 2). A service for Moti (BD-0006, outside the old pilot) raised `ambiguous_service` and `no_heat_sign`; `Save over these checks` wrote it with both recorded.
+- **Correcting from the page.** On Moti's Timeline, `Correct` showed on her effective services only. It opened the form already filled in ("23 Nov 2026"), with the kind locked, the line "Correcting the service of 23 Nov 2026. The original stays on her record." and `Save correction`. Moving the date to 22 November raised both warnings again; saving over them announced "Corrected the service on BD-0006.". The 23 November row stays on record, marked as corrected, the 22 November row names it in `supersedes_id`, her state counts from 22 November, and `Correct` is no longer offered on the corrected row.
+- **Backfill, on a copy only.** `server/dairy.db` was copied byte for byte outside the repository. On the copy, two females were added and a two-case file (a heat, a service and a check on a cycle card; a month-precision service from recall) was run through `checkBackfill` and `saveBackfill` from a scratch script: the check reported all 4 rows `would_write` and wrote nothing; the save wrote all 4; a second check reported all 4 `already_on_record` and a second save wrote nothing. `verifyAll` on the copy afterwards: 0 violations. The `registry:breed-backfill` command itself was not run.
+- **Migration rehearsal:** no migration in this stage. The copy was at version 13 before and after (0 applied), events 0, 0 violations.
+- **The real database was migrated by a test run.** On 24 November at 07:15:32 a test run during this stage loaded the real `server/dairy.db` (a command's entry function was called from a test without its database handle) and so applied migrations 12 and 13 to it: version 11 to 13. Checked on copies: the file is line-for-line identical to the 16 November file migrated on a copy, so the schema changed and no row was written (the registry tables were and are empty). `server/src/db.ts` now refuses to open the real file under the test runner (`db-guard.ts`), so no test can do this again. The nightly backup job stays unloaded; the owner reloads it after the merge.
+- **Not checked:** nothing has run on the real herd; no owner walkthrough; the live-model regression suites (`npm run test:regression`) are now refused by the guard until they get their own database; the walk was at desktop width only.
 
 ## Breeding stage 4
 

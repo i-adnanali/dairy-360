@@ -14,9 +14,11 @@
 //     never run, and would report nothing. A silent skip forever.
 //   - Quoting the glob to "fix" it hands globbing to node, which DOES recurse,
 //     and pulls in the three regression files. Those import ../db at module
-//     level (opening the database) and, without RUN_REGRESSION and an API key,
-//     emit `ok N - ... # SKIP` -- which the TAP summary counts as passing. CI
-//     would report a green run for a suite that never executed.
+//     level (opening the database). Before the database guard (db-guard.ts)
+//     they would, without RUN_REGRESSION and an API key, emit `ok N - ... # SKIP`,
+//     which the TAP summary counts as passing. Now the guard refuses the real
+//     farm database under the test runner, so a regression file pulled into
+//     `npm test` fails at load instead of showing as skipped.
 //
 // node 22 has no --test-exclude-pattern; --test-name-pattern and
 // --test-skip-pattern filter by TEST NAME and still load the file, so neither

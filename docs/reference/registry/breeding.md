@@ -182,4 +182,4 @@ Migration 10 widens the event table so it can hold the five breeding types. It i
 
 ## Not built yet
 
-The page's control for correcting an event, and the backfill command (stage 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar is not built.
+Retracting a breeding event ("this never happened") — [OPEN-064](../../OPEN.md#open-064). The Breeding page's day-by-day progress bar.

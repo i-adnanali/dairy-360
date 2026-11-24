@@ -308,9 +308,9 @@ Built when something needs them, not before.
   Breeding is no longer in this list: stage 1 is read-only derivation, see [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md).
 <a id="open-062"></a>
 
-- **OPEN-062** — **Breeding stage 5 is not built**: general availability, page correction and
-  backfill —
-  [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#what-stage-1-is)
+- **OPEN-062** — **Closed.** Breeding stages 2 to 5 are built on branch `breeding` (general
+  availability, page correction and backfill in stage 5); merging turns breeding on —
+  [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-5-general-availability-page-correction-and-backfill)
 <a id="open-063"></a>
 
 - **OPEN-063** — **`GESTATION_DAYS = 310` in `calving.ts` is not revisited**; it is a
@@ -325,15 +325,20 @@ Built when something needs them, not before.
   [Breeding](reference/registry/breeding.md#correcting-a-breeding-event)
 <a id="open-065"></a>
 
-- **OPEN-065** — **A breeding event entered on the page can only be corrected with
-  `registry:breed --supersedes`**; decide whether the page needs a Correct action before general
-  availability —
-  [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-2-entry-for-services-and-checks-on-a-pilot)
+- **OPEN-065** — **Closed.** A breeding event is corrected from the animal's Timeline
+  (`Correct`), with the same refusals and warnings as a new entry —
+  [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-5-general-availability-page-correction-and-backfill)
 <a id="open-066"></a>
 
 - **OPEN-066** — **Closed.** An `override_checks` list replaces the single `override_check`
   column (migration 12), so two warnings can be recorded on one save; decided by the owner —
   [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-3-heat-entry-two-overrides-notes-and-tasks)
+<a id="open-067"></a>
+
+- **OPEN-067** — **The live-model regression suites are blocked**: `npm run test:regression`
+  loads `server/src/db.ts`, which now refuses the real farm database under the test runner (one
+  suite also re-seeds demo tables). They need their own database through an injectable handle
+  before they can run again — [testing.md](guides/testing.md)
 <a id="open-057"></a>
 
 - **OPEN-057** — Health/report real-farm acceptance remains unverified. Actual Chrome/Safari A4 Save-as-PDF output was verified on synthetic animal reports, including complete audit content and repeated long identity. Alternative-format support and further browser/report coverage were skipped on 9 October 2026; the known alternate-format limitation remains. See [current status and PDF evidence](reference/ui/acceptance-status.md), and the [original delivery record](records/REGISTRY_HEALTH.md#validation).
