@@ -175,3 +175,19 @@ Both are worded from `deriveReproduction`'s answer (the case the calving closes)
 | `FIGURES.periodDays` | 365 | farm-tunable default |
 
 **Not built.** The season split and target lines (no target is drawn, and none is invented). The Breeding page's day-by-day progress bar on Cases is not built. General availability, correcting a breeding event from the page, and the backfill command are stage 5.
+
+## Stage 5: general availability, page correction and backfill
+
+**Scope.** Stage 5 removes the flags, adds a Correct action to the Timeline and adds a backfill command. It adds no migration and no new number. Nothing here is stored beyond events: events are only ever added, and status, notes, tasks and figures stay computed on read.
+
+**Merging turns breeding on.** `REGISTRY_BREEDING` and `REGISTRY_BREEDING_PILOT` are removed. After this stage the feature has no flag, so merging the branch turns it on for the whole herd. Merging is the owner's decision. The pilot gate becomes "a current female": entry is open for any current female, and the stage 1 refusals stand.
+
+**Correcting from the page.** A correction made on the page is the stage 1 superseding write, through the same path as `registry:breed --supersedes`. It takes the same three refusals (same type, same animal, corrected once) and every stage 2-4 warning applies to the corrected event as to a new one. The caller can save over each warning, and the override is recorded from the condition, never from the flag. The original row is never changed.
+
+**Backfill.** `registry:breed-backfill` reads a JSON file of cases the owner picked. Each case is one animal, a `source_form` (`recall`, `cycle_card`, `herd_sheet` or `import`) and its events in the order given. It checks by default and prints a report per event: would write, already on record, refused (the stage 1 refusal) or needs an `allow` (a warning fired that the row does not name). Warnings are computed with the earlier rows of the same case already in place. `--save` is all-or-nothing: if any row is refused or needs an `allow`, nothing is written, not even the clean rows of other cases. Otherwise every new row is written in one transaction through `recordBreedingEvent`. It runs only for the cases the owner picks; nothing sweeps the herd.
+
+**A row already on record is skipped, not written twice.** An effective event with the same animal, type, date, precision and payload counts as already on record, so a backfill can be re-run safely.
+
+**Left open for the owner.** OPEN-064 (retraction, "this never happened") is not built. A wrong entry is still corrected by a superseding event.
+
+**No migration, no new number.** The constants stay imported from `reproduction.ts`. `GESTATION_DAYS = 310` in `calving.ts` is not read, changed or reused.
