@@ -168,9 +168,11 @@ Each fires only when the whole calving date lies outside the bound: a month- or 
 
 ## Correcting a breeding event
 
-A wrongly entered service, check or heat is corrected by writing a superseding event: `recordBreedingEvent` takes `supersedes_id`, and `registry:breed` takes `--supersedes=<event id>`. The original row stays in the table untouched; the new row carries `supersedes_id`, and `effectiveEvents()` drops the original, so the state follows the correction.
+A wrongly entered service, check or heat is corrected by writing a superseding event: `recordBreedingEvent` takes `supersedes_id`, and `registry:breed` takes `--supersedes=<event id>`; the page's `POST /breeding/events` takes `supersedes_id` and passes it unchanged ([HTTP API](http-api.md)). The original row stays in the table untouched; the new row carries `supersedes_id`, and `effectiveEvents()` drops the original, so the state follows the correction.
 
 - **Same animal, same type.** A service is corrected by a service, a check by a check. The corrected event is written as any other, so the four refusals above still apply to it.
+- **Warnings follow the correction.** The correcting event is the candidate for every stage 2-4 warning, with the event it replaces already left out by `effectiveEvents()`: correcting the only service does not make it an "earlier service in the case". A warning that still fires is saved over by its own flag, and the override is recorded on the correcting row from the condition.
+- **A malformed `supersedes_id`.** Over HTTP a value that is not a non-empty string is `invalid_payload` on `supersedes_id`; the three refusals below answer on the same field as for the CLI.
 - **Once per event.** An event can be superseded only once. To correct a correction, supersede the replacement, not the original.
 - **No retraction.** There is still no way to say "this never happened": a correction must be an event of the same type on the same animal. That remaining gap is [OPEN-064](../../OPEN.md#open-064).
 
@@ -180,4 +182,4 @@ Migration 10 widens the event table so it can hold the five breeding types. It i
 
 ## Not built yet
 
-Correcting a breeding event from the page, and the backfill command (stage 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar is not built.
+The page's control for correcting an event, and the backfill command (stage 5, [OPEN-062](../../OPEN.md#open-062)). The Breeding page's day-by-day progress bar is not built.

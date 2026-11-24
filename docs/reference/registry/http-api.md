@@ -38,7 +38,7 @@ Mounted at `/api/registry` on the real server ([index.ts](../../../server/src/in
 | POST | `/animals` | `addAcquiredAnimal` |
 | POST | `/animals/born-here` | `addFarmBornAnimal` — born on the farm, mother not known |
 | POST | `/events` | `appendLifeEvent` |
-| POST | `/breeding/events` | `recordBreedingEvent`, for any female; see [Breeding](breeding.md) |
+| POST | `/breeding/events` | `recordBreedingEvent`, for any female; an optional `supersedes_id` corrects an event ([Breeding](breeding.md#correcting-a-breeding-event)) |
 | POST | `/calvings` | `recordCalving` — `calf_id` present means link mode; the calving warnings in [Breeding](breeding.md#calving-warnings) |
 | POST | `/calvings/:eventId/correction` | `correctCalving`; the same calving warnings |
 | POST | `/milking/session` | one whole session, all rows or none |

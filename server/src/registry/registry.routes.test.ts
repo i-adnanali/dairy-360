@@ -1045,3 +1045,88 @@ test('POST /calvings/:id/correction before the window: 400 with warnings, 201 wi
   await ctx.close();
 });
 
+
+// ---------------------------------------------------------------------------
+// Breeding stage 5: POST /breeding/events with supersedes_id (a correction)
+// ---------------------------------------------------------------------------
+
+type EventRow = { id: string; type: string; occurred_on: string; supersedes_id: string | null; superseded_by_id: string | null; override_checks: string[] };
+type Detail = { events: EventRow[]; reproduction: { service: { occurred_on: string; event_id: string } | null } & Record<string, unknown> };
+
+async function heerService(ctx: Ctx): Promise<EventRow> {
+  const { body } = (await get(ctx, '/animals/BD-0007')) as unknown as { body: Detail };
+  return body.events.find((e) => e.type === 'insemination')!;
+}
+const SERVICE_PAYLOAD = { service_type: 'ai', exposure_days: null };
+const correction = (id: string, on: string, extra: object = {}) =>
+  ({ animal_id: 'BD-0007', type: 'insemination', occurred_on: on, date_precision: 'day', payload: SERVICE_PAYLOAD, supersedes_id: id, ...PROV, ...extra });
+
+test('a service is corrected to the next day: the old row is untouched, the new row supersedes it, her view follows', async () => {
+  const ctx = await breedingCtx();
+  const old = await heerService(ctx);
+  assert.equal(old.occurred_on, '2026-10-09');
+  // A heat the day before the corrected date, so the correction trips no warning of its own.
+  const heat = await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'heat_observed', occurred_on: '2026-10-09', date_precision: 'day', payload: { sign: 'standing' }, ...PROV });
+  assert.equal(heat.status, 201);
+  const r = (await post(ctx, '/breeding/events', correction(old.id, '2026-10-10'))) as { status: number; body: { event_id: string } };
+  assert.equal(r.status, 201);
+  const { body } = (await get(ctx, '/animals/BD-0007')) as unknown as { body: Detail };
+  const was = body.events.find((e) => e.id === old.id)!;
+  assert.equal(was.occurred_on, '2026-10-09');
+  assert.equal(was.supersedes_id, null);
+  assert.equal(was.superseded_by_id, r.body.event_id);
+  const now = body.events.find((e) => e.id === r.body.event_id)!;
+  assert.equal(now.supersedes_id, old.id);
+  assert.equal(now.occurred_on, '2026-10-10');
+  assert.equal(body.reproduction.service!.occurred_on, '2026-10-10');
+  assert.equal(body.reproduction.service!.event_id, r.body.event_id);
+  await ctx.close();
+});
+
+test('a correction to a date with no heat sign is refused, and saves over it with its flag', async () => {
+  const ctx = await breedingCtx();
+  const old = await heerService(ctx);
+  const refused = (await post(ctx, '/breeding/events', correction(old.id, '2026-10-10'))) as { status: number; body: { error: string; warnings: { check: string }[] } };
+  assert.equal(refused.status, 400);
+  assert.equal(refused.body.error, 'no_heat_sign');
+  // The superseded service is left out of her record, so it is not counted as an earlier service in the case.
+  assert.deepEqual(refused.body.warnings.map((w) => w.check), ['no_heat_sign']);
+  const saved = (await post(ctx, '/breeding/events', correction(old.id, '2026-10-10', { allow_no_heat_sign: true }))) as { status: number; body: { event_id: string } };
+  assert.equal(saved.status, 201);
+  const { body } = (await get(ctx, '/animals/BD-0007')) as unknown as { body: Detail };
+  assert.deepEqual(body.events.find((e) => e.id === saved.body.event_id)!.override_checks, ['no_heat_sign']);
+  await ctx.close();
+});
+
+test('a correction is refused on supersedes_id when the event is already superseded, is another type, or is another animal\'s', async () => {
+  const ctx = await breedingCtx();
+  const old = await heerService(ctx);
+  const first = (await post(ctx, '/breeding/events', correction(old.id, '2026-10-10', { allow_no_heat_sign: true }))) as { status: number };
+  assert.equal(first.status, 201);
+  const again = (await post(ctx, '/breeding/events', correction(old.id, '2026-10-11', { allow_no_heat_sign: true }))) as { status: number; body: { error: string; field: string } };
+  assert.equal(again.status, 400);
+  assert.deepEqual([again.body.error, again.body.field], ['already_superseded', 'supersedes_id']);
+
+  // A service cannot be replaced by a check.
+  const wrongType = (await post(ctx, '/breeding/events', { animal_id: 'BD-0007', type: 'pregnancy_check', occurred_on: '2026-11-13', date_precision: 'day', payload: { method: 'palpation', result: 'positive' }, supersedes_id: old.id, allow_early_check: true, ...PROV })) as { status: number; body: { error: string; field: string } };
+  assert.equal(wrongType.status, 400);
+  assert.deepEqual([wrongType.body.error, wrongType.body.field], ['supersede_type_mismatch', 'supersedes_id']);
+
+  // BD-0006's service cannot be corrected from BD-0007.
+  const { body: moti } = (await get(ctx, '/animals/BD-0006')) as unknown as { body: Detail };
+  const other = moti.events.find((e) => e.type === 'insemination')!;
+  const elsewhere = (await post(ctx, '/breeding/events', correction(other.id, '2026-10-10', { allow_no_heat_sign: true }))) as { status: number; body: { error: string; field: string } };
+  assert.equal(elsewhere.status, 400);
+  assert.deepEqual([elsewhere.body.error, elsewhere.body.field], ['unknown_event', 'supersedes_id']);
+  await ctx.close();
+});
+
+test('supersedes_id that is not a non-empty string is refused as invalid_payload on supersedes_id', async () => {
+  const ctx = await breedingCtx();
+  for (const bad of [7, '', ['x'], true]) {
+    const r = (await post(ctx, '/breeding/events', correction('x', '2026-10-10', { supersedes_id: bad, allow_no_heat_sign: true }))) as { status: number; body: { error: string; field: string } };
+    assert.equal(r.status, 400, JSON.stringify(bad));
+    assert.deepEqual([r.body.error, r.body.field], ['invalid_payload', 'supersedes_id'], JSON.stringify(bad));
+  }
+  await ctx.close();
+});

@@ -296,3 +296,14 @@ test('--allow-x=false is false, and USAGE names the two new flags', () => {
   assert.throws(() => flagIsOn(parseFlags(['--allow-early-check=maybe']), 'allow-early-check'), CliError);
   for (const f of ['--allow-no-heat-sign', '--allow-heat-after-positive']) assert.ok(USAGE.includes(f), f);
 });
+
+test('a correction is warned about as the candidate, with the superseded service left out', () => {
+  const db = herd();
+  const first = recordBreedingEvent(db, { ...base, ...ai, animal_id: 'BD-0001', occurred_on: '2026-01-20' }).event_id;
+  // Without supersedes_id the second service a day later joins the first one's case and is ambiguous.
+  const flags = { ...base, allow_no_heat_sign: true, allow_ambiguous_service: false };
+  refuses(db, { ...flags, ...ai, animal_id: 'BD-0001', occurred_on: '2026-01-21' }, 'breeding_warnings');
+  // As a correction, the first service is not an earlier service in the case: only the heat check fires, and it is saved over.
+  const second = recordBreedingEvent(db, { ...flags, ...ai, animal_id: 'BD-0001', occurred_on: '2026-01-21', supersedes_id: first }).event_id;
+  assert.deepEqual(eventsForAnimal(db, 'BD-0001').find((e) => e.id === second)!.override_checks, ['no_heat_sign']);
+});

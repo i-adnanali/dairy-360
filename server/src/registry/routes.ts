@@ -712,6 +712,16 @@ export function registryRouter(db: Db): express.Router {
           'type',
         );
       }
+      // A correction names the event it replaces. Absent means a new event; a
+      // present value that is not a non-empty string is a malformed request, not
+      // "no correction" (str() would read '' as absent).
+      let supersedesId: string | null = null;
+      if (b.supersedes_id !== undefined && b.supersedes_id !== null) {
+        if (typeof b.supersedes_id !== 'string' || b.supersedes_id === '') {
+          throw new RegistryError('invalid_payload', 'supersedes_id must be a non-empty string', 'supersedes_id');
+        }
+        supersedesId = b.supersedes_id;
+      }
       // A male, or a date after she left, is refused by recordBreedingEvent's
       // stage 1 checks; every other female is open.
       const result = recordBreedingEvent(db, {
@@ -721,7 +731,7 @@ export function registryRouter(db: Db): express.Router {
         occurred_time: str(b, 'occurred_time'),
         date_precision: requirePrecision(b) as never,
         payload: b.payload,
-        supersedes_id: str(b, 'supersedes_id'),
+        supersedes_id: supersedesId,
         allow_ambiguous_service: b.allow_ambiguous_service === true,
         allow_early_check: b.allow_early_check === true,
         allow_check_without_service: b.allow_check_without_service === true,
