@@ -109,6 +109,38 @@ npm run registry:breed -w server -- --animal=BD-0001 --type=insemination --servi
   --on=2026-02-20 --precision=day --source-form=recall --recorded-by=adnan --supersedes=<event id of the wrong service>
 ```
 
+## Breeding backfill
+
+`registry:breed-backfill` enters the breeding history of the animals the owner picks from one JSON file. **It opens the registry database the other `registry:*` commands open, which in normal use is the real one, `server/dairy.db`.** Try a file on a copy first.
+
+Each case is one animal, with the `source_form` its rows were taken from (`recall`, `cycle_card`, `daily_herd_sheet`, `import` or `direct_entry`); its events are written in the order given. An event has `type`, `occurred_on`, `date_precision` and `payload` (the same fields `registry:breed` builds from its flags), and optionally `occurred_time`, `observed_by`, `allow` (the warnings to save over, by name) and `override_reason`. Unknown keys, wrong types and empty lists are refused before anything is checked.
+
+```json
+{
+  "cases": [
+    {
+      "animal_id": "BD-0012",
+      "source_form": "recall",
+      "events": [
+        { "type": "heat_observed", "occurred_on": "2026-01-19", "occurred_time": "06:30", "date_precision": "day", "payload": { "sign": "standing" } },
+        { "type": "insemination", "occurred_on": "2026-01-20", "date_precision": "day", "payload": { "service_type": "ai" }, "observed_by": "karim" },
+        { "type": "pregnancy_check", "occurred_on": "2026-03-10", "date_precision": "day", "payload": { "method": "ultrasound", "result": "positive" } }
+      ]
+    }
+  ]
+}
+```
+
+```bash
+# check: prints one line per row, writes nothing
+npm run registry:breed-backfill -w server -- --file=cases.json --recorded-by=adnan
+
+# save: the whole file in one transaction, or nothing
+npm run registry:breed-backfill -w server -- --file=cases.json --recorded-by=adnan --save
+```
+
+Every row goes through the same write path as `registry:breed`, with the earlier rows of its case already in place, and reports one of: `would_write`; `already_on_record` (an effective event with the same animal, type, date, precision and payload exists, so it is not written again); `refused` (a refusal with no override: its code and message); or `needs_allow` (a warning fired that the row's `allow` does not name: each warning's check and message). A warning named in `allow` is recorded on the event from the condition; a name in `allow` that does not fire records nothing. `--save` is a switch (bare or `=true` on, `=false` off). When any row is `refused` or `needs_allow`, the command exits non-zero and `--save` writes nothing at all, not even the other cases' clean rows.
+
 ---
 ## Recovery and related contracts
 

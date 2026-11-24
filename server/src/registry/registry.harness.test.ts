@@ -152,6 +152,7 @@ test('exactly the CLI entry points import ../db, and nothing else does', () => {
     [
       'add.ts',
       'backup.ts',
+      'breed-backfill.ts',
       'breed.ts',
       'calve.ts',
       'correct.ts',
@@ -159,7 +160,7 @@ test('exactly the CLI entry points import ../db, and nothing else does', () => {
       'rebuild.ts',
       'verifyRegistry.ts',
     ],
-    'only the eight CLI entry points may reach the db singleton',
+    'only the nine CLI entry points may reach the db singleton',
   );
 });
 
