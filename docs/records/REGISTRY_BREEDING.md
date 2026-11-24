@@ -2,6 +2,11 @@
 
 > Decision record, 13 November 2026. Stage 1 of five. Written with the change that made
 > the five breeding event types live; later stages add to it.
+>
+> **Status, 24 November 2026:** stages 1 to 5 are built and merged into `main`. The flags
+> `REGISTRY_BREEDING` and `REGISTRY_BREEDING_PILOT` described in stages 1 to 4 were removed
+> in stage 5: breeding is always on, for every current female. Current behavior is in
+> [reference/registry/breeding.md](../reference/registry/breeding.md).
 
 ## What stage 1 is
 
@@ -180,7 +185,7 @@ Both are worded from `deriveReproduction`'s answer (the case the calving closes)
 
 **Scope.** Stage 5 removes the flags, adds a Correct action to the Timeline and adds a backfill command. It adds no migration and no new number. Nothing here is stored beyond events: events are only ever added, and status, notes, tasks and figures stay computed on read.
 
-**Merging turns breeding on.** `REGISTRY_BREEDING` and `REGISTRY_BREEDING_PILOT` are removed. After this stage the feature has no flag, so merging the branch turns it on for every current female. Merging is the owner's decision. The pilot gate becomes "a current female": entry is open for any current female, and the stage 1 refusals stand.
+**Merging turns breeding on.** `REGISTRY_BREEDING` and `REGISTRY_BREEDING_PILOT` are removed. After this stage the feature has no flag, so merging the branch turns it on for every current female. Merging is the owner's decision; the owner merged it into `main` on 24 November 2026. The pilot gate becomes "a current female": entry is open for any current female, and the stage 1 refusals stand.
 
 **Correcting from the page.** This closes OPEN-065. A correction made on the page is the stage 1 superseding write, through the same path as `registry:breed --supersedes`. It takes the same three refusals (same type, same animal, corrected once) and every stage 2-4 warning applies to the corrected event as to a new one. The caller can save over each warning, and the override is recorded from the condition, never from the flag. The original row is never changed.
 

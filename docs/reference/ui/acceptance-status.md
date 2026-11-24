@@ -1,21 +1,23 @@
 # Acceptance status
 
-Updated **24 November 2026**, for branch `breeding` (see *Breeding stage 5* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
+Updated **24 November 2026**, for `main` at `2beaa6f` after branch `breeding` was merged into it (see *Breeding stage 5* below). The previous full run, 11 November against `12a5735` on branch `farm-born-unknown-mother`, covered the Add animal *Born here, mother not known* path. The run before that, 10 November against `659dc3f`, covered the November section restructure, the shared selection language and the Check rework. This page holds the latest recorded results and the checks skipped by decision. It is not a claim of exhaustive platform or accessibility certification.
 
 ## Latest recorded results
 
-Run on 16 November 2026 against branch `breeding-stage-1` (base `2be39a4`), Node 22.22.3 (the Angular CLI refuses the machine default 22.3.0):
+Run on 24 November 2026 against `main` at `2beaa6f` (branch `breeding` merged by fast-forward), Node 22.22.3 (the Angular CLI refuses the machine default 22.3.0):
 
 | Check | Result |
 |---|---|
-| Frontend tests (`npm test -w web-angular -- --watch=false`) | 632 passed in 66 files, exit 0, no unhandled errors |
-| Server tests (`npm test -w server`) | 841 passed, 0 failed, 0 skipped |
-| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass |
-| Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.12 kB against the 500 kB budget; four component stylesheets over the 4 kB budget (Health, Analytics, Today, life report); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
+| Frontend tests (`npm test -w web-angular -- --watch=false`) | 724 passed in 69 files |
+| Server tests (`npm test -w server`) | 1040 passed, 0 failed, 0 skipped |
+| `check:docs`, `build:shared`, `check:templates`, typecheck | Pass (docs: 78 files, 0 errors; templates: 106 files) |
+| Production build (`npm run build -w web-angular`) | Builds. Warnings: initial bundle 712.73 kB against the 500 kB budget; five component stylesheets over the 4 kB budget (Breeding, Analytics, Today, life report, Health); two unused-import notices (`Card` in HealthPage, `IdentifierLink` in PeopleList); the shared CommonJS notice. |
+
+Breeding is on with the merge: it has no switch. The real `server/dairy.db` is at schema version 13 and holds no registry events; nothing has been entered on the real herd. The live-model regression suites are refused by the test-runner guard until they get their own database ([OPEN-067](../../OPEN.md#open-067)).
 
 ## Breeding stage 5
 
-Run on 24 November 2026 against branch `breeding` at `66e8bd9`, Node 22.22.3. Breeding has no switch any more: **merging this branch turns it on for the real registry. Merging is the owner's decision.**
+Run on 24 November 2026 against branch `breeding` at `66e8bd9`, Node 22.22.3. Breeding has no switch any more: **merging this branch turns it on for the real registry. Merging is the owner's decision.** The owner merged it into `main` on 24 November 2026.
 
 | Check | Result |
 |---|---|

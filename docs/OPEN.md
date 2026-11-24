@@ -305,11 +305,13 @@ Built when something needs them, not before.
 
 - **OPEN-056** — Structured weight, movement, breed and discarded-milk capture
   remain stage 3; the report labels unsupported coverage — [REGISTRY_HEALTH.md](records/REGISTRY_HEALTH.md#using-it).
-  Breeding is no longer in this list: stage 1 is read-only derivation, see [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md).
+  Breeding is no longer in this list: it is built, see [Breeding](reference/registry/breeding.md).
+  The lifetime report does not show breeding events yet and still says they are not supported.
 <a id="open-062"></a>
 
-- **OPEN-062** — **Closed.** Breeding stages 2 to 5 are built on branch `breeding` (general
-  availability, page correction and backfill in stage 5); merging turns breeding on —
+- **OPEN-062** — **Closed.** Breeding stages 2 to 5 are built and were merged into `main` on
+  24 November 2026 (general availability, page correction and backfill in stage 5); breeding
+  is on for every current female —
   [REGISTRY_BREEDING.md](records/REGISTRY_BREEDING.md#stage-5-general-availability-page-correction-and-backfill)
 <a id="open-063"></a>
 
@@ -320,7 +322,7 @@ Built when something needs them, not before.
 
 - **OPEN-064** — **A breeding event cannot be retracted**: a wrongly entered service, check or
   heat can be corrected by a superseding event of the same type on the same animal
-  (`registry:breed --supersedes`), but nothing can say "this never happened". Decide whether a
+  (`Correct` on the Timeline, or `registry:breed --supersedes`), but nothing can say "this never happened". Decide whether a
   retraction is needed —
   [Breeding](reference/registry/breeding.md#correcting-a-breeding-event)
 <a id="open-065"></a>

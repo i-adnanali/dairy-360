@@ -38,7 +38,7 @@ A record that shows its own uncertainty and provenance. Approximate dates stay a
 
 - **Delivered (v0.15.0):**
   - Today board
-  - Herd (animals, calvings, health, life report)
+  - Herd (animals, calvings, health, breeding, life report)
   - Milk (milking roster, dispatch, buyers, statements)
   - Feed
   - Labour (people, payroll)

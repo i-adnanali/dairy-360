@@ -3,7 +3,7 @@
 [![CI](https://github.com/i-adnanali/dairy-360/actions/workflows/ci.yml/badge.svg)](https://github.com/i-adnanali/dairy-360/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A local dairy-farm workspace for animal records, veterinary care, milk production and sales, feed, people and payroll, with an optional AI assistant that answers questions about the records.
+A local dairy-farm workspace for animal records, breeding and pregnancy, veterinary care, milk production and sales, feed, people and payroll, with an optional AI assistant that answers questions about the records.
 
 Dairy 360 keeps uncertainty visible: approximate dates stay approximate, missing records stay distinct from zero, wages earned stay distinct from payments, and approval stays distinct from successful execution.
 
@@ -28,7 +28,7 @@ npm run harness:app
 
 Open **http://localhost:6420**. This starts Angular and a synthetic registry backend on port 6400. No API key or farm database is needed; anything saved disappears when the harness stops. Press Ctrl+C to stop.
 
-The harness serves every registry workflow but not assistant responses. For a larger analytics scenario, stop it and run `npm run harness:analytics`, then open `/analytics`. Both commands share ports with the persistent app.
+The harness serves every registry workflow but not assistant responses. For a larger analytics scenario, stop it and run `npm run harness:analytics`, then open `/analytics`. For breeding, run `npm run harness:breeding` and open **Herd › Breeding**: eleven synthetic females, one in each breeding state. All three commands share ports with the persistent app, so run one at a time.
 
 ### Persistent app and AI assistant
 
@@ -51,6 +51,7 @@ Read [setup and data boundaries](docs/guides/development.md) before using persis
 |---|---|
 | Today | One work board ranked by consequence: overdue health work, milk withdrawals, urgent camera events and late sessions first, then due-today work, payroll and feeding; a session board in the header for today's five sessions |
 | Herd | Herd search and stage filters, calvings, event timelines, precision-aware corrections and provenance, lifetime reports |
+| Breeding | Services (AI or bull), heats, pregnancy checks, "nothing seen" and losses for every current female; a reproductive state and calving window worked out on read, never stored; heat-watch, check, dry-off and calving tasks on Today; a Breeding page with To do, Cases and Herd figures; corrections from the animal's Timeline and a backfill command for past cases |
 | Health | Visits, doses, vaccination rounds, tasks, cases, plans and withdrawal instructions, on To do, Records and Medicines tabs |
 | Milk | Per-animal session sheets answered by keyboard, sale and home dispatch, effective-dated rates, buyer balances and payments |
 | Feed | Daily feeding accounts, crop lifecycles and expenses, purchases in original units and a feed catalogue |
@@ -138,6 +139,7 @@ Unit suites need no API key or farm database. Live-model regression tests are se
 | Setup, troubleshooting, CLI and backups | [Development](docs/guides/development.md), [CLI](docs/guides/registry-cli.md), [backup/restore](docs/guides/backup-restore.md) |
 | How the UI looks and behaves | [Design system](docs/reference/ui/design-system.md), [interaction contracts](docs/reference/ui/application-interactions.md) |
 | Animals and corrections | [Registry](docs/reference/registry/animals.md) |
+| Breeding and pregnancy | [Breeding](docs/reference/registry/breeding.md), [decisions](docs/records/REGISTRY_BREEDING.md) |
 | Milk recording and sales | [Milking](docs/reference/registry/milking.md), [sales](docs/reference/registry/sales.md) |
 | Feed, health and labour | [Feed](docs/reference/registry/feed.md), [health](docs/reference/registry/health.md), [payroll](docs/reference/registry/payroll.md) |
 | Metrics and uncertainty | [Analytics specification](docs/reference/registry/analytics.md) |
@@ -146,7 +148,7 @@ Unit suites need no API key or farm database. Live-model regression tests are se
 
 ## Status and limitations
 
-This is a local, single-user application without authentication or multi-user tenancy, and it is not production-hardened. Registry HTTP retry protections do not provide cross-request replay protection for assistant demo writes. No real herd data has been entered yet, and real-farm operator trials and live assistant acceptance have not been run. Some platform checks were skipped by decision rather than passed; [acceptance status](docs/reference/ui/acceptance-status.md) lists them.
+This is a local, single-user application without authentication or multi-user tenancy, and it is not production-hardened. Registry HTTP retry protections do not provide cross-request replay protection for assistant demo writes. No real herd data has been entered yet, and real-farm operator trials and live assistant acceptance have not been run. Breeding has been exercised only on synthetic herds, and a breeding event can be corrected but not retracted ([OPEN-064](docs/OPEN.md#open-064)). Some platform checks were skipped by decision rather than passed; [acceptance status](docs/reference/ui/acceptance-status.md) lists them.
 
 ## Contributing
 

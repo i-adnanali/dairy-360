@@ -1,7 +1,7 @@
 # Dairy 360 Angular frontend
 
 Current frontend: Angular 22, standalone components, signals and zoneless change
-detection. It includes the animal, health, milk, feed and labour registry, the analytics dashboard, and the assistant.
+detection. It includes the animal, breeding, health, milk, feed and labour registry, the analytics dashboard, and the assistant.
 
 Run the commands below from the **repository root**, using the Node version in
 [`.nvmrc`](../.nvmrc). Install dependencies once with `npm ci`.
@@ -46,6 +46,18 @@ records. Use A4 portrait at 100% scale for the verified print configuration. Buy
 
 The standard harness seeds these health screens as well: due work, visits, doses,
 round outcomes, follow-up results and vaccination-card history are ready to browse.
+
+## Breeding and its demo herd
+
+Run `npm run harness:breeding` from the repository root, then open
+`http://localhost:6420/animals/breeding`. It serves eleven synthetic females,
+BD-0001 to BD-0011, one in each breeding state, from memory on 6400 with Angular
+on 6420; writes are discarded on exit. Breeding has no switch: every harness
+herd and the persistent server serve it. The herd was built for 13 November 2026
+and the page counts from today, so day counts move with the calendar. Services,
+heats, checks, "nothing seen" and losses are entered from an animal's Breeding tab
+or the Breeding page, and corrected from the Timeline. See
+[Breeding](../docs/reference/registry/breeding.md).
 
 ## Analytics dashboard and demo data
 

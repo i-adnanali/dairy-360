@@ -30,7 +30,7 @@ Frontend tests use Vitest/jsdom. A missing jsdom canvas implementation is not br
 
 ## Synthetic browser workflows
 
-Run `harness:app` for the standard herd/feed/health walkthrough or `harness:analytics` for 30 dams, 30 calves, multi-month records and paging/coverage examples. Both use memory-only storage. Their controls are documented in [development](development.md). For production-bundle checks, build first and serve against an independent memory harness.
+Run `harness:app` for the standard herd/feed/health walkthrough, `harness:analytics` for 30 dams, 30 calves, multi-month records and paging/coverage examples, or `harness:breeding` for eleven females in every breeding state. All three use memory-only storage. Their controls are documented in [development](development.md). For production-bundle checks, build first and serve against an independent memory harness.
 
 For changed workflows, exercise desktop/mobile widths, light/dark themes, narrow and long content, keyboard/focus, labels/errors, cancellation, drafts, refusals and recovery. Record the actual route/state, dimensions, source baseline, bundle and fixture mode. Capture before/after where useful. Do not claim a native-device or screen-reader check from a desktop viewport.
 

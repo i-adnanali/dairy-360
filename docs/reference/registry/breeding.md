@@ -1,6 +1,6 @@
 # Breeding
 
-Current contract for the five breeding event types and the reproductive state derived from them. The decisions behind it are in [REGISTRY_BREEDING.md](../../records/REGISTRY_BREEDING.md). Events are written with the [registry CLI](../../guides/registry-cli.md#breeding-events). [Animals](animals.md) owns the rest of the event log.
+Current contract for the five breeding event types and the reproductive state derived from them. The decisions behind it are in [REGISTRY_BREEDING.md](../../records/REGISTRY_BREEDING.md). Events are entered on the animal's Breeding tab or the Breeding page (**Herd › Breeding**, `/animals/breeding`), corrected from the animal's Timeline, or written with the [registry CLI](../../guides/registry-cli.md#breeding-events). [Animals](animals.md) owns the rest of the event log.
 
 Breeding events are only ever added. The state is calculated on every read from an animal's effective events and is never stored; it is separate from the animal's status, which this feature does not change.
 
@@ -180,9 +180,9 @@ A wrongly entered service, check or heat is corrected by writing a superseding e
 - **Once per event.** An event can be superseded only once. To correct a correction, supersede the replacement, not the original.
 - **No retraction.** There is still no way to say "this never happened": a correction must be an event of the same type on the same animal. That remaining gap is [OPEN-064](../../OPEN.md#open-064).
 
-## Migration 10 is one-way
+## Migrations 10 to 13 are one-way
 
-Migration 10 widens the event table so it can hold the five breeding types. It is one-way: it runs the first time a build that has it opens the database (a server start or any `registry:*` command), and a build from before it refuses to open the migrated database. Rolling back means restoring a backup taken before it ran, such as the pre-migration snapshot written to `server/backups/`; see [Back up, verify and restore registry data](../../guides/backup-restore.md).
+Migration 10 widens the event table so it can hold the five breeding types; migration 11 widens the override names; migration 12 adds the `override_checks` list; migration 13 recreates the override-name check. Each is one-way: it runs the first time a build that has it opens the database (a server start or any `registry:*` command), and a build from before it refuses to open the migrated database. Rolling back means restoring a backup taken before it ran, such as the pre-migration snapshot written to `server/backups/`; see [Back up, verify and restore registry data](../../guides/backup-restore.md).
 
 ## Not built yet
 

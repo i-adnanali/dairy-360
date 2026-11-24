@@ -545,6 +545,8 @@ Six live types: `birth`, `acquired`, `calving`, `dry_off`, `departure`, `note`.
 
 Ten **reserved** types, named so the taxonomy is designed once rather than accreted, and **rejected** by the write boundary rather than accepted with a loose payload: `heat_observed`, `insemination`, `pregnancy_check`, `abortion`, `treatment`, `vet_visit`, `null_observation`, `milking`, `weight`, `body_condition`.
 
+*Later:* breeding stage 1 made five of them live (`heat_observed`, `insemination`, `pregnancy_check`, `abortion`, `null_observation`); see [REGISTRY_BREEDING.md](REGISTRY_BREEDING.md).
+
 **No validation library was added.** The repo has no Zod and no equivalent; boundary validation today is `guardIds()` plus `String(args.x)` coercion, with JSON-Schema enums enforced by the model rather than by code. Six payload shapes is less code than the dependency would be, and adding one is a repo-wide decision rather than a registry one. `assertEventPayload(type, payload)` in `events.ts` is exhaustive over the discriminated union, with a compile-time exhaustiveness check.
 
 It also **rejects unknown payload keys**. Not pedantry: a typo'd `calf_sexe` would otherwise be stored as JSON, read back as `undefined` by the projection, and produce a wrong derived value with no error anywhere — the same class of silent failure the no-default-precision rule exists to prevent.

@@ -2,7 +2,7 @@
 
 Current reference, reviewed against source at `43438b1` on 2 October 2026. This page explains application boundaries; detailed contracts live in the linked references.
 
-Dairy 360 is a local operational registry with an optional assistant. Angular serves direct workflows for animals, health, milk, feed, labour and analytics. Express serves registry HTTP APIs and the separate assistant stream. SQLite holds persistent records. No authentication or multi-user tenancy is implemented.
+Dairy 360 is a local operational registry with an optional assistant. Angular serves direct workflows for animals, breeding, health, milk, feed, labour and analytics. Express serves registry HTTP APIs and the separate assistant stream. SQLite holds persistent records. No authentication or multi-user tenancy is implemented.
 
 ```mermaid
 flowchart LR

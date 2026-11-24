@@ -45,8 +45,10 @@ convention. Estimated history remains visible because its bounds are uncertain.
 The report includes full JSON export and measured pages for browser Save as PDF. Use A4 portrait at 100% scale. Each sheet repeats the animal identity; wrapped names reduce the available body height instead of overlapping content. Chrome and Safari exports were verified against complete synthetic audit content. Alternative paper/orientation/scale can split sheets without repeated identity; broader support was skipped by decision, not verified.
 Long sections use local pagination with 25, 50 or 100 records per page. Print/export includes
 all loaded records. Source fields remain available separately from readable record
-content. New structured weight, movement, breed, breeding/pregnancy and discarded-milk
-capture is **not included**: these are stage 3, explicitly identified as gaps.
+content. New structured weight, movement, breed and discarded-milk capture is **not
+included**: these are stage 3, explicitly identified as gaps. Breeding and pregnancy
+events are recorded (see [Breeding](breeding.md)), but the report's reproduction section
+still lists calvings and dry-offs only and says breeding capture is not supported.
 No individual consumption, pooled revenue or animal profitability is inferred.
 
 ## Persistence and audit
@@ -126,6 +128,6 @@ Actual administration, planned work and operator/veterinary instructions remain 
 
 ## Limits and evidence
 
-Structured weight, movement, breed, breeding/pregnancy and discarded-milk capture remain deferred stage-3 scope. Clinical, real-farm and exhaustive print/export acceptance are not implied by the implemented report layout. [Acceptance status](../ui/acceptance-status.md) records performed checks and the owner-approved exclusions.
+Structured weight, movement, breed and discarded-milk capture remain deferred stage-3 scope. Breeding events are captured but not yet shown in the lifetime report. Clinical, real-farm and exhaustive print/export acceptance are not implied by the implemented report layout. [Acceptance status](../ui/acceptance-status.md) records performed checks and the owner-approved exclusions.
 
 [Testing](../../guides/testing.md) describes the synthetic harness. [Original requirements](../../records/ANIMAL_HEALTH_SPEC.md) and [delivery record](../../records/REGISTRY_HEALTH.md) preserve original acceptance examples, deviations and dated measurements.

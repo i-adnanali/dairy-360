@@ -897,8 +897,8 @@ npm run dev:angular
 
 **What creates the database.** Nothing in `git`: `server/dairy.db` is gitignored.
 It is created the first time a process imports `server/src/db.ts` — for example
-the persistent server, a registry write command or `seed`. The harness and isolated unit tests must not import it. The five herd write CLI
-modules (`add.ts`, `calve.ts`, `event.ts`, `correct.ts`, `breed.ts`) now defer that import until command execution, so importing their usage
+the persistent server, a registry write command or `seed`. The harness and isolated unit tests must not import it. The six herd write CLI
+modules (`add.ts`, `calve.ts`, `event.ts`, `correct.ts`, `breed.ts`, `breed-backfill.ts`) now defer that import until command execution, so importing their usage
 constants or asking for their help no longer opens the database. `new Database(DB_PATH)` creates the file,
 then `FARM_SCHEMA` and the migration runner apply.
 
@@ -906,7 +906,7 @@ then `FARM_SCHEMA` and the migration runner apply.
 after the first server start, before any seed:
 
 ```
-user_version = 10
+user_version = 13
 tables: farm_events, registry_animal_events, registry_animal_status,
         registry_animals, registry_destination_prices, registry_destinations,
         registry_dispatches, registry_engagements, registry_lactations,
@@ -921,7 +921,7 @@ tables: farm_events, registry_animal_events, registry_animal_status,
         registry_health_attachment_links
 ```
 
-The current schema applies nine migrations; the 32 `registry_*` tables exist
+The current schema applies thirteen migrations (10 to 13, for breeding, add no table); the 32 `registry_*` tables exist
 with no farm records. `registry_serial_counter` alone has its initial allocator row. Note what is **absent**: `animals`, `milkings`, `vendors`, `deliveries`,
 `feed_inventory`, `health_events`. Those are `resetSchema()`'s tables and only
 `seed()` creates them.
