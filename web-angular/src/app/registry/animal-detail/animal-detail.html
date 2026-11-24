@@ -55,7 +55,7 @@
           <div><dt>Tag · post</dt><dd>{{ d.animal.tag_no || '—' }} · {{ d.animal.post_no || '—' }}</dd></div>
         </dl>
 
-        @if (milkWithdrawals().length || openTasks().length || d.breeding_tasks?.length) {
+        @if (milkWithdrawals().length || openTasks().length || d.breeding_tasks.length) {
           <section class="open-now" aria-label="Open for this animal" data-role="open-now">
             @for (w of milkWithdrawals(); track $index) {
               <p class="open-item is-danger"><span appBadge tone="danger">Not for sale</span>
@@ -68,7 +68,7 @@
             @if (milkWithdrawals().length || openTasks().length) {
               <a appTextLink tone="strong" routerLink="/animals/health" [queryParams]="{ animal: d.animal.id }">Open in Health</a>
             }
-            @if (d.breeding_tasks?.length) {
+            @if (d.breeding_tasks.length) {
               @for (t of d.breeding_tasks; track t.kind) {
                 <p class="open-item"><span appBadge [tone]="t.standing === 'overdue' ? 'danger' : 'warning'">{{ t.standing === 'overdue' ? 'Overdue' : 'Due' }}</span>
                   <a appTextLink routerLink="/animals/breeding" [queryParams]="{ animal: d.animal.id }" data-role="open-breeding-task">{{ breedingTaskLabel(t.kind) }}</a></p>
@@ -108,7 +108,7 @@
                     <p data-role="latest-check">{{ methodWord(c.method) }} · {{ c.result === 'positive' ? 'Pregnant' : 'Not pregnant' }} · day {{ c.day }}@if (!c.reliable) { <span appQualifier>not relied on yet</span> }</p>
                   }
                 </div>
-                @for (n of d.reproduction_notes ?? []; track $index) {
+                @for (n of d.reproduction_notes; track $index) {
                   <p data-role="note"><span appQualifier>Note</span> {{ n.text }}</p>
                 }
                 @if (r.conception_latest !== r.conception_earliest) {
@@ -128,7 +128,7 @@
                   <app-breeding-form [animalId]="d.animal.id" [initialKind]="f.kind" [saved]="onSaved" />
                 }
               } @else {
-                <p appHelp data-role="entry-closed">Breeding entry is open only for the animals in the pilot.</p>
+                <p appHelp data-role="entry-closed">She has left the herd, so no breeding event can be entered for her.</p>
               }
             </section>
           }

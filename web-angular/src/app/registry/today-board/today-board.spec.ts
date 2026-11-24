@@ -17,6 +17,7 @@ const board = (): DayBoard => ({
   ],
   payroll: { from_on: '2026-11-01', to_on: '2026-11-30', outstanding: 2, permanent: 2 },
   payroll_previous: null,
+  breeding: { on: '2026-11-06', tasks: [], overdue: 0, due: 0, cases: [] },
 });
 
 const health = (over: Partial<HealthBoard> = {}): HealthBoard => ({
@@ -119,10 +120,8 @@ describe('attentionItems', () => {
     expect(attentionItems(b, null, 0, 'morning').now[0].when).toBe('Since 3 Nov · Day 40 to 52');
   });
 
-  it('changes nothing when the board has no breeding key', () => {
-    const b = board();
-    expect('breeding' in b).toBe(false);
-    expect(attentionItems(b, null, 0, 'morning')).toEqual({ now: [], open: [] });
+  it('changes nothing when the board has no breeding tasks', () => {
+    expect(attentionItems(board(), null, 0, 'morning')).toEqual({ now: [], open: [] });
   });
 
   it('lists a session still open from the morning as late, in the evening only', () => {

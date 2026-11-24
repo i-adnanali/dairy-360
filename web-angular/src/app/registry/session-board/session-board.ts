@@ -35,7 +35,6 @@ import { filter } from 'rxjs/operators';
 
 import { RegistryApi } from '../api';
 import { WriteLog } from '../after-write';
-import { ShellActions } from '../navigation';
 import { farmToday, likelySession } from '../today';
 import type { DayBoard, SessionStanding } from '../types';
 
@@ -143,7 +142,6 @@ export class SessionBoard {
 
   private readonly api = inject(RegistryApi);
   private readonly writeLog = inject(WriteLog);
-  private readonly shell = inject(ShellActions);
   private readonly board = signal<DayBoard | null>(null);
   private sequence = 0;
 
@@ -194,10 +192,7 @@ export class SessionBoard {
     const n = ++this.sequence;
     try {
       const b = await this.api.today(farmToday());
-      if (n === this.sequence) {
-        this.board.set(b);
-        this.shell.breeding.set('breeding' in b);
-      }
+      if (n === this.sequence) this.board.set(b);
     } catch {
       // The board is orientation, not data entry: on failure it stays as it
       // was (or absent), and Today's own load reports the error in words.

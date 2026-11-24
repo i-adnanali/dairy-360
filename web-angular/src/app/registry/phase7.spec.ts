@@ -138,18 +138,15 @@ async function shell(extra: Record<string, unknown> = {}) {
   return h;
 }
 describe('Phase 7 shell', () => {
-  it('shows the Breeding view only when the day board carries breeding', async () => {
+  it('shows the Breeding view after Health without reading the day board', async () => {
+    // A board with no breeding key: the nav must not consult it.
     const day = { on: '2026-11-13', milking: [], dispatch: [], feed: null };
-    for (const [board, shown] of [[day, false], [{ ...day, breeding: { on: '2026-11-13', tasks: [], overdue: 0, due: 0, cases: [] } }, true]] as const) {
-      const h = await shell({ today: () => Promise.resolve(board) });
-      await new Promise((r) => setTimeout(r, 0));
-      await h.fixture.whenStable();
-      h.detectChanges();
-      const views = Array.from((h.fixture.nativeElement as HTMLElement).querySelectorAll('[data-role="section-view"]')).map((a) => a.textContent!.trim());
-      expect(views.includes('Breeding')).toBe(shown);
-      expect(views).toContain('Health');
-      TestBed.resetTestingModule();
-    }
+    const h = await shell({ today: () => Promise.resolve(day) });
+    await new Promise((r) => setTimeout(r, 0));
+    await h.fixture.whenStable();
+    h.detectChanges();
+    const views = Array.from((h.fixture.nativeElement as HTMLElement).querySelectorAll('[data-role="section-view"]')).map((a) => a.textContent!.trim());
+    expect(views).toEqual(['Animals', 'Calvings', 'Health', 'Breeding']);
   });
   it('shows eight sections and leaves contextual write actions to pages', async () => {
     const h = await shell();

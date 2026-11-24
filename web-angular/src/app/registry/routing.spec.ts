@@ -163,6 +163,7 @@ const BOARD: DayBoard = {
   ],
   payroll: { from_on: '2026-09-01', to_on: '2026-09-30', outstanding: 2, permanent: 2 },
   payroll_previous: { from_on: '2026-08-01', to_on: '2026-08-31', outstanding: 2, permanent: 2 },
+  breeding: { on: '2026-09-07', tasks: [], overdue: 0, due: 0, cases: [] },
 };
 
 class BoardApi {

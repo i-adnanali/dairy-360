@@ -100,20 +100,20 @@ export interface AnimalDetail {
   } | null;
   events: TimelineEvent[];
   /**
-   * Present only when the server runs with REGISTRY_BREEDING=1. Absent with the
-   * flag off; null when the animal has no reproductive state. The page draws
+   * Her reproductive state as of farm today; null for a male, a female that
+   * has left the herd, or a female with no service on record. The page draws
    * the badge only when this is a view.
    */
-  reproduction?: ReproductionView | null;
+  reproduction: ReproductionView | null;
   /**
-   * Present only with REGISTRY_BREEDING=1: true when this animal is in the
-   * pilot, so POST /breeding/events accepts a service or a check for her.
+   * True for a female not departed as of farm today, so POST /breeding/events
+   * accepts a breeding event for her.
    */
-  breeding_entry?: boolean;
-  /** Present only with REGISTRY_BREEDING=1: the derived notes on her state. */
-  reproduction_notes?: ReproductionNote[];
-  /** Present only with REGISTRY_BREEDING=1: her open breeding tasks, computed on read. */
-  breeding_tasks?: BreedingTask[];
+  breeding_entry: boolean;
+  /** The derived notes on her state. */
+  reproduction_notes: ReproductionNote[];
+  /** Her open breeding tasks, computed on read. */
+  breeding_tasks: BreedingTask[];
 }
 
 /** Mirrors server/src/registry/breeding-tasks.ts. */
@@ -878,8 +878,8 @@ export interface SessionStanding {
 export interface DayBoard {
   health?: {overdue:number;due:number;upcoming:number;withdrawals:unknown[]};
   feed?: {state: string; summary: string};
-  /** Present only with REGISTRY_BREEDING=1. */
-  breeding?: BreedingBoard;
+  /** The breeding tasks and cases on the day. */
+  breeding: BreedingBoard;
   on: string;
   milking: SessionStanding[];
   /** STANDING destinations only — an occasional household is not a gap. */

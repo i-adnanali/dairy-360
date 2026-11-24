@@ -77,8 +77,7 @@ export const routes: Routes = [
         loadComponent: () => import("./registry/health-page/health-page").then((m) => m.HealthPage),
       },
       {
-        // BEFORE `animals/:id`. Only reachable from the nav with REGISTRY_BREEDING on;
-        // with it off the server has no /breeding/board and the page says so.
+        // BEFORE `animals/:id`, or `breeding` would be read as an animal id.
         path: 'animals/breeding',
         canDeactivate: [draftDeactivate],
         loadComponent: () => import("./registry/breeding-page/breeding-page").then((m) => m.BreedingPage),

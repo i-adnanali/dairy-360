@@ -18,8 +18,19 @@ function detail(extra: Record<string, unknown> = {}): AnimalDetail {
     animal: { id: 'BD-0001', name: 'Noori', sex: 'female', species: 'buffalo', origin: 'born_on_farm', post_no: null, tag_no: null },
     status: { animal_id: 'BD-0001', status: 'lactating', parity: 1, birth_on: '2020-01-01', birth_precision: 'day', open_lactation_id: null },
     events: [],
+    reproduction: null,
+    reproduction_notes: [],
+    breeding_tasks: [],
+    breeding_entry: true,
     ...extra,
   } as AnimalDetail;
+}
+
+/** A female that has left the herd: the server sends a null view and closes entry. */
+function departed(extra: Record<string, unknown> = {}): AnimalDetail {
+  const d = detail({ reproduction: null, breeding_entry: false, ...extra });
+  d.status = { ...d.status!, status: 'departed' };
+  return d;
 }
 
 const view = {
@@ -60,12 +71,6 @@ async function mountFixture(
 }
 
 describe('AnimalDetailView reproduction badge', () => {
-  it('draws no reproduction badge when the field is absent', async () => {
-    const el = await mount(detail());
-    expect(el.querySelector('[data-role="serial"]')).not.toBeNull();
-    expect(el.querySelector('[data-role="reproduction"]')).toBeNull();
-    expect(el.querySelector('[data-role="reproduction-basis"]')).toBeNull();
-  });
   it('draws no reproduction badge when reproduction is null', async () => {
     const el = await mount(detail({ reproduction: null }));
     expect(el.querySelector('[data-role="serial"]')).not.toBeNull();
@@ -88,11 +93,6 @@ async function openBreeding(el: HTMLElement): Promise<HTMLElement> {
 }
 
 describe('AnimalDetailView Breeding tab', () => {
-  it('no Breeding tab when the server sends no reproduction key', async () => {
-    const el = await mount(detail());
-    expect(el.querySelector('[data-tab="events"]')).not.toBeNull();
-    expect(el.querySelector('[data-tab="breeding"]')).toBeNull();
-  });
   it('no Breeding tab for a male', async () => {
     const d = detail({ reproduction: null });
     d.animal.sex = 'male';
@@ -101,26 +101,33 @@ describe('AnimalDetailView Breeding tab', () => {
     expect(el.querySelector('[data-tab="breeding"]')).toBeNull();
   });
   it('the tab says no service when the view is null', async () => {
-    const tab = await openBreeding(await mount(detail({ reproduction: null, breeding_entry: false })));
+    const tab = await openBreeding(await mount(detail({ reproduction: null })));
     expect(tab.querySelector('[data-role="no-service"]')?.textContent).toContain('No service recorded.');
   });
-  it('the tab shows the pregnancy and the closed note outside the pilot', async () => {
-    const tab = await openBreeding(await mount(detail({ reproduction: view, breeding_entry: false })));
+  it('the tab shows the pregnancy', async () => {
+    const tab = await openBreeding(await mount(detail({ reproduction: view })));
     const text = tab.textContent ?? '';
     expect(text).toContain('Calving window');
     expect(text).toContain('worked out');
     expect(text).toContain('Day 288');
-    expect(tab.querySelector('[data-role="entry-closed"]')?.textContent).toContain(
-      'Breeding entry is open only for the animals in the pilot.',
-    );
-    expect(tab.querySelector('app-breeding-form')).toBeNull();
   });
-  it('the form appears for a pilot animal', async () => {
-    const tab = await openBreeding(await mount(detail({ reproduction: view, breeding_entry: true })));
+  it('the tab and its form show for any current female, with no closed note', async () => {
+    // BD-0042 stands for any female in the herd: there is no list of animals.
+    const d = detail({ reproduction: null });
+    d.animal = { ...d.animal, id: 'BD-0042', name: null };
+    const tab = await openBreeding(await mount(d));
     expect(tab.querySelector('app-breeding-form')).not.toBeNull();
     expect(tab.querySelector('[data-role="entry-closed"]')).toBeNull();
   });
-  it('an inferred loss in the pilot offers Record a loss, which opens an empty loss form', async () => {
+  it('a female that has left the herd keeps the tab, with no form and a note saying why', async () => {
+    const tab = await openBreeding(await mount(departed()));
+    expect(tab.querySelector('app-breeding-form')).toBeNull();
+    expect(tab.querySelector('[data-role="entry-closed"]')?.textContent?.trim()).toBe(
+      'She has left the herd, so no breeding event can be entered for her.',
+    );
+    expect(tab.textContent).not.toContain('pilot');
+  });
+  it('an inferred loss offers Record a loss, which opens an empty loss form', async () => {
     const lost = { ...view, state: 'lost', basis: 'inferred', window: null };
     const tab = await openBreeding(await mount(detail({ reproduction: lost, breeding_entry: true })));
     const button = tab.querySelector('[data-role="record-loss"]') as HTMLButtonElement;
@@ -150,7 +157,7 @@ describe('AnimalDetailView Breeding tab', () => {
     expect(request).toHaveBeenCalled();
     expect(tab.querySelector('app-breeding-form [data-chip="abortion"]')?.getAttribute('aria-checked')).toBe('true');
   });
-  it('no Record a loss when the loss is observed, or outside the pilot', async () => {
+  it('no Record a loss when the loss is observed, or when entry is closed', async () => {
     const observed = await openBreeding(await mount(detail({ reproduction: { ...view, state: 'lost', basis: 'observed', window: null }, breeding_entry: true })));
     expect(observed.querySelector('[data-role="record-loss"]')).toBeNull();
     TestBed.resetTestingModule();
@@ -271,7 +278,10 @@ describe('AnimalDetailView opened on a tab', () => {
   });
 
   it('falls back to Timeline for a tab this animal does not offer, or no such tab', async () => {
-    const el = await open('/animals/BD-0001?tab=breeding', detail());
+    // A male offers no Breeding tab (the female-only rule).
+    const bull = detail();
+    bull.animal = { ...bull.animal, sex: 'male' };
+    const el = await open('/animals/BD-0001?tab=breeding', bull);
     expect(el.querySelector('[data-tab="events"]')!.getAttribute('aria-selected')).toBe('true');
   });
 });

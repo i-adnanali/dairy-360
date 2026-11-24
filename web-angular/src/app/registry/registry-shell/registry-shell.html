@@ -45,7 +45,7 @@
           data-role="nav"
           aria-label="Sections"
         >
-          @for (section of navSections(); track section.label) {
+          @for (section of sections; track section.label) {
             <div class="navigation-group">
             <a
               [routerLink]="section.path"

@@ -109,9 +109,9 @@ export function attentionItems(
         query: { animal: String(t.animal_id ?? ''), task: t.id },
       });
   }
-  // Breeding tasks come with the board (only when the server runs with
-  // REGISTRY_BREEDING); computed on read, closed only by a recorded event.
-  for (const t of board.breeding?.tasks ?? []) {
+  // Breeding tasks come with the board; computed on read, closed only by a
+  // recorded event.
+  for (const t of board.breeding.tasks) {
     const overdue = t.standing === 'overdue';
     (overdue ? now : open).push({
       key: 'breeding-' + t.kind + '-' + t.animal_id,
@@ -338,7 +338,7 @@ export class TodayBoard {
       b.payroll_previous === null &&
       (!b.feed || b.feed.state === 'complete') &&
       (!b.health || (b.health.overdue === 0 && b.health.due === 0 && b.health.withdrawals.length === 0)) &&
-      (!b.breeding || b.breeding.tasks.length === 0)
+      b.breeding.tasks.length === 0
     );
   });
 

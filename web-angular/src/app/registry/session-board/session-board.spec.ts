@@ -19,6 +19,7 @@ const BOARD: DayBoard = {
   feed: { state: 'complete', summary: 'Fed' },
   payroll: { from_on: '2026-09-01', to_on: '2026-09-30', outstanding: 0, permanent: 0 },
   payroll_previous: null,
+  breeding: { on: '2026-09-07', tasks: [], overdue: 0, due: 0, cases: [] },
 };
 const clone = () => structuredClone(BOARD);
 const state = (b: DayBoard, half: 'morning' | 'evening') =>

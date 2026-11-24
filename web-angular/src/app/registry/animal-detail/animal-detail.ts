@@ -159,10 +159,10 @@ export class AnimalDetailView {
   protected readonly detail = signal<Detail | null>(null);
   protected readonly loadError = signal<string | null>(null);
   protected readonly tab = signal<Tab>('events');
-  /** Breeding only when the server sent a reproduction key and she is female. */
+  /** Breeding for every female, current or departed; never for a male. */
   protected readonly tabs = computed<{ id: Tab; label: string }[]>(() => {
     const d = this.detail();
-    const breeding = d !== null && 'reproduction' in d && d.animal.sex === 'female';
+    const breeding = d !== null && d.animal.sex === 'female';
     return [
       { id: 'events', label: 'Timeline' },
       ...(breeding ? [{ id: 'breeding' as const, label: 'Breeding' }] : []),

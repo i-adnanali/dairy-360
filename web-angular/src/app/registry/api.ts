@@ -326,17 +326,17 @@ export class RegistryApi {
     )));
   }
 
-  /** The Breeding page's tasks and cases on a day. Absent on the server unless REGISTRY_BREEDING=1. */
+  /** The Breeding page's tasks and cases on a day. */
   breedingBoard(on: string): Promise<BreedingBoard> {
     return unwrap(firstValueFrom(this.http.get<BreedingBoard>(`${BASE}/breeding/board?on=${on}`)));
   }
 
-  /** The eight herd figures as of farm today, over the last 12 months or all on record. Absent unless REGISTRY_BREEDING=1. */
+  /** The eight herd figures as of farm today, over the last 12 months or all on record. */
   breedingFigures(period: FiguresPeriod): Promise<BreedingFigures> {
     return unwrap(firstValueFrom(this.http.get<BreedingFigures>(`${BASE}/breeding/figures?period=${period}`)));
   }
 
-  /** A service, a heat, a pregnancy check, "nothing seen" or a loss. Absent on the server unless REGISTRY_BREEDING=1. */
+  /** A service, a heat, a pregnancy check, "nothing seen" or a loss. */
   recordBreedingEvent(
     body: Record<string, unknown>,
     idempotencyKey: string,

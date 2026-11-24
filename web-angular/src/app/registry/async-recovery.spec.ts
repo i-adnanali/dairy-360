@@ -11,7 +11,8 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 const board = (on: string): DayBoard => ({ on, milking: [], dispatch: [],
-  payroll: { from_on: on, to_on: on, outstanding: 0, permanent: 0 }, payroll_previous: null });
+  payroll: { from_on: on, to_on: on, outstanding: 0, permanent: 0 }, payroll_previous: null,
+  breeding: { on, tasks: [], overdue: 0, due: 0, cases: [] } });
 it('does not let an older date overwrite a newer Today board or publish its error', async () => {
   const old = deferred<DayBoard>();
   const today = vi.fn(async (on: string) => board(on));
